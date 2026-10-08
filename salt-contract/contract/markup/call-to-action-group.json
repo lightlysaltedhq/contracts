@@ -1,0 +1,64 @@
+{
+  "$schema": "../../schema/markup.schema.json",
+  "version": "0.1.0",
+  "id": "call-to-action-group",
+  "kind": "component",
+  "summary": "The row of up to two buttons after a section's words.",
+  "root": {
+    "element": "div",
+    "note": "The parent names it: salt-hero__actions, salt-cta__actions, salt-media-text__actions. No class of its own."
+  },
+  "elements": [
+    {
+      "role": "button",
+      "component": "button",
+      "repeat": {
+        "from": "buttons",
+        "min": 1,
+        "max": 2
+      }
+    }
+  ],
+  "headings": {
+    "provides": "never",
+    "level": "none"
+  },
+  "zeroState": "Not drawn when no button resolves.",
+  "script": {
+    "kind": "none"
+  },
+  "uses": [
+    "button"
+  ],
+  "notes": [
+    {
+      "topic": "ruling",
+      "text": "A div of buttons, not a list, in every section."
+    }
+  ],
+  "platforms": {
+    "nextjs": {
+      "owes": [
+        "Nothing visible: sections already write div.salt-<block>__actions."
+      ]
+    },
+    "wordpress": {
+      "formerly": [
+        {
+          "role": "root",
+          "element": "div",
+          "classes": [
+            "x-cta",
+            "x-hero-ctas",
+            "flex",
+            "flex-wrap",
+            "gap-4"
+          ]
+        }
+      ],
+      "owes": [
+        "Use the section's salt-<block>__actions class on the button row."
+      ]
+    }
+  }
+}

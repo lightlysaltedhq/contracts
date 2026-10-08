@@ -1,0 +1,174 @@
+{
+  "$schema": "../../schema/markup.schema.json",
+  "version": "0.1.0",
+  "id": "post",
+  "kind": "view",
+  "summary": "A blog post.",
+  "root": {
+    "element": "main",
+    "attributes": {
+      "id": "main",
+      "tabindex": "-1"
+    },
+    "note": "Inside the document skeleton page.json draws once (section#landmarks)."
+  },
+  "elements": [
+    {
+      "role": "article",
+      "element": "article",
+      "children": [
+        {
+          "role": "header",
+          "element": "header",
+          "children": [
+            {
+              "role": "breadcrumb",
+              "element": "nav",
+              "attributes": {
+                "aria-label": "from:labels.breadcrumb"
+              },
+              "optional": true,
+              "when": "the site shows a breadcrumb",
+              "children": [
+                {
+                  "role": "trail",
+                  "element": "ol",
+                  "attributes": {
+                    "role": "list"
+                  }
+                }
+              ]
+            },
+            {
+              "role": "title",
+              "element": "h1",
+              "text": "from:post.title"
+            },
+            {
+              "role": "meta",
+              "element": "p",
+              "optional": true,
+              "when": "byline, date or reading time is set",
+              "children": [
+                {
+                  "role": "date",
+                  "element": "time",
+                  "attributes": {
+                    "datetime": "from:date"
+                  },
+                  "optional": true,
+                  "when": "dated"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "role": "media",
+          "component": "media",
+          "optional": true,
+          "when": "the post has a featured image",
+          "note": "The view's priority image."
+        },
+        {
+          "role": "body",
+          "component": "rich-text-body",
+          "note": "Base level 1: body headings start at h2."
+        },
+        {
+          "role": "footer",
+          "element": "footer",
+          "optional": true,
+          "when": "tags, sharing or an author are shown",
+          "children": [
+            {
+              "role": "tags",
+              "element": "ul",
+              "attributes": {
+                "role": "list",
+                "aria-label": "from:labels.tags"
+              },
+              "optional": true,
+              "when": "tagged"
+            },
+            {
+              "role": "share",
+              "component": "share-links",
+              "optional": true,
+              "when": "sharing is on"
+            },
+            {
+              "role": "author",
+              "component": "author-box",
+              "optional": true,
+              "when": "the author box is on"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "role": "adjacent",
+      "element": "nav",
+      "attributes": {
+        "aria-label": "from:labels.adjacent"
+      },
+      "optional": true,
+      "when": "a previous or next post exists"
+    }
+  ],
+  "headings": {
+    "provides": "always",
+    "level": "fixed",
+    "fixedLevel": 1,
+    "rules": [
+      "section#single-h1"
+    ],
+    "role": "title"
+  },
+  "script": {
+    "kind": "none"
+  },
+  "uses": [
+    "rich-text-body",
+    "media",
+    "share-links",
+    "author-box"
+  ],
+  "ruleRefs": [
+    "section#landmarks",
+    "section#single-h1"
+  ],
+  "notes": [
+    {
+      "topic": "open-question",
+      "text": "Only the landmark structure and the h1 are fixed here; the view body's class vocabulary is not yet in the contract (Next's example app writes salt-post__*, salt-service__* and salt-archive__*, which no shared stylesheet styles)."
+    }
+  ],
+  "platforms": {
+    "wordpress": {
+      "formerly": [
+        {
+          "role": "root",
+          "element": "main",
+          "note": "single-post.php"
+        }
+      ],
+      "owes": [
+        "The article, header, footer and nav structure above."
+      ]
+    },
+    "nextjs": {
+      "formerly": [
+        {
+          "role": "article",
+          "element": "article",
+          "classes": [
+            "salt-post"
+          ],
+          "note": "apps/example blog-views.tsx, not core"
+        }
+      ]
+    }
+  }
+}

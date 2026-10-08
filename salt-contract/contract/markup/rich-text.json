@@ -1,0 +1,167 @@
+{
+  "$schema": "../../schema/markup.schema.json",
+  "version": "0.1.0",
+  "id": "rich-text",
+  "kind": "section",
+  "tier": "core",
+  "root": {
+    "element": "div",
+    "classes": [
+      "salt-block"
+    ],
+    "attributes": {
+      "data-block": "rich-text",
+      "data-align": {
+        "enum": [
+          "left",
+          "centre"
+        ]
+      }
+    }
+  },
+  "elements": [
+    {
+      "role": "eyebrow",
+      "component": "eyebrow",
+      "optional": true,
+      "when": "eyebrow is set"
+    },
+    {
+      "role": "heading",
+      "component": "heading",
+      "attributes": {
+        "id": "from:plan.headingId"
+      },
+      "optional": true,
+      "when": "heading is set"
+    },
+    {
+      "role": "body",
+      "component": "rich-text-body",
+      "optional": true,
+      "when": "the body has words"
+    }
+  ],
+  "variants": [
+    {
+      "field": "alignment",
+      "sameOrder": true,
+      "options": {
+        "left": {
+          "root": {
+            "attributes": {
+              "data-align": "left"
+            }
+          }
+        },
+        "centre": {
+          "root": {
+            "attributes": {
+              "data-align": "centre"
+            }
+          }
+        }
+      }
+    }
+  ],
+  "headings": {
+    "provides": "when heading is set",
+    "role": "heading",
+    "level": "plan",
+    "labelledBy": true,
+    "rules": [
+      "section#heading-level",
+      "section#single-h1",
+      "section#labelled-by"
+    ],
+    "headingBeforeOwn": "no heading of its own and the body contains a heading",
+    "children": "body headings from base + 1 (section#body-heading-base)"
+  },
+  "zeroState": "Eyebrow, heading and body all empty.",
+  "priorityMedia": {
+    "role": null
+  },
+  "dataAttributes": [
+    {
+      "name": "data-align",
+      "on": "root",
+      "values": [
+        "left",
+        "centre"
+      ]
+    }
+  ],
+  "script": {
+    "kind": "none"
+  },
+  "uses": [
+    "section",
+    "eyebrow",
+    "heading",
+    "rich-text-body"
+  ],
+  "platforms": {
+    "nextjs": {
+      "formerly": [
+        {
+          "role": "root",
+          "element": "div",
+          "classes": [
+            "salt-block"
+          ],
+          "attributes": [
+            "data-block=richText"
+          ]
+        }
+      ],
+      "owes": [
+        "data-block rich-text."
+      ]
+    },
+    "wordpress": {
+      "formerly": [
+        {
+          "role": "root",
+          "element": "div",
+          "classes": [
+            "x-intro",
+            "max-w-prose",
+            "mx-auto",
+            "text-center"
+          ],
+          "note": "intro layout; rich_text has no wrapper"
+        },
+        {
+          "role": "eyebrow",
+          "element": "p",
+          "classes": [
+            "x-eyebrow",
+            "mb-2"
+          ]
+        },
+        {
+          "role": "heading",
+          "element": "h1|h2",
+          "classes": [
+            "x-heading",
+            "mb-6"
+          ],
+          "note": "No id; the WordPress section has no aria-labelledby."
+        },
+        {
+          "role": "body",
+          "element": "div",
+          "classes": [
+            "x-prose"
+          ]
+        }
+      ],
+      "owes": [
+        "Write the block root div.salt-block with data-block set to the contract id inside the section wrapper (section.json).",
+        "Give the section heading the plan's id and point the wrapper's aria-labelledby at it (section#labelled-by).",
+        "Drop Tailwind utility classes from the markup; the shared stylesheets style the salt-* classes.",
+        "One section for intro and rich_text; data-align centre (stored center maps); eyebrow on both."
+      ]
+    }
+  }
+}

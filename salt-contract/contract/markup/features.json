@@ -1,0 +1,172 @@
+{
+  "$schema": "../../schema/markup.schema.json",
+  "version": "0.1.0",
+  "id": "features",
+  "kind": "section",
+  "tier": "core",
+  "root": {
+    "element": "div",
+    "classes": [
+      "salt-block"
+    ],
+    "attributes": {
+      "data-block": "features"
+    }
+  },
+  "elements": [
+    {
+      "role": "eyebrow",
+      "component": "eyebrow",
+      "optional": true,
+      "when": "eyebrow is set"
+    },
+    {
+      "role": "heading",
+      "component": "heading",
+      "attributes": {
+        "id": "from:plan.headingId"
+      },
+      "optional": true,
+      "when": "heading is set",
+      "note": "Level from the plan (section#heading-level)."
+    },
+    {
+      "role": "intro",
+      "element": "p",
+      "classes": [
+        "salt-intro"
+      ],
+      "text": "from:intro",
+      "optional": true,
+      "when": "intro is set"
+    },
+    {
+      "role": "list",
+      "element": "ul",
+      "classes": [
+        "salt-grid"
+      ],
+      "attributes": {
+        "role": "list",
+        "data-columns": {
+          "enum": [
+            "2",
+            "3",
+            "4"
+          ]
+        }
+      },
+      "optional": true,
+      "when": "an item has a title",
+      "children": [
+        {
+          "role": "item",
+          "element": "li",
+          "repeat": {
+            "from": "items",
+            "min": 1
+          },
+          "children": [
+            {
+              "role": "card",
+              "component": "card",
+              "note": "Generic style: icon, title (linked when url), rich-text body."
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "headings": {
+    "provides": "when heading is set",
+    "role": "heading",
+    "level": "plan",
+    "labelledBy": true,
+    "rules": [
+      "section#heading-level",
+      "section#single-h1",
+      "section#labelled-by"
+    ],
+    "headingBeforeOwn": "no heading of its own and there are items (card titles are headings)",
+    "children": "card titles at body base + 1"
+  },
+  "zeroState": "Eyebrow, heading, intro and items all empty.",
+  "priorityMedia": {
+    "role": null
+  },
+  "dataAttributes": [
+    {
+      "name": "data-columns",
+      "on": "list",
+      "values": [
+        "2",
+        "3",
+        "4"
+      ]
+    }
+  ],
+  "script": {
+    "kind": "none"
+  },
+  "uses": [
+    "section",
+    "section-intro",
+    "card",
+    "icon",
+    "arrow",
+    "rich-text-body",
+    "eyebrow",
+    "heading"
+  ],
+  "ruleRefs": [
+    "section#list-semantics"
+  ],
+  "platforms": {
+    "wordpress": {
+      "formerly": [
+        {
+          "role": "eyebrow",
+          "element": "p",
+          "classes": [
+            "x-eyebrow",
+            "mb-2"
+          ]
+        },
+        {
+          "role": "heading",
+          "element": "h1|h2",
+          "classes": [
+            "x-heading",
+            "mb-6"
+          ],
+          "note": "No id; the WordPress section has no aria-labelledby."
+        },
+        {
+          "role": "list",
+          "element": "div",
+          "classes": [
+            "x-features-grid",
+            "grid",
+            "gap-6",
+            "sm:grid-cols-2",
+            "lg:grid-cols-3"
+          ]
+        },
+        {
+          "role": "card",
+          "element": "article",
+          "classes": [
+            "x-card",
+            "x-card-feature"
+          ]
+        }
+      ],
+      "owes": [
+        "Write the block root div.salt-block with data-block set to the contract id inside the section wrapper (section.json).",
+        "Give the section heading the plan's id and point the wrapper's aria-labelledby at it (section#labelled-by).",
+        "Drop Tailwind utility classes from the markup; the shared stylesheets style the salt-* classes.",
+        "ul.salt-grid with li items and data-columns; the intro paragraph; a rich-text body per item."
+      ]
+    }
+  }
+}

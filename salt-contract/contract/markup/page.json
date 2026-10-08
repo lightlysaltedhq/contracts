@@ -1,0 +1,190 @@
+{
+  "$schema": "../../schema/markup.schema.json",
+  "version": "0.1.0",
+  "id": "page",
+  "kind": "view",
+  "summary": "A builder page. Its file also draws the document skeleton every view sits in, once.",
+  "root": {
+    "element": "body"
+  },
+  "elements": [
+    {
+      "role": "skip-link",
+      "element": "a",
+      "classes": [
+        "salt-skip-link"
+      ],
+      "attributes": {
+        "href": "#main"
+      },
+      "text": "from:labels.skip"
+    },
+    {
+      "role": "consent-banner",
+      "element": "div",
+      "classes": [
+        "salt-consent-banner"
+      ],
+      "attributes": {
+        "role": "region",
+        "aria-label": "from:labels.region"
+      },
+      "optional": true,
+      "when": "consent is pending and the site runs an integration that needs it",
+      "children": [
+        {
+          "role": "consent-message",
+          "element": "div",
+          "classes": [
+            "salt-consent-banner__message"
+          ],
+          "text": "from:message"
+        },
+        {
+          "role": "consent-actions",
+          "element": "div",
+          "classes": [
+            "salt-consent-banner__actions"
+          ],
+          "children": [
+            {
+              "role": "consent-choice",
+              "component": "button",
+              "repeat": {
+                "from": "accept, reject, preferences",
+                "max": 3
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "role": "consent-announce",
+      "element": "p",
+      "classes": [
+        "salt-sr-only"
+      ],
+      "attributes": {
+        "role": "status",
+        "aria-live": "polite"
+      },
+      "optional": true,
+      "when": "the consent banner is offered"
+    },
+    {
+      "role": "header",
+      "component": "site-header"
+    },
+    {
+      "role": "main",
+      "element": "main",
+      "attributes": {
+        "id": "main",
+        "tabindex": "-1"
+      },
+      "children": [
+        {
+          "role": "fallback-heading",
+          "component": "fallback-heading",
+          "optional": true,
+          "when": "no section claimed the h1"
+        },
+        {
+          "role": "sections",
+          "component": "section",
+          "repeat": {
+            "from": "page sections"
+          }
+        }
+      ]
+    },
+    {
+      "role": "footer",
+      "component": "site-footer"
+    }
+  ],
+  "headings": {
+    "provides": "always",
+    "role": "main",
+    "level": "plan",
+    "note": "The first heading-providing section claims the h1; otherwise fallback-heading draws it.",
+    "rules": [
+      "section#single-h1",
+      "section#fallback-heading"
+    ]
+  },
+  "script": {
+    "kind": "none"
+  },
+  "uses": [
+    "site-header",
+    "site-footer",
+    "fallback-heading",
+    "section",
+    "button"
+  ],
+  "ruleRefs": [
+    "section#landmarks",
+    "section#single-h1"
+  ],
+  "hooks": [
+    {
+      "class": "salt-skip-link",
+      "role": "skip-link",
+      "reason": "New: the skip link's class. The shared stylesheets owe the visually-hidden-until-focused rule."
+    }
+  ],
+  "notes": [
+    {
+      "topic": "open-question",
+      "text": "WordPress loads no third-party script by default and draws no consent banner; whether it owes the banner only once a site enables an integration that needs consent is for the owner."
+    }
+  ],
+  "platforms": {
+    "nextjs": {
+      "formerly": [
+        {
+          "role": "skip-link",
+          "element": "a",
+          "classes": [
+            "skip-link"
+          ],
+          "note": "apps/example layout"
+        },
+        {
+          "role": "main",
+          "element": "main",
+          "attributes": [
+            "id=main",
+            "tabindex=-1"
+          ]
+        }
+      ],
+      "owes": [
+        "Rename skip-link to salt-skip-link (and give it a rule in chrome.css)."
+      ]
+    },
+    "wordpress": {
+      "formerly": [
+        {
+          "role": "skip-link",
+          "element": "a",
+          "classes": [
+            "visually-hidden"
+          ]
+        },
+        {
+          "role": "main",
+          "element": "main",
+          "attributes": [
+            "id=main"
+          ]
+        }
+      ],
+      "owes": [
+        "salt-skip-link; tabindex -1 on main; the hidden h1 as fallback-heading; the consent banner when consent is needed (open question)."
+      ]
+    }
+  }
+}

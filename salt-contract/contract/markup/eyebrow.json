@@ -1,0 +1,47 @@
+{
+  "$schema": "../../schema/markup.schema.json",
+  "version": "0.1.0",
+  "id": "eyebrow",
+  "kind": "component",
+  "root": {
+    "element": "p",
+    "classes": [
+      "salt-eyebrow"
+    ]
+  },
+  "elements": [],
+  "headings": {
+    "provides": "never",
+    "level": "none",
+    "rules": [
+      "section#eyebrow-and-intro"
+    ]
+  },
+  "zeroState": "Not drawn when empty.",
+  "script": {
+    "kind": "none"
+  },
+  "platforms": {
+    "wordpress": {
+      "formerly": [
+        {
+          "role": "root",
+          "element": "p",
+          "classes": [
+            "x-eyebrow",
+            "text-sm",
+            "font-semibold",
+            "uppercase",
+            "tracking-widest",
+            "text-brand",
+            "mb-2",
+            "mb-3"
+          ]
+        }
+      ],
+      "owes": [
+        "Rename x-eyebrow to salt-eyebrow; spacing comes from the stylesheet."
+      ]
+    }
+  }
+}

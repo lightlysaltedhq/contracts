@@ -1,0 +1,138 @@
+{
+  "$schema": "../../schema/markup.schema.json",
+  "version": "0.1.0",
+  "id": "stats",
+  "kind": "section",
+  "tier": "core",
+  "root": {
+    "element": "div",
+    "classes": [
+      "salt-block"
+    ],
+    "attributes": {
+      "data-block": "stats"
+    }
+  },
+  "elements": [
+    {
+      "role": "heading",
+      "component": "heading",
+      "attributes": {
+        "id": "from:plan.headingId"
+      },
+      "optional": true,
+      "when": "heading is set",
+      "note": "Level from the plan (section#heading-level)."
+    },
+    {
+      "role": "intro",
+      "element": "p",
+      "classes": [
+        "salt-intro"
+      ],
+      "text": "from:intro",
+      "optional": true,
+      "when": "intro is set"
+    },
+    {
+      "role": "list",
+      "element": "ul",
+      "classes": [
+        "salt-grid"
+      ],
+      "attributes": {
+        "role": "list",
+        "data-columns": {
+          "enum": [
+            "2",
+            "3",
+            "4"
+          ]
+        }
+      },
+      "optional": true,
+      "when": "an item has a value",
+      "children": [
+        {
+          "role": "stat",
+          "component": "stat",
+          "repeat": {
+            "from": "items",
+            "min": 1
+          }
+        }
+      ]
+    }
+  ],
+  "headings": {
+    "provides": "when heading is set",
+    "role": "heading",
+    "level": "plan",
+    "labelledBy": true,
+    "rules": [
+      "section#heading-level",
+      "section#single-h1",
+      "section#labelled-by"
+    ]
+  },
+  "zeroState": "Heading, intro and items all empty.",
+  "priorityMedia": {
+    "role": null
+  },
+  "dataAttributes": [
+    {
+      "name": "data-columns",
+      "on": "list",
+      "values": [
+        "2",
+        "3",
+        "4"
+      ]
+    }
+  ],
+  "script": {
+    "kind": "none"
+  },
+  "uses": [
+    "section",
+    "section-intro",
+    "stat",
+    "icon",
+    "heading"
+  ],
+  "ruleRefs": [
+    "section#list-semantics",
+    "section#reduced-motion"
+  ],
+  "platforms": {
+    "wordpress": {
+      "formerly": [
+        {
+          "role": "heading",
+          "element": "h1|h2",
+          "classes": [
+            "x-heading",
+            "mb-6"
+          ],
+          "note": "No id; the WordPress section has no aria-labelledby."
+        },
+        {
+          "role": "list",
+          "element": "div",
+          "classes": [
+            "x-stats-grid",
+            "grid",
+            "gap-8",
+            "sm:grid-cols-3"
+          ]
+        }
+      ],
+      "owes": [
+        "Write the block root div.salt-block with data-block set to the contract id inside the section wrapper (section.json).",
+        "Give the section heading the plan's id and point the wrapper's aria-labelledby at it (section#labelled-by).",
+        "Drop Tailwind utility classes from the markup; the shared stylesheets style the salt-* classes.",
+        "A list of li.salt-stat; data-columns; the intro paragraph."
+      ]
+    }
+  }
+}

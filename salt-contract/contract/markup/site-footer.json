@@ -1,0 +1,495 @@
+{
+  "$schema": "../../schema/markup.schema.json",
+  "version": "0.1.0",
+  "id": "site-footer",
+  "kind": "component",
+  "root": {
+    "element": "footer",
+    "classes": [
+      "salt-footer"
+    ],
+    "attributes": {
+      "data-tone": {
+        "enum": [
+          "surface",
+          "surface-alt",
+          "brand-tint",
+          "surface-inverse"
+        ]
+      },
+      "data-tone-dark": {
+        "enum": [
+          "surface",
+          "surface-alt",
+          "brand-tint",
+          "surface-inverse"
+        ]
+      }
+    }
+  },
+  "elements": [
+    {
+      "role": "inner",
+      "element": "div",
+      "classes": [
+        "salt-footer__inner"
+      ],
+      "children": [
+        {
+          "role": "brand",
+          "element": "div",
+          "classes": [
+            "salt-footer__brand"
+          ],
+          "optional": true,
+          "when": "the footer shows the logo",
+          "children": [
+            {
+              "role": "logo",
+              "component": "site-logo"
+            }
+          ]
+        },
+        {
+          "role": "nav",
+          "element": "nav",
+          "classes": [
+            "salt-footer__nav"
+          ],
+          "attributes": {
+            "aria-label": "from:labels.navigation"
+          },
+          "optional": true,
+          "when": "a column has links",
+          "children": [
+            {
+              "role": "column",
+              "element": "div",
+              "classes": [
+                "salt-footer__column"
+              ],
+              "repeat": {
+                "from": "columns with links"
+              },
+              "children": [
+                {
+                  "role": "title",
+                  "element": "p",
+                  "classes": [
+                    "salt-footer__title"
+                  ],
+                  "attributes": {
+                    "id": "<prefix>-column-<n>"
+                  },
+                  "text": "from:column.title"
+                },
+                {
+                  "role": "links",
+                  "element": "ul",
+                  "classes": [
+                    "salt-footer__links"
+                  ],
+                  "attributes": {
+                    "role": "list",
+                    "aria-labelledby": "<prefix>-column-<n>"
+                  },
+                  "children": [
+                    {
+                      "role": "link-item",
+                      "element": "li",
+                      "repeat": {
+                        "from": "column.links"
+                      },
+                      "children": [
+                        {
+                          "role": "link",
+                          "element": [
+                            "a",
+                            "span"
+                          ],
+                          "classes": [
+                            "salt-footer__link"
+                          ],
+                          "attributes": {
+                            "href": "from:href",
+                            "aria-current": {
+                              "value": "page",
+                              "when": "current"
+                            }
+                          },
+                          "text": "from:label"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "role": "base",
+          "element": "div",
+          "classes": [
+            "salt-footer__base"
+          ],
+          "children": [
+            {
+              "role": "text",
+              "component": "rich-text-body",
+              "classes": [
+                "salt-footer__text"
+              ],
+              "optional": true,
+              "when": "footer text has words",
+              "note": "No headings allowed in footer text."
+            },
+            {
+              "role": "social",
+              "element": "ul",
+              "classes": [
+                "salt-footer__social"
+              ],
+              "attributes": {
+                "role": "list",
+                "aria-label": "from:labels.social"
+              },
+              "optional": true,
+              "when": "profiles are set",
+              "children": [
+                {
+                  "role": "social-item",
+                  "element": "li",
+                  "repeat": {
+                    "from": "profiles"
+                  },
+                  "children": [
+                    {
+                      "role": "social-link",
+                      "element": "a",
+                      "classes": [
+                        "salt-footer__social-link"
+                      ],
+                      "attributes": {
+                        "href": "from:profile url"
+                      },
+                      "children": [
+                        {
+                          "role": "social-icon",
+                          "component": "icon",
+                          "attributes": {
+                            "role": "img",
+                            "aria-label": "from:profile name"
+                          },
+                          "optional": true,
+                          "when": "a glyph exists for the profile; the name as text otherwise"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "role": "theme-toggle",
+              "element": "button",
+              "classes": [
+                "salt-theme-toggle"
+              ],
+              "attributes": {
+                "type": "button",
+                "aria-pressed": {
+                  "enum": [
+                    "true",
+                    "false"
+                  ]
+                },
+                "aria-label": "from:labels.theme"
+              },
+              "optional": true,
+              "when": "the theme toggle is placed in the footer and named"
+            },
+            {
+              "role": "display-preferences",
+              "component": "display-preferences",
+              "optional": true,
+              "when": "the site offers display preferences"
+            },
+            {
+              "role": "copyright",
+              "element": "p",
+              "classes": [
+                "salt-footer__copyright"
+              ],
+              "text": "from:copyright line",
+              "optional": true,
+              "when": "the site sets an organisation name"
+            },
+            {
+              "role": "consent",
+              "element": "div",
+              "classes": [
+                "salt-footer__consent"
+              ],
+              "children": [
+                {
+                  "role": "consent-control",
+                  "component": "button",
+                  "attributes": {
+                    "type": "button",
+                    "data-style": "secondary",
+                    "data-salt-consent-preferences": ""
+                  },
+                  "text": "from:labels.preferences",
+                  "note": "aria-disabled until script hydrates."
+                },
+                {
+                  "role": "consent-announce",
+                  "element": "p",
+                  "classes": [
+                    "salt-sr-only"
+                  ],
+                  "attributes": {
+                    "role": "status",
+                    "aria-live": "polite"
+                  }
+                },
+                {
+                  "role": "consent-panel",
+                  "element": "dialog",
+                  "classes": [
+                    "salt-consent-panel"
+                  ],
+                  "attributes": {
+                    "aria-labelledby": "<id>title"
+                  },
+                  "optional": true,
+                  "when": "the visitor opens preferences",
+                  "children": [
+                    {
+                      "role": "consent-form",
+                      "element": "form",
+                      "children": [
+                        {
+                          "role": "consent-title",
+                          "element": "h2",
+                          "classes": [
+                            "salt-consent-panel__title"
+                          ],
+                          "attributes": {
+                            "id": "<id>title"
+                          },
+                          "text": "from:labels.title"
+                        },
+                        {
+                          "role": "consent-category",
+                          "element": "div",
+                          "classes": [
+                            "salt-consent-panel__category"
+                          ],
+                          "repeat": {
+                            "from": "categories"
+                          },
+                          "children": [
+                            {
+                              "role": "consent-checkbox",
+                              "element": "input",
+                              "classes": [
+                                "salt-consent-panel__checkbox"
+                              ],
+                              "attributes": {
+                                "type": "checkbox",
+                                "aria-describedby": "<id><category>-description"
+                              }
+                            },
+                            {
+                              "role": "consent-label",
+                              "element": "label",
+                              "text": "from:category.label"
+                            },
+                            {
+                              "role": "consent-description",
+                              "element": "div",
+                              "classes": [
+                                "salt-consent-panel__description"
+                              ],
+                              "attributes": {
+                                "id": "<id><category>-description"
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "role": "consent-actions",
+                          "element": "div",
+                          "classes": [
+                            "salt-consent-panel__actions"
+                          ],
+                          "children": [
+                            {
+                              "role": "consent-save",
+                              "component": "button",
+                              "attributes": {
+                                "type": "submit",
+                                "data-style": "primary"
+                              }
+                            },
+                            {
+                              "role": "consent-cancel",
+                              "component": "button",
+                              "attributes": {
+                                "type": "button",
+                                "data-style": "secondary"
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "headings": {
+    "provides": "never",
+    "level": "none",
+    "note": "The consent panel's title is an h2 inside its own dialog, outside the page outline."
+  },
+  "script": {
+    "kind": "progressive",
+    "withoutScript": "Footer links and text; the consent control is drawn disabled.",
+    "withScript": "The consent preferences dialog and the theme toggle."
+  },
+  "uses": [
+    "button",
+    "display-preferences",
+    "icon",
+    "rich-text-body",
+    "site-logo"
+  ],
+  "ruleRefs": [
+    "section#landmarks",
+    "section#focus-ring",
+    "section#target-size",
+    "section#sr-only"
+  ],
+  "hooks": [
+    {
+      "class": "salt-footer__brand",
+      "role": "brand",
+      "reason": "Holds the footer logo; laid out by the inner grid."
+    },
+    {
+      "class": "salt-footer__column",
+      "role": "column",
+      "reason": "Groups a column title with its links."
+    },
+    {
+      "class": "salt-footer__consent",
+      "role": "consent",
+      "reason": "Holds the consent preferences control and its dialog."
+    }
+  ],
+  "notes": [
+    {
+      "topic": "stylesheet-owes",
+      "text": "From WordPress: the copyright line; no rule yet.",
+      "classes": [
+        "salt-footer__copyright"
+      ]
+    },
+    {
+      "topic": "open-question",
+      "text": "WordPress has one footer menu (a flat list); Next has titled columns. Ruled: columns. Open: how WordPress's single menu maps (one untitled column, or top-level items as titles)."
+    },
+    {
+      "topic": "order",
+      "text": "Base order: text, social, theme toggle, display preferences, copyright, consent. WordPress today: social, text, copyright, preferences."
+    }
+  ],
+  "platforms": {
+    "nextjs": {
+      "owes": [
+        "The copyright line (p.salt-footer__copyright) and the display preferences slot."
+      ]
+    },
+    "wordpress": {
+      "formerly": [
+        {
+          "role": "root",
+          "element": "footer",
+          "classes": [
+            "x-footer",
+            "border-t",
+            "bg-surface-alt"
+          ]
+        },
+        {
+          "role": "inner",
+          "element": "div",
+          "classes": [
+            "mx-auto",
+            "max-w-7xl"
+          ]
+        },
+        {
+          "role": "nav",
+          "element": "nav",
+          "classes": [
+            "x-footer-nav"
+          ],
+          "attributes": [
+            "aria-label=Footer"
+          ]
+        },
+        {
+          "role": "links",
+          "element": "ul",
+          "classes": [
+            "x-footer-menu"
+          ]
+        },
+        {
+          "role": "social",
+          "element": "ul",
+          "classes": [
+            "x-footer-social"
+          ]
+        },
+        {
+          "role": "social-link",
+          "element": "a",
+          "classes": [
+            "x-footer-social-link"
+          ],
+          "attributes": [
+            "rel=noopener"
+          ],
+          "note": "x-icon plus span.visually-hidden label"
+        },
+        {
+          "role": "text",
+          "element": "p",
+          "classes": [
+            "x-footer-text"
+          ]
+        },
+        {
+          "role": "copyright",
+          "element": "p",
+          "classes": [
+            "x-footer-copyright"
+          ]
+        }
+      ],
+      "owes": [
+        "Rename to salt-footer*; data-tone on the footer; columns; the consent control and panel when an integration needs consent; social icons named by role=img and aria-label."
+      ]
+    }
+  }
+}

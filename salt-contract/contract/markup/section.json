@@ -1,0 +1,435 @@
+{
+  "$schema": "../../schema/markup.schema.json",
+  "version": "0.1.0",
+  "id": "section",
+  "kind": "component",
+  "summary": "The band every section renders inside, and the rules every section, component and view follows, stated once here and referenced elsewhere as section#<rule>.",
+  "root": {
+    "element": [
+      "section",
+      "div"
+    ],
+    "classes": [
+      "salt-section"
+    ],
+    "attributes": {
+      "id": {
+        "value": "from:anchor",
+        "when": "an anchor is set or minted",
+        "note": "section#anchors"
+      },
+      "aria-labelledby": {
+        "value": "from:plan.headingId",
+        "when": "the section provides a heading; the element is then section, otherwise div"
+      },
+      "data-tone": {
+        "enum": [
+          "surface",
+          "surface-alt",
+          "brand-tint",
+          "surface-inverse"
+        ]
+      },
+      "data-tone-dark": {
+        "enum": [
+          "surface",
+          "surface-alt",
+          "brand-tint",
+          "surface-inverse"
+        ],
+        "note": "The resolved dark tone, written server-side so one cached document serves both schemes."
+      },
+      "data-spacing": {
+        "enum": [
+          "none",
+          "sm",
+          "md",
+          "lg"
+        ]
+      },
+      "data-width": {
+        "enum": [
+          "full",
+          "wide",
+          "default",
+          "narrow"
+        ]
+      },
+      "data-collapse-top": {
+        "value": "",
+        "when": "section#adjacent-collapse holds"
+      },
+      "data-divider": {
+        "value": "",
+        "when": "the divider setting is on"
+      },
+      "data-media": {
+        "value": "",
+        "when": "a background image is actually drawn"
+      },
+      "data-track": {
+        "value": "from:renderer",
+        "note": "section#data-track"
+      },
+      "style": {
+        "value": "--salt-section-space: var(--space-section-<spacing>)",
+        "when": "spacing is not none"
+      }
+    },
+    "note": "A named section element or a div, never an unnamed section (section#labelled-by)."
+  },
+  "elements": [
+    {
+      "role": "background",
+      "element": "img",
+      "classes": [
+        "salt-section__media"
+      ],
+      "attributes": {
+        "alt": "",
+        "aria-hidden": "true"
+      },
+      "optional": true,
+      "when": "a background image is set and resolves",
+      "note": "Decorative by contract (section#background-decorative)."
+    },
+    {
+      "role": "scrim",
+      "element": "div",
+      "classes": [
+        "salt-section__scrim"
+      ],
+      "attributes": {
+        "style": "--salt-scrim-alpha: var(--scrim-<strength>)"
+      },
+      "optional": true,
+      "when": "a background image is drawn and the scrim is on",
+      "note": "Absent, not transparent, when off."
+    },
+    {
+      "role": "content",
+      "element": "div",
+      "classes": [
+        "salt-section__content"
+      ],
+      "children": [
+        {
+          "role": "block",
+          "element": "div",
+          "classes": [
+            "salt-block"
+          ],
+          "attributes": {
+            "data-block": "from:section id"
+          },
+          "note": "The section's own root, specified in contract/markup/<section id>.json."
+        }
+      ]
+    }
+  ],
+  "headings": {
+    "provides": "never",
+    "level": "none",
+    "note": "The wrapper names itself from the block's heading; it draws none.",
+    "rules": [
+      "section#heading-level",
+      "section#single-h1",
+      "section#labelled-by"
+    ]
+  },
+  "zeroState": "When the block inside renders nothing, the wrapper is not drawn either (section#zero-state).",
+  "priorityMedia": {
+    "role": "background",
+    "when": "the plan grants priority media to this band and the background image is renderable",
+    "rules": [
+      "section#priority-media"
+    ]
+  },
+  "dataAttributes": [
+    {
+      "name": "data-tone",
+      "on": "root",
+      "values": [
+        "surface",
+        "surface-alt",
+        "brand-tint",
+        "surface-inverse"
+      ]
+    },
+    {
+      "name": "data-tone-dark",
+      "on": "root",
+      "values": [
+        "surface",
+        "surface-alt",
+        "brand-tint",
+        "surface-inverse"
+      ]
+    },
+    {
+      "name": "data-spacing",
+      "on": "root",
+      "values": [
+        "none",
+        "sm",
+        "md",
+        "lg"
+      ]
+    },
+    {
+      "name": "data-width",
+      "on": "root",
+      "values": [
+        "full",
+        "wide",
+        "default",
+        "narrow"
+      ]
+    },
+    {
+      "name": "data-collapse-top",
+      "on": "root",
+      "values": "",
+      "when": "section#adjacent-collapse holds"
+    },
+    {
+      "name": "data-divider",
+      "on": "root",
+      "values": "",
+      "when": "the divider setting is on"
+    },
+    {
+      "name": "data-media",
+      "on": "root",
+      "values": "",
+      "when": "a background image is drawn"
+    },
+    {
+      "name": "data-track",
+      "on": "root",
+      "values": "from:renderer",
+      "note": "section#data-track"
+    },
+    {
+      "name": "data-block",
+      "on": "block",
+      "values": "from:section id",
+      "note": "section#data-block"
+    }
+  ],
+  "script": {
+    "kind": "none"
+  },
+  "rules": {
+    "single-h1": {
+      "statement": "A document has exactly one h1. The first section that provides a heading claims it, unless a heading of any rank has already rendered (a route's own heading, or a heading inside an earlier section's body); every later section heading is h2. When no section claims it, the view draws fallback-heading before any other heading in main."
+    },
+    "heading-level": {
+      "statement": "A section heading's level comes from the page plan, never from the section: 1 when it claims the h1 under section#single-h1, otherwise 2. A section declares whether it provides a heading (its `headings.provides`) and whether a heading can render before its own (`headings.headingBeforeOwn`); the plan reads both. Levels are clamped to 1-6, and an unknown level resolves to 6, never 1."
+    },
+    "body-heading-base": {
+      "statement": "Headings nested in a section rank under its heading. The body base is the section heading's level when it has one, otherwise the level it would have had. Rich-text headings start at base + 1; card, step, group and later-row titles are base + 1. A nested heading never outranks or skips past the section heading."
+    },
+    "labelled-by": {
+      "statement": "A section that provides a heading renders as section with aria-labelledby pointing at that heading's id; the id is unique on the page ('<section id>-heading', suffixed on repeats). A section that provides none renders as div. An unnamed section element is never written."
+    },
+    "fallback-heading": {
+      "statement": "When no section claims the h1, the view draws a visually hidden h1 (h1.salt-sr-only) carrying the page's title, first in main, before any other heading. It is never display:none.",
+      "classes": [
+        "salt-sr-only"
+      ]
+    },
+    "eyebrow-and-intro": {
+      "statement": "An eyebrow (p.salt-eyebrow) and an intro (p.salt-intro) are paragraphs, never headings. Where a section has them, the order is eyebrow, heading, intro, then the section's items.",
+      "classes": [
+        "salt-eyebrow",
+        "salt-intro"
+      ]
+    },
+    "landmarks": {
+      "statement": "The document body is, in order: the skip link (a.salt-skip-link to #main), the consent banner region when consent is pending, header.salt-header (banner), main#main with tabindex -1 (the skip link's target), footer.salt-footer (contentinfo). Navigation landmarks are nav with an aria-label (primary, drawer, footer, pagination, breadcrumb). Sections are region landmarks only when named (section#labelled-by). Search forms sit in a search element. contract/markup/page.json draws the skeleton once for every view.",
+      "order": [
+        "skip-link",
+        "consent-banner",
+        "site-header",
+        "main",
+        "site-footer"
+      ]
+    },
+    "focus-ring": {
+      "statement": "Every focusable element core renders shows one focus indicator on :focus-visible: an outline of --focus-ring-width in --color-focus at --focus-ring-offset. Inside a section with a background image (data-media) the both-poles composition replaces it. The tab set draws its ring on the label when the radio input is focused. Rich-text links take it through their container. A new focusable element joins this list.",
+      "classes": [
+        "salt-button",
+        "salt-card__link",
+        "salt-accordion__summary",
+        "salt-tabs__tab",
+        "salt-tabs__panel",
+        "salt-showcase__link",
+        "salt-pagination__link",
+        "salt-share__link",
+        "salt-copy-link__button",
+        "salt-search__input",
+        "salt-consent-panel__checkbox",
+        "salt-logo",
+        "salt-nav__link",
+        "salt-nav__sublink",
+        "salt-nav__toggle",
+        "salt-header__burger",
+        "salt-drawer__close",
+        "salt-theme-toggle",
+        "salt-header__phone",
+        "salt-footer__link",
+        "salt-footer__social-link",
+        "salt-contact__input",
+        "salt-rich-text",
+        "salt-case-study-view__back-link",
+        "salt-logos__frame",
+        "salt-carousel__track",
+        "salt-contact__status"
+      ],
+      "values": {
+        "width": "var(--focus-ring-width)",
+        "offset": "var(--focus-ring-offset)",
+        "colour": "var(--color-focus)"
+      },
+      "source": "salt-nextjs packages/core/styles/primitives.css, the :focus-visible list"
+    },
+    "target-size": {
+      "statement": "Every control that is a target of its own is at least max(2.75rem, 24px) on the block axis, and icon-only controls and single-digit links on both axes. The 24px inside max() keeps WCAG 2.5.8 in CSS pixels whatever the root font size. Links inside running text are exempt (2.5.8's inline exception).",
+      "classes": [
+        "salt-button",
+        "salt-pagination__link",
+        "salt-tabs__tab",
+        "salt-carousel__control",
+        "salt-header__burger",
+        "salt-drawer__close",
+        "salt-theme-toggle",
+        "salt-nav__toggle",
+        "salt-contact__input",
+        "salt-share__link",
+        "salt-copy-link__button"
+      ],
+      "values": {
+        "floor": "max(2.75rem, 24px)"
+      },
+      "source": "salt-nextjs packages/core/styles/primitives.css, .salt-button and its neighbours"
+    },
+    "reduced-motion": {
+      "statement": "Motion is opt-in: transitions and animations sit inside @media (prefers-reduced-motion: no-preference), and scripted scrolling (the carousel) jumps instantly when the visitor prefers reduced motion. No content depends on motion to be understood. Stat figures do not count up.",
+      "source": "primitives.css and chrome.css media blocks; client carousel"
+    },
+    "sr-only": {
+      "statement": "Visually hidden text uses salt-sr-only (clipped, 1px, still in the accessibility tree). It is the only visually-hidden class; display:none and the hidden attribute remove content from assistive technology and are never used for text meant to be heard.",
+      "classes": [
+        "salt-sr-only"
+      ]
+    },
+    "variants-keep-order": {
+      "statement": "A variant changes attribute values and classes, never the element order: every option of a layout select draws the same elements in the same order, and the stylesheet places them (CSS order, grid areas). An element may be absent under an option, but no option reorders, wraps or moves one. A file whose variant breaks this records it with `sameOrder: false` and a note."
+    },
+    "zero-state": {
+      "statement": "A section with nothing to show renders nothing: no wrapper, no heading, no empty list. Malformed rows are skipped, never drawn blank. One item draws the one-item form, never a carousel track or controls."
+    },
+    "priority-media": {
+      "statement": "At most one image per page loads eagerly with fetchpriority=high: the principal image of the first section, and only when that section has one. A renderable section background image takes precedence over the block's own image. Every other image is loading=lazy. Images always carry intrinsic width and height, or fill a sized box."
+    },
+    "data-block": {
+      "statement": "The block root carries data-block with the contract's section id (kebab case). Stylesheets and analytics select on it; former platform names are migrated, not kept beside it."
+    },
+    "data-track": {
+      "statement": "The section wrapper carries data-track = '<section id>-<n>' (n counts that section id on the page from 1), or '<section id>-<n>@<scope>' inside a named list. It is reserved for section wrappers and carries no editor text or personal data. Links built by the button component carry data-track-control='cta'; carousel controls carry 'carousel-previous' and 'carousel-next'."
+    },
+    "background-decorative": {
+      "statement": "A section background image is decorative: alt=\"\" and aria-hidden=\"true\". An image that carries meaning belongs to the block, with its own alt."
+    },
+    "adjacent-collapse": {
+      "statement": "A section collapses its top spacing (data-collapse-top) when the previous section shares its tone and dark tone, neither has a background image, it has no divider, and neither section's spacing is none."
+    },
+    "anchors": {
+      "statement": "A section's id is its anchor, slugged. Ids reserved by the document (main, content, header, footer, nav, primary-navigation, search, skip-link) and repeats take a numeric suffix (-2, -3)."
+    },
+    "new-tab": {
+      "statement": "A link that opens a new tab carries target=_blank and rel=\"noopener noreferrer\"."
+    },
+    "list-semantics": {
+      "statement": "A list of items is ul or ol with role=list (so list semantics survive list-style: none), each item an li. Grids of cards, stats, logos, steps, tags and results are all lists."
+    }
+  },
+  "hooks": [],
+  "notes": [
+    {
+      "topic": "ruling",
+      "text": "The divider is an attribute the stylesheet draws, not an hr element: WordPress's hr.x-section-divider goes."
+    },
+    {
+      "topic": "ruling",
+      "text": "Tone values are surface, surface-alt, brand-tint and surface-inverse; WordPress's stored 'inverse' maps to surface-inverse."
+    },
+    {
+      "topic": "open-question",
+      "text": "WordPress spacing and width are utility classes on a container div inside the section; the contract has no container element, the content div takes the measure from data-width. Confirm no WordPress site styles the container div directly."
+    }
+  ],
+  "platforms": {
+    "nextjs": {
+      "formerly": [
+        {
+          "role": "block",
+          "element": "div",
+          "note": "data-block values were camelCase payload slugs: richText, cta, mediaText, collectionShowcase."
+        }
+      ],
+      "owes": [
+        "Write data-block and data-track from contract ids: rich-text, call-to-action, media-text, collection-showcase.",
+        "Rename the skip link's class skip-link to salt-skip-link (page.json)."
+      ]
+    },
+    "wordpress": {
+      "formerly": [
+        {
+          "role": "root",
+          "element": "section",
+          "classes": [
+            "x-section",
+            "section-<name>",
+            "py-*",
+            "bg-*",
+            "text-*",
+            "pt-0 md:pt-0"
+          ],
+          "attributes": [
+            "data-section"
+          ]
+        },
+        {
+          "role": "content",
+          "element": "div",
+          "classes": [
+            "mx-auto",
+            "w-full",
+            "max-w-*",
+            "px-4",
+            "sm:px-6",
+            "lg:px-8"
+          ],
+          "note": "The container div; width is a class on it."
+        },
+        {
+          "element": "hr",
+          "classes": [
+            "x-section-divider"
+          ],
+          "note": "Replaced by data-divider on the root."
+        }
+      ],
+      "owes": [
+        "Render section only when named (with aria-labelledby), div otherwise; today every band is an unnamed section.",
+        "Move spacing, tone, width, collapse and divider from classes to data-spacing, data-tone, data-tone-dark, data-width, data-collapse-top and data-divider.",
+        "Draw a background image layer and scrim (salt-section__media, salt-section__scrim); WordPress has no background image setting today.",
+        "Wrap the block in div.salt-section__content > div.salt-block[data-block].",
+        "Write data-track per section#data-track.",
+        "Use salt-sr-only for the fallback h1 and the skip link's hidden state instead of visually-hidden."
+      ]
+    }
+  }
+}

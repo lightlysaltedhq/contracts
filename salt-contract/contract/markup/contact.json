@@ -1,0 +1,268 @@
+{
+  "$schema": "../../schema/markup.schema.json",
+  "version": "0.1.0",
+  "id": "contact",
+  "kind": "section",
+  "tier": "core",
+  "root": {
+    "element": "div",
+    "classes": [
+      "salt-block"
+    ],
+    "attributes": {
+      "data-block": "contact"
+    }
+  },
+  "elements": [
+    {
+      "role": "heading",
+      "component": "heading",
+      "attributes": {
+        "id": "from:plan.headingId"
+      },
+      "optional": true,
+      "when": "heading is set",
+      "note": "Level from the plan (section#heading-level)."
+    },
+    {
+      "role": "intro",
+      "element": "p",
+      "classes": [
+        "salt-intro"
+      ],
+      "text": "from:intro",
+      "optional": true,
+      "when": "intro is set"
+    },
+    {
+      "role": "details",
+      "element": "div",
+      "classes": [
+        "salt-contact__details"
+      ],
+      "optional": true,
+      "when": "the site shows any of its organisation name, phone, email or address",
+      "children": [
+        {
+          "role": "organisation",
+          "element": "p",
+          "classes": [
+            "salt-contact__organisation"
+          ],
+          "text": "from:organisation name",
+          "optional": true,
+          "when": "shown"
+        },
+        {
+          "role": "phone",
+          "element": "p",
+          "optional": true,
+          "when": "shown",
+          "children": [
+            {
+              "role": "phone-link",
+              "element": "a",
+              "attributes": {
+                "href": "from:tel"
+              },
+              "text": "from:phone",
+              "note": "Plain text when the number has no digits."
+            }
+          ]
+        },
+        {
+          "role": "email",
+          "element": "p",
+          "optional": true,
+          "when": "shown",
+          "children": [
+            {
+              "role": "email-link",
+              "element": "a",
+              "attributes": {
+                "href": "from:mailto"
+              },
+              "text": "from:email"
+            }
+          ]
+        },
+        {
+          "role": "address",
+          "element": "address",
+          "classes": [
+            "salt-contact__address"
+          ],
+          "optional": true,
+          "when": "shown",
+          "children": [
+            {
+              "role": "line",
+              "element": "span",
+              "classes": [
+                "salt-contact__line"
+              ],
+              "repeat": {
+                "from": "address lines"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "role": "form",
+      "component": "contact-form",
+      "optional": true,
+      "when": "the site accepts enquiries"
+    },
+    {
+      "role": "closed",
+      "element": "p",
+      "classes": [
+        "salt-contact__closed"
+      ],
+      "text": "from:labels.unavailable",
+      "optional": true,
+      "when": "the site does not accept enquiries"
+    }
+  ],
+  "headings": {
+    "provides": "when heading is set",
+    "role": "heading",
+    "level": "plan",
+    "labelledBy": true,
+    "rules": [
+      "section#heading-level",
+      "section#single-h1",
+      "section#labelled-by"
+    ],
+    "headingBeforeOwn": "never"
+  },
+  "zeroState": "Never empty: it draws the form or the closed message.",
+  "priorityMedia": {
+    "role": null
+  },
+  "script": {
+    "kind": "progressive",
+    "withoutScript": "The form posts natively (contact-form).",
+    "withScript": "In-place submission (contact-form)."
+  },
+  "uses": [
+    "section",
+    "section-intro",
+    "contact-form",
+    "button",
+    "heading"
+  ],
+  "hooks": [
+    {
+      "class": "salt-contact__closed",
+      "role": "closed",
+      "reason": "The not-accepting message; no default style."
+    }
+  ],
+  "notes": [
+    {
+      "topic": "stylesheet-owes",
+      "text": "New vocabulary from WordPress's details column; no rules yet.",
+      "classes": [
+        "salt-contact__details",
+        "salt-contact__organisation",
+        "salt-contact__address",
+        "salt-contact__line"
+      ]
+    },
+    {
+      "topic": "order",
+      "text": "Platforms differ: WordPress draws a two-column grid (details, then a form column with its own intro), and a mailto button when the form is off; Next draws heading, intro, form. Ruled: heading, intro, details, then form or the closed message; the mailto button goes (the details carry the email)."
+    },
+    {
+      "topic": "open-question",
+      "text": "WordPress's separate form intro paragraph has no Next counterpart; whether it stays (as a second p.salt-intro) needs a ruling. Its zero state (draws nothing when nothing to show) differs from Next's (always draws); ruled Next's."
+    }
+  ],
+  "platforms": {
+    "nextjs": {
+      "owes": [
+        "The details block (salt-contact__details), read from site settings."
+      ]
+    },
+    "wordpress": {
+      "formerly": [
+        {
+          "role": "heading",
+          "element": "h1|h2",
+          "classes": [
+            "x-heading",
+            "mb-6"
+          ],
+          "note": "No id; the WordPress section has no aria-labelledby."
+        },
+        {
+          "role": "intro",
+          "element": "p",
+          "classes": [
+            "mb-8",
+            "max-w-prose",
+            "text-ink-muted"
+          ]
+        },
+        {
+          "element": "div",
+          "classes": [
+            "x-contact",
+            "grid",
+            "md:grid-cols-2"
+          ],
+          "attributes": [
+            "data-section-component=contact"
+          ]
+        },
+        {
+          "role": "details",
+          "element": "div",
+          "classes": [
+            "x-contact-details",
+            "flex",
+            "flex-col"
+          ]
+        },
+        {
+          "role": "address",
+          "element": "address",
+          "classes": [
+            "not-italic"
+          ]
+        },
+        {
+          "role": "line",
+          "element": "span",
+          "classes": [
+            "block"
+          ]
+        },
+        {
+          "element": "div",
+          "classes": [
+            "x-contact-form-col"
+          ],
+          "note": "Form column; dropped"
+        },
+        {
+          "role": "closed",
+          "element": "a",
+          "classes": [
+            "x-button-primary"
+          ],
+          "note": "'Email us' mailto button when the form is off"
+        }
+      ],
+      "owes": [
+        "Write the block root div.salt-block with data-block set to the contract id inside the section wrapper (section.json).",
+        "Give the section heading the plan's id and point the wrapper's aria-labelledby at it (section#labelled-by).",
+        "Drop Tailwind utility classes from the markup; the shared stylesheets style the salt-* classes.",
+        "No two-column wrapper; the closed message in place of the mailto button; draw the section even when the form is off."
+      ]
+    }
+  }
+}

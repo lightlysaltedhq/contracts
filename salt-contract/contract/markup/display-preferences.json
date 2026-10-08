@@ -1,0 +1,236 @@
+{
+  "$schema": "../../schema/markup.schema.json",
+  "version": "0.1.0",
+  "id": "display-preferences",
+  "kind": "component",
+  "root": {
+    "element": "div",
+    "classes": [
+      "salt-display-preferences"
+    ],
+    "attributes": {
+      "hidden": "",
+      "data-motion-default": {
+        "value": "reduce",
+        "when": "the site defaults to reduced motion"
+      }
+    },
+    "note": "Hidden until script reveals it: every control needs script."
+  },
+  "elements": [
+    {
+      "role": "panel",
+      "element": "details",
+      "classes": [
+        "salt-display-preferences__panel"
+      ],
+      "children": [
+        {
+          "role": "summary",
+          "element": "summary",
+          "classes": [
+            "salt-display-preferences__summary"
+          ],
+          "text": "from:labels.summary"
+        },
+        {
+          "role": "controls",
+          "element": "div",
+          "classes": [
+            "salt-display-preferences__controls"
+          ],
+          "children": [
+            {
+              "role": "scale",
+              "element": "div",
+              "classes": [
+                "salt-display-preferences__group"
+              ],
+              "attributes": {
+                "role": "group",
+                "aria-label": "from:labels.fontSize"
+              },
+              "optional": true,
+              "when": "font size is offered",
+              "children": [
+                {
+                  "role": "scale-label",
+                  "element": "span",
+                  "classes": [
+                    "salt-display-preferences__label"
+                  ],
+                  "attributes": {
+                    "aria-hidden": "true"
+                  }
+                },
+                {
+                  "role": "scale-button",
+                  "element": "button",
+                  "attributes": {
+                    "type": "button",
+                    "data-salt-pref": "scale",
+                    "data-salt-action": {
+                      "enum": [
+                        "decrease",
+                        "reset",
+                        "increase"
+                      ]
+                    },
+                    "aria-label": "from:labels"
+                  },
+                  "repeat": {
+                    "from": "decrease, reset, increase",
+                    "max": 3
+                  }
+                }
+              ]
+            },
+            {
+              "role": "toggle",
+              "element": "button",
+              "attributes": {
+                "type": "button",
+                "aria-pressed": {
+                  "enum": [
+                    "true",
+                    "false"
+                  ]
+                },
+                "data-salt-pref": {
+                  "enum": [
+                    "contrast",
+                    "grayscale",
+                    "theme",
+                    "motion"
+                  ]
+                }
+              },
+              "repeat": {
+                "from": "offered toggles",
+                "max": 4
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "headings": {
+    "provides": "never",
+    "level": "none"
+  },
+  "dataAttributes": [
+    {
+      "name": "data-salt-pref",
+      "on": "toggle",
+      "values": [
+        "scale",
+        "contrast",
+        "grayscale",
+        "theme",
+        "motion"
+      ]
+    },
+    {
+      "name": "data-salt-action",
+      "on": "scale-button",
+      "values": [
+        "decrease",
+        "reset",
+        "increase"
+      ]
+    }
+  ],
+  "script": {
+    "kind": "progressive",
+    "withoutScript": "Nothing: the widget stays hidden.",
+    "withScript": "Reveals the widget; each control sets a preference on the document."
+  },
+  "ruleRefs": [
+    "section#target-size",
+    "section#reduced-motion"
+  ],
+  "notes": [
+    {
+      "topic": "stylesheet-owes",
+      "text": "New vocabulary from WordPress; no rules in the shared stylesheets yet.",
+      "classes": [
+        "salt-display-preferences",
+        "salt-display-preferences__panel",
+        "salt-display-preferences__summary",
+        "salt-display-preferences__controls",
+        "salt-display-preferences__group",
+        "salt-display-preferences__label"
+      ]
+    },
+    {
+      "topic": "ruling",
+      "text": "data-salt-pref and data-salt-action stay: they are the script's contract with the markup."
+    }
+  ],
+  "platforms": {
+    "nextjs": {
+      "formerly": [
+        {
+          "note": "ThemeScript and the theme toggle cover the theme preference only"
+        }
+      ],
+      "owes": [
+        "The preferences widget (sections.json)."
+      ]
+    },
+    "wordpress": {
+      "formerly": [
+        {
+          "role": "root",
+          "element": "div",
+          "classes": [
+            "x-display-preferences"
+          ],
+          "attributes": [
+            "hidden",
+            "data-salt-display-prefs"
+          ]
+        },
+        {
+          "role": "panel",
+          "element": "details",
+          "classes": [
+            "x-display-preferences-panel"
+          ]
+        },
+        {
+          "role": "summary",
+          "element": "summary",
+          "classes": [
+            "x-display-preferences-summary"
+          ]
+        },
+        {
+          "role": "controls",
+          "element": "div",
+          "classes": [
+            "x-display-preferences-controls"
+          ]
+        },
+        {
+          "role": "scale",
+          "element": "div",
+          "classes": [
+            "x-display-preferences-group"
+          ]
+        },
+        {
+          "role": "scale-label",
+          "element": "span",
+          "classes": [
+            "x-display-preferences-label"
+          ]
+        }
+      ],
+      "owes": [
+        "Rename to salt-display-preferences*; data-salt-display-prefs goes (the class marks it)."
+      ]
+    }
+  }
+}

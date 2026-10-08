@@ -1,0 +1,80 @@
+{
+  "$schema": "../../schema/markup.schema.json",
+  "version": "0.1.0",
+  "id": "media",
+  "kind": "component",
+  "root": {
+    "element": "img",
+    "attributes": {
+      "src": "from:image",
+      "srcset": "from:image",
+      "sizes": "from:context and band",
+      "alt": "from:alt",
+      "width": {
+        "value": "from:image",
+        "when": "not fill"
+      },
+      "height": {
+        "value": "from:image",
+        "when": "not fill"
+      },
+      "loading": {
+        "enum": [
+          "lazy"
+        ],
+        "when": "not priority"
+      },
+      "fetchpriority": {
+        "value": "high",
+        "when": "priority"
+      },
+      "decoding": "async",
+      "aria-hidden": {
+        "value": "true",
+        "when": "decorative background"
+      }
+    },
+    "note": "The image takes the class its parent gives it (salt-hero__image, salt-gallery__image and so on); media has no class of its own. sizes is derived from the image context (full, content, wide, aside, half, card, logo, thumb) and the band's width."
+  },
+  "headings": {
+    "provides": "never",
+    "level": "none"
+  },
+  "zeroState": "Not drawn when the image does not resolve.",
+  "priorityMedia": {
+    "role": "root",
+    "when": "the parent passes priority",
+    "rules": [
+      "section#priority-media"
+    ]
+  },
+  "script": {
+    "kind": "none"
+  },
+  "notes": [
+    {
+      "topic": "ruling",
+      "text": "Alt precedence is the parent's: an explicit alt, else the stored alt, else empty (decorative)."
+    },
+    {
+      "topic": "open-question",
+      "text": "WordPress may emit picture with source elements (opt-in); Next emits img only. The contract allows img only until a fixture needs picture."
+    }
+  ],
+  "platforms": {
+    "wordpress": {
+      "formerly": [
+        {
+          "role": "root",
+          "element": "img",
+          "classes": [
+            "x-image"
+          ]
+        }
+      ],
+      "owes": [
+        "Drop x-image; take the parent's class; derive sizes from the same contexts."
+      ]
+    }
+  }
+}

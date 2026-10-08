@@ -1,0 +1,97 @@
+{
+  "$schema": "../../schema/markup.schema.json",
+  "version": "0.1.0",
+  "id": "archive",
+  "kind": "view",
+  "summary": "Archive and category pages: a listing with a heading.",
+  "root": {
+    "element": "main",
+    "attributes": {
+      "id": "main",
+      "tabindex": "-1"
+    },
+    "note": "Inside the document skeleton page.json draws once (section#landmarks)."
+  },
+  "elements": [
+    {
+      "role": "header",
+      "element": "header",
+      "children": [
+        {
+          "role": "title",
+          "element": "h1",
+          "text": "from:archive or term title"
+        },
+        {
+          "role": "description",
+          "element": "p",
+          "optional": true,
+          "when": "the term has a description"
+        }
+      ]
+    },
+    {
+      "role": "listing",
+      "component": "section",
+      "note": "The listing section (listing.json), with its card list and pagination; its heading, if any, is h2."
+    }
+  ],
+  "headings": {
+    "provides": "always",
+    "level": "fixed",
+    "fixedLevel": 1,
+    "rules": [
+      "section#single-h1"
+    ],
+    "role": "title"
+  },
+  "script": {
+    "kind": "none"
+  },
+  "uses": [
+    "section",
+    "pagination",
+    "card"
+  ],
+  "ruleRefs": [
+    "section#landmarks",
+    "section#single-h1"
+  ],
+  "notes": [
+    {
+      "topic": "open-question",
+      "text": "Only the landmark structure and the h1 are fixed here; the view body's class vocabulary is not yet in the contract (Next's example app writes salt-post__*, salt-service__* and salt-archive__*, which no shared stylesheet styles)."
+    }
+  ],
+  "platforms": {
+    "wordpress": {
+      "formerly": [
+        {
+          "role": "header",
+          "element": "header",
+          "classes": [
+            "x-archive-header"
+          ]
+        },
+        {
+          "element": "div",
+          "classes": [
+            "x-archive-description"
+          ]
+        }
+      ],
+      "owes": [
+        "The listing section in place of native loops (listing.json)."
+      ]
+    },
+    "nextjs": {
+      "formerly": [
+        {
+          "role": "root",
+          "element": "main",
+          "note": "apps/example ArchiveView; salt-blog__list, salt-archive__profile"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,71 @@
+{
+  "$schema": "../../schema/markup.schema.json",
+  "version": "0.1.0",
+  "id": "rich-text-body",
+  "kind": "component",
+  "root": {
+    "element": "div",
+    "classes": [
+      "salt-rich-text"
+    ]
+  },
+  "elements": [
+    {
+      "role": "content",
+      "element": [
+        "p",
+        "h3",
+        "h4",
+        "h5",
+        "h6",
+        "ul",
+        "ol",
+        "blockquote"
+      ],
+      "repeat": {
+        "from": "body nodes"
+      },
+      "note": "Allowed inline: a (href; http, https, mailto, tel, or an internal link), strong, em, code, br. Headings rank from the base level (section#body-heading-base); a heading outside the allowed set renders as p."
+    }
+  ],
+  "headings": {
+    "provides": "never",
+    "level": "given",
+    "children": "base + 1 for the first heading tag, base + 2 for the second",
+    "rules": [
+      "section#body-heading-base"
+    ]
+  },
+  "zeroState": "Not drawn when the body has no words (an editor's empty paragraph counts as none).",
+  "script": {
+    "kind": "none"
+  },
+  "ruleRefs": [
+    "section#focus-ring"
+  ],
+  "notes": [
+    {
+      "topic": "ruling",
+      "text": "Headings inside a body are relative to the section, not the absolute h3 and h4 WordPress's allow-list permits."
+    }
+  ],
+  "platforms": {
+    "wordpress": {
+      "formerly": [
+        {
+          "role": "root",
+          "element": "div",
+          "classes": [
+            "x-prose",
+            "text-lg",
+            "text-ink"
+          ],
+          "note": "salt_sanitize_html output; allow-list p, a, strong, em, ul, ol, li, blockquote, h3, h4, br, code"
+        }
+      ],
+      "owes": [
+        "Wrap every body in div.salt-rich-text; map stored h3 and h4 to the base-relative levels."
+      ]
+    }
+  }
+}

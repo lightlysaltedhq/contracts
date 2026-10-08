@@ -1,0 +1,71 @@
+{
+  "$schema": "../../schema/markup.schema.json",
+  "version": "0.1.0",
+  "id": "search",
+  "kind": "view",
+  "summary": "Search results.",
+  "root": {
+    "element": "main",
+    "attributes": {
+      "id": "main",
+      "tabindex": "-1"
+    },
+    "note": "Inside the document skeleton page.json draws once (section#landmarks)."
+  },
+  "elements": [
+    {
+      "role": "title",
+      "element": "h1",
+      "text": "from:labels.results (query)"
+    },
+    {
+      "role": "search",
+      "component": "search-form"
+    },
+    {
+      "role": "listing",
+      "component": "section",
+      "note": "The listing section with its empty message."
+    }
+  ],
+  "headings": {
+    "provides": "always",
+    "level": "fixed",
+    "fixedLevel": 1,
+    "rules": [
+      "section#single-h1"
+    ],
+    "role": "title"
+  },
+  "script": {
+    "kind": "none"
+  },
+  "uses": [
+    "search-form",
+    "section"
+  ],
+  "ruleRefs": [
+    "section#landmarks",
+    "section#single-h1"
+  ],
+  "notes": [
+    {
+      "topic": "open-question",
+      "text": "Only the landmark structure and the h1 are fixed here; the view body's class vocabulary is not yet in the contract (Next's example app writes salt-post__*, salt-service__* and salt-archive__*, which no shared stylesheet styles)."
+    }
+  ],
+  "platforms": {
+    "wordpress": {
+      "formerly": [
+        {
+          "role": "root",
+          "element": "main",
+          "note": "search.php; salt_the_document_h1"
+        }
+      ],
+      "owes": [
+        "The search form and listing section markup."
+      ]
+    }
+  }
+}

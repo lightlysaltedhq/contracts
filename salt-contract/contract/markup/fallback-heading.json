@@ -1,0 +1,54 @@
+{
+  "$schema": "../../schema/markup.schema.json",
+  "version": "0.1.0",
+  "id": "fallback-heading",
+  "kind": "component",
+  "root": {
+    "element": "h1",
+    "classes": [
+      "salt-sr-only"
+    ],
+    "when": "no section claimed the h1"
+  },
+  "elements": [],
+  "headings": {
+    "provides": "when no section claimed the h1",
+    "level": "fixed",
+    "fixedLevel": 1,
+    "rules": [
+      "section#fallback-heading",
+      "section#single-h1"
+    ]
+  },
+  "zeroState": "Not drawn when a section claimed the h1.",
+  "script": {
+    "kind": "none"
+  },
+  "platforms": {
+    "nextjs": {
+      "formerly": [
+        {
+          "role": "root",
+          "element": "h1",
+          "classes": [
+            "salt-sr-only"
+          ]
+        }
+      ]
+    },
+    "wordpress": {
+      "formerly": [
+        {
+          "role": "root",
+          "element": "h1",
+          "classes": [
+            "visually-hidden"
+          ]
+        }
+      ],
+      "owes": [
+        "Use salt-sr-only for the hidden h1 (flexible-content.php)."
+      ]
+    }
+  }
+}

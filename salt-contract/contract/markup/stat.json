@@ -1,0 +1,121 @@
+{
+  "$schema": "../../schema/markup.schema.json",
+  "version": "0.1.0",
+  "id": "stat",
+  "kind": "component",
+  "root": {
+    "element": "li",
+    "classes": [
+      "salt-stat"
+    ]
+  },
+  "elements": [
+    {
+      "role": "icon",
+      "component": "icon",
+      "attributes": {
+        "data-size": "lg"
+      },
+      "optional": true,
+      "when": "icon is set"
+    },
+    {
+      "role": "value",
+      "element": "p",
+      "classes": [
+        "salt-stat__value"
+      ],
+      "text": "from:value",
+      "children": [
+        {
+          "role": "suffix",
+          "element": "span",
+          "classes": [
+            "salt-stat__suffix"
+          ],
+          "text": "from:suffix",
+          "optional": true,
+          "when": "suffix is set"
+        }
+      ]
+    },
+    {
+      "role": "label",
+      "element": "p",
+      "classes": [
+        "salt-stat__label"
+      ],
+      "text": "from:label",
+      "optional": true,
+      "when": "label is set"
+    }
+  ],
+  "headings": {
+    "provides": "never",
+    "level": "none"
+  },
+  "zeroState": "Not drawn without a value.",
+  "script": {
+    "kind": "none"
+  },
+  "uses": [
+    "icon"
+  ],
+  "notes": [
+    {
+      "topic": "ruling",
+      "text": "The value's figure is text directly in p.salt-stat__value; WordPress's span.x-stat-number goes. A stat is an li because every stat sits in a list (section#list-semantics)."
+    }
+  ],
+  "platforms": {
+    "nextjs": {
+      "owes": [
+        "Nothing visible; the stats section, showcase results and case study already write this."
+      ]
+    },
+    "wordpress": {
+      "formerly": [
+        {
+          "role": "root",
+          "element": "div",
+          "classes": [
+            "x-stat",
+            "flex",
+            "flex-col",
+            "gap-1"
+          ]
+        },
+        {
+          "role": "value",
+          "element": "p",
+          "classes": [
+            "x-stat-value"
+          ]
+        },
+        {
+          "element": "span",
+          "classes": [
+            "x-stat-number"
+          ]
+        },
+        {
+          "role": "suffix",
+          "element": "span",
+          "classes": [
+            "x-stat-suffix"
+          ]
+        },
+        {
+          "role": "label",
+          "element": "p",
+          "classes": [
+            "x-stat-label"
+          ]
+        }
+      ],
+      "owes": [
+        "li.salt-stat inside a list; drop the number span; add the optional icon."
+      ]
+    }
+  }
+}

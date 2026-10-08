@@ -1,0 +1,118 @@
+{
+  "$schema": "../../schema/markup.schema.json",
+  "version": "0.1.0",
+  "id": "accordion",
+  "kind": "component",
+  "root": {
+    "element": "div",
+    "classes": [
+      "salt-accordion"
+    ]
+  },
+  "elements": [
+    {
+      "role": "item",
+      "element": "details",
+      "classes": [
+        "salt-accordion__item"
+      ],
+      "attributes": {
+        "name": "from:name (exclusive open)",
+        "open": {
+          "value": "",
+          "when": "the first item marked open; none by default"
+        }
+      },
+      "repeat": {
+        "from": "items",
+        "min": 1
+      },
+      "children": [
+        {
+          "role": "summary",
+          "element": "summary",
+          "classes": [
+            "salt-accordion__summary"
+          ],
+          "text": "from:item.summary",
+          "note": "Plain text, never a heading; the marker is drawn by the stylesheet."
+        },
+        {
+          "role": "content",
+          "element": "div",
+          "classes": [
+            "salt-accordion__content"
+          ],
+          "text": "from:item.content"
+        }
+      ]
+    }
+  ],
+  "headings": {
+    "provides": "never",
+    "level": "none",
+    "note": "Summaries are not headings."
+  },
+  "zeroState": "Not drawn with no items.",
+  "script": {
+    "kind": "none"
+  },
+  "ruleRefs": [
+    "section#focus-ring",
+    "section#reduced-motion"
+  ],
+  "notes": [
+    {
+      "topic": "ruling",
+      "text": "No chevron element: WordPress's span.x-accordion-chevron with its svg goes; the stylesheet draws the marker."
+    }
+  ],
+  "platforms": {
+    "wordpress": {
+      "formerly": [
+        {
+          "role": "root",
+          "element": "div",
+          "classes": [
+            "x-accordion"
+          ],
+          "attributes": [
+            "data-section-component=accordion"
+          ]
+        },
+        {
+          "role": "item",
+          "element": "details",
+          "classes": [
+            "x-accordion-item",
+            "group",
+            "border-b"
+          ]
+        },
+        {
+          "role": "summary",
+          "element": "summary",
+          "classes": [
+            "x-accordion-summary"
+          ]
+        },
+        {
+          "element": "span",
+          "classes": [
+            "x-accordion-chevron"
+          ]
+        },
+        {
+          "role": "content",
+          "element": "div",
+          "classes": [
+            "x-accordion-content"
+          ]
+        }
+      ],
+      "owes": [
+        "Rename to salt-accordion*; drop the chevron span and data-section-component."
+      ]
+    }
+  }
+}

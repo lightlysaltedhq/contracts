@@ -1,0 +1,170 @@
+{
+  "$schema": "../../schema/markup.schema.json",
+  "version": "0.1.0",
+  "id": "call-to-action",
+  "kind": "section",
+  "tier": "core",
+  "root": {
+    "element": "div",
+    "classes": [
+      "salt-block"
+    ],
+    "attributes": {
+      "data-block": "call-to-action",
+      "data-align": "centre"
+    }
+  },
+  "elements": [
+    {
+      "role": "heading",
+      "component": "heading",
+      "attributes": {
+        "id": "from:plan.headingId"
+      },
+      "optional": true,
+      "when": "heading is set"
+    },
+    {
+      "role": "body",
+      "component": "rich-text-body",
+      "optional": true,
+      "when": "the body has words"
+    },
+    {
+      "role": "actions",
+      "element": "div",
+      "classes": [
+        "salt-cta__actions"
+      ],
+      "optional": true,
+      "when": "a button resolves",
+      "children": [
+        {
+          "role": "button",
+          "component": "button",
+          "repeat": {
+            "from": "buttons",
+            "min": 1,
+            "max": 2
+          }
+        }
+      ]
+    }
+  ],
+  "headings": {
+    "provides": "when heading is set",
+    "role": "heading",
+    "level": "plan",
+    "labelledBy": true,
+    "rules": [
+      "section#heading-level",
+      "section#single-h1",
+      "section#labelled-by"
+    ],
+    "headingBeforeOwn": "no heading of its own and the body contains a heading"
+  },
+  "zeroState": "Heading, body and buttons all empty.",
+  "priorityMedia": {
+    "role": null
+  },
+  "dataAttributes": [
+    {
+      "name": "data-align",
+      "on": "root",
+      "values": [
+        "centre"
+      ],
+      "note": "Fixed; no field."
+    }
+  ],
+  "script": {
+    "kind": "none"
+  },
+  "uses": [
+    "section",
+    "heading",
+    "rich-text-body",
+    "call-to-action-group",
+    "button",
+    "arrow"
+  ],
+  "notes": [
+    {
+      "topic": "ruling",
+      "text": "The actions class keeps the stylesheet's short name salt-cta__actions although the section id is call-to-action; renaming it is a stylesheet change for no visitor gain.",
+      "classes": [
+        "salt-cta__actions"
+      ]
+    },
+    {
+      "topic": "ruling",
+      "text": "The band defaults to the brand-tint tone (a field default, not markup)."
+    }
+  ],
+  "platforms": {
+    "nextjs": {
+      "formerly": [
+        {
+          "role": "root",
+          "element": "div",
+          "classes": [
+            "salt-block"
+          ],
+          "attributes": [
+            "data-block=cta"
+          ]
+        }
+      ],
+      "owes": [
+        "data-block call-to-action."
+      ]
+    },
+    "wordpress": {
+      "formerly": [
+        {
+          "role": "root",
+          "element": "div",
+          "classes": [
+            "x-cta",
+            "flex",
+            "flex-col",
+            "items-center",
+            "text-center"
+          ]
+        },
+        {
+          "role": "heading",
+          "element": "h1|h2",
+          "classes": [
+            "x-heading",
+            "text-3xl"
+          ]
+        },
+        {
+          "role": "body",
+          "element": "p",
+          "classes": [
+            "text-ink-muted"
+          ],
+          "note": "Plain paragraph"
+        },
+        {
+          "role": "actions",
+          "element": "div",
+          "classes": [
+            "flex",
+            "flex-wrap",
+            "gap-4",
+            "justify-center"
+          ]
+        }
+      ],
+      "owes": [
+        "Write the block root div.salt-block with data-block set to the contract id inside the section wrapper (section.json).",
+        "Give the section heading the plan's id and point the wrapper's aria-labelledby at it (section#labelled-by).",
+        "Drop Tailwind utility classes from the markup; the shared stylesheets style the salt-* classes.",
+        "The body as div.salt-rich-text; the button row as div.salt-cta__actions."
+      ]
+    }
+  }
+}

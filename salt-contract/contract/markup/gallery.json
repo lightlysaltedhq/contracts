@@ -1,0 +1,295 @@
+{
+  "$schema": "../../schema/markup.schema.json",
+  "version": "0.1.0",
+  "id": "gallery",
+  "kind": "section",
+  "tier": "core",
+  "root": {
+    "element": "div",
+    "classes": [
+      "salt-block"
+    ],
+    "attributes": {
+      "data-block": "gallery"
+    }
+  },
+  "elements": [
+    {
+      "role": "heading",
+      "component": "heading",
+      "attributes": {
+        "id": "from:plan.headingId"
+      },
+      "optional": true,
+      "when": "heading is set",
+      "note": "Level from the plan (section#heading-level)."
+    },
+    {
+      "role": "intro",
+      "element": "p",
+      "classes": [
+        "salt-intro"
+      ],
+      "text": "from:intro",
+      "optional": true,
+      "when": "intro is set"
+    },
+    {
+      "role": "list",
+      "element": "ul",
+      "classes": [
+        "salt-grid",
+        "salt-gallery"
+      ],
+      "attributes": {
+        "role": "list",
+        "data-layout": {
+          "enum": [
+            "grid",
+            "masonry"
+          ]
+        },
+        "data-columns": {
+          "enum": [
+            "2",
+            "3",
+            "4"
+          ]
+        }
+      },
+      "optional": true,
+      "when": "two or more images",
+      "children": [
+        {
+          "role": "item",
+          "element": "li",
+          "classes": [
+            "salt-gallery__item"
+          ],
+          "repeat": {
+            "from": "images",
+            "min": 2
+          },
+          "children": [
+            {
+              "role": "figure",
+              "element": "figure",
+              "classes": [
+                "salt-gallery__figure"
+              ],
+              "children": [
+                {
+                  "role": "image",
+                  "component": "media",
+                  "classes": [
+                    "salt-gallery__image"
+                  ]
+                },
+                {
+                  "role": "caption",
+                  "element": "figcaption",
+                  "classes": [
+                    "salt-gallery__caption"
+                  ],
+                  "text": "from:caption",
+                  "optional": true,
+                  "when": "captions are on and the image has one"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "role": "single",
+      "element": "figure",
+      "classes": [
+        "salt-gallery__figure"
+      ],
+      "optional": true,
+      "when": "exactly one image, in every layout",
+      "note": "The figure above, alone, in place of the list."
+    }
+  ],
+  "variants": [
+    {
+      "field": "layout",
+      "sameOrder": false,
+      "options": {
+        "grid": {
+          "elements": {
+            "list": {
+              "attributes": {
+                "data-layout": "grid"
+              }
+            }
+          }
+        },
+        "masonry": {
+          "elements": {
+            "list": {
+              "attributes": {
+                "data-layout": "masonry"
+              }
+            }
+          }
+        },
+        "carousel": {
+          "replace": {
+            "list": {
+              "role": "carousel",
+              "component": "carousel-track",
+              "attributes": {
+                "aria-label": "from:heading or label"
+              },
+              "optional": true,
+              "when": "two or more images and a name (heading or label); falls back to grid without one",
+              "note": "Each slide is the figure above."
+            }
+          }
+        }
+      },
+      "note": "Carousel swaps the list for the carousel track: a different structure at the same position."
+    }
+  ],
+  "headings": {
+    "provides": "when heading is set",
+    "role": "heading",
+    "level": "plan",
+    "labelledBy": true,
+    "rules": [
+      "section#heading-level",
+      "section#single-h1",
+      "section#labelled-by"
+    ]
+  },
+  "zeroState": "Heading, intro and images all empty (a heading-only gallery is drawn).",
+  "priorityMedia": {
+    "role": "image",
+    "when": "the first image, when the plan grants priority and the section has no renderable background",
+    "rules": [
+      "section#priority-media"
+    ]
+  },
+  "dataAttributes": [
+    {
+      "name": "data-layout",
+      "on": "list",
+      "values": [
+        "grid",
+        "masonry"
+      ]
+    },
+    {
+      "name": "data-columns",
+      "on": "list",
+      "values": [
+        "2",
+        "3",
+        "4"
+      ]
+    }
+  ],
+  "script": {
+    "kind": "progressive",
+    "withoutScript": "Grid and masonry need none; the carousel layout scrolls (carousel-track).",
+    "withScript": "Carousel controls (carousel-track)."
+  },
+  "uses": [
+    "section",
+    "section-intro",
+    "media",
+    "carousel-track",
+    "heading"
+  ],
+  "ruleRefs": [
+    "section#list-semantics",
+    "section#zero-state"
+  ],
+  "omitted": [
+    {
+      "class": "salt-gallery__carousel",
+      "platform": "nextjs",
+      "reason": "No rule styles it; [data-block='gallery'] .salt-carousel reaches the same element."
+    }
+  ],
+  "notes": [
+    {
+      "topic": "variant-order",
+      "text": "layout=carousel draws the carousel track where grid and masonry draw the list."
+    }
+  ],
+  "platforms": {
+    "nextjs": {
+      "formerly": [
+        {
+          "role": "carousel",
+          "element": "div",
+          "classes": [
+            "salt-carousel",
+            "salt-gallery__carousel"
+          ]
+        }
+      ],
+      "owes": [
+        "Drop salt-gallery__carousel."
+      ]
+    },
+    "wordpress": {
+      "formerly": [
+        {
+          "role": "list",
+          "element": "div",
+          "classes": [
+            "x-gallery-grid",
+            "x-gallery-masonry",
+            "columns-2",
+            "lg:columns-3"
+          ]
+        },
+        {
+          "role": "item",
+          "element": "figure",
+          "classes": [
+            "x-gallery-item",
+            "break-inside-avoid"
+          ],
+          "note": "The figure is the grid item; no li"
+        },
+        {
+          "role": "caption",
+          "element": "figcaption",
+          "classes": [
+            "mt-2",
+            "text-sm"
+          ]
+        },
+        {
+          "role": "single",
+          "element": "div",
+          "classes": [
+            "x-gallery-single"
+          ]
+        },
+        {
+          "role": "carousel",
+          "element": "div",
+          "classes": [
+            "x-gallery-track"
+          ],
+          "attributes": [
+            "data-salt-carousel=gallery"
+          ]
+        }
+      ],
+      "owes": [
+        "Write the block root div.salt-block with data-block set to the contract id inside the section wrapper (section.json).",
+        "Give the section heading the plan's id and point the wrapper's aria-labelledby at it (section#labelled-by).",
+        "Drop Tailwind utility classes from the markup; the shared stylesheets style the salt-* classes.",
+        "The heading, intro and carousel label fields (WordPress's gallery never has a heading today).",
+        "ul > li.salt-gallery__item > figure.salt-gallery__figure; data-layout and data-columns."
+      ]
+    }
+  }
+}

@@ -1,0 +1,215 @@
+{
+  "$schema": "../../schema/markup.schema.json",
+  "version": "0.1.0",
+  "id": "logos",
+  "kind": "section",
+  "tier": "core",
+  "root": {
+    "element": "div",
+    "classes": [
+      "salt-block"
+    ],
+    "attributes": {
+      "data-block": "logos"
+    }
+  },
+  "elements": [
+    {
+      "role": "heading",
+      "component": "heading",
+      "attributes": {
+        "id": "from:plan.headingId"
+      },
+      "optional": true,
+      "when": "heading is set",
+      "note": "Level from the plan (section#heading-level)."
+    },
+    {
+      "role": "intro",
+      "element": "p",
+      "classes": [
+        "salt-intro"
+      ],
+      "text": "from:intro",
+      "optional": true,
+      "when": "intro is set"
+    },
+    {
+      "role": "list",
+      "element": "ul",
+      "classes": [
+        "salt-grid",
+        "salt-logos"
+      ],
+      "attributes": {
+        "role": "list",
+        "data-columns": {
+          "enum": [
+            "2",
+            "3",
+            "4"
+          ]
+        },
+        "data-greyscale": {
+          "enum": [
+            "true",
+            "false"
+          ]
+        }
+      },
+      "optional": true,
+      "when": "a logo resolves",
+      "children": [
+        {
+          "role": "item",
+          "element": "li",
+          "classes": [
+            "salt-logos__item"
+          ],
+          "repeat": {
+            "from": "items",
+            "min": 1
+          },
+          "children": [
+            {
+              "role": "frame",
+              "element": [
+                "a",
+                "span"
+              ],
+              "classes": [
+                "salt-logos__frame"
+              ],
+              "attributes": {
+                "href": {
+                  "value": "from:url",
+                  "when": "a safe url and an accessible name"
+                },
+                "aria-label": {
+                  "value": "from:name",
+                  "when": "linked"
+                }
+              },
+              "children": [
+                {
+                  "role": "image",
+                  "component": "media",
+                  "classes": [
+                    "salt-logos__image"
+                  ],
+                  "note": "fill, contain, context thumb; alt from the stored alt, else the name, else empty."
+                }
+              ],
+              "note": "a when linked, span otherwise."
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "headings": {
+    "provides": "when heading is set",
+    "role": "heading",
+    "level": "plan",
+    "labelledBy": true,
+    "rules": [
+      "section#heading-level",
+      "section#single-h1",
+      "section#labelled-by"
+    ]
+  },
+  "zeroState": "Heading, intro and items all empty.",
+  "priorityMedia": {
+    "role": null,
+    "when": "Logos never take priority."
+  },
+  "dataAttributes": [
+    {
+      "name": "data-columns",
+      "on": "list",
+      "values": [
+        "2",
+        "3",
+        "4"
+      ]
+    },
+    {
+      "name": "data-greyscale",
+      "on": "list",
+      "values": [
+        "true",
+        "false"
+      ]
+    }
+  ],
+  "script": {
+    "kind": "none"
+  },
+  "uses": [
+    "section",
+    "section-intro",
+    "media",
+    "heading"
+  ],
+  "ruleRefs": [
+    "section#list-semantics",
+    "section#focus-ring"
+  ],
+  "platforms": {
+    "wordpress": {
+      "formerly": [
+        {
+          "role": "heading",
+          "element": "h1|h2",
+          "classes": [
+            "x-heading",
+            "mb-6"
+          ],
+          "note": "No id; the WordPress section has no aria-labelledby."
+        },
+        {
+          "role": "list",
+          "element": "ul",
+          "classes": [
+            "x-logos",
+            "flex",
+            "flex-wrap",
+            "justify-center"
+          ],
+          "attributes": [
+            "data-section-component=logos"
+          ]
+        },
+        {
+          "role": "item",
+          "element": "li",
+          "classes": [
+            "x-logos-item"
+          ]
+        },
+        {
+          "role": "frame",
+          "element": "a",
+          "note": "Only when linked; no frame when unlinked"
+        },
+        {
+          "role": "image",
+          "element": "img",
+          "classes": [
+            "x-image",
+            "grayscale",
+            "hover:grayscale-0",
+            "h-10",
+            "md:h-12"
+          ]
+        }
+      ],
+      "owes": [
+        "Write the block root div.salt-block with data-block set to the contract id inside the section wrapper (section.json).",
+        "Give the section heading the plan's id and point the wrapper's aria-labelledby at it (section#labelled-by).",
+        "Drop Tailwind utility classes from the markup; the shared stylesheets style the salt-* classes.",
+        "Always a frame (a or span.salt-logos__frame); greyscale and columns as attributes; the intro paragraph."
+      ]
+    }
+  }
+}

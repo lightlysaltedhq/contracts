@@ -1,0 +1,378 @@
+{
+  "$schema": "../../schema/markup.schema.json",
+  "version": "0.1.0",
+  "id": "locations",
+  "kind": "section",
+  "tier": "core",
+  "root": {
+    "element": "div",
+    "classes": [
+      "salt-block"
+    ],
+    "attributes": {
+      "data-block": "locations"
+    }
+  },
+  "elements": [
+    {
+      "role": "eyebrow",
+      "component": "eyebrow",
+      "optional": true,
+      "when": "eyebrow is set"
+    },
+    {
+      "role": "heading",
+      "component": "heading",
+      "attributes": {
+        "id": "from:plan.headingId"
+      },
+      "optional": true,
+      "when": "heading is set",
+      "note": "Level from the plan (section#heading-level)."
+    },
+    {
+      "role": "offices",
+      "element": "div",
+      "classes": [
+        "salt-accordion",
+        "salt-locations"
+      ],
+      "optional": true,
+      "when": "an office has a title",
+      "children": [
+        {
+          "role": "office",
+          "element": "details",
+          "classes": [
+            "salt-accordion__item"
+          ],
+          "attributes": {
+            "name": "locations-<section index>"
+          },
+          "repeat": {
+            "from": "offices",
+            "min": 1
+          },
+          "children": [
+            {
+              "role": "summary",
+              "element": "summary",
+              "classes": [
+                "salt-accordion__summary"
+              ],
+              "children": [
+                {
+                  "role": "name",
+                  "element": "span",
+                  "classes": [
+                    "salt-locations__name"
+                  ],
+                  "text": "from:office.title",
+                  "note": "Not a heading."
+                },
+                {
+                  "role": "status",
+                  "element": "span",
+                  "classes": [
+                    "salt-locations__status"
+                  ],
+                  "attributes": {
+                    "data-status": {
+                      "enum": [
+                        "open",
+                        "appointment",
+                        "closed"
+                      ]
+                    }
+                  },
+                  "text": "from:labels.status",
+                  "optional": true,
+                  "when": "the office has hours (unknown status draws none)"
+                }
+              ]
+            },
+            {
+              "role": "content",
+              "element": "div",
+              "classes": [
+                "salt-accordion__content"
+              ],
+              "children": [
+                {
+                  "role": "office-body",
+                  "element": "div",
+                  "classes": [
+                    "salt-locations__office"
+                  ],
+                  "children": [
+                    {
+                      "role": "address",
+                      "element": "address",
+                      "classes": [
+                        "salt-locations__address"
+                      ],
+                      "optional": true,
+                      "when": "an address line is set",
+                      "children": [
+                        {
+                          "role": "line",
+                          "element": "span",
+                          "classes": [
+                            "salt-locations__line"
+                          ],
+                          "repeat": {
+                            "from": "non-empty address lines"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "role": "contact",
+                      "element": "ul",
+                      "classes": [
+                        "salt-locations__contact"
+                      ],
+                      "attributes": {
+                        "role": "list"
+                      },
+                      "optional": true,
+                      "when": "phone or email is set",
+                      "children": [
+                        {
+                          "role": "contact-item",
+                          "element": "li",
+                          "repeat": {
+                            "from": "tel, mailto",
+                            "max": 2
+                          },
+                          "children": [
+                            {
+                              "role": "contact-link",
+                              "element": "a",
+                              "attributes": {
+                                "href": "from:tel or mailto"
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "role": "hours",
+                      "component": "opening-hours",
+                      "optional": true,
+                      "when": "hours are set"
+                    },
+                    {
+                      "role": "map",
+                      "component": "map",
+                      "optional": true,
+                      "when": "maps are on and the office has coordinates"
+                    },
+                    {
+                      "role": "directions",
+                      "element": "a",
+                      "classes": [
+                        "salt-locations__directions"
+                      ],
+                      "attributes": {
+                        "href": "from:directions url",
+                        "aria-label": "from:labels.directions (office name)"
+                      },
+                      "text": "from:labels.getDirections",
+                      "optional": true,
+                      "when": "an address is set"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "headings": {
+    "provides": "when heading is set",
+    "role": "heading",
+    "level": "plan",
+    "labelledBy": true,
+    "rules": [
+      "section#heading-level",
+      "section#single-h1",
+      "section#labelled-by"
+    ],
+    "children": "office names are summary text, not headings"
+  },
+  "zeroState": "Module off, or no office with a title.",
+  "priorityMedia": {
+    "role": null
+  },
+  "dataAttributes": [
+    {
+      "name": "data-status",
+      "on": "status",
+      "values": [
+        "open",
+        "appointment",
+        "closed"
+      ]
+    }
+  ],
+  "script": {
+    "kind": "none"
+  },
+  "uses": [
+    "section",
+    "section-intro",
+    "accordion",
+    "opening-hours",
+    "map",
+    "eyebrow",
+    "heading"
+  ],
+  "notes": [
+    {
+      "topic": "stylesheet-owes",
+      "text": "New vocabulary from WordPress; no rules in the shared stylesheets yet. The office list reuses the accordion classes, as WordPress does.",
+      "classes": [
+        "salt-locations",
+        "salt-locations__name",
+        "salt-locations__status",
+        "salt-locations__office",
+        "salt-locations__address",
+        "salt-locations__line",
+        "salt-locations__contact",
+        "salt-locations__directions"
+      ]
+    },
+    {
+      "topic": "open-question",
+      "text": "The open-now status is computed at render time in the site's timezone, so cached HTML can go stale; whether it moves to the client is a platform question, the markup is fixed here."
+    }
+  ],
+  "platforms": {
+    "nextjs": {
+      "owes": [
+        "The section, planned as Epic WP8."
+      ]
+    },
+    "wordpress": {
+      "formerly": [
+        {
+          "role": "eyebrow",
+          "element": "p",
+          "classes": [
+            "x-eyebrow",
+            "mb-2"
+          ]
+        },
+        {
+          "role": "heading",
+          "element": "h1|h2",
+          "classes": [
+            "x-heading",
+            "mb-6"
+          ],
+          "note": "No id; the WordPress section has no aria-labelledby."
+        },
+        {
+          "role": "offices",
+          "element": "div",
+          "classes": [
+            "x-locations",
+            "flex",
+            "flex-col"
+          ],
+          "attributes": [
+            "data-section-component=locations"
+          ]
+        },
+        {
+          "role": "office",
+          "element": "details",
+          "classes": [
+            "x-accordion-item"
+          ]
+        },
+        {
+          "role": "summary",
+          "element": "summary",
+          "classes": [
+            "x-accordion-summary"
+          ]
+        },
+        {
+          "role": "name",
+          "element": "span",
+          "classes": [
+            "text-lg",
+            "font-semibold"
+          ]
+        },
+        {
+          "role": "status",
+          "element": "span",
+          "classes": [
+            "x-status-pill",
+            "text-success",
+            "text-info"
+          ],
+          "attributes": [
+            "data-status"
+          ]
+        },
+        {
+          "element": "span",
+          "classes": [
+            "x-accordion-chevron"
+          ]
+        },
+        {
+          "role": "content",
+          "element": "div",
+          "classes": [
+            "x-accordion-content"
+          ]
+        },
+        {
+          "role": "office-body",
+          "element": "div",
+          "classes": [
+            "x-location-card"
+          ]
+        },
+        {
+          "role": "address",
+          "element": "address",
+          "classes": [
+            "not-italic"
+          ]
+        },
+        {
+          "role": "contact",
+          "element": "ul",
+          "classes": [
+            "flex",
+            "flex-col",
+            "gap-1"
+          ]
+        },
+        {
+          "role": "directions",
+          "element": "a",
+          "classes": [
+            "text-brand",
+            "underline"
+          ]
+        }
+      ],
+      "owes": [
+        "Write the block root div.salt-block with data-block set to the contract id inside the section wrapper (section.json).",
+        "Give the section heading the plan's id and point the wrapper's aria-labelledby at it (section#labelled-by).",
+        "Drop Tailwind utility classes from the markup; the shared stylesheets style the salt-* classes.",
+        "Rename to the salt-locations vocabulary and salt-accordion classes; the outer list gains salt-accordion."
+      ]
+    }
+  }
+}

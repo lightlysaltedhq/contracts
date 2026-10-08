@@ -1,0 +1,159 @@
+{
+  "$schema": "../../schema/markup.schema.json",
+  "version": "0.1.0",
+  "id": "button",
+  "kind": "component",
+  "root": {
+    "element": [
+      "a",
+      "button"
+    ],
+    "classes": [
+      "salt-button"
+    ],
+    "attributes": {
+      "href": {
+        "value": "from:link",
+        "when": "link form (a)"
+      },
+      "type": {
+        "enum": [
+          "button",
+          "submit"
+        ],
+        "when": "button form"
+      },
+      "data-style": {
+        "enum": [
+          "primary",
+          "secondary",
+          "ghost",
+          "link"
+        ]
+      },
+      "data-icon-only": {
+        "value": "",
+        "when": "the button shows only an icon; aria-label then carries its name"
+      },
+      "aria-label": {
+        "value": "from:label",
+        "when": "icon-only"
+      },
+      "data-track-control": {
+        "value": "cta",
+        "when": "link form"
+      },
+      "target": {
+        "value": "_blank",
+        "when": "newTab"
+      },
+      "rel": {
+        "value": "noopener noreferrer",
+        "when": "newTab"
+      }
+    },
+    "note": "a when it has an href, button otherwise."
+  },
+  "elements": [
+    {
+      "role": "label",
+      "element": "span",
+      "classes": [
+        "salt-button__label"
+      ],
+      "optional": true,
+      "when": "an arrow follows the text",
+      "children": [
+        {
+          "role": "arrow",
+          "component": "arrow"
+        }
+      ],
+      "note": "Text and arrow together, so the arrow wraps with the last word."
+    }
+  ],
+  "headings": {
+    "provides": "never",
+    "level": "none"
+  },
+  "zeroState": "Not drawn without a label, or, in link form, without a resolvable href.",
+  "dataAttributes": [
+    {
+      "name": "data-style",
+      "on": "root",
+      "values": [
+        "primary",
+        "secondary",
+        "ghost",
+        "link"
+      ]
+    },
+    {
+      "name": "data-icon-only",
+      "on": "root",
+      "values": "",
+      "when": "icon only"
+    },
+    {
+      "name": "data-track-control",
+      "on": "root",
+      "values": [
+        "cta"
+      ],
+      "when": "link form"
+    }
+  ],
+  "script": {
+    "kind": "none"
+  },
+  "uses": [
+    "arrow"
+  ],
+  "ruleRefs": [
+    "section#focus-ring",
+    "section#target-size",
+    "section#new-tab",
+    "section#data-track"
+  ],
+  "hooks": [
+    {
+      "class": "salt-button__label",
+      "role": "label",
+      "reason": "Groups the text and its arrow; the word joiner inside the arrow keeps them on one line. No rule needed, but sites and tests target the label."
+    }
+  ],
+  "notes": [
+    {
+      "topic": "ruling",
+      "text": "WordPress's link-arrow style is the link style plus the arrow component; its size argument goes (one size, floored by section#target-size)."
+    }
+  ],
+  "platforms": {
+    "wordpress": {
+      "formerly": [
+        {
+          "role": "root",
+          "element": "a",
+          "classes": [
+            "x-button",
+            "x-button-primary",
+            "x-button-secondary",
+            "x-button-ghost",
+            "x-button-link-arrow",
+            "inline-flex",
+            "px-5",
+            "py-2.5"
+          ]
+        },
+        {
+          "role": "arrow",
+          "element": "span",
+          "note": "span[aria-hidden] with a right arrow entity, inside x-button-link-arrow"
+        }
+      ],
+      "owes": [
+        "Style as data-style, not a class per style; add data-track-control='cta'; draw the arrow through the arrow component inside span.salt-button__label."
+      ]
+    }
+  }
+}

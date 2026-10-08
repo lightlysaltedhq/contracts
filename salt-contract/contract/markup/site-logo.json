@@ -1,0 +1,137 @@
+{
+  "$schema": "../../schema/markup.schema.json",
+  "version": "0.1.0",
+  "id": "site-logo",
+  "kind": "component",
+  "root": {
+    "element": "a",
+    "classes": [
+      "salt-logo"
+    ],
+    "attributes": {
+      "href": "from:home",
+      "aria-label": {
+        "value": "from:site name",
+        "when": "an image logo is drawn"
+      },
+      "data-swaps": {
+        "value": "",
+        "when": "a dark-scheme image is set"
+      },
+      "style": {
+        "value": "--logo-height: <n>px",
+        "when": "a height is set"
+      }
+    }
+  },
+  "elements": [
+    {
+      "role": "light",
+      "component": "media",
+      "classes": [
+        "salt-logo__image",
+        "salt-logo__light"
+      ],
+      "attributes": {
+        "alt": ""
+      },
+      "optional": true,
+      "when": "a light image is set"
+    },
+    {
+      "role": "dark",
+      "component": "media",
+      "classes": [
+        "salt-logo__image",
+        "salt-logo__dark"
+      ],
+      "attributes": {
+        "alt": ""
+      },
+      "optional": true,
+      "when": "a light and a dark image are set"
+    },
+    {
+      "role": "wordmark",
+      "element": "span",
+      "classes": [
+        "salt-logo__wordmark"
+      ],
+      "text": "from:site name",
+      "optional": true,
+      "when": "no light image"
+    }
+  ],
+  "headings": {
+    "provides": "never",
+    "level": "none"
+  },
+  "dataAttributes": [
+    {
+      "name": "data-swaps",
+      "on": "root",
+      "values": "",
+      "when": "a dark image is set"
+    }
+  ],
+  "script": {
+    "kind": "none"
+  },
+  "uses": [
+    "media"
+  ],
+  "ruleRefs": [
+    "section#focus-ring"
+  ],
+  "notes": [
+    {
+      "topic": "ruling",
+      "text": "The link is named once by aria-label and both images are alt=\"\"; WordPress's light image alt and dark image aria-hidden go."
+    }
+  ],
+  "platforms": {
+    "wordpress": {
+      "formerly": [
+        {
+          "role": "root",
+          "element": "a",
+          "classes": [
+            "x-logo",
+            "has-dark",
+            "inline-flex"
+          ]
+        },
+        {
+          "role": "light",
+          "element": "img",
+          "classes": [
+            "x-logo-light"
+          ],
+          "attributes": [
+            "alt=<site title>"
+          ]
+        },
+        {
+          "role": "dark",
+          "element": "img",
+          "classes": [
+            "x-logo-dark"
+          ],
+          "attributes": [
+            "aria-hidden"
+          ]
+        },
+        {
+          "role": "wordmark",
+          "element": "span",
+          "classes": [
+            "x-logo-text"
+          ]
+        }
+      ],
+      "owes": [
+        "data-swaps instead of has-dark; name on the link; --logo-height inline."
+      ]
+    }
+  }
+}

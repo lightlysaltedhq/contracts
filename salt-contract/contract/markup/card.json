@@ -1,0 +1,481 @@
+{
+  "$schema": "../../schema/markup.schema.json",
+  "version": "0.1.0",
+  "id": "card",
+  "kind": "component",
+  "summary": "One card. The generic style serves services, case studies, posts, team, features and inline cards; the quote style serves testimonials.",
+  "root": {
+    "element": "div",
+    "classes": [
+      "salt-card"
+    ]
+  },
+  "elements": [
+    {
+      "role": "media",
+      "element": "div",
+      "classes": [
+        "salt-showcase__media"
+      ],
+      "optional": true,
+      "when": "the card has an image",
+      "children": [
+        {
+          "role": "image",
+          "component": "media",
+          "note": "fill, object-fit cover; context card, content for a lone or lead card."
+        }
+      ]
+    },
+    {
+      "role": "icon",
+      "component": "icon",
+      "attributes": {
+        "data-size": "lg"
+      },
+      "optional": true,
+      "when": "icon is set and the card has no image"
+    },
+    {
+      "role": "title",
+      "component": "heading",
+      "children": [
+        {
+          "role": "link",
+          "element": "a",
+          "classes": [
+            "salt-card__link"
+          ],
+          "attributes": {
+            "href": "from:href"
+          },
+          "optional": true,
+          "when": "the item has its own page or a safe url",
+          "children": [
+            {
+              "role": "arrow",
+              "component": "arrow",
+              "optional": true,
+              "when": "the site supplies an arrow"
+            }
+          ],
+          "note": "The one stretched link per card, wrapping the title."
+        }
+      ],
+      "note": "Level given by the section: body base + 1."
+    },
+    {
+      "role": "meta",
+      "element": "p",
+      "classes": [
+        "salt-showcase__meta"
+      ],
+      "text": "from:meta",
+      "optional": true,
+      "when": "meta is set (client, role)"
+    },
+    {
+      "role": "date",
+      "element": "p",
+      "classes": [
+        "salt-showcase__meta"
+      ],
+      "optional": true,
+      "when": "date is set",
+      "children": [
+        {
+          "role": "time",
+          "element": "time",
+          "attributes": {
+            "datetime": "from:date (YYYY-MM-DD)"
+          }
+        }
+      ]
+    },
+    {
+      "role": "text",
+      "element": "p",
+      "classes": [
+        "salt-showcase__text"
+      ],
+      "text": "from:text",
+      "optional": true,
+      "when": "text is set"
+    },
+    {
+      "role": "body",
+      "component": "rich-text-body",
+      "optional": true,
+      "when": "a features item has a body",
+      "note": "Features cards draw a rich-text body where collection cards draw the text paragraph."
+    },
+    {
+      "role": "results",
+      "element": "ul",
+      "classes": [
+        "salt-grid",
+        "salt-showcase__results"
+      ],
+      "attributes": {
+        "role": "list",
+        "aria-label": "from:labels.results",
+        "data-columns": {
+          "value": "2",
+          "when": "two or fewer results"
+        }
+      },
+      "optional": true,
+      "when": "the lead card of a featured case-studies showcase has results",
+      "children": [
+        {
+          "role": "result",
+          "component": "stat",
+          "repeat": {
+            "from": "results"
+          }
+        }
+      ]
+    },
+    {
+      "role": "tags",
+      "element": "ul",
+      "classes": [
+        "salt-showcase__tags"
+      ],
+      "attributes": {
+        "role": "list"
+      },
+      "optional": true,
+      "when": "tags are shown and the card has some",
+      "children": [
+        {
+          "role": "tag",
+          "element": "li",
+          "classes": [
+            "salt-showcase__tag"
+          ],
+          "text": "from:tag.title",
+          "repeat": {
+            "from": "tags"
+          }
+        }
+      ]
+    }
+  ],
+  "variants": [
+    {
+      "field": "style",
+      "sameOrder": false,
+      "note": "The quote style is a figure with its own order; the style follows the source (testimonials are quotes) or the carousel's card-style.",
+      "options": {
+        "generic": {},
+        "quote": {
+          "root": {
+            "element": "figure",
+            "classes": [
+              "salt-card",
+              "salt-showcase__quote"
+            ]
+          },
+          "tree": [
+            {
+              "role": "rating",
+              "element": "p",
+              "classes": [
+                "salt-showcase__rating"
+              ],
+              "attributes": {
+                "role": "img",
+                "aria-label": "from:labels.rating ({n} of {N})"
+              },
+              "optional": true,
+              "when": "rating is set (0-5)",
+              "children": [
+                {
+                  "role": "stars",
+                  "element": "span",
+                  "classes": [
+                    "salt-showcase__stars"
+                  ],
+                  "attributes": {
+                    "aria-hidden": "true",
+                    "style": "--salt-rating-fill: <percentage>"
+                  },
+                  "text": "five empty stars",
+                  "children": [
+                    {
+                      "role": "stars-fill",
+                      "element": "span",
+                      "classes": [
+                        "salt-showcase__stars-fill"
+                      ],
+                      "text": "five filled stars"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "role": "quote",
+              "element": "blockquote",
+              "classes": [
+                "salt-showcase__text"
+              ],
+              "children": [
+                {
+                  "role": "quote-text",
+                  "element": "p",
+                  "text": "from:text"
+                }
+              ]
+            },
+            {
+              "role": "caption",
+              "element": "figcaption",
+              "classes": [
+                "salt-showcase__caption"
+              ],
+              "children": [
+                {
+                  "role": "media",
+                  "element": "div",
+                  "classes": [
+                    "salt-showcase__media"
+                  ],
+                  "optional": true,
+                  "when": "the testimonial has a photo or logo",
+                  "children": [
+                    {
+                      "role": "image",
+                      "component": "media",
+                      "note": "Decorative: alt empty, context thumb."
+                    }
+                  ]
+                },
+                {
+                  "role": "title",
+                  "component": "heading",
+                  "text": "from:title (the person)",
+                  "note": "Level given: body base + 1."
+                },
+                {
+                  "role": "meta",
+                  "element": "p",
+                  "classes": [
+                    "salt-showcase__meta"
+                  ],
+                  "text": "from:meta (role, company)",
+                  "optional": true,
+                  "when": "meta is set"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "headings": {
+    "provides": "always",
+    "role": "title",
+    "level": "given",
+    "rules": [
+      "section#body-heading-base"
+    ]
+  },
+  "zeroState": "Not drawn without a title (quote: without the quote text).",
+  "priorityMedia": {
+    "role": "image",
+    "when": "the section passes priority to its first card",
+    "rules": [
+      "section#priority-media"
+    ]
+  },
+  "script": {
+    "kind": "none"
+  },
+  "uses": [
+    "arrow",
+    "heading",
+    "icon",
+    "media",
+    "rich-text-body",
+    "stat"
+  ],
+  "ruleRefs": [
+    "section#focus-ring",
+    "section#list-semantics"
+  ],
+  "hooks": [
+    {
+      "class": "salt-showcase__results",
+      "role": "results",
+      "reason": "The case-study results list inside a lead card; salt-grid lays it out and salt-stat styles its items, but the list needs a name of its own for sites and tests."
+    }
+  ],
+  "notes": [
+    {
+      "topic": "variant-order",
+      "text": "The quote style changes the root element (figure) and its children's order; the generic style is the base."
+    },
+    {
+      "topic": "open-question",
+      "text": "Next names the person in a quote card with a heading; WordPress's testimonial card has no heading (a span). The contract follows Next so a carousel of quotes has an outline; confirm before WordPress migrates."
+    },
+    {
+      "topic": "open-question",
+      "text": "WordPress team cards also list email, phone and social links (x-card-team-contact, x-card-team-socials); Next's do not. Not in the contract until the owner rules whether team cards carry contact details."
+    },
+    {
+      "topic": "ruling",
+      "text": "One card element for every source: WordPress's article.x-card-* variants and their x-card-media and x-card-content wrappers go, and the stretched link is a.salt-card__link rather than an after: utility."
+    }
+  ],
+  "platforms": {
+    "nextjs": {
+      "formerly": [
+        {
+          "role": "root",
+          "element": "div",
+          "classes": [
+            "salt-card"
+          ],
+          "note": "Card plus the ShowcaseCard children from collection-showcase/section.tsx"
+        }
+      ]
+    },
+    "wordpress": {
+      "formerly": [
+        {
+          "role": "root",
+          "element": "article",
+          "classes": [
+            "x-card",
+            "x-card-service",
+            "x-card-work",
+            "x-card-post",
+            "x-card-team",
+            "x-card-feature",
+            "group",
+            "relative",
+            "flex",
+            "flex-col",
+            "rounded-lg",
+            "border"
+          ]
+        },
+        {
+          "role": "media",
+          "element": "div",
+          "classes": [
+            "x-card-media",
+            "x-card-service-icon",
+            "x-card-feature-icon"
+          ]
+        },
+        {
+          "element": "div",
+          "classes": [
+            "x-card-content"
+          ],
+          "note": "Wrapper around title, meta and body; dropped."
+        },
+        {
+          "role": "title",
+          "element": "h",
+          "classes": [
+            "x-card-title"
+          ]
+        },
+        {
+          "role": "link",
+          "element": "a",
+          "classes": [
+            "after:absolute",
+            "after:inset-0"
+          ]
+        },
+        {
+          "role": "meta",
+          "element": "div",
+          "classes": [
+            "x-card-meta",
+            "x-card-work-client"
+          ]
+        },
+        {
+          "role": "date",
+          "element": "time",
+          "classes": [
+            "x-card-post-date"
+          ]
+        },
+        {
+          "role": "text",
+          "element": "p",
+          "classes": [
+            "x-card-body"
+          ]
+        },
+        {
+          "role": "root",
+          "element": "figure",
+          "classes": [
+            "x-card-testimonial"
+          ],
+          "note": "Quote style"
+        },
+        {
+          "role": "rating",
+          "element": "div",
+          "classes": [
+            "x-card-testimonial-rating"
+          ],
+          "attributes": [
+            "role=img",
+            "aria-label"
+          ]
+        },
+        {
+          "role": "quote",
+          "element": "blockquote",
+          "classes": [
+            "x-card-testimonial-quote",
+            "x-scroll-carousel-quote"
+          ]
+        },
+        {
+          "role": "caption",
+          "element": "figcaption",
+          "classes": [
+            "x-card-testimonial-attribution",
+            "x-scroll-carousel-caption"
+          ]
+        },
+        {
+          "element": "div",
+          "classes": [
+            "x-card-testimonial-author",
+            "x-scroll-carousel-name",
+            "x-scroll-carousel-role"
+          ],
+          "note": "Name and role spans; the name becomes the title heading, the role the meta paragraph."
+        },
+        {
+          "element": "div",
+          "classes": [
+            "x-scroll-carousel-card",
+            "x-scroll-carousel-title",
+            "x-scroll-carousel-text"
+          ],
+          "note": "The scroll carousel's own generic card; becomes this card."
+        }
+      ],
+      "owes": [
+        "One div.salt-card (figure for quotes) with the order above; drop x-card-media and x-card-content wrappers.",
+        "Rating as p.salt-showcase__rating with the two star spans, not five icons.",
+        "Name the person in a quote card with a heading (see open question)."
+      ]
+    }
+  }
+}
