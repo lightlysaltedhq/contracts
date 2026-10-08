@@ -86,7 +86,8 @@
             "scroll_carousel": "inline",
             "testimonials": "testimonials"
           },
-          "owes": "the source select: scroll_carousel becomes source inline, a testimonials layout set to slider becomes source testimonials; the other collections are new"
+          "owes": "the source select: scroll_carousel becomes source inline, a testimonials layout set to slider becomes source testimonials; the other collections are new",
+          "note": "COLLISION: salt-wordpress's query control already stores a sub-field named source meaning the query MODE (default|taxonomy|manual, inc/query/controls.php), at the same level this field is stored. A migration must read the old source into the query's mode (manual keeps its picked items) before it writes this field, or manual selections are lost and a half-migrated row reads 'manual' as a collection. The formerly names here are LAYOUT slugs, not field names: the layout a row was stored under gives its source."
         }
       }
     },

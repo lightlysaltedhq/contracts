@@ -143,11 +143,11 @@
           "options": [
             {
               "value": "single",
-              "label": "Each row chooses its side"
+              "label": "One layout for every row"
             },
             {
               "value": "alternating",
-              "label": "Alternating"
+              "label": "Alternate the sides automatically"
             }
           ],
           "default": "single"
@@ -401,15 +401,15 @@
             },
             {
               "value": "featured",
-              "label": "Featured"
+              "label": "Featured (the first card leads)"
             },
             {
               "value": "accordion",
-              "label": "Accordion"
+              "label": "Accordion (each title opens in place)"
             },
             {
               "value": "index",
-              "label": "Index",
+              "label": "Index (a list of links)",
               "note": "Only for sources whose items have their own page."
             }
           ],
@@ -493,11 +493,11 @@
           "options": [
             {
               "value": "generic",
-              "label": "Generic"
+              "label": "Card: an image, a title and text"
             },
             {
               "value": "quote",
-              "label": "Quote"
+              "label": "Quote: the words, and who said them"
             }
           ],
           "default": "generic",

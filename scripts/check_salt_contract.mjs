@@ -50,9 +50,10 @@ function versionKeys(node, trail, file) {
   if (!node || typeof node !== 'object') return
   for (const [k, v] of Object.entries(node)) {
     const isSchema = file.startsWith('schema/')
-    // A schema DEFINES the `version` property contract files carry; that definition is not a
-    // version, so `properties.version` inside a schema is exempt.
-    const definesVersion = isSchema && trail.at(-1) === 'properties' && k === 'version'
+    // A schema DEFINES the `version` property contract files carry at their top level; that one
+    // definition is not a version, so a schema's top-level `properties.version` is exempt. A
+    // `properties.version` anywhere deeper defines something else and is ranked like any key.
+    const definesVersion = isSchema && trail.length === 1 && trail[0] === 'properties' && k === 'version'
     if (isVersionKey(k) && !(trail.length === 0 && k === 'version' && !isSchema) && !definesVersion) {
       fails.push(`${file} ${[...trail, k].join('.').replace(/\.\[/g, '[')}: a version key this gate does not rank. ` +
         'The only version a contract file may carry is its top-level "version".')
@@ -83,7 +84,13 @@ for (const abs of contractFiles) {
   else if (doc.version !== pkg.version) fails.push(`${file} version says ${doc.version}; package.json says ${pkg.version}`)
   versionKeys(doc, [], file)
   if (typeof doc.$schema !== 'string') { fails.push(`${file} declares no $schema; every contract file names the schema it validates against`); continue }
+  if (path.isAbsolute(doc.$schema) || /^[a-z][a-z0-9+.-]*:/i.test(doc.$schema)) {
+    fails.push(`${file} $schema must be a relative path to a file in schema/, not ${doc.$schema}`); continue
+  }
   const schemaAbs = path.resolve(path.dirname(abs), doc.$schema)
+  const family = file.startsWith('contract/fields/') ? 'schema/field-definition.schema.json'
+    : file.startsWith('contract/markup/') ? 'schema/markup.schema.json' : null
+  if (family && rel(schemaAbs) !== family) { fails.push(`${file} must validate against ${family}, not ${doc.$schema}`); continue }
   const validate = schemas.get(schemaAbs)
   if (!validate) { fails.push(`${file} names $schema ${doc.$schema}, which is not a compiled schema in schema/`); continue }
   if (!validate(doc)) {
@@ -93,57 +100,120 @@ for (const abs of contractFiles) {
 
 // ── 2b. The three artefacts agree ────────────────────────────────────────────────────────────
 // sections.json names the sections, components and views; contract/fields and contract/markup
-// describe them. JSON Schema cannot see across files, or inside a file across siblings, so:
-// every section has a fields file and every section, component and view a markup file; each
-// variant in sections.json is a select field with the same option values; every select's default
-// is one of its options; a condition names a sibling field; no two siblings share a name. Applies
-// only once contract/sections.json exists.
+// describe them. JSON Schema cannot see across files, or inside a file across siblings, so this
+// checks: every section has a fields file and every entry a markup file, and no file describes
+// something the vocabulary lacks; each file's id is its file name; each variant in sections.json
+// is a select field with the same option values, labels and default; markup describes only
+// variant options the vocabulary offers, and uses only components that have markup; within a
+// fields file, sibling names and option values are unique, a select's default is one of its
+// options, a condition names a sibling other than itself and expects values that sibling offers,
+// a rowLabel names a child, a list's min is not above its max, and shared.omit and
+// shared.defaults name shared settings. Applies only once contract/sections.json exists.
 const read = (p) => { try { return JSON.parse(readFileSync(path.join(dir, p), 'utf8')) } catch { return null } }
 const vocab = read('contract/sections.json')
 // A vocabulary whose entries are objects; a bare list of ids has nothing to cross-check.
 if (vocab && (vocab.sections ?? []).every((x) => x && typeof x === 'object')) {
   const has = (p) => existsSync(path.join(dir, p))
+  const sectionIds = new Set((vocab.sections ?? []).map((s) => s.id))
+  const entries = [...(vocab.sections ?? []), ...(vocab.components ?? []), ...(vocab.views ?? [])]
+  const entryIds = new Set(entries.map((e) => e.id))
   for (const s of vocab.sections ?? []) {
     if (!has(`contract/fields/${s.id}.json`)) fails.push(`section ${s.id} has no contract/fields/${s.id}.json`)
   }
-  for (const e of [...(vocab.sections ?? []), ...(vocab.components ?? []), ...(vocab.views ?? [])]) {
+  for (const e of entries) {
     if (!has(`contract/markup/${e.id}.json`)) fails.push(`${e.id} has no contract/markup/${e.id}.json`)
   }
+  const settings = read('contract/fields/_section-settings.json')
+  const sharedNames = new Set((settings?.fields ?? []).map((f) => f.name))
   const checkFields = (owner, fields) => {
-    const names = new Set()
+    const byName = new Map()
     for (const f of fields ?? []) {
-      if (names.has(f.name)) fails.push(`${owner} has two fields named ${f.name}`)
-      names.add(f.name)
+      if (byName.has(f.name)) fails.push(`${owner} has two fields named ${f.name}`)
+      byName.set(f.name, f)
     }
     for (const f of fields ?? []) {
-      if (f.type === 'select' && f.default !== undefined && !(f.options ?? []).some((o) => o.value === f.default)) {
+      const values = (f.options ?? []).map((o) => o.value)
+      for (const v of values.filter((v, i) => values.indexOf(v) !== i)) fails.push(`${owner}.${f.name} offers ${v} twice`)
+      if (f.type === 'select' && f.default !== undefined && !f.optionsFrom && !values.includes(f.default)) {
         fails.push(`${owner}.${f.name} default ${f.default} is not one of its options`)
       }
       for (const clause of [f.condition ?? []].flat()) {
-        if (!names.has(clause.field)) fails.push(`${owner}.${f.name} condition names ${clause.field}, which is not a sibling field`)
+        if (clause.field === f.name) { fails.push(`${owner}.${f.name} is conditioned on itself`); continue }
+        const target = byName.get(clause.field)
+        if (!target) { fails.push(`${owner}.${f.name} condition names ${clause.field}, which is not a sibling field`); continue }
+        if (target.type === 'select' && !target.optionsFrom) {
+          const offered = (target.options ?? []).map((o) => o.value)
+          for (const want of [...('equals' in clause ? [clause.equals] : []), ...(clause.in ?? [])]) {
+            if (!offered.includes(want)) fails.push(`${owner}.${f.name} condition expects ${want}, which ${clause.field} does not offer`)
+          }
+        }
+      }
+      if (typeof f.min === 'number' && typeof f.max === 'number' && f.min > f.max) fails.push(`${owner}.${f.name} min ${f.min} exceeds max ${f.max}`)
+      if (f.rowLabel && !(f.fields ?? []).some((c) => c.name === f.rowLabel)) {
+        fails.push(`${owner}.${f.name} rowLabel names ${f.rowLabel}, which is not one of its fields`)
       }
       if (f.fields) checkFields(`${owner}.${f.name}`, f.fields)
     }
   }
+  for (const abs of walk('contract/fields', (p) => p.endsWith('.json'))) {
+    const name = path.basename(abs, '.json')
+    const doc = read(rel(abs))
+    if (!doc) continue
+    const want = name === '_section-settings' ? 'section-settings' : name
+    if (doc.section !== want) fails.push(`${rel(abs)} declares section ${doc.section}; its file name says ${want}`)
+    if (name !== '_section-settings' && !sectionIds.has(name)) fails.push(`${rel(abs)} describes no section in sections.json`)
+  }
+  if (settings) checkFields('section-settings', settings.fields)
   for (const s of vocab.sections ?? []) {
     const doc = read(`contract/fields/${s.id}.json`)
     if (!doc) continue
     checkFields(s.id, doc.fields)
+    for (const key of ['omit', 'defaults']) {
+      const named = key === 'omit' ? (doc.shared?.omit ?? []) : Object.keys(doc.shared?.defaults ?? {})
+      if (settings) for (const n of named) if (!sharedNames.has(n)) fails.push(`${s.id} shared.${key} names ${n}, which is not a shared setting`)
+    }
     for (const v of s.variants ?? []) {
       const f = (doc.fields ?? []).find((x) => x.name === v.field)
       const want = v.options.map((o) => o.value).join(', ')
       if (!f || f.type !== 'select') { fails.push(`${s.id} variant ${v.field} has no select field of that name in its fields file`); continue }
       const got = (f.options ?? []).map((o) => o.value).join(', ')
-      if (got !== want) fails.push(`${s.id} variant ${v.field} offers ${want} in sections.json but ${got} in its fields file`)
+      if (got !== want) { fails.push(`${s.id} variant ${v.field} offers ${want} in sections.json but ${got} in its fields file`); continue }
+      if (v.default !== f.default) fails.push(`${s.id} variant ${v.field} defaults to ${v.default} in sections.json but ${f.default} in its fields file`)
+      for (const o of v.options) {
+        const label = f.options.find((x) => x.value === o.value)?.label
+        if (label !== o.label) fails.push(`${s.id} variant ${v.field} option ${o.value} is labelled "${o.label}" in sections.json but "${label}" in its fields file`)
+      }
     }
   }
-  const settings = read('contract/fields/_section-settings.json')
-  if (settings) checkFields('section-settings', settings.fields)
+  for (const abs of walk('contract/markup', (p) => p.endsWith('.json'))) {
+    const name = path.basename(abs, '.json')
+    const doc = read(rel(abs))
+    if (!doc) continue
+    if (doc.id !== name) fails.push(`${rel(abs)} declares id ${doc.id}; its file name says ${name}`)
+    if (!entryIds.has(name)) { fails.push(`${rel(abs)} describes nothing in sections.json`); continue }
+    for (const u of doc.uses ?? []) {
+      const target = String(u).split('#')[0]
+      if (!has(`contract/markup/${target}.json`)) fails.push(`${name} uses ${target}, which has no markup file`)
+    }
+    const section = (vocab.sections ?? []).find((s) => s.id === name)
+    if (section) {
+      for (const mv of doc.variants ?? []) {
+        const sv = (section.variants ?? []).find((v) => v.field === mv.field)
+        if (!sv) continue
+        const offered = sv.options.map((o) => o.value)
+        for (const key of Object.keys(mv.options ?? {})) {
+          if (!offered.includes(key)) fails.push(`${name} markup describes variant option ${key}, which sections.json does not offer`)
+        }
+      }
+    }
+  }
 }
 
 // ── 3 ─────────────────────────────────────────────────────────────────────────────────────────
 const HEX = /#(?:[0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})\b/
-const FN = /\b(?:rgba?|hsla?|hwb|lab|lch|oklab|oklch|color)\(\s*[-+.\d]/i
+// A colour function with a literal inside: a number, `none`, `from` (relative colour) or a colour
+// space name followed by a number, as in color(srgb 1 0 0). color-mix() over var() is not one.
+const FN = /\b(?:rgba?|hsla?|hwb|lab|lch|oklab|oklch|color)\(\s*(?:[-+.\d]|none\b|from\b|[a-z][\w-]*\s+[-+.\d])/i
 const NAMED = new Set(('aliceblue antiquewhite aqua aquamarine azure beige bisque black blanchedalmond blue blueviolet brown ' +
   'burlywood cadetblue chartreuse chocolate coral cornflowerblue cornsilk crimson cyan darkblue darkcyan darkgoldenrod ' +
   'darkgray darkgreen darkgrey darkkhaki darkmagenta darkolivegreen darkorange darkorchid darkred darksalmon ' +
@@ -158,19 +228,72 @@ const NAMED = new Set(('aliceblue antiquewhite aqua aquamarine azure beige bisqu
   'rebeccapurple red rosybrown royalblue saddlebrown salmon sandybrown seagreen seashell sienna silver skyblue slateblue ' +
   'slategray slategrey snow springgreen steelblue tan teal thistle tomato turquoise violet wheat white whitesmoke yellow ' +
   'yellowgreen').split(' '))
-const COLOUR_PROPERTY = /(^|[\s;{])(?:color|background(?:-color)?|border(?:-(?:top|right|bottom|left|block|inline)(?:-(?:start|end))?)?(?:-color)?|outline(?:-color)?|fill|stroke|caret-color|accent-color|text-decoration(?:-color)?|column-rule(?:-color)?|box-shadow|text-shadow)\s*:\s*([^;}]*)/gi
 
-for (const abs of [...walk('contract'), ...walk('schema'), ...walk('styles'), ...walk('fixtures')]) {
-  const file = rel(abs)
-  const lines = readFileSync(abs, 'utf8').split('\n')
-  lines.forEach((line, i) => {
-    if (HEX.test(line) || FN.test(line)) fails.push(`${file}:${i + 1} carries a colour value: ${line.trim().slice(0, 100)}`)
-    if (file.endsWith('.css')) {
-      for (const m of line.matchAll(COLOUR_PROPERTY)) {
-        const hit = m[2].toLowerCase().match(/[a-z]+/g)?.find((w) => NAMED.has(w))
-        if (hit) fails.push(`${file}:${i + 1} sets a named colour (${hit}) on a colour property; reach colour through a custom property`)
-      }
+const lineAt = (text, index) => text.slice(0, index).split('\n').length
+// What a colour check should not read: comments, the names of custom properties inside var()
+// (a fallback after the comma is still read), and url() targets, whose file names and fragments
+// may contain colour words or hex-looking anchors. Same length out as in, so line numbers hold.
+const blank = (m) => m.replace(/[^\n]/g, ' ')
+const cssReadable = (css) => css
+  .replace(/\/\*[\s\S]*?\*\//g, blank)
+  .replace(/url\(\s*(?:"[^"]*"|'[^']*'|[^)]*)\)/gi, (m) => 'url(' + blank(m.slice(4, -1)) + ')')
+  .replace(/var\(\s*--[\w-]+/g, (m) => 'var(' + blank(m.slice(4)))
+const namedIn = (value) => (value.match(/(?<![\w-])[a-z]+(?![\w-])/gi) ?? []).map((w) => w.toLowerCase()).find((w) => NAMED.has(w))
+// Every declaration value inside a rule's braces, however it is split across lines. Selectors
+// and at-rule preludes are outside the innermost braces, so `.red:hover` is never read as a value.
+function declarations(css) {
+  const out = []
+  for (const block of css.matchAll(/\{([^{}]*)\}/g)) {
+    let at = block.index + 1
+    for (const decl of block[1].split(';')) {
+      const colon = decl.indexOf(':')
+      if (colon > 0) out.push({ value: decl.slice(colon + 1), index: at + colon + 1 })
+      at += decl.length + 1
     }
+  }
+  return out
+}
+function checkCss(file, text, offset = 0, whole = text) {
+  const css = cssReadable(text)
+  css.split('\n').forEach((line, i) => {
+    if (HEX.test(line) || FN.test(line)) fails.push(`${file}:${lineAt(whole, offset) + i} carries a colour value: ${line.trim().slice(0, 100)}`)
+  })
+  for (const d of declarations(css.includes('{') ? css : `{${css}}`)) {
+    const hit = namedIn(d.value)
+    if (hit) fails.push(`${file}:${lineAt(whole, offset + Math.max(0, d.index - (css.includes('{') ? 0 : 1)))} sets a named colour (${hit}); reach colour through a custom property`)
+  }
+}
+
+for (const abs of walk('styles')) {
+  const file = rel(abs)
+  if (!file.endsWith('.css')) { fails.push(`${file}: styles/ holds .css files only, so every rule the gate reads is the rule that ships`); continue }
+  checkCss(file, readFileSync(abs, 'utf8'))
+}
+const COLOUR_ATTR = /\b(fill|stroke|color|stop-color|flood-color|lighting-color|bgcolor)\s*=\s*("([^"]*)"|'([^']*)')/gi
+const STYLE_ATTR = /\bstyle\s*=\s*("([^"]*)"|'([^']*)')/gi
+for (const abs of walk('fixtures')) {
+  const file = rel(abs)
+  const text = readFileSync(abs, 'utf8')
+  if (/\.(html?|svg)$/.test(file)) {
+    for (const m of text.matchAll(COLOUR_ATTR)) {
+      const value = m[3] ?? m[4]
+      const at = lineAt(text, m.index)
+      if (HEX.test(value) || FN.test(value)) fails.push(`${file}:${at} carries a colour value in ${m[1]}`)
+      const hit = namedIn(value)
+      if (hit) fails.push(`${file}:${at} sets a named colour (${hit}) in ${m[1]}`)
+    }
+    for (const m of text.matchAll(STYLE_ATTR)) checkCss(file, m[2] ?? m[3], m.index, text)
+    continue
+  }
+  if (file.endsWith('.css')) { checkCss(file, text); continue }
+  text.split('\n').forEach((line, i) => {
+    if (HEX.test(line) || FN.test(line)) fails.push(`${file}:${i + 1} carries a colour value: ${line.trim().slice(0, 100)}`)
+  })
+}
+for (const abs of [...walk('contract'), ...walk('schema')]) {
+  const file = rel(abs)
+  readFileSync(abs, 'utf8').split('\n').forEach((line, i) => {
+    if (HEX.test(line) || FN.test(line)) fails.push(`${file}:${i + 1} carries a colour value: ${line.trim().slice(0, 100)}`)
   })
 }
 

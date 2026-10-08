@@ -209,3 +209,64 @@ test('a subpath-pattern export passes when the tarball has a match, and fails wh
   dir = makePackage((f) => { f['package.json'].exports['./markup/*'] = './contract/markup/*.json' })
   try { const r = run(dir); assert.equal(r.code, 1); assert.match(r.out, /no file in the tarball matches the exported pattern contract\/markup\/\*\.json/) } finally { rmSync(dir, { recursive: true, force: true }) }
 })
+
+// ── Review of #2: colour values the first gate let through, and what it wrongly refused ─────────
+const cssCase = (name, css, pattern) => test(`colour: ${name} fails`, () => {
+  expectFail((f, t) => { t['styles/sections.css'] = css }, pattern)
+})
+cssCase('a named colour in a custom property', ':root {\n  --brand: red;\n}\n', /named colour \(red\)/)
+cssCase('a named colour in a gradient', '.a { background-image: linear-gradient(red, var(--x)); }\n', /named colour \(red\)/)
+cssCase('a declaration split across lines', '.a {\n  color:\n    red;\n}\n', /named colour \(red\)/)
+cssCase('color() with a colour space', '.a { color: color(srgb 1 0 0); }\n', /colour value/)
+cssCase('rgb() starting with none', '.a { color: rgb(none 2 3); }\n', /colour value/)
+cssCase('an upper-case colour function', '.a { color: RGB(1, 2, 3); }\n', /colour value/)
+test('colour: a styles file that is not CSS fails', () => {
+  expectFail((f, t) => { t['styles/sections.scss'] = '.a { color: var(--x); }\n' }, /styles\/sections\.scss: styles\/ holds \.css files only/)
+})
+test('colour: a named colour in a fixture attribute fails', () => {
+  expectFail((f, t) => { t['fixtures/hero/one.html'] = '<svg><path fill="red"/></svg>\n' }, /fixtures\/hero\/one\.html:1.*named colour \(red\)/)
+})
+test('colour: a named colour in a fixture style attribute fails', () => {
+  expectFail((f, t) => { t['fixtures/hero/one.html'] = '<p style="color: red">x</p>\n' }, /named colour \(red\)/)
+})
+test('colour: token names, url() targets and anchors that contain colour words pass', () => {
+  const dir = makePackage((f, t) => {
+    t['styles/sections.css'] = '.a {\n  color: var(--salt-tan-surface);\n  background: url(red-arrow.svg) no-repeat;\n  mask: url(a.svg#abc);\n}\n.red:not(.tan) { color: currentColor; }\n'
+    t['fixtures/hero/one.html'] = '<a class="salt-red" href="#cafe">x</a>\n'
+  })
+  try { const r = run(dir); assert.equal(r.code, 0, r.out) } finally { rmSync(dir, { recursive: true, force: true }) }
+})
+
+// ── Review of #2: cross-file rules the first gate did not check ──────────────────────────────────
+const crossFail = (name, edit, pattern) => test(`cross-file: ${name} fails`, () => {
+  const r = crossRun(edit)
+  assert.equal(r.code, 1, r.out); assert.match(r.out, pattern)
+})
+crossFail('a variant default that differs from the select default', (f) => { f['contract/fields/hero.json'].fields[0].default = 'b' }, /hero variant variant defaults to a in sections\.json but b in its fields file/)
+crossFail('a variant option label that differs', (f) => { f['contract/fields/hero.json'].fields[0].options[1].label = 'Bee' }, /hero variant variant option b is labelled "B" in sections\.json but "Bee" in its fields file/)
+crossFail('a condition value that is not an option of its select', (f) => { f['contract/fields/hero.json'].fields[1].condition = { field: 'variant', in: ['c'] } }, /hero\.image condition expects c, which variant does not offer/)
+crossFail('a field conditioned on itself', (f) => { f['contract/fields/hero.json'].fields[1].condition = { field: 'image', equals: 'x' } }, /hero\.image is conditioned on itself/)
+crossFail('duplicate option values', (f) => { f['contract/fields/hero.json'].fields[0].options.push({ value: 'b', label: 'B again' }) }, /hero\.variant offers b twice/)
+crossFail('a list whose min exceeds its max', (f) => { f['contract/fields/hero.json'].fields.push({ name: 'rows', type: 'list', min: 5, max: 2, fields: [{ name: 'title', type: 'text' }] }) }, /hero\.rows min 5 exceeds max 2/)
+crossFail('a rowLabel naming no child', (f) => { f['contract/fields/hero.json'].fields.push({ name: 'rows', type: 'list', rowLabel: 'nope', fields: [{ name: 'title', type: 'text' }] }) }, /hero\.rows rowLabel names nope, which is not one of its fields/)
+crossFail('shared.omit naming no shared field', (f) => {
+  f['contract/fields/_section-settings.json'] = { $schema: '../../schema/field-definition.schema.json', version: '0.1.0', section: 'section-settings', fields: [{ name: 'tone', type: 'text' }] }
+  f['contract/fields/hero.json'].shared = { id: 'section-settings', omit: ['nope'] }
+}, /hero shared\.omit names nope, which is not a shared setting/)
+crossFail('a fields file whose section is not its file name', (f) => { f['contract/fields/hero.json'].section = 'faq' }, /contract\/fields\/hero\.json declares section faq/)
+crossFail('a markup file whose id is not its file name', (f) => { f['contract/markup/hero.json'].id = 'faq' }, /contract\/markup\/hero\.json declares id faq/)
+crossFail('a stray markup file', (f) => { f['contract/markup/zzz.json'] = { $schema: '../../schema/markup.schema.json', version: '0.1.0', id: 'zzz', kind: 'component' } }, /contract\/markup\/zzz\.json describes nothing in sections\.json/)
+crossFail('a stray fields file', (f) => { f['contract/fields/zzz.json'] = { $schema: '../../schema/field-definition.schema.json', version: '0.1.0', section: 'zzz', fields: [] } }, /contract\/fields\/zzz\.json describes no section in sections\.json/)
+crossFail('markup that uses a component with no markup', (f) => { f['contract/markup/hero.json'].uses = ['button', 'nonexistent'] }, /hero uses nonexistent, which has no markup file/)
+crossFail('a markup variant option sections.json does not offer', (f) => { f['contract/markup/hero.json'].variants = [{ field: 'variant', options: { a: {}, bogus: {} } }] }, /hero markup describes variant option bogus, which sections\.json does not offer/)
+crossFail('a fields file pointing at the markup schema', (f) => { f['contract/fields/hero.json'].$schema = '../../schema/markup.schema.json' }, /contract\/fields\/hero\.json must validate against schema\/field-definition\.schema\.json/)
+test('cross-file: an absolute $schema fails', () => {
+  expectFail((f) => { f['contract/sections.json'].$schema = '/Users/someone/schema/sections.schema.json' }, /\$schema must be a relative path/)
+})
+test('version: a properties.version below the top level of a schema fails', () => {
+  expectFail((f) => { f['schema/sections.schema.json'].$defs = { x: { properties: { version: { const: '1' } } } } }, /\$defs\.x\.properties\.version: a version key/)
+})
+test('cross-file: a select whose options come from a registry may carry a default', () => {
+  const r = crossRun((f) => { f['contract/fields/hero.json'].fields.push({ name: 'icon', type: 'select', optionsFrom: 'icons', default: 'star' }) })
+  assert.equal(r.code, 0, r.out)
+})

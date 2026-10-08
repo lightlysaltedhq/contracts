@@ -30,6 +30,10 @@ jobs:
         with:
           node-version: '22.23.3'
 
+      # Installed first: the gate scripts' tests run the Salt contract gate, which imports ajv. No
+      # install scripts: nothing here needs one.
+      - name: Install the pinned tools
+        run: npm ci --ignore-scripts
       - name: The repository's own gate scripts fail when they should
         run: npm run test:scripts
       - name: Every action is pinned to a commit
@@ -42,10 +46,6 @@ jobs:
       - name: Vectors, derivation, zero colours, the emitter's own guards
         run: npm run foundations
 
-      # TypeScript for the pack gate's strict consumer and esbuild for the bundle check. No install
-      # scripts: neither needs one.
-      - name: Install the pinned tools
-        run: npm ci --ignore-scripts
       - name: The foundations tarball ships the contract and nothing else
         run: npm run verify:foundations-pack
       - name: ./type-tokens and ./layout-roles bundle for a neutral platform

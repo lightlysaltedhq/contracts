@@ -123,7 +123,7 @@
           "platforms": {
             "wordpress": {
               "formerly": "cta",
-              "owes": "a list of up to two buttons in place of one link field: cta becomes buttons[0] with style secondary"
+              "owes": "a list of up to two buttons in place of one link field: cta becomes buttons[0] with style secondary. Visible change: WordPress draws this link today with the link-arrow style (template-parts/sections/media-text.php), so migrated rows change appearance unless the contract adds a link style; and a row with only a second link must move it to buttons[0], closing the gap"
             }
           }
         }
