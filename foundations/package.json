@@ -1,0 +1,56 @@
+{
+  "name": "@lightlysaltedhq/design-foundations",
+  "version": "3.0.0",
+  "description": "The design-system contract \u2014 tier model, role vocabulary, OKLCH derivation spec and frozen reference vectors. Rules for building a design system, and deliberately no colour values at all.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lightlysaltedhq/contracts.git",
+    "directory": "foundations"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "publishConfig": {
+    "access": "public",
+    "@lightlysaltedhq:registry": "https://registry.npmjs.org"
+  },
+  "files": [
+    "contract",
+    "schema",
+    "scripts",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE",
+    "!**/__pycache__"
+  ],
+  "exports": {
+    "./vocabulary": "./contract/vocabulary.json",
+    "./derivation": "./contract/derivation.json",
+    "./vectors": "./contract/vectors.json",
+    "./scale-shape": "./contract/scale-shape.json",
+    "./scale-tokens": {
+      "types": "./scripts/scale_tokens.d.mts",
+      "default": "./scripts/scale_tokens.mjs"
+    },
+    "./layout-roles": {
+      "types": "./scripts/layout_roles.d.mts",
+      "default": "./scripts/layout_roles.mjs"
+    },
+    "./schema/token-file": "./schema/token-file.schema.json",
+    "./type-scale": "./contract/type-scale.json",
+    "./type-vectors": "./contract/type-vectors.json",
+    "./type-tokens": {
+      "types": "./scripts/type_tokens.d.mts",
+      "default": "./scripts/type_tokens.mjs"
+    }
+  },
+  "keywords": [
+    "design-tokens",
+    "design-system",
+    "contract",
+    "oklch",
+    "wcag",
+    "colour-contrast"
+  ]
+}

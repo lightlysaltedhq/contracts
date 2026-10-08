@@ -1,0 +1,1579 @@
+{
+  "$comment": "Frozen test vectors for contract/type-scale.json and contract/vocabulary.json#textRoles, chosen for the maths each one exercises and for nothing else: no value here is a product's, and a private gate in the design-system repository fails any that lands within 0.5px of a product's table at both viewports. Every expected string was computed by scripts/type_tokens.mjs and scripts/type_scale.py independently, and check_type_scale.py requires both to reproduce every one of them, byte for byte, on every run.",
+  "version": "3.0.0",
+  "$exercises": "What each vector exercises is a structured field, `exercises`, that check_type_scale.py RECOMPUTES from first principles rather than reading as prose: an exact tie is re-derived and its binary expansion compared, a pow flip is re-derived with a correctly rounded power, a refusal names the one rule it breaks and the gate re-measures the quantity that breaks it. The colour vectors' prose notes were wrong twice before anything read them. `$what` is the one line of prose, for a reader.",
+  "$shape": "`derivations`, `refusals` (inputs) and the named scales run contract/type-scale.json#derivation; `tables` and `refusals[].variants` are a product's own table in contract/scale-shape.json's type families; `overrides` are a declaration (contract/type-scale.json#declaration) with the product it belongs to, resolved against the scale shape's type steps and rung families. A vector that cannot be derived as written names, in `exercises.otherwise`, the valid vector it is a one-change copy of.",
+  "derivations": [
+    {
+      "id": "exact-tie",
+      "$what": "An exact tie. 1.1875 x 1.5 is 1.78125 in binary64 exactly, so four decimals is a tie: half to even gives 1.7812, and a consumer rounding half away from zero (JavaScript's toFixed, Math.round) gives 1.7813.",
+      "inputs": {
+        "viewportMinPx": 360,
+        "viewportMaxPx": 1240,
+        "baseMinRem": 1,
+        "baseMaxRem": 1.1875,
+        "ratioMin": 1.2,
+        "ratioMax": 1.5,
+        "ratioBelow": 1.2,
+        "fluidFrom": -2,
+        "steps": ["-2", "-1", "0", "1", "2", "3"]
+      },
+      "expect": {
+        "steps": {
+          "-2": "clamp(0.6944rem, 0.6411rem + 0.2369vw, 0.8247rem)",
+          "-1": "clamp(0.8333rem, 0.7694rem + 0.2842vw, 0.9896rem)",
+          "0": "clamp(1rem, 0.9233rem + 0.3409vw, 1.1875rem)",
+          "1": "clamp(1.2rem, 0.9622rem + 1.0567vw, 1.7812rem)",
+          "2": "clamp(1.44rem, 0.936rem + 2.2398vw, 2.6719rem)",
+          "3": "clamp(1.728rem, 0.7954rem + 4.1451vw, 4.0078rem)"
+        }
+      },
+      "exercises": {
+        "exactTie": {"step": "1", "bound": "max", "binary64": "1.78125", "halfEven": "1.7812", "halfAwayFromZero": "1.7813"}
+      }
+    },
+    {
+      "id": "binary-near-tie",
+      "$what": "A tie in decimal that is not one in binary. 1.125 x 1.15 is 1.29375 in decimal, and 1.29374999... in binary64, so the rule gives 1.2937, where a consumer computing in exact decimal, or with Math.round(x * 1e4) / 1e4, gives 1.2938.",
+      "inputs": {
+        "viewportMinPx": 360,
+        "viewportMaxPx": 1240,
+        "baseMinRem": 0.9375,
+        "baseMaxRem": 1.125,
+        "ratioMin": 1.125,
+        "ratioMax": 1.15,
+        "ratioBelow": 1.1,
+        "fluidFrom": -3,
+        "steps": ["-3", "-2", "-1", "0", "1", "2", "3", "4"]
+      },
+      "expect": {
+        "steps": {
+          "-3": "clamp(0.7044rem, 0.6468rem + 0.256vw, 0.8452rem)",
+          "-2": "clamp(0.7748rem, 0.7114rem + 0.2818vw, 0.9298rem)",
+          "-1": "clamp(0.8523rem, 0.7826rem + 0.3098vw, 1.0227rem)",
+          "0": "clamp(0.9375rem, 0.8608rem + 0.3409vw, 1.125rem)",
+          "1": "clamp(1.0547rem, 0.9569rem + 0.4345vw, 1.2937rem)",
+          "2": "clamp(1.1865rem, 1.0632rem + 0.5478vw, 1.4878rem)",
+          "3": "clamp(1.3348rem, 1.1809rem + 0.684vw, 1.711rem)",
+          "4": "clamp(1.5017rem, 1.3111rem + 0.8471vw, 1.9676rem)"
+        }
+      },
+      "exercises": {
+        "binaryNearTie": {
+          "step": "1",
+          "bound": "max",
+          "decimal": "1.29375",
+          "binary64": "below",
+          "halfEven": "1.2937",
+          "exactDecimalHalfEven": "1.2938",
+          "mathRound": "1.2938"
+        }
+      }
+    },
+    {
+      "id": "pow-flip",
+      "$what": "Repeated multiplication against pow. (1.125 x 1.26) x 1.26 is 1.78604999... in binary64 and rounds to 1.786; 1.125 x pow(1.26, 2), with pow correctly rounded, is 1.78605000... and rounds to 1.7861.",
+      "inputs": {
+        "viewportMinPx": 360,
+        "viewportMaxPx": 1240,
+        "baseMinRem": 1,
+        "baseMaxRem": 1.125,
+        "ratioMin": 1.15,
+        "ratioMax": 1.26,
+        "ratioBelow": 1.15,
+        "fluidFrom": -2,
+        "steps": ["-2", "-1", "0", "1", "2", "3", "4"]
+      },
+      "expect": {
+        "steps": {
+          "-2": "clamp(0.7561rem, 0.7174rem + 0.172vw, 0.8507rem)",
+          "-1": "clamp(0.8696rem, 0.8251rem + 0.1976vw, 0.9783rem)",
+          "0": "clamp(1rem, 0.9489rem + 0.2273vw, 1.125rem)",
+          "1": "clamp(1.15rem, 1.0406rem + 0.4864vw, 1.4175rem)",
+          "2": "clamp(1.3225rem, 1.1329rem + 0.8427vw, 1.786rem)",
+          "3": "clamp(1.5209rem, 1.2225rem + 1.3264vw, 2.2504rem)",
+          "4": "clamp(1.749rem, 1.3045rem + 1.9755vw, 2.8355rem)"
+        }
+      },
+      "exercises": {"powFlip": {"step": "2", "bound": "max", "repeated": "1.786", "pow": "1.7861"}}
+    },
+    {
+      "id": "viewports-fixed-move",
+      "$what": "Viewports other than the named scales', steps below `fluidFrom` fixed at their narrow-viewport size, and step 0 moving exactly 1px (1rem to 1.0625rem), the T6 boundary, which passes.",
+      "inputs": {
+        "viewportMinPx": 320,
+        "viewportMaxPx": 1440,
+        "baseMinRem": 1,
+        "baseMaxRem": 1.0625,
+        "ratioMin": 1.2,
+        "ratioMax": 1.25,
+        "ratioBelow": 1.08,
+        "fluidFrom": 0,
+        "steps": ["-2", "-1", "0", "1", "2", "3"]
+      },
+      "expect": {
+        "steps": {
+          "-2": "0.8573rem",
+          "-1": "0.9259rem",
+          "0": "clamp(1rem, 0.9821rem + 0.0893vw, 1.0625rem)",
+          "1": "clamp(1.2rem, 1.1634rem + 0.183vw, 1.3281rem)",
+          "2": "clamp(1.44rem, 1.3771rem + 0.3146vw, 1.6602rem)",
+          "3": "clamp(1.728rem, 1.6288rem + 0.496vw, 2.0752rem)"
+        }
+      },
+      "exercises": {"viewports": {"minPx": 320, "maxPx": 1440}, "moveExactly1Px": "0", "fixed": ["-2", "-1"]}
+    },
+    {
+      "id": "near-zoom-limit",
+      "$what": "A largest max/min just under T7's 2.5, at step 5.",
+      "inputs": {
+        "viewportMinPx": 360,
+        "viewportMaxPx": 1240,
+        "baseMinRem": 1,
+        "baseMaxRem": 1.125,
+        "ratioMin": 1.16,
+        "ratioMax": 1.36,
+        "ratioBelow": 1.2,
+        "fluidFrom": -2,
+        "steps": ["-2", "-1", "0", "1", "2", "3", "4", "5"]
+      },
+      "expect": {
+        "steps": {
+          "-2": "clamp(0.6944rem, 0.6589rem + 0.1578vw, 0.7812rem)",
+          "-1": "clamp(0.8333rem, 0.7907rem + 0.1895vw, 0.9375rem)",
+          "0": "clamp(1rem, 0.9489rem + 0.2273vw, 1.125rem)",
+          "1": "clamp(1.16rem, 1.0086rem + 0.6727vw, 1.53rem)",
+          "2": "clamp(1.3456rem, 1.0448rem + 1.3367vw, 2.0808rem)",
+          "3": "clamp(1.5609rem, 1.0418rem + 2.3073vw, 2.8299rem)",
+          "4": "clamp(1.8106rem, 0.9769rem + 3.7055vw, 3.8486rem)",
+          "5": "clamp(2.1003rem, 0.8182rem + 5.698vw, 5.2342rem)"
+        }
+      },
+      "exercises": {"maxOverMin": {"step": "5", "atLeast": "2.49", "below": "2.5"}}
+    }
+  ],
+  "tables": [
+    {
+      "id": "boundaries",
+      "$what": "Every boundary at once, each of which passes: gaps of exactly 1px (T5), moves of exactly 1px (T6), a max/min of exactly 2.5 (T7). Step 2's max is 10rem, which a consumer that strips trailing zeros with Python's Decimal.normalize() writes as 1E+1rem.",
+      "table": {
+        "typeScaleFixed": {"-1": "0.9375rem"},
+        "typeScaleFluid": {
+          "0": ["1rem", "0.9744rem + 0.1136vw", "1.0625rem"],
+          "1": ["1.0625rem", "1.0369rem + 0.1136vw", "1.125rem"],
+          "2": ["4rem", "1.5455rem + 10.9091vw", "10rem"]
+        },
+        "typeScaleViewports": ["360px", "1240px"]
+      },
+      "expect": {
+        "steps": {
+          "-1": "0.9375rem",
+          "0": "clamp(1rem, 0.9744rem + 0.1136vw, 1.0625rem)",
+          "1": "clamp(1.0625rem, 1.0369rem + 0.1136vw, 1.125rem)",
+          "2": "clamp(4rem, 1.5455rem + 10.9091vw, 10rem)"
+        }
+      },
+      "exercises": {
+        "gapExactly1Px": [
+          {"below": "-1", "above": "0", "at": "min"},
+          {"below": "0", "above": "1", "at": "min"},
+          {"below": "0", "above": "1", "at": "max"}
+        ],
+        "moveExactly1Px": ["0", "1"],
+        "maxOverMinExactly": {"step": "2", "ratio": "2.5"},
+        "writesTen": {"step": "2", "field": "maxRem"}
+      }
+    },
+    {
+      "id": "plain-at-scale",
+      "$what": "One fixed step of 10^21 rem and no viewports, since an all-fixed table owes none: absurd as a size and valid by T1 to T7, and the magnitude at which JavaScript's own Number-to-string conversion switches to exponent form (1e+21). The notation is plain at every magnitude.",
+      "table": {"typeScaleFixed": {"0": "1000000000000000000000rem"}},
+      "expect": {"steps": {"0": "1000000000000000000000rem"}},
+      "exercises": {"writesPlain": {"step": "0", "digits": 22}}
+    }
+  ],
+  "refusals": [
+    {
+      "id": "zoom-over-limit",
+      "$what": "Max/min over 2.5 at the top steps.",
+      "inputs": {
+        "viewportMinPx": 360,
+        "viewportMaxPx": 1240,
+        "baseMinRem": 1,
+        "baseMaxRem": 1.125,
+        "ratioMin": 1.1,
+        "ratioMax": 1.4,
+        "ratioBelow": 1.2,
+        "fluidFrom": -2,
+        "steps": ["-2", "-1", "0", "1", "2", "3", "4", "5"]
+      },
+      "expect": {"refused": ["T7"]},
+      "exercises": {"maxOverMin": {"step": "5", "above": "2.5"}}
+    },
+    {
+      "id": "gap-under-1px",
+      "$what": "A ratio of 1.05 at the narrow viewport puts step 1 0.8px above body.",
+      "inputs": {
+        "viewportMinPx": 360,
+        "viewportMaxPx": 1240,
+        "baseMinRem": 1,
+        "baseMaxRem": 1.125,
+        "ratioMin": 1.05,
+        "ratioMax": 1.25,
+        "ratioBelow": 1.2,
+        "fluidFrom": -2,
+        "steps": ["-2", "-1", "0", "1", "2", "3"]
+      },
+      "expect": {"refused": ["T5"]},
+      "exercises": {"smallestGap": {"below": "0", "above": "1", "at": "min"}}
+    },
+    {
+      "id": "move-under-1px",
+      "$what": "Body grows 0.8px across the viewports, and the steps below it less.",
+      "inputs": {
+        "viewportMinPx": 360,
+        "viewportMaxPx": 1240,
+        "baseMinRem": 1,
+        "baseMaxRem": 1.05,
+        "ratioMin": 1.2,
+        "ratioMax": 1.25,
+        "ratioBelow": 1.2,
+        "fluidFrom": -2,
+        "steps": ["-2", "-1", "0", "1", "2", "3"]
+      },
+      "expect": {"refused": ["T6"]},
+      "exercises": {"smallestMoveUnder1Px": {"step": "-2"}, "notInverted": true}
+    },
+    {
+      "id": "non-ascii-step",
+      "$what": "Step -1 written with U+2212 MINUS SIGN.",
+      "inputs": {
+        "viewportMinPx": 360,
+        "viewportMaxPx": 1240,
+        "baseMinRem": 1,
+        "baseMaxRem": 1.1875,
+        "ratioMin": 1.2,
+        "ratioMax": 1.5,
+        "ratioBelow": 1.2,
+        "fluidFrom": -2,
+        "steps": ["-2", "−1", "0", "1", "2", "3"]
+      },
+      "expect": {"refused": ["T2"]},
+      "exercises": {"otherwise": "exact-tie", "respelt": {"index": 1, "codePoint": "U+2212"}}
+    },
+    {
+      "id": "missing-input",
+      "$what": "pow-flip without ratioBelow.",
+      "inputs": {
+        "viewportMinPx": 360,
+        "viewportMaxPx": 1240,
+        "baseMinRem": 1,
+        "baseMaxRem": 1.125,
+        "ratioMin": 1.15,
+        "ratioMax": 1.26,
+        "fluidFrom": -2,
+        "steps": ["-2", "-1", "0", "1", "2", "3", "4"]
+      },
+      "expect": {"refused": ["inputs"]},
+      "exercises": {"otherwise": "pow-flip", "missing": "ratioBelow"}
+    },
+    {
+      "id": "inverted-base",
+      "$what": "Body larger at the narrow viewport than the wide one: an inverted clamp.",
+      "inputs": {
+        "viewportMinPx": 360,
+        "viewportMaxPx": 1240,
+        "baseMinRem": 1.125,
+        "baseMaxRem": 1,
+        "ratioMin": 1.2,
+        "ratioMax": 1.25,
+        "ratioBelow": 1.1,
+        "fluidFrom": -2,
+        "steps": ["-2", "-1", "0", "1", "2", "3", "4"]
+      },
+      "expect": {"refused": ["T6"]},
+      "exercises": {"inverted": {"step": "0"}}
+    },
+    {
+      "id": "flat-ratio",
+      "$what": "A ratio of 1 below body: steps -2 to 0 are one size.",
+      "inputs": {
+        "viewportMinPx": 360,
+        "viewportMaxPx": 1240,
+        "baseMinRem": 1,
+        "baseMaxRem": 1.125,
+        "ratioMin": 1.2,
+        "ratioMax": 1.25,
+        "ratioBelow": 1,
+        "fluidFrom": -2,
+        "steps": ["-2", "-1", "0", "1", "2", "3"]
+      },
+      "expect": {"refused": ["T5"]},
+      "exercises": {"flat": "ratioBelow", "gapPx": "0", "below": "-1", "above": "0"}
+    },
+    {
+      "id": "table-variants",
+      "$what": "A product's own table, three ways wrong, one invariant each.",
+      "variants": [
+        {
+          "id": "both-fixed-and-fluid",
+          "$what": "Step 1 declared fixed as well as fluid.",
+          "table": {
+            "typeScaleFixed": {"-1": "0.9375rem", "1": "1.0625rem"},
+            "typeScaleFluid": {
+              "0": ["1rem", "0.9744rem + 0.1136vw", "1.0625rem"],
+              "1": ["1.0625rem", "1.0369rem + 0.1136vw", "1.125rem"],
+              "2": ["4rem", "1.5455rem + 10.9091vw", "10rem"]
+            },
+            "typeScaleViewports": ["360px", "1240px"]
+          },
+          "expect": {"refused": ["T1"]},
+          "exercises": {"otherwise": "boundaries", "alsoFixed": "1"}
+        },
+        {
+          "id": "px-bound",
+          "$what": "Step 0's max written in px.",
+          "table": {
+            "typeScaleFixed": {"-1": "0.9375rem"},
+            "typeScaleFluid": {
+              "0": ["1rem", "0.9744rem + 0.1136vw", "17px"],
+              "1": ["1.0625rem", "1.0369rem + 0.1136vw", "1.125rem"],
+              "2": ["4rem", "1.5455rem + 10.9091vw", "10rem"]
+            },
+            "typeScaleViewports": ["360px", "1240px"]
+          },
+          "expect": {"refused": ["T3"]},
+          "exercises": {"otherwise": "boundaries", "respelt": {"step": "0", "slot": 2, "was": "1.0625rem"}}
+        },
+        {
+          "id": "preferred-off",
+          "$what": "Step 1's preferred value moved by 0.01rem (0.16px) at both viewports.",
+          "table": {
+            "typeScaleFixed": {"-1": "0.9375rem"},
+            "typeScaleFluid": {
+              "0": ["1rem", "0.9744rem + 0.1136vw", "1.0625rem"],
+              "1": ["1.0625rem", "1.0469rem + 0.1136vw", "1.125rem"],
+              "2": ["4rem", "1.5455rem + 10.9091vw", "10rem"]
+            },
+            "typeScaleViewports": ["360px", "1240px"]
+          },
+          "expect": {"refused": ["T4"]},
+          "exercises": {"otherwise": "boundaries", "shifted": {"step": "1", "preferredRemBy": "0.01"}}
+        }
+      ]
+    }
+  ],
+  "overrides": [
+    {
+      "id": "valid-weight-and-font",
+      "$what": "Two valid overrides over balanced, with the neutral rungs carried in the product's scale at exactly their numbers.",
+      "product": {
+        "scale": {
+          "leading": {"display": 1.1, "heading": 1.2, "subhead": 1.3, "body": 1.5, "ui": 1.4, "tight": 1.25},
+          "tracking": {"display": "-0.02em", "heading": "-0.01em", "subhead": "0em", "body": "0em", "ui": "0em", "caps": "0.1em"},
+          "weight": {"regular": 400, "medium": 500, "semibold": 600, "bold": 700}
+        },
+        "fontRoles": ["heading", "body"],
+        "colourRoles": []
+      },
+      "declaration": {
+        "scale": {"named": "balanced"},
+        "overrides": [
+          {
+            "role": "heading-3",
+            "property": "weight",
+            "value": "bold",
+            "replaces": "semibold",
+            "reason": "Measured against the component it sets."
+          },
+          {
+            "role": "eyebrow",
+            "property": "font",
+            "value": "heading",
+            "replaces": "body",
+            "reason": "Measured against the component it sets."
+          }
+        ]
+      },
+      "expect": {
+        "roles": {
+          "display": {"step": "5", "leading": "display", "tracking": "display", "weight": "bold", "font": "heading"},
+          "heading-1": {"step": "4", "leading": "heading", "tracking": "heading", "weight": "bold", "font": "heading"},
+          "heading-2": {"step": "3", "leading": "heading", "tracking": "heading", "weight": "bold", "font": "heading"},
+          "heading-3": {"step": "2", "leading": "subhead", "tracking": "subhead", "weight": "bold", "font": "heading"},
+          "heading-4": {"step": "1", "leading": "subhead", "tracking": "subhead", "weight": "semibold", "font": "heading"},
+          "lead": {"step": "1", "leading": "body", "tracking": "body", "weight": "regular", "font": "body"},
+          "body": {"step": "0", "leading": "body", "tracking": "body", "weight": "regular", "font": "body"},
+          "small": {"step": "-1", "leading": "body", "tracking": "body", "weight": "regular", "font": "body"},
+          "label": {"step": "-1", "leading": "ui", "tracking": "ui", "weight": "semibold", "font": "body"},
+          "caption": {"step": "-2", "leading": "ui", "tracking": "ui", "weight": "regular", "font": "body"},
+          "eyebrow": {"step": "-2", "leading": "tight", "tracking": "caps", "weight": "semibold", "font": "heading"}
+        },
+        "tokens": {
+          "--text-display": "var(--step-5)",
+          "--text-display--line-height": "var(--leading-display)",
+          "--text-display--letter-spacing": "var(--tracking-display)",
+          "--text-display--font-weight": "var(--weight-bold)",
+          "--text-display--font-family": "var(--font-heading)",
+          "--text-heading-1": "var(--step-4)",
+          "--text-heading-1--line-height": "var(--leading-heading)",
+          "--text-heading-1--letter-spacing": "var(--tracking-heading)",
+          "--text-heading-1--font-weight": "var(--weight-bold)",
+          "--text-heading-1--font-family": "var(--font-heading)",
+          "--text-heading-2": "var(--step-3)",
+          "--text-heading-2--line-height": "var(--leading-heading)",
+          "--text-heading-2--letter-spacing": "var(--tracking-heading)",
+          "--text-heading-2--font-weight": "var(--weight-bold)",
+          "--text-heading-2--font-family": "var(--font-heading)",
+          "--text-heading-3": "var(--step-2)",
+          "--text-heading-3--line-height": "var(--leading-subhead)",
+          "--text-heading-3--letter-spacing": "var(--tracking-subhead)",
+          "--text-heading-3--font-weight": "var(--weight-bold)",
+          "--text-heading-3--font-family": "var(--font-heading)",
+          "--text-heading-4": "var(--step-1)",
+          "--text-heading-4--line-height": "var(--leading-subhead)",
+          "--text-heading-4--letter-spacing": "var(--tracking-subhead)",
+          "--text-heading-4--font-weight": "var(--weight-semibold)",
+          "--text-heading-4--font-family": "var(--font-heading)",
+          "--text-lead": "var(--step-1)",
+          "--text-lead--line-height": "var(--leading-body)",
+          "--text-lead--letter-spacing": "var(--tracking-body)",
+          "--text-lead--font-weight": "var(--weight-regular)",
+          "--text-lead--font-family": "var(--font-body)",
+          "--text-body": "var(--step-0)",
+          "--text-body--line-height": "var(--leading-body)",
+          "--text-body--letter-spacing": "var(--tracking-body)",
+          "--text-body--font-weight": "var(--weight-regular)",
+          "--text-body--font-family": "var(--font-body)",
+          "--text-small": "var(--step--1)",
+          "--text-small--line-height": "var(--leading-body)",
+          "--text-small--letter-spacing": "var(--tracking-body)",
+          "--text-small--font-weight": "var(--weight-regular)",
+          "--text-small--font-family": "var(--font-body)",
+          "--text-label": "var(--step--1)",
+          "--text-label--line-height": "var(--leading-ui)",
+          "--text-label--letter-spacing": "var(--tracking-ui)",
+          "--text-label--font-weight": "var(--weight-semibold)",
+          "--text-label--font-family": "var(--font-body)",
+          "--text-caption": "var(--step--2)",
+          "--text-caption--line-height": "var(--leading-ui)",
+          "--text-caption--letter-spacing": "var(--tracking-ui)",
+          "--text-caption--font-weight": "var(--weight-regular)",
+          "--text-caption--font-family": "var(--font-body)",
+          "--text-eyebrow": "var(--step--2)",
+          "--text-eyebrow--line-height": "var(--leading-tight)",
+          "--text-eyebrow--letter-spacing": "var(--tracking-caps)",
+          "--text-eyebrow--font-weight": "var(--weight-semibold)",
+          "--text-eyebrow--font-family": "var(--font-heading)"
+        }
+      },
+      "exercises": {"valid": true, "carriesNeutralRungs": true}
+    },
+    {
+      "id": "valid-optional-fallback",
+      "$what": "Both optional roles, a product with a lead face and no display face (display falls back to heading), and a step override.",
+      "product": {"scale": {}, "fontRoles": ["heading", "body", "lead"], "colourRoles": []},
+      "declaration": {
+        "scale": {"named": "quiet"},
+        "optionalRoles": ["quote", "stat"],
+        "overrides": [
+          {
+            "role": "label",
+            "property": "step",
+            "value": "-2",
+            "replaces": "-1",
+            "reason": "Measured against the component it sets."
+          },
+          {
+            "role": "stat",
+            "property": "weight",
+            "value": "semibold",
+            "replaces": "bold",
+            "reason": "Measured against the component it sets."
+          }
+        ]
+      },
+      "expect": {
+        "roles": {
+          "display": {"step": "5", "leading": "display", "tracking": "display", "weight": "bold", "font": "heading"},
+          "heading-1": {"step": "4", "leading": "heading", "tracking": "heading", "weight": "bold", "font": "heading"},
+          "heading-2": {"step": "3", "leading": "heading", "tracking": "heading", "weight": "bold", "font": "heading"},
+          "heading-3": {"step": "2", "leading": "subhead", "tracking": "subhead", "weight": "semibold", "font": "heading"},
+          "heading-4": {"step": "1", "leading": "subhead", "tracking": "subhead", "weight": "semibold", "font": "heading"},
+          "lead": {"step": "1", "leading": "body", "tracking": "body", "weight": "regular", "font": "lead"},
+          "body": {"step": "0", "leading": "body", "tracking": "body", "weight": "regular", "font": "body"},
+          "small": {"step": "-1", "leading": "body", "tracking": "body", "weight": "regular", "font": "body"},
+          "label": {"step": "-2", "leading": "ui", "tracking": "ui", "weight": "semibold", "font": "body"},
+          "caption": {"step": "-2", "leading": "ui", "tracking": "ui", "weight": "regular", "font": "body"},
+          "eyebrow": {"step": "-2", "leading": "tight", "tracking": "caps", "weight": "semibold", "font": "body"},
+          "quote": {"step": "2", "leading": "subhead", "tracking": "body", "weight": "regular", "font": "lead"},
+          "stat": {"step": "4", "leading": "tight", "tracking": "display", "weight": "semibold", "font": "heading"}
+        },
+        "tokens": {
+          "--text-display": "var(--step-5)",
+          "--text-display--line-height": "var(--leading-display)",
+          "--text-display--letter-spacing": "var(--tracking-display)",
+          "--text-display--font-weight": "var(--weight-bold)",
+          "--text-display--font-family": "var(--font-heading)",
+          "--text-heading-1": "var(--step-4)",
+          "--text-heading-1--line-height": "var(--leading-heading)",
+          "--text-heading-1--letter-spacing": "var(--tracking-heading)",
+          "--text-heading-1--font-weight": "var(--weight-bold)",
+          "--text-heading-1--font-family": "var(--font-heading)",
+          "--text-heading-2": "var(--step-3)",
+          "--text-heading-2--line-height": "var(--leading-heading)",
+          "--text-heading-2--letter-spacing": "var(--tracking-heading)",
+          "--text-heading-2--font-weight": "var(--weight-bold)",
+          "--text-heading-2--font-family": "var(--font-heading)",
+          "--text-heading-3": "var(--step-2)",
+          "--text-heading-3--line-height": "var(--leading-subhead)",
+          "--text-heading-3--letter-spacing": "var(--tracking-subhead)",
+          "--text-heading-3--font-weight": "var(--weight-semibold)",
+          "--text-heading-3--font-family": "var(--font-heading)",
+          "--text-heading-4": "var(--step-1)",
+          "--text-heading-4--line-height": "var(--leading-subhead)",
+          "--text-heading-4--letter-spacing": "var(--tracking-subhead)",
+          "--text-heading-4--font-weight": "var(--weight-semibold)",
+          "--text-heading-4--font-family": "var(--font-heading)",
+          "--text-lead": "var(--step-1)",
+          "--text-lead--line-height": "var(--leading-body)",
+          "--text-lead--letter-spacing": "var(--tracking-body)",
+          "--text-lead--font-weight": "var(--weight-regular)",
+          "--text-lead--font-family": "var(--font-lead)",
+          "--text-body": "var(--step-0)",
+          "--text-body--line-height": "var(--leading-body)",
+          "--text-body--letter-spacing": "var(--tracking-body)",
+          "--text-body--font-weight": "var(--weight-regular)",
+          "--text-body--font-family": "var(--font-body)",
+          "--text-small": "var(--step--1)",
+          "--text-small--line-height": "var(--leading-body)",
+          "--text-small--letter-spacing": "var(--tracking-body)",
+          "--text-small--font-weight": "var(--weight-regular)",
+          "--text-small--font-family": "var(--font-body)",
+          "--text-label": "var(--step--2)",
+          "--text-label--line-height": "var(--leading-ui)",
+          "--text-label--letter-spacing": "var(--tracking-ui)",
+          "--text-label--font-weight": "var(--weight-semibold)",
+          "--text-label--font-family": "var(--font-body)",
+          "--text-caption": "var(--step--2)",
+          "--text-caption--line-height": "var(--leading-ui)",
+          "--text-caption--letter-spacing": "var(--tracking-ui)",
+          "--text-caption--font-weight": "var(--weight-regular)",
+          "--text-caption--font-family": "var(--font-body)",
+          "--text-eyebrow": "var(--step--2)",
+          "--text-eyebrow--line-height": "var(--leading-tight)",
+          "--text-eyebrow--letter-spacing": "var(--tracking-caps)",
+          "--text-eyebrow--font-weight": "var(--weight-semibold)",
+          "--text-eyebrow--font-family": "var(--font-body)",
+          "--text-quote": "var(--step-2)",
+          "--text-quote--line-height": "var(--leading-subhead)",
+          "--text-quote--letter-spacing": "var(--tracking-body)",
+          "--text-quote--font-weight": "var(--weight-regular)",
+          "--text-quote--font-family": "var(--font-lead)",
+          "--text-stat": "var(--step-4)",
+          "--text-stat--line-height": "var(--leading-tight)",
+          "--text-stat--letter-spacing": "var(--tracking-display)",
+          "--text-stat--font-weight": "var(--weight-semibold)",
+          "--text-stat--font-family": "var(--font-heading)"
+        }
+      },
+      "exercises": {"valid": true, "fallsBack": {"display": "heading"}}
+    },
+    {
+      "id": "valid-custom",
+      "$what": "A product's own table, leading and tracking, and an override to a rung (tracking `wide`) only a custom family has.",
+      "product": {
+        "scale": {
+          "typeScaleFixed": {},
+          "typeScaleFluid": {
+            "-5": ["0.5896rem", "0.5549rem + 0.1388vw", "0.659rem"],
+            "-4": ["0.6633rem", "0.6242rem + 0.1562vw", "0.7414rem"],
+            "-3": ["0.7462rem", "0.7023rem + 0.1756vw", "0.834rem"],
+            "-2": ["0.8395rem", "0.7901rem + 0.1976vw", "0.9383rem"],
+            "-1": ["0.9444rem", "0.8888rem + 0.2224vw", "1.0556rem"],
+            "0": ["1.0625rem", "1rem + 0.25vw", "1.1875rem"],
+            "1": ["1.2219rem", "1.1085rem + 0.4536vw", "1.4487rem"],
+            "2": ["1.4052rem", "1.2241rem + 0.7246vw", "1.7675rem"],
+            "3": ["1.6159rem", "1.3457rem + 1.0808vw", "2.1563rem"],
+            "4": ["1.8583rem", "1.4721rem + 1.5448vw", "2.6307rem"],
+            "5": ["2.1371rem", "1.6009rem + 2.1448vw", "3.2095rem"]
+          },
+          "typeScaleViewports": ["400px", "1200px"],
+          "leading": {"display": 1.08, "heading": 1.18, "subhead": 1.28, "body": 1.55, "ui": 1.35, "tight": 1.22, "mono": 1.45},
+          "tracking": {
+            "display": "-0.025em",
+            "heading": "-0.012em",
+            "subhead": "-0.005em",
+            "body": "0em",
+            "ui": "0.005em",
+            "wide": "0.05em",
+            "caps": "0.11em",
+            "mono": "0.02em"
+          },
+          "weight": {"regular": 400, "medium": 500, "semibold": 600, "bold": 700}
+        },
+        "fontRoles": ["heading", "body", "display", "lead"],
+        "colourRoles": []
+      },
+      "declaration": {
+        "scale": {"custom": true, "reason": "The product's own table, sized against its own components."},
+        "rungs": {
+          "leading": {"custom": true, "reason": "The product's own leading."},
+          "tracking": {"custom": true, "reason": "The product's own tracking."}
+        },
+        "optionalRoles": ["stat"],
+        "overrides": [
+          {
+            "role": "heading-1",
+            "property": "leading",
+            "value": "display",
+            "replaces": "heading",
+            "reason": "Measured against the component it sets."
+          },
+          {
+            "role": "eyebrow",
+            "property": "tracking",
+            "value": "wide",
+            "replaces": "caps",
+            "reason": "Measured against the component it sets."
+          }
+        ]
+      },
+      "expect": {
+        "roles": {
+          "display": {"step": "5", "leading": "display", "tracking": "display", "weight": "bold", "font": "display"},
+          "heading-1": {"step": "4", "leading": "display", "tracking": "heading", "weight": "bold", "font": "heading"},
+          "heading-2": {"step": "3", "leading": "heading", "tracking": "heading", "weight": "bold", "font": "heading"},
+          "heading-3": {"step": "2", "leading": "subhead", "tracking": "subhead", "weight": "semibold", "font": "heading"},
+          "heading-4": {"step": "1", "leading": "subhead", "tracking": "subhead", "weight": "semibold", "font": "heading"},
+          "lead": {"step": "1", "leading": "body", "tracking": "body", "weight": "regular", "font": "lead"},
+          "body": {"step": "0", "leading": "body", "tracking": "body", "weight": "regular", "font": "body"},
+          "small": {"step": "-1", "leading": "body", "tracking": "body", "weight": "regular", "font": "body"},
+          "label": {"step": "-1", "leading": "ui", "tracking": "ui", "weight": "semibold", "font": "body"},
+          "caption": {"step": "-2", "leading": "ui", "tracking": "ui", "weight": "regular", "font": "body"},
+          "eyebrow": {"step": "-2", "leading": "tight", "tracking": "wide", "weight": "semibold", "font": "body"},
+          "stat": {"step": "4", "leading": "tight", "tracking": "display", "weight": "bold", "font": "heading"}
+        },
+        "tokens": {
+          "--text-display": "var(--step-5)",
+          "--text-display--line-height": "var(--leading-display)",
+          "--text-display--letter-spacing": "var(--tracking-display)",
+          "--text-display--font-weight": "var(--weight-bold)",
+          "--text-display--font-family": "var(--font-display)",
+          "--text-heading-1": "var(--step-4)",
+          "--text-heading-1--line-height": "var(--leading-display)",
+          "--text-heading-1--letter-spacing": "var(--tracking-heading)",
+          "--text-heading-1--font-weight": "var(--weight-bold)",
+          "--text-heading-1--font-family": "var(--font-heading)",
+          "--text-heading-2": "var(--step-3)",
+          "--text-heading-2--line-height": "var(--leading-heading)",
+          "--text-heading-2--letter-spacing": "var(--tracking-heading)",
+          "--text-heading-2--font-weight": "var(--weight-bold)",
+          "--text-heading-2--font-family": "var(--font-heading)",
+          "--text-heading-3": "var(--step-2)",
+          "--text-heading-3--line-height": "var(--leading-subhead)",
+          "--text-heading-3--letter-spacing": "var(--tracking-subhead)",
+          "--text-heading-3--font-weight": "var(--weight-semibold)",
+          "--text-heading-3--font-family": "var(--font-heading)",
+          "--text-heading-4": "var(--step-1)",
+          "--text-heading-4--line-height": "var(--leading-subhead)",
+          "--text-heading-4--letter-spacing": "var(--tracking-subhead)",
+          "--text-heading-4--font-weight": "var(--weight-semibold)",
+          "--text-heading-4--font-family": "var(--font-heading)",
+          "--text-lead": "var(--step-1)",
+          "--text-lead--line-height": "var(--leading-body)",
+          "--text-lead--letter-spacing": "var(--tracking-body)",
+          "--text-lead--font-weight": "var(--weight-regular)",
+          "--text-lead--font-family": "var(--font-lead)",
+          "--text-body": "var(--step-0)",
+          "--text-body--line-height": "var(--leading-body)",
+          "--text-body--letter-spacing": "var(--tracking-body)",
+          "--text-body--font-weight": "var(--weight-regular)",
+          "--text-body--font-family": "var(--font-body)",
+          "--text-small": "var(--step--1)",
+          "--text-small--line-height": "var(--leading-body)",
+          "--text-small--letter-spacing": "var(--tracking-body)",
+          "--text-small--font-weight": "var(--weight-regular)",
+          "--text-small--font-family": "var(--font-body)",
+          "--text-label": "var(--step--1)",
+          "--text-label--line-height": "var(--leading-ui)",
+          "--text-label--letter-spacing": "var(--tracking-ui)",
+          "--text-label--font-weight": "var(--weight-semibold)",
+          "--text-label--font-family": "var(--font-body)",
+          "--text-caption": "var(--step--2)",
+          "--text-caption--line-height": "var(--leading-ui)",
+          "--text-caption--letter-spacing": "var(--tracking-ui)",
+          "--text-caption--font-weight": "var(--weight-regular)",
+          "--text-caption--font-family": "var(--font-body)",
+          "--text-eyebrow": "var(--step--2)",
+          "--text-eyebrow--line-height": "var(--leading-tight)",
+          "--text-eyebrow--letter-spacing": "var(--tracking-wide)",
+          "--text-eyebrow--font-weight": "var(--weight-semibold)",
+          "--text-eyebrow--font-family": "var(--font-body)",
+          "--text-stat": "var(--step-4)",
+          "--text-stat--line-height": "var(--leading-tight)",
+          "--text-stat--letter-spacing": "var(--tracking-display)",
+          "--text-stat--font-weight": "var(--weight-bold)",
+          "--text-stat--font-family": "var(--font-heading)"
+        }
+      },
+      "exercises": {"valid": true, "custom": ["scale", "leading", "tracking"]}
+    },
+    {
+      "id": "stale",
+      "$what": "`replaces` names semibold; heading-2's default is bold.",
+      "product": {"scale": {}, "fontRoles": ["heading", "body"], "colourRoles": []},
+      "declaration": {
+        "scale": {"named": "balanced"},
+        "overrides": [
+          {
+            "role": "heading-2",
+            "property": "weight",
+            "value": "medium",
+            "replaces": "semibold",
+            "reason": "Measured against the component it sets."
+          }
+        ]
+      },
+      "expect": {"refused": ["stale"]},
+      "exercises": {"override": 0}
+    },
+    {
+      "id": "unchanged",
+      "$what": "An override that sets heading-2's weight to the bold it already has.",
+      "product": {"scale": {}, "fontRoles": ["heading", "body"], "colourRoles": []},
+      "declaration": {
+        "scale": {"named": "balanced"},
+        "overrides": [
+          {
+            "role": "heading-2",
+            "property": "weight",
+            "value": "bold",
+            "replaces": "bold",
+            "reason": "Measured against the component it sets."
+          }
+        ]
+      },
+      "expect": {"refused": ["unchanged"]},
+      "exercises": {"override": 0}
+    },
+    {
+      "id": "numeric",
+      "$what": "A number where a rung name belongs.",
+      "product": {"scale": {}, "fontRoles": ["heading", "body"], "colourRoles": []},
+      "declaration": {
+        "scale": {"named": "balanced"},
+        "overrides": [
+          {
+            "role": "heading-2",
+            "property": "leading",
+            "value": 1.3,
+            "replaces": "heading",
+            "reason": "Measured against the component it sets."
+          }
+        ]
+      },
+      "expect": {"refused": ["numeric"]},
+      "exercises": {"override": 0}
+    },
+    {
+      "id": "structural",
+      "$what": "Body's step is fixed by R1.",
+      "product": {"scale": {}, "fontRoles": ["heading", "body"], "colourRoles": []},
+      "declaration": {
+        "scale": {"named": "balanced"},
+        "overrides": [
+          {
+            "role": "body",
+            "property": "step",
+            "value": "1",
+            "replaces": "0",
+            "reason": "Measured against the component it sets."
+          }
+        ]
+      },
+      "expect": {"refused": ["structural"]},
+      "exercises": {"override": 0}
+    },
+    {
+      "id": "unknown-rung",
+      "$what": "`wide` is a tracking rung the scale shape declares, with no neutral number: only a product that declares tracking as its own can use it.",
+      "product": {"scale": {}, "fontRoles": ["heading", "body"], "colourRoles": []},
+      "declaration": {
+        "scale": {"named": "balanced"},
+        "overrides": [
+          {
+            "role": "eyebrow",
+            "property": "tracking",
+            "value": "wide",
+            "replaces": "caps",
+            "reason": "Measured against the component it sets."
+          }
+        ]
+      },
+      "expect": {"refused": ["unknownRung"]},
+      "exercises": {"override": 0, "declaredByShapeNotNeutral": "wide"}
+    },
+    {
+      "id": "empty-reason",
+      "$what": "An override whose reason is whitespace.",
+      "product": {"scale": {}, "fontRoles": ["heading", "body"], "colourRoles": []},
+      "declaration": {
+        "scale": {"named": "balanced"},
+        "overrides": [{"role": "heading-3", "property": "weight", "value": "bold", "replaces": "semibold", "reason": " "}]
+      },
+      "expect": {"refused": ["reason"]},
+      "exercises": {"override": 0}
+    },
+    {
+      "id": "duplicate",
+      "$what": "The same role and property twice.",
+      "product": {"scale": {}, "fontRoles": ["heading", "body"], "colourRoles": []},
+      "declaration": {
+        "scale": {"named": "balanced"},
+        "overrides": [
+          {
+            "role": "heading-3",
+            "property": "weight",
+            "value": "bold",
+            "replaces": "semibold",
+            "reason": "Measured against the component it sets."
+          },
+          {
+            "role": "heading-3",
+            "property": "weight",
+            "value": "bold",
+            "replaces": "semibold",
+            "reason": "Measured against the component it sets."
+          }
+        ]
+      },
+      "expect": {"refused": ["duplicate"]},
+      "exercises": {"override": 1}
+    },
+    {
+      "id": "unknown-role",
+      "$what": "An override of an optional role the product does not emit.",
+      "product": {"scale": {}, "fontRoles": ["heading", "body"], "colourRoles": []},
+      "declaration": {
+        "scale": {"named": "balanced"},
+        "overrides": [
+          {
+            "role": "quote",
+            "property": "weight",
+            "value": "semibold",
+            "replaces": "regular",
+            "reason": "Measured against the component it sets."
+          }
+        ]
+      },
+      "expect": {"refused": ["unknownRole"]},
+      "exercises": {"override": 0, "notEmitted": "quote"}
+    },
+    {
+      "id": "partial-family",
+      "$what": "Leading declared custom without its mono rung.",
+      "product": {
+        "scale": {"leading": {"display": 1.08, "heading": 1.18, "subhead": 1.28, "body": 1.55, "ui": 1.35, "tight": 1.22}},
+        "fontRoles": ["heading", "body"],
+        "colourRoles": []
+      },
+      "declaration": {"scale": {"named": "balanced"}, "rungs": {"leading": {"custom": true, "reason": "The product's own leading."}}},
+      "expect": {"refused": ["partialFamily"]},
+      "exercises": {"family": "leading", "missing": ["mono"]}
+    },
+    {
+      "id": "undeclared-custom",
+      "$what": "The product carries its own leading and does not declare it.",
+      "product": {
+        "scale": {
+          "leading": {"display": 1.08, "heading": 1.18, "subhead": 1.28, "body": 1.55, "ui": 1.35, "tight": 1.22, "mono": 1.45}
+        },
+        "fontRoles": ["heading", "body"],
+        "colourRoles": []
+      },
+      "declaration": {"scale": {"named": "balanced"}},
+      "expect": {"refused": ["undeclaredCustom"]},
+      "exercises": {"family": "leading"}
+    },
+    {
+      "id": "undeclared-extra-rung",
+      "$what": "The neutral leading at its own numbers plus a mono rung the contract has no number for, undeclared.",
+      "product": {
+        "scale": {
+          "leading": {"display": 1.1, "heading": 1.2, "subhead": 1.3, "body": 1.5, "ui": 1.4, "tight": 1.25, "mono": 1.45}
+        },
+        "fontRoles": ["heading", "body"],
+        "colourRoles": []
+      },
+      "declaration": {"scale": {"named": "balanced"}},
+      "expect": {"refused": ["undeclaredCustom"]},
+      "exercises": {"family": "leading", "withoutNeutral": ["mono"]}
+    },
+    {
+      "id": "undeclared-weight-rung",
+      "$what": "CSS's four weights plus a heavy rung the contract does not name.",
+      "product": {
+        "scale": {"weight": {"regular": 400, "medium": 500, "semibold": 600, "bold": 700, "heavy": 900}},
+        "fontRoles": ["heading", "body"],
+        "colourRoles": []
+      },
+      "declaration": {"scale": {"named": "balanced"}},
+      "expect": {"refused": ["undeclaredCustom"]},
+      "exercises": {"family": "weight", "withoutNeutral": ["heavy"]}
+    },
+    {
+      "id": "undeclared-dark-weights",
+      "$what": "Dark-mode weights, which have no neutral numbers, carried without being declared.",
+      "product": {
+        "scale": {"weight": {"regular": 400, "medium": 500, "semibold": 600, "bold": 700}, "weightDark": {"bold": 650}},
+        "fontRoles": ["heading", "body"],
+        "colourRoles": []
+      },
+      "declaration": {"scale": {"named": "balanced"}},
+      "expect": {"refused": ["undeclaredCustom"]},
+      "exercises": {"family": "weightDark", "withoutNeutral": ["bold"]}
+    },
+    {
+      "id": "named-beside-table",
+      "$what": "A named scale and a product table: two sources for one table.",
+      "product": {
+        "scale": {
+          "typeScaleFixed": {"-1": "0.9375rem"},
+          "typeScaleFluid": {
+            "0": ["1rem", "0.9744rem + 0.1136vw", "1.0625rem"],
+            "1": ["1.0625rem", "1.0369rem + 0.1136vw", "1.125rem"],
+            "2": ["4rem", "1.5455rem + 10.9091vw", "10rem"]
+          },
+          "typeScaleViewports": ["360px", "1240px"]
+        },
+        "fontRoles": ["heading", "body"],
+        "colourRoles": []
+      },
+      "declaration": {"scale": {"named": "balanced"}},
+      "expect": {"refused": ["table"]},
+      "exercises": {"carries": ["typeScaleFixed", "typeScaleFluid", "typeScaleViewports"]}
+    },
+    {
+      "id": "duplicate-optional-role",
+      "$what": "An optional role listed twice.",
+      "product": {"scale": {}, "fontRoles": ["heading", "body"], "colourRoles": []},
+      "declaration": {"scale": {"named": "balanced"}, "optionalRoles": ["quote", "quote"]},
+      "expect": {"refused": ["shape"]},
+      "exercises": {"repeats": "quote"}
+    },
+    {
+      "id": "unknown-scale",
+      "$what": "A named scale the contract does not have.",
+      "product": {"scale": {}, "fontRoles": ["heading", "body"], "colourRoles": []},
+      "declaration": {"scale": {"named": "loud"}},
+      "expect": {"refused": ["shape"]},
+      "exercises": {"named": "loud"}
+    },
+    {
+      "id": "r2-heading-order",
+      "$what": "heading-2 above heading-1.",
+      "product": {"scale": {}, "fontRoles": ["heading", "body"], "colourRoles": []},
+      "declaration": {
+        "scale": {"named": "balanced"},
+        "overrides": [
+          {
+            "role": "heading-2",
+            "property": "step",
+            "value": "5",
+            "replaces": "3",
+            "reason": "Measured against the component it sets."
+          }
+        ]
+      },
+      "expect": {"refused": ["R2"]},
+      "exercises": {"pair": ["heading-1", ">", "heading-2"]}
+    },
+    {
+      "id": "r3-small-at-body",
+      "$what": "Small print at body size.",
+      "product": {"scale": {}, "fontRoles": ["heading", "body"], "colourRoles": []},
+      "declaration": {
+        "scale": {"named": "balanced"},
+        "overrides": [
+          {
+            "role": "small",
+            "property": "step",
+            "value": "0",
+            "replaces": "-1",
+            "reason": "Measured against the component it sets."
+          }
+        ]
+      },
+      "expect": {"refused": ["R3"]},
+      "exercises": {"pair": ["small", "<", "body"], "boundary": ["small", "<", "body"]}
+    },
+    {
+      "id": "boundary-display-heading-1",
+      "$what": "display >= heading-1 with both at one step: accepted, the pair allows equality.",
+      "product": {"scale": {}, "fontRoles": ["heading", "body"], "colourRoles": []},
+      "declaration": {
+        "scale": {"named": "balanced"},
+        "overrides": [
+          {
+            "role": "display",
+            "property": "step",
+            "value": "4",
+            "replaces": "5",
+            "reason": "Measured against the component it sets."
+          }
+        ]
+      },
+      "expect": {
+        "roles": {
+          "display": {"step": "4", "leading": "display", "tracking": "display", "weight": "bold", "font": "heading"},
+          "heading-1": {"step": "4", "leading": "heading", "tracking": "heading", "weight": "bold", "font": "heading"},
+          "heading-2": {"step": "3", "leading": "heading", "tracking": "heading", "weight": "bold", "font": "heading"},
+          "heading-3": {"step": "2", "leading": "subhead", "tracking": "subhead", "weight": "semibold", "font": "heading"},
+          "heading-4": {"step": "1", "leading": "subhead", "tracking": "subhead", "weight": "semibold", "font": "heading"},
+          "lead": {"step": "1", "leading": "body", "tracking": "body", "weight": "regular", "font": "body"},
+          "body": {"step": "0", "leading": "body", "tracking": "body", "weight": "regular", "font": "body"},
+          "small": {"step": "-1", "leading": "body", "tracking": "body", "weight": "regular", "font": "body"},
+          "label": {"step": "-1", "leading": "ui", "tracking": "ui", "weight": "semibold", "font": "body"},
+          "caption": {"step": "-2", "leading": "ui", "tracking": "ui", "weight": "regular", "font": "body"},
+          "eyebrow": {"step": "-2", "leading": "tight", "tracking": "caps", "weight": "semibold", "font": "body"}
+        },
+        "tokens": {
+          "--text-display": "var(--step-4)",
+          "--text-display--line-height": "var(--leading-display)",
+          "--text-display--letter-spacing": "var(--tracking-display)",
+          "--text-display--font-weight": "var(--weight-bold)",
+          "--text-display--font-family": "var(--font-heading)",
+          "--text-heading-1": "var(--step-4)",
+          "--text-heading-1--line-height": "var(--leading-heading)",
+          "--text-heading-1--letter-spacing": "var(--tracking-heading)",
+          "--text-heading-1--font-weight": "var(--weight-bold)",
+          "--text-heading-1--font-family": "var(--font-heading)",
+          "--text-heading-2": "var(--step-3)",
+          "--text-heading-2--line-height": "var(--leading-heading)",
+          "--text-heading-2--letter-spacing": "var(--tracking-heading)",
+          "--text-heading-2--font-weight": "var(--weight-bold)",
+          "--text-heading-2--font-family": "var(--font-heading)",
+          "--text-heading-3": "var(--step-2)",
+          "--text-heading-3--line-height": "var(--leading-subhead)",
+          "--text-heading-3--letter-spacing": "var(--tracking-subhead)",
+          "--text-heading-3--font-weight": "var(--weight-semibold)",
+          "--text-heading-3--font-family": "var(--font-heading)",
+          "--text-heading-4": "var(--step-1)",
+          "--text-heading-4--line-height": "var(--leading-subhead)",
+          "--text-heading-4--letter-spacing": "var(--tracking-subhead)",
+          "--text-heading-4--font-weight": "var(--weight-semibold)",
+          "--text-heading-4--font-family": "var(--font-heading)",
+          "--text-lead": "var(--step-1)",
+          "--text-lead--line-height": "var(--leading-body)",
+          "--text-lead--letter-spacing": "var(--tracking-body)",
+          "--text-lead--font-weight": "var(--weight-regular)",
+          "--text-lead--font-family": "var(--font-body)",
+          "--text-body": "var(--step-0)",
+          "--text-body--line-height": "var(--leading-body)",
+          "--text-body--letter-spacing": "var(--tracking-body)",
+          "--text-body--font-weight": "var(--weight-regular)",
+          "--text-body--font-family": "var(--font-body)",
+          "--text-small": "var(--step--1)",
+          "--text-small--line-height": "var(--leading-body)",
+          "--text-small--letter-spacing": "var(--tracking-body)",
+          "--text-small--font-weight": "var(--weight-regular)",
+          "--text-small--font-family": "var(--font-body)",
+          "--text-label": "var(--step--1)",
+          "--text-label--line-height": "var(--leading-ui)",
+          "--text-label--letter-spacing": "var(--tracking-ui)",
+          "--text-label--font-weight": "var(--weight-semibold)",
+          "--text-label--font-family": "var(--font-body)",
+          "--text-caption": "var(--step--2)",
+          "--text-caption--line-height": "var(--leading-ui)",
+          "--text-caption--letter-spacing": "var(--tracking-ui)",
+          "--text-caption--font-weight": "var(--weight-regular)",
+          "--text-caption--font-family": "var(--font-body)",
+          "--text-eyebrow": "var(--step--2)",
+          "--text-eyebrow--line-height": "var(--leading-tight)",
+          "--text-eyebrow--letter-spacing": "var(--tracking-caps)",
+          "--text-eyebrow--font-weight": "var(--weight-semibold)",
+          "--text-eyebrow--font-family": "var(--font-body)"
+        }
+      },
+      "exercises": {"boundary": ["display", ">=", "heading-1"]}
+    },
+    {
+      "id": "boundary-heading-1-heading-2",
+      "$what": "heading-1 > heading-2 with both at one step: refused, the pair is strict.",
+      "product": {"scale": {}, "fontRoles": ["heading", "body"], "colourRoles": []},
+      "declaration": {
+        "scale": {"named": "balanced"},
+        "overrides": [
+          {
+            "role": "heading-2",
+            "property": "step",
+            "value": "4",
+            "replaces": "3",
+            "reason": "Measured against the component it sets."
+          }
+        ]
+      },
+      "expect": {"refused": ["R2"]},
+      "exercises": {"boundary": ["heading-1", ">", "heading-2"]}
+    },
+    {
+      "id": "boundary-heading-2-heading-3",
+      "$what": "heading-2 > heading-3 with both at one step: refused, the pair is strict.",
+      "product": {"scale": {}, "fontRoles": ["heading", "body"], "colourRoles": []},
+      "declaration": {
+        "scale": {"named": "balanced"},
+        "overrides": [
+          {
+            "role": "heading-3",
+            "property": "step",
+            "value": "3",
+            "replaces": "2",
+            "reason": "Measured against the component it sets."
+          }
+        ]
+      },
+      "expect": {"refused": ["R2"]},
+      "exercises": {"boundary": ["heading-2", ">", "heading-3"]}
+    },
+    {
+      "id": "boundary-heading-3-heading-4",
+      "$what": "heading-3 > heading-4 with both at one step: refused, the pair is strict.",
+      "product": {"scale": {}, "fontRoles": ["heading", "body"], "colourRoles": []},
+      "declaration": {
+        "scale": {"named": "balanced"},
+        "overrides": [
+          {
+            "role": "heading-4",
+            "property": "step",
+            "value": "2",
+            "replaces": "1",
+            "reason": "Measured against the component it sets."
+          }
+        ]
+      },
+      "expect": {"refused": ["R2"]},
+      "exercises": {"boundary": ["heading-3", ">", "heading-4"]}
+    },
+    {
+      "id": "boundary-heading-4-body",
+      "$what": "heading-4 >= body with both at one step: accepted, the pair allows equality.",
+      "product": {"scale": {}, "fontRoles": ["heading", "body"], "colourRoles": []},
+      "declaration": {
+        "scale": {"named": "balanced"},
+        "overrides": [
+          {
+            "role": "heading-4",
+            "property": "step",
+            "value": "0",
+            "replaces": "1",
+            "reason": "Measured against the component it sets."
+          }
+        ]
+      },
+      "expect": {
+        "roles": {
+          "display": {"step": "5", "leading": "display", "tracking": "display", "weight": "bold", "font": "heading"},
+          "heading-1": {"step": "4", "leading": "heading", "tracking": "heading", "weight": "bold", "font": "heading"},
+          "heading-2": {"step": "3", "leading": "heading", "tracking": "heading", "weight": "bold", "font": "heading"},
+          "heading-3": {"step": "2", "leading": "subhead", "tracking": "subhead", "weight": "semibold", "font": "heading"},
+          "heading-4": {"step": "0", "leading": "subhead", "tracking": "subhead", "weight": "semibold", "font": "heading"},
+          "lead": {"step": "1", "leading": "body", "tracking": "body", "weight": "regular", "font": "body"},
+          "body": {"step": "0", "leading": "body", "tracking": "body", "weight": "regular", "font": "body"},
+          "small": {"step": "-1", "leading": "body", "tracking": "body", "weight": "regular", "font": "body"},
+          "label": {"step": "-1", "leading": "ui", "tracking": "ui", "weight": "semibold", "font": "body"},
+          "caption": {"step": "-2", "leading": "ui", "tracking": "ui", "weight": "regular", "font": "body"},
+          "eyebrow": {"step": "-2", "leading": "tight", "tracking": "caps", "weight": "semibold", "font": "body"}
+        },
+        "tokens": {
+          "--text-display": "var(--step-5)",
+          "--text-display--line-height": "var(--leading-display)",
+          "--text-display--letter-spacing": "var(--tracking-display)",
+          "--text-display--font-weight": "var(--weight-bold)",
+          "--text-display--font-family": "var(--font-heading)",
+          "--text-heading-1": "var(--step-4)",
+          "--text-heading-1--line-height": "var(--leading-heading)",
+          "--text-heading-1--letter-spacing": "var(--tracking-heading)",
+          "--text-heading-1--font-weight": "var(--weight-bold)",
+          "--text-heading-1--font-family": "var(--font-heading)",
+          "--text-heading-2": "var(--step-3)",
+          "--text-heading-2--line-height": "var(--leading-heading)",
+          "--text-heading-2--letter-spacing": "var(--tracking-heading)",
+          "--text-heading-2--font-weight": "var(--weight-bold)",
+          "--text-heading-2--font-family": "var(--font-heading)",
+          "--text-heading-3": "var(--step-2)",
+          "--text-heading-3--line-height": "var(--leading-subhead)",
+          "--text-heading-3--letter-spacing": "var(--tracking-subhead)",
+          "--text-heading-3--font-weight": "var(--weight-semibold)",
+          "--text-heading-3--font-family": "var(--font-heading)",
+          "--text-heading-4": "var(--step-0)",
+          "--text-heading-4--line-height": "var(--leading-subhead)",
+          "--text-heading-4--letter-spacing": "var(--tracking-subhead)",
+          "--text-heading-4--font-weight": "var(--weight-semibold)",
+          "--text-heading-4--font-family": "var(--font-heading)",
+          "--text-lead": "var(--step-1)",
+          "--text-lead--line-height": "var(--leading-body)",
+          "--text-lead--letter-spacing": "var(--tracking-body)",
+          "--text-lead--font-weight": "var(--weight-regular)",
+          "--text-lead--font-family": "var(--font-body)",
+          "--text-body": "var(--step-0)",
+          "--text-body--line-height": "var(--leading-body)",
+          "--text-body--letter-spacing": "var(--tracking-body)",
+          "--text-body--font-weight": "var(--weight-regular)",
+          "--text-body--font-family": "var(--font-body)",
+          "--text-small": "var(--step--1)",
+          "--text-small--line-height": "var(--leading-body)",
+          "--text-small--letter-spacing": "var(--tracking-body)",
+          "--text-small--font-weight": "var(--weight-regular)",
+          "--text-small--font-family": "var(--font-body)",
+          "--text-label": "var(--step--1)",
+          "--text-label--line-height": "var(--leading-ui)",
+          "--text-label--letter-spacing": "var(--tracking-ui)",
+          "--text-label--font-weight": "var(--weight-semibold)",
+          "--text-label--font-family": "var(--font-body)",
+          "--text-caption": "var(--step--2)",
+          "--text-caption--line-height": "var(--leading-ui)",
+          "--text-caption--letter-spacing": "var(--tracking-ui)",
+          "--text-caption--font-weight": "var(--weight-regular)",
+          "--text-caption--font-family": "var(--font-body)",
+          "--text-eyebrow": "var(--step--2)",
+          "--text-eyebrow--line-height": "var(--leading-tight)",
+          "--text-eyebrow--letter-spacing": "var(--tracking-caps)",
+          "--text-eyebrow--font-weight": "var(--weight-semibold)",
+          "--text-eyebrow--font-family": "var(--font-body)"
+        }
+      },
+      "exercises": {"boundary": ["heading-4", ">=", "body"]}
+    },
+    {
+      "id": "boundary-lead-body",
+      "$what": "lead > body with both at one step: refused, the pair is strict.",
+      "product": {"scale": {}, "fontRoles": ["heading", "body"], "colourRoles": []},
+      "declaration": {
+        "scale": {"named": "balanced"},
+        "overrides": [
+          {
+            "role": "lead",
+            "property": "step",
+            "value": "0",
+            "replaces": "1",
+            "reason": "Measured against the component it sets."
+          }
+        ]
+      },
+      "expect": {"refused": ["R3"]},
+      "exercises": {"boundary": ["lead", ">", "body"]}
+    },
+    {
+      "id": "boundary-caption-small",
+      "$what": "caption <= small with both at one step: accepted, the pair allows equality.",
+      "product": {"scale": {}, "fontRoles": ["heading", "body"], "colourRoles": []},
+      "declaration": {
+        "scale": {"named": "balanced"},
+        "overrides": [
+          {
+            "role": "caption",
+            "property": "step",
+            "value": "-1",
+            "replaces": "-2",
+            "reason": "Measured against the component it sets."
+          }
+        ]
+      },
+      "expect": {
+        "roles": {
+          "display": {"step": "5", "leading": "display", "tracking": "display", "weight": "bold", "font": "heading"},
+          "heading-1": {"step": "4", "leading": "heading", "tracking": "heading", "weight": "bold", "font": "heading"},
+          "heading-2": {"step": "3", "leading": "heading", "tracking": "heading", "weight": "bold", "font": "heading"},
+          "heading-3": {"step": "2", "leading": "subhead", "tracking": "subhead", "weight": "semibold", "font": "heading"},
+          "heading-4": {"step": "1", "leading": "subhead", "tracking": "subhead", "weight": "semibold", "font": "heading"},
+          "lead": {"step": "1", "leading": "body", "tracking": "body", "weight": "regular", "font": "body"},
+          "body": {"step": "0", "leading": "body", "tracking": "body", "weight": "regular", "font": "body"},
+          "small": {"step": "-1", "leading": "body", "tracking": "body", "weight": "regular", "font": "body"},
+          "label": {"step": "-1", "leading": "ui", "tracking": "ui", "weight": "semibold", "font": "body"},
+          "caption": {"step": "-1", "leading": "ui", "tracking": "ui", "weight": "regular", "font": "body"},
+          "eyebrow": {"step": "-2", "leading": "tight", "tracking": "caps", "weight": "semibold", "font": "body"}
+        },
+        "tokens": {
+          "--text-display": "var(--step-5)",
+          "--text-display--line-height": "var(--leading-display)",
+          "--text-display--letter-spacing": "var(--tracking-display)",
+          "--text-display--font-weight": "var(--weight-bold)",
+          "--text-display--font-family": "var(--font-heading)",
+          "--text-heading-1": "var(--step-4)",
+          "--text-heading-1--line-height": "var(--leading-heading)",
+          "--text-heading-1--letter-spacing": "var(--tracking-heading)",
+          "--text-heading-1--font-weight": "var(--weight-bold)",
+          "--text-heading-1--font-family": "var(--font-heading)",
+          "--text-heading-2": "var(--step-3)",
+          "--text-heading-2--line-height": "var(--leading-heading)",
+          "--text-heading-2--letter-spacing": "var(--tracking-heading)",
+          "--text-heading-2--font-weight": "var(--weight-bold)",
+          "--text-heading-2--font-family": "var(--font-heading)",
+          "--text-heading-3": "var(--step-2)",
+          "--text-heading-3--line-height": "var(--leading-subhead)",
+          "--text-heading-3--letter-spacing": "var(--tracking-subhead)",
+          "--text-heading-3--font-weight": "var(--weight-semibold)",
+          "--text-heading-3--font-family": "var(--font-heading)",
+          "--text-heading-4": "var(--step-1)",
+          "--text-heading-4--line-height": "var(--leading-subhead)",
+          "--text-heading-4--letter-spacing": "var(--tracking-subhead)",
+          "--text-heading-4--font-weight": "var(--weight-semibold)",
+          "--text-heading-4--font-family": "var(--font-heading)",
+          "--text-lead": "var(--step-1)",
+          "--text-lead--line-height": "var(--leading-body)",
+          "--text-lead--letter-spacing": "var(--tracking-body)",
+          "--text-lead--font-weight": "var(--weight-regular)",
+          "--text-lead--font-family": "var(--font-body)",
+          "--text-body": "var(--step-0)",
+          "--text-body--line-height": "var(--leading-body)",
+          "--text-body--letter-spacing": "var(--tracking-body)",
+          "--text-body--font-weight": "var(--weight-regular)",
+          "--text-body--font-family": "var(--font-body)",
+          "--text-small": "var(--step--1)",
+          "--text-small--line-height": "var(--leading-body)",
+          "--text-small--letter-spacing": "var(--tracking-body)",
+          "--text-small--font-weight": "var(--weight-regular)",
+          "--text-small--font-family": "var(--font-body)",
+          "--text-label": "var(--step--1)",
+          "--text-label--line-height": "var(--leading-ui)",
+          "--text-label--letter-spacing": "var(--tracking-ui)",
+          "--text-label--font-weight": "var(--weight-semibold)",
+          "--text-label--font-family": "var(--font-body)",
+          "--text-caption": "var(--step--1)",
+          "--text-caption--line-height": "var(--leading-ui)",
+          "--text-caption--letter-spacing": "var(--tracking-ui)",
+          "--text-caption--font-weight": "var(--weight-regular)",
+          "--text-caption--font-family": "var(--font-body)",
+          "--text-eyebrow": "var(--step--2)",
+          "--text-eyebrow--line-height": "var(--leading-tight)",
+          "--text-eyebrow--letter-spacing": "var(--tracking-caps)",
+          "--text-eyebrow--font-weight": "var(--weight-semibold)",
+          "--text-eyebrow--font-family": "var(--font-body)"
+        }
+      },
+      "exercises": {"boundary": ["caption", "<=", "small"]}
+    },
+    {
+      "id": "boundary-label-body",
+      "$what": "label <= body with both at one step: accepted, the pair allows equality.",
+      "product": {"scale": {}, "fontRoles": ["heading", "body"], "colourRoles": []},
+      "declaration": {
+        "scale": {"named": "balanced"},
+        "overrides": [
+          {
+            "role": "label",
+            "property": "step",
+            "value": "0",
+            "replaces": "-1",
+            "reason": "Measured against the component it sets."
+          }
+        ]
+      },
+      "expect": {
+        "roles": {
+          "display": {"step": "5", "leading": "display", "tracking": "display", "weight": "bold", "font": "heading"},
+          "heading-1": {"step": "4", "leading": "heading", "tracking": "heading", "weight": "bold", "font": "heading"},
+          "heading-2": {"step": "3", "leading": "heading", "tracking": "heading", "weight": "bold", "font": "heading"},
+          "heading-3": {"step": "2", "leading": "subhead", "tracking": "subhead", "weight": "semibold", "font": "heading"},
+          "heading-4": {"step": "1", "leading": "subhead", "tracking": "subhead", "weight": "semibold", "font": "heading"},
+          "lead": {"step": "1", "leading": "body", "tracking": "body", "weight": "regular", "font": "body"},
+          "body": {"step": "0", "leading": "body", "tracking": "body", "weight": "regular", "font": "body"},
+          "small": {"step": "-1", "leading": "body", "tracking": "body", "weight": "regular", "font": "body"},
+          "label": {"step": "0", "leading": "ui", "tracking": "ui", "weight": "semibold", "font": "body"},
+          "caption": {"step": "-2", "leading": "ui", "tracking": "ui", "weight": "regular", "font": "body"},
+          "eyebrow": {"step": "-2", "leading": "tight", "tracking": "caps", "weight": "semibold", "font": "body"}
+        },
+        "tokens": {
+          "--text-display": "var(--step-5)",
+          "--text-display--line-height": "var(--leading-display)",
+          "--text-display--letter-spacing": "var(--tracking-display)",
+          "--text-display--font-weight": "var(--weight-bold)",
+          "--text-display--font-family": "var(--font-heading)",
+          "--text-heading-1": "var(--step-4)",
+          "--text-heading-1--line-height": "var(--leading-heading)",
+          "--text-heading-1--letter-spacing": "var(--tracking-heading)",
+          "--text-heading-1--font-weight": "var(--weight-bold)",
+          "--text-heading-1--font-family": "var(--font-heading)",
+          "--text-heading-2": "var(--step-3)",
+          "--text-heading-2--line-height": "var(--leading-heading)",
+          "--text-heading-2--letter-spacing": "var(--tracking-heading)",
+          "--text-heading-2--font-weight": "var(--weight-bold)",
+          "--text-heading-2--font-family": "var(--font-heading)",
+          "--text-heading-3": "var(--step-2)",
+          "--text-heading-3--line-height": "var(--leading-subhead)",
+          "--text-heading-3--letter-spacing": "var(--tracking-subhead)",
+          "--text-heading-3--font-weight": "var(--weight-semibold)",
+          "--text-heading-3--font-family": "var(--font-heading)",
+          "--text-heading-4": "var(--step-1)",
+          "--text-heading-4--line-height": "var(--leading-subhead)",
+          "--text-heading-4--letter-spacing": "var(--tracking-subhead)",
+          "--text-heading-4--font-weight": "var(--weight-semibold)",
+          "--text-heading-4--font-family": "var(--font-heading)",
+          "--text-lead": "var(--step-1)",
+          "--text-lead--line-height": "var(--leading-body)",
+          "--text-lead--letter-spacing": "var(--tracking-body)",
+          "--text-lead--font-weight": "var(--weight-regular)",
+          "--text-lead--font-family": "var(--font-body)",
+          "--text-body": "var(--step-0)",
+          "--text-body--line-height": "var(--leading-body)",
+          "--text-body--letter-spacing": "var(--tracking-body)",
+          "--text-body--font-weight": "var(--weight-regular)",
+          "--text-body--font-family": "var(--font-body)",
+          "--text-small": "var(--step--1)",
+          "--text-small--line-height": "var(--leading-body)",
+          "--text-small--letter-spacing": "var(--tracking-body)",
+          "--text-small--font-weight": "var(--weight-regular)",
+          "--text-small--font-family": "var(--font-body)",
+          "--text-label": "var(--step-0)",
+          "--text-label--line-height": "var(--leading-ui)",
+          "--text-label--letter-spacing": "var(--tracking-ui)",
+          "--text-label--font-weight": "var(--weight-semibold)",
+          "--text-label--font-family": "var(--font-body)",
+          "--text-caption": "var(--step--2)",
+          "--text-caption--line-height": "var(--leading-ui)",
+          "--text-caption--letter-spacing": "var(--tracking-ui)",
+          "--text-caption--font-weight": "var(--weight-regular)",
+          "--text-caption--font-family": "var(--font-body)",
+          "--text-eyebrow": "var(--step--2)",
+          "--text-eyebrow--line-height": "var(--leading-tight)",
+          "--text-eyebrow--letter-spacing": "var(--tracking-caps)",
+          "--text-eyebrow--font-weight": "var(--weight-semibold)",
+          "--text-eyebrow--font-family": "var(--font-body)"
+        }
+      },
+      "exercises": {"boundary": ["label", "<=", "body"]}
+    },
+    {
+      "id": "boundary-eyebrow-body",
+      "$what": "eyebrow < body with both at one step: refused, the pair is strict.",
+      "product": {"scale": {}, "fontRoles": ["heading", "body"], "colourRoles": []},
+      "declaration": {
+        "scale": {"named": "balanced"},
+        "overrides": [
+          {
+            "role": "eyebrow",
+            "property": "step",
+            "value": "0",
+            "replaces": "-2",
+            "reason": "Measured against the component it sets."
+          }
+        ]
+      },
+      "expect": {"refused": ["R3"]},
+      "exercises": {"boundary": ["eyebrow", "<", "body"]}
+    },
+    {
+      "id": "r4-below-floor",
+      "$what": "A caption at balanced's step -3, under 0.75rem at the narrow viewport.",
+      "product": {"scale": {}, "fontRoles": ["heading", "body"], "colourRoles": []},
+      "declaration": {
+        "scale": {"named": "balanced"},
+        "overrides": [
+          {
+            "role": "caption",
+            "property": "step",
+            "value": "-3",
+            "replaces": "-2",
+            "reason": "Measured against the component it sets."
+          }
+        ]
+      },
+      "expect": {"refused": ["R4"]},
+      "exercises": {"role": "caption"}
+    },
+    {
+      "id": "r5-no-heading-face",
+      "$what": "A product that emits no heading typography role.",
+      "product": {"scale": {}, "fontRoles": ["body"], "colourRoles": []},
+      "declaration": {"scale": {"named": "balanced"}},
+      "expect": {"refused": ["R5"]},
+      "exercises": {"unresolved": "heading"}
+    },
+    {
+      "id": "r6-colour-named-label",
+      "$what": "A product colour role called label.",
+      "product": {"scale": {}, "fontRoles": ["heading", "body"], "colourRoles": ["label"]},
+      "declaration": {"scale": {"named": "balanced"}},
+      "expect": {"refused": ["R6"]},
+      "exercises": {"collides": "label"}
+    }
+  ],
+  "namedScales": {
+    "quiet": {
+      "expect": {
+        "steps": {
+          "-5": "clamp(0.5549rem, 0.5265rem + 0.1262vw, 0.6243rem)",
+          "-4": "clamp(0.6243rem, 0.5924rem + 0.1418vw, 0.7023rem)",
+          "-3": "clamp(0.7023rem, 0.6664rem + 0.1596vw, 0.7901rem)",
+          "-2": "clamp(0.7901rem, 0.7497rem + 0.1796vw, 0.8889rem)",
+          "-1": "clamp(0.8889rem, 0.8435rem + 0.202vw, 1rem)",
+          "0": "clamp(1rem, 0.9489rem + 0.2273vw, 1.125rem)",
+          "1": "clamp(1.125rem, 1.033rem + 0.4091vw, 1.35rem)",
+          "2": "clamp(1.2656rem, 1.1206rem + 0.6444vw, 1.62rem)",
+          "3": "clamp(1.4238rem, 1.211rem + 0.9458vw, 1.944rem)",
+          "4": "clamp(1.6018rem, 1.3028rem + 1.3291vw, 2.3328rem)",
+          "5": "clamp(1.802rem, 1.394rem + 1.8135vw, 2.7994rem)"
+        }
+      },
+      "exercises": {
+        "minGapPx": "1.1104",
+        "minMovePx": "1.1104",
+        "largestMaxOverMin": {"step": "5", "atLeast": "1.55", "below": "1.56"},
+        "worstPreferredErrorPx": "0.001",
+        "exactTies": [],
+        "utopiaBelow": {"differsAt": ["-5", "-4", "-3", "-2", "-1"], "invertsAt": ["-5", "-4", "-3", "-2"]}
+      }
+    },
+    "balanced": {
+      "expect": {
+        "steps": {
+          "-5": "clamp(0.5549rem, 0.5265rem + 0.1262vw, 0.6243rem)",
+          "-4": "clamp(0.6243rem, 0.5924rem + 0.1418vw, 0.7023rem)",
+          "-3": "clamp(0.7023rem, 0.6664rem + 0.1596vw, 0.7901rem)",
+          "-2": "clamp(0.7901rem, 0.7497rem + 0.1796vw, 0.8889rem)",
+          "-1": "clamp(0.8889rem, 0.8435rem + 0.202vw, 1rem)",
+          "0": "clamp(1rem, 0.9489rem + 0.2273vw, 1.125rem)",
+          "1": "clamp(1.2rem, 1.1156rem + 0.3749vw, 1.4062rem)",
+          "2": "clamp(1.44rem, 1.31rem + 0.5778vw, 1.7578rem)",
+          "3": "clamp(1.728rem, 1.536rem + 0.8533vw, 2.1973rem)",
+          "4": "clamp(2.0736rem, 1.7983rem + 1.2236vw, 2.7466rem)",
+          "5": "clamp(2.4883rem, 2.1018rem + 1.718vw, 3.4332rem)"
+        }
+      },
+      "exercises": {
+        "minGapPx": "1.1104",
+        "minMovePx": "1.1104",
+        "largestMaxOverMin": {"step": "5", "atLeast": "1.37", "below": "1.38"},
+        "worstPreferredErrorPx": "0.00092",
+        "exactTies": [{"step": "1", "bound": "max", "binary64": "1.40625"}],
+        "utopiaBelow": {"differsAt": ["-5", "-4", "-3", "-2", "-1"], "invertsAt": ["-5", "-4", "-3"]}
+      }
+    },
+    "dramatic": {
+      "expect": {
+        "steps": {
+          "-5": "clamp(0.5549rem, 0.5265rem + 0.1262vw, 0.6243rem)",
+          "-4": "clamp(0.6243rem, 0.5924rem + 0.1418vw, 0.7023rem)",
+          "-3": "clamp(0.7023rem, 0.6664rem + 0.1596vw, 0.7901rem)",
+          "-2": "clamp(0.7901rem, 0.7497rem + 0.1796vw, 0.8889rem)",
+          "-1": "clamp(0.8889rem, 0.8435rem + 0.202vw, 1rem)",
+          "0": "clamp(1rem, 0.9489rem + 0.2273vw, 1.125rem)",
+          "1": "clamp(1.25rem, 1.1479rem + 0.4538vw, 1.4996rem)",
+          "2": "clamp(1.5625rem, 1.3839rem + 0.7936vw, 1.999rem)",
+          "3": "clamp(1.9531rem, 1.662rem + 1.2938vw, 2.6647rem)",
+          "4": "clamp(2.4414rem, 1.9871rem + 2.0193vw, 3.552rem)",
+          "5": "clamp(3.0518rem, 2.3633rem + 3.06vw, 4.7348rem)"
+        }
+      },
+      "exercises": {
+        "minGapPx": "1.1104",
+        "minMovePx": "1.1104",
+        "largestMaxOverMin": {"step": "5", "atLeast": "1.55", "below": "1.56"},
+        "worstPreferredErrorPx": "0.00096",
+        "exactTies": [],
+        "utopiaBelow": {"differsAt": ["-5", "-4", "-3", "-2", "-1"], "invertsAt": ["-5", "-4", "-3", "-2"]}
+      }
+    }
+  }
+}
