@@ -1,0 +1,555 @@
+{
+  "$comment": "FROZEN reference ramps \u2014 the independent truth every conforming implementation proves itself against. Regenerate with scripts/freeze_vectors.py, but read its docstring first: if an implementation disagrees with a vector here, the IMPLEMENTATION is wrong. Re-freeze only when the spec or the seed corpus changes. These hexes are test fixtures, not a palette \u2014 nothing renders them, and this contract holds no colour values.",
+  "version": "3.0.0",
+  "spec": "derivation.json",
+  "frozen": "2026-09-25",
+  "provenance": "Frozen from the byte-identical agreement of TWO independent implementations: salt/inc/colors.php (PHP) and foundations/scripts/oklch.py (Python). Both were run over every seed below and agreed on all 165 ramp steps. That agreement is what is frozen here; from this point each implementation proves itself against this file alone, with no sibling checkout and no PHP runtime. The quantise vectors are frozen from the Python implementation alone: they pin the rounding rule 3.0.0 adopts, half to even, and salt's PHP still rounds half away from zero until it moves to 3.0.0 (design-system decision D39).",
+  "counts": {
+    "seeds": 15,
+    "steps": 11,
+    "assertions": 165,
+    "quantise": 2
+  },
+  "$exercises": "What each vector exercises is a structured field, `exercises`, that scripts/audit_vectors.py RECOMPUTES from derivation.json rather than reading as prose: a coordinate is re-measured and rounded to the places written, a clip range is re-derived rung by rung, a cusp is searched for. A claim kind the audit does not know fails, and so does a vector with no claims. `$what` is one line of prose for a reader, and holds no figure: every figure is a claim. The prose notes these fields replace were wrong three times before anything read them.",
+  "vectors": [
+    {
+      "seed": "#F8F929",
+      "$what": "A yellow whose chroma fits while the ladder is light and runs out as it darkens: the whole dark half is gamut-mapped and none of the light half, the mirror image of the blue primary's clip range. Yellow's cusp sits near the top of the lightness range.",
+      "exercises": {
+        "oklch": {
+          "C": "0.200",
+          "H": "110"
+        },
+        "chosenAt": {
+          "L": "0.95",
+          "C": "0.20",
+          "H": "110"
+        },
+        "mapped": [
+          400,
+          500,
+          600,
+          700,
+          800,
+          900,
+          950
+        ],
+        "cusp": {
+          "L": "0.967"
+        }
+      },
+      "ramp": {
+        "50": "#f7f9d2",
+        "100": "#edf0bc",
+        "200": "#dbde8f",
+        "300": "#c3c556",
+        "400": "#a5a600",
+        "500": "#8c8c00",
+        "600": "#707100",
+        "700": "#595900",
+        "800": "#434300",
+        "900": "#2b2b00",
+        "950": "#171700"
+      }
+    },
+    {
+      "seed": "#6CFD95",
+      "$what": "A green that clips only in the dark middle, with both ends direct. Green is wide in sRGB when light and narrow when dark, so this catches an implementation that assumes clipping is a light-end problem; unlike the yellow, the two darkest rungs fit again once the taper has cut the chroma.",
+      "exercises": {
+        "oklch": {
+          "C": "0.190",
+          "H": "150"
+        },
+        "chosenAt": {
+          "L": "0.89",
+          "C": "0.19",
+          "H": "150"
+        },
+        "mapped": [
+          500,
+          600,
+          700,
+          800
+        ]
+      },
+      "ramp": {
+        "50": "#dfffe5",
+        "100": "#cef8d5",
+        "200": "#aaeab7",
+        "300": "#7ed592",
+        "400": "#44b967",
+        "500": "#00a14a",
+        "600": "#00823a",
+        "700": "#00672d",
+        "800": "#004e20",
+        "900": "#083216",
+        "950": "#031c0a"
+      }
+    },
+    {
+      "seed": "#FD26E0",
+      "$what": "A magenta whose clip range has a hole at the rung beside its cusp. A non-contiguous clip range guards against short-circuiting the search once a step fits. Its darkest clipped rung clips by a hair, and as a fill it needs dark text: light text on it is under AA.",
+      "exercises": {
+        "oklch": {
+          "C": "0.290",
+          "H": "335"
+        },
+        "chosenAt": {
+          "L": "0.69",
+          "C": "0.29",
+          "H": "335"
+        },
+        "mapped": [
+          50,
+          100,
+          200,
+          300,
+          500,
+          600,
+          700,
+          800
+        ],
+        "cusp": {
+          "L": "0.685",
+          "nearestRung": 400
+        },
+        "clipsBy": {
+          "step": 800,
+          "C": "0.001"
+        },
+        "contrast": {
+          "lightPole": "3.22",
+          "darkPole": "6.53"
+        }
+      },
+      "ramp": {
+        "50": "#fff0fb",
+        "100": "#ffe1f7",
+        "200": "#ffc1f0",
+        "300": "#ff90e9",
+        "400": "#f351d8",
+        "500": "#df00c5",
+        "600": "#b500a0",
+        "700": "#910080",
+        "800": "#6f0061",
+        "900": "#450d3c",
+        "950": "#280523"
+      }
+    },
+    {
+      "seed": "#4b5563",
+      "$what": "Never gamut-mapped: after the taper there is almost no chroma to clip. Exercises the direct path end to end.",
+      "exercises": {
+        "oklch": {
+          "C": "0.026"
+        },
+        "mapped": []
+      },
+      "ramp": {
+        "50": "#f2f5fa",
+        "100": "#e7ebf1",
+        "200": "#d2d8e0",
+        "300": "#b7bec9",
+        "400": "#969fac",
+        "500": "#7c8796",
+        "600": "#626d7b",
+        "700": "#4e5661",
+        "800": "#3b4048",
+        "900": "#26292e",
+        "950": "#141619"
+      }
+    },
+    {
+      "seed": "#F5F0F3",
+      "$what": "Near-achromatic but not achromatic, so its hue still moves the ramp: the case between a real colour and the degenerate one. Never mapped.",
+      "exercises": {
+        "oklch": {
+          "C": "0.007"
+        },
+        "chosenAt": {
+          "L": "0.96",
+          "C": "0.007",
+          "H": "340"
+        },
+        "mapped": [],
+        "hueIgnored": false
+      },
+      "ramp": {
+        "50": "#f6f5f5",
+        "100": "#eceaeb",
+        "200": "#d9d7d8",
+        "300": "#c0bdbe",
+        "400": "#a19d9f",
+        "500": "#898587",
+        "600": "#6f6a6d",
+        "700": "#575456",
+        "800": "#413f40",
+        "900": "#2a2829",
+        "950": "#171616"
+      }
+    },
+    {
+      "seed": "#28240C",
+      "$what": "Very dark and low in chroma; the ladder must lighten it a long way. Never mapped.",
+      "exercises": {
+        "oklch": {
+          "L": "0.26",
+          "C": "0.039"
+        },
+        "chosenAt": {
+          "L": "0.26",
+          "C": "0.04",
+          "H": "100"
+        },
+        "mapped": []
+      },
+      "ramp": {
+        "50": "#f6f5ee",
+        "100": "#edece2",
+        "200": "#dad8ca",
+        "300": "#c1beac",
+        "400": "#a39f88",
+        "500": "#8b876c",
+        "600": "#716d53",
+        "700": "#595642",
+        "800": "#424033",
+        "900": "#2a2921",
+        "950": "#171611"
+      }
+    },
+    {
+      "seed": "#ffffff",
+      "$what": "The light pole. Its chroma is float noise rather than zero and its hue is noise too, so the ramp must not depend on the hue: guards the degenerate achromatic path.",
+      "exercises": {
+        "oklch": {
+          "L": "1.000000",
+          "C": "0.000000"
+        },
+        "mapped": [],
+        "hueIgnored": true
+      },
+      "ramp": {
+        "50": "#f5f5f5",
+        "100": "#ebebeb",
+        "200": "#d7d7d7",
+        "300": "#bebebe",
+        "400": "#9e9e9e",
+        "500": "#868686",
+        "600": "#6c6c6c",
+        "700": "#555555",
+        "800": "#404040",
+        "900": "#292929",
+        "950": "#161616"
+      }
+    },
+    {
+      "seed": "#000000",
+      "$what": "The dark pole, where lightness and chroma are both exactly zero: the other degenerate end.",
+      "exercises": {
+        "oklch": {
+          "L": "0",
+          "C": "0"
+        },
+        "exactZero": [
+          "L",
+          "C"
+        ],
+        "mapped": []
+      },
+      "ramp": {
+        "50": "#f5f5f5",
+        "100": "#ebebeb",
+        "200": "#d7d7d7",
+        "300": "#bebebe",
+        "400": "#9e9e9e",
+        "500": "#868686",
+        "600": "#6c6c6c",
+        "700": "#555555",
+        "800": "#404040",
+        "900": "#292929",
+        "950": "#161616"
+      }
+    },
+    {
+      "seed": "#ff0000",
+      "$what": "The sRGB red primary, at the red boundary.",
+      "exercises": {
+        "oklch": {
+          "C": "0.258",
+          "H": "29"
+        },
+        "mapped": [
+          50,
+          100,
+          200,
+          300,
+          400,
+          500,
+          600,
+          700
+        ]
+      },
+      "ramp": {
+        "50": "#fff2ef",
+        "100": "#ffe4e0",
+        "200": "#ffc8bf",
+        "300": "#ffa193",
+        "400": "#ff6553",
+        "500": "#fb0000",
+        "600": "#cc0000",
+        "700": "#a30000",
+        "800": "#7b0603",
+        "900": "#4d100a",
+        "950": "#2d0704"
+      }
+    },
+    {
+      "seed": "#00ff00",
+      "$what": "The green primary. Its light rungs fit despite the second-highest chroma in the set, because green is sRGB's widest hue: the clearest proof that clipping depends on hue, not chroma alone.",
+      "exercises": {
+        "oklch": {
+          "C": "0.295",
+          "H": "142"
+        },
+        "mapped": [
+          50,
+          400,
+          500,
+          600,
+          700,
+          800,
+          900,
+          950
+        ],
+        "chromaRank": 2
+      },
+      "ramp": {
+        "50": "#e1ffde",
+        "100": "#c5fdc0",
+        "200": "#9cf095",
+        "300": "#66dc5f",
+        "400": "#00c000",
+        "500": "#00a300",
+        "600": "#008400",
+        "700": "#006900",
+        "800": "#004f00",
+        "900": "#003400",
+        "950": "#001d00"
+      }
+    },
+    {
+      "seed": "#0000ff",
+      "$what": "The blue primary, with the highest chroma in the set; it clips the light end.",
+      "exercises": {
+        "oklch": {
+          "C": "0.313",
+          "H": "264"
+        },
+        "mapped": [
+          50,
+          100,
+          200,
+          300,
+          400,
+          500,
+          600
+        ],
+        "chromaRank": 1
+      },
+      "ramp": {
+        "50": "#f0f5ff",
+        "100": "#e2ecff",
+        "200": "#c4d8ff",
+        "300": "#9dbdff",
+        "400": "#6c9aff",
+        "500": "#447cff",
+        "600": "#1552ff",
+        "700": "#0538da",
+        "800": "#0a309c",
+        "900": "#0a225f",
+        "950": "#041239"
+      }
+    },
+    {
+      "seed": "#7C3AED",
+      "$what": "Violet, a narrow-gamut hue.",
+      "exercises": {
+        "oklch": {
+          "C": "0.247",
+          "H": "293"
+        },
+        "mapped": [
+          50,
+          100,
+          200,
+          300,
+          400,
+          500
+        ]
+      },
+      "ramp": {
+        "50": "#f5f3ff",
+        "100": "#ebe8ff",
+        "200": "#d8d0ff",
+        "300": "#c0b0ff",
+        "400": "#a486ff",
+        "500": "#905eff",
+        "600": "#7935e9",
+        "700": "#5f30b4",
+        "800": "#452982",
+        "900": "#2c1d4f",
+        "950": "#180f2f"
+      }
+    },
+    {
+      "seed": "#DB2777",
+      "$what": "A hue just past the wraparound, where a hue-interpolation bug shows up. It clips on both sides of two unclipped middle rungs.",
+      "exercises": {
+        "oklch": {
+          "C": "0.218",
+          "H": "0.6"
+        },
+        "mapped": [
+          50,
+          100,
+          200,
+          300,
+          600
+        ]
+      },
+      "ramp": {
+        "50": "#fff1f4",
+        "100": "#ffe3ea",
+        "200": "#ffc5d5",
+        "300": "#ff9bb9",
+        "400": "#f46599",
+        "500": "#e5347f",
+        "600": "#c40065",
+        "700": "#991250",
+        "800": "#70183c",
+        "900": "#461527",
+        "950": "#290915"
+      }
+    },
+    {
+      "seed": "#123456",
+      "$what": "A mild colour that still clips at the lightest rung: the boundary case, and the one most likely to expose an epsilon or linear-versus-sRGB gamut-test error.",
+      "exercises": {
+        "oklch": {
+          "C": "0.072"
+        },
+        "mapped": [
+          50
+        ],
+        "clipsBy": {
+          "step": 50,
+          "C": "0.003"
+        }
+      },
+      "ramp": {
+        "50": "#eef6ff",
+        "100": "#e0edfb",
+        "200": "#c7daef",
+        "300": "#a7c1dd",
+        "400": "#83a2c3",
+        "500": "#6589b1",
+        "600": "#4c6f95",
+        "700": "#3d5874",
+        "800": "#2f4155",
+        "900": "#1f2a35",
+        "950": "#10171e"
+      }
+    },
+    {
+      "seed": "#abcdef",
+      "$what": "The same boundary from a lighter seed, clipping by less.",
+      "exercises": {
+        "oklch": {
+          "C": "0.060"
+        },
+        "mapped": [
+          50
+        ],
+        "clipsBy": {
+          "step": 50,
+          "C": "0.0002"
+        }
+      },
+      "ramp": {
+        "50": "#eef6ff",
+        "100": "#e1edf8",
+        "200": "#c9daeb",
+        "300": "#aac1d7",
+        "400": "#87a2bd",
+        "500": "#6a8aa9",
+        "600": "#506f8d",
+        "700": "#40586f",
+        "800": "#314151",
+        "900": "#212a33",
+        "950": "#11171d"
+      }
+    }
+  ],
+  "$quantise": "Step 5 of derivation.json on its own: `linear` is three LINEAR sRGB channels, the values the gamut map hands to step 5, and `hex` is what they must quantise to. No hex seed makes a scaled channel an exact tie, so the seeds above cannot tell half to even from half away from zero; these can, and they tell the binary64 operand step 5 names from two exact ones. Read each channel as the binary64 its JSON number denotes and compute in binary64, in the order step 5 writes.",
+  "quantise": [
+    {
+      "id": "exact-ties",
+      "$what": "Three linear channels, each landing exactly on a tie when scaled in double precision in the order the spec writes. Half to even takes the even byte at each; half away from zero and half up take the byte above at the red and blue ties; rounding the exact product, which is just below the green tie, takes the byte below it; and rounding the decimal product, which is just above the blue tie, takes the byte above it.",
+      "linear": [
+        0.0007588174588720937,
+        0.0010623444424209313,
+        0.0025799793601651187
+      ],
+      "hex": "#020408",
+      "exercises": {
+        "exactTie": [
+          {
+            "channel": "r",
+            "binary64": "2.5",
+            "halfEven": "02",
+            "halfAwayFromZero": "03",
+            "exactProduct": "02",
+            "exactDecimal": "02"
+          },
+          {
+            "channel": "g",
+            "binary64": "3.5",
+            "halfEven": "04",
+            "halfAwayFromZero": "04",
+            "exactProduct": "03",
+            "exactDecimal": "04"
+          },
+          {
+            "channel": "b",
+            "binary64": "8.5",
+            "halfEven": "08",
+            "halfAwayFromZero": "09",
+            "exactProduct": "08",
+            "exactDecimal": "09"
+          }
+        ]
+      }
+    },
+    {
+      "id": "operation-order",
+      "$what": "The red tie's input one step up. In the order the spec writes, its scaled value is just above the tie and rounds up; multiplying the two constants first, or by the scale before the transfer's slope, lands exactly on the tie and rounds to the even byte below.",
+      "linear": [
+        0.0007588174588720938,
+        0.0,
+        0.0
+      ],
+      "hex": "#030000",
+      "exercises": {
+        "order": [
+          {
+            "channel": "r",
+            "binary64": "2.500000000000000444089209850062616169452667236328125",
+            "rule": "03",
+            "constantsFirst": "02",
+            "scaleFirst": "02"
+          }
+        ]
+      }
+    }
+  ]
+}

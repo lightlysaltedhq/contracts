@@ -1,0 +1,69 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://cdn.jsdelivr.net/npm/@lightlysaltedhq/design-foundations@3/schema/token-file.schema.json",
+  "title": "Token file — the shared shape a conforming design system emits",
+  "$comment": "How a token is EXPRESSED, not what it is. Generalised from ls-design-system's generated token files, which is the only place this shape has been proven. Holds no colour values and mandates no role -> value mapping — see contract/vocabulary.json. Deliberately permissive about extra keys: an implementation is expected to carry its own metadata, and a contract that forbade that would be a straitjacket rather than a floor.",
+
+  "type": "object",
+  "required": ["domain", "tokens"],
+  "properties": {
+    "domain": { "type": "string", "description": "color, typography, space, layout, motion, …" },
+    "group": { "type": "string" },
+    "count": { "type": "integer", "minimum": 0 },
+    "version": { "type": "string" },
+    "generated": { "type": "string" },
+    "source": { "type": "string" },
+    "groups": { "type": "object" },
+    "files": { "type": "array", "items": { "type": "string" } },
+
+    "tokens": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["$value", "$type", "css", "source"],
+        "properties": {
+          "$value": {
+            "description": "The resolved, ready-to-use value, or the literal CSS declaration (var()/oklch()/color-mix()). A consumer must never have to compute this."
+          },
+          "$type": {
+            "enum": ["color", "gradient", "shadow", "dimension", "number", "duration",
+                     "cubicBezier", "fontFamily", "fontWeight"]
+          },
+          "css": {
+            "type": "string",
+            "pattern": "^--[a-z0-9-]+$",
+            "description": "The custom property this token IS. The contract is that a token and its CSS variable are the same thing under two names."
+          },
+          "source": {
+            "type": "string",
+            "description": "Provenance. Where this value came from — ideally file:line. A token whose origin cannot be stated is a token nobody can safely change."
+          },
+          "group": { "type": "string" },
+          "role": { "type": "string" },
+          "exactSeed": {
+            "type": "boolean",
+            "description": "True for the verbatim brand hex that is never laddered."
+          },
+          "description": { "type": "string" },
+          "note": { "type": "string" },
+          "modes": {
+            "type": "object",
+            "required": ["light", "dark"],
+            "properties": { "light": {}, "dark": {} },
+            "description": "Present ONLY when the token differs between light and dark. Absent means mode-agnostic — which is the common case, and should stay that way: dark mode is a Tier 2 inversion, not a per-token variant."
+          },
+          "derived": {
+            "type": "object",
+            "properties": {
+              "from": { "type": "string", "description": "Token id this derives from." },
+              "fn": { "type": "string" },
+              "space": { "type": "string" },
+              "expr": { "type": "string" }
+            },
+            "description": "Set when the value is computed rather than authored. `from` should name a real token id in the same system."
+          }
+        }
+      }
+    }
+  }
+}

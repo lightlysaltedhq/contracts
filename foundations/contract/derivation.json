@@ -1,0 +1,70 @@
+{
+  "$comment": "The ramp-derivation spec: one seed hex in, an 11-step ladder of real displayable hexes out. Pure maths — the ONLY hexes anywhere near this contract are the test fixtures in vectors.json, which are inputs, not a palette. Extracted from salt/inc/colors.php:150-272, which ls-design-system/scripts/oklch.py already reproduces byte-for-byte; this file is the spec both were measured against.",
+  "version": "3.0.0",
+  "name": "gamut-mapped OKLCH tonal ramp",
+
+  "$contract": "Given the same seed, two conforming implementations MUST produce byte-identical ramps. That is pinned by vectors.json, not by prose — if you implement this spec and disagree with a vector, you are wrong, and neither implementation gets a vote.",
+
+  "input":  { "seed": "an sRGB hex colour, #rgb or #rrggbb" },
+  "output": { "ramp": "11 steps keyed 50,100,200,...,900,950 — each a real, displayable lowercase #rrggbb" },
+
+  "$stepsNote": "The DERIVED ladder is always 11 steps. This is the spec's output shape, not a palette choice, and it is independent of the hand-authored neutral ramp — whose length this contract deliberately does not mandate (see vocabulary.json#neutralRamp). Conflating the two is the mistake that makes people think Base must pick a ramp length.",
+
+  "algorithm": {
+    "1_decompose": {
+      "what": "Convert the seed to OKLCH. Keep its chroma C and hue H; discard its lightness.",
+      "$why": "Every step gets its lightness from the ladder, so the seed contributes hue and saturation only."
+    },
+    "2_ladder": {
+      "what": "Each step has a fixed target lightness L.",
+      "values": {
+        "50": 0.97, "100": 0.94, "200": 0.88, "300": 0.80, "400": 0.70,
+        "500": 0.62, "600": 0.53, "700": 0.45, "800": 0.37, "900": 0.28, "950": 0.20
+      },
+      "source": "salt:inc/colors.php:245-257"
+    },
+    "3_chromaTaper": {
+      "what": "Scale the seed's chroma per step, so the ramp's ends desaturate toward the extremes rather than staying vivid and muddy.",
+      "formula": {
+        "step <= 500": "0.25 + 0.75 * (step - 50) / (500 - 50)",
+        "step >= 600": "0.25 + 0.75 * (950 - step) / (950 - 600)",
+        "otherwise":   "1.0"
+      },
+      "$note": "No step lies strictly between 500 and 600, so the `otherwise` branch is unreachable with the ladder above. It is specified anyway because both implementations have it, and a re-implementation that drops it stays conformant.",
+      "source": "salt:inc/colors.php:259-266"
+    },
+    "4_gamutMap": {
+      "what": "Many (L, C, H) triples are outside sRGB. Reduce CHROMA until the colour fits, preserving lightness and hue.",
+      "method": "binary search on chroma",
+      "iterations": 20,
+      "$why": "Chroma-reduction, not per-channel clamping. Clamping shifts hue and lightness; reduction preserves both and just desaturates — which is what a viewer expects of an out-of-gamut brand colour.",
+      "gamutTest": {
+        "space": "LINEAR sRGB — test BEFORE applying the transfer function",
+        "bounds": "-epsilon <= channel <= 1.0 + epsilon",
+        "epsilon": 1e-6,
+        "$why": "Testing after the sRGB transfer gives different results at the boundary. This is a real interoperability trap: it is exactly where a naive re-implementation drifts from the vectors."
+      },
+      "source": "salt:inc/colors.php:150-187"
+    },
+    "5_quantise": {
+      "what": "Clamp to [0,1], apply the sRGB transfer function, scale by 255, round, format lowercase hex.",
+      "rounding": "halfEven",
+      "of": "exactBinary64",
+      "$rounding": "One tie-break across the contract (owner's ruling, 25/09/2026, design-system decision D39): ties go to the even byte, as they do in type-scale.json and scale-shape.json. Until 3.0.0 this step rounded half away from zero. No hex seed's ramp changes: no seed makes a scaled channel an exact tie (all 16,777,216 were measured, the closest is 3.6e-10 from one), and the two rules differ only on a tie. vectors.json#quantise holds the ties that tell them apart.",
+      "$of": "The operand is the scaled channel as binary64 computes it, in this step's order: clamp the linear channel, apply the transfer, clamp, multiply by 255, and round the exact value of that binary64 product. Not an exact decimal: the transfer is a power function, so there is no decimal value to be exact about, only binary64. Nor is that binary64 unique above the transfer's linear segment: pow() is not correctly rounded, and two maths libraries may differ there in the last place. That is harmless: over every hex seed the closest a scaled channel comes to a tie is 3.55e-10 (one seed, at rung 600), about 25,000 ulps of the value, so no library's last place moves a byte; and the quantise vectors sit in the linear segment, where the value is two correctly rounded multiplications and is unique; and not the exact product of the sRGB value and 255 before that multiplication rounds, which vectors.json#quantise shows can land on the other side of a tie. A language's own rounding is not to be trusted to be this: PHP's round() and JavaScript's Math.round() are half away from zero and half up, and floor(x + 0.5) is wrong even away from ties, at 0.49999999999999994, where the addition rounds up to 1.",
+      "source": "salt:inc/colors.php:180-186"
+    }
+  },
+
+  "colorSpace": {
+    "model": "Oklab / OKLCH — Björn Ottosson's matrices",
+    "$note": "Both implementations carry the same matrix constants. They are standard and are not restated here; see oklab reference or either implementation."
+  },
+
+  "verification": {
+    "vectors": "vectors.json",
+    "$how": "Run your implementation over each vector's seed and compare the full 11-step ramp byte-for-byte. This is the gate. It needs no other implementation present — which is the point: it replaces a mutual test in which each implementation's only evidence was the other's agreement.",
+    "quantise": "vectors.json#quantise",
+    "$quantise": "Run step 5 alone over each quantise vector's `linear` channels and compare the hex. No seed makes a scaled channel an exact tie, so the ramps pass under any tie-break; these channels are ties in binary64, and half away from zero, half up and floor(x + 0.5) fail them. The operand is the binary64 value in step 5's order: clamp, transfer, clamp, multiply by 255. Rounding the exact product before that multiplication rounds, or the decimal product, also fails."
+  }
+}

@@ -1,0 +1,195 @@
+{
+  "$comment": "The type scale's derivation rule, its invariants, the neutral rung numbers and three named scales, as data a consumer can run without emit.py. A consumer reads the fields below and implements them; it never has to read Python or prose to learn an operation, an order, a rounding mode or a format. Its one implementation is scripts/type_tokens.mjs, dependency-free JavaScript exported as `./type-tokens`, which the design system's own build runs and a consumer imports. scripts/type_scale.py is a second implementation kept only to check the frozen vectors: check_type_scale.py requires both to reproduce every expected string in type-vectors.json byte for byte. The text roles that use a scale are contract/vocabulary.json#textRoles.",
+  "version": "3.0.0",
+  "$noValues": "No product's values. The named scales are the contract's own: conventional musical intervals, chosen for the maths and the contrast between them, and a private gate in the design-system repository fails any of them, and any vector, that lands within 0.5px of a product's table at both viewports. A product's own table, leading and tracking stay in the product's repository. There is no default named scale: which one a product uses is the product's choice (decision 13 of the typography proposal).",
+
+  "units": {
+    "$rule": "A number's unit is in its key, never in its value: `viewportMinPx` is a number of CSS pixels and `baseMinRem` a number of rems. A value is a JSON number, so no consumer ever parses a unit out of a string it was handed as input.",
+    "rootPx": 16,
+    "$rootPx": "The browser's default root size, which a rem is computed against. A rem clamp's rem part scales with the reader's root and its vw part does not, so the viewports a fluid step reaches its bounds at are exact only at this root."
+  },
+
+  "inputs": {
+    "$rule": "Every input is required, with no default, and each is a finite JSON number except `steps`. A scale missing one is refused (`inputs`), never completed from a default: a consumer that fills a gap silently derives a scale nobody declared.",
+    "numbers": ["viewportMinPx", "viewportMaxPx", "baseMinRem", "baseMaxRem", "ratioMin", "ratioMax", "ratioBelow", "fluidFrom"],
+    "integers": ["fluidFrom"],
+    "lists": ["steps"],
+    "what": {
+      "viewportMinPx": "The narrow viewport, where every fluid step is at its min.",
+      "viewportMaxPx": "The wide viewport, where every fluid step is at its max.",
+      "baseMinRem": "Step 0 (body text) at the narrow viewport.",
+      "baseMaxRem": "Step 0 at the wide viewport.",
+      "ratioMin": "The ratio between adjacent steps above step 0, at the narrow viewport.",
+      "ratioMax": "The same ratio at the wide viewport.",
+      "ratioBelow": "The one ratio between adjacent steps below step 0, used at both viewports.",
+      "fluidFrom": "The lowest fluid step, as a number. Every step below it is fixed (see derivation.fixed).",
+      "steps": "The step names the scale has, as strings, lowest first."
+    },
+    "$whyOneRatioBelow": "Utopia derives the steps below body with the two ratios above it, one per viewport. When the wide-viewport ratio is the larger, each step down shrinks its max faster than its min until max falls below min and the clamp inverts; every browser then pins the step to its min, so it is silently fixed while still written as fluid. One ratio at both viewports makes that impossible: below body, min and max shrink by the same factor, so a step can never cross over. Derived Utopia's way, `balanced` below would invert steps -5 to -3."
+  },
+
+  "steps": {
+    "$rule": "ASCII only. A step name is a string of ASCII digits with at most one ASCII hyphen-minus in front: no plus sign, no leading zero, no `-0`, and never U+2212 MINUS SIGN, which looks identical and is not a number to any parser (JavaScript's `Number` gives NaN for it, and a table keyed by it misses every lookup, so a consumer falls back to step 0's size without an error). A name that does not match is refused (T2) before anything is derived.",
+    "pattern": "^(0|-?[1-9][0-9]*)$",
+    "number": "The step's number is its name read as a base-10 integer."
+  },
+
+  "derivation": {
+    "$rule": "Each bound of each step is computed in IEEE 754 binary64 (a JavaScript Number, a Python float) exactly as the fields below say, then rounded once. Every operation named here is one correctly rounded binary64 operation, so two conforming consumers get the same bits in any language.",
+    "arithmetic": "binary64",
+    "base": {"min": "baseMinRem", "max": "baseMaxRem"},
+    "above": {"op": "multiply", "by": {"min": "ratioMin", "max": "ratioMax"}},
+    "below": {"op": "divide", "by": {"min": "ratioBelow", "max": "ratioBelow"}},
+    "repeat": "stepDistance",
+    "$repeat": "A step's bound starts from `base` and applies the op once for each step between it and step 0, each application to the unrounded result of the last. Step 3's max is ((baseMaxRem x ratioMax) x ratioMax) x ratioMax; step -2's min is (baseMinRem / ratioBelow) / ratioBelow. Never a power function: `pow` returns the correctly rounded power, repeated multiplication rounds at every step, and the two land on different sides of a four-decimal boundary often enough to matter; type-vectors.json carries a case, and the gate re-derives it with a correctly rounded power.",
+    "fixed": {"below": "fluidFrom", "size": "min"},
+    "$fixed": "A step whose number is below `fluidFrom` is fixed: its one size is the step's derived min, rounded, and it has no max or preferred value. With `fluidFrom` equal to the lowest step, every step is fluid.",
+    "round": {"decimalPlaces": 4, "rounding": "halfEven", "of": "exactBinary64"},
+    "$round": "Round the exact value of the binary64 result, never a decimal approximation of it, to four decimal places, a tie going to the even digit. The same tie-break contract/scale-shape.json names for `space`, applied to a different operand: that rule rounds an exact decimal product, this one the exact binary64 value, and `of` says which. A helper that rounds one operand used for the other gets both wrong: rounding the exact decimal product here gives 1.2938 where the binary rule gives 1.2937 (type-vectors.json, binary-near-tie). Neither built-in formatter meets it: JavaScript's `toFixed` rounds an exact tie upwards (1.40625 to 1.4063, where half to even gives 1.4062), and `Math.round(x * 1e4) / 1e4` rounds the product of a second binary rounding. A value whose decimal is a tie can be just above or just below it in binary: the rule rounds the binary value, so 1.125 x 1.15 (1.29375 in decimal, 1.29374999... in binary64) gives 1.2937. Compute on the exact binary value: `Decimal(x).quantize(Decimal('0.0001'), ROUND_HALF_EVEN)` in Python; in JavaScript, the double's bits as a BigInt ratio.",
+    "preferred": {
+      "from": "roundedBounds",
+      "constants": {"rootPx": 16, "vwPerUnit": 100},
+      "ops": [
+        ["minPx", "multiply", "minRem", "rootPx"],
+        ["maxPx", "multiply", "maxRem", "rootPx"],
+        ["risePx", "subtract", "maxPx", "minPx"],
+        ["spanPx", "subtract", "viewportMaxPx", "viewportMinPx"],
+        ["slope", "divide", "risePx", "spanPx"],
+        ["dropPx", "multiply", "slope", "viewportMinPx"],
+        ["interceptPx", "subtract", "minPx", "dropPx"],
+        ["preferredRem", "divide", "interceptPx", "rootPx"],
+        ["preferredVw", "multiply", "slope", "vwPerUnit"]
+      ],
+      "round": ["preferredRem", "preferredVw"],
+      "$how": "A fluid step's preferred value, `<preferredRem>rem + <preferredVw>vw`, is derived from its bounds AFTER they are rounded: `minRem` and `maxRem` here are the binary64 values nearest the rounded four-decimal bounds, so the clamp reaches exactly the bounds it declares. Each op is [result, operation, left, right], executed in order in binary64; a name is an input, a constant or an earlier result. Only the two outputs are rounded, by `round` above."
+    },
+    "notation": "plain",
+    "$notation": "A rounded value is written as the shortest decimal that holds it: digits, at most one point, a minus sign when negative, no trailing zeros after the point, no point when nothing follows it, never exponent notation (10, not 1E+1 or 1e1; 0.0001, not 1e-4). Python's `Decimal.normalize()` writes 10 as 1E+1, which is why type-vectors.json has a 10."
+  },
+
+  "output": {
+    "fluid": ["minRem", "preferredRem", "preferredVw", "maxRem"],
+    "fixed": ["sizeRem"],
+    "css": {
+      "fluid": "clamp({minRem}rem, {preferredRem}rem + {preferredVw}vw, {maxRem}rem)",
+      "fixed": "{sizeRem}rem"
+    },
+    "$css": "What a consumer writes as each `--step-<name>`. Each `{field}` is that field's written value. The same shape the design system's own table is written in."
+  },
+
+  "table": {
+    "$rule": "A product's own table (a custom scale, see `declaration`) is written in contract/scale-shape.json's type families and read as follows. It passes T1 to T7 exactly as a derived scale does.",
+    "families": ["typeScaleFixed", "typeScaleFluid", "typeScaleViewports"],
+    "rem": "^[0-9]+(\\.[0-9]+)?rem$",
+    "preferred": "^(-?[0-9]+(\\.[0-9]+)?)rem \\+ (-?[0-9]+(\\.[0-9]+)?)vw$",
+    "viewport": "^[0-9]+(\\.[0-9]+)?px$",
+    "whitespace": " \t\n\r\f",
+    "$whitespace": "Only CSS's own whitespace (CSS Syntax 3, section 4.2) is stripped from either end of a value before it is matched. A no-break space, or any other non-ASCII character, is refused by T2."
+  },
+
+  "invariants": {
+    "$rule": "Every scale, derived or a product's own table, must pass all seven. They are evaluated EXACTLY, on the written decimal values (a rem is its decimal times rootPx, a viewport its decimal), never on binary floats: a gap of exactly 1px is a pass, and a float that makes it 0.9999999 is an error in the gate, not in the scale. These are the rules scripts/check_scales.py enforces on the design system's own table, made contract rules.",
+    "T1": {"name": "ladder", "rule": "The steps form one contiguous run of integers that includes 0. Each appears once, fixed or fluid, never both."},
+    "T2": {"name": "ascii", "rule": "Every step name matches `steps.pattern`, and every value is ASCII. Checked first: a name that is not a number cannot be placed on the ladder at all."},
+    "T3": {"name": "units", "rule": "Every bound is a positive rem length, every preferred value is `<a>rem + <b>vw`, and, when the table has a fluid step, the viewports are two positive pixel widths, the narrow one first. An all-fixed table owes no viewports, and contract/scale-shape.json refuses them on one.", "boundsPositive": true},
+    "T4": {"name": "preferred", "rule": "A fluid step's preferred value, evaluated at each viewport (a x rootPx + b x viewport / 100), is within `tolerancePx` of the bound it declares there.", "tolerancePx": 0.01},
+    "T5": {"name": "gap", "rule": "At each viewport, every step is at least `minGapPx` larger than the step below it, or two levels render the same size, or upside down.", "minGapPx": 1},
+    "T6": {"name": "move", "rule": "A fluid step's max is at least `minMovePx` larger than its min. One that moves less is a fixed step written as fluid, and an inverted clamp renders its min everywhere.", "minMovePx": 1},
+    "T7": {"name": "zoom", "rule": "A fluid step's max divided by its min is at most `maxOverMin`, for WCAG 1.4.4 (Resize Text): at 500% zoom, Chrome's and Firefox's maximum, a clamp falls back towards 5 x its min, which must still reach 200% of its max.", "maxOverMin": 2.5},
+    "$order": "T2 before anything, and a scale that fails it is not read further. `inputs` is checked before T2 for a derived scale. After them, every failure is reported, not the first. A step T3 cannot read is left out of T4 to T7, and T5 runs only over a complete, readable ladder: a gap to a step nobody could read is not a claim anyone can check."
+  },
+
+  "roleFloorRem": 0.75,
+  "$roleFloorRem": "R4 in contract/vocabulary.json#textRoles: every text role is at least this size at the narrow viewport. A paragraph leading of at least 1.5 is deliberately NOT an invariant: that is WCAG 1.4.12 at AAA, and the bar here is AA.",
+
+  "rungDefaults": {
+    "$rule": "The neutral numbers behind the rung names a text role uses by default, for a product that declares no rung family of its own. Each key is a family of contract/scale-shape.json (`rungFamilies` names which) with its unit in the key: `leading` is unitless, `trackingEm` is in em, `weight` is a CSS font-weight. They cover exactly the rungs contract/vocabulary.json#textRoles names in a default; a family's other rungs (leading `mono`, tracking `wide` and `mono`) have no neutral number, so a product that wants one declares the whole family as its own.",
+    "leading": {"display": 1.1, "heading": 1.2, "subhead": 1.3, "body": 1.5, "ui": 1.4, "tight": 1.25},
+    "trackingEm": {"display": -0.02, "heading": -0.01, "subhead": 0, "body": 0, "ui": 0, "caps": 0.1},
+    "weight": {"regular": 400, "medium": 500, "semibold": 600, "bold": 700},
+    "$where": "Body leading 1.5 is WCAG 1.4.12's line height. Caps tracking 0.1em is Tailwind v4's `tracking-widest`. The weights are CSS's own numbers for those names (CSS Fonts 4, font-weight), which is why `weight` is structural: a product cannot declare it as its own. The rest are picks. Some leading and tracking numbers coincide with a product's, rung for rung or on another rung; no leading or tracking family as a whole does. The weights are CSS's, so they equal every product's."
+  },
+  "rungFamilies": {"leading": "leading", "trackingEm": "tracking", "weight": "weight"},
+  "$rungFamilies": "Which contract/scale-shape.json family each `rungDefaults` key supplies. check_type_scale.py requires every family, and every rung named here or in a text role's default, to be one the scale shape declares.",
+
+  "namedScales": {
+    "$rule": "Three complete scales a product may name instead of writing its own table. Each repeats every input, so each can be derived alone. They share the viewports, the body and the ratio below body, so switching between them changes steps 1 to 5 and nothing else: never body text, small print, labels or captions. Every step is fluid.",
+    "order": ["quiet", "balanced", "dramatic"],
+    "quiet": {
+      "what": "Gentle contrast, for text-led pages. A major second at the narrow viewport, a minor third at the wide one.",
+      "viewportMinPx": 360, "viewportMaxPx": 1240,
+      "baseMinRem": 1, "baseMaxRem": 1.125,
+      "ratioMin": 1.125, "ratioMax": 1.2, "ratioBelow": 1.125,
+      "fluidFrom": -5,
+      "steps": ["-5", "-4", "-3", "-2", "-1", "0", "1", "2", "3", "4", "5"]
+    },
+    "balanced": {
+      "what": "The general case. A minor third at the narrow viewport, a major third at the wide one.",
+      "viewportMinPx": 360, "viewportMaxPx": 1240,
+      "baseMinRem": 1, "baseMaxRem": 1.125,
+      "ratioMin": 1.2, "ratioMax": 1.25, "ratioBelow": 1.125,
+      "fluidFrom": -5,
+      "steps": ["-5", "-4", "-3", "-2", "-1", "0", "1", "2", "3", "4", "5"]
+    },
+    "dramatic": {
+      "what": "For hero-led pages and display or condensed heading faces. A major third at the narrow viewport, a perfect fourth at the wide one.",
+      "viewportMinPx": 360, "viewportMaxPx": 1240,
+      "baseMinRem": 1, "baseMaxRem": 1.125,
+      "ratioMin": 1.25, "ratioMax": 1.333, "ratioBelow": 1.125,
+      "fluidFrom": -5,
+      "steps": ["-5", "-4", "-3", "-2", "-1", "0", "1", "2", "3", "4", "5"]
+    },
+    "invariants": {
+      "N1": {"name": "shared", "rule": "Every named scale carries every input, and all of them carry the same values for `shares`.", "shares": ["viewportMinPx", "viewportMaxPx", "baseMinRem", "baseMaxRem", "ratioBelow", "fluidFrom", "steps"]},
+      "N2": {"name": "ahead", "rule": "In `order`, each scale is strictly larger than the one before it at every step in `aheadAt`, at both viewports, so switching is visible on a phone too.", "aheadAt": ["1", "2", "3", "4", "5"]},
+      "N3": {"name": "valid", "rule": "Each named scale passes T1 to T7, its steps are exactly contract/scale-shape.json's type steps, and every step is fluid (`fluidFrom` is the lowest step)."}
+    }
+  },
+
+  "declaration": {
+    "$rule": "How a product declares its typography, in its own repository and never in this one. A product that emits any text-role property declares, with its scale (contract/scale-shape.json's families) beside it: `scale`, and optionally `rungs`, `optionalRoles` and `overrides`. Keys starting with `$` are prose. Nothing else is read, and an unknown key is refused (`shape`). Editors never create a declaration or an override; they live in site code.",
+    "keys": ["scale", "rungs", "optionalRoles", "overrides"],
+    "scale": {
+      "$rule": "Exactly one of `{\"named\": <a key of namedScales>}` or `{\"custom\": true, \"reason\": <non-empty>}`. Named: the consumer derives the table, and the product's scale must carry none of the type families (`table`): two sources for one table is how they drift. Custom: the table is the product's own, in its scale's type families, carrying exactly the scale shape's type steps (`table`), and it must pass T1 to T7.",
+      "forms": ["named", "custom"]
+    },
+    "rungs": {
+      "$rule": "A family a product declares as its own: `{\"<family>\": {\"custom\": true, \"reason\": <non-empty>}}`. Its values are the family in the product's scale, and they must be WHOLE: every rung contract/scale-shape.json declares for the family (`partialFamily`). A family not declared custom uses `rungDefaults`, and the product's scale may carry it only as exactly those rungs at exactly those numbers, no rung more (`undeclaredCustom`): a rung the contract has no number for, leading `mono` or a `weight.heavy`, is a value somebody chose. `weight` cannot be declared custom: its numbers are CSS's. An overlay (`weightDark`, the per-weight dark-mode values) has no neutral numbers, so a product carries one only by declaring it custom, with a reason; it is not whole, since it sets only the weights it changes.",
+      "families": ["leading", "tracking", "weightDark"],
+      "overlays": ["weightDark"],
+      "fixed": ["weight"]
+    },
+    "optionalRoles": {
+      "$rule": "Which of contract/vocabulary.json#textRoles.optional the product emits, as a list of ids. An id that is not an optional role is refused (`unknownRole`), and so is one listed twice (`shape`). Every required role is always emitted."
+    },
+    "overrides": {
+      "$rule": "Explicit changes to a role's defaults, each an object with exactly these fields. `value` is a name, never a number: a step name on the product's ladder, a rung the product's rung set has a value for, or a typography role (`font`). `replaces` is the contract's CURRENT default for that role and property, so when a major release changes a default every override of it stops matching and has to be re-affirmed (`stale`). Each role and property is overridden at most once (`duplicate`). The text roles' invariants R1 to R6 must hold afterwards.",
+      "fields": ["role", "property", "value", "replaces", "reason"],
+      "check": ["structural", "unknownRole", "numeric", "unknownRung", "stale", "unchanged", "reason"],
+      "$check": "Each override is checked in this order and reports the first rule it breaks, so one mistake is one code. `duplicate` is reported for the second and later override of the same role and property."
+    },
+    "refusals": {
+      "$rule": "The closed set of reasons a declaration is refused, in the order they are checked. A consumer reports every one that applies at the first stage that has any, sorted; `resolve` in scripts/type_tokens.mjs is the reference.",
+      "stages": [
+        ["shape", "reason", "table", "partialFamily", "undeclaredCustom", "unknownRole"],
+        ["T1", "T2", "T3", "T4", "T5", "T6", "T7"],
+        ["structural", "unknownRole", "numeric", "unknownRung", "stale", "unchanged", "reason", "duplicate"],
+        ["R1", "R2", "R3", "R4", "R5", "R6"]
+      ],
+      "what": {
+        "shape": "The declaration is not the shape above: an unknown key, a scale that is not exactly one form, a named scale this file does not have, a rung family that cannot be declared, or an override that is not an object of exactly the five fields.",
+        "reason": "A custom declaration or an override without a non-empty `reason`.",
+        "table": "A named scale beside a product table, or a custom scale whose table is missing or does not carry exactly the scale shape's type steps.",
+        "partialFamily": "A family declared custom whose values do not cover every rung the scale shape declares for it.",
+        "undeclaredCustom": "The product's scale carries a rung family it did not declare custom, with numbers other than `rungDefaults`.",
+        "unknownRole": "A role (in `optionalRoles` or an override) that is not a text role the product emits.",
+        "structural": "An override of something the contract fixes: a property that is not in textRoles.overridable, or one listed in textRoles.structural.",
+        "numeric": "An override whose `value` is not a string. Overrides name rungs; numbers belong to rung families.",
+        "unknownRung": "An override whose `value` is not in its property's domain for this product.",
+        "stale": "An override whose `replaces` is not the contract's current default.",
+        "unchanged": "An override whose `value` is the default it `replaces`: it changes nothing, and would survive a major that moved the default without anyone re-affirming it.",
+        "duplicate": "A second override of the same role and property."
+      }
+    }
+  }
+}

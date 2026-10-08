@@ -1,0 +1,159 @@
+{
+  "$comment": "The SHAPE of the non-colour scales: which structural families exist, what their rungs are called, the CSS custom property each rung emits, and the rules that bind them. It carries no values. An implementation supplies what `--radius-sm` IS, exactly as it supplies what `--color-surface` is. Before this file existed the shape lived only as a Python constant (SCALE_SHAPE in scripts/emit.py), so an implementation in any other language could learn the rung names only by reading Python, and in practice hand-rolled its own. emit.py now reads this file and holds no copy of it. scripts/scale_tokens.mjs, exported as `./scale-tokens`, is the one implementation: it derives every scale token from this file and a scale's values alone, and emit.py builds its own scale tokens by calling it.",
+  "version": "3.0.0",
+  "$noValues": "Names, never values. v2.0.0 shipped these families as DEFAULT_SCALES carrying real numbers, which handed one product's page frame and type rungs to every implementation as if they were the contract's, and made the extraction's byte-identity proof circular: it passed with no scales supplied at all. So a scale is required, it has no default, and nothing here says how big, how long or how heavy anything is, with one exception: the two structural constants in `spaceBase.alsoEmits` (a zero and a hairline), which are the same in every implementation. Rung names are shared vocabulary, which is what lets two implementations swap a component, so a new rung is a change to this file with a reason, never a value passed in quietly.",
+  "$order": "Family order is emitted order. The emitter adds each family's tokens to its token table in the sequence the families appear here, and every emitted file is written from that table (grouped by domain, each domain where its first token falls). Reordering families here is a claim that a shipping stylesheet changed. Family keys are non-numeric identifiers so that JavaScript and Python parsers both keep this order.",
+  "$keys": {
+    "type": "The token type every rung of the family emits (the `$type` of each emitted token).",
+    "css": "The custom property a rung emits. `{k}` is replaced by the rung name; a scalar family has no `{k}`.",
+    "group": "The group each emitted token is filed under.",
+    "steps": "The rung names, in order. Always strings, including the ones that look like numbers.",
+    "scalar": "The family is one value, not a map of rungs.",
+    "stepsFrom": "The family's rungs are another family's rungs.",
+    "noEmit": "The family emits no custom property of its own; it changes how another family's tokens are emitted.",
+    "modifies": "noEmit families only: the families whose emitted tokens this family changes, and no others.",
+    "requires": "Families that must also be supplied, non-empty, whenever this one is. The emitter refuses a scale that supplies this family without them; withholding a required family removes nothing silently.",
+    "exclusiveWith": "Families that share this family's rung names and custom properties. A rung may be supplied to one of them, never to both; the emitter refuses a rung supplied twice. The only case where two families may claim the same property.",
+    "derive": "The family's values are computed, not supplied: a scale lists the rungs it uses. Value = the number in `from`'s value times the rung's number, computed exactly in decimal (never through binary floating point), rounded to `significantDigits` significant digits by `rounding`, written in `notation` with trailing zeros removed, then `from`'s unit. A rung's number is its name with `decimalSeparator` read as a decimal point: with \"-\", rung \"0-5\" is 0.5 and rung \"12\" is 12. `op` is \"multiply\". `of` is \"exactDecimal\": the rounding applies to the exact decimal product of the two numbers as written, never to a binary64 approximation of it (a rule that rounds the binary64 value instead says \"exactBinary64\", and gives different bytes: 0.333333 times 1.5 is 0.4999995 exactly, 0.5 here, and 0.499999 from the binary value). `rounding` is \"halfEven\": a tie goes to the even digit, so 0.1328125 to six digits is 0.132812. `notation` is \"plain\": 0.00003125, never 3.125e-5, and a zero is 0, never -0 or 0.0. `units` lists the units the source may be in; a length is digits, an optional point with digits after it, and one of those units, with no space (0.25rem, never 1.rem, .5rem, 0.25 rem or 0.25foo).",
+    "optional": "A scale may omit the family.",
+    "themeExtensible": "A theme may supply the family on top of a shared structural scale. Read by a consuming repository's own gate, not by the emitter.",
+    "requiresTokens": "Colour tokens that must exist before the family may be emitted, because its values reference them.",
+    "alsoEmits": "Custom properties the family emits beyond its own, each with the constant value the emitter writes for it. No scale supplies them; they are emitted whenever the family is.",
+    "slots": "The value a scale supplies (per rung, or once for a scalar family) is a list; these name its positions, in order.",
+    "valueTemplate": "The emitted value: each `{slot}` replaced by that position of the supplied list.",
+    "recordAs": "Each emitted token also records the supplied list's named positions under this key, together with the positions of any family that `sets` it as \"record\".",
+    "sets": "noEmit families only: what this family's value does to the family it modifies. \"dark\": a rung's value here is the same rung's dark-mode value there (rungs this family does not supply have none). \"record\": this family's named positions are added to the `recordAs` record of every token there.",
+    "pxFrom": "The unit a `pxAt` family's values must be in, the only one the pixel width is computed from.",
+    "pxAt": "Each rung's token also records `px`: the number in its value times this root font size, truncated to a whole number, followed by px. The value must be in the family's `pxFrom` unit; any other is refused.",
+    "what": "One line on what the family is for."
+  },
+
+  "families": {
+    "shadow": {
+      "type": "shadow", "css": "--shadow-{k}", "group": "primitives",
+      "steps": ["sm", "md", "lg", "xl"],
+      "requiresTokens": ["color.shadow.sm", "color.shadow.md", "color.shadow.lg"],
+      "what": "Box-shadow elevation. Reference the shadow colour roles rather than restating a colour, so one declaration adapts to mode.",
+      "$why": "Its values reference the shadow COLOUR roles, so it declares that dependency: emitting a box-shadow whose colour token does not exist is a dangling reference, and a dangling reference in a generated stylesheet is a silently unstyled element."
+    },
+    "radius": {
+      "type": "dimension", "css": "--radius-{k}", "group": "primitives",
+      "steps": ["sm", "md", "lg", "full"]
+    },
+    "borderWidth": {
+      "type": "dimension", "css": "--border-{k}", "group": "primitives",
+      "steps": ["1", "2", "3"]
+    },
+    "focusRing": {
+      "type": "dimension", "css": "--focus-ring-{k}", "group": "primitives",
+      "steps": ["width", "offset"]
+    },
+    "opacity": {
+      "type": "number", "css": "--opacity-{k}", "group": "primitives",
+      "steps": ["invisible", "subtle", "light", "medium", "strong", "heavy", "opaque"]
+    },
+
+    "duration": {
+      "type": "duration", "css": "--duration-{k}", "group": "duration",
+      "steps": ["instant", "fast", "moderate", "slow", "deliberate", "ambient"]
+    },
+    "easing": {
+      "type": "cubicBezier", "css": "--ease-{k}", "group": "easing",
+      "steps": ["standard", "in", "out", "in-out", "spring"]
+    },
+    "stagger": {
+      "type": "duration", "css": "--stagger-delay", "group": "stagger",
+      "scalar": true
+    },
+    "durationExtended": {
+      "type": "duration", "css": "--duration-{k}", "group": "duration",
+      "steps": ["drift-near", "drift-mid", "drift-far", "drift-deep", "traverse"],
+      "optional": true, "themeExtensible": true,
+      "what": "Ambient-loop rungs above `ambient`, for motion measured in tens of seconds rather than hundreds of milliseconds. Optional.",
+      "$why": "OPTIONAL, and declared separately rather than folded into `duration` for two reasons. It is emitted after `stagger`, at the END of the motion domain, which is where the wrapper that first needed these rungs appended them: order is structure, and a shipping stylesheet does not get reshuffled to make a source file read better. And it keeps `duration`'s six rungs as the set every implementation has, so a theme with no ambient motion declares nothing and emits nothing rather than carrying five empty rungs it will never use. They exist because a page was multiplying `--duration-ambient` by five hand-picked factors. Wearing a token as a unit does not make those numbers derived (retune `ambient` and all five rescale by arbitrary ratios), so they were five undeclared values in a system whose hard rule is that it has none. Named for the LAYER each drives rather than its length, so retuning one does not make its name a lie.",
+      "$flags": "The only family a THEME may supply on top of the shared structural scale, and the only one a scale may omit. Both flags are read by the consuming repository's own gate, not by the emitter: the contract states which families are optional; it does not police who declares them."
+    },
+
+    "typeScaleFixed": {
+      "type": "dimension", "css": "--step-{k}", "group": "scale",
+      "steps": ["-5", "-4", "-3", "-2", "-1", "0", "1", "2", "3", "4", "5"],
+      "exclusiveWith": ["typeScaleFluid"],
+      "what": "Rungs declared at a fixed size. A rung may be fixed OR fluid, never both.",
+      "$why": "The type scale. Which rungs are FIXED and which are FLUID is the implementation's call, and it is a call worth making deliberately rather than by default. A fluid scale whose ratio differs at the two viewport ends is fine going UP and broken going DOWN: each step down divides min by the small-end ratio and max by the large-end one, so if the large-end ratio is the bigger, max shrinks faster until it drops BELOW min and the clamp inverts. Every browser resolves an inverted clamp by pinning to the min, so the rung silently becomes fixed while still claiming to be fluid. Declaring such a rung fixed says what it already does."
+    },
+    "typeScaleFluid": {
+      "type": "dimension", "css": "--step-{k}", "group": "scale",
+      "steps": ["-5", "-4", "-3", "-2", "-1", "0", "1", "2", "3", "4", "5"],
+      "exclusiveWith": ["typeScaleFixed"],
+      "requires": ["typeScaleViewports"],
+      "slots": ["min", "preferred", "max"],
+      "valueTemplate": "clamp({min}, {preferred}, {max})",
+      "recordAs": "fluid"
+    },
+    "typeScaleViewports": {
+      "scalar": true, "noEmit": true,
+      "requires": ["typeScaleFluid"], "modifies": ["typeScaleFluid"], "sets": "record",
+      "slots": ["minViewport", "maxViewport"]
+    },
+    "weight": {
+      "type": "fontWeight", "css": "--weight-{k}", "group": "weight",
+      "steps": ["regular", "medium", "semibold", "bold"]
+    },
+    "weightDark": {
+      "noEmit": true, "stepsFrom": "weight",
+      "requires": ["weight"], "modifies": ["weight"], "sets": "dark",
+      "what": "Per-weight dark-mode overrides. Heavier weights often want one notch less on a dark ground, where the same stem reads fatter."
+    },
+    "leading": {
+      "type": "number", "css": "--leading-{k}", "group": "leading",
+      "steps": ["display", "heading", "subhead", "body", "ui", "tight", "mono"]
+    },
+    "tracking": {
+      "type": "dimension", "css": "--tracking-{k}", "group": "tracking",
+      "steps": ["display", "heading", "subhead", "body", "ui", "wide", "caps", "mono"]
+    },
+    "measure": {
+      "type": "dimension", "css": "--measure-{k}", "group": "measure",
+      "steps": ["prose", "narrow", "wide"]
+    },
+
+    "spaceBase": {
+      "type": "dimension", "css": "--spacing", "group": "scale",
+      "scalar": true,
+      "alsoEmits": {"--space-0": "0", "--space-px": "1px"},
+      "$alsoEmits": "Supplying the base unit also emits a zero rung and a hairline rung. They are Tailwind v4's, the same in every implementation, so no scale supplies them; they are listed with their values because every package with a spacing scale ships them and a consumer deriving its own tokens needs both the names and what they are."
+    },
+    "space": {
+      "type": "dimension", "css": "--space-{k}", "group": "scale",
+      "requires": ["spaceBase"],
+      "derive": {"from": "spaceBase", "op": "multiply", "decimalSeparator": "-", "significantDigits": 6, "of": "exactDecimal", "rounding": "halfEven", "notation": "plain", "units": ["rem"]},
+      "steps": ["0-5", "1", "1-5", "2", "2-5", "3", "3-5", "4", "5", "6", "7", "8", "9", "10", "11", "12", "14", "16", "20", "24", "28", "32", "36", "40", "44", "48", "52", "56", "60", "64", "72", "80", "96"],
+      "what": "Rung names only; every value is derived from spaceBase (see `derive`).",
+      "$why": "A list of rung NAMES, not a map: every value is derived from spaceBase, so the scale cannot drift from its own base unit.",
+      "$rounding": "Ties go to the even digit because that is what every build before this file already did: the emitter's old six-digit format rounded an exactly representable tie to even, so naming half-to-even changes no emitted byte, where half away from zero would have silently re-rounded any tie a scale already produced. It is also the rounding that carries no upward bias. Neither built-in formatter meets the rule: Python's six-digit `g` writes 0.00003125 as 3.125e-05, and JavaScript's toPrecision(6) rounds 0.1328125 up to 0.132813 and writes 1234567.5 as 1.23457e+6. Compute in decimal."
+    },
+
+    "breakpoint": {
+      "type": "dimension", "css": "--breakpoint-{k}", "group": "breakpoint", "pxAt": 16, "pxFrom": "rem",
+      "steps": ["sm", "md", "lg", "xl", "2xl"]
+    },
+    "container": {
+      "type": "dimension", "css": "--container-{k}", "group": "container",
+      "steps": ["3xs", "2xs", "xs", "sm", "md", "lg", "xl", "2xl", "3xl", "4xl", "5xl", "6xl", "7xl"]
+    },
+    "containerPage": {
+      "type": "dimension", "css": "--container-page", "group": "container",
+      "scalar": true,
+      "what": "The page frame."
+    },
+    "containerPadding": {
+      "type": "dimension", "css": "--container-padding-{k}", "group": "container",
+      "steps": ["base", "sm", "lg"]
+    },
+    "contentSize": {
+      "type": "dimension", "css": "--content-size", "group": "content",
+      "scalar": true,
+      "what": "Long-form content measure."
+    }
+  }
+}

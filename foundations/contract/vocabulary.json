@@ -1,0 +1,405 @@
+{
+  "$comment": "The role vocabulary and tier model every conforming design system must implement. Lifted from two working implementations (salt/assets/src/css/app.css:4-15 documents the tier model; salt/inc/colors.php and ls-design-system/scripts/generate.py implement it), NOT designed in the abstract. Contains ZERO colour values by construction — see $noValues.",
+  "version": "3.0.0",
+  "$v2": "v2 adds colorRoles.extended (the Tier-2 roles a real application consumes, enumerated from a shipping implementation's emitted CSS rather than invented), the shadcn adapter mapping, and an OPTIONAL typography `display` role. Nothing v1 required moved or changed, so every v1-conformant implementation was still conformant at v2 — `extended` is opt-in and `salt` emits none of it. Since 2.1.0 a v1-conformant implementation also owes one conditional rule, `[ink, brand.tint]`, because both of its roles are required (see `contrast.conditionalRequirements.$rule`).",
+  "$noValues": "This file names roles. It never says what colour a role is. Two conforming systems legitimately answer that differently: one's dark surface is neutral-950, the other's is neutral-800. A Base that picked one would break the other. That is the whole reason this repo exists — v3 shared a palette between two systems, and it broke one of them.",
+
+  "tiers": {
+    "1": {
+      "name": "primitives",
+      "what": "Raw ramps — the neutral ramp and the derived role ladders.",
+      "rule": "Components MUST NOT consume Tier 1 directly."
+    },
+    "2": {
+      "name": "semantic roles",
+      "what": "The named roles below. Each resolves to a Tier 1 position, or is derived.",
+      "rule": "Components consume Tier 2 ONLY. This is the load-bearing rule of the whole model: it is what lets a palette change without touching a component."
+    },
+    "3": {
+      "name": "components",
+      "what": "Utility classes / component styles.",
+      "rule": "Reference Tier 2 role tokens only."
+    }
+  },
+
+  "colorRoles": {
+    "$rule": "Every role listed as required MUST exist and MUST resolve. Naming is `--color-<role>`; a dot in a role id is a hyphen in CSS (surface.alt -> --color-surface-alt).",
+    "required": [
+      { "id": "surface",         "what": "The page background." },
+      { "id": "surface.alt",     "what": "A companion surface, distinguishable from `surface`. Direction is the implementation's choice." },
+      { "id": "surface.inverse", "what": "A surface that inverts against `surface`." },
+      { "id": "ink",             "what": "Body text on `surface`." },
+      { "id": "ink.muted",       "what": "De-emphasised text on `surface`." },
+      { "id": "ink.inverse",     "what": "Text on `surface.inverse`." },
+      { "id": "brand",           "what": "The brand fill." },
+      { "id": "brand.strong",    "what": "A stronger brand state (hover/emphasis)." },
+      { "id": "brand.tint",      "what": "A brand-tinted surface wash." },
+      { "id": "on-brand",        "what": "Text/icons on `brand`." },
+      { "id": "accent",          "what": "The accent fill." },
+      { "id": "on-accent",       "what": "Text/icons on `accent`." },
+      { "id": "border",          "what": "The default border." },
+      { "id": "focus",           "what": "The focus ring." }
+    ],
+    "status": {
+      "$rule": "All four MUST exist. Values are the implementation's — fixed hexes and computed OKLCH both conform.",
+      "required": ["success", "warning", "error", "info"]
+    },
+
+    "extended": {
+      "$rule": "OPTIONAL, every one of them. An implementation that emits none of these is fully conformant — `salt` emits none. What this block fixes is the NAME and the JOB of a role, so that two implementations that both need 'the recessed surface' spell it the same way. It fixes no value, no ramp position, and no mode behaviour.",
+      "$why": "The required set above is the smallest vocabulary a design system can have. It is not the vocabulary an application has. A real product needs a disabled surface, a tertiary text tone, a hairline that is not the default border, a link that has been visited, a chart series. Before v2 those roles existed — enumerated here from ls-design-system/build/tokens.css, which emits every one of them — but they existed inside ONE brand's generator, so the second and third implementations had to either copy that generator or re-invent the names. Re-invented names are how two systems stop being able to share a component.",
+      "$naming": "Same rule as `required`: the CSS custom property is `--color-<role>` with each dot rendered as a hyphen. surface.interactive-strong -> --color-surface-interactive-strong.",
+      "$modes": "Whether an extended role differs between light and dark is the implementation's business, exactly as it is for the required roles. Several of these are most cheaply expressed as an alpha of `ink` (text.*, border.subtle/strong/disabled), which makes them invert for free when `ink` inverts — that is a technique, not a requirement.",
+
+      "$onDark": {
+        "family": ["surface.deep", "surface.deep-raised", "surface.on-dark-wash", "surface.on-dark-wash-hover", "ink.on-dark", "ink.on-dark.muted", "border.on-dark", "highlight.on-dark"],
+        "$what": "The NON-FLIPPING family. Every other role in this vocabulary answers 'what does this mean in the current theme'; these eight answer 'what does this mean on a ground that is dark in both'. A full-bleed dark band, a photographic hero, a media overlay: the ground does not change when the theme does, so neither may anything drawn on it.",
+        "$why": "The two anchors of this family (`ink.on-dark`, `surface.deep`) came first and were enough for a headline on a band. The QUIETER readings — a muted paragraph, a hairline, the wash behind a secondary button — had no role, so the first application to need them derived them itself, from `ink.on-dark`, `surface.deep` and the opacity scale. That is a good app-side derivation: no component knew a colour, everything was roles plus a scale. It was still wrong, for one reason and it is the reason this whole vocabulary exists: A ROLE GETS MEASURED BY THE CONFORMANCE GATE; AN APP-SIDE MIX DOES NOT. Change the preset and nothing re-checks the derivation. A palette move that breaks a role fails loudly; the same move breaking three mixes in an application's stylesheet fails silently, on the surface with the most traffic.",
+        "$trap": "Reaching for `ink.muted` or `border.subtle` here is the commonest version of this bug and it survives review because it is asymmetric: those roles are correct in dark mode and wrong in light, so a reviewer testing dark mode sees nothing. Roughly 2.6:1 for muted text on a deep band in light mode is the observed shape of it.",
+        "$resolvable": "A role with a measurement obligation must be emitted as a value the gate can RESOLVE — a real colour, or a var() chain ending in one. An unresolved `color-mix()` cannot be measured, so a gate meeting one can only report 'unverifiable' and fail; treating it as a pass would recreate the exact hole these roles were added to close. If the natural expression is a mix, resolve it at build time, as the status dark rung already does."
+      },
+
+      "$inverse": {
+        "family": ["ink.muted.inverse", "border.inverse", "border.strong.inverse"],
+        "$what": "The quieter readings on `surface.inverse`, the band that FLIPS: dark in light mode, light in dark mode. `surface.inverse` and `ink.inverse` are required. The muted text, the divider and the control outline drawn on the same band had no role, so an implementation reached for `ink.muted`, `border` and `border.strong`, which are chosen against `surface` and sit on the wrong side of the lightness range. Not the `$onDark` family: that ground stays dark in both modes, and this one does not.",
+        "$measured": "Over the 15 frozen vector ramps, with `surface.inverse` at 900 in light and 100 in dark: `ink.muted` at its usual rungs measures 2.51 to 2.88:1 in light (600) and 2.13 to 2.49:1 in dark (400), and `border` at its usual rungs measures 10.11 to 10.39:1 (200) and 8.53 to 9.39:1 (800), a hard line where a hairline was meant. The quietest rung that clears 4.5:1 on every vector is 400 in light (5.07:1 at worst) and 700 in dark (6.02:1).",
+        "$origin": "Upstreamed from salt-core (`packages/core/src/lib/brand/roles.ts`), which minted all three for its inverted section tone before this contract named them. Its CSS names are the ones these ids render to."
+      },
+
+      "surfaces": [
+        { "id": "surface.overlay",            "what": "The surface of a thing that floats above the page — card, popover, menu, dialog. Distinguishable from `surface`; which direction it moves is the implementation's choice." },
+        { "id": "surface.sunken",             "what": "A recessed surface — a well, an inset field, a muted panel. Moves away from `surface.overlay`, whichever way that is." },
+        { "id": "surface.interactive",        "what": "The first rung of the hover/press overlay: a translucent wash laid OVER whatever surface is underneath, so one declaration works on every surface." },
+        { "id": "surface.interactive-strong", "what": "The second, heavier rung of the same overlay — press/active where `surface.interactive` is hover." },
+        { "id": "surface.disabled",           "what": "The wash that marks a control as unavailable. Translucent for the same reason as `surface.interactive`." },
+        { "id": "surface.backdrop",           "what": "The scrim behind a modal — dims the page without theming it." },
+        { "id": "surface.deep",               "what": "A page surface that is dark in BOTH themes. Not `surface.inverse`: that one flips, this one does not." },
+        { "id": "surface.deep-raised",        "what": "The raised card/input surface that sits over `surface.deep`. Same non-flipping contract." },
+        { "id": "surface.on-dark-wash",       "what": "The low-opacity fill behind a SECONDARY control on a non-flipping dark surface — the ghost button beside the solid one on a full-bleed band. Quiet by obligation: visibly distinct from the ground it sits on (a wash nobody can see is not a wash) while staying clearly subordinate to `brand.fill` next to it. Its measurement obligation is inherited rather than its own — it LIGHTENS the ground, so text drawn on it has LESS contrast than the same text on the bare surface. That inherited pair is the one the gate has to check." },
+        { "id": "surface.on-dark-wash-hover", "what": "The hover/press companion of `surface.on-dark-wash`. Same obligations, and it is the harder of the pair: it is the lighter of the two, so it is where text-on-wash contrast is at its worst. Emit it only if a hover state exists; a system with no such control needs neither." }
+      ],
+
+      "ink": [
+        { "id": "ink.on-dark",   "what": "Text/icons on a surface that is dark in BOTH themes — a photographic hero, a media overlay, `surface.deep`. `ink.inverse` is the wrong role for this and it is an easy mistake: `ink.inverse` means 'ink on surface.inverse', and surface.inverse flips with the theme." },
+        { "id": "ink.on-dark.muted", "what": "The DE-EMPHASISED reading on such a surface — the supporting paragraph under the headline of a full-bleed band. `ink.muted` is the wrong role and the failure is asymmetric, which is why it survives review: it flips with the theme, so it is correct in dark mode and lands somewhere near 2.6:1 on a deep band in LIGHT mode, where nobody testing dark mode will see it. Must still clear the text contrast property against `surface.deep` AND `surface.deep-raised`, in both modes." },
+        { "id": "ink.muted.inverse", "what": "De-emphasised text on `surface.inverse`: a caption, a timestamp or a byline inside an inverted band. `ink.inverse` is the body reading there and had no quieter companion, so the muted line took `ink.muted`, which is chosen against `surface` and fails on the inverted band in BOTH modes (see `$inverse.$measured`). It flips with the theme because `surface.inverse` does, which is what separates it from `ink.on-dark.muted`. Must clear the text contrast property against `surface.inverse`, in both modes." },
+        { "id": "text.tertiary", "what": "A third text tone, quieter than `ink.muted` — timestamps, captions, incidental metadata." },
+        { "id": "text.disabled", "what": "Text in an unavailable control. Quieter than tertiary; deliberately not required to meet AA, because a disabled control is not readable content." },
+        { "id": "text.icon",     "what": "The default weight for a standalone icon, which usually wants to sit between `ink` and `ink.muted`." }
+      ],
+
+      "brand": [
+        { "id": "brand.fill",    "what": "The surface a SOLID brand button is painted with. This is NOT `brand`, and conflating the two is a live accessibility defect waiting to happen: `brand` is the exact seed and is correct for text, rules, icons and tints, but a fill carries text ON it and therefore has a contrast obligation the seed was never chosen to meet." },
+        { "id": "on-brand-fill", "what": "Text/icons on `brand.fill`. MUST meet the contrast property below — that obligation is the entire reason `brand.fill` exists separately from `brand`." },
+        { "id": "brand.active",  "what": "The pressed/active brand state, one stop beyond `brand.strong`." }
+      ],
+
+      "$secondaryAccentWhy": "A component that paints an icon chip — a glyph on a hue-tinted wash — needs the SAME pair for every role seed it accepts, not only `brand`. Found and fixed at the marketing kit's FeatureCard/PillarCard icon chip (L2, 18/08/2026, revised the same day): `secondary`/`accent` had no tint of their own, so a component offering a secondary/accent variant had nowhere to point but a raw Tier-1 ramp step, the reference D21 forbids inside a component. The FIRST attempt paired a hue's FILL against its TINT (`brand.fill` on `brand.tint`) and picked the wrong role for the glyph: `brand.fill` is the SOLID BUTTON surface (mode-invariant, carries white text), not a wash glyph, and no dark tint step could be found that was both distinct from an unrelated surface role AND legible against a mode-invariant mid-ramp fill — because none exists; the pairing itself was the defect. `*.tint` is a WASH (contract 'colorRoles.extended.surfaces#surface.on-dark-wash' is the same idea for the non-flipping family) and a wash stays dark in dark mode; the GLYPH drawn on it is what inverts, which is the job of the three `on-*-tint` roles below.",
+      "secondaryAccent": [
+        { "id": "secondary.fill", "what": "The solid fill for the secondary hue — `brand.fill`'s counterpart for `color.secondary`. A genuine SOLID BUTTON/surface fill, mode-invariant, distinct from `secondary.tint`'s wash job — a card's own coloured CTA button is the usual reason a component needs this rather than the tint." },
+        { "id": "secondary.tint", "what": "A secondary-hue tinted WASH — `brand.tint`'s counterpart. Stays a dark wash in dark mode, like `brand.tint`; pairs with `on-secondary-tint` for the glyph/text drawn on it, and with plain `ink` for anything (a message bubble, a chip) that paints ordinary text straight onto it." },
+        { "id": "accent.tint",    "what": "An accent-hue tinted WASH — `brand.tint`'s counterpart for `accent`, which (with `on-accent`) already IS the accent fill pair, so only the wash was missing." },
+        { "id": "on-brand-tint",    "what": "The glyph/text colour drawn ON `brand.tint` — an icon-chip glyph, a link, anything that is NOT plain body text (which uses `ink` instead, paired with `brand.tint` directly — see the conditionalRequirements pair below). Inverts opposite to the wash: a light-register ladder step in both modes, so it stays legible as the wash goes from pale (light mode) to dark (dark mode)." },
+        { "id": "on-secondary-tint", "what": "`on-brand-tint`'s counterpart for `secondary.tint`." },
+        { "id": "on-accent-tint",    "what": "`on-brand-tint`'s counterpart for `accent.tint`." }
+      ],
+
+      "border": [
+        { "id": "border.subtle",   "what": "A hairline quieter than `border` — the divider inside a card, where the default border would be too loud." },
+        { "id": "border.strong",   "what": "A line louder than `border` — an input outline, a selected edge." },
+        { "id": "border.disabled", "what": "The outline of an unavailable control." },
+        { "id": "border.on-dark",  "what": "The hairline on a surface that is dark in BOTH themes — the rule under a full-bleed band's heading, the outline of a ghost control on it. `border` and `border.subtle` both flip or track `ink`, so both are wrong here for the same reason `ink.muted` is. It carries meaning rather than decoration when it outlines a control, so it has a non-text contrast obligation against `surface.deep`." },
+        { "id": "border.inverse",  "what": "The divider or card edge on `surface.inverse`, the counterpart `border` never had. `border` is a short step from `surface`, so the same declaration on an inverted band reads as a hard line (see `$inverse.$measured`). No contrast obligation, for the reason `border` has none: a divider identifies no component, so WCAG 1.4.11 does not govern it. Its failure is too MUCH contrast, which a minimum ratio cannot express; choose it the same short step from `surface.inverse` that `border` is from `surface`." },
+        { "id": "border.strong.inverse", "what": "`border.strong` on `surface.inverse`: the line that identifies a control (an input outline, a selected edge) inside an inverted band. It carries a non-text contrast obligation against `surface.inverse`, because an outline a low-vision reader cannot find has removed the control. Emit a value the gate can resolve: an alpha of `ink.inverse` is the natural expression and cannot be measured (see `$onDark.$resolvable`)." }
+      ],
+
+      "highlight": [
+        { "id": "highlight.on-dark", "what": "The brand's highlight hue on a surface that is dark in BOTH themes — an eyebrow, an icon tint, a small emphasised label on a full-bleed band. Not `accent`: that role is the general-purpose tinted-fill/on-fill pair (a badge, a callout), and reaching for it here is the same unmeasured-stand-in mistake `ink.muted`/`border` make on this family — a badge on a dark band would inherit whatever hue `accent` happens to be, not the brand's own highlight family. Must clear the text contrast property against `surface.deep` AND `surface.deep-raised`, in both modes, the same obligation shape as `ink.on-dark`." }
+      ],
+
+      "link": [
+        { "id": "link.default", "what": "Inline link text at rest. A separate role from `brand` because brand-as-TEXT has a contrast obligation an exact seed usually cannot meet — this is normally a ladder step, not the seed." },
+        { "id": "link.hover",   "what": "Inline link text under the pointer." },
+        { "id": "link.active",  "what": "Inline link text while pressed." },
+        { "id": "link.visited", "what": "A link the reader has already followed. Conventionally the one role that leaves the brand family entirely, so that 'been there' is legible as a distinct signal rather than as a shade." }
+      ],
+
+      "statusCompanions": {
+        "$rule": "Suffixes available on each of the four status roles. An implementation may emit any subset, on any subset of the four — `error.glow` alone is a legitimate answer.",
+        "$why": "A status role on its own paints a dot. An alert needs a tinted panel, a matching edge, and sometimes a halo, and every implementation that lacks them re-invents them at the component layer with a hand-mixed value — which is a colour value living in a component, i.e. exactly what Tier 2 exists to prevent.",
+        "suffixes": [
+          { "id": "<status>.subtle", "what": "The tinted panel behind a status message — the status colour pulled most of the way toward the surface it sits on." },
+          { "id": "<status>.border", "what": "The edge of that panel — the same tint, carried further." },
+          { "id": "<status>.glow",   "what": "A halo/focus wash for a control in that state, over transparency rather than over a surface." }
+        ]
+      },
+
+      "chart": {
+        "$rule": "Data-visualisation roles. Two different jobs, and they must not be interchanged: the categorical slots encode IDENTITY (which series), the band ramp encodes ORDER (which rank), and `chart-neutral` encodes DE-EMPHASIS (not the story).",
+        "$why": "Charts are brand-facing surface. Left out of the token layer they get hard-coded per consumer, which is how a dashboard ends up with a series colour that a palette change silently repaints — or worse, with a categorical series borrowing `success` and `info`, so 'the fourth series' and 'this means good' become the same colour by accident.",
+        "$validation": "The values behind these are the one place a design system genuinely can be WRONG rather than merely different, so this contract states the checkable properties and ships the instrument (scripts/validate_palette.py) — never the colours. Categorical slots: a lightness band, a chroma floor, pairwise separation under normal vision AND under simulated deutan/protan/tritan, and mark contrast against the surface they are drawn on. Ordinal bands: monotone lightness plus adjacent lightness and colour-difference floors. Run it with your own palette; it holds none.",
+        "$honesty": "A brand of three role seeds yields three categorical hues. Slots beyond that can only be lightness variants of slots already present, which is a real limit and should be documented by an implementation rather than papered over with a generated sixth hue. Beyond three series in an all-pairs form (scatter, choropleth, small multiples), fold the tail into 'Other' or facet.",
+        "$idForm": "These are written in CSS form because that is how a chart consumer meets them. Their dotted token ids are the same names with the hyphen after `chart` restored: chart-1 -> chart.1, chart-band-1 -> chart.band.1, chart-neutral -> chart.neutral, chart-inactive -> chart.inactive.",
+        "roles": [
+          { "id": "chart-1",      "what": "Categorical series 1." },
+          { "id": "chart-2",      "what": "Categorical series 2." },
+          { "id": "chart-3",      "what": "Categorical series 3." },
+          { "id": "chart-4",      "what": "Categorical series 4. Where a three-seed brand is in use, this is a lightness variant rather than a fourth hue — valid in adjacent forms (stacked/grouped bars, multi-line) with direct labels or an identifying legend." },
+          { "id": "chart-5",      "what": "Categorical series 5. Same caveat as series 4." },
+          { "id": "chart-band-1", "what": "Ordinal band 1 of 5 — the hottest end of a sequential ramp." },
+          { "id": "chart-band-2", "what": "Ordinal band 2 of 5." },
+          { "id": "chart-band-3", "what": "Ordinal band 3 of 5." },
+          { "id": "chart-band-4", "what": "Ordinal band 4 of 5." },
+          { "id": "chart-band-5", "what": "Ordinal band 5 of 5 — the faintest end. A tail is MEANT to recede toward the surface, so this one legitimately falls below the mark-contrast floor; the consumer rule is that a band series always ships an identifying legend and is never a standalone mark." },
+          { "id": "chart-neutral", "what": "The de-emphasised comparison SERIES — a competitor, a 'lost' cohort, an inactive period. Must measurably LOSE to every categorical slot, which caps its contrast on purpose, and must stay far enough from them that it cannot be mistaken for one." },
+          { "id": "chart-inactive", "what": "The de-emphasised or unlit MARK — an off dot in a gauge, an inactive segment, a de-emphasised fill. Distinct from chart-neutral, which names a series; this names the absence of one. It MUST stay distinguishable from the TRACK it is drawn on, which is why it cannot be surface.sunken: bars, meters and gauges draw their tracks with the sunken surface, and an unlit dot in the track's own colour vanishes into it. Measure this one against BOTH the track and the card behind it — the naive choice fails. The role existed as a hard-coded ramp reference in an application before it existed here, which is the usual way a missing Tier-2 role announces itself: a component reaching into Tier 1." }
+        ]
+      },
+
+      "shadow": [
+        { "id": "shadow.sm", "what": "The colour component of the smallest elevation shadow, held as its own role so elevation can deepen in dark mode without every shadow token carrying a mode." },
+        { "id": "shadow.md", "what": "The colour component of the mid elevation shadow." },
+        { "id": "shadow.lg", "what": "The colour component of the largest elevation shadow." }
+      ]
+    }
+  },
+
+  "adapters": {
+    "$rule": "OPTIONAL. A conforming implementation MAY publish an adapter stylesheet that re-expresses a third-party component library's colour vocabulary in terms of the roles above. An adapter defines ZERO values of its own — every declaration is a reference — which is what makes it inherit dark mode for free from the Tier-2 inversion.",
+    "$why": "Without one, every application on that library restates the palette in its own globals file, and that copy drifts. With one, the library's vocabulary is a projection of the roles and there is nothing to drift. Enumerated here because the shape of the mapping is shared knowledge even though the values are not.",
+    "$modeInvariance": "An adapter MUST NOT carry its own dark-mode block. It is mode-invariant by construction: because each declaration is a reference, flipping the theme re-points the underlying role and the adapter follows. Re-declaring an adapter under a dark selector 'to be safe' reintroduces exactly the second source of truth the adapter exists to remove.",
+    "shadcn": {
+      "$note": "shadcn/ui's own template stores channel triples (`--primary: 222 47% 11%`) and consumes them as `hsl(var(--primary) / <alpha-value>)`. That encoding cannot express a var() chain or a color-mix(), so an adapter must emit WHOLE colours and the consuming Tailwind config must implement opacity modifiers with color-mix instead. Skip that and every `bg-primary/50` in the application silently renders fully opaque.",
+      "map": {
+        "--background": "surface", "--foreground": "ink",
+        "--card": "surface.overlay", "--card-foreground": "ink", "--card-border": "border.subtle",
+        "--popover": "surface.overlay", "--popover-foreground": "ink", "--popover-border": "border.subtle",
+        "--primary": "brand.fill", "--primary-foreground": "on-brand-fill", "--primary-border": "brand.fill",
+        "--secondary": "surface.sunken", "--secondary-foreground": "ink", "--secondary-border": "surface.sunken",
+        "--muted": "surface.sunken", "--muted-foreground": "ink.muted", "--muted-border": "surface.sunken",
+        "--accent": "surface.sunken", "--accent-foreground": "ink", "--accent-border": "surface.sunken",
+        "--destructive": "error", "--destructive-foreground": "ink.on-dark", "--destructive-border": "error",
+        "--border": "border", "--input": "border.strong", "--ring": "focus",
+        "--chart-1": "chart-1", "--chart-2": "chart-2", "--chart-3": "chart-3", "--chart-4": "chart-4", "--chart-5": "chart-5",
+        "--elevate-1": "surface.interactive", "--elevate-2": "surface.interactive-strong",
+        "--button-outline": "an alpha of ink", "--badge-outline": "border",
+        "--radius": "the implementation's small radius token"
+      },
+      "$notEmitted": "--sidebar-* is deliberately absent: mapping seven roles nothing consumes would be speculative. Build them from surface.alt / border / brand.fill when a sidebar actually lands. --font-*, --shadow-*, --ease-* and the larger radii are absent because they already exist under their own names in the token layer and should be consumed there."
+    }
+  },
+
+  "typographyRoles": {
+    "$rule": "Roles, not families. Components reference the role; the role points at a family.",
+    "required": [
+      { "id": "heading", "css": "--font-heading" },
+      { "id": "body",    "css": "--font-body" }
+    ],
+    "optional": [
+      { "id": "display", "css": "--font-display", "what": "Poster/display type — the face used at the top of the scale, where a heading face chosen for legibility at body sizes is not the face you want at the largest step. Distinct from `heading` on purpose: an implementation that has only one face points both roles at it and loses nothing, and one that has a display cut gains somewhere to put it that is not a component." },
+      { "id": "lead", "css": "--font-lead", "what": "The standfirst under a heading — which family a lead paragraph wears, kept apart from `body` because the two implementations genuinely disagree: one pairs a serif lead with a sans body (marketing prose), the other keeps its lead on the same sans as everything else (a data-dense application, where a serif lead would read as a magazine excerpt). A `Lead` component consumes this role rather than hard-coding either answer (marketing-kit plan §5)." }
+    ],
+    "$whyOptional": "`required` stays at heading + body. Both existing implementations ship exactly two roles, and promoting a third to required would make them non-conformant overnight for owning no third face — which is a contract failing its implementations, not implementations failing a contract."
+  },
+
+  "textRoles": {
+    "$rule": "OPT-IN, THEN COMPLETE. A product that emits no text-role property owes nothing here. A product that emits ANY text-role property must emit every role in `required`, each with all five properties in `properties`, and each optional role it emits in full. The trigger is a text-role property: one of the custom properties `properties` gives a role in `required` or `optional` (`--text-heading-1`, `--text-heading-1--line-height` and so on). Any other `--text-*` property, Tailwind v4's own `--text-sm` among them, is not a text role and triggers nothing. Half a set of roles is how a heading renders at body size on the one screen that reached for the missing one.",
+    "$what": "How each kind of text is SET: its size step, leading, tracking, weight and which typography role it wears. A role is a visual rank, not an HTML element: a card title is `heading-4` whatever element carries it. Every default is a NAME (a step, a rung, a typography role), never a number, so the numbers stay the product's: a product's table or a named scale (contract/type-scale.json) says what size step 3 is, and the rung families say what `heading` leading is.",
+    "$versusTypographyRoles": "`typographyRoles` names FAMILIES (which face) and is unchanged. `textRoles` uses them: each text role's `font` is a typography role.",
+    "required": [
+      { "id": "display",   "what": "The hero headline.",                        "defaults": { "step": "5",  "leading": "display", "tracking": "display", "weight": "bold",     "font": "display" } },
+      { "id": "heading-1", "what": "The page title where there is no hero.",    "defaults": { "step": "4",  "leading": "heading", "tracking": "heading", "weight": "bold",     "font": "heading" } },
+      { "id": "heading-2", "what": "A section heading.",                        "defaults": { "step": "3",  "leading": "heading", "tracking": "heading", "weight": "bold",     "font": "heading" } },
+      { "id": "heading-3", "what": "A sub-section or row heading.",             "defaults": { "step": "2",  "leading": "subhead", "tracking": "subhead", "weight": "semibold", "font": "heading" } },
+      { "id": "heading-4", "what": "A minor heading: a card title, an FAQ question.", "defaults": { "step": "1", "leading": "subhead", "tracking": "subhead", "weight": "semibold", "font": "heading" } },
+      { "id": "lead",      "what": "The standfirst under a heading.",           "defaults": { "step": "1",  "leading": "body",    "tracking": "body",    "weight": "regular",  "font": "lead" } },
+      { "id": "body",      "what": "Running text.",                             "defaults": { "step": "0",  "leading": "body",    "tracking": "body",    "weight": "regular",  "font": "body" } },
+      { "id": "small",     "what": "Meta lines, help text, legal text.",        "defaults": { "step": "-1", "leading": "body",    "tracking": "body",    "weight": "regular",  "font": "body" } },
+      { "id": "label",     "what": "Buttons, form labels, navigation.",         "defaults": { "step": "-1", "leading": "ui",      "tracking": "ui",      "weight": "semibold", "font": "body" } },
+      { "id": "caption",   "what": "Captions, footnotes, credits.",             "defaults": { "step": "-2", "leading": "ui",      "tracking": "ui",      "weight": "regular",  "font": "body" } },
+      { "id": "eyebrow",   "what": "The kicker above a heading.",               "defaults": { "step": "-2", "leading": "tight",   "tracking": "caps",    "weight": "semibold", "font": "body" } }
+    ],
+    "optional": [
+      { "id": "quote",     "what": "A pull quote or testimonial.",              "defaults": { "step": "2",  "leading": "subhead", "tracking": "body",    "weight": "regular",  "font": "lead" } },
+      { "id": "stat",      "what": "A figure shown as the thing itself.",       "defaults": { "step": "4",  "leading": "tight",   "tracking": "display", "weight": "bold",     "font": "heading" } }
+    ],
+    "$noMono": "There is no `mono` role. Inline code is sized relative to the text around it, and a fixed step would break code inside a heading.",
+    "$ladder": "The heading ladder is the component kit's (display 5, heading-1 4, heading-2 3, heading-3 2, heading-4 1), not a prose ladder with heading-1 at step 3: Ollie's ruling of 25/09/2026 on the typography proposal's decision 5.",
+
+    "properties": {
+      "$rule": "What a role emits: one custom property per property, in this order, in Tailwind v4's `--text-*` shape, so `text-heading-1` sets size, line height, letter spacing and weight together. Tailwind's `text-*` utility does not read `--font-family` (measured on Tailwind 4.3.3, 25/09/2026), so the family is for a base style, or `font-(family-name:--text-<role>--font-family)`, to apply. Each value is a reference, never a number: `references` names the property it points at, `{value}` being the role's resolved default or override, and `font` points at the typography role's own `css`.",
+      "step":     { "css": "--text-{role}",                 "type": "dimension",  "references": "--step-{value}",     "domain": "steps" },
+      "leading":  { "css": "--text-{role}--line-height",    "type": "number",     "references": "--leading-{value}",  "domain": "leading" },
+      "tracking": { "css": "--text-{role}--letter-spacing", "type": "dimension",  "references": "--tracking-{value}", "domain": "tracking" },
+      "weight":   { "css": "--text-{role}--font-weight",    "type": "fontWeight", "references": "--weight-{value}",   "domain": "weight" },
+      "font":     { "css": "--text-{role}--font-family",    "type": "fontFamily", "references": "typographyRoles",    "domain": "typographyRoles" }
+    },
+    "$domain": "`steps` is the product's type ladder (contract/scale-shape.json's type steps). `leading`, `tracking` and `weight` are contract/scale-shape.json families: a rung the family declares and the product's rung set has a value for (contract/type-scale.json#rungDefaults, or the product's own family). `typographyRoles` is an id in the block above.",
+
+    "fontFallback": { "display": "heading", "lead": "body" },
+    "$fontFallback": "The typography roles `display` and `lead` are optional, so a text role that wears one resolves at build time to the first role in this chain the product emits: `display` to `heading`, `lead` to `body`. `heading` and `body` are required and end every chain. Resolved at build time rather than as a CSS `var()` fallback, because a reference to a property nothing declares fails the emitter's dangling-reference gate, as it should.",
+
+    "overridable": ["step", "leading", "tracking", "weight", "font"],
+    "structural": [
+      { "role": "body", "property": "step", "why": "R1: body text is step 0 in every product; the scale is built outwards from it." }
+    ],
+    "$structure": "What the contract fixes: the role names, body at step 0, the order of the ranks (R2, R3), the font fallback chain, the units, and the weight names with CSS's numbers for them. What a product may change, explicitly and only through a declaration's `overrides` (contract/type-scale.json#declaration): each role's step, leading rung, tracking rung, weight rung and typography role. What a product supplies: the size behind each step, and the faces.",
+
+    "elementConvention": { "h1": "heading-1", "h2": "heading-2", "h3": "heading-3", "h4": "heading-4", "h5": "heading-4", "h6": "heading-4", "p": "body" },
+    "$elementConvention": "A default for unclassed markup (a CMS's rich text, say): which role an element takes when nothing else says. A convention, not an obligation, and never the other way round: a role does not imply an element.",
+
+    "invariants": {
+      "$rule": "Checked on the resolved roles, after overrides. R2 and R3 compare step NUMBERS: the type scale's T5 already makes each step larger than the one below at both viewports, so rank by number is rank by size.",
+      "R1": { "name": "body", "rule": "Body text is step 0.", "role": "body", "property": "step", "equals": "0" },
+      "R2": { "name": "headings", "rule": "display >= heading-1 > heading-2 > heading-3 > heading-4 >= body.", "compare": "step",
+              "pairs": [["display", ">=", "heading-1"], ["heading-1", ">", "heading-2"], ["heading-2", ">", "heading-3"], ["heading-3", ">", "heading-4"], ["heading-4", ">=", "body"]] },
+      "R3": { "name": "around body", "rule": "lead > body, small < body, caption <= small, label <= body, eyebrow < body.", "compare": "step",
+              "pairs": [["lead", ">", "body"], ["small", "<", "body"], ["caption", "<=", "small"], ["label", "<=", "body"], ["eyebrow", "<", "body"]] },
+      "R4": { "name": "floor", "rule": "Every role the product emits is at least contract/type-scale.json#roleFloorRem at the narrow viewport.", "floor": "roleFloorRem", "at": "viewportMin" },
+      "R5": { "name": "fonts resolve", "rule": "Every role's typography role resolves, through `fontFallback`, to one the product emits." },
+      "R6": { "name": "names", "rule": "No text-role id equals a colour role's name in CSS form (the part after `--color-`), whether the colour role is this vocabulary's or one the product emits.", "against": "colorRoles" }
+    },
+    "$R6": "Tailwind v4 resolves `text-<name>` against `--color-<name>` before `--text-<name>`, so a colour role called `label` would silently turn every `text-label` into a colour and drop the type. Measured on Tailwind 4.3.3 (25/09/2026): with both `--color-label` and `--text-label` in the theme, `text-label` emits a `color` declaration and no `font-size`. The names are reserved here so that neither side takes one the other has. A product checks its own colour roles too, because it may emit some this vocabulary does not name."
+  },
+
+  "neutralRamp": {
+    "$rule": "A neutral ramp MUST exist and MUST be hand-authored (it is a brand decision, not a derivation).",
+    "mandated": ["that it exists"],
+    "explicitlyNotMandated": ["its length", "its step names", "which step any role maps to"],
+    "$why": "This is a constraint discovered from the code, not a preference. salt/assets/src/css/app.css:116 sets `--color-surface: var(--color-neutral-950)` for dark, and salt/tests/unit/ContrastCheckerTest.php:120 asserts that exact string — salt's 950 is load-bearing. ls-design-system's dark surface is neutral-800 and its ramp stops at 900. Both are correct. A Base that standardised on 10 steps would break salt's dark mode; one that standardised on 11 would force ls-design-system to invent a step it never had."
+  },
+
+  "darkMode": {
+    "$rule": "Dark mode is a Tier 2 inversion — re-point semantic roles under `[data-theme=\"dark\"]`. Tier 1 does not change; components carry no dark variants.",
+    "selector": "[data-theme=\"dark\"]",
+    "$why": "Lifted from salt/assets/src/css/app.css:110-126. If components need dark variants, the roles are not doing their job."
+  },
+
+  "layoutRoles": {
+    "$rule": "OPT-IN, THEN COMPLETE. A product that emits no layout-role token owes nothing here. A product that emits ANY emits every role below, both ends of each, and its resolved roles meet every invariant. Half a set is how one band keeps its room while the band beside it loses it.",
+    "$what": "The two spacings whose SIZE is a product's decision while their JOB is shared: the block space around a page section (the band's own padding, at three weights) and the page's inline gutter. A component spaces a band with a role, never with a rung, so a product retunes its whole rhythm in one place. Each role has two ends: `min`, at the smallest viewport the product supports, and `max`, at the largest. How a role moves between them, stepped at a breakpoint or fluid, is the product's. Every end is a rung NAME of the role's `family` in contract/scale-shape.json, never a length, so the lengths stay the product's.",
+    "ends": ["min", "max"],
+    "css": "--space-{role}-{end}",
+    "$css": "Each end is emitted as a reference to its rung: `--space-section-md-min: var(--space-16)`, `--space-gutter-min: var(--container-padding-base)`. A product that composes one stepped or fluid value from the two ends may emit that as `--space-{role}`; salt-core's `--space-section-sm`, `-md`, `-lg` and `--space-gutter` have that shape, but are not yet compositions of rungs: its large band starts at a length that falls between two `space` rungs, and its gutter is a token of its own rather than two `containerPadding` rungs. When salt-core adopts the roles, the large band's lower end moves onto a rung, and the space scale gains none for it.",
+    "roles": [
+      { "id": "section-sm", "family": "space", "what": "A compact band: a strip of logos, a short notice.", "defaults": { "min": "8", "max": "14" } },
+      { "id": "section-md", "family": "space", "what": "The default band. Most sections are this one.", "defaults": { "min": "16", "max": "24" } },
+      { "id": "section-lg", "family": "space", "what": "A spacious band: a hero, or a closing call to action that needs room around it.", "defaults": { "min": "20", "max": "28" } },
+      { "id": "gutter", "family": "containerPadding", "what": "The inline padding between the viewport's edge and the page's content, on every band and on the page's own header and footer. Never a band's block space: salt-core once had one token doing both jobs, and retuning a compact band's rhythm moved the gutter of every section on the site.", "defaults": { "min": "base", "max": "lg" } }
+    ],
+    "$family": "The section weights are rungs of `space`, so a band's padding moves with the spacing scale: a product's `spaceBase` says what rung 16 is. The gutter is a rung of `containerPadding`, the family that exists so a page's edge inset is one decision rather than a length repeated in every stylesheet; the component kit's Container reads it for exactly that reason, and not the space ramp.",
+    "$defaults": "Where each default comes from. `section-md` and `gutter` are the component kit's own Section and Container, which the portal and Wakemere render unchanged: `space` 16 rising to 24 at the large breakpoint, and `containerPadding` from `base` to `lg`. The kit has no compact or spacious band, so those come from the products that ship one: `section-sm` is salt-core's compact band, 8 rising to 14, and `section-lg` is Wakemere's closing call to action, 20 rising to 28. A product overrides any end by naming another rung of the role's family; the invariants still hold.",
+    "invariants": [
+      { "id": "L1", "kind": "emitted", "rule": "Every end points at a rung the product's own scale emits, under the property the end's reference names." },
+      { "id": "L2", "kind": "ends", "op": "<=", "rule": "No role shrinks as the viewport grows: min <= max." },
+      { "id": "L3", "kind": "order", "pairs": [["section-sm", "<=", "section-md"], ["section-md", "<=", "section-lg"]], "rule": "The section weights keep their order at each end." },
+      { "id": "L4", "kind": "floor", "role": "gutter", "end": "min", "atLeastCssPx": 16, "rule": "The gutter's `min` end, the rung it names, is at least 16 CSS px. This bounds the rung, not what a viewer gets at the smallest viewport, which is the product's own composition of the two ends." }
+    ],
+    "$invariants": "Checked on the resolved roles, after a product's overrides, by scripts/layout_roles.mjs (the `./layout-roles` export), which reads each end's length from scripts/scale_tokens.mjs rather than deriving it again. Lengths are compared in CSS px, a rem read at 16 px (the root size the scale shape's `pxAt` reads a breakpoint at); a length in any other unit cannot be ranked and is refused. The kinds are `emitted`, `ends` (the first end against the last), `order` (each pair at each end) and `floor` (one end of one role against a minimum).",
+    "$L4": "16 CSS px is the narrowest gutter any product of this design system ships, so the floor holds every product that exists and stops the next one going below it. The floor is read at the initial root font size, a rem at 16 px. A gutter in rem narrows under a smaller root, and a product that must hold 16 px at every root applies the floor where it composes the two ends into its `--space-gutter`, as `max(16px, …)` around that composition. It never goes in the rung: a rung written `max(1rem, 16px)` is not a px or rem length, so no end that points at it can be ranked, and it is refused as `unrankable`.",
+    "$notRoles": "Not rhythm roles: the page's WIDTHS, which are the scale shape's `container` and `containerPage` families (and a text measure is `measure`), and the space between elements INSIDE a section, which is a component's own, taken from `space` directly."
+  },
+
+  "contrast": {
+    "$rule": "Stated as PROPERTIES of the output, deliberately — not as a shared algorithm with shared candidate colours. A property is checkable against whatever palette an implementation actually has; a pinned algorithm would require a shared palette, which is exactly what this repo exists to prevent.",
+    "requirements": [
+      { "pair": ["on-brand", "brand"],   "minRatio": 4.5, "standard": "WCAG 2.x AA (normal text)" },
+      { "pair": ["on-accent", "accent"], "minRatio": 4.5, "standard": "WCAG 2.x AA (normal text)" },
+      { "pair": ["ink", "surface"],      "minRatio": 4.5, "standard": "WCAG 2.x AA (normal text)" },
+      { "pair": ["ink.muted", "surface"], "minRatio": 4.5, "standard": "WCAG 2.x AA (normal text)" },
+      { "pair": ["ink.inverse", "surface.inverse"], "minRatio": 4.5, "standard": "WCAG 2.x AA (normal text)" },
+      { "pair": ["focus", "surface"],     "minRatio": 3.0, "standard": "WCAG 2.2 SC 1.4.11 (non-text contrast): the focus ring, see focusIndicator" },
+      { "pair": ["focus", "surface.alt"], "minRatio": 3.0, "standard": "WCAG 2.2 SC 1.4.11 (non-text contrast): the focus ring, see focusIndicator" },
+      { "pair": ["focus", "brand.tint"],  "minRatio": 3.0, "standard": "WCAG 2.2 SC 1.4.11 (non-text contrast): the focus ring, see focusIndicator" }
+    ],
+    "$note": "Both implementations happen to ship a `text_on()` helper picking between a near-white and a near-black candidate. Base does NOT pin those candidates: they are two hex values, and this contract holds none. Implement the property however you like.",
+
+    "conditionalRequirements": {
+      "$rule": "Each rule applies ONLY if the implementation emits every role named in `when`. Emit one and you have accepted its obligation, because a role that is never measured is the failure mode this section exists to close. So a rule whose `when` names only REQUIRED roles binds every conforming implementation, whatever else it emits. Exactly one rule here does: `[ink, brand.tint]` at 4.5:1, added in 2.1.0, which every implementation owes because `ink` and `brand.tint` are both required. Emit none of the extended roles and every OTHER rule here is skipped.",
+      "$why": "v2 promoted 37 named optional roles (49 addressable, counting the status companion suffixes); 2.1.0 carries 48 (60), and 3.0.0 51 (63). Several of them exist SPECIFICALLY because a required role was being misused for their job and failing a contrast property nobody was checking — `brand` used as a button fill, `ink.muted` used on a non-flipping dark band. Naming the role fixes the misuse; only measuring it stops the next one. The `requirements` list above is deliberately not extended, because every entry there is unconditional and these roles are not. The one exception is `[ink, brand.tint]`, kept beside its two siblings for `secondary.tint` and `accent.tint`: its roles are both required, so it is unconditional in effect (see `$rule`).",
+      "$unresolvable": "A rule whose roles do not resolve to a real colour is NOT a pass. Report it as unverified and fail. See colorRoles.extended.$onDark.$resolvable.",
+      "rules": [
+        { "when": ["on-brand-fill", "brand.fill"], "pair": ["on-brand-fill", "brand.fill"], "minRatio": 4.5, "standard": "WCAG 2.x AA (normal text)",
+          "$why": "The whole reason brand.fill is a separate role from brand. Unmeasured, it silently becomes brand again." },
+
+        { "when": ["ink.on-dark", "surface.deep"], "pair": ["ink.on-dark", "surface.deep"], "minRatio": 4.5, "standard": "WCAG 2.x AA (normal text)" },
+        { "when": ["ink.on-dark", "surface.deep-raised"], "pair": ["ink.on-dark", "surface.deep-raised"], "minRatio": 4.5, "standard": "WCAG 2.x AA (normal text)" },
+
+        { "when": ["ink.on-dark.muted", "surface.deep"], "pair": ["ink.on-dark.muted", "surface.deep"], "minRatio": 4.5, "standard": "WCAG 2.x AA (normal text)" },
+        { "when": ["ink.on-dark.muted", "surface.deep-raised"], "pair": ["ink.on-dark.muted", "surface.deep-raised"], "minRatio": 4.5, "standard": "WCAG 2.x AA (normal text)" },
+
+        { "when": ["ink.on-dark", "surface.on-dark-wash"], "pair": ["ink.on-dark", "surface.on-dark-wash"], "minRatio": 4.5, "standard": "WCAG 2.x AA (normal text)",
+          "$why": "A wash lightens the ground, so the label on a ghost button has LESS contrast than the same text beside it on the bare band. This is the pair an app-side derivation never checks." },
+        { "when": ["ink.on-dark", "surface.on-dark-wash-hover"], "pair": ["ink.on-dark", "surface.on-dark-wash-hover"], "minRatio": 4.5, "standard": "WCAG 2.x AA (normal text)",
+          "$why": "The hover wash is the lighter of the pair, so it is the worst case — and it is the state a static review never sees." },
+
+        { "when": ["border.on-dark", "surface.deep"], "pair": ["border.on-dark", "surface.deep"], "minRatio": 3.0, "standard": "WCAG 2.x AA (1.4.11 non-text contrast)",
+          "$why": "3:1, not 4.5:1: a hairline is a graphical object, not text. It still has to be visible — an invisible outline on a ghost control removes the control." },
+
+        { "when": ["highlight.on-dark", "surface.deep"], "pair": ["highlight.on-dark", "surface.deep"], "minRatio": 4.5, "standard": "WCAG 2.x AA (normal text)" },
+        { "when": ["highlight.on-dark", "surface.deep-raised"], "pair": ["highlight.on-dark", "surface.deep-raised"], "minRatio": 4.5, "standard": "WCAG 2.x AA (normal text)" },
+        { "when": ["on-brand-tint", "brand.tint"], "pair": ["on-brand-tint", "brand.tint"], "minRatio": 4.5, "standard": "WCAG 2.x AA (normal text)",
+          "$why": "The icon-chip pattern, corrected: the glyph is on-brand-tint (a role that inverts), not brand.fill (mode-invariant, the wrong role — see $secondaryAccentWhy). REPLACES the v5.2.0 [brand.fill, brand.tint] rule, which paired a wash against a mode-invariant fill and could not be satisfied at 3:1 by any dark tint step that was also distinct from an unrelated surface role." },
+        { "when": ["on-secondary-tint", "secondary.tint"], "pair": ["on-secondary-tint", "secondary.tint"], "minRatio": 4.5, "standard": "WCAG 2.x AA (normal text)",
+          "$why": "Same pattern as on-brand-tint/brand.tint, for the secondary hue." },
+        { "when": ["on-accent-tint", "accent.tint"], "pair": ["on-accent-tint", "accent.tint"], "minRatio": 4.5, "standard": "WCAG 2.x AA (normal text)",
+          "$why": "Same pattern as on-brand-tint/brand.tint, for accent." },
+
+        { "when": ["ink", "brand.tint"], "pair": ["ink", "brand.tint"], "minRatio": 4.5, "standard": "WCAG 2.x AA (normal text)",
+          "$why": "The pair the v5.2.0 [brand.fill, brand.tint] rule should have been: a tint is a WASH, and the commonest thing painted on a wash is plain body text (a message bubble, a chip, a badge — not just an icon glyph), which reads `ink`, not a role-specific glyph colour. Nothing measured this before marketing kit L2's fix pass (18/08/2026), which is exactly how brand.tint's dark step regressed to primary-200 (5.00:1 light, ~1.3:1 dark against ink) with the gate green: the icon-chip rule above measured a DIFFERENT pair and passed." },
+        { "when": ["ink", "secondary.tint"], "pair": ["ink", "secondary.tint"], "minRatio": 4.5, "standard": "WCAG 2.x AA (normal text)",
+          "$why": "Same pattern as ink/brand.tint, for the secondary hue." },
+        { "when": ["ink", "accent.tint"], "pair": ["ink", "accent.tint"], "minRatio": 4.5, "standard": "WCAG 2.x AA (normal text)",
+          "$why": "Same pattern as ink/brand.tint, for accent." },
+
+        { "when": ["ink.muted.inverse", "surface.inverse"], "pair": ["ink.muted.inverse", "surface.inverse"], "minRatio": 4.5, "standard": "WCAG 2.x AA (normal text)",
+          "$why": "The reason the role exists: the muted line on an inverted band otherwise takes `ink.muted`, which fails there in both modes (colorRoles.extended.$inverse.$measured). Measured, it cannot quietly become `ink.muted` again." },
+        { "when": ["border.strong.inverse", "surface.inverse"], "pair": ["border.strong.inverse", "surface.inverse"], "minRatio": 3.0, "standard": "WCAG 2.x AA (1.4.11 non-text contrast)",
+          "$why": "3:1, not 4.5:1: a control's outline is a graphical object, not text. `border.inverse` has no rule beside this one, deliberately: a divider identifies no component." },
+        { "when": ["focus", "surface.overlay"],     "pair": ["focus", "surface.overlay"],     "minRatio": 3.0, "standard": "WCAG 2.2 SC 1.4.11 (non-text contrast): the focus ring, see focusIndicator" },
+        { "when": ["focus", "surface.sunken"],      "pair": ["focus", "surface.sunken"],      "minRatio": 3.0, "standard": "WCAG 2.2 SC 1.4.11 (non-text contrast): the focus ring, see focusIndicator" },
+        { "when": ["focus", "surface.deep"],        "pair": ["focus", "surface.deep"],        "minRatio": 3.0, "standard": "WCAG 2.2 SC 1.4.11 (non-text contrast): the focus ring, see focusIndicator" },
+        { "when": ["focus", "surface.deep-raised"], "pair": ["focus", "surface.deep-raised"], "minRatio": 3.0, "standard": "WCAG 2.2 SC 1.4.11 (non-text contrast): the focus ring, see focusIndicator" },
+        { "when": ["focus", "secondary.tint"],      "pair": ["focus", "secondary.tint"],      "minRatio": 3.0, "standard": "WCAG 2.2 SC 1.4.11 (non-text contrast): the focus ring, see focusIndicator" },
+        { "when": ["focus", "accent.tint"],         "pair": ["focus", "accent.tint"],         "minRatio": 3.0, "standard": "WCAG 2.2 SC 1.4.11 (non-text contrast): the focus ring, see focusIndicator" }
+      ]
+    },
+
+    "focusIndicator": {
+      "$rule": "The focus indicator is the `focus` role drawn as a ring: an outline `focusRing.width` thick, standing `focusRing.offset` clear of the control (the scale shape's `focusRing` family, emitted as `--focus-ring-width` and `--focus-ring-offset`). Its colour is measured against the GROUND the control sits on, by the `focus` pairs in `requirements` and `conditionalRequirements`, so an evaluator that already reads those two lists evaluates them with no code change. This block holds what a pair cannot say: the ring's geometry, the one ground the ring cannot carry, and what only a rendered page shows.",
+      "$wcag": "Cited precisely, because the numbers moved between drafts. 2.4.7 Focus Visible (AA) requires an indicator. 1.4.11 Non-text Contrast (AA) requires 3:1 against adjacent colours for what identifies a component's state, which is the 3:1 in the pairs. 2.4.11 Focus Not Obscured (Minimum) (AA) is about the focused control being hidden by other content, a sticky header for instance, which no token can show, so nothing here states it. 2.4.13 Focus Appearance (AAA) asks for an indicator at least as large as a 2 CSS px thick perimeter of the control, with 3:1 between its focused and unfocused pixels. It carried the number 2.4.11 in drafts, which is why the two are still confused. This contract's baseline is AA; the ring's thickness floor below is 2.4.13's, adopted on purpose because AA sets none.",
+      "$adjacent": "Why the ground, and why one ratio answers two criteria. With a positive offset the ground shows on both sides of the ring, outside it and in the gap between ring and control. So the ground is the ring's adjacent colour (1.4.11), and it is also the colour those pixels had before focus (2.4.13's change of contrast).",
+      "$grounds": "The pairs cover every opaque surface that a section, card or panel paints and a control sits on: `surface`, `surface.alt` and `brand.tint`, which are required, so their pairs are in `requirements`; and `surface.overlay`, `surface.sunken`, `surface.deep`, `surface.deep-raised`, `secondary.tint` and `accent.tint`, which bind once emitted. Not the translucent roles (`surface.interactive`, `surface.disabled`, `surface.backdrop`, the on-dark washes), which are a control's own fill or a scrim rather than the ground outside it. Not the status companions, which are colour mixes toward the surface that no gate can resolve. And not `surface.inverse`: see `keyline`.",
+      "geometry": [
+        { "id": "width", "family": "focusRing", "rung": "width", "css": "--focus-ring-width", "atLeastCssPx": 2,
+          "standard": "WCAG 2.2 SC 2.4.13 Focus Appearance (AAA), adopted as a floor",
+          "$why": "A ring at least 2 CSS px thick drawn around the control is at least as large as a 2 CSS px perimeter of it, which is 2.4.13's area floor. A 1 px ring passes 1.4.11 on colour alone and is still a hairline a low-vision reader loses." },
+        { "id": "offset", "family": "focusRing", "rung": "offset", "css": "--focus-ring-offset", "atLeastCssPx": 1,
+          "$why": "The ring stands clear of the control, or the pairs measure the wrong neighbour: with no offset the ring's inner edge meets the control's own fill, and `focus` is commonly that fill's colour. Measured 1.00:1 against `brand.fill` in light mode in each of this design system's three themes, and 1.000:1 against the brand fill at every one of salt-core's 766 swept seeds. The floor is a whole CSS px rather than anything above zero, because the rule exists to put the ground between ring and control: a gap narrower than a pixel at 1x density is one a browser may round away, and `0.01px` would otherwise pass as clear." }
+      ],
+      "$lengths": "How a geometry value is read. An unsigned number in ASCII digits followed by `px`, case-insensitive, or a bare 0, once CSS's own whitespace (space, tab, LF, CR, FF) is stripped. A non-ASCII digit or space is refused by name: CSS reads neither, so a browser drops the declaration and the ring with it. The floors are CSS px, which do not scale with the root font size, and a rem does (see `targetSize.$rootSize`): read at a 16 px root, `0.125rem` passes as 2 px and draws 1.25 px at a 10 px root. So `rem` is refused, like every other spelling that cannot be ranked against a minimum at every root, never passed: `em` depends on the element's own font size, `%` on its box, and `calc()`, `var()` and keywords such as `thin` on things a token check cannot see. `atLeastCssPx` is inclusive and `greaterThanCssPx` is not; each rule carries exactly one.",
+      "keyline": [
+        { "ground": "surface.inverse", "role": "ink.inverse", "widthAtLeastCssPx": 2, "evaluatedBy": "rendered-page",
+          "$why": "The ring alone does not reach 3:1 on the inverted band: `focus` is a brand-derived rung and `surface.inverse` sits at the far end of the neutral range. Measured below 3:1 there in at least one mode in each of this design system's three themes (2.16 to 2.93:1), and at 2.087:1 at worst over salt-core's 766 seeds, where no seed fixes it. So an indicator drawn on this ground carries a second part: a keyline in `ink.inverse`, drawn as the indicator's outermost part so that the keyline, not the ring, meets the ground. Its colour needs no rule of its own, because `[ink.inverse, surface.inverse]` is already required at 4.5:1. The keyline is held to the ring's own thickness floor, `widthAtLeastCssPx`, because on this ground it is the part of the indicator that meets the ground, so a hairline keyline around a 2 px ring would leave the one ground that depends on it without the floor. Whether the keyline is DRAWN, and how thick, is a property of the rendered page, like `targetSize`." }
+      ]
+    },
+
+    "targetSize": {
+      "$rule": "Every pointer target is at least `minCssPx` in both dimensions, unless one of `exceptions` applies. Measured on the rendered page: a hit area is a layout property no token can show, so a product's conformance check evaluates this in a browser. The figures and the exception geometry are fields so that the check reads them rather than transcribing prose.",
+      "standard": "WCAG 2.2 SC 2.5.8 Target Size (Minimum) (AA)",
+      "evaluatedBy": "rendered-page",
+      "minCssPx": { "width": 24, "height": 24 },
+      "measure": "The target's hit area: the region in which a pointer activates it, found by hit-testing the rendered page rather than by reading one element's box. A card whose link is stretched over it is a target the size of the card, and a box measured off-screen or before layout reports nothing.",
+      "exceptions": [
+        { "id": "spacing", "circleDiameterCssPx": 24,
+          "rule": "An undersized target passes if a circle of `circleDiameterCssPx`, centred on its bounding box, intersects no other target and no other undersized target's circle." },
+        { "id": "equivalent", "rule": "The same function is available on the same page through a control that meets the minimum." },
+        { "id": "inline", "rule": "The target is in a sentence, or its size is otherwise constrained by the line height of text that is not a target: a link in running prose." },
+        { "id": "userAgent", "rule": "The browser sets the target's size and the author has not changed it." },
+        { "id": "essential", "rule": "A particular presentation of the target is essential, or legally required, for the information conveyed." }
+      ],
+      "$rootSize": "CSS px do not scale with the root font size, and a size written in rem does. A control floored at a rem value alone falls below the minimum when a reader sets a smaller root, so a floor that must hold at every root is written as the larger of the rem value and the pixel minimum.",
+      "$evidence": "The figures are salt-core's measurement, not this package's: this package renders nothing and has measured no target, and the rule is `evaluatedBy` a rendered page for that reason. salt-core measured every interactive primitive in a browser, once and by hand (its register's BD-032, the hit-area sweep: four button styles, icon-only buttons, a stretched card link and an inline link, across four section tones in both colour schemes; 88 targets measured, 8 inline links exempt, none below the minimum) and floors each axis at the larger of a rem value and the pixel minimum. The sweep's three false failures are why `measure` says hit-testing: a stretched link's element box is not its hit area, an off-screen target reports nothing, and an inline link measured as a block is measured wrongly."
+    }
+  }
+}

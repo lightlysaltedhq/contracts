@@ -1,0 +1,25 @@
+{
+  "name": "lightlysaltedhq-contracts",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Lightly Salted's public contracts. Each package is published on its own: design-foundations from foundations/.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lightlysaltedhq/contracts.git"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "foundations": "python3 foundations/scripts/audit_vectors.py && python3 foundations/scripts/check_derivation.py && python3 foundations/scripts/check_no_colours.py && python3 foundations/scripts/check_prose_lengths.py && python3 foundations/scripts/oklch.py && python3 foundations/scripts/contrast_rules.py && python3 foundations/scripts/selftest_emit.py && python3 foundations/scripts/check_scale_shape.py && python3 foundations/scripts/check_type_scale.py && python3 foundations/scripts/check_layout_roles.py",
+    "verify:foundations-pack": "bash scripts/check_foundations_pack.sh",
+    "verify:type-tokens-bundle": "esbuild foundations/scripts/type_tokens.mjs --bundle --platform=neutral --format=esm --log-level=warning --outfile=/dev/null && esbuild foundations/scripts/layout_roles.mjs --bundle --platform=neutral --format=esm --log-level=warning --outfile=/dev/null",
+    "verify:actions-pinned": "bash scripts/check_actions_pinned.sh",
+    "verify": "npm run verify:actions-pinned && npm run foundations && npm run verify:foundations-pack && npm run verify:type-tokens-bundle"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2",
+    "typescript": "5.6.3"
+  }
+}
