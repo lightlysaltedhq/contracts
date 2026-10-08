@@ -137,3 +137,75 @@ test('an export that is not in the tarball fails', () => {
 test('a file outside the declared directories in the tarball fails', () => {
   expectFail((f, t) => { f['package.json'].files.push('scratch'); t['scratch/notes.txt'] = 'x\n' }, /must not ship: package\/scratch\/notes\.txt/)
 })
+
+// ── Cross-file integrity: sections.json, contract/fields and contract/markup agree ────────────────
+const crossSchemas = {
+  'schema/sections.schema.json': { $schema: 'https://json-schema.org/draft/2020-12/schema', type: 'object' },
+  'schema/field-definition.schema.json': { $schema: 'https://json-schema.org/draft/2020-12/schema', type: 'object' },
+  'schema/markup.schema.json': { $schema: 'https://json-schema.org/draft/2020-12/schema', type: 'object' },
+}
+function crossPackage(edit) {
+  return makePackage((f, t) => {
+    delete f['schema/sections.schema.json']; delete f['contract/sections.json']
+    f['package.json'].exports = { './package.json': './package.json' }
+    Object.assign(f, structuredClone(crossSchemas))
+    f['contract/sections.json'] = {
+      $schema: '../schema/sections.schema.json', version: '0.1.0',
+      sections: [{ id: 'hero', label: 'Hero', tier: 'core', variants: [{ field: 'variant', options: [{ value: 'a', label: 'A' }, { value: 'b', label: 'B' }], default: 'a' }] }],
+      components: [{ id: 'button', label: 'Button' }], views: [],
+    }
+    f['contract/fields/hero.json'] = {
+      $schema: '../../schema/field-definition.schema.json', version: '0.1.0', section: 'hero',
+      fields: [
+        { name: 'variant', type: 'select', options: [{ value: 'a', label: 'A' }, { value: 'b', label: 'B' }], default: 'a' },
+        { name: 'image', type: 'image', condition: { field: 'variant', in: ['b'] } },
+      ],
+    }
+    f['contract/markup/hero.json'] = { $schema: '../../schema/markup.schema.json', version: '0.1.0', id: 'hero', kind: 'section' }
+    f['contract/markup/button.json'] = { $schema: '../../schema/markup.schema.json', version: '0.1.0', id: 'button', kind: 'component' }
+    edit?.(f, t)
+  })
+}
+function crossRun(edit) {
+  const dir = crossPackage(edit)
+  try { return run(dir) } finally { rmSync(dir, { recursive: true, force: true }) }
+}
+
+test('cross-file: a consistent set passes', () => {
+  const r = crossRun()
+  assert.equal(r.code, 0, r.out)
+})
+test('cross-file: a section with no fields file fails', () => {
+  const r = crossRun((f) => { delete f['contract/fields/hero.json'] })
+  assert.equal(r.code, 1); assert.match(r.out, /section hero has no contract\/fields\/hero\.json/)
+})
+test('cross-file: a section or component with no markup file fails', () => {
+  const r = crossRun((f) => { delete f['contract/markup/button.json'] })
+  assert.equal(r.code, 1); assert.match(r.out, /button has no contract\/markup\/button\.json/)
+})
+test('cross-file: a variant whose options differ from its select field fails', () => {
+  const r = crossRun((f) => { f['contract/fields/hero.json'].fields[0].options.pop() })
+  assert.equal(r.code, 1); assert.match(r.out, /hero variant variant offers a, b in sections\.json but a in its fields file/)
+})
+test('cross-file: a select whose default is not an option fails', () => {
+  const r = crossRun((f) => { f['contract/fields/hero.json'].fields[0].default = 'c' }) 
+  assert.equal(r.code, 1); assert.match(r.out, /hero\.variant default c is not one of its options/)
+})
+test('cross-file: a condition naming a field that is not a sibling fails', () => {
+  const r = crossRun((f) => { f['contract/fields/hero.json'].fields[1].condition.field = 'layout' })
+  assert.equal(r.code, 1); assert.match(r.out, /hero\.image condition names layout, which is not a sibling field/)
+})
+test('cross-file: two sibling fields with one name fail', () => {
+  const r = crossRun((f) => { f['contract/fields/hero.json'].fields[1].name = 'variant'; delete f['contract/fields/hero.json'].fields[1].condition })
+  assert.equal(r.code, 1); assert.match(r.out, /hero has two fields named variant/)
+})
+test('cross-file: every clause of a list condition must name a sibling', () => {
+  const r = crossRun((f) => { f['contract/fields/hero.json'].fields[1].condition = [{ field: 'variant', in: ['b'] }, { field: 'layout', equals: 'x' }] })
+  assert.equal(r.code, 1); assert.match(r.out, /hero\.image condition names layout, which is not a sibling field/)
+})
+test('a subpath-pattern export passes when the tarball has a match, and fails when it has none', () => {
+  let dir = makePackage((f) => { f['package.json'].exports['./contract/*'] = './contract/*.json' })
+  try { assert.equal(run(dir).code, 0) } finally { rmSync(dir, { recursive: true, force: true }) }
+  dir = makePackage((f) => { f['package.json'].exports['./markup/*'] = './contract/markup/*.json' })
+  try { const r = run(dir); assert.equal(r.code, 1); assert.match(r.out, /no file in the tarball matches the exported pattern contract\/markup\/\*\.json/) } finally { rmSync(dir, { recursive: true, force: true }) }
+})

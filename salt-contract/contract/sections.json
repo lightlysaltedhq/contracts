@@ -488,7 +488,7 @@
       "summary": "Cards in a scrolling track with previous and next controls, written inline or drawn from a collection.",
       "variants": [
         {
-          "field": "card-style",
+          "field": "cardStyle",
           "label": "Card style",
           "options": [
             {
@@ -551,7 +551,7 @@
             {
               "name": "scroll_carousel",
               "values": {
-                "card-style": {
+                "cardStyle": {
                   "generic": "generic",
                   "testimonial": "quote"
                 }

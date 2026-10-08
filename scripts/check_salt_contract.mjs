@@ -91,6 +91,56 @@ for (const abs of contractFiles) {
   }
 }
 
+// ── 2b. The three artefacts agree ────────────────────────────────────────────────────────────
+// sections.json names the sections, components and views; contract/fields and contract/markup
+// describe them. JSON Schema cannot see across files, or inside a file across siblings, so:
+// every section has a fields file and every section, component and view a markup file; each
+// variant in sections.json is a select field with the same option values; every select's default
+// is one of its options; a condition names a sibling field; no two siblings share a name. Applies
+// only once contract/sections.json exists.
+const read = (p) => { try { return JSON.parse(readFileSync(path.join(dir, p), 'utf8')) } catch { return null } }
+const vocab = read('contract/sections.json')
+// A vocabulary whose entries are objects; a bare list of ids has nothing to cross-check.
+if (vocab && (vocab.sections ?? []).every((x) => x && typeof x === 'object')) {
+  const has = (p) => existsSync(path.join(dir, p))
+  for (const s of vocab.sections ?? []) {
+    if (!has(`contract/fields/${s.id}.json`)) fails.push(`section ${s.id} has no contract/fields/${s.id}.json`)
+  }
+  for (const e of [...(vocab.sections ?? []), ...(vocab.components ?? []), ...(vocab.views ?? [])]) {
+    if (!has(`contract/markup/${e.id}.json`)) fails.push(`${e.id} has no contract/markup/${e.id}.json`)
+  }
+  const checkFields = (owner, fields) => {
+    const names = new Set()
+    for (const f of fields ?? []) {
+      if (names.has(f.name)) fails.push(`${owner} has two fields named ${f.name}`)
+      names.add(f.name)
+    }
+    for (const f of fields ?? []) {
+      if (f.type === 'select' && f.default !== undefined && !(f.options ?? []).some((o) => o.value === f.default)) {
+        fails.push(`${owner}.${f.name} default ${f.default} is not one of its options`)
+      }
+      for (const clause of [f.condition ?? []].flat()) {
+        if (!names.has(clause.field)) fails.push(`${owner}.${f.name} condition names ${clause.field}, which is not a sibling field`)
+      }
+      if (f.fields) checkFields(`${owner}.${f.name}`, f.fields)
+    }
+  }
+  for (const s of vocab.sections ?? []) {
+    const doc = read(`contract/fields/${s.id}.json`)
+    if (!doc) continue
+    checkFields(s.id, doc.fields)
+    for (const v of s.variants ?? []) {
+      const f = (doc.fields ?? []).find((x) => x.name === v.field)
+      const want = v.options.map((o) => o.value).join(', ')
+      if (!f || f.type !== 'select') { fails.push(`${s.id} variant ${v.field} has no select field of that name in its fields file`); continue }
+      const got = (f.options ?? []).map((o) => o.value).join(', ')
+      if (got !== want) fails.push(`${s.id} variant ${v.field} offers ${want} in sections.json but ${got} in its fields file`)
+    }
+  }
+  const settings = read('contract/fields/_section-settings.json')
+  if (settings) checkFields('section-settings', settings.fields)
+}
+
 // ── 3 ─────────────────────────────────────────────────────────────────────────────────────────
 const HEX = /#(?:[0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})\b/
 const FN = /\b(?:rgba?|hsla?|hwb|lab|lch|oklab|oklch|color)\(\s*[-+.\d]/i
@@ -148,7 +198,13 @@ if (statSync(dir).isDirectory()) {
   const targets = Object.values(pkg.exports ?? {}).flatMap((t) => typeof t === 'string' ? [t] : Object.values(t))
   for (const t of targets) {
     const p = t.replace(/^\.\//, '')
-    if (!packed.includes(p)) fails.push(`exported path is not in the tarball: ${p}`)
+    if (p.includes('*')) {
+      // A subpath pattern: one `*` standing for any run of characters, as Node resolves it.
+      const [pre, post] = p.split('*')
+      if (!packed.some((f) => f.startsWith(pre) && f.endsWith(post) && f.length >= pre.length + post.length)) {
+        fails.push(`no file in the tarball matches the exported pattern ${p}`)
+      }
+    } else if (!packed.includes(p)) fails.push(`exported path is not in the tarball: ${p}`)
   }
 }
 

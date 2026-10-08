@@ -17,3 +17,19 @@ Salted's decision log for Product Salt.
   renames can be generated. Every current Next.js block and WordPress layout is mapped; WordPress
   `intro` folds into `rich-text`, and its five collection layouts into `collection-showcase`
   (testimonials as a slider into `carousel`). Three open questions are recorded in the file.
+- `contract/fields/` (`./fields/<section>`, schema `./schema/field-definition`): every section's
+  editor fields, and the section settings every section shares, in one platform-neutral form
+  each implementation will generate its fields from. Field types are only those Payload and ACF can
+  both express. Where the platforms differed, one canonical definition is chosen and each
+  platform's former name and stored value is recorded with what it owes. Nine open questions are
+  listed in the schema's description.
+- `contract/markup/` (`./markup/<id>`, schema `./schema/markup`): element order, `salt-*` classes,
+  data attributes, heading rules, zero state and priority media for all 17 sections, 29 components
+  and 7 views; 403 elements and 214 classes. The shared accessibility rules are written once in
+  `markup/section`. Every `salt-*` class in salt-nextjs's four section and component stylesheets
+  appears on a contract element. Open questions are recorded as notes in the files concerned.
+- The gate now checks the three artefacts against each other: every section has fields and markup,
+  each variant is a select field with the same options, a select's default is one of its options,
+  a condition names a sibling field, and sibling names are unique. The carousel's variant field is
+  `cardStyle`, as the fields file names it.
+

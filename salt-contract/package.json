@@ -28,7 +28,11 @@
   ],
   "exports": {
     "./sections": "./contract/sections.json",
+    "./fields/*": "./contract/fields/*.json",
+    "./markup/*": "./contract/markup/*.json",
     "./schema/sections": "./schema/sections.schema.json",
+    "./schema/field-definition": "./schema/field-definition.schema.json",
+    "./schema/markup": "./schema/markup.schema.json",
     "./package.json": "./package.json"
   },
   "keywords": [

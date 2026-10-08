@@ -49,7 +49,7 @@
       "additionalProperties": false,
       "properties": {
         "field": {
-          "$ref": "#/$defs/id"
+          "$ref": "#/$defs/fieldName"
         },
         "label": {
           "$ref": "#/$defs/label"
@@ -116,6 +116,9 @@
             "additionalProperties": {
               "$ref": "#/$defs/id"
             }
+          },
+          "propertyNames": {
+            "$ref": "#/$defs/fieldName"
           }
         },
         "note": {
@@ -210,6 +213,11 @@
           "type": "string"
         }
       }
+    },
+    "fieldName": {
+      "type": "string",
+      "pattern": "^[a-z][a-zA-Z0-9]*$",
+      "description": "A field name, as in contract/fields: camelCase ASCII."
     }
   },
   "properties": {
