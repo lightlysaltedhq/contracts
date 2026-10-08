@@ -1,6 +1,6 @@
 {
   "$comment": "The role vocabulary and tier model every conforming design system must implement. Lifted from two working implementations (salt/assets/src/css/app.css:4-15 documents the tier model; salt/inc/colors.php and ls-design-system/scripts/generate.py implement it), NOT designed in the abstract. Contains ZERO colour values by construction — see $noValues.",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "$v2": "v2 adds colorRoles.extended (the Tier-2 roles a real application consumes, enumerated from a shipping implementation's emitted CSS rather than invented), the shadcn adapter mapping, and an OPTIONAL typography `display` role. Nothing v1 required moved or changed, so every v1-conformant implementation was still conformant at v2 — `extended` is opt-in and `salt` emits none of it. Since 2.1.0 a v1-conformant implementation also owes one conditional rule, `[ink, brand.tint]`, because both of its roles are required (see `contrast.conditionalRequirements.$rule`).",
   "$noValues": "This file names roles. It never says what colour a role is. Two conforming systems legitimately answer that differently: one's dark surface is neutral-950, the other's is neutral-800. A Base that picked one would break the other. That is the whole reason this repo exists — v3 shared a palette between two systems, and it broke one of them.",
 

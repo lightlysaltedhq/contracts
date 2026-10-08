@@ -1,6 +1,6 @@
 {
   "$comment": "FROZEN reference ramps \u2014 the independent truth every conforming implementation proves itself against. Regenerate with scripts/freeze_vectors.py, but read its docstring first: if an implementation disagrees with a vector here, the IMPLEMENTATION is wrong. Re-freeze only when the spec or the seed corpus changes. These hexes are test fixtures, not a palette \u2014 nothing renders them, and this contract holds no colour values.",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "spec": "derivation.json",
   "frozen": "2026-09-25",
   "provenance": "Frozen from the byte-identical agreement of TWO independent implementations: salt/inc/colors.php (PHP) and foundations/scripts/oklch.py (Python). Both were run over every seed below and agreed on all 165 ramp steps. That agreement is what is frozen here; from this point each implementation proves itself against this file alone, with no sibling checkout and no PHP runtime. The quantise vectors are frozen from the Python implementation alone: they pin the rounding rule 3.0.0 adopts, half to even, and salt's PHP still rounds half away from zero until it moves to 3.0.0 (design-system decision D39).",

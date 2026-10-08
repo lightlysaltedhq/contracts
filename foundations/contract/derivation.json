@@ -1,6 +1,6 @@
 {
   "$comment": "The ramp-derivation spec: one seed hex in, an 11-step ladder of real displayable hexes out. Pure maths — the ONLY hexes anywhere near this contract are the test fixtures in vectors.json, which are inputs, not a palette. Extracted from salt/inc/colors.php:150-272, which ls-design-system/scripts/oklch.py already reproduces byte-for-byte; this file is the spec both were measured against.",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "name": "gamut-mapped OKLCH tonal ramp",
 
   "$contract": "Given the same seed, two conforming implementations MUST produce byte-identical ramps. That is pinned by vectors.json, not by prose — if you implement this spec and disagree with a vector, you are wrong, and neither implementation gets a vote.",

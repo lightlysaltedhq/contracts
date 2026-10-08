@@ -1,6 +1,6 @@
 {
   "$comment": "The type scale's derivation rule, its invariants, the neutral rung numbers and three named scales, as data a consumer can run without emit.py. A consumer reads the fields below and implements them; it never has to read Python or prose to learn an operation, an order, a rounding mode or a format. Its one implementation is scripts/type_tokens.mjs, dependency-free JavaScript exported as `./type-tokens`, which the design system's own build runs and a consumer imports. scripts/type_scale.py is a second implementation kept only to check the frozen vectors: check_type_scale.py requires both to reproduce every expected string in type-vectors.json byte for byte. The text roles that use a scale are contract/vocabulary.json#textRoles.",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "$noValues": "No product's values. The named scales are the contract's own: conventional musical intervals, chosen for the maths and the contrast between them, and a private gate in the design-system repository fails any of them, and any vector, that lands within 0.5px of a product's table at both viewports. A product's own table, leading and tracking stay in the product's repository. There is no default named scale: which one a product uses is the product's choice (decision 13 of the typography proposal).",
 
   "units": {

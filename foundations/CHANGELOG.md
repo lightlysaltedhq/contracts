@@ -59,7 +59,7 @@ design-system repository. After 3.0.0 the contract moved to the public repositor
   metadata and gates. A fixture change is a patch only if no implementation that passed before
   can fail after it; if it could, it is a major.
 
-## Unreleased
+## 3.0.1 — 08/10/2026
 
 - **The package's source moved to the public repository `lightlysaltedhq/contracts`**, as this
   changelog said it would after 3.0.0. The tree moved byte for byte from `lightlysaltedhq/design-system`
