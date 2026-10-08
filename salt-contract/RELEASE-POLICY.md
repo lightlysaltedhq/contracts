@@ -72,7 +72,7 @@ Hand-published or unattested releases are exceptions that the CHANGELOG states p
 
 ## 7. Changelog
 
-`CHANGELOG.md` is newest first, dates DD/MM/YYYY, and each entry names the semver call and the reason. It does not carry per-file versions. Headings used: *Breaking*, *Deprecated*, *Added*, *Changed*, *What a site does* (majors only). The SC-001..SC-004 rulings are cited by number where a release depends on one, for example a new section citing SC-001, or a rejected request to put routing in the contract citing SC-003.
+`CHANGELOG.md` is newest first, dates DD/MM/YYYY, and each entry names the semver call and the reason. It does not carry per-file versions. Headings used: *Breaking*, *Deprecated*, *Added*, *Changed*, *What a site does* (majors only). Rulings in the Salt decision log (`SC-nnn`) are cited by number where a release depends on one, for example a new section citing SC-001, or a rejected request to put routing in the contract citing SC-003.
 
 ## Not adopted
 
