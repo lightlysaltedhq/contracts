@@ -1,0 +1,347 @@
+{
+  "$schema": "../../schema/field-definition.schema.json",
+  "version": "0.1.0",
+  "$comment": "The wrapper settings every section carries, stored in a group named settings on each section. Merged from Salt for Next.js's sectionSettings (13 fields, stored under settings) and Salt for WordPress's five Advanced-tab wrapper fields (stored at the layout's top level as section_*). A section file may change a default or omit a field through its shared object.",
+  "section": "section-settings",
+  "fields": [
+    {
+      "name": "spacing",
+      "type": "select",
+      "label": "Spacing",
+      "description": "Space above and below the section.",
+      "options": [
+        {
+          "value": "none",
+          "label": "None (flush against its neighbours)"
+        },
+        {
+          "value": "sm",
+          "label": "Small"
+        },
+        {
+          "value": "md",
+          "label": "Medium"
+        },
+        {
+          "value": "lg",
+          "label": "Large"
+        }
+      ],
+      "default": "md",
+      "platforms": {
+        "nextjs": {
+          "formerly": "settings.spacing"
+        },
+        "wordpress": {
+          "formerly": "section_spacing",
+          "owes": "storing it in the settings group"
+        }
+      }
+    },
+    {
+      "name": "tone",
+      "type": "select",
+      "label": "Tone",
+      "description": "The section's background and text colour roles.",
+      "options": [
+        {
+          "value": "surface",
+          "label": "Surface (the page background)"
+        },
+        {
+          "value": "surface-alt",
+          "label": "Surface, alternate (a subtle step away from it)"
+        },
+        {
+          "value": "brand-tint",
+          "label": "Brand tint"
+        },
+        {
+          "value": "surface-inverse",
+          "label": "Inverse (light on dark)"
+        }
+      ],
+      "default": "surface",
+      "platforms": {
+        "nextjs": {
+          "formerly": "settings.tone"
+        },
+        "wordpress": {
+          "formerly": "section_background",
+          "values": {
+            "inverse": "surface-inverse"
+          },
+          "owes": "storing it in the settings group, and the value surface-inverse in place of inverse",
+          "note": "Labelled Background on WordPress."
+        }
+      }
+    },
+    {
+      "name": "toneDark",
+      "type": "select",
+      "label": "Dark mode tone",
+      "description": "The tone in dark mode. Automatic uses the counterpart of the tone above.",
+      "options": [
+        {
+          "value": "auto",
+          "label": "Automatic (the counterpart of the tone above)"
+        },
+        {
+          "value": "surface",
+          "label": "Surface"
+        },
+        {
+          "value": "surface-alt",
+          "label": "Surface, alternate"
+        },
+        {
+          "value": "brand-tint",
+          "label": "Brand tint"
+        },
+        {
+          "value": "surface-inverse",
+          "label": "Inverse"
+        }
+      ],
+      "default": "auto",
+      "platforms": {
+        "nextjs": {
+          "formerly": "settings.toneDark",
+          "values": {
+            "": "auto"
+          },
+          "owes": "the value auto in place of an empty string"
+        },
+        "wordpress": {
+          "owes": "the field; dark mode is a token inversion today, with no per-section choice"
+        }
+      }
+    },
+    {
+      "name": "width",
+      "type": "select",
+      "label": "Width",
+      "description": "How wide the section's content runs.",
+      "options": [
+        {
+          "value": "full",
+          "label": "Full (edge to edge)"
+        },
+        {
+          "value": "wide",
+          "label": "Wide"
+        },
+        {
+          "value": "default",
+          "label": "Default"
+        },
+        {
+          "value": "narrow",
+          "label": "Narrow (reading measure)"
+        }
+      ],
+      "default": "default",
+      "platforms": {
+        "nextjs": {
+          "formerly": "settings.width"
+        },
+        "wordpress": {
+          "formerly": "section_container",
+          "owes": "storing it in the settings group"
+        }
+      }
+    },
+    {
+      "name": "backgroundImage",
+      "type": "group",
+      "label": "Background image",
+      "fields": [
+        {
+          "name": "image",
+          "type": "image",
+          "label": "Image",
+          "description": "Decorative: hidden from screen readers, with empty alternative text."
+        },
+        {
+          "name": "fit",
+          "type": "select",
+          "label": "Fit",
+          "description": "Applies when an image is set.",
+          "options": [
+            {
+              "value": "cover",
+              "label": "Cover (fill the section, cropping as needed)"
+            },
+            {
+              "value": "contain",
+              "label": "Contain (fit the whole image in)"
+            }
+          ],
+          "default": "cover",
+          "platforms": {
+            "nextjs": {
+              "note": "Shown only when an image is set; the contract cannot express that condition (open question 3)."
+            }
+          }
+        },
+        {
+          "name": "position",
+          "type": "select",
+          "label": "Position",
+          "description": "Applies when an image is set.",
+          "options": [
+            {
+              "value": "focal-point",
+              "label": "Focal point (from the image)"
+            },
+            {
+              "value": "top-left",
+              "label": "Top left"
+            },
+            {
+              "value": "top",
+              "label": "Top"
+            },
+            {
+              "value": "top-right",
+              "label": "Top right"
+            },
+            {
+              "value": "left",
+              "label": "Left"
+            },
+            {
+              "value": "centre",
+              "label": "Centre"
+            },
+            {
+              "value": "right",
+              "label": "Right"
+            },
+            {
+              "value": "bottom-left",
+              "label": "Bottom left"
+            },
+            {
+              "value": "bottom",
+              "label": "Bottom"
+            },
+            {
+              "value": "bottom-right",
+              "label": "Bottom right"
+            }
+          ],
+          "default": "focal-point",
+          "platforms": {
+            "nextjs": {
+              "values": {
+                "": "focal-point"
+              },
+              "owes": "the value focal-point in place of an empty string",
+              "note": "Shown only when an image is set (open question 3)."
+            }
+          }
+        },
+        {
+          "name": "scrim",
+          "type": "boolean",
+          "label": "Tint the image with the section's colour behind the text",
+          "description": "Applies when an image is set.",
+          "default": true,
+          "platforms": {
+            "nextjs": {
+              "note": "Shown only when an image is set (open question 3)."
+            }
+          }
+        },
+        {
+          "name": "scrimStrength",
+          "type": "select",
+          "label": "Tint strength",
+          "options": [
+            {
+              "value": "subtle",
+              "label": "Subtle"
+            },
+            {
+              "value": "standard",
+              "label": "Standard"
+            },
+            {
+              "value": "strong",
+              "label": "Strong"
+            }
+          ],
+          "default": "strong",
+          "condition": {
+            "field": "scrim",
+            "equals": true
+          },
+          "platforms": {
+            "nextjs": {
+              "note": "Also hidden until an image is set (open question 3)."
+            }
+          }
+        }
+      ],
+      "platforms": {
+        "nextjs": {
+          "formerly": "settings.backgroundImage"
+        },
+        "wordpress": {
+          "owes": "the background image and its four settings"
+        }
+      }
+    },
+    {
+      "name": "anchorId",
+      "type": "text",
+      "format": "anchor",
+      "label": "Anchor",
+      "description": "Optional, for links to this section. Made URL-safe on save; ids the page itself uses are refused, and duplicates on a page get a number added.",
+      "platforms": {
+        "nextjs": {
+          "formerly": "settings.anchorId",
+          "note": "Reserved ids: main, content, header, footer, nav, navigation, search, skip-link (open question 7)."
+        },
+        "wordpress": {
+          "formerly": "section_anchor",
+          "owes": "storing it in the settings group",
+          "note": "Reserved ids: main, content, header, footer, nav, primary-navigation, search, skip-link (open question 7)."
+        }
+      }
+    },
+    {
+      "name": "firstPageOnly",
+      "type": "boolean",
+      "label": "First page only",
+      "description": "On a paginated index, hide this section after the first page.",
+      "default": false,
+      "platforms": {
+        "nextjs": {
+          "formerly": "settings.firstPageOnly"
+        },
+        "wordpress": {
+          "owes": "the field, with the listing section that paginates"
+        }
+      }
+    },
+    {
+      "name": "divider",
+      "type": "boolean",
+      "label": "Rule above this section",
+      "description": "A hairline rule between this section and the one before. It also stops two sections of the same tone running together.",
+      "default": false,
+      "platforms": {
+        "nextjs": {
+          "formerly": "settings.divider"
+        },
+        "wordpress": {
+          "formerly": "section_divider",
+          "owes": "storing it in the settings group",
+          "note": "Labelled Divider line; draws the rule after the content (open question 9)."
+        }
+      }
+    }
+  ]
+}

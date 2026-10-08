@@ -1,0 +1,67 @@
+{
+  "$schema": "../../schema/field-definition.schema.json",
+  "version": "0.1.0",
+  "section": "locations",
+  "shared": {
+    "id": "section-settings"
+  },
+  "fields": [
+    {
+      "name": "eyebrow",
+      "type": "text",
+      "label": "Eyebrow",
+      "description": "A short label above the heading. Drawn as a paragraph, never a heading.",
+      "platforms": {
+        "nextjs": {
+          "owes": "the section"
+        }
+      }
+    },
+    {
+      "name": "heading",
+      "type": "text",
+      "label": "Heading",
+      "platforms": {
+        "nextjs": {
+          "owes": "the section"
+        }
+      }
+    },
+    {
+      "name": "query",
+      "type": "collection-query",
+      "label": "Which locations to show",
+      "source": "locations",
+      "platforms": {
+        "nextjs": {
+          "owes": "the section"
+        },
+        "wordpress": {
+          "formerly": [
+            "source",
+            "manual",
+            "taxonomy_terms",
+            "orderby",
+            "order",
+            "count"
+          ],
+          "values": {
+            "source": {
+              "default": "automatic",
+              "taxonomy": "by-category",
+              "manual": "manual"
+            },
+            "orderby": {
+              "": "default",
+              "menu_order": "default",
+              "date": "newest",
+              "title": "title"
+            }
+          },
+          "owes": "one query group in place of six layout fields",
+          "note": "Stored as the layout's own source, taxonomy_terms, manual, orderby, order and count; taxonomy_terms becomes categories, manual becomes items, orderby and order fold into order, count stays count. Order ascending/descending has no contract equivalent (open question 2)."
+        }
+      }
+    }
+  ]
+}

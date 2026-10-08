@@ -1,0 +1,47 @@
+{
+  "$schema": "../../schema/field-definition.schema.json",
+  "version": "0.1.0",
+  "section": "listing",
+  "shared": {
+    "id": "section-settings",
+    "omit": [
+      "firstPageOnly"
+    ]
+  },
+  "fields": [
+    {
+      "name": "eyebrow",
+      "type": "text",
+      "label": "Eyebrow",
+      "description": "A short label above the heading. Drawn as a paragraph, never a heading.",
+      "platforms": {
+        "wordpress": {
+          "owes": "the section"
+        }
+      }
+    },
+    {
+      "name": "heading",
+      "type": "text",
+      "label": "Heading",
+      "description": "Optional. The cards come from the page: a blog index, a category or a search result.",
+      "platforms": {
+        "wordpress": {
+          "owes": "the section"
+        }
+      }
+    },
+    {
+      "name": "intro",
+      "type": "textarea",
+      "label": "Intro",
+      "maxLength": 300,
+      "description": "Optional. A line or two under the heading, drawn as one paragraph.",
+      "platforms": {
+        "wordpress": {
+          "owes": "the section"
+        }
+      }
+    }
+  ]
+}

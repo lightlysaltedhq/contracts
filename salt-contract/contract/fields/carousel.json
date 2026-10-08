@@ -1,0 +1,255 @@
+{
+  "$schema": "../../schema/field-definition.schema.json",
+  "version": "0.1.0",
+  "section": "carousel",
+  "shared": {
+    "id": "section-settings"
+  },
+  "fields": [
+    {
+      "name": "eyebrow",
+      "type": "text",
+      "label": "Eyebrow",
+      "description": "A short label above the heading. Drawn as a paragraph, never a heading."
+    },
+    {
+      "name": "heading",
+      "type": "text",
+      "label": "Heading"
+    },
+    {
+      "name": "intro",
+      "type": "textarea",
+      "label": "Intro",
+      "maxLength": 300,
+      "description": "Optional. A line or two under the heading, drawn as one paragraph.",
+      "platforms": {
+        "wordpress": {
+          "owes": "the field"
+        }
+      }
+    },
+    {
+      "name": "label",
+      "type": "text",
+      "label": "Carousel name",
+      "description": "Names the carousel for screen readers when there is no heading. Never shown. Without either, two or more cards are drawn as a grid.",
+      "platforms": {
+        "nextjs": {
+          "note": "Shown only while the heading is empty, a condition the contract cannot express (open question 3)."
+        },
+        "wordpress": {
+          "owes": "the field; the track is named Carousel when there is no heading today"
+        }
+      }
+    },
+    {
+      "name": "source",
+      "type": "select",
+      "label": "Show",
+      "required": true,
+      "options": [
+        {
+          "value": "inline",
+          "label": "Cards written here"
+        },
+        {
+          "value": "services",
+          "label": "Services"
+        },
+        {
+          "value": "case-studies",
+          "label": "Case studies"
+        },
+        {
+          "value": "testimonials",
+          "label": "Testimonials"
+        },
+        {
+          "value": "posts",
+          "label": "Posts"
+        },
+        {
+          "value": "team",
+          "label": "Team"
+        }
+      ],
+      "default": "inline",
+      "description": "Only the collections the site has installed are offered.",
+      "platforms": {
+        "wordpress": {
+          "formerly": [
+            "scroll_carousel",
+            "testimonials"
+          ],
+          "values": {
+            "scroll_carousel": "inline",
+            "testimonials": "testimonials"
+          },
+          "owes": "the source select: scroll_carousel becomes source inline, a testimonials layout set to slider becomes source testimonials; the other collections are new"
+        }
+      }
+    },
+    {
+      "name": "cardStyle",
+      "type": "select",
+      "label": "Card style",
+      "options": [
+        {
+          "value": "generic",
+          "label": "Card: an image, a title and text"
+        },
+        {
+          "value": "quote",
+          "label": "Quote: the words, and who said them"
+        }
+      ],
+      "default": "generic",
+      "condition": {
+        "field": "source",
+        "equals": "inline"
+      },
+      "description": "The variant contract/sections.json names card-style (open question 4).",
+      "platforms": {
+        "wordpress": {
+          "formerly": "card_type",
+          "values": {
+            "testimonial": "quote"
+          }
+        }
+      }
+    },
+    {
+      "name": "cards",
+      "type": "list",
+      "label": "Cards",
+      "itemLabel": "Card",
+      "rowLabel": "title",
+      "condition": {
+        "field": "source",
+        "equals": "inline"
+      },
+      "fields": [
+        {
+          "name": "image",
+          "type": "image",
+          "label": "Image",
+          "description": "Optional image or portrait."
+        },
+        {
+          "name": "title",
+          "type": "text",
+          "label": "Title",
+          "required": true,
+          "description": "The card's heading; on a quote, who said it.",
+          "platforms": {
+            "wordpress": {
+              "owes": "requiring it; a card with text alone is kept today"
+            }
+          }
+        },
+        {
+          "name": "role",
+          "type": "text",
+          "label": "Role",
+          "description": "Used by quote cards only.",
+          "platforms": {
+            "nextjs": {
+              "note": "Shown only when the card style is quote, a condition on the parent that the contract cannot express."
+            }
+          }
+        },
+        {
+          "name": "text",
+          "type": "textarea",
+          "label": "Text",
+          "description": "On a quote, the words; a quote with none is skipped."
+        }
+      ]
+    },
+    {
+      "name": "query",
+      "type": "collection-query",
+      "label": "Which items to show",
+      "sourceField": "source",
+      "condition": {
+        "field": "source",
+        "in": [
+          "services",
+          "case-studies",
+          "testimonials",
+          "posts",
+          "team"
+        ]
+      },
+      "platforms": {
+        "nextjs": {
+          "formerly": [
+            "servicesQuery",
+            "caseStudiesQuery",
+            "testimonialsQuery",
+            "postsQuery",
+            "teamQuery"
+          ],
+          "values": {
+            "mode": {
+              "auto": "automatic",
+              "filtered": "by-category",
+              "manual": "manual"
+            },
+            "sortBy": {
+              "": "default",
+              "date": "newest",
+              "title": "title"
+            }
+          },
+          "owes": "one query group read against the chosen source in place of one group per source",
+          "note": "Stored as {mode, terms, items, sortBy, limit}; terms becomes categories, sortBy becomes order, limit becomes count."
+        },
+        "wordpress": {
+          "formerly": [
+            "source",
+            "manual",
+            "orderby",
+            "order",
+            "count"
+          ],
+          "values": {
+            "source": {
+              "default": "automatic",
+              "taxonomy": "by-category",
+              "manual": "manual"
+            },
+            "orderby": {
+              "": "default",
+              "menu_order": "default",
+              "date": "newest",
+              "title": "title"
+            }
+          },
+          "owes": "the query on scroll_carousel; only the testimonials layout has one today",
+          "note": "Stored as the layout's own source, taxonomy_terms, manual, orderby, order and count; taxonomy_terms becomes categories, manual becomes items, orderby and order fold into order, count stays count. Order ascending/descending has no contract equivalent (open question 2)."
+        }
+      }
+    },
+    {
+      "name": "showTags",
+      "type": "boolean",
+      "label": "Show each card's categories",
+      "default": false,
+      "condition": {
+        "field": "source",
+        "in": [
+          "services",
+          "case-studies",
+          "posts"
+        ]
+      },
+      "platforms": {
+        "wordpress": {
+          "owes": "the field"
+        }
+      }
+    }
+  ]
+}

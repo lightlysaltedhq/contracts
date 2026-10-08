@@ -1,0 +1,83 @@
+{
+  "$schema": "../../schema/field-definition.schema.json",
+  "version": "0.1.0",
+  "section": "call-to-action",
+  "shared": {
+    "id": "section-settings",
+    "defaults": {
+      "tone": "brand-tint"
+    }
+  },
+  "fields": [
+    {
+      "name": "heading",
+      "type": "text",
+      "label": "Heading"
+    },
+    {
+      "name": "body",
+      "type": "rich-text",
+      "label": "Text",
+      "allowed": [
+        "paragraph",
+        "bold",
+        "italic",
+        "code",
+        "link",
+        "unordered-list",
+        "ordered-list",
+        "blockquote",
+        "heading-3",
+        "heading-4"
+      ],
+      "platforms": {
+        "wordpress": {
+          "formerly": "text",
+          "owes": "rich text in place of a textarea; a stored plain text migrates as one paragraph"
+        }
+      }
+    },
+    {
+      "name": "buttons",
+      "type": "list",
+      "label": "Buttons",
+      "description": "Up to two.",
+      "max": 2,
+      "rowLabel": "link",
+      "itemLabel": "Button",
+      "fields": [
+        {
+          "name": "link",
+          "type": "link",
+          "label": "Link",
+          "required": true
+        },
+        {
+          "name": "style",
+          "type": "select",
+          "label": "Style",
+          "options": [
+            {
+              "value": "primary",
+              "label": "Primary"
+            },
+            {
+              "value": "secondary",
+              "label": "Secondary"
+            },
+            {
+              "value": "ghost",
+              "label": "Ghost"
+            }
+          ],
+          "default": "primary"
+        }
+      ],
+      "platforms": {
+        "wordpress": {
+          "owes": "the link shape: label, url and style become link (label, type, document or url, newTab) and style; internal links and opening in a new tab are new"
+        }
+      }
+    }
+  ]
+}

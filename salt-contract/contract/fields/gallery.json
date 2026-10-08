@@ -1,0 +1,124 @@
+{
+  "$schema": "../../schema/field-definition.schema.json",
+  "version": "0.1.0",
+  "section": "gallery",
+  "shared": {
+    "id": "section-settings"
+  },
+  "fields": [
+    {
+      "name": "heading",
+      "type": "text",
+      "label": "Heading",
+      "description": "Optional.",
+      "platforms": {
+        "wordpress": {
+          "owes": "the field; the gallery has no heading today"
+        }
+      }
+    },
+    {
+      "name": "intro",
+      "type": "textarea",
+      "label": "Intro",
+      "maxLength": 300,
+      "description": "Optional. A line or two under the heading, drawn as one paragraph.",
+      "platforms": {
+        "wordpress": {
+          "owes": "the field"
+        }
+      }
+    },
+    {
+      "name": "layout",
+      "type": "select",
+      "label": "Layout",
+      "options": [
+        {
+          "value": "grid",
+          "label": "Grid"
+        },
+        {
+          "value": "masonry",
+          "label": "Masonry"
+        },
+        {
+          "value": "carousel",
+          "label": "Carousel"
+        }
+      ],
+      "default": "grid"
+    },
+    {
+      "name": "columns",
+      "type": "select",
+      "label": "Columns",
+      "description": "The most items across. Fewer fit on narrow screens.",
+      "options": [
+        {
+          "value": "2",
+          "label": "2 across"
+        },
+        {
+          "value": "3",
+          "label": "3 across"
+        },
+        {
+          "value": "4",
+          "label": "4 across"
+        }
+      ],
+      "default": "3",
+      "condition": {
+        "field": "layout",
+        "in": [
+          "grid",
+          "masonry"
+        ]
+      },
+      "platforms": {
+        "nextjs": {
+          "note": "Hidden for the carousel layout, as layout !== carousel."
+        },
+        "wordpress": {
+          "owes": "storing the strings 2, 3 and 4; the default is stored as the integer 3 today",
+          "note": "Shown for every layout, with the instruction that only grid and masonry use it."
+        }
+      }
+    },
+    {
+      "name": "label",
+      "type": "text",
+      "label": "Carousel name",
+      "condition": {
+        "field": "layout",
+        "equals": "carousel"
+      },
+      "description": "Names the carousel for screen readers when there is no heading. Never shown.",
+      "platforms": {
+        "wordpress": {
+          "owes": "the field"
+        }
+      }
+    },
+    {
+      "name": "captions",
+      "type": "boolean",
+      "label": "Show captions",
+      "default": true,
+      "description": "Captions come from the media library, so an image is described once for every place it appears.",
+      "platforms": {
+        "wordpress": {
+          "owes": "the default true; it is false today"
+        }
+      }
+    },
+    {
+      "name": "images",
+      "type": "image",
+      "many": true,
+      "label": "Images",
+      "description": "Shown in this order. Alternative text and captions come from the media library."
+    }
+  ]
+}

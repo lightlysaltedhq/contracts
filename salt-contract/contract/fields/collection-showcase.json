@@ -1,0 +1,337 @@
+{
+  "$schema": "../../schema/field-definition.schema.json",
+  "version": "0.1.0",
+  "section": "collection-showcase",
+  "shared": {
+    "id": "section-settings"
+  },
+  "fields": [
+    {
+      "name": "eyebrow",
+      "type": "text",
+      "label": "Eyebrow",
+      "description": "A short label above the heading. Drawn as a paragraph, never a heading."
+    },
+    {
+      "name": "heading",
+      "type": "text",
+      "label": "Heading"
+    },
+    {
+      "name": "intro",
+      "type": "textarea",
+      "label": "Intro",
+      "maxLength": 300,
+      "description": "Optional. A line or two under the heading, drawn as one paragraph.",
+      "platforms": {
+        "wordpress": {
+          "owes": "the field"
+        }
+      }
+    },
+    {
+      "name": "source",
+      "type": "select",
+      "label": "Show",
+      "required": true,
+      "options": [
+        {
+          "value": "services",
+          "label": "Services"
+        },
+        {
+          "value": "case-studies",
+          "label": "Case studies"
+        },
+        {
+          "value": "testimonials",
+          "label": "Testimonials"
+        },
+        {
+          "value": "posts",
+          "label": "Posts"
+        },
+        {
+          "value": "team",
+          "label": "Team"
+        }
+      ],
+      "description": "Only the collections the site has installed are offered.",
+      "platforms": {
+        "nextjs": {
+          "note": "Defaults to the first installed source (open question 8)."
+        },
+        "wordpress": {
+          "formerly": [
+            "services",
+            "work",
+            "testimonials",
+            "team",
+            "blog_teaser"
+          ],
+          "values": {
+            "work": "case-studies",
+            "blog_teaser": "posts"
+          },
+          "owes": "one section with a source select in place of five layouts; the former layout slug gives the source"
+        }
+      }
+    },
+    {
+      "name": "layout",
+      "type": "select",
+      "label": "Layout",
+      "options": [
+        {
+          "value": "grid",
+          "label": "Grid"
+        },
+        {
+          "value": "list",
+          "label": "List"
+        },
+        {
+          "value": "featured",
+          "label": "Featured (the first card leads)"
+        },
+        {
+          "value": "accordion",
+          "label": "Accordion (each title opens in place)"
+        },
+        {
+          "value": "index",
+          "label": "Index (a list of links)"
+        }
+      ],
+      "default": "grid",
+      "description": "Index is offered only for a collection whose items have their own pages.",
+      "platforms": {
+        "wordpress": {
+          "owes": "the accordion and index layouts, and the field on work, team and blog_teaser; services has grid, list and featured; testimonials grid becomes source testimonials with layout grid"
+        }
+      }
+    },
+    {
+      "name": "columns",
+      "type": "select",
+      "label": "Columns",
+      "description": "The most items across. Fewer fit on narrow screens.",
+      "options": [
+        {
+          "value": "2",
+          "label": "2 across"
+        },
+        {
+          "value": "3",
+          "label": "3 across"
+        },
+        {
+          "value": "4",
+          "label": "4 across"
+        }
+      ],
+      "default": "3",
+      "condition": {
+        "field": "layout",
+        "in": [
+          "grid",
+          "featured"
+        ]
+      },
+      "platforms": {
+        "wordpress": {
+          "owes": "one select with the strings 2, 3 and 4 on every source; work and blog_teaser offer 2 and 3 with an integer default 3, team uses bare-numeral labels, testimonials has none"
+        }
+      }
+    },
+    {
+      "name": "query",
+      "type": "collection-query",
+      "label": "Which items to show",
+      "sourceField": "source",
+      "platforms": {
+        "nextjs": {
+          "formerly": [
+            "servicesQuery",
+            "caseStudiesQuery",
+            "testimonialsQuery",
+            "postsQuery",
+            "teamQuery"
+          ],
+          "values": {
+            "mode": {
+              "auto": "automatic",
+              "filtered": "by-category",
+              "manual": "manual"
+            },
+            "sortBy": {
+              "": "default",
+              "date": "newest",
+              "title": "title"
+            }
+          },
+          "owes": "one query group read against the chosen source in place of one group per source",
+          "note": "Stored as {mode, terms, items, sortBy, limit}; terms becomes categories, sortBy becomes order, limit becomes count."
+        },
+        "wordpress": {
+          "formerly": [
+            "source",
+            "manual",
+            "taxonomy_terms",
+            "orderby",
+            "order",
+            "count"
+          ],
+          "values": {
+            "source": {
+              "default": "automatic",
+              "taxonomy": "by-category",
+              "manual": "manual"
+            },
+            "orderby": {
+              "": "default",
+              "menu_order": "default",
+              "date": "newest",
+              "title": "title"
+            }
+          },
+          "owes": "one query group in place of six layout fields",
+          "note": "Stored as the layout's own source, taxonomy_terms, manual, orderby, order and count; taxonomy_terms becomes categories, manual becomes items, orderby and order fold into order, count stays count. Order ascending/descending has no contract equivalent (open question 2)."
+        }
+      }
+    },
+    {
+      "name": "showIcons",
+      "type": "boolean",
+      "label": "Show each service's icon",
+      "default": true,
+      "condition": [
+        {
+          "field": "source",
+          "equals": "services"
+        },
+        {
+          "field": "layout",
+          "in": [
+            "grid",
+            "featured",
+            "list"
+          ]
+        }
+      ],
+      "platforms": {
+        "wordpress": {
+          "owes": "the field; services always draws its icon today"
+        }
+      }
+    },
+    {
+      "name": "showRatings",
+      "type": "boolean",
+      "label": "Show star ratings",
+      "default": true,
+      "condition": [
+        {
+          "field": "source",
+          "equals": "testimonials"
+        },
+        {
+          "field": "layout",
+          "in": [
+            "grid",
+            "featured",
+            "list",
+            "accordion"
+          ]
+        }
+      ],
+      "platforms": {
+        "wordpress": {
+          "owes": "the field; testimonials always draws a stored rating today"
+        }
+      }
+    },
+    {
+      "name": "showTags",
+      "type": "boolean",
+      "label": "Show each card's categories",
+      "default": false,
+      "condition": [
+        {
+          "field": "source",
+          "in": [
+            "services",
+            "case-studies",
+            "posts"
+          ]
+        },
+        {
+          "field": "layout",
+          "in": [
+            "grid",
+            "featured",
+            "list"
+          ]
+        }
+      ],
+      "platforms": {
+        "wordpress": {
+          "owes": "the field"
+        }
+      }
+    },
+    {
+      "name": "groupByCategory",
+      "type": "boolean",
+      "label": "Group the links under their categories",
+      "default": false,
+      "condition": [
+        {
+          "field": "source",
+          "in": [
+            "services",
+            "case-studies",
+            "posts"
+          ]
+        },
+        {
+          "field": "layout",
+          "equals": "index"
+        }
+      ],
+      "platforms": {
+        "wordpress": {
+          "owes": "the field, with the index layout"
+        }
+      }
+    },
+    {
+      "name": "viewAll",
+      "type": "boolean",
+      "label": "Link to the full list",
+      "default": true,
+      "description": "Shown only where the collection has an index page. Sections never paginate.",
+      "platforms": {
+        "wordpress": {
+          "formerly": "view_all",
+          "owes": "the default true on services, where it is false today; team has none"
+        }
+      }
+    },
+    {
+      "name": "viewAllLabel",
+      "type": "text",
+      "label": "Link text",
+      "condition": {
+        "field": "viewAll",
+        "equals": true
+      },
+      "description": "Optional. Leave empty for the default wording.",
+      "platforms": {
+        "wordpress": {
+          "owes": "the field; the wording is fixed per collection today"
+        }
+      }
+    }
+  ]
+}

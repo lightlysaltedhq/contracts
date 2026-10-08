@@ -1,0 +1,120 @@
+{
+  "$schema": "../../schema/field-definition.schema.json",
+  "version": "0.1.0",
+  "section": "features",
+  "shared": {
+    "id": "section-settings"
+  },
+  "fields": [
+    {
+      "name": "eyebrow",
+      "type": "text",
+      "label": "Eyebrow",
+      "description": "A short label above the heading. Drawn as a paragraph, never a heading."
+    },
+    {
+      "name": "heading",
+      "type": "text",
+      "label": "Heading"
+    },
+    {
+      "name": "intro",
+      "type": "textarea",
+      "label": "Intro",
+      "maxLength": 300,
+      "description": "Optional. A line or two under the heading, drawn as one paragraph.",
+      "platforms": {
+        "wordpress": {
+          "owes": "the field"
+        }
+      }
+    },
+    {
+      "name": "columns",
+      "type": "select",
+      "label": "Columns",
+      "description": "The most items across. Fewer fit on narrow screens.",
+      "options": [
+        {
+          "value": "2",
+          "label": "2 across"
+        },
+        {
+          "value": "3",
+          "label": "3 across"
+        },
+        {
+          "value": "4",
+          "label": "4 across"
+        }
+      ],
+      "default": "3",
+      "platforms": {
+        "wordpress": {
+          "note": "Stored as the strings 2, 3 and 4 already."
+        }
+      }
+    },
+    {
+      "name": "items",
+      "type": "list",
+      "label": "Features",
+      "itemLabel": "Feature",
+      "rowLabel": "title",
+      "fields": [
+        {
+          "name": "icon",
+          "type": "select",
+          "label": "Icon",
+          "optionsFrom": "icons",
+          "description": "Optional and decorative.",
+          "platforms": {
+            "wordpress": {
+              "owes": "a select of the site's icons in place of a text field holding an icon name"
+            }
+          }
+        },
+        {
+          "name": "title",
+          "type": "text",
+          "label": "Title",
+          "required": true,
+          "description": "Also the link text when a link is set."
+        },
+        {
+          "name": "text",
+          "type": "rich-text",
+          "label": "Text",
+          "allowed": [
+            "paragraph",
+            "bold",
+            "italic",
+            "code",
+            "link",
+            "unordered-list",
+            "ordered-list",
+            "blockquote"
+          ],
+          "platforms": {
+            "wordpress": {
+              "owes": "rich text in place of a textarea; a stored plain text migrates as one paragraph"
+            }
+          }
+        },
+        {
+          "name": "url",
+          "type": "text",
+          "format": "url",
+          "label": "Link",
+          "description": "Optional. Makes the whole card a link, named by its title.",
+          "platforms": {
+            "wordpress": {
+              "formerly": "link",
+              "owes": "a plain address in place of a link field, whose title and target were already ignored"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
