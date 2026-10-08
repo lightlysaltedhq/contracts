@@ -110,7 +110,7 @@
         "field": "source",
         "equals": "inline"
       },
-      "description": "The variant contract/sections.json names card-style (open question 4).",
+      "description": "The variant contract/sections.json names cardStyle.",
       "platforms": {
         "wordpress": {
           "formerly": "card_type",

@@ -97,7 +97,7 @@
   ],
   "variants": [
     {
-      "field": "card-style",
+      "field": "cardStyle",
       "sameOrder": false,
       "options": {
         "generic": {
@@ -168,7 +168,7 @@
   "notes": [
     {
       "topic": "variant-order",
-      "text": "card-style changes the card element (div or figure) and its order, recorded in card.json."
+      "text": "cardStyle changes the card element (div or figure) and its order, recorded in card.json."
     }
   ],
   "platforms": {

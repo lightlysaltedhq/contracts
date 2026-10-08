@@ -166,7 +166,7 @@
     {
       "field": "style",
       "sameOrder": false,
-      "note": "The quote style is a figure with its own order; the style follows the source (testimonials are quotes) or the carousel's card-style.",
+      "note": "The quote style is a figure with its own order; the style follows the source (testimonials are quotes) or the carousel's cardStyle.",
       "options": {
         "generic": {},
         "quote": {

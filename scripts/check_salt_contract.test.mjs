@@ -270,3 +270,36 @@ test('cross-file: a select whose options come from a registry may carry a defaul
   const r = crossRun((f) => { f['contract/fields/hero.json'].fields.push({ name: 'icon', type: 'select', optionsFrom: 'icons', default: 'star' }) })
   assert.equal(r.code, 0, r.out)
 })
+
+// ── Re-review of fe0fddb ─────────────────────────────────────────────────────────────────────────
+cssCase('a named colour beside a nested rule', '.a {\n  color: red;\n  .b { margin: 0; }\n}\n', /named colour \(red\)/)
+cssCase('a named colour after a nested rule', '.a {\n  .b { margin: 0 }\n  background: white;\n}\n', /named colour \(white\)/)
+cssCase('a hex value in a nested rule', '.a {\n  .b { color: #fff; }\n}\n', /colour value/)
+crossFail('a boolean condition expecting a non-boolean', (f) => {
+  f['contract/fields/hero.json'].fields.push({ name: 'scrim', type: 'boolean' }, { name: 'strength', type: 'select', options: [{ value: 'a', label: 'A' }, { value: 'b', label: 'B' }], condition: { field: 'scrim', equals: 'yes' } })
+}, /hero\.strength condition expects yes, but scrim is a boolean/)
+crossFail('a condition on a text field', (f) => {
+  f['contract/fields/hero.json'].fields.push({ name: 'title', type: 'text' }, { name: 'x', type: 'text', condition: { field: 'title', equals: 'a' } })
+}, /hero\.x condition names title, a text field; a condition may name only a select or a boolean/)
+crossFail('a markup variant on a field the section does not have', (f) => {
+  f['contract/markup/hero.json'].variants = [{ field: 'bogus', options: { a: {} } }]
+}, /hero markup describes a variant of bogus, which is not a select in its fields file/)
+crossFail('shared settings named but the settings file missing', (f) => {
+  f['contract/fields/hero.json'].shared = { id: 'section-settings', omit: ['tone'] }
+}, /hero names shared settings, but contract\/fields\/_section-settings\.json is missing/)
+test('colour: a <style> element in a fixture is read', () => {
+  expectFail((f, t) => { t['fixtures/hero/one.html'] = '<svg><style>.a { fill: red }</style></svg>\n' }, /named colour \(red\)/)
+})
+test('colour: an unquoted colour attribute in a fixture is read', () => {
+  expectFail((f, t) => { t['fixtures/hero/one.html'] = '<svg><path fill=red /></svg>\n' }, /named colour \(red\) in fill/)
+})
+test('colour: a fixture that is not JSON, HTML or SVG fails', () => {
+  expectFail((f, t) => { t['fixtures/hero/one.jsx'] = 'export default () => null\n' }, /fixtures holds \.json, \.html and \.svg files only/)
+})
+test('colour: words that are not colours on non-colour properties, data attributes, url fragments and id selectors pass', () => {
+  const dir = makePackage((f, t) => {
+    t['styles/sections.css'] = '#add { margin: 0; }\n.a { content: "White space"; grid-area: tan; }\n'
+    t['fixtures/hero/one.html'] = '<svg data-color="white"><path fill="url(#red)"/></svg>\n'
+  })
+  try { const r = run(dir); assert.equal(r.code, 0, r.out) } finally { rmSync(dir, { recursive: true, force: true }) }
+})

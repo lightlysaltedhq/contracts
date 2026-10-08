@@ -12,7 +12,9 @@
 // 3. NO COLOUR VALUES. The contract holds rules and markup, never a brand's values (SC-001), and
 //    its stylesheets reach colour only through custom properties (SC-002). Refused anywhere in
 //    contract/, schema/, styles/ and fixtures/: hex colours and the CSS colour functions with a
-//    literal argument. Refused in stylesheets: a CSS named colour on a colour property.
+//    literal argument, in any declaration at any nesting depth. Refused in stylesheets and in
+//    fixtures' style attributes, <style> elements and colour attributes: a CSS named colour on a
+//    property that takes colour, custom properties included. Selectors are never read as values.
 //    Allowed: var(), color-mix() over var(), currentColor, transparent, inherit and friends.
 // 4. THE TARBALL. `npm pack --dry-run` of the package lists only package.json and files under the
 //    directories and documents it declares, and every path in `exports` is in it.
@@ -141,11 +143,16 @@ if (vocab && (vocab.sections ?? []).every((x) => x && typeof x === 'object')) {
         if (clause.field === f.name) { fails.push(`${owner}.${f.name} is conditioned on itself`); continue }
         const target = byName.get(clause.field)
         if (!target) { fails.push(`${owner}.${f.name} condition names ${clause.field}, which is not a sibling field`); continue }
-        if (target.type === 'select' && !target.optionsFrom) {
+        const expected = [...('equals' in clause ? [clause.equals] : []), ...(clause.in ?? [])]
+        if (target.type === 'select') {
           const offered = (target.options ?? []).map((o) => o.value)
-          for (const want of [...('equals' in clause ? [clause.equals] : []), ...(clause.in ?? [])]) {
-            if (!offered.includes(want)) fails.push(`${owner}.${f.name} condition expects ${want}, which ${clause.field} does not offer`)
+          if (!target.optionsFrom) {
+            for (const want of expected) if (!offered.includes(want)) fails.push(`${owner}.${f.name} condition expects ${want}, which ${clause.field} does not offer`)
           }
+        } else if (target.type === 'boolean') {
+          for (const want of expected) if (typeof want !== 'boolean') fails.push(`${owner}.${f.name} condition expects ${want}, but ${clause.field} is a boolean`)
+        } else {
+          fails.push(`${owner}.${f.name} condition names ${clause.field}, a ${target.type} field; a condition may name only a select or a boolean`)
         }
       }
       if (typeof f.min === 'number' && typeof f.max === 'number' && f.min > f.max) fails.push(`${owner}.${f.name} min ${f.min} exceeds max ${f.max}`)
@@ -168,6 +175,7 @@ if (vocab && (vocab.sections ?? []).every((x) => x && typeof x === 'object')) {
     const doc = read(`contract/fields/${s.id}.json`)
     if (!doc) continue
     checkFields(s.id, doc.fields)
+    if (doc.shared && !settings) fails.push(`${s.id} names shared settings, but contract/fields/_section-settings.json is missing`)
     for (const key of ['omit', 'defaults']) {
       const named = key === 'omit' ? (doc.shared?.omit ?? []) : Object.keys(doc.shared?.defaults ?? {})
       if (settings) for (const n of named) if (!sharedNames.has(n)) fails.push(`${s.id} shared.${key} names ${n}, which is not a shared setting`)
@@ -197,12 +205,17 @@ if (vocab && (vocab.sections ?? []).every((x) => x && typeof x === 'object')) {
     }
     const section = (vocab.sections ?? []).find((s) => s.id === name)
     if (section) {
+      // A section's markup may describe variants of any select in its fields file; the options it
+      // describes must be ones that select offers (and, for a vocabulary variant, ones sections.json offers).
+      const fieldsDoc = read(`contract/fields/${name}.json`)
       for (const mv of doc.variants ?? []) {
+        const sel = (fieldsDoc?.fields ?? []).find((x) => x.name === mv.field && x.type === 'select')
+        if (!sel) { fails.push(`${name} markup describes a variant of ${mv.field}, which is not a select in its fields file`); continue }
         const sv = (section.variants ?? []).find((v) => v.field === mv.field)
-        if (!sv) continue
-        const offered = sv.options.map((o) => o.value)
+        const offered = sv ? sv.options.map((o) => o.value) : sel.optionsFrom ? null : (sel.options ?? []).map((o) => o.value)
+        if (!offered) continue
         for (const key of Object.keys(mv.options ?? {})) {
-          if (!offered.includes(key)) fails.push(`${name} markup describes variant option ${key}, which sections.json does not offer`)
+          if (!offered.includes(key)) fails.push(`${name} markup describes variant option ${key}, which ${sv ? 'sections.json' : 'its fields file'} does not offer`)
         }
       }
     }
@@ -239,28 +252,39 @@ const cssReadable = (css) => css
   .replace(/url\(\s*(?:"[^"]*"|'[^']*'|[^)]*)\)/gi, (m) => 'url(' + blank(m.slice(4, -1)) + ')')
   .replace(/var\(\s*--[\w-]+/g, (m) => 'var(' + blank(m.slice(4)))
 const namedIn = (value) => (value.match(/(?<![\w-])[a-z]+(?![\w-])/gi) ?? []).map((w) => w.toLowerCase()).find((w) => NAMED.has(w))
-// Every declaration value inside a rule's braces, however it is split across lines. Selectors
-// and at-rule preludes are outside the innermost braces, so `.red:hover` is never read as a value.
+// Every declaration in a stylesheet, at any nesting depth: the text between `{` or `;` and the
+// next `;` or `}`, excluding the selectors and at-rule preludes that end in `{`. Native CSS nesting
+// puts declarations and child rules in the same block, so innermost blocks alone are not enough.
 function declarations(css) {
   const out = []
-  for (const block of css.matchAll(/\{([^{}]*)\}/g)) {
-    let at = block.index + 1
-    for (const decl of block[1].split(';')) {
-      const colon = decl.indexOf(':')
-      if (colon > 0) out.push({ value: decl.slice(colon + 1), index: at + colon + 1 })
-      at += decl.length + 1
+  let depth = 0, start = 0
+  for (let i = 0; i < css.length; i++) {
+    const c = css[i]
+    if (c === '{') { depth++; start = i + 1 }
+    else if (c === ';' || c === '}') {
+      if (depth > 0) {
+        const text = css.slice(start, i), colon = text.indexOf(':')
+        if (colon > 0) out.push({ property: text.slice(0, colon).trim().toLowerCase(), value: text.slice(colon + 1), index: start + colon + 1 })
+      }
+      if (c === '}') depth = Math.max(0, depth - 1)
+      start = i + 1
     }
   }
   return out
 }
+// Properties whose value can be a colour: custom properties (a named colour there is a colour),
+// and the colour, background, border, outline, shadow, SVG paint, decoration and rule families.
+const TAKES_COLOUR = /^(?:--|.*color$|background|border|outline|box-shadow|text-shadow|fill$|stroke$|text-decoration|column-rule|mask|scrollbar-color)/
 function checkCss(file, text, offset = 0, whole = text) {
   const css = cssReadable(text)
-  css.split('\n').forEach((line, i) => {
-    if (HEX.test(line) || FN.test(line)) fails.push(`${file}:${lineAt(whole, offset) + i} carries a colour value: ${line.trim().slice(0, 100)}`)
-  })
-  for (const d of declarations(css.includes('{') ? css : `{${css}}`)) {
+  const block = css.includes('{') ? css : `{${css}}`
+  const shift = css.includes('{') ? 0 : 1
+  for (const d of declarations(block)) {
+    const at = lineAt(whole, offset + Math.max(0, d.index - shift))
+    if (HEX.test(d.value) || FN.test(d.value)) fails.push(`${file}:${at} carries a colour value: ${d.property}: ${d.value.trim().slice(0, 80)}`)
+    if (!TAKES_COLOUR.test(d.property)) continue
     const hit = namedIn(d.value)
-    if (hit) fails.push(`${file}:${lineAt(whole, offset + Math.max(0, d.index - (css.includes('{') ? 0 : 1)))} sets a named colour (${hit}); reach colour through a custom property`)
+    if (hit) fails.push(`${file}:${at} sets a named colour (${hit}) on ${d.property}; reach colour through a custom property`)
   }
 }
 
@@ -269,23 +293,25 @@ for (const abs of walk('styles')) {
   if (!file.endsWith('.css')) { fails.push(`${file}: styles/ holds .css files only, so every rule the gate reads is the rule that ships`); continue }
   checkCss(file, readFileSync(abs, 'utf8'))
 }
-const COLOUR_ATTR = /\b(fill|stroke|color|stop-color|flood-color|lighting-color|bgcolor)\s*=\s*("([^"]*)"|'([^']*)')/gi
-const STYLE_ATTR = /\bstyle\s*=\s*("([^"]*)"|'([^']*)')/gi
+const COLOUR_ATTR = /(?<![\w-])(fill|stroke|color|stop-color|flood-color|lighting-color|bgcolor)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'>/]+))/gi
+const STYLE_ATTR = /(?<![\w-])style\s*=\s*(?:"([^"]*)"|'([^']*)')/gi
+const STYLE_ELEMENT = /<style\b[^>]*>([\s\S]*?)<\/style>/gi
 for (const abs of walk('fixtures')) {
   const file = rel(abs)
   const text = readFileSync(abs, 'utf8')
+  if (!/\.(json|html?|svg)$/.test(file)) { fails.push(`${file}: fixtures holds .json, .html and .svg files only, so every file is one the gate reads`); continue }
   if (/\.(html?|svg)$/.test(file)) {
     for (const m of text.matchAll(COLOUR_ATTR)) {
-      const value = m[3] ?? m[4]
+      const value = (m[2] ?? m[3] ?? m[4]).replace(/url\([^)]*\)/gi, 'url()')
       const at = lineAt(text, m.index)
       if (HEX.test(value) || FN.test(value)) fails.push(`${file}:${at} carries a colour value in ${m[1]}`)
       const hit = namedIn(value)
       if (hit) fails.push(`${file}:${at} sets a named colour (${hit}) in ${m[1]}`)
     }
-    for (const m of text.matchAll(STYLE_ATTR)) checkCss(file, m[2] ?? m[3], m.index, text)
+    for (const m of text.matchAll(STYLE_ATTR)) checkCss(file, m[1] ?? m[2], m.index, text)
+    for (const m of text.matchAll(STYLE_ELEMENT)) checkCss(file, m[1], m.index + m[0].indexOf('>') + 1, text)
     continue
   }
-  if (file.endsWith('.css')) { checkCss(file, text); continue }
   text.split('\n').forEach((line, i) => {
     if (HEX.test(line) || FN.test(line)) fails.push(`${file}:${i + 1} carries a colour value: ${line.trim().slice(0, 100)}`)
   })
