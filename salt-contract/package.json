@@ -27,6 +27,8 @@
     "LICENSE"
   ],
   "exports": {
+    "./sections": "./contract/sections.json",
+    "./schema/sections": "./schema/sections.schema.json",
     "./package.json": "./package.json"
   },
   "keywords": [

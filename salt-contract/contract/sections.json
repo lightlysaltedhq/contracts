@@ -1,0 +1,1500 @@
+{
+  "$schema": "../schema/sections.schema.json",
+  "version": "0.1.0",
+  "$comment": "The vocabulary both implementations rename to (SC-001). Ids are canonical; each platform's former names and stored option values are mapped under platforms.<platform>.formerly, so its migration can be generated. Variants listed here are the selects that change a section's layout; every other field is in contract/fields. Visitor output and editor fields must match (SC-003). Drafted 08/10/2026 from inventories of salt-nextjs 0.11.0 and salt-wordpress 5.0.0.",
+  "sections": [
+    {
+      "id": "hero",
+      "label": "Hero",
+      "tier": "core",
+      "summary": "The page's opening band: eyebrow, heading, subheading, up to the contract's limit of buttons, and an image.",
+      "variants": [
+        {
+          "field": "variant",
+          "label": "Layout",
+          "options": [
+            {
+              "value": "full-bleed",
+              "label": "Full bleed"
+            },
+            {
+              "value": "split",
+              "label": "Split"
+            },
+            {
+              "value": "stacked",
+              "label": "Stacked"
+            },
+            {
+              "value": "minimal",
+              "label": "Minimal (text only)"
+            }
+          ],
+          "default": "full-bleed"
+        }
+      ],
+      "platforms": {
+        "nextjs": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "hero",
+              "values": {
+                "variant": {
+                  "fullBleed": "full-bleed",
+                  "split": "split",
+                  "stacked": "stacked",
+                  "minimal": "minimal"
+                }
+              }
+            }
+          ]
+        },
+        "wordpress": {
+          "status": "partial",
+          "formerly": [
+            {
+              "name": "hero"
+            }
+          ],
+          "owes": "the stacked variant"
+        }
+      }
+    },
+    {
+      "id": "rich-text",
+      "label": "Rich text",
+      "tier": "core",
+      "summary": "Eyebrow, heading and a rich-text body, aligned left or centred.",
+      "variants": [
+        {
+          "field": "alignment",
+          "label": "Alignment",
+          "options": [
+            {
+              "value": "left",
+              "label": "Left"
+            },
+            {
+              "value": "centre",
+              "label": "Centred"
+            }
+          ],
+          "default": "left"
+        }
+      ],
+      "platforms": {
+        "nextjs": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "richText",
+              "note": "Its alignment option values are mapped when field definitions land."
+            }
+          ]
+        },
+        "wordpress": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "rich_text"
+            },
+            {
+              "name": "intro",
+              "note": "Eyebrow, heading, content and align: the same fields as rich-text, so intro folds into it."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "call-to-action",
+      "label": "Call to action",
+      "tier": "core",
+      "summary": "A heading, a short body and buttons, on a contrasting band.",
+      "platforms": {
+        "nextjs": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "cta"
+            }
+          ]
+        },
+        "wordpress": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "cta"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "media-text",
+      "label": "Media and text",
+      "tier": "core",
+      "summary": "Rows of an image beside text, each row on a chosen side or alternating.",
+      "variants": [
+        {
+          "field": "mode",
+          "label": "Mode",
+          "options": [
+            {
+              "value": "single",
+              "label": "Each row chooses its side"
+            },
+            {
+              "value": "alternating",
+              "label": "Alternating"
+            }
+          ],
+          "default": "single"
+        }
+      ],
+      "platforms": {
+        "nextjs": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "mediaText"
+            }
+          ]
+        },
+        "wordpress": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "media_text"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "features",
+      "label": "Features",
+      "tier": "core",
+      "summary": "A grid of items, each an icon, a title and a short description.",
+      "platforms": {
+        "nextjs": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "features"
+            }
+          ]
+        },
+        "wordpress": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "features"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "stats",
+      "label": "Stats",
+      "tier": "core",
+      "summary": "A row of figures with labels.",
+      "platforms": {
+        "nextjs": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "stats"
+            }
+          ]
+        },
+        "wordpress": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "stats"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "logos",
+      "label": "Logos",
+      "tier": "core",
+      "summary": "A strip of client or partner logos, optionally in greyscale.",
+      "platforms": {
+        "nextjs": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "logos"
+            }
+          ]
+        },
+        "wordpress": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "logos"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "gallery",
+      "label": "Gallery",
+      "tier": "core",
+      "summary": "A set of images in a grid, a masonry layout or a carousel.",
+      "variants": [
+        {
+          "field": "layout",
+          "label": "Layout",
+          "options": [
+            {
+              "value": "grid",
+              "label": "Grid"
+            },
+            {
+              "value": "masonry",
+              "label": "Masonry"
+            },
+            {
+              "value": "carousel",
+              "label": "Carousel"
+            }
+          ],
+          "default": "grid"
+        }
+      ],
+      "platforms": {
+        "nextjs": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "gallery"
+            }
+          ]
+        },
+        "wordpress": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "gallery"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "process",
+      "label": "Process",
+      "tier": "core",
+      "summary": "Ordered steps, as a timeline or as cards.",
+      "variants": [
+        {
+          "field": "layout",
+          "label": "Layout",
+          "options": [
+            {
+              "value": "timeline",
+              "label": "Timeline"
+            },
+            {
+              "value": "cards",
+              "label": "Cards"
+            }
+          ],
+          "default": "timeline"
+        }
+      ],
+      "platforms": {
+        "nextjs": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "process"
+            }
+          ]
+        },
+        "wordpress": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "process"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "faq",
+      "label": "Frequently asked questions",
+      "tier": "core",
+      "summary": "Questions and answers drawn from the FAQ collection, as an accordion, with optional FAQPage structured data.",
+      "sources": [
+        {
+          "id": "faqs",
+          "label": "FAQs",
+          "linked": false
+        }
+      ],
+      "platforms": {
+        "nextjs": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "faq"
+            }
+          ]
+        },
+        "wordpress": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "faq"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "tabs",
+      "label": "Tabs",
+      "tier": "core",
+      "summary": "Content panels behind an accessible tab set.",
+      "platforms": {
+        "nextjs": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "tabs"
+            }
+          ]
+        },
+        "wordpress": {
+          "status": "owes",
+          "owes": "the section"
+        }
+      }
+    },
+    {
+      "id": "collection-showcase",
+      "label": "Collection showcase",
+      "tier": "core",
+      "summary": "Items from one collection as cards, in a grid, a list, a featured layout, an accordion or an index.",
+      "variants": [
+        {
+          "field": "layout",
+          "label": "Layout",
+          "options": [
+            {
+              "value": "grid",
+              "label": "Grid"
+            },
+            {
+              "value": "list",
+              "label": "List"
+            },
+            {
+              "value": "featured",
+              "label": "Featured"
+            },
+            {
+              "value": "accordion",
+              "label": "Accordion"
+            },
+            {
+              "value": "index",
+              "label": "Index",
+              "note": "Only for sources whose items have their own page."
+            }
+          ],
+          "default": "grid"
+        }
+      ],
+      "sources": [
+        {
+          "id": "services",
+          "label": "Services",
+          "linked": true
+        },
+        {
+          "id": "case-studies",
+          "label": "Case studies",
+          "linked": true
+        },
+        {
+          "id": "testimonials",
+          "label": "Testimonials",
+          "linked": false
+        },
+        {
+          "id": "posts",
+          "label": "Posts",
+          "linked": true
+        },
+        {
+          "id": "team",
+          "label": "Team",
+          "linked": false
+        }
+      ],
+      "platforms": {
+        "nextjs": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "collectionShowcase"
+            }
+          ]
+        },
+        "wordpress": {
+          "status": "partial",
+          "formerly": [
+            {
+              "name": "services",
+              "note": "source services"
+            },
+            {
+              "name": "work",
+              "note": "source case-studies"
+            },
+            {
+              "name": "team",
+              "note": "source team"
+            },
+            {
+              "name": "testimonials",
+              "when": "layout grid",
+              "note": "source testimonials"
+            },
+            {
+              "name": "blog_teaser",
+              "note": "source posts"
+            }
+          ],
+          "owes": "one section in place of five, and the accordion and index layouts"
+        }
+      }
+    },
+    {
+      "id": "carousel",
+      "label": "Carousel",
+      "tier": "core",
+      "summary": "Cards in a scrolling track with previous and next controls, written inline or drawn from a collection.",
+      "variants": [
+        {
+          "field": "card-style",
+          "label": "Card style",
+          "options": [
+            {
+              "value": "generic",
+              "label": "Generic"
+            },
+            {
+              "value": "quote",
+              "label": "Quote"
+            }
+          ],
+          "default": "generic",
+          "note": "For inline cards only; a collection source sets its own style (testimonials are quotes)."
+        }
+      ],
+      "sources": [
+        {
+          "id": "inline",
+          "label": "Written in the section",
+          "linked": false
+        },
+        {
+          "id": "services",
+          "label": "Services",
+          "linked": true
+        },
+        {
+          "id": "case-studies",
+          "label": "Case studies",
+          "linked": true
+        },
+        {
+          "id": "testimonials",
+          "label": "Testimonials",
+          "linked": false
+        },
+        {
+          "id": "posts",
+          "label": "Posts",
+          "linked": true
+        },
+        {
+          "id": "team",
+          "label": "Team",
+          "linked": false
+        }
+      ],
+      "platforms": {
+        "nextjs": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "carousel"
+            }
+          ]
+        },
+        "wordpress": {
+          "status": "partial",
+          "formerly": [
+            {
+              "name": "scroll_carousel",
+              "values": {
+                "card-style": {
+                  "generic": "generic",
+                  "testimonial": "quote"
+                }
+              }
+            },
+            {
+              "name": "testimonials",
+              "when": "layout slider",
+              "note": "source testimonials"
+            }
+          ],
+          "owes": "collection sources other than testimonials"
+        }
+      }
+    },
+    {
+      "id": "listing",
+      "label": "Listing",
+      "tier": "core",
+      "summary": "A paginated list of cards whose items the route supplies: a blog index, a category or a search result.",
+      "platforms": {
+        "nextjs": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "listing"
+            }
+          ]
+        },
+        "wordpress": {
+          "status": "owes",
+          "owes": "the section's markup on archive, category, tag, taxonomy and search templates, which render natively today"
+        }
+      }
+    },
+    {
+      "id": "contact",
+      "label": "Contact form",
+      "tier": "core",
+      "summary": "The enquiry form and its intro. Its fields and markup are in the contract; where a submission is delivered is not (SC-003).",
+      "platforms": {
+        "nextjs": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "contact"
+            }
+          ]
+        },
+        "wordpress": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "contact"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "locations",
+      "label": "Locations",
+      "tier": "core",
+      "summary": "Offices with addresses, opening hours, an open-now status and an optional consent-gated map.",
+      "sources": [
+        {
+          "id": "locations",
+          "label": "Locations",
+          "linked": false
+        }
+      ],
+      "platforms": {
+        "nextjs": {
+          "status": "owes",
+          "owes": "the section, planned as Salt for Next.js Epic WP8"
+        },
+        "wordpress": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "locations"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "pricing",
+      "label": "Pricing",
+      "tier": "edge",
+      "summary": "Plans with a price, a period, features and a call to action.",
+      "note": "Kept at the edge in Salt for Next.js on purpose (docs/recipes/pricing.md): the version every site needs does not exist. Whether it stays edge on both platforms is open-question pricing-tier.",
+      "platforms": {
+        "nextjs": {
+          "status": "edge",
+          "formerly": [
+            {
+              "name": "pricing",
+              "note": "apps/example/src/site/pricing, a recipe"
+            }
+          ]
+        },
+        "wordpress": {
+          "status": "edge",
+          "formerly": [
+            {
+              "name": "pricing",
+              "note": "ships in the parent theme today"
+            }
+          ],
+          "owes": "moving it out of the parent theme into a recipe, unless the owner rules it core"
+        }
+      }
+    }
+  ],
+  "components": [
+    {
+      "id": "section",
+      "label": "Section wrapper",
+      "summary": "Every section's band: spacing, tone, background, anchor and its accessible name.",
+      "platforms": {
+        "nextjs": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "Section"
+            }
+          ]
+        },
+        "wordpress": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "x-section"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "heading",
+      "label": "Heading",
+      "platforms": {
+        "nextjs": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "Heading"
+            }
+          ]
+        },
+        "wordpress": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "x-heading"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "platforms": {
+        "nextjs": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "Eyebrow"
+            }
+          ]
+        },
+        "wordpress": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "x-eyebrow"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "section-intro",
+      "label": "Section intro",
+      "summary": "The eyebrow, heading and intro text above a section's items.",
+      "platforms": {
+        "nextjs": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "Intro"
+            }
+          ]
+        },
+        "wordpress": {
+          "status": "owes",
+          "owes": "a shared intro component; sections write their own today"
+        }
+      }
+    },
+    {
+      "id": "button",
+      "label": "Button",
+      "platforms": {
+        "nextjs": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "Button"
+            }
+          ]
+        },
+        "wordpress": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "x-button"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "call-to-action-group",
+      "label": "Button group",
+      "platforms": {
+        "nextjs": {
+          "status": "owes",
+          "owes": "a named group; sections lay out their own buttons"
+        },
+        "wordpress": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "x-cta"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "arrow",
+      "label": "Arrow after a way onward",
+      "platforms": {
+        "nextjs": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "Arrow"
+            }
+          ]
+        },
+        "wordpress": {
+          "status": "owes",
+          "owes": "the arrow"
+        }
+      }
+    },
+    {
+      "id": "icon",
+      "label": "Icon",
+      "platforms": {
+        "nextjs": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "Icon",
+              "note": "createIcon"
+            }
+          ]
+        },
+        "wordpress": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "x-icon"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "media",
+      "label": "Image",
+      "platforms": {
+        "nextjs": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "Media"
+            }
+          ]
+        },
+        "wordpress": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "x-image"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "card",
+      "label": "Card",
+      "summary": "One card with a variant per source; the variants are fixed with the markup contract.",
+      "platforms": {
+        "nextjs": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "Card"
+            },
+            {
+              "name": "ShowcaseCard"
+            }
+          ]
+        },
+        "wordpress": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "x-card"
+            },
+            {
+              "name": "x-card-service"
+            },
+            {
+              "name": "x-card-work"
+            },
+            {
+              "name": "x-card-post"
+            },
+            {
+              "name": "x-card-team"
+            },
+            {
+              "name": "x-card-testimonial"
+            },
+            {
+              "name": "x-card-pricing"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "accordion",
+      "label": "Accordion",
+      "platforms": {
+        "nextjs": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "Accordion"
+            }
+          ]
+        },
+        "wordpress": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "x-accordion"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "tab-set",
+      "label": "Tab set",
+      "platforms": {
+        "nextjs": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "Tabs"
+            }
+          ]
+        },
+        "wordpress": {
+          "status": "owes",
+          "owes": "the tab set"
+        }
+      }
+    },
+    {
+      "id": "carousel-track",
+      "label": "Carousel track and controls",
+      "platforms": {
+        "nextjs": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "Carousel"
+            }
+          ]
+        },
+        "wordpress": {
+          "status": "partial",
+          "formerly": [
+            {
+              "name": "scroll_carousel and gallery carousel scripts"
+            }
+          ],
+          "owes": "one shared track"
+        }
+      }
+    },
+    {
+      "id": "rich-text-body",
+      "label": "Rich text body",
+      "platforms": {
+        "nextjs": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "RichText",
+              "note": "createRichText"
+            }
+          ]
+        },
+        "wordpress": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "salt_sanitize_html output"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "stat",
+      "label": "Stat",
+      "platforms": {
+        "nextjs": {
+          "status": "owes",
+          "owes": "a named component; stats renders inline"
+        },
+        "wordpress": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "x-stat"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "process-step",
+      "label": "Process step",
+      "platforms": {
+        "nextjs": {
+          "status": "owes",
+          "owes": "a named component; process renders inline"
+        },
+        "wordpress": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "x-process-step"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "pagination",
+      "label": "Pagination",
+      "platforms": {
+        "nextjs": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "Pagination"
+            }
+          ]
+        },
+        "wordpress": {
+          "status": "owes",
+          "owes": "pagination markup to the contract"
+        }
+      }
+    },
+    {
+      "id": "contact-form",
+      "label": "Contact form",
+      "platforms": {
+        "nextjs": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "ContactForm"
+            }
+          ]
+        },
+        "wordpress": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "contact section form"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "search-form",
+      "label": "Search form",
+      "platforms": {
+        "nextjs": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "SearchForm"
+            }
+          ]
+        },
+        "wordpress": {
+          "status": "partial",
+          "formerly": [
+            {
+              "name": "searchform (WordPress core)"
+            }
+          ],
+          "owes": "the contract's markup"
+        }
+      }
+    },
+    {
+      "id": "share-links",
+      "label": "Share links",
+      "platforms": {
+        "nextjs": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "ShareLinks"
+            }
+          ]
+        },
+        "wordpress": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "x-share-links"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "author-box",
+      "label": "Author box",
+      "platforms": {
+        "nextjs": {
+          "status": "owes",
+          "owes": "the author box"
+        },
+        "wordpress": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "x-author-box"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "opening-hours",
+      "label": "Opening hours",
+      "platforms": {
+        "nextjs": {
+          "status": "owes",
+          "owes": "with locations, WP8"
+        },
+        "wordpress": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "x-opening-hours"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "map",
+      "label": "Consent-gated map",
+      "platforms": {
+        "nextjs": {
+          "status": "owes",
+          "owes": "with locations, WP8"
+        },
+        "wordpress": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "x-map"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "booking",
+      "label": "Booking facade",
+      "platforms": {
+        "nextjs": {
+          "status": "owes",
+          "owes": "the booking facade"
+        },
+        "wordpress": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "x-booking"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "site-logo",
+      "label": "Site logo",
+      "platforms": {
+        "nextjs": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "SiteLogo"
+            }
+          ]
+        },
+        "wordpress": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "x-logo"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "site-header",
+      "label": "Site header and navigation",
+      "platforms": {
+        "nextjs": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "SiteHeader"
+            }
+          ]
+        },
+        "wordpress": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "site-header template part"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "site-footer",
+      "label": "Site footer",
+      "platforms": {
+        "nextjs": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "SiteFooter"
+            }
+          ]
+        },
+        "wordpress": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "site-footer template part"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "display-preferences",
+      "label": "Display preferences",
+      "platforms": {
+        "nextjs": {
+          "status": "partial",
+          "formerly": [
+            {
+              "name": "ThemeScript",
+              "note": "theme control"
+            }
+          ],
+          "owes": "the preferences widget"
+        },
+        "wordpress": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "x-display-preferences"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "fallback-heading",
+      "label": "Fallback page heading",
+      "summary": "The page's h1 when no section provides one, visually hidden.",
+      "platforms": {
+        "nextjs": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "FallbackHeading"
+            }
+          ]
+        },
+        "wordpress": {
+          "status": "owes",
+          "owes": "the visually hidden h1 when no section claims one"
+        }
+      }
+    }
+  ],
+  "views": [
+    {
+      "id": "page",
+      "label": "Builder page",
+      "platforms": {
+        "nextjs": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "[[...slug]] route"
+            }
+          ]
+        },
+        "wordpress": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "page.php"
+            },
+            {
+              "name": "front-page.php"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "post",
+      "label": "Post",
+      "platforms": {
+        "nextjs": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "blog post view"
+            }
+          ]
+        },
+        "wordpress": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "single-post.php"
+            },
+            {
+              "name": "single.php"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "service",
+      "label": "Service page",
+      "platforms": {
+        "nextjs": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "service view"
+            }
+          ]
+        },
+        "wordpress": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "single-service.php"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "case-study",
+      "label": "Case study",
+      "platforms": {
+        "nextjs": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "CaseStudyView"
+            }
+          ]
+        },
+        "wordpress": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "single-work.php"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "archive",
+      "label": "Archive and category pages",
+      "platforms": {
+        "nextjs": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "listing routes"
+            }
+          ]
+        },
+        "wordpress": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "home.php"
+            },
+            {
+              "name": "archive.php"
+            },
+            {
+              "name": "category.php"
+            },
+            {
+              "name": "tag.php"
+            },
+            {
+              "name": "taxonomy.php"
+            },
+            {
+              "name": "author.php"
+            },
+            {
+              "name": "date.php"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "search",
+      "label": "Search results",
+      "platforms": {
+        "nextjs": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "search route"
+            }
+          ]
+        },
+        "wordpress": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "search.php"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "not-found",
+      "label": "Page not found",
+      "platforms": {
+        "nextjs": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "not-found.tsx"
+            }
+          ]
+        },
+        "wordpress": {
+          "status": "ships",
+          "formerly": [
+            {
+              "name": "404.php"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "openQuestions": [
+    {
+      "id": "pricing-tier",
+      "question": "Does pricing stay an edge recipe on both platforms, or become a core section?",
+      "recommendation": "Edge on both: Salt for Next.js ruled it out of core because no single version serves every site; salt-wordpress moves its pricing layout into a grain-wordpress recipe.",
+      "affects": [
+        "pricing"
+      ]
+    },
+    {
+      "id": "call-to-action-id",
+      "question": "Is the section id call-to-action, or cta as both platforms call it today?",
+      "recommendation": "call-to-action: ids are read by people writing overrides and content migrations, and cta is the only abbreviated id. Both platforms already have to map stored slugs, so the rename costs one more entry each.",
+      "affects": [
+        "call-to-action"
+      ]
+    },
+    {
+      "id": "alignment-centre",
+      "question": "Is the centred option value centre (British) or center (CSS)?",
+      "recommendation": "centre in stored values and labels, mapped to text-align: center in the stylesheet; salt-wordpress stores center today and maps.",
+      "affects": [
+        "rich-text",
+        "hero"
+      ]
+    }
+  ]
+}
