@@ -359,7 +359,26 @@ echo "✓ the token-file schema's \$id names this package at its major"
 # inherits its quiet: `npm run -s verify:foundations-pack` exports npm_config_loglevel=silent
 # to this script, the inner publish printed nothing, and the check reported a blank target
 # as a wrong one. An empty read now fails as what it is.
-target=$( (cd "$root" && npm publish ./foundations --dry-run --loglevel=notice 2>&1) | sed -n 's/.*Publishing to \([^ ]*\).*/\1/p' | head -1)
+# The pin itself is asserted first, so deleting it fails here even where no redirect is in force.
+pinned=$(node -p 'require(process.argv[1]).publishConfig?.["@lightlysaltedhq:registry"] ?? ""' "$root/foundations/package.json")
+if [ "$pinned" != "https://registry.npmjs.org" ]; then
+  echo "✗ foundations/package.json publishConfig[\"@lightlysaltedhq:registry\"] is \"$pinned\", not https://registry.npmjs.org"
+  echo "      it is the one setting that beats a scope redirect, from this root or a developer's ~/.npmrc."
+  exit 1
+fi
+# The dry run publishes a COPY of the package at a version that can never exist on the registry.
+# npm 11 and later refuse a dry run of a version already published, before printing its target,
+# so probing the real version reported nothing between releases. The copy keeps every setting
+# that decides the target (publishConfig and the package's own .npmrc); the dry run still runs
+# from the repository root, where any scope redirect would be in force.
+probe="$work/probe"
+mkdir -p "$probe"
+cp "$root/foundations/package.json" "$root/foundations/.npmrc" "$probe/"
+node -e '
+  const fs = require("fs"), f = process.argv[1], p = JSON.parse(fs.readFileSync(f, "utf8"))
+  p.version = "0.0.0-pack-probe." + Date.now(); p.files = ["package.json"]; delete p.exports
+  fs.writeFileSync(f, JSON.stringify(p))' "$probe/package.json"
+target=$( (cd "$root" && npm publish "$probe" --dry-run --tag pack-probe --loglevel=notice 2>&1) | sed -n 's/.*Publishing to \([^ ]*\).*/\1/p' | head -1)
 if [ -z "$target" ]; then
   echo "✗ npm's dry run printed no 'Publishing to' line, so this check cannot tell where the"
   echo "      package would go. Run \`cd \"$root\" && npm publish ./foundations --dry-run\` and read it."
@@ -367,8 +386,8 @@ if [ -z "$target" ]; then
 fi
 if [ "$target" != "https://registry.npmjs.org" ]; then
   echo "✗ from the repository root, npm would publish this to $target"
-  echo "      publishConfig[\"@lightlysaltedhq:registry\"] is what overrides the root"
-  echo "      .npmrc's scope redirect. Neither publishConfig.registry nor --registry does."
+  echo "      publishConfig[\"@lightlysaltedhq:registry\"] is what overrides a scope redirect."
+  echo "      Neither publishConfig.registry nor --registry does."
   exit 1
 fi
 echo "✓ resolves to registry.npmjs.org even from the repository root"

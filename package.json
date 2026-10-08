@@ -16,7 +16,8 @@
     "verify:foundations-pack": "bash scripts/check_foundations_pack.sh",
     "verify:type-tokens-bundle": "esbuild foundations/scripts/type_tokens.mjs --bundle --platform=neutral --format=esm --log-level=warning --outfile=/dev/null && esbuild foundations/scripts/layout_roles.mjs --bundle --platform=neutral --format=esm --log-level=warning --outfile=/dev/null",
     "verify:actions-pinned": "bash scripts/check_actions_pinned.sh",
-    "verify": "npm run verify:actions-pinned && npm run foundations && npm run verify:foundations-pack && npm run verify:type-tokens-bundle"
+    "verify": "npm run test:scripts && npm run verify:actions-pinned && npm run foundations && npm run verify:foundations-pack && npm run verify:type-tokens-bundle",
+    "test:scripts": "node --test scripts/*.test.mjs"
   },
   "devDependencies": {
     "esbuild": "0.28.2",

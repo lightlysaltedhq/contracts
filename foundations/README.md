@@ -60,26 +60,25 @@ package, then checks the shipped bytes rather than the working tree: nothing fro
 `themes/` or `packages/` is present, the colour guard passes on what would actually go
 out, and every declared export resolves inside the archive.
 
-That first check is the one with teeth. npm packs relative to the directory holding the
-manifest, so a package rooted here cannot reach the palettes today — but "cannot today" is
-a property of where one file sits. Moving the manifest to the repository root would be a
-small, reasonable-looking change that publishes three products' palettes (Lightly Salted's
-own, in the Saltworks theme, and Wakemere's and Ezra's) to a public registry, permanently: npm unpublish does not recall what has already been fetched, and
-the tarball is mirrored the moment it lands.
+That first check keeps the tarball to this directory. npm packs relative to the directory
+holding the manifest, and this repository holds more than one package, so a manifest moved to
+the repository root would ship everything beside it, permanently: npm unpublish does not recall
+what has already been fetched, and the tarball is mirrored the moment it lands. The palettes
+that conform to this contract are not in this repository at all; they stay in the private
+design-system repository.
 
 **Releasing.** `.github/workflows/release-foundations.yml` stages this package on npmjs.com
 with npm trusted publishing (OIDC, no token anywhere) when a `foundations-v<version>` tag is
-pushed. Staged is not published: nothing is installable until a maintainer approves it. `v*`
-tags are the private design system's and never publish this package.
+pushed. Staged is not published: nothing is installable until a maintainer approves it. Each
+package in this repository releases on its own tag prefix.
 
-1. On a branch, set one version string in `package.json`, the top-level `version` in each
-   `contract/*.json`, and `contract.version` in `themes/ezra/theme.py` and
-   `themes/wakemere/theme.py` at the repository root. In a new major, also move the `@<major>`
-   in `schema/token-file.schema.json`'s `$id`. Run `npm run build` at the root, so
-   `build/ezra/index.json` and `build/wakemere/index.json` carry it. Move `CHANGELOG.md`'s
-   Unreleased section under the version, and merge to `main`. CI fails the branch if any of
-   those versions disagrees (`verify:foundations-pack` for the contract files and the `$id`, the conformance
-   check's VERSION rule for the themes) or `build/` is stale (`verify:tree`).
+1. On a branch, set one version string in `package.json` and the top-level `version` in each
+   `contract/*.json`. In a new major, also move the `@<major>` in
+   `schema/token-file.schema.json`'s `$id`. Move `CHANGELOG.md`'s Unreleased section under the
+   version, and merge to `main`. CI fails the branch if any of those versions disagrees
+   (`verify:foundations-pack`). Each implementation then moves its own exact pin in a reviewed
+   pull request; the design-system repository also moves the `contract.version` its themes
+   declare.
 2. Tag the merge commit on main, `foundations-v<version>`, and push the tag. The workflow
    checks that the tag matches `package.json`, that the commit is on `main` and that its
    `foundations/` is `main`'s, runs the contract's gates and the pack gate, and stages the
@@ -191,9 +190,10 @@ npm run foundations        # audit_vectors · check_derivation · check_no_colou
                            # check_prose_lengths · oklch selftest ·
                            # contrast_rules · selftest_emit · check_scale_shape · check_type_scale ·
                            # check_layout_roles   (needs Node 22+)
-npm run prove              # regenerate a theme and diff it against the commit, byte for byte
 ```
 
-`prove_byte_identity.py` takes `--theme` and defaults to `saltworks`. Its `--claim promotion`
+`scripts/prove_byte_identity.py` ships in the package for implementations to run against their
+own repository (the design-system runs it as `npm run prove`). It takes `--impl` and `--theme`,
+the latter defaulting to `saltworks`. Its `--claim promotion`
 (the default) fails unless the generator genuinely *imports* `emit.py`, because identical bytes
 from a generator that **copied** the machinery prove nothing at all.
