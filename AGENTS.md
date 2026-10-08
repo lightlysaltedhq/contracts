@@ -7,7 +7,7 @@ Lightly Salted's public contracts. Rules only: no brand values, no implementatio
 | Directory | Package | Notion Product | Release tag |
 | --- | --- | --- | --- |
 | `foundations/` | `@lightlysaltedhq/design-foundations` | Design System | `foundations-v*` |
-| `salt-contract/` (to come) | `@lightlysaltedhq/salt-contract` | Salt | `salt-contract-v*` |
+| `salt-contract/` | `@lightlysaltedhq/salt-contract` (0.x, unpublished) | Salt | `salt-contract-v*` |
 
 Each package is versioned and released on its own. Its own CHANGELOG says what each part of a
 version means.
