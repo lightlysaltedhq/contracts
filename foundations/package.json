@@ -1,6 +1,6 @@
 {
   "name": "@lightlysaltedhq/design-foundations",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "The design-system contract \u2014 tier model, role vocabulary, OKLCH derivation spec and frozen reference vectors. Rules for building a design system, and deliberately no colour values at all.",
   "license": "MIT",
   "repository": {
