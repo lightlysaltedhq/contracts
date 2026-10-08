@@ -1,0 +1,62 @@
+{
+  "$schema": "../../schema/markup.schema.json",
+  "version": "0.1.0",
+  "id": "heading",
+  "kind": "component",
+  "root": {
+    "element": [
+      "h1",
+      "h2",
+      "h3",
+      "h4",
+      "h5",
+      "h6"
+    ],
+    "attributes": {
+      "id": {
+        "value": "from:plan.headingId",
+        "when": "it names a section"
+      }
+    },
+    "note": "No class: the stylesheet styles headings by context (.salt-block > h*, card titles). The level is data, never a tag the author picked."
+  },
+  "headings": {
+    "provides": "always",
+    "level": "given",
+    "rules": [
+      "section#heading-level",
+      "section#body-heading-base"
+    ]
+  },
+  "zeroState": "Not drawn when its text is empty after trimming.",
+  "script": {
+    "kind": "none"
+  },
+  "notes": [
+    {
+      "topic": "ruling",
+      "text": "Visual size is decoupled from level by context in the stylesheet, so WordPress's size argument (xl, lg, md, sm) and its utility classes go."
+    }
+  ],
+  "platforms": {
+    "wordpress": {
+      "formerly": [
+        {
+          "role": "root",
+          "element": "h1-h6",
+          "classes": [
+            "x-heading",
+            "text-4xl",
+            "md:text-5xl",
+            "font-bold",
+            "tracking-tight",
+            "mb-6"
+          ]
+        }
+      ],
+      "owes": [
+        "Drop x-heading and size classes; take the id when it names a section."
+      ]
+    }
+  }
+}

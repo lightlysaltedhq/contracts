@@ -1,0 +1,167 @@
+{
+  "$schema": "../../schema/markup.schema.json",
+  "version": "0.1.0",
+  "id": "pagination",
+  "kind": "component",
+  "root": {
+    "element": "nav",
+    "classes": [
+      "salt-pagination"
+    ],
+    "attributes": {
+      "aria-label": "from:labels.nav"
+    }
+  },
+  "elements": [
+    {
+      "role": "list",
+      "element": "ul",
+      "classes": [
+        "salt-pagination__list"
+      ],
+      "attributes": {
+        "role": "list"
+      },
+      "children": [
+        {
+          "role": "previous",
+          "element": "li",
+          "optional": true,
+          "when": "current page > 1",
+          "children": [
+            {
+              "role": "previous-link",
+              "element": "a",
+              "classes": [
+                "salt-pagination__link"
+              ],
+              "attributes": {
+                "data-step": "previous",
+                "rel": "prev",
+                "href": "from:href(current - 1)"
+              },
+              "text": "from:labels.previous"
+            }
+          ]
+        },
+        {
+          "role": "page",
+          "element": "li",
+          "repeat": {
+            "from": "page window: first, last, current and its neighbours"
+          },
+          "children": [
+            {
+              "role": "page-link",
+              "element": "a",
+              "classes": [
+                "salt-pagination__link"
+              ],
+              "attributes": {
+                "href": "from:href(n)",
+                "aria-label": "from:labels.page",
+                "aria-current": {
+                  "value": "page",
+                  "when": "n is the current page"
+                }
+              },
+              "text": "from:n"
+            }
+          ]
+        },
+        {
+          "role": "gap",
+          "element": "li",
+          "classes": [
+            "salt-pagination__gap"
+          ],
+          "attributes": {
+            "aria-hidden": "true"
+          },
+          "text": "an ellipsis",
+          "repeat": {
+            "from": "gaps",
+            "max": 2
+          },
+          "optional": true,
+          "when": "pages are skipped"
+        },
+        {
+          "role": "next",
+          "element": "li",
+          "optional": true,
+          "when": "current page < total",
+          "children": [
+            {
+              "role": "next-link",
+              "element": "a",
+              "classes": [
+                "salt-pagination__link"
+              ],
+              "attributes": {
+                "data-step": "next",
+                "rel": "next",
+                "href": "from:href(current + 1)"
+              },
+              "text": "from:labels.next"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "headings": {
+    "provides": "never",
+    "level": "none"
+  },
+  "zeroState": "Not drawn when there is one page or none.",
+  "dataAttributes": [
+    {
+      "name": "data-step",
+      "on": "previous-link",
+      "values": [
+        "previous",
+        "next"
+      ]
+    }
+  ],
+  "script": {
+    "kind": "none"
+  },
+  "ruleRefs": [
+    "section#focus-ring",
+    "section#target-size",
+    "section#landmarks"
+  ],
+  "hooks": [
+    {
+      "class": "salt-pagination",
+      "role": "root",
+      "reason": "Names the pagination landmark for sites and tests; its list and links carry the rules."
+    }
+  ],
+  "notes": [
+    {
+      "topic": "order",
+      "text": "Gaps sit between page items where the window skips; the previous and next items open and close the list."
+    }
+  ],
+  "platforms": {
+    "wordpress": {
+      "formerly": [
+        {
+          "role": "root",
+          "element": "nav",
+          "classes": [
+            "navigation",
+            "pagination"
+          ],
+          "note": "the_posts_pagination(), WordPress core markup"
+        }
+      ],
+      "owes": [
+        "Pagination markup to the contract on archive and search templates."
+      ]
+    }
+  }
+}

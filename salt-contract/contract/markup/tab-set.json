@@ -1,0 +1,167 @@
+{
+  "$schema": "../../schema/markup.schema.json",
+  "version": "0.1.0",
+  "id": "tab-set",
+  "kind": "component",
+  "root": {
+    "element": "div",
+    "classes": [
+      "salt-tabs"
+    ],
+    "attributes": {
+      "data-tabbed": {
+        "value": "",
+        "when": "more than one panel and a non-blank name"
+      }
+    }
+  },
+  "elements": [
+    {
+      "role": "list",
+      "element": "div",
+      "classes": [
+        "salt-tabs__list"
+      ],
+      "attributes": {
+        "role": "radiogroup",
+        "aria-label": "from:label"
+      },
+      "optional": true,
+      "when": "tabbed",
+      "children": [
+        {
+          "role": "control",
+          "element": "div",
+          "classes": [
+            "salt-tabs__control"
+          ],
+          "repeat": {
+            "from": "panels",
+            "min": 2,
+            "max": 8
+          },
+          "children": [
+            {
+              "role": "input",
+              "element": "input",
+              "classes": [
+                "salt-tabs__input",
+                "salt-sr-only"
+              ],
+              "attributes": {
+                "type": "radio",
+                "name": "from:baseId",
+                "id": "<baseId>-tab-<n>",
+                "checked": {
+                  "value": "",
+                  "when": "first panel"
+                }
+              }
+            },
+            {
+              "role": "tab",
+              "element": "label",
+              "classes": [
+                "salt-tabs__tab"
+              ],
+              "attributes": {
+                "for": "<baseId>-tab-<n>",
+                "id": "<baseId>-label-<n>"
+              },
+              "text": "from:panel.label"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "role": "panels",
+      "element": "div",
+      "classes": [
+        "salt-tabs__panels"
+      ],
+      "children": [
+        {
+          "role": "panel",
+          "element": "div",
+          "classes": [
+            "salt-tabs__panel"
+          ],
+          "attributes": {
+            "id": "<baseId>-panel-<n>",
+            "role": {
+              "value": "group",
+              "when": "tabbed"
+            },
+            "aria-labelledby": {
+              "value": "<baseId>-label-<n>",
+              "when": "tabbed"
+            },
+            "tabindex": {
+              "value": "0",
+              "when": "tabbed"
+            }
+          },
+          "repeat": {
+            "from": "panels",
+            "min": 1,
+            "max": 8
+          },
+          "children": [
+            {
+              "role": "label",
+              "element": "p",
+              "classes": [
+                "salt-tabs__label"
+              ],
+              "text": "from:panel.label",
+              "note": "Hidden by the stylesheet when tabbed; the visible title of each stacked panel otherwise."
+            },
+            {
+              "role": "content",
+              "component": "rich-text-body"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "headings": {
+    "provides": "never",
+    "level": "none",
+    "children": "panel bodies rank from the section's body base"
+  },
+  "zeroState": "Not drawn with no panels. One panel, or a set with no name, draws the panels stacked with no radio group.",
+  "dataAttributes": [
+    {
+      "name": "data-tabbed",
+      "on": "root",
+      "values": "",
+      "when": "more than one panel and a name"
+    }
+  ],
+  "script": {
+    "kind": "none"
+  },
+  "uses": [
+    "rich-text-body"
+  ],
+  "ruleRefs": [
+    "section#focus-ring",
+    "section#target-size",
+    "section#sr-only"
+  ],
+  "notes": [
+    {
+      "topic": "ruling",
+      "text": "No script: radio inputs and :has(:checked) show the chosen panel. The group is a radiogroup, not an ARIA tablist, because it behaves as radios."
+    }
+  ],
+  "platforms": {
+    "wordpress": {
+      "owes": [
+        "The whole tab set (sections.json: WordPress owes the tabs section)."
+      ]
+    }
+  }
+}

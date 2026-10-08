@@ -1,0 +1,499 @@
+{
+  "$schema": "../../schema/markup.schema.json",
+  "version": "0.1.0",
+  "id": "site-header",
+  "kind": "component",
+  "root": {
+    "element": "header",
+    "classes": [
+      "salt-header"
+    ],
+    "attributes": {
+      "data-site-header": ""
+    }
+  },
+  "elements": [
+    {
+      "role": "inner",
+      "element": "div",
+      "classes": [
+        "salt-header__inner"
+      ],
+      "children": [
+        {
+          "role": "logo",
+          "component": "site-logo"
+        },
+        {
+          "role": "nav",
+          "element": "nav",
+          "classes": [
+            "salt-nav"
+          ],
+          "attributes": {
+            "aria-label": "from:labels.navigation"
+          },
+          "optional": true,
+          "when": "a menu is set",
+          "children": [
+            {
+              "role": "list",
+              "element": "ul",
+              "classes": [
+                "salt-nav__list"
+              ],
+              "attributes": {
+                "role": "list"
+              },
+              "children": [
+                {
+                  "role": "item",
+                  "element": "li",
+                  "classes": [
+                    "salt-nav__item"
+                  ],
+                  "attributes": {
+                    "data-enhanced": {
+                      "value": "",
+                      "when": "script has mounted the disclosure"
+                    },
+                    "data-open": {
+                      "value": "",
+                      "when": "submenu open"
+                    },
+                    "data-current-section": {
+                      "value": "",
+                      "when": "a child is current"
+                    }
+                  },
+                  "repeat": {
+                    "from": "menu"
+                  },
+                  "children": [
+                    {
+                      "role": "link",
+                      "element": [
+                        "a",
+                        "span"
+                      ],
+                      "classes": [
+                        "salt-nav__link"
+                      ],
+                      "attributes": {
+                        "href": {
+                          "value": "from:href",
+                          "when": "the item has a url"
+                        },
+                        "aria-current": {
+                          "value": "page",
+                          "when": "current"
+                        },
+                        "tabindex": {
+                          "value": "0",
+                          "when": "a span that opens a submenu"
+                        }
+                      },
+                      "text": "from:label"
+                    },
+                    {
+                      "role": "toggle",
+                      "element": [
+                        "button",
+                        "span"
+                      ],
+                      "classes": [
+                        "salt-nav__toggle"
+                      ],
+                      "attributes": {
+                        "type": "button",
+                        "aria-expanded": {
+                          "enum": [
+                            "true",
+                            "false"
+                          ]
+                        },
+                        "aria-controls": "from:submenu id",
+                        "aria-label": "from:labels.submenu",
+                        "aria-hidden": {
+                          "value": "true",
+                          "when": "span before script"
+                        }
+                      },
+                      "optional": true,
+                      "when": "the item has children",
+                      "children": [
+                        {
+                          "role": "caret",
+                          "component": "icon",
+                          "attributes": {
+                            "data-icon": "chevron-down",
+                            "data-size": "sm"
+                          }
+                        }
+                      ],
+                      "note": "A span carrying the caret before script; a button after."
+                    },
+                    {
+                      "role": "submenu",
+                      "element": [
+                        "ul",
+                        "div"
+                      ],
+                      "classes": [
+                        "salt-nav__submenu"
+                      ],
+                      "attributes": {
+                        "id": "<prefix>-submenu-<n>",
+                        "role": {
+                          "value": "list",
+                          "when": "ul"
+                        },
+                        "data-submenu": {
+                          "value": "site",
+                          "when": "the site renders its own submenu (div)"
+                        }
+                      },
+                      "optional": true,
+                      "when": "the item has children",
+                      "children": [
+                        {
+                          "role": "subitem",
+                          "element": "li",
+                          "classes": [
+                            "salt-nav__subitem"
+                          ],
+                          "repeat": {
+                            "from": "children"
+                          },
+                          "children": [
+                            {
+                              "role": "sublink",
+                              "element": [
+                                "a",
+                                "span"
+                              ],
+                              "classes": [
+                                "salt-nav__sublink"
+                              ],
+                              "attributes": {
+                                "href": "from:href",
+                                "aria-current": {
+                                  "value": "page",
+                                  "when": "current"
+                                }
+                              },
+                              "text": "from:label"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "role": "theme-toggle",
+          "element": "button",
+          "classes": [
+            "salt-theme-toggle"
+          ],
+          "attributes": {
+            "type": "button",
+            "aria-pressed": {
+              "enum": [
+                "true",
+                "false"
+              ]
+            },
+            "aria-label": "from:labels.theme"
+          },
+          "optional": true,
+          "when": "the theme toggle is offered in the header and named",
+          "children": [
+            {
+              "role": "theme-glyph",
+              "component": "icon",
+              "attributes": {
+                "data-size": "sm"
+              },
+              "repeat": {
+                "from": "sun, moon",
+                "max": 2
+              }
+            }
+          ],
+          "note": "A span.salt-theme-toggle[aria-hidden] placeholder until script mounts it."
+        },
+        {
+          "role": "phone",
+          "element": "a",
+          "classes": [
+            "salt-header__phone"
+          ],
+          "attributes": {
+            "href": "from:tel",
+            "aria-label": {
+              "value": "from:labels.phone",
+              "when": "set"
+            }
+          },
+          "optional": true,
+          "when": "a phone number normalises to a tel: link",
+          "children": [
+            {
+              "role": "phone-icon",
+              "component": "icon",
+              "attributes": {
+                "data-icon": "phone"
+              }
+            },
+            {
+              "role": "phone-number",
+              "element": "span",
+              "classes": [
+                "salt-header__phone-number"
+              ],
+              "text": "from:phone"
+            }
+          ]
+        },
+        {
+          "role": "cta",
+          "component": "button",
+          "classes": [
+            "salt-header__cta"
+          ],
+          "optional": true,
+          "when": "a header call to action has a label"
+        },
+        {
+          "role": "burger",
+          "element": "button",
+          "classes": [
+            "salt-header__burger"
+          ],
+          "attributes": {
+            "type": "button",
+            "aria-expanded": {
+              "enum": [
+                "true",
+                "false"
+              ]
+            },
+            "aria-label": "from:labels.menu",
+            "data-morph": {
+              "value": "closing",
+              "when": "animating closed"
+            }
+          },
+          "children": [
+            {
+              "role": "menu-morph",
+              "element": "svg",
+              "classes": [
+                "salt-icon",
+                "salt-menu-morph"
+              ],
+              "attributes": {
+                "data-icon": "menu",
+                "aria-hidden": "true"
+              },
+              "children": [
+                {
+                  "role": "bar",
+                  "element": "path",
+                  "classes": [
+                    "salt-menu-morph__bar"
+                  ],
+                  "repeat": {
+                    "from": "three bars",
+                    "max": 3
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "role": "drawer",
+          "element": "dialog",
+          "classes": [
+            "salt-drawer"
+          ],
+          "attributes": {
+            "aria-label": "from:labels.menu",
+            "tabindex": "-1"
+          },
+          "optional": true,
+          "when": "the burger is open (portalled)",
+          "children": [
+            {
+              "role": "drawer-close",
+              "element": "button",
+              "classes": [
+                "salt-drawer__close"
+              ],
+              "attributes": {
+                "type": "button",
+                "aria-label": "from:labels.closeMenu"
+              }
+            },
+            {
+              "role": "drawer-panel",
+              "element": "div",
+              "classes": [
+                "salt-drawer__panel"
+              ],
+              "text": "the nav again (ids prefixed -drawer), the phone link, the call to action"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "headings": {
+    "provides": "never",
+    "level": "none"
+  },
+  "dataAttributes": [
+    {
+      "name": "data-site-header",
+      "on": "root",
+      "values": ""
+    },
+    {
+      "name": "data-enhanced",
+      "on": "item",
+      "values": ""
+    },
+    {
+      "name": "data-open",
+      "on": "item",
+      "values": ""
+    },
+    {
+      "name": "data-current-section",
+      "on": "item",
+      "values": ""
+    },
+    {
+      "name": "data-submenu",
+      "on": "submenu",
+      "values": [
+        "site"
+      ]
+    },
+    {
+      "name": "data-morph",
+      "on": "burger",
+      "values": [
+        "closing"
+      ]
+    }
+  ],
+  "script": {
+    "kind": "progressive",
+    "withoutScript": "Links, submenus shown on hover and focus-within, and a noscript style that shows the full nav in place of the burger.",
+    "withScript": "Disclosure buttons for submenus, the burger opening a modal drawer dialog, the theme toggle, a sticky-focus guard and the measured header height."
+  },
+  "uses": [
+    "button",
+    "icon",
+    "site-logo"
+  ],
+  "ruleRefs": [
+    "section#landmarks",
+    "section#focus-ring",
+    "section#target-size",
+    "section#reduced-motion"
+  ],
+  "hooks": [
+    {
+      "class": "salt-menu-morph",
+      "role": "menu-morph",
+      "reason": "The burger glyph whose bars animate to a cross; the rules select its bars (salt-menu-morph__bar)."
+    }
+  ],
+  "notes": [
+    {
+      "topic": "open-question",
+      "text": "WordPress's sticky header is a class (is-sticky); Next has no sticky option on the header element. Needs a ruling (data-sticky) before either migrates."
+    },
+    {
+      "topic": "ruling",
+      "text": "The call to action follows the nav, then the burger, in both platforms' order."
+    }
+  ],
+  "platforms": {
+    "wordpress": {
+      "formerly": [
+        {
+          "role": "root",
+          "element": "header",
+          "classes": [
+            "x-header",
+            "is-sticky",
+            "bg-surface",
+            "border-b"
+          ]
+        },
+        {
+          "role": "inner",
+          "element": "div",
+          "classes": [
+            "mx-auto",
+            "flex",
+            "max-w-7xl"
+          ]
+        },
+        {
+          "role": "nav",
+          "element": "nav",
+          "classes": [
+            "x-nav"
+          ],
+          "attributes": [
+            "aria-label=Primary"
+          ]
+        },
+        {
+          "role": "list",
+          "element": "ul",
+          "classes": [
+            "x-nav-menu"
+          ]
+        },
+        {
+          "role": "item",
+          "element": "li",
+          "classes": [
+            "x-nav-item",
+            "menu-item"
+          ]
+        },
+        {
+          "role": "link",
+          "element": "a",
+          "classes": [
+            "x-nav-link"
+          ]
+        },
+        {
+          "role": "cta",
+          "element": "a",
+          "classes": [
+            "x-button",
+            "x-button-primary",
+            "x-header-cta"
+          ]
+        }
+      ],
+      "owes": [
+        "Rename to salt-header and salt-nav*; the burger, drawer, submenu disclosure, phone link and theme toggle; data-site-header."
+      ]
+    }
+  }
+}

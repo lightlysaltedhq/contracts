@@ -1,0 +1,227 @@
+{
+  "$schema": "../../schema/markup.schema.json",
+  "version": "0.1.0",
+  "id": "share-links",
+  "kind": "component",
+  "root": {
+    "element": "div",
+    "classes": [
+      "salt-share"
+    ],
+    "attributes": {
+      "role": "group",
+      "aria-label": "from:labels.group"
+    }
+  },
+  "elements": [
+    {
+      "role": "heading",
+      "element": "p",
+      "classes": [
+        "salt-share__heading"
+      ],
+      "text": "from:heading",
+      "optional": true,
+      "when": "a visible heading is set",
+      "note": "A paragraph, never a heading."
+    },
+    {
+      "role": "list",
+      "element": "ul",
+      "classes": [
+        "salt-share__list"
+      ],
+      "attributes": {
+        "role": "list"
+      },
+      "optional": true,
+      "when": "at least one service",
+      "children": [
+        {
+          "role": "item",
+          "element": "li",
+          "repeat": {
+            "from": "services"
+          },
+          "children": [
+            {
+              "role": "link",
+              "element": "a",
+              "classes": [
+                "salt-share__link"
+              ],
+              "attributes": {
+                "href": "from:share intent",
+                "data-share": {
+                  "enum": [
+                    "x",
+                    "facebook",
+                    "linkedin",
+                    "whatsapp",
+                    "bluesky",
+                    "reddit",
+                    "email",
+                    "pinterest"
+                  ]
+                }
+              },
+              "text": "from:labels.services.<service>"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "role": "copy",
+      "element": "span",
+      "classes": [
+        "salt-copy-link"
+      ],
+      "optional": true,
+      "when": "copy is offered",
+      "children": [
+        {
+          "role": "copy-button",
+          "element": "button",
+          "classes": [
+            "salt-copy-link__button"
+          ],
+          "attributes": {
+            "type": "button",
+            "data-ready": {
+              "enum": [
+                "true",
+                "false"
+              ]
+            }
+          },
+          "text": "from:labels.copy"
+        },
+        {
+          "role": "copy-status",
+          "element": "span",
+          "classes": [
+            "salt-copy-link__status"
+          ],
+          "attributes": {
+            "role": "status",
+            "aria-live": "polite"
+          }
+        }
+      ]
+    }
+  ],
+  "headings": {
+    "provides": "never",
+    "level": "none"
+  },
+  "dataAttributes": [
+    {
+      "name": "data-share",
+      "on": "link",
+      "values": [
+        "x",
+        "facebook",
+        "linkedin",
+        "whatsapp",
+        "bluesky",
+        "reddit",
+        "email",
+        "pinterest"
+      ]
+    },
+    {
+      "name": "data-ready",
+      "on": "copy-button",
+      "values": [
+        "true",
+        "false"
+      ]
+    }
+  ],
+  "script": {
+    "kind": "progressive",
+    "withoutScript": "The share links work as plain links; the copy button is drawn not-ready (data-ready=false).",
+    "withScript": "The copy button copies the url and announces the result in its status."
+  },
+  "ruleRefs": [
+    "section#focus-ring",
+    "section#target-size"
+  ],
+  "hooks": [
+    {
+      "class": "salt-share__heading",
+      "role": "heading",
+      "reason": "WordPress's optional visible label; no rule in the shared stylesheets yet."
+    }
+  ],
+  "notes": [
+    {
+      "topic": "open-question",
+      "text": "WordPress draws icon-only links named by aria-label and opens them in a new tab; Next draws text links in the same tab. The contract follows Next (text, same tab) until the owner rules."
+    }
+  ],
+  "platforms": {
+    "nextjs": {
+      "owes": [
+        "The optional visible heading (p.salt-share__heading)."
+      ]
+    },
+    "wordpress": {
+      "formerly": [
+        {
+          "role": "root",
+          "element": "div",
+          "classes": [
+            "x-share"
+          ]
+        },
+        {
+          "role": "heading",
+          "element": "p",
+          "classes": [
+            "x-share-heading"
+          ]
+        },
+        {
+          "role": "list",
+          "element": "ul",
+          "classes": [
+            "x-share-list"
+          ]
+        },
+        {
+          "role": "link",
+          "element": "a",
+          "classes": [
+            "x-share-link"
+          ],
+          "attributes": [
+            "aria-label=Share on <Service>",
+            "target=_blank"
+          ]
+        },
+        {
+          "role": "copy",
+          "element": "li",
+          "attributes": [
+            "hidden",
+            "data-share-copy-item"
+          ]
+        },
+        {
+          "role": "copy-button",
+          "element": "button",
+          "attributes": [
+            "data-share-copy",
+            "data-share-url",
+            "data-copied-label"
+          ]
+        }
+      ],
+      "owes": [
+        "role=group with a name; text links with data-share; the copy control as span.salt-copy-link after the list."
+      ]
+    }
+  }
+}

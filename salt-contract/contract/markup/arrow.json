@@ -1,0 +1,38 @@
+{
+  "$schema": "../../schema/markup.schema.json",
+  "version": "0.1.0",
+  "id": "arrow",
+  "kind": "component",
+  "root": {
+    "element": "span",
+    "classes": [
+      "salt-arrow"
+    ],
+    "attributes": {
+      "aria-hidden": "true"
+    },
+    "note": "Its text begins with U+2060 (word joiner), then the site's arrow glyph, so it never wraps alone."
+  },
+  "headings": {
+    "provides": "never",
+    "level": "none"
+  },
+  "zeroState": "Not drawn when the site supplies no arrow.",
+  "script": {
+    "kind": "none"
+  },
+  "platforms": {
+    "wordpress": {
+      "formerly": [
+        {
+          "role": "root",
+          "element": "span",
+          "note": "span[aria-hidden] with a right-arrow entity inside x-button-link-arrow"
+        }
+      ],
+      "owes": [
+        "The arrow as its own span.salt-arrow with the word joiner, after card titles and link buttons."
+      ]
+    }
+  }
+}

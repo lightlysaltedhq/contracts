@@ -1,0 +1,512 @@
+{
+  "$schema": "../../schema/markup.schema.json",
+  "version": "0.1.0",
+  "id": "collection-showcase",
+  "kind": "section",
+  "tier": "core",
+  "root": {
+    "element": "div",
+    "classes": [
+      "salt-block"
+    ],
+    "attributes": {
+      "data-block": "collection-showcase",
+      "data-source": {
+        "enum": [
+          "services",
+          "case-studies",
+          "testimonials",
+          "posts",
+          "team"
+        ]
+      }
+    }
+  },
+  "elements": [
+    {
+      "role": "eyebrow",
+      "component": "eyebrow",
+      "optional": true,
+      "when": "eyebrow is set"
+    },
+    {
+      "role": "heading",
+      "component": "heading",
+      "attributes": {
+        "id": "from:plan.headingId"
+      },
+      "optional": true,
+      "when": "heading is set",
+      "note": "Level from the plan (section#heading-level)."
+    },
+    {
+      "role": "intro",
+      "element": "p",
+      "classes": [
+        "salt-intro"
+      ],
+      "text": "from:intro",
+      "optional": true,
+      "when": "intro is set"
+    },
+    {
+      "role": "list",
+      "element": "ul",
+      "classes": [
+        "salt-grid",
+        "salt-showcase"
+      ],
+      "attributes": {
+        "role": "list",
+        "data-layout": {
+          "enum": [
+            "grid",
+            "list",
+            "featured"
+          ]
+        },
+        "data-columns": {
+          "enum": [
+            "2",
+            "3",
+            "4"
+          ],
+          "when": "not list"
+        }
+      },
+      "children": [
+        {
+          "role": "item",
+          "element": "li",
+          "attributes": {
+            "data-featured": {
+              "value": "true",
+              "when": "featured layout, first item"
+            }
+          },
+          "repeat": {
+            "from": "cards",
+            "min": 1
+          },
+          "children": [
+            {
+              "role": "card",
+              "component": "card",
+              "note": "Quote style for testimonials, generic otherwise; the featured case study's lead card carries results."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "role": "view-all",
+      "element": "p",
+      "classes": [
+        "salt-showcase__view-all"
+      ],
+      "optional": true,
+      "when": "view all is on and the collection has an index",
+      "children": [
+        {
+          "role": "view-all-link",
+          "component": "button",
+          "attributes": {
+            "data-style": "link"
+          },
+          "text": "from:label or labels.viewAll"
+        }
+      ]
+    }
+  ],
+  "variants": [
+    {
+      "field": "layout",
+      "sameOrder": false,
+      "options": {
+        "grid": {
+          "elements": {
+            "list": {
+              "attributes": {
+                "data-layout": "grid"
+              }
+            }
+          }
+        },
+        "list": {
+          "elements": {
+            "list": {
+              "attributes": {
+                "data-layout": "list"
+              }
+            }
+          },
+          "note": "No data-columns."
+        },
+        "featured": {
+          "elements": {
+            "list": {
+              "attributes": {
+                "data-layout": "featured"
+              }
+            },
+            "item": {
+              "attributes": {
+                "data-featured": {
+                  "value": "true",
+                  "when": "first item"
+                }
+              }
+            }
+          }
+        },
+        "accordion": {
+          "replace": {
+            "list": {
+              "role": "accordion",
+              "component": "accordion",
+              "attributes": {
+                "name": "showcase-<section index>"
+              },
+              "children": [
+                {
+                  "role": "panel",
+                  "element": [
+                    "div",
+                    "figure"
+                  ],
+                  "classes": [
+                    "salt-showcase__panel"
+                  ],
+                  "children": [
+                    {
+                      "role": "panel-meta",
+                      "element": "p",
+                      "classes": [
+                        "salt-showcase__meta"
+                      ],
+                      "optional": true,
+                      "when": "meta is set"
+                    },
+                    {
+                      "role": "panel-date",
+                      "element": "p",
+                      "classes": [
+                        "salt-showcase__meta"
+                      ],
+                      "optional": true,
+                      "when": "date is set",
+                      "children": [
+                        {
+                          "role": "panel-time",
+                          "element": "time",
+                          "attributes": {
+                            "datetime": "from:date"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "role": "panel-text",
+                      "element": "p",
+                      "classes": [
+                        "salt-showcase__text"
+                      ],
+                      "optional": true,
+                      "when": "text is set"
+                    },
+                    {
+                      "role": "panel-link",
+                      "element": "p",
+                      "optional": true,
+                      "when": "the item has a page",
+                      "children": [
+                        {
+                          "role": "panel-anchor",
+                          "element": "a",
+                          "classes": [
+                            "salt-showcase__link"
+                          ],
+                          "attributes": {
+                            "href": "from:href"
+                          },
+                          "text": "from:title"
+                        }
+                      ]
+                    },
+                    {
+                      "role": "panel-caption",
+                      "element": "figcaption",
+                      "classes": [
+                        "salt-showcase__caption"
+                      ],
+                      "optional": true,
+                      "when": "testimonials"
+                    }
+                  ],
+                  "note": "Each item's content. Testimonials: figure.salt-showcase__panel.salt-showcase__quote with rating, blockquote and a figcaption meta line."
+                }
+              ]
+            }
+          },
+          "note": "Summary is the title; no image and no heading in a panel."
+        },
+        "index": {
+          "replace": {
+            "list": {
+              "role": "index-groups",
+              "element": "div",
+              "classes": [
+                "salt-showcase__group"
+              ],
+              "repeat": {
+                "from": "groups, when the source is grouped"
+              },
+              "children": [
+                {
+                  "role": "group-heading",
+                  "component": "heading",
+                  "note": "Level: body base + 1."
+                },
+                {
+                  "role": "index",
+                  "element": "ul",
+                  "classes": [
+                    "salt-showcase__index"
+                  ],
+                  "attributes": {
+                    "role": "list"
+                  },
+                  "children": [
+                    {
+                      "role": "entry",
+                      "element": "li",
+                      "repeat": {
+                        "from": "entries"
+                      },
+                      "children": [
+                        {
+                          "role": "entry-link",
+                          "element": "a",
+                          "classes": [
+                            "salt-showcase__link"
+                          ],
+                          "attributes": {
+                            "href": "from:href"
+                          },
+                          "text": "from:title"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "note": "Ungrouped: the index list alone. Grouped: uncategorised entries first as an unheaded index list, then one group per term."
+            }
+          },
+          "note": "Linked sources only."
+        }
+      },
+      "note": "accordion and index draw a different structure at the list's position; grid, list and featured differ by attribute only."
+    }
+  ],
+  "headings": {
+    "provides": "when heading is set",
+    "role": "heading",
+    "level": "plan",
+    "labelledBy": true,
+    "rules": [
+      "section#heading-level",
+      "section#single-h1",
+      "section#labelled-by"
+    ],
+    "headingBeforeOwn": "no heading of its own and the layout draws headings (cards, or a grouped index)",
+    "children": "card and group titles at body base + 1"
+  },
+  "zeroState": "The source is not installed, index on an unlinked source, or no card survives.",
+  "priorityMedia": {
+    "role": "card",
+    "when": "the first card's image, except for testimonials, when the plan grants priority and the section has no renderable background",
+    "rules": [
+      "section#priority-media"
+    ]
+  },
+  "dataAttributes": [
+    {
+      "name": "data-source",
+      "on": "root",
+      "values": [
+        "services",
+        "case-studies",
+        "testimonials",
+        "posts",
+        "team"
+      ]
+    },
+    {
+      "name": "data-layout",
+      "on": "list",
+      "values": [
+        "grid",
+        "list",
+        "featured"
+      ]
+    },
+    {
+      "name": "data-columns",
+      "on": "list",
+      "values": [
+        "2",
+        "3",
+        "4"
+      ],
+      "when": "not list"
+    },
+    {
+      "name": "data-featured",
+      "on": "item",
+      "values": [
+        "true"
+      ],
+      "when": "featured, first item"
+    }
+  ],
+  "script": {
+    "kind": "none"
+  },
+  "uses": [
+    "section",
+    "section-intro",
+    "card",
+    "stat",
+    "accordion",
+    "button",
+    "arrow",
+    "icon",
+    "media",
+    "heading",
+    "eyebrow"
+  ],
+  "ruleRefs": [
+    "section#list-semantics",
+    "section#focus-ring"
+  ],
+  "notes": [
+    {
+      "topic": "variant-order",
+      "text": "layout accordion and index replace the card list with an accordion or link index (sameOrder false)."
+    },
+    {
+      "topic": "order",
+      "text": "Platforms differ on featured: WordPress draws the lead card then a nested grid of the rest; Next one flat list with data-featured on the first item. Ruled: the flat list."
+    },
+    {
+      "topic": "open-question",
+      "text": "WordPress's testimonials slider becomes the carousel section with source testimonials, not a showcase layout."
+    }
+  ],
+  "platforms": {
+    "nextjs": {
+      "formerly": [
+        {
+          "role": "root",
+          "element": "div",
+          "classes": [
+            "salt-block"
+          ],
+          "attributes": [
+            "data-block=collectionShowcase"
+          ]
+        }
+      ],
+      "owes": [
+        "data-block collection-showcase."
+      ]
+    },
+    "wordpress": {
+      "formerly": [
+        {
+          "role": "eyebrow",
+          "element": "p",
+          "classes": [
+            "x-eyebrow",
+            "mb-2"
+          ]
+        },
+        {
+          "role": "heading",
+          "element": "h1|h2",
+          "classes": [
+            "x-heading",
+            "mb-6"
+          ],
+          "note": "No id; the WordPress section has no aria-labelledby."
+        },
+        {
+          "element": "header",
+          "classes": [
+            "x-work-header",
+            "x-blog-teaser-header"
+          ]
+        },
+        {
+          "role": "list",
+          "element": "div|ul",
+          "classes": [
+            "x-services-grid",
+            "x-services-list",
+            "x-services-featured",
+            "x-work-grid",
+            "x-team-grid",
+            "x-testimonials-grid",
+            "x-blog-teaser-grid",
+            "x-testimonials-single",
+            "list-none",
+            "grid",
+            "gap-6"
+          ]
+        },
+        {
+          "role": "item",
+          "element": "li",
+          "classes": [
+            "x-work-grid-item",
+            "x-blog-teaser-grid-item",
+            "flex"
+          ],
+          "note": "Services and testimonials have no li"
+        },
+        {
+          "element": "div",
+          "classes": [
+            "x-card-service-featured",
+            "bg-brand-tint"
+          ],
+          "note": "Featured lead card class; replaced by data-featured on its li"
+        },
+        {
+          "role": "view-all",
+          "element": "div",
+          "classes": [
+            "x-work-view-all",
+            "x-blog-teaser-view-all",
+            "mt-8",
+            "mt-10"
+          ]
+        },
+        {
+          "role": "view-all-link",
+          "element": "a",
+          "classes": [
+            "x-button-link-arrow"
+          ]
+        }
+      ],
+      "owes": [
+        "Write the block root div.salt-block with data-block set to the contract id inside the section wrapper (section.json).",
+        "Give the section heading the plan's id and point the wrapper's aria-labelledby at it (section#labelled-by).",
+        "Drop Tailwind utility classes from the markup; the shared stylesheets style the salt-* classes.",
+        "One section in place of services, work, team, testimonials and blog_teaser; ul/li in every layout; a flat featured list; the accordion and index layouts."
+      ]
+    }
+  }
+}

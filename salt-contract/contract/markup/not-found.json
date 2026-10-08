@@ -1,0 +1,81 @@
+{
+  "$schema": "../../schema/markup.schema.json",
+  "version": "0.1.0",
+  "id": "not-found",
+  "kind": "view",
+  "summary": "Page not found.",
+  "root": {
+    "element": "main",
+    "attributes": {
+      "id": "main",
+      "tabindex": "-1"
+    },
+    "note": "Inside the document skeleton page.json draws once (section#landmarks)."
+  },
+  "elements": [
+    {
+      "role": "title",
+      "element": "h1",
+      "text": "from:labels.notFound"
+    },
+    {
+      "role": "message",
+      "element": "p",
+      "text": "from:labels.message"
+    },
+    {
+      "role": "search",
+      "component": "search-form",
+      "optional": true,
+      "when": "search is offered"
+    },
+    {
+      "role": "home",
+      "element": "a",
+      "attributes": {
+        "href": "/"
+      },
+      "text": "from:labels.home",
+      "optional": true,
+      "when": "a home page exists"
+    }
+  ],
+  "headings": {
+    "provides": "always",
+    "level": "fixed",
+    "fixedLevel": 1,
+    "rules": [
+      "section#single-h1"
+    ],
+    "role": "title"
+  },
+  "script": {
+    "kind": "none"
+  },
+  "uses": [
+    "search-form"
+  ],
+  "ruleRefs": [
+    "section#landmarks",
+    "section#single-h1"
+  ],
+  "platforms": {
+    "wordpress": {
+      "formerly": [
+        {
+          "role": "root",
+          "element": "main",
+          "note": "404.php"
+        }
+      ],
+      "owes": [
+        "The order above: heading, message, search, home link (WordPress puts search before the home link, as here)."
+      ]
+    },
+    "nextjs": {
+      "owes": [
+        "The home link after the search form, as its own paragraph-less link."
+      ]
+    }
+  }
+}

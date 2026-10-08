@@ -1,0 +1,95 @@
+{
+  "$schema": "../../schema/field-definition.schema.json",
+  "version": "0.1.0",
+  "section": "faq",
+  "shared": {
+    "id": "section-settings"
+  },
+  "fields": [
+    {
+      "name": "eyebrow",
+      "type": "text",
+      "label": "Eyebrow",
+      "description": "A short label above the heading. Drawn as a paragraph, never a heading."
+    },
+    {
+      "name": "heading",
+      "type": "text",
+      "label": "Heading",
+      "description": "Optional. The questions come from the FAQs collection."
+    },
+    {
+      "name": "intro",
+      "type": "textarea",
+      "label": "Intro",
+      "maxLength": 300,
+      "description": "Optional. A line or two under the heading, drawn as one paragraph.",
+      "platforms": {
+        "wordpress": {
+          "owes": "the field"
+        }
+      }
+    },
+    {
+      "name": "query",
+      "type": "collection-query",
+      "label": "Which questions to show",
+      "source": "faqs",
+      "platforms": {
+        "nextjs": {
+          "formerly": "query",
+          "values": {
+            "mode": {
+              "auto": "automatic",
+              "filtered": "by-category",
+              "manual": "manual"
+            },
+            "sortBy": {
+              "": "default",
+              "date": "newest",
+              "title": "title"
+            }
+          },
+          "note": "Stored as {mode, terms, items, sortBy, limit}; terms becomes categories, sortBy becomes order, limit becomes count."
+        },
+        "wordpress": {
+          "formerly": [
+            "source",
+            "manual",
+            "taxonomy_terms",
+            "orderby",
+            "order",
+            "count"
+          ],
+          "values": {
+            "source": {
+              "default": "automatic",
+              "taxonomy": "by-category",
+              "manual": "manual"
+            },
+            "orderby": {
+              "": "default",
+              "menu_order": "default",
+              "date": "newest",
+              "title": "title"
+            }
+          },
+          "owes": "one query group in place of six layout fields",
+          "note": "Stored as the layout's own source, taxonomy_terms, manual, orderby, order and count; taxonomy_terms becomes categories, manual becomes items, orderby and order fold into order, count stays count. Order ascending/descending has no contract equivalent (open question 2)."
+        }
+      }
+    },
+    {
+      "name": "structuredData",
+      "type": "boolean",
+      "label": "Describe these as FAQs for search engines",
+      "default": true,
+      "platforms": {
+        "wordpress": {
+          "formerly": "schema_toggle",
+          "note": "A row saved before the field existed reads as on."
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,735 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "field-definition.schema.json",
+  "title": "A Salt section's editor fields, defined once for both platforms",
+  "description": "One file per section in contract/fields/<section id>.json, plus contract/fields/_section-settings.json for the wrapper settings every section carries. Salt for Next.js generates Payload fields from these files and Salt for WordPress generates ACF fields from them (SC-003: names, types, choices, limits and descriptions must match). Neither platform is the reference (SC-001): where they disagreed, each file records the canonical definition and, under platforms.<platform>, what that platform called it before and what it owes.\n\nFIELD TYPES are limited to what both Payload and ACF Pro can express, and the list is closed: a type outside it is refused. text (Payload text; ACF text, or url when format is url). textarea. rich-text (Payload Lexical; ACF wysiwyg), with an allowed list of element kinds. image (Payload upload; ACF image, or gallery when many). link (a fixed shape: label, type internal|external, document, url, newTab; Payload group; ACF group or link). select (Payload select or radio; ACF select, radio or button_group: the widget is admin presentation and stays native). boolean (Payload checkbox; ACF true_false). number. list (Payload array; ACF repeater). group (both group). relationship (Payload relationship; ACF relationship or post_object) to a source id from contract/sections.json. collection-query (the shared 'pick items from a source' control, below).\n\nNAMES are canonical ids, camelCase ASCII, unique among siblings, and stable: renaming one is a MAJOR (RELEASE-POLICY.md section 2). Option values are lower-case kebab ids. Empty-string option values are not allowed; a 'nothing chosen' choice gets a word (auto, focal-point, default).\n\nCONDITIONS show a field only when a SIBLING field (same object: section, row or group) equals a value, or is one of several values. An array of clauses means all must hold. No other expression form exists: no paths, no parent or root data, no 'is filled' test. Where a platform used one, the field carries no condition, its description says when it applies, and the platform's note records the dropped condition.\n\nSHARED SETTINGS. Every section file names the shared wrapper settings in 'shared'; they live in contract/fields/_section-settings.json and are stored in a group named 'settings' on each section. A section may change a shared field's default ('defaults') or leave a shared field out ('omit'). The settings file itself has section id 'section-settings' and must not carry 'shared' (the if/then at the end of this schema); no section in contract/sections.json may take that id.\n\nCOLLECTION-QUERY stores one object of this fixed shape. mode: automatic (the collection's usual order) | by-category | manual; default automatic. categories: terms from the source's own category taxonomy, many, shown when mode is by-category, and only offered for a source that has categories. items: hand-picked items of the source, many, in the order picked, shown when mode is manual. order: default (the collection's usual order) | newest | title (A to Z), shown unless mode is manual. count: whole number from 0 to 'max' (default 24), 0 meaning the section's default for that source, shown unless mode is manual. 'source' fixes the source; 'sourceField' names a sibling select whose value picks it.\n\nGATE JOBS JSON Schema cannot do here, for a later script: sibling names unique; a condition's field names an existing sibling; a select default is one of its options; rowLabel names a child field; every source id exists in contract/sections.json; every variant in sections.json appears as a select with the same values.\n\nOPEN QUESTIONS (drafted 08/10/2026, owner to rule; nothing below was guessed into the field files beyond the choice stated). (1) mode values: the brief proposed manual|latest|by-category; 'automatic' was chosen because the default order is not newest-first for services, faqs, team or locations. (2) order: Salt for WordPress offers menu order and ascending/descending separately; the contract keeps Salt for Next.js's default|newest|title, so oldest-first and Z to A are dropped unless the owner wants them added on both. (3) Conditions cannot say 'when a sibling is filled'; Salt for Next.js uses that for the background image's fit, position and scrim and for the tabs and carousel screen-reader name. Add a 'filled' clause (MINOR) or keep them unconditional. (4) Settled: sections.json names the carousel variant field cardStyle, and the gate now checks variant names, options, labels and defaults against these files. (5) hero full-bleed: Salt for Next.js draws the section's background image behind the words; Salt for WordPress draws the hero's own image edge to edge above the text. The fields follow Next (image only for split and stacked); the visitor output is the markup contract's call. (6) Category taxonomies: Salt for WordPress filters team by department and locations by area; Salt for Next.js has no team categories. by-category is offered wherever the source has categories, so Next owes team categories or the contract drops them. (7) Reserved anchor ids differ: Next refuses 'navigation', WordPress 'primary-navigation'. (8) collection-showcase source has no contract default (Next defaults to the first installed source). (9) The divider: Next draws a rule above the section, WordPress below its content.",
+  "type": "object",
+  "required": [
+    "$schema",
+    "version",
+    "section",
+    "fields"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string"
+    },
+    "$comment": {
+      "type": "string"
+    },
+    "section": {
+      "description": "The section id from contract/sections.json, or 'section-settings' for the shared wrapper settings file.",
+      "$ref": "#/$defs/id"
+    },
+    "shared": {
+      "description": "The shared settings this section carries, stored in a group named 'settings'.",
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "const": "section-settings"
+        },
+        "defaults": {
+          "description": "Shared field name to this section's default for it.",
+          "type": "object",
+          "propertyNames": {
+            "$ref": "#/$defs/name"
+          },
+          "additionalProperties": {
+            "type": [
+              "string",
+              "boolean",
+              "number"
+            ]
+          }
+        },
+        "omit": {
+          "description": "Shared fields this section does not carry.",
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/name"
+          }
+        }
+      }
+    },
+    "fields": {
+      "$ref": "#/$defs/fields"
+    }
+  },
+  "if": {
+    "properties": {
+      "section": {
+        "const": "section-settings"
+      }
+    }
+  },
+  "then": {
+    "not": {
+      "required": [
+        "shared"
+      ]
+    }
+  },
+  "else": {
+    "required": [
+      "shared"
+    ]
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*$"
+    },
+    "name": {
+      "description": "A canonical field name: camelCase ASCII. Stable; renaming is a MAJOR.",
+      "type": "string",
+      "pattern": "^[a-z][a-zA-Z0-9]*$"
+    },
+    "value": {
+      "description": "A stored option value: a lower-case kebab id, digits allowed.",
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+    },
+    "source": {
+      "description": "A source id from contract/sections.json that holds items (not 'inline').",
+      "enum": [
+        "services",
+        "case-studies",
+        "testimonials",
+        "posts",
+        "team",
+        "faqs",
+        "locations"
+      ]
+    },
+    "text": {
+      "type": "string",
+      "minLength": 1
+    },
+    "count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "fields": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/field"
+      }
+    },
+    "clause": {
+      "type": "object",
+      "required": [
+        "field"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "field": {
+          "description": "A sibling field's name. Paths are not names, so a parent's or another row's field cannot be reached.",
+          "$ref": "#/$defs/name"
+        },
+        "equals": {
+          "type": [
+            "string",
+            "boolean",
+            "number"
+          ]
+        },
+        "in": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": [
+              "string",
+              "number"
+            ]
+          }
+        }
+      },
+      "oneOf": [
+        {
+          "required": [
+            "equals"
+          ]
+        },
+        {
+          "required": [
+            "in"
+          ]
+        }
+      ]
+    },
+    "condition": {
+      "description": "Show this field only when a sibling equals a value or is one of several values. An array means every clause must hold.",
+      "oneOf": [
+        {
+          "$ref": "#/$defs/clause"
+        },
+        {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "$ref": "#/$defs/clause"
+          }
+        }
+      ]
+    },
+    "platformNote": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": false,
+      "properties": {
+        "formerly": {
+          "description": "The field name or path this platform used before the contract; several when fields fold into one.",
+          "oneOf": [
+            {
+              "$ref": "#/$defs/text"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/text"
+              }
+            }
+          ]
+        },
+        "values": {
+          "description": "Former stored value to the contract's: flat, or keyed by a part of a composite field (a collection-query's mode, for example).",
+          "type": "object",
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              }
+            ]
+          }
+        },
+        "owes": {
+          "description": "What this platform must add or change to conform.",
+          "$ref": "#/$defs/text"
+        },
+        "note": {
+          "$ref": "#/$defs/text"
+        }
+      }
+    },
+    "common": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/name"
+        },
+        "type": {
+          "type": "string"
+        },
+        "label": {
+          "$ref": "#/$defs/text"
+        },
+        "description": {
+          "description": "Editor help text, the same on both platforms.",
+          "$ref": "#/$defs/text"
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "condition": {
+          "$ref": "#/$defs/condition"
+        },
+        "deprecated": {
+          "type": "object",
+          "required": [
+            "since",
+            "replacedBy"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "since": {
+              "type": "string"
+            },
+            "replacedBy": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          }
+        },
+        "platforms": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": false,
+          "properties": {
+            "nextjs": {
+              "$ref": "#/$defs/platformNote"
+            },
+            "wordpress": {
+              "$ref": "#/$defs/platformNote"
+            }
+          }
+        }
+      }
+    },
+    "field": {
+      "type": "object",
+      "required": [
+        "name",
+        "type",
+        "label"
+      ],
+      "properties": {
+        "type": {
+          "enum": [
+            "text",
+            "textarea",
+            "rich-text",
+            "image",
+            "link",
+            "select",
+            "boolean",
+            "number",
+            "list",
+            "group",
+            "relationship",
+            "collection-query"
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "text"
+              }
+            }
+          },
+          "then": {
+            "$ref": "#/$defs/textField"
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "textarea"
+              }
+            }
+          },
+          "then": {
+            "$ref": "#/$defs/textareaField"
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "rich-text"
+              }
+            }
+          },
+          "then": {
+            "$ref": "#/$defs/richTextField"
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "image"
+              }
+            }
+          },
+          "then": {
+            "$ref": "#/$defs/imageField"
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "link"
+              }
+            }
+          },
+          "then": {
+            "$ref": "#/$defs/linkField"
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "select"
+              }
+            }
+          },
+          "then": {
+            "$ref": "#/$defs/selectField"
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "boolean"
+              }
+            }
+          },
+          "then": {
+            "$ref": "#/$defs/booleanField"
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "number"
+              }
+            }
+          },
+          "then": {
+            "$ref": "#/$defs/numberField"
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "list"
+              }
+            }
+          },
+          "then": {
+            "$ref": "#/$defs/listField"
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "group"
+              }
+            }
+          },
+          "then": {
+            "$ref": "#/$defs/groupField"
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "relationship"
+              }
+            }
+          },
+          "then": {
+            "$ref": "#/$defs/relationshipField"
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "collection-query"
+              }
+            }
+          },
+          "then": {
+            "$ref": "#/$defs/collectionQueryField"
+          }
+        }
+      ]
+    },
+    "textField": {
+      "$ref": "#/$defs/common",
+      "properties": {
+        "default": {
+          "type": "string"
+        },
+        "maxLength": {
+          "$ref": "#/$defs/count"
+        },
+        "format": {
+          "description": "url: an absolute address (http, https, mailto or tel), ACF url on WordPress. anchor: slugified on save; reserved page ids and duplicates are refused or suffixed.",
+          "enum": [
+            "url",
+            "anchor"
+          ]
+        }
+      },
+      "unevaluatedProperties": false
+    },
+    "textareaField": {
+      "$ref": "#/$defs/common",
+      "properties": {
+        "default": {
+          "type": "string"
+        },
+        "maxLength": {
+          "$ref": "#/$defs/count"
+        }
+      },
+      "unevaluatedProperties": false
+    },
+    "richTextField": {
+      "$ref": "#/$defs/common",
+      "required": [
+        "allowed"
+      ],
+      "properties": {
+        "allowed": {
+          "description": "The element kinds an editor may use; both platforms strip anything else. Links allow http, https, mailto and tel.",
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "paragraph",
+              "bold",
+              "italic",
+              "code",
+              "link",
+              "unordered-list",
+              "ordered-list",
+              "blockquote",
+              "heading-3",
+              "heading-4"
+            ]
+          }
+        }
+      },
+      "unevaluatedProperties": false
+    },
+    "imageField": {
+      "$ref": "#/$defs/common",
+      "properties": {
+        "many": {
+          "description": "An ordered set of images (Payload upload hasMany; ACF gallery).",
+          "type": "boolean"
+        },
+        "min": {
+          "$ref": "#/$defs/count"
+        },
+        "max": {
+          "$ref": "#/$defs/count"
+        }
+      },
+      "dependentRequired": {
+        "min": [
+          "many"
+        ],
+        "max": [
+          "many"
+        ]
+      },
+      "unevaluatedProperties": false
+    },
+    "linkField": {
+      "$ref": "#/$defs/common",
+      "properties": {
+        "withLabel": {
+          "description": "Whether the link carries its own visible text. Default true.",
+          "type": "boolean"
+        }
+      },
+      "unevaluatedProperties": false
+    },
+    "option": {
+      "type": "object",
+      "required": [
+        "value",
+        "label"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "value": {
+          "$ref": "#/$defs/value"
+        },
+        "label": {
+          "$ref": "#/$defs/text"
+        }
+      }
+    },
+    "selectField": {
+      "$ref": "#/$defs/common",
+      "properties": {
+        "options": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "$ref": "#/$defs/option"
+          }
+        },
+        "optionsFrom": {
+          "description": "icons: the options are the site's icon set, supplied by the site, not the contract.",
+          "enum": [
+            "icons"
+          ]
+        },
+        "default": {
+          "$ref": "#/$defs/value"
+        }
+      },
+      "oneOf": [
+        {
+          "required": [
+            "options"
+          ]
+        },
+        {
+          "required": [
+            "optionsFrom"
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "booleanField": {
+      "$ref": "#/$defs/common",
+      "properties": {
+        "default": {
+          "type": "boolean"
+        }
+      },
+      "unevaluatedProperties": false
+    },
+    "numberField": {
+      "$ref": "#/$defs/common",
+      "properties": {
+        "default": {
+          "type": "number"
+        },
+        "min": {
+          "type": "number"
+        },
+        "max": {
+          "type": "number"
+        },
+        "step": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      },
+      "unevaluatedProperties": false
+    },
+    "listField": {
+      "$ref": "#/$defs/common",
+      "required": [
+        "fields"
+      ],
+      "properties": {
+        "fields": {
+          "$ref": "#/$defs/fields"
+        },
+        "min": {
+          "$ref": "#/$defs/count"
+        },
+        "max": {
+          "$ref": "#/$defs/count"
+        },
+        "rowLabel": {
+          "description": "The child field whose value names each row in the editor; for a link child, its label.",
+          "$ref": "#/$defs/name"
+        },
+        "itemLabel": {
+          "description": "What one row is called, singular.",
+          "$ref": "#/$defs/text"
+        }
+      },
+      "unevaluatedProperties": false
+    },
+    "groupField": {
+      "$ref": "#/$defs/common",
+      "required": [
+        "fields"
+      ],
+      "properties": {
+        "fields": {
+          "$ref": "#/$defs/fields"
+        }
+      },
+      "unevaluatedProperties": false
+    },
+    "relationshipField": {
+      "$ref": "#/$defs/common",
+      "required": [
+        "to"
+      ],
+      "properties": {
+        "to": {
+          "$ref": "#/$defs/source"
+        },
+        "many": {
+          "type": "boolean"
+        },
+        "min": {
+          "$ref": "#/$defs/count"
+        },
+        "max": {
+          "$ref": "#/$defs/count"
+        }
+      },
+      "unevaluatedProperties": false
+    },
+    "collectionQueryField": {
+      "$ref": "#/$defs/common",
+      "properties": {
+        "source": {
+          "$ref": "#/$defs/source"
+        },
+        "sourceField": {
+          "description": "A sibling select whose value is the source id.",
+          "$ref": "#/$defs/name"
+        },
+        "modes": {
+          "description": "The modes offered, when not all three.",
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "automatic",
+              "by-category",
+              "manual"
+            ]
+          }
+        },
+        "max": {
+          "description": "The highest count an editor may set. Default 24.",
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "oneOf": [
+        {
+          "required": [
+            "source"
+          ]
+        },
+        {
+          "required": [
+            "sourceField"
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    }
+  }
+}

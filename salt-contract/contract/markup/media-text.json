@@ -1,0 +1,299 @@
+{
+  "$schema": "../../schema/markup.schema.json",
+  "version": "0.1.0",
+  "id": "media-text",
+  "kind": "section",
+  "tier": "core",
+  "root": {
+    "element": "div",
+    "classes": [
+      "salt-block"
+    ],
+    "attributes": {
+      "data-block": "media-text"
+    }
+  },
+  "elements": [
+    {
+      "role": "rows",
+      "element": "div",
+      "classes": [
+        "salt-media-text"
+      ],
+      "children": [
+        {
+          "role": "row",
+          "element": "div",
+          "classes": [
+            "salt-media-text__row"
+          ],
+          "attributes": {
+            "data-media-side": {
+              "enum": [
+                "left",
+                "right"
+              ],
+              "when": "the row has an image and words"
+            }
+          },
+          "repeat": {
+            "from": "rows",
+            "min": 1
+          },
+          "children": [
+            {
+              "role": "media",
+              "element": "div",
+              "classes": [
+                "salt-media-text__media"
+              ],
+              "optional": true,
+              "when": "the row's image resolves with dimensions",
+              "children": [
+                {
+                  "role": "image",
+                  "component": "media",
+                  "classes": [
+                    "salt-media-text__image"
+                  ]
+                }
+              ]
+            },
+            {
+              "role": "body",
+              "element": "div",
+              "classes": [
+                "salt-media-text__body"
+              ],
+              "optional": true,
+              "when": "the row has a heading, body or button",
+              "children": [
+                {
+                  "role": "heading",
+                  "component": "heading",
+                  "attributes": {
+                    "id": {
+                      "value": "from:plan.headingId",
+                      "when": "first rendered row"
+                    }
+                  },
+                  "optional": true,
+                  "when": "the row heading is set",
+                  "note": "First rendered row: the plan's level and id; later rows: body base + 1."
+                },
+                {
+                  "role": "body-text",
+                  "component": "rich-text-body",
+                  "optional": true,
+                  "when": "the row body has words"
+                },
+                {
+                  "role": "actions",
+                  "element": "div",
+                  "classes": [
+                    "salt-media-text__actions"
+                  ],
+                  "optional": true,
+                  "when": "a button resolves",
+                  "children": [
+                    {
+                      "role": "button",
+                      "component": "button",
+                      "repeat": {
+                        "from": "row.buttons",
+                        "min": 1,
+                        "max": 2
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variants": [
+    {
+      "field": "mode",
+      "sameOrder": true,
+      "options": {
+        "single": {
+          "elements": {
+            "row": {
+              "attributes": {
+                "data-media-side": {
+                  "value": "from:row.side",
+                  "when": "image and words"
+                }
+              }
+            }
+          }
+        },
+        "alternating": {
+          "elements": {
+            "row": {
+              "attributes": {
+                "data-media-side": {
+                  "enum": [
+                    "left",
+                    "right"
+                  ],
+                  "when": "image and words",
+                  "note": "left on even rendered rows, right on odd"
+                }
+              }
+            }
+          }
+        }
+      },
+      "note": "Media then body in the DOM for every row and mode; the side is CSS order."
+    }
+  ],
+  "headings": {
+    "provides": "when the first rendered row has a heading",
+    "role": "heading",
+    "level": "plan",
+    "labelledBy": true,
+    "rules": [
+      "section#heading-level",
+      "section#single-h1",
+      "section#labelled-by"
+    ],
+    "headingBeforeOwn": "the first row has no heading and a later row or body does",
+    "children": "later row headings at body base + 1; row bodies from the row heading's level"
+  },
+  "zeroState": "No row with an image, heading, body or button.",
+  "priorityMedia": {
+    "role": "image",
+    "when": "first row only, when the plan grants priority and the section has no renderable background",
+    "rules": [
+      "section#priority-media"
+    ]
+  },
+  "dataAttributes": [
+    {
+      "name": "data-media-side",
+      "on": "row",
+      "values": [
+        "left",
+        "right"
+      ],
+      "when": "the row has an image and words"
+    }
+  ],
+  "script": {
+    "kind": "none"
+  },
+  "uses": [
+    "section",
+    "heading",
+    "rich-text-body",
+    "button",
+    "arrow",
+    "media"
+  ],
+  "notes": [
+    {
+      "topic": "platform-difference",
+      "text": "WordPress draws later row headings at the section level (h2 beside an h2); Next ranks them under the first row (h3). Ruled: Next's, so the first row's heading names the section and the rest rank under it."
+    }
+  ],
+  "platforms": {
+    "nextjs": {
+      "formerly": [
+        {
+          "role": "root",
+          "element": "div",
+          "classes": [
+            "salt-block"
+          ],
+          "attributes": [
+            "data-block=mediaText"
+          ]
+        }
+      ],
+      "owes": [
+        "data-block media-text."
+      ]
+    },
+    "wordpress": {
+      "formerly": [
+        {
+          "role": "rows",
+          "element": "div",
+          "classes": [
+            "x-media-text-rows",
+            "flex",
+            "flex-col",
+            "gap-12"
+          ]
+        },
+        {
+          "role": "row",
+          "element": "div",
+          "classes": [
+            "x-media-text-row",
+            "grid",
+            "md:grid-cols-2"
+          ]
+        },
+        {
+          "role": "media",
+          "element": "div",
+          "classes": [
+            "x-media-text-media",
+            "md:order-2"
+          ],
+          "note": "md:order-2 when right"
+        },
+        {
+          "role": "image",
+          "element": "img",
+          "classes": [
+            "x-image",
+            "w-full",
+            "rounded-lg"
+          ]
+        },
+        {
+          "role": "body",
+          "element": "div",
+          "classes": [
+            "x-media-text-body"
+          ]
+        },
+        {
+          "role": "heading",
+          "element": "h",
+          "classes": [
+            "x-heading",
+            "mb-4"
+          ]
+        },
+        {
+          "role": "body-text",
+          "element": "div",
+          "classes": [
+            "x-prose"
+          ]
+        },
+        {
+          "role": "actions",
+          "element": "div",
+          "classes": [
+            "mt-6"
+          ],
+          "note": "one link-arrow button"
+        }
+      ],
+      "owes": [
+        "Write the block root div.salt-block with data-block set to the contract id inside the section wrapper (section.json).",
+        "Give the section heading the plan's id and point the wrapper's aria-labelledby at it (section#labelled-by).",
+        "Drop Tailwind utility classes from the markup; the shared stylesheets style the salt-* classes.",
+        "data-media-side on the row instead of an order class; later row headings at base + 1; up to two buttons per row."
+      ]
+    }
+  }
+}

@@ -1,0 +1,86 @@
+{
+  "$schema": "../../schema/markup.schema.json",
+  "version": "0.1.0",
+  "id": "tabs",
+  "kind": "section",
+  "tier": "core",
+  "root": {
+    "element": "div",
+    "classes": [
+      "salt-block"
+    ],
+    "attributes": {
+      "data-block": "tabs"
+    }
+  },
+  "elements": [
+    {
+      "role": "eyebrow",
+      "component": "eyebrow",
+      "optional": true,
+      "when": "eyebrow is set"
+    },
+    {
+      "role": "heading",
+      "component": "heading",
+      "attributes": {
+        "id": "from:plan.headingId"
+      },
+      "optional": true,
+      "when": "heading is set",
+      "note": "Level from the plan (section#heading-level)."
+    },
+    {
+      "role": "intro",
+      "element": "p",
+      "classes": [
+        "salt-intro"
+      ],
+      "text": "from:intro",
+      "optional": true,
+      "when": "intro is set"
+    },
+    {
+      "role": "tab-set",
+      "component": "tab-set",
+      "attributes": {
+        "aria-label": "from:heading or label"
+      },
+      "note": "baseId tabs-<section index>; up to eight panels."
+    }
+  ],
+  "headings": {
+    "provides": "when heading is set",
+    "role": "heading",
+    "level": "plan",
+    "labelledBy": true,
+    "rules": [
+      "section#heading-level",
+      "section#single-h1",
+      "section#labelled-by"
+    ],
+    "headingBeforeOwn": "no heading of its own and a panel contains a heading"
+  },
+  "zeroState": "Eyebrow, heading, intro and tabs all empty.",
+  "priorityMedia": {
+    "role": null
+  },
+  "script": {
+    "kind": "none"
+  },
+  "uses": [
+    "section",
+    "section-intro",
+    "tab-set",
+    "rich-text-body",
+    "eyebrow",
+    "heading"
+  ],
+  "platforms": {
+    "wordpress": {
+      "owes": [
+        "The section."
+      ]
+    }
+  }
+}

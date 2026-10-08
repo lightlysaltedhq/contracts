@@ -1,0 +1,144 @@
+{
+  "$schema": "../../schema/markup.schema.json",
+  "version": "0.1.0",
+  "id": "opening-hours",
+  "kind": "component",
+  "root": {
+    "element": "dl",
+    "classes": [
+      "salt-opening-hours"
+    ],
+    "attributes": {
+      "data-compact": {
+        "value": "",
+        "when": "compact (short day names)"
+      }
+    }
+  },
+  "elements": [
+    {
+      "role": "day",
+      "element": "div",
+      "classes": [
+        "salt-opening-hours__day"
+      ],
+      "repeat": {
+        "from": "days with rows",
+        "max": 7
+      },
+      "children": [
+        {
+          "role": "name",
+          "element": "dt",
+          "text": "from:day (Monday, or Mon when compact)"
+        },
+        {
+          "role": "hours",
+          "element": "dd",
+          "children": [
+            {
+              "role": "span",
+              "element": "span",
+              "classes": [
+                "salt-opening-hours__span"
+              ],
+              "repeat": {
+                "from": "spans"
+              },
+              "optional": true,
+              "when": "the day has opening spans",
+              "children": [
+                {
+                  "role": "opens",
+                  "element": "time",
+                  "attributes": {
+                    "datetime": "from:HH:MM"
+                  }
+                },
+                {
+                  "role": "closes",
+                  "element": "time",
+                  "attributes": {
+                    "datetime": "from:HH:MM"
+                  }
+                }
+              ],
+              "note": "An en dash between the two times; spans joined by a hidden comma separator."
+            },
+            {
+              "role": "appointment",
+              "element": "span",
+              "text": "from:labels.byAppointment",
+              "optional": true,
+              "when": "the day is by appointment"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "headings": {
+    "provides": "never",
+    "level": "none"
+  },
+  "zeroState": "Not drawn without hours.",
+  "script": {
+    "kind": "none"
+  },
+  "notes": [
+    {
+      "topic": "stylesheet-owes",
+      "text": "New vocabulary from WordPress; no rules in the shared stylesheets yet.",
+      "classes": [
+        "salt-opening-hours",
+        "salt-opening-hours__day",
+        "salt-opening-hours__span"
+      ]
+    },
+    {
+      "topic": "ruling",
+      "text": "Compact is an attribute, not WordPress's text-sm class."
+    }
+  ],
+  "platforms": {
+    "nextjs": {
+      "owes": [
+        "The component, with locations (Epic WP8)."
+      ]
+    },
+    "wordpress": {
+      "formerly": [
+        {
+          "role": "root",
+          "element": "dl",
+          "classes": [
+            "x-opening-hours",
+            "grid",
+            "grid-cols-[auto_1fr]",
+            "text-sm"
+          ]
+        },
+        {
+          "role": "day",
+          "element": "div",
+          "classes": [
+            "x-opening-hours-day",
+            "col-span-2",
+            "grid-cols-subgrid"
+          ]
+        },
+        {
+          "role": "span",
+          "element": "span",
+          "classes": [
+            "x-opening-hours-span",
+            "whitespace-nowrap"
+          ]
+        }
+      ],
+      "owes": [
+        "Rename to salt-opening-hours*; data-compact instead of text-sm."
+      ]
+    }
+  }
+}

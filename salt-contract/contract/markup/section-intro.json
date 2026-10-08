@@ -1,0 +1,88 @@
+{
+  "$schema": "../../schema/markup.schema.json",
+  "version": "0.1.0",
+  "id": "section-intro",
+  "kind": "component",
+  "summary": "The run of eyebrow, heading and intro above a section's items. No wrapper element.",
+  "fragment": true,
+  "elements": [
+    {
+      "role": "eyebrow",
+      "component": "eyebrow",
+      "optional": true,
+      "when": "eyebrow is set"
+    },
+    {
+      "role": "heading",
+      "component": "heading",
+      "attributes": {
+        "id": "from:plan.headingId"
+      },
+      "optional": true,
+      "when": "heading is set"
+    },
+    {
+      "role": "intro",
+      "element": "p",
+      "classes": [
+        "salt-intro"
+      ],
+      "text": "from:intro",
+      "optional": true,
+      "when": "intro is set"
+    }
+  ],
+  "headings": {
+    "provides": "when heading is set",
+    "role": "heading",
+    "level": "plan",
+    "labelledBy": true,
+    "rules": [
+      "section#heading-level",
+      "section#single-h1",
+      "section#labelled-by"
+    ]
+  },
+  "zeroState": "Each part is drawn only when set; the run has no element of its own.",
+  "script": {
+    "kind": "none"
+  },
+  "uses": [
+    "eyebrow",
+    "heading"
+  ],
+  "ruleRefs": [
+    "section#eyebrow-and-intro"
+  ],
+  "notes": [
+    {
+      "topic": "ruling",
+      "text": "No wrapper: WordPress's header.x-work-header and header.x-blog-teaser-header around eyebrow and heading go, so every section's first three children are the same."
+    }
+  ],
+  "platforms": {
+    "wordpress": {
+      "formerly": [
+        {
+          "element": "header",
+          "classes": [
+            "x-work-header",
+            "x-blog-teaser-header",
+            "mb-10",
+            "max-w-prose"
+          ]
+        },
+        {
+          "element": "div",
+          "classes": [
+            "x-intro",
+            "max-w-prose"
+          ]
+        }
+      ],
+      "owes": [
+        "A shared intro run; drop the header wrappers; add the intro paragraph (p.salt-intro) where the section has an intro field."
+      ]
+    }
+  }
+}

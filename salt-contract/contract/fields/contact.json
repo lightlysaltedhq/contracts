@@ -1,0 +1,88 @@
+{
+  "$schema": "../../schema/field-definition.schema.json",
+  "version": "0.1.0",
+  "section": "contact",
+  "shared": {
+    "id": "section-settings"
+  },
+  "fields": [
+    {
+      "name": "heading",
+      "type": "text",
+      "label": "Heading",
+      "description": "Optional, such as \"Get in touch\"."
+    },
+    {
+      "name": "intro",
+      "type": "textarea",
+      "label": "Intro",
+      "maxLength": 300,
+      "description": "Optional. A line or two under the heading, drawn as one paragraph.",
+      "platforms": {
+        "wordpress": {
+          "formerly": "text",
+          "owes": "the 300-character limit"
+        }
+      }
+    },
+    {
+      "name": "showPhone",
+      "type": "boolean",
+      "label": "Show phone",
+      "default": true,
+      "description": "The number comes from the site's company details.",
+      "platforms": {
+        "nextjs": {
+          "owes": "the field"
+        },
+        "wordpress": {
+          "formerly": "show_phone"
+        }
+      }
+    },
+    {
+      "name": "showEmail",
+      "type": "boolean",
+      "label": "Show email",
+      "default": true,
+      "description": "The address comes from the site's company details.",
+      "platforms": {
+        "nextjs": {
+          "owes": "the field"
+        },
+        "wordpress": {
+          "formerly": "show_email"
+        }
+      }
+    },
+    {
+      "name": "showAddress",
+      "type": "boolean",
+      "label": "Show address",
+      "default": true,
+      "description": "The address comes from the site's company details.",
+      "platforms": {
+        "nextjs": {
+          "owes": "the field"
+        },
+        "wordpress": {
+          "formerly": "show_address"
+        }
+      }
+    },
+    {
+      "name": "formIntro",
+      "type": "textarea",
+      "label": "Form intro",
+      "description": "Short copy above the form.",
+      "platforms": {
+        "nextjs": {
+          "owes": "the field"
+        },
+        "wordpress": {
+          "formerly": "form_intro"
+        }
+      }
+    }
+  ]
+}

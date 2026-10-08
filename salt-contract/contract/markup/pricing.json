@@ -1,0 +1,326 @@
+{
+  "$schema": "../../schema/markup.schema.json",
+  "version": "0.1.0",
+  "id": "pricing",
+  "kind": "section",
+  "tier": "edge",
+  "summary": "Edge: a recipe on either platform, outside core. Its vocabulary is reserved here so a recipe on each platform draws the same markup; the shared stylesheets carry none of it.",
+  "root": {
+    "element": "div",
+    "classes": [
+      "salt-block"
+    ],
+    "attributes": {
+      "data-block": "pricing"
+    }
+  },
+  "elements": [
+    {
+      "role": "eyebrow",
+      "component": "eyebrow",
+      "optional": true,
+      "when": "eyebrow is set"
+    },
+    {
+      "role": "heading",
+      "component": "heading",
+      "attributes": {
+        "id": "from:plan.headingId"
+      },
+      "optional": true,
+      "when": "heading is set",
+      "note": "Level from the plan (section#heading-level)."
+    },
+    {
+      "role": "list",
+      "element": "ul",
+      "classes": [
+        "salt-grid",
+        "salt-pricing"
+      ],
+      "attributes": {
+        "role": "list",
+        "data-columns": {
+          "enum": [
+            "1",
+            "2",
+            "3"
+          ]
+        }
+      },
+      "optional": true,
+      "when": "a plan has a name",
+      "children": [
+        {
+          "role": "item",
+          "element": "li",
+          "repeat": {
+            "from": "plans",
+            "min": 1
+          },
+          "children": [
+            {
+              "role": "plan",
+              "element": "div",
+              "classes": [
+                "salt-card",
+                "salt-pricing__plan"
+              ],
+              "attributes": {
+                "data-featured": {
+                  "value": "",
+                  "when": "the first featured plan"
+                }
+              },
+              "children": [
+                {
+                  "role": "name",
+                  "component": "heading",
+                  "note": "Level: body base + 1."
+                },
+                {
+                  "role": "badge",
+                  "element": "p",
+                  "classes": [
+                    "salt-pricing__badge"
+                  ],
+                  "text": "from:labels.featured",
+                  "optional": true,
+                  "when": "featured"
+                },
+                {
+                  "role": "price",
+                  "element": "p",
+                  "classes": [
+                    "salt-pricing__price"
+                  ],
+                  "optional": true,
+                  "when": "price or period is set",
+                  "children": [
+                    {
+                      "role": "amount",
+                      "element": "span",
+                      "classes": [
+                        "salt-pricing__amount"
+                      ],
+                      "optional": true,
+                      "when": "price is set"
+                    },
+                    {
+                      "role": "period",
+                      "element": "span",
+                      "classes": [
+                        "salt-pricing__period"
+                      ],
+                      "optional": true,
+                      "when": "period is set"
+                    }
+                  ]
+                },
+                {
+                  "role": "features",
+                  "element": "ul",
+                  "classes": [
+                    "salt-pricing__features"
+                  ],
+                  "attributes": {
+                    "role": "list"
+                  },
+                  "optional": true,
+                  "when": "the plan lists features",
+                  "children": [
+                    {
+                      "role": "feature",
+                      "element": "li",
+                      "attributes": {
+                        "data-included": {
+                          "enum": [
+                            "true",
+                            "false"
+                          ]
+                        }
+                      },
+                      "repeat": {
+                        "from": "features"
+                      },
+                      "children": [
+                        {
+                          "role": "not-included",
+                          "element": "span",
+                          "classes": [
+                            "salt-sr-only"
+                          ],
+                          "optional": true,
+                          "when": "not included"
+                        },
+                        {
+                          "role": "feature-icon",
+                          "component": "icon",
+                          "attributes": {
+                            "data-size": "sm"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "role": "action",
+                  "component": "button",
+                  "attributes": {
+                    "data-style": {
+                      "enum": [
+                        "primary",
+                        "secondary"
+                      ],
+                      "note": "primary when featured"
+                    }
+                  },
+                  "optional": true,
+                  "when": "a call to action resolves"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "headings": {
+    "provides": "when heading is set",
+    "role": "heading",
+    "level": "plan",
+    "labelledBy": true,
+    "rules": [
+      "section#heading-level",
+      "section#single-h1",
+      "section#labelled-by"
+    ],
+    "children": "plan names at body base + 1"
+  },
+  "zeroState": "No plan with a name.",
+  "priorityMedia": {
+    "role": null
+  },
+  "script": {
+    "kind": "none"
+  },
+  "uses": [
+    "section",
+    "section-intro",
+    "heading",
+    "icon",
+    "button",
+    "eyebrow"
+  ],
+  "notes": [
+    {
+      "topic": "stylesheet-owes",
+      "text": "Recipe vocabulary; styled by the recipe, not the shared stylesheets.",
+      "classes": [
+        "salt-pricing",
+        "salt-pricing__plan",
+        "salt-pricing__badge",
+        "salt-pricing__price",
+        "salt-pricing__amount",
+        "salt-pricing__period",
+        "salt-pricing__features"
+      ]
+    },
+    {
+      "topic": "order",
+      "text": "Platforms differ: WordPress draws the badge before the plan name; Next's recipe the name first. Ruled: name first, so a screen reader meets the plan before its badge."
+    },
+    {
+      "topic": "open-question",
+      "text": "sections.json openQuestions pricing-tier: edge on both is recommended, not yet ruled."
+    }
+  ],
+  "platforms": {
+    "nextjs": {
+      "formerly": [
+        {
+          "role": "root",
+          "element": "div",
+          "classes": [
+            "salt-block"
+          ],
+          "note": "apps/example site/pricing recipe"
+        }
+      ]
+    },
+    "wordpress": {
+      "formerly": [
+        {
+          "role": "list",
+          "element": "div",
+          "classes": [
+            "x-pricing-grid",
+            "grid",
+            "gap-6"
+          ]
+        },
+        {
+          "role": "plan",
+          "element": "article",
+          "classes": [
+            "x-card-pricing",
+            "x-card-pricing-featured"
+          ]
+        },
+        {
+          "role": "badge",
+          "element": "span",
+          "classes": [
+            "x-card-pricing-badge"
+          ]
+        },
+        {
+          "role": "name",
+          "element": "h",
+          "classes": [
+            "x-card-pricing-name"
+          ]
+        },
+        {
+          "role": "price",
+          "element": "p",
+          "classes": [
+            "x-card-pricing-price"
+          ]
+        },
+        {
+          "role": "amount",
+          "element": "span",
+          "classes": [
+            "x-card-pricing-amount"
+          ]
+        },
+        {
+          "role": "period",
+          "element": "span",
+          "classes": [
+            "x-card-pricing-period"
+          ]
+        },
+        {
+          "role": "features",
+          "element": "ul",
+          "classes": [
+            "x-card-pricing-features"
+          ]
+        },
+        {
+          "role": "action",
+          "element": "div",
+          "classes": [
+            "x-card-pricing-cta"
+          ]
+        }
+      ],
+      "owes": [
+        "Move the layout into a recipe that draws this markup (sections.json)."
+      ]
+    }
+  }
+}

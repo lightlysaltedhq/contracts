@@ -1,0 +1,82 @@
+{
+  "$schema": "../../schema/markup.schema.json",
+  "version": "0.1.0",
+  "id": "booking",
+  "kind": "component",
+  "root": {
+    "element": "a",
+    "classes": [
+      "salt-button",
+      "salt-booking"
+    ],
+    "attributes": {
+      "href": "from:booking url",
+      "target": "_blank",
+      "rel": "noopener noreferrer",
+      "data-style": "primary",
+      "data-track-control": "cta",
+      "data-provider": "from:provider"
+    },
+    "note": "A button-styled link; label defaults to the site's 'Book a call'."
+  },
+  "headings": {
+    "provides": "never",
+    "level": "none"
+  },
+  "zeroState": "Not drawn when no provider or url is set.",
+  "dataAttributes": [
+    {
+      "name": "data-provider",
+      "on": "root",
+      "values": "from:provider"
+    }
+  ],
+  "script": {
+    "kind": "none"
+  },
+  "ruleRefs": [
+    "section#new-tab",
+    "section#target-size"
+  ],
+  "hooks": [
+    {
+      "class": "salt-booking",
+      "role": "root",
+      "reason": "Marks the booking link for analytics and site styles; salt-button styles it."
+    }
+  ],
+  "notes": [
+    {
+      "topic": "ruling",
+      "text": "WordPress's data-salt-booking and data-url go: the class marks it and href carries the url."
+    }
+  ],
+  "platforms": {
+    "nextjs": {
+      "owes": [
+        "The booking facade (sections.json)."
+      ]
+    },
+    "wordpress": {
+      "formerly": [
+        {
+          "role": "root",
+          "element": "a",
+          "classes": [
+            "x-booking",
+            "x-button",
+            "x-button-primary"
+          ],
+          "attributes": [
+            "data-salt-booking",
+            "data-provider",
+            "data-url"
+          ]
+        }
+      ],
+      "owes": [
+        "Rename to salt-booking with the button component's attributes."
+      ]
+    }
+  }
+}

@@ -1,0 +1,190 @@
+{
+  "$schema": "../../schema/markup.schema.json",
+  "version": "0.1.0",
+  "id": "carousel-track",
+  "kind": "component",
+  "root": {
+    "element": "div",
+    "classes": [
+      "salt-carousel"
+    ],
+    "attributes": {
+      "role": "region",
+      "aria-roledescription": "carousel",
+      "aria-label": "from:label"
+    }
+  },
+  "elements": [
+    {
+      "role": "track",
+      "element": "ul",
+      "classes": [
+        "salt-carousel__track"
+      ],
+      "attributes": {
+        "role": "list",
+        "tabindex": {
+          "value": "0",
+          "when": "no slide holds anything focusable"
+        }
+      },
+      "children": [
+        {
+          "role": "slide",
+          "element": "li",
+          "classes": [
+            "salt-carousel__slide"
+          ],
+          "repeat": {
+            "from": "slides",
+            "min": 2
+          },
+          "children": [
+            {
+              "role": "slide-inner",
+              "element": "div",
+              "classes": [
+                "salt-carousel__slide-inner"
+              ],
+              "attributes": {
+                "role": "group",
+                "aria-roledescription": "slide",
+                "aria-label": "from:labels.slide ({n} of {N})"
+              },
+              "text": "the slide: a card or a gallery figure"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "role": "controls",
+      "element": "div",
+      "classes": [
+        "salt-carousel__controls"
+      ],
+      "optional": true,
+      "when": "script has mounted",
+      "children": [
+        {
+          "role": "control",
+          "element": "button",
+          "classes": [
+            "salt-button",
+            "salt-carousel__control"
+          ],
+          "attributes": {
+            "type": "button",
+            "data-style": "secondary",
+            "data-direction": {
+              "enum": [
+                "previous",
+                "next"
+              ]
+            },
+            "data-track-control": {
+              "enum": [
+                "carousel-previous",
+                "carousel-next"
+              ]
+            },
+            "aria-disabled": {
+              "value": "true",
+              "when": "at that edge"
+            }
+          },
+          "text": "from:labels.previous / labels.next",
+          "repeat": {
+            "from": "previous, next",
+            "min": 2,
+            "max": 2
+          }
+        }
+      ]
+    }
+  ],
+  "headings": {
+    "provides": "never",
+    "level": "none"
+  },
+  "zeroState": "No slides: nothing. One slide: the slide alone, with no region, track or controls.",
+  "dataAttributes": [
+    {
+      "name": "data-direction",
+      "on": "control",
+      "values": [
+        "previous",
+        "next"
+      ]
+    },
+    {
+      "name": "data-track-control",
+      "on": "control",
+      "values": [
+        "carousel-previous",
+        "carousel-next"
+      ]
+    }
+  ],
+  "script": {
+    "kind": "progressive",
+    "withoutScript": "A scroll-snapping list every slide of which is reachable by scrolling, swiping and Tab (the track is a tab stop when its slides hold no link).",
+    "withScript": "Previous and next buttons, mounted client-side only, that scroll by one slide and report the edges with aria-disabled (never disabled, so focus is not lost); instant when the visitor prefers reduced motion."
+  },
+  "ruleRefs": [
+    "section#reduced-motion",
+    "section#focus-ring",
+    "section#target-size",
+    "section#data-track"
+  ],
+  "notes": [
+    {
+      "topic": "ruling",
+      "text": "The region wraps the track and the controls; WordPress's track-as-region with data-salt-prev-label and data-salt-next-label goes, and its scripts key off .salt-carousel."
+    }
+  ],
+  "platforms": {
+    "wordpress": {
+      "formerly": [
+        {
+          "role": "root",
+          "element": "div",
+          "classes": [
+            "x-gallery-track",
+            "x-scroll-carousel-track",
+            "x-testimonials-track",
+            "flex",
+            "snap-x",
+            "snap-mandatory",
+            "overflow-x-auto"
+          ],
+          "attributes": [
+            "data-salt-carousel",
+            "data-salt-testimonials",
+            "role=region",
+            "tabindex=0",
+            "aria-label",
+            "data-salt-prev-label",
+            "data-salt-next-label"
+          ],
+          "note": "The track is the region today."
+        },
+        {
+          "role": "slide",
+          "element": "div",
+          "classes": [
+            "x-gallery-slide",
+            "x-scroll-carousel-item",
+            "x-testimonials-item",
+            "w-4/5",
+            "shrink-0",
+            "snap-start"
+          ]
+        }
+      ],
+      "owes": [
+        "One shared track: div.salt-carousel region > ul.salt-carousel__track > li.salt-carousel__slide > div.salt-carousel__slide-inner; controls in div.salt-carousel__controls after the track."
+      ]
+    }
+  }
+}

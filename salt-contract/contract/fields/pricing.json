@@ -1,0 +1,107 @@
+{
+  "$schema": "../../schema/field-definition.schema.json",
+  "version": "0.1.0",
+  "section": "pricing",
+  "shared": {
+    "id": "section-settings"
+  },
+  "fields": [
+    {
+      "name": "eyebrow",
+      "type": "text",
+      "label": "Eyebrow",
+      "description": "A short label above the heading. Drawn as a paragraph, never a heading."
+    },
+    {
+      "name": "heading",
+      "type": "text",
+      "label": "Heading"
+    },
+    {
+      "name": "plans",
+      "type": "list",
+      "label": "Plans",
+      "itemLabel": "Plan",
+      "rowLabel": "name",
+      "description": "One plan reads on its own, two sit side by side, three or more cap at three across.",
+      "fields": [
+        {
+          "name": "name",
+          "type": "text",
+          "label": "Name",
+          "required": true,
+          "description": "The plan's heading, and its button's text when the button has none."
+        },
+        {
+          "name": "price",
+          "type": "text",
+          "label": "Price",
+          "description": "Written as it should read, such as £29, From £750 or POA."
+        },
+        {
+          "name": "period",
+          "type": "text",
+          "label": "Period",
+          "description": "What the price is per, such as a month or one-off. Read straight after the price."
+        },
+        {
+          "name": "features",
+          "type": "list",
+          "label": "Features",
+          "itemLabel": "Feature",
+          "rowLabel": "text",
+          "fields": [
+            {
+              "name": "text",
+              "type": "text",
+              "label": "Feature",
+              "required": true,
+              "platforms": {
+                "wordpress": {
+                  "owes": "requiring it"
+                }
+              }
+            },
+            {
+              "name": "included",
+              "type": "boolean",
+              "label": "Included in this plan",
+              "default": true,
+              "description": "Untick to show something the plan does not include. It is drawn crossed out and read as \"Not included\".",
+              "platforms": {
+                "wordpress": {
+                  "owes": "the field"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "cta",
+          "type": "link",
+          "label": "Button",
+          "platforms": {
+            "wordpress": {
+              "owes": "the link shape (label, type, document or url, newTab) in place of an ACF link"
+            }
+          }
+        },
+        {
+          "name": "featured",
+          "type": "boolean",
+          "label": "Feature this plan",
+          "default": false,
+          "description": "One plan only. Saving a second featured plan is refused.",
+          "platforms": {
+            "nextjs": {
+              "note": "Refused on publish, not on a draft save."
+            },
+            "wordpress": {
+              "owes": "refusing a second featured plan on save; today the extra is demoted when the page is drawn"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

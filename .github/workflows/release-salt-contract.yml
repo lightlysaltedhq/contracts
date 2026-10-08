@@ -1,0 +1,255 @@
+name: Release salt-contract
+
+# Stages salt-contract/ as @lightlysaltedhq/salt-contract on npmjs.com when a salt-contract-v*
+# tag is pushed, e.g. salt-contract-v1.0.0. Staged is not published: nothing is installable until
+# Ollie approves the staged version on npmjs.com with his passkey (D28).
+#
+# A PACKAGE-PREFIXED TAG PATTERN, on purpose. This repository holds more than one package, and
+# each releases on its own prefix (`salt-contract-v*` here, `foundations-v*` for
+# design-foundations), so no package's release can ever be triggered by another's tag.
+#
+# WHY STAGED (D28). A tagged commit runs its own copy of this file, so nothing in it can gate a
+# release: a commit that edits a check away is the commit the check would have run on. The steps
+# below catch honest mistakes (a tag that disagrees with package.json, a failing gate) and are not
+# enforcement. The gate the tagged tree cannot touch is npm's: the package's Trusted Publisher
+# allows `npm stage publish` and not `npm publish`, and a staged version stays out of the
+# registry's public view until a maintainer approves it with 2FA (docs.npmjs.com/staged-publishing).
+#
+# NPM TRUSTED PUBLISHING (OIDC), NOT A TOKEN. There is no NPM_TOKEN secret and there must never be
+# one. `id-token: write` lets the job mint a short-lived GitHub OIDC token; npm exchanges it for a
+# credential scoped to this one package, and only if npmjs.com lists THIS repository and THIS
+# workflow filename as the package's trusted publisher. Renaming this file breaks staging until
+# the npmjs.com setting is changed to match. Requirements, from docs.npmjs.com: npm 11.5.1 or
+# later for trusted publishing and 11.15.0 or later for `npm stage`, Node 22.14.0 or later, and a
+# GitHub-hosted runner.
+#
+# PROVENANCE. npm generates provenance automatically under trusted publishing from a PUBLIC
+# repository, which this is, so every release carries it with no flag; `--provenance` is not
+# passed, so a repository made private again fails nothing and simply attests nothing.
+# (D-numbers in this file are design-system decisions: this workflow copies the one written for
+# design-foundations, and its reasoning carries over.)
+#
+# Before tagging, on the release branch, set one version string in salt-contract/package.json and
+# the top-level `version` in each salt-contract/contract/*.json (npm run salt-contract fails
+# otherwise: it allows a version key nowhere else in the contract, and a contract file without one
+# fails too). Then move salt-contract/CHANGELOG.md's Unreleased section under that version, and merge.
+# Consumers move on their own pins afterwards: Salt for Next.js and Salt for WordPress each bump
+# their exact pin in a reviewed pull request, as RELEASE-POLICY.md describes.
+
+on:
+  push:
+    tags: [ 'salt-contract-v*' ]
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    name: Stage @lightlysaltedhq/salt-contract on npmjs.com
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write     # the OIDC token npm trusted publishing exchanges; there is no npm secret
+    steps:
+      # Pinned to commits, not tags: this job can mint an OIDC token npm accepts for this package,
+      # and a tag is a pointer its owner can move. Each SHA was resolved from the tag and checked
+      # against `git ls-remote` on 25/09/2026.
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          fetch-depth: 0          # the checks against main below need its history and its tip now
+
+      # Node is pinned exactly, like npm below. Verifying a release is a re-run of this run after
+      # approval (see the registry step), and the re-run re-packs the tree and compares integrities,
+      # so the pack must come out byte-identical days later. '22' would float to whatever patch is
+      # newest on the day, and the gzip bytes come from Node's own zlib.
+      #
+      # No registry-url, on purpose. With it, setup-node writes an .npmrc whose token is a
+      # placeholder, and when the OIDC exchange is refused npm sends the stage request with that
+      # placeholder anyway, so a Trusted Publisher mismatch surfaces as whatever the registry says
+      # about the write. Without it there is no credential at all, and npm stops at ENEEDAUTH
+      # before sending anything. Both measured with npm 11.20.0 against a local mock registry.
+      # Reads need no credential: the package is public.
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '22.23.3'
+
+      # Pinned, not "latest": the gates, the pack and the stage all run on one known npm, and a
+      # re-run packs with that same npm.
+      - name: npm with trusted publishing and npm stage (11.15.0 or later)
+        run: |
+          npm install -g npm@11.20.0
+          node --version
+          npm --version
+
+      - name: Tag matches salt-contract/package.json version
+        run: |
+          TAG_VERSION="${GITHUB_REF_NAME#salt-contract-v}"
+          PKG_VERSION="$(node -p 'require("./salt-contract/package.json").version')"
+          echo "tag=$TAG_VERSION salt-contract/package.json=$PKG_VERSION"
+          if [ "$TAG_VERSION" != "$PKG_VERSION" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match salt-contract/package.json version $PKG_VERSION"
+            exit 1
+          fi
+
+      - name: Record the integrity of the tarball this tag packs
+        working-directory: salt-contract
+        run: |
+          read -r NAME VERSION INTEGRITY SHASUM < <(npm pack --dry-run --json | node -e '
+            let s = ""
+            process.stdin.on("data", d => s += d).on("end", () => {
+              const r = JSON.parse(s)[0]
+              console.log(r.name, r.version, r.integrity, r.shasum)
+            })')
+          echo "$NAME@$VERSION packs to $INTEGRITY, shasum $SHASUM"
+          {
+            echo "PKG_NAME=$NAME"
+            echo "PKG_VERSION=$VERSION"
+            echo "PACKED_INTEGRITY=$INTEGRITY"
+            echo "PACKED_SHASUM=$SHASUM"
+          } >> "$GITHUB_ENV"
+
+      # Makes the run repeatable, and is how a release is verified. Staging a version twice is
+      # refused, so a re-run must first ask what the registry already holds:
+      #   - served, with this tag's integrity: approved and live with exactly these bytes. Nothing
+      #     to stage; the run passes as the verification. This is the path a re-run of the tag's run
+      #     takes after Ollie approves (D28), so there is no separate verify workflow to keep.
+      #   - served, with any other integrity: something else holds this version. Fail loudly.
+      #   - E404: not served. That is either never staged, or staged and waiting for approval: a
+      #     staged version is "not available for public access" (docs.npmjs.com/cli/v11/commands/
+      #     npm-stage), so `npm view` answers E404 for it too, and an OIDC credential cannot run
+      #     `npm stage list` to tell the two apart (docs.npmjs.com/trusted-publishers). The stage
+      #     step does: staging a version that is already staged is refused with E409 "Cannot
+      #     publish over previously staged version".
+      #   - anything else (the registry unreachable, say) is not an answer. Fail rather than stage.
+      - name: What the registry already serves for this version
+        id: registry
+        working-directory: salt-contract
+        run: |
+          set +e
+          SERVED="$(npm view "$PKG_NAME@$PKG_VERSION" dist.integrity --json --prefer-online 2>/dev/null)"
+          STATUS=$?
+          set -e
+          ANSWER="$(node -e '
+            const [status, out] = process.argv.slice(1)
+            let j; try { j = JSON.parse(out) } catch { j = undefined }
+            if (status === "0" && typeof j === "string") console.log("served " + j)
+            else if (j && j.error && j.error.code === "E404") console.log("absent")
+            else console.log("unknown")' "$STATUS" "$SERVED")"
+          echo "packed=$PACKED_INTEGRITY registry: $ANSWER"
+          case "$ANSWER" in
+            "served $PACKED_INTEGRITY")
+              echo "live=true" >> "$GITHUB_OUTPUT"
+              {
+                echo "### Verified: $PKG_NAME@$PKG_VERSION is live with exactly the tarball this tag packs"
+                echo
+                echo "- integrity: \`$PACKED_INTEGRITY\`"
+              } >> "$GITHUB_STEP_SUMMARY" ;;
+            served\ *)
+              echo "::error::$PKG_NAME@$PKG_VERSION is already on the registry with ${ANSWER#served }, not the $PACKED_INTEGRITY this tag packs. Different bytes hold this version; investigate before anything else. A new version needs a new number."
+              exit 1 ;;
+            absent)
+              echo "live=false" >> "$GITHUB_OUTPUT" ;;
+            *)
+              echo "::error::Could not tell whether $PKG_NAME@$PKG_VERSION is on the registry (npm view exited $STATUS). Not staging on a guess; re-run when the registry answers."
+              exit 1 ;;
+          esac
+
+      # Catch a tag pushed on the wrong commit. What ships is salt-contract/ and nothing else, so the
+      # property that matters is that the tagged salt-contract/ tree IS main's, compared now, at run
+      # time. Ancestry alone was not that: a PR merged with a merge commit puts its pre-review
+      # commits on main too, and a tag on one of those passed. The tree comparison refuses those
+      # and a tag left behind after main's salt-contract/ moved on. Ancestry stays for what it still
+      # adds: the copy of this workflow that runs, holding `id-token: write`, is one that has been
+      # merged. Neither check is enforcement, because the tagged commit brings its own copy of this
+      # step; approval on npmjs.com is the control (D28). Main is spelled refs/remotes/origin/main
+      # because a bare `origin/main` resolves to a TAG of that name first, when one exists.
+      - name: The tagged commit is on main, and its salt-contract/ is main's
+        if: steps.registry.outputs.live == 'false'
+        run: |
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" refs/remotes/origin/main; then
+            echo "::error::$GITHUB_REF_NAME points at $GITHUB_SHA, which is not on main. Tag the merge commit on main."
+            exit 1
+          fi
+          TAGGED="$(git rev-parse "$GITHUB_SHA:salt-contract")"
+          MAIN="$(git rev-parse refs/remotes/origin/main:salt-contract)"
+          echo "salt-contract/ tree: tagged=$TAGGED origin/main=$MAIN"
+          if [ "$TAGGED" != "$MAIN" ]; then
+            echo "::error::$GITHUB_REF_NAME's salt-contract/ is not main's salt-contract/ ($TAGGED, main has $MAIN). Tag the merge commit on main, and re-tag if main's salt-contract/ has moved since."
+            exit 1
+          fi
+
+      # The package's gate: one version across every contract file, each valid against its schema,
+      # no colour values, and a tarball that ships only what it declares. ajv comes from the
+      # lockfile. No install scripts: nothing here needs one.
+      - name: Install the pinned tools
+        if: steps.registry.outputs.live == 'false'
+        run: npm ci --ignore-scripts
+      - name: The Salt contract's own gate
+        if: steps.registry.outputs.live == 'false'
+        run: npm run salt-contract
+
+      # Until 1.0.0 the package is `private`, and npm refuses to stage a private package. That is
+      # deliberate: a 0.x drafting tag can never reach the registry, even by accident.
+      - name: The package is publishable
+        if: steps.registry.outputs.live == 'false'
+        run: |
+          if [ "$(node -p 'require("./salt-contract/package.json").private === true')" = true ]; then
+            echo "::error::salt-contract/package.json is private. Remove \"private\": true in the 1.0.0 release pull request, not before."
+            exit 1
+          fi
+
+      # publishConfig carries `access: public` and pins the scope to registry.npmjs.org, so the
+      # command needs no flags. Run from salt-contract/, whose own .npmrc also points the scope there.
+      # `--json` returns the stage id (for `npm stage approve`; the npmjs.com card does not show
+      # it) and the integrity and shasum npm actually staged, which must be the ones recorded
+      # above. The shasum matters most: it is what the approval card shows. `--loglevel
+      # verbose` is for the one line npm logs when the OIDC exchange is refused, "oidc Failed token
+      # exchange request with body message: ...", which carries the registry's reason. npm swallows
+      # the refusal otherwise and reports only ENEEDAUTH.
+      - name: Stage for approval on npmjs.com
+        if: steps.registry.outputs.live == 'false'
+        working-directory: salt-contract
+        run: |
+          set +e
+          npm stage publish --json --loglevel verbose > "$RUNNER_TEMP/stage.json"
+          STATUS=$?
+          set -e
+          if [ "$STATUS" -ne 0 ]; then
+            cat "$RUNNER_TEMP/stage.json"
+            if grep -q '"ENEEDAUTH"' "$RUNNER_TEMP/stage.json"; then
+              echo "::error::npm has no credential for the stage: the OIDC exchange was refused (the verbose 'oidc' line above gives the registry's reason). Check that the package's Trusted Publisher on npmjs.com names lightlysaltedhq / contracts / release-salt-contract.yml with no environment, and that this job has id-token: write."
+            elif grep -q 'previously staged version' "$RUNNER_TEMP/stage.json"; then
+              # npm's docs describe no 409; its text is from npm/cli#9889, where one arrived with
+              # nothing staged at all. So the message claims only what this run knows: it staged
+              # nothing, and what it would have staged. Whatever IS staged may hold other bytes: a
+              # tag moved before approval, or a stage from someone's local tree. The approval card
+              # on npmjs.com shows no stage id and no sha512, only DATE, SHASUM (SHA-1) and USER
+              # (docs.npmjs.com/staged-publishing, its screenshot), so the test is the one a person
+              # can make on that card: SHASUM equals this commit's, and USER is GitHub Actions.
+              echo "::error::npm refused to stage $PKG_NAME@$PKG_VERSION: 409 \"previously staged version\". This attempt staged nothing. This run packs commit $GITHUB_SHA to shasum $PACKED_SHASUM (integrity $PACKED_INTEGRITY). In the Staged Packages tab on npmjs.com, approve the staged $PKG_VERSION only if its card's SHASUM is exactly $PACKED_SHASUM and its USER is GitHub Actions; otherwise reject it, then re-run. \`npm stage list $PKG_NAME\` from a logged-in terminal lists stage ids if you need them. If the tab shows nothing staged for $PKG_VERSION, this is the npm/cli#9889 case, where there was nothing to approve or reject and the way out was a new version number."
+            fi
+            exit "$STATUS"
+          fi
+          read -r ID STAGE_ID STAGED STAGED_SHASUM < <(node -e '
+            const r = Object.values(require(process.argv[1]))[0]
+            console.log(r.id, r.stageId, r.integrity, r.shasum)' "$RUNNER_TEMP/stage.json")
+          echo "staged=$STAGED shasum=$STAGED_SHASUM stageId=$STAGE_ID"
+          if [ "$STAGED" != "$PACKED_INTEGRITY" ] || [ "$STAGED_SHASUM" != "$PACKED_SHASUM" ]; then
+            echo "::error::npm staged $STAGED (shasum $STAGED_SHASUM), not the $PACKED_INTEGRITY (shasum $PACKED_SHASUM) packed above. Reject stage $STAGE_ID on npmjs.com."
+            exit 1
+          fi
+          {
+            echo "### $ID is staged, not published"
+            echo
+            echo "- **SHASUM: \`$STAGED_SHASUM\`** (the approval card on npmjs.com shows this)"
+            echo "- commit: \`$GITHUB_SHA\`"
+            echo "- integrity: \`$STAGED\`"
+            echo "- stage id: \`$STAGE_ID\` (for \`npm stage approve\`; the card does not show it)"
+            echo
+            echo "Nothing is installable yet. In the Staged Packages tab on npmjs.com, approve $ID with your passkey only if its card's SHASUM is exactly \`$STAGED_SHASUM\` and its USER is GitHub Actions. Otherwise reject it."
+            echo
+            echo "Once approved, re-run this run. The re-run finds the version on the registry and passes only if it is served with the integrity above."
+          } >> "$GITHUB_STEP_SUMMARY"
+          # A staging run and a verifying run both end green. The summary tells them apart only for
+          # someone who opens it; an annotation shows on the run page itself.
+          echo "::notice::STAGED, NOT PUBLISHED: approve on npmjs.com, then re-run to verify"

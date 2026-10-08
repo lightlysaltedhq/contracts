@@ -1,0 +1,78 @@
+{
+  "$schema": "../../schema/field-definition.schema.json",
+  "version": "0.1.0",
+  "section": "rich-text",
+  "shared": {
+    "id": "section-settings"
+  },
+  "fields": [
+    {
+      "name": "eyebrow",
+      "type": "text",
+      "label": "Eyebrow",
+      "description": "A short label above the heading. Drawn as a paragraph, never a heading.",
+      "platforms": {
+        "wordpress": {
+          "owes": "the field on rich_text; intro already has it"
+        }
+      }
+    },
+    {
+      "name": "heading",
+      "type": "text",
+      "label": "Heading",
+      "description": "Optional."
+    },
+    {
+      "name": "body",
+      "type": "rich-text",
+      "label": "Text",
+      "allowed": [
+        "paragraph",
+        "bold",
+        "italic",
+        "code",
+        "link",
+        "unordered-list",
+        "ordered-list",
+        "blockquote",
+        "heading-3",
+        "heading-4"
+      ],
+      "platforms": {
+        "nextjs": {
+          "formerly": "body"
+        },
+        "wordpress": {
+          "formerly": "content",
+          "note": "The allow-list also passes line breaks."
+        }
+      }
+    },
+    {
+      "name": "alignment",
+      "type": "select",
+      "label": "Alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "centre",
+          "label": "Centred"
+        }
+      ],
+      "default": "left",
+      "platforms": {
+        "wordpress": {
+          "formerly": "align",
+          "values": {
+            "center": "centre"
+          },
+          "owes": "the field on rich_text, and the value centre in place of center on intro"
+        }
+      }
+    }
+  ]
+}

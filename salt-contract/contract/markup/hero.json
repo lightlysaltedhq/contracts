@@ -1,0 +1,343 @@
+{
+  "$schema": "../../schema/markup.schema.json",
+  "version": "0.1.0",
+  "id": "hero",
+  "kind": "section",
+  "tier": "core",
+  "root": {
+    "element": "div",
+    "classes": [
+      "salt-block",
+      "salt-hero"
+    ],
+    "attributes": {
+      "data-block": "hero",
+      "data-variant": {
+        "enum": [
+          "full-bleed",
+          "split",
+          "stacked",
+          "minimal"
+        ]
+      },
+      "data-media-side": {
+        "enum": [
+          "left",
+          "right"
+        ],
+        "when": "variant split and an image is drawn"
+      },
+      "data-align": {
+        "enum": [
+          "left",
+          "centre"
+        ],
+        "when": "variant minimal"
+      }
+    }
+  },
+  "elements": [
+    {
+      "role": "text",
+      "element": "div",
+      "classes": [
+        "salt-hero__text"
+      ],
+      "children": [
+        {
+          "role": "eyebrow",
+          "component": "eyebrow",
+          "optional": true,
+          "when": "eyebrow is set"
+        },
+        {
+          "role": "heading",
+          "component": "heading",
+          "attributes": {
+            "id": "from:plan.headingId"
+          },
+          "optional": true,
+          "when": "heading is set"
+        },
+        {
+          "role": "subheading",
+          "element": "p",
+          "classes": [
+            "salt-hero__subheading"
+          ],
+          "text": "from:subheading",
+          "optional": true,
+          "when": "subheading is set"
+        },
+        {
+          "role": "actions",
+          "element": "div",
+          "classes": [
+            "salt-hero__actions"
+          ],
+          "optional": true,
+          "when": "a button resolves",
+          "children": [
+            {
+              "role": "button",
+              "component": "button",
+              "repeat": {
+                "from": "buttons",
+                "min": 1,
+                "max": 2
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "role": "media",
+      "element": "div",
+      "classes": [
+        "salt-hero__media"
+      ],
+      "optional": true,
+      "when": "variant split or stacked and the image resolves with dimensions",
+      "children": [
+        {
+          "role": "image",
+          "component": "media",
+          "classes": [
+            "salt-hero__image"
+          ],
+          "note": "Context half for split, content for stacked."
+        }
+      ]
+    }
+  ],
+  "variants": [
+    {
+      "field": "variant",
+      "sameOrder": true,
+      "options": {
+        "full-bleed": {
+          "root": {
+            "attributes": {
+              "data-variant": "full-bleed"
+            }
+          },
+          "elements": {
+            "media": {
+              "absent": true,
+              "note": "The photograph is the section's background image (section.json), behind the words."
+            }
+          }
+        },
+        "split": {
+          "root": {
+            "attributes": {
+              "data-variant": "split",
+              "data-media-side": {
+                "enum": [
+                  "left",
+                  "right"
+                ],
+                "when": "an image is drawn"
+              }
+            }
+          }
+        },
+        "stacked": {
+          "root": {
+            "attributes": {
+              "data-variant": "stacked"
+            }
+          }
+        },
+        "minimal": {
+          "root": {
+            "attributes": {
+              "data-variant": "minimal",
+              "data-align": {
+                "enum": [
+                  "left",
+                  "centre"
+                ]
+              }
+            }
+          },
+          "elements": {
+            "media": {
+              "absent": true
+            }
+          }
+        }
+      },
+      "note": "Text first and media second in every variant; side and alignment are attributes the stylesheet reads."
+    }
+  ],
+  "headings": {
+    "provides": "when heading is set",
+    "role": "heading",
+    "level": "plan",
+    "labelledBy": true,
+    "rules": [
+      "section#heading-level",
+      "section#single-h1",
+      "section#labelled-by"
+    ],
+    "headingBeforeOwn": "never: the hero's own heading is its first"
+  },
+  "zeroState": "Eyebrow, heading, subheading, image and buttons all empty.",
+  "priorityMedia": {
+    "role": "image",
+    "when": "the plan grants priority and the section has no renderable background image (in full-bleed the background is the priority image)",
+    "rules": [
+      "section#priority-media"
+    ]
+  },
+  "dataAttributes": [
+    {
+      "name": "data-variant",
+      "on": "root",
+      "values": [
+        "full-bleed",
+        "split",
+        "stacked",
+        "minimal"
+      ]
+    },
+    {
+      "name": "data-media-side",
+      "on": "root",
+      "values": [
+        "left",
+        "right"
+      ],
+      "when": "split with an image"
+    },
+    {
+      "name": "data-align",
+      "on": "root",
+      "values": [
+        "left",
+        "centre"
+      ],
+      "when": "minimal"
+    }
+  ],
+  "script": {
+    "kind": "none"
+  },
+  "uses": [
+    "section",
+    "eyebrow",
+    "heading",
+    "button",
+    "call-to-action-group",
+    "arrow",
+    "media"
+  ],
+  "notes": [
+    {
+      "topic": "order",
+      "text": "Platforms differ: WordPress full-bleed draws the image before the text. Ruled: text, then media, in every variant; the full-bleed photograph is the section background, decorative."
+    }
+  ],
+  "platforms": {
+    "nextjs": {
+      "formerly": [
+        {
+          "role": "root",
+          "element": "div",
+          "classes": [
+            "salt-block",
+            "salt-hero"
+          ],
+          "attributes": [
+            "data-variant=fullBleed|split|stacked|minimal"
+          ]
+        }
+      ],
+      "owes": [
+        "data-variant value full-bleed (was fullBleed)."
+      ]
+    },
+    "wordpress": {
+      "formerly": [
+        {
+          "role": "root",
+          "element": "div",
+          "classes": [
+            "x-hero",
+            "x-hero-full-bleed",
+            "x-hero-split",
+            "x-hero-minimal",
+            "grid",
+            "md:grid-cols-2"
+          ]
+        },
+        {
+          "role": "text",
+          "element": "div",
+          "classes": [
+            "x-hero-text",
+            "mx-auto",
+            "max-w-5xl"
+          ]
+        },
+        {
+          "role": "eyebrow",
+          "element": "p",
+          "classes": [
+            "x-eyebrow",
+            "mb-2"
+          ]
+        },
+        {
+          "role": "heading",
+          "element": "h1|h2",
+          "classes": [
+            "x-heading",
+            "text-4xl",
+            "md:text-5xl"
+          ]
+        },
+        {
+          "role": "subheading",
+          "element": "p",
+          "classes": [
+            "x-hero-subheading"
+          ]
+        },
+        {
+          "role": "actions",
+          "element": "div",
+          "classes": [
+            "x-hero-ctas"
+          ]
+        },
+        {
+          "role": "media",
+          "element": "div",
+          "classes": [
+            "x-hero-media"
+          ]
+        },
+        {
+          "role": "image",
+          "element": "img",
+          "classes": [
+            "x-image",
+            "aspect-[4/3]",
+            "rounded-lg"
+          ]
+        }
+      ],
+      "owes": [
+        "Write the block root div.salt-block with data-block set to the contract id inside the section wrapper (section.json).",
+        "Give the section heading the plan's id and point the wrapper's aria-labelledby at it (section#labelled-by).",
+        "Drop Tailwind utility classes from the markup; the shared stylesheets style the salt-* classes.",
+        "Full bleed: draw the photograph as the section background (salt-section__media, alt empty, aria-hidden), not as an img before the text with the attachment's alt.",
+        "The stacked variant; data-variant, data-media-side and data-align on the root; buttons with arrows.",
+        "Eager loading only under section#priority-media, not for every hero image."
+      ]
+    }
+  }
+}

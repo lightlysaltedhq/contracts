@@ -1,0 +1,386 @@
+{
+  "$schema": "../../schema/markup.schema.json",
+  "version": "0.1.0",
+  "id": "case-study",
+  "kind": "view",
+  "summary": "A case study, drawn by core's case-study view.",
+  "root": {
+    "element": "main",
+    "attributes": {
+      "id": "main",
+      "tabindex": "-1"
+    },
+    "note": "Inside the document skeleton page.json draws once (section#landmarks)."
+  },
+  "elements": [
+    {
+      "role": "article",
+      "element": "article",
+      "classes": [
+        "salt-case-study-view"
+      ],
+      "attributes": {
+        "data-header": {
+          "value": "band",
+          "when": "a header tone is set"
+        },
+        "data-media": {
+          "value": "aside",
+          "when": "media aside, an image and a sidebar part"
+        }
+      },
+      "children": [
+        {
+          "role": "header",
+          "element": "header",
+          "classes": [
+            "salt-case-study-view__header"
+          ],
+          "children": [
+            {
+              "role": "back",
+              "element": "p",
+              "classes": [
+                "salt-case-study-view__back"
+              ],
+              "optional": true,
+              "when": "the index has a safe href",
+              "children": [
+                {
+                  "role": "back-link",
+                  "element": "a",
+                  "classes": [
+                    "salt-case-study-view__back-link"
+                  ],
+                  "attributes": {
+                    "href": "from:index.href"
+                  }
+                }
+              ]
+            },
+            {
+              "role": "title",
+              "element": "h1",
+              "text": "from:caseStudy.title"
+            },
+            {
+              "role": "client",
+              "element": "p",
+              "classes": [
+                "salt-case-study-view__client"
+              ],
+              "optional": true,
+              "when": "client is set"
+            },
+            {
+              "role": "summary",
+              "element": "p",
+              "classes": [
+                "salt-case-study-view__summary"
+              ],
+              "optional": true,
+              "when": "summary is set"
+            },
+            {
+              "role": "results",
+              "element": "ul",
+              "classes": [
+                "salt-grid",
+                "salt-case-study-view__results"
+              ],
+              "attributes": {
+                "role": "list",
+                "aria-label": "from:labels.results",
+                "data-columns": {
+                  "enum": [
+                    "2",
+                    "4"
+                  ],
+                  "when": "two or fewer, or four or more"
+                }
+              },
+              "optional": true,
+              "when": "results are set",
+              "children": [
+                {
+                  "role": "result",
+                  "component": "stat",
+                  "repeat": {
+                    "from": "results"
+                  }
+                }
+              ]
+            },
+            {
+              "role": "details",
+              "element": "dl",
+              "classes": [
+                "salt-case-study-view__details"
+              ],
+              "optional": true,
+              "when": "details are set",
+              "children": [
+                {
+                  "role": "detail",
+                  "element": "div",
+                  "classes": [
+                    "salt-case-study-view__detail"
+                  ],
+                  "repeat": {
+                    "from": "details"
+                  },
+                  "children": [
+                    {
+                      "role": "detail-label",
+                      "element": "dt",
+                      "classes": [
+                        "salt-case-study-view__detail-label"
+                      ]
+                    },
+                    {
+                      "role": "detail-value",
+                      "element": "dd",
+                      "classes": [
+                        "salt-case-study-view__detail-value"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "note": "With a header tone: also salt-section, with data-tone, data-tone-dark, data-spacing=md and data-width=default, and its parts inside div.salt-section__content."
+        },
+        {
+          "role": "media",
+          "element": "div",
+          "classes": [
+            "salt-case-study-view__media"
+          ],
+          "optional": true,
+          "when": "an image is set",
+          "children": [
+            {
+              "role": "image",
+              "component": "media",
+              "note": "Priority; fill, cover."
+            }
+          ]
+        },
+        {
+          "role": "challenge",
+          "element": "section",
+          "classes": [
+            "salt-case-study-view__section"
+          ],
+          "optional": true,
+          "when": "challenge is set",
+          "children": [
+            {
+              "role": "challenge-heading",
+              "element": "h2"
+            },
+            {
+              "role": "challenge-body",
+              "component": "rich-text-body"
+            }
+          ]
+        },
+        {
+          "role": "solution",
+          "element": "section",
+          "classes": [
+            "salt-case-study-view__section"
+          ],
+          "optional": true,
+          "when": "solution is set",
+          "children": [
+            {
+              "role": "solution-heading",
+              "element": "h2"
+            },
+            {
+              "role": "solution-body",
+              "component": "rich-text-body"
+            }
+          ]
+        },
+        {
+          "role": "gallery",
+          "element": "section",
+          "classes": [
+            "salt-case-study-view__section"
+          ],
+          "optional": true,
+          "when": "gallery images are set",
+          "children": [
+            {
+              "role": "gallery-heading",
+              "element": "h2"
+            },
+            {
+              "role": "gallery-list",
+              "element": "ul",
+              "classes": [
+                "salt-grid"
+              ],
+              "attributes": {
+                "role": "list"
+              },
+              "children": [
+                {
+                  "role": "gallery-item",
+                  "element": "li",
+                  "repeat": {
+                    "from": "gallery"
+                  },
+                  "children": [
+                    {
+                      "role": "frame",
+                      "element": "div",
+                      "classes": [
+                        "salt-case-study-view__frame"
+                      ],
+                      "children": [
+                        {
+                          "role": "frame-image",
+                          "component": "media"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "role": "live",
+          "element": "p",
+          "classes": [
+            "salt-case-study-view__live"
+          ],
+          "optional": true,
+          "when": "the live url is safe",
+          "children": [
+            {
+              "role": "live-link",
+              "component": "button",
+              "attributes": {
+                "data-style": "secondary",
+                "target": "_blank"
+              }
+            }
+          ]
+        },
+        {
+          "role": "services",
+          "element": "section",
+          "classes": [
+            "salt-case-study-view__section",
+            "salt-case-study-view__services"
+          ],
+          "optional": true,
+          "when": "services are linked",
+          "children": [
+            {
+              "role": "services-heading",
+              "element": "h2"
+            },
+            {
+              "role": "services-list",
+              "element": "ul",
+              "classes": [
+                "salt-grid",
+                "salt-showcase"
+              ],
+              "attributes": {
+                "role": "list",
+                "data-layout": "grid"
+              },
+              "children": [
+                {
+                  "role": "service-card",
+                  "component": "card",
+                  "repeat": {
+                    "from": "services"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "headings": {
+    "provides": "always",
+    "level": "fixed",
+    "fixedLevel": 1,
+    "rules": [
+      "section#single-h1"
+    ],
+    "role": "title",
+    "children": "section headings h2; their bodies from base 2"
+  },
+  "script": {
+    "kind": "none"
+  },
+  "uses": [
+    "stat",
+    "media",
+    "rich-text-body",
+    "button",
+    "card"
+  ],
+  "ruleRefs": [
+    "section#landmarks",
+    "section#single-h1"
+  ],
+  "hooks": [
+    {
+      "class": "salt-case-study-view__back",
+      "role": "back",
+      "reason": "The back link's paragraph; the link carries the rules."
+    },
+    {
+      "class": "salt-case-study-view__detail",
+      "role": "detail",
+      "reason": "Groups each dt with its dd; the details grid styles the pair's parts."
+    },
+    {
+      "class": "salt-case-study-view__live",
+      "role": "live",
+      "reason": "The live-site link's paragraph; the button carries the rules."
+    }
+  ],
+  "notes": [
+    {
+      "topic": "ruling",
+      "text": "This view's vocabulary is core's and fixed here, because primitives.css styles it."
+    },
+    {
+      "topic": "stylesheet-only",
+      "text": "primitives.css mentions .salt-case-study only in a comment (a site's own older copy); it is not contract vocabulary."
+    }
+  ],
+  "platforms": {
+    "wordpress": {
+      "formerly": [
+        {
+          "role": "root",
+          "element": "main",
+          "note": "single-work.php"
+        }
+      ],
+      "owes": [
+        "The case-study view's markup above."
+      ]
+    },
+    "nextjs": {
+      "owes": [
+        "Name its sections (aria-labelledby on each h2) or draw them as div (section#labelled-by)."
+      ]
+    }
+  }
+}

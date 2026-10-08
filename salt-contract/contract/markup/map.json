@@ -1,0 +1,137 @@
+{
+  "$schema": "../../schema/markup.schema.json",
+  "version": "0.1.0",
+  "id": "map",
+  "kind": "component",
+  "root": {
+    "element": "div",
+    "classes": [
+      "salt-map"
+    ],
+    "attributes": {
+      "data-lat": "from:lat",
+      "data-lng": "from:lng",
+      "data-zoom": "from:zoom",
+      "data-tile": "from:tile template",
+      "data-consent-message": "from:labels.consent",
+      "data-error-message": "from:labels.error"
+    }
+  },
+  "elements": [
+    {
+      "role": "label",
+      "element": "p",
+      "classes": [
+        "salt-map__label"
+      ],
+      "text": "from:label",
+      "optional": true,
+      "when": "label is set"
+    },
+    {
+      "role": "load",
+      "component": "button",
+      "classes": [
+        "salt-map__load"
+      ],
+      "attributes": {
+        "type": "button",
+        "data-style": "primary",
+        "aria-label": "from:labels.load"
+      },
+      "text": "from:labels.loadMap"
+    }
+  ],
+  "headings": {
+    "provides": "never",
+    "level": "none"
+  },
+  "zeroState": "Not drawn when maps are off or the coordinates are out of range.",
+  "dataAttributes": [
+    {
+      "name": "data-lat",
+      "on": "root",
+      "values": "from:lat"
+    },
+    {
+      "name": "data-lng",
+      "on": "root",
+      "values": "from:lng"
+    },
+    {
+      "name": "data-zoom",
+      "on": "root",
+      "values": "from:zoom"
+    },
+    {
+      "name": "data-tile",
+      "on": "root",
+      "values": "from:tile template"
+    }
+  ],
+  "script": {
+    "kind": "progressive",
+    "withoutScript": "An inert facade: the label and a button; no tile, script or font from another origin loads.",
+    "withScript": "On a click, and only with maps consent, loads the map library and tiles into the facade."
+  },
+  "uses": [
+    "button"
+  ],
+  "notes": [
+    {
+      "topic": "stylesheet-owes",
+      "text": "New vocabulary from WordPress; no rules in the shared stylesheets yet.",
+      "classes": [
+        "salt-map",
+        "salt-map__label",
+        "salt-map__load"
+      ]
+    },
+    {
+      "topic": "open-question",
+      "text": "WordPress also writes data-maplibre (the library's url); whether the contract fixes the library is for the owner."
+    }
+  ],
+  "platforms": {
+    "nextjs": {
+      "owes": [
+        "The facade, with locations (Epic WP8)."
+      ]
+    },
+    "wordpress": {
+      "formerly": [
+        {
+          "role": "root",
+          "element": "div",
+          "classes": [
+            "x-map",
+            "aspect-video",
+            "bg-surface-alt"
+          ],
+          "attributes": [
+            "data-salt-map",
+            "data-maplibre"
+          ]
+        },
+        {
+          "role": "label",
+          "element": "p",
+          "classes": [
+            "x-map-label"
+          ]
+        },
+        {
+          "role": "load",
+          "element": "button",
+          "classes": [
+            "x-map-load",
+            "x-button"
+          ]
+        }
+      ],
+      "owes": [
+        "Rename to salt-map*; the load control through the button component."
+      ]
+    }
+  }
+}

@@ -1,0 +1,96 @@
+{
+  "$schema": "../../schema/field-definition.schema.json",
+  "version": "0.1.0",
+  "section": "tabs",
+  "shared": {
+    "id": "section-settings"
+  },
+  "fields": [
+    {
+      "name": "eyebrow",
+      "type": "text",
+      "label": "Eyebrow",
+      "description": "A short label above the heading. Drawn as a paragraph, never a heading.",
+      "platforms": {
+        "wordpress": {
+          "owes": "the section"
+        }
+      }
+    },
+    {
+      "name": "heading",
+      "type": "text",
+      "label": "Heading",
+      "description": "Also names the tab set for screen readers.",
+      "platforms": {
+        "wordpress": {
+          "owes": "the section"
+        }
+      }
+    },
+    {
+      "name": "intro",
+      "type": "textarea",
+      "label": "Intro",
+      "maxLength": 300,
+      "description": "Optional. A line or two under the heading, drawn as one paragraph.",
+      "platforms": {
+        "wordpress": {
+          "owes": "the section"
+        }
+      }
+    },
+    {
+      "name": "label",
+      "type": "text",
+      "label": "Tab set name",
+      "description": "Names the tab set for screen readers when there is no heading. Never shown.",
+      "platforms": {
+        "nextjs": {
+          "note": "Shown only while the heading is empty, a condition the contract cannot express (open question 3)."
+        },
+        "wordpress": {
+          "owes": "the section"
+        }
+      }
+    },
+    {
+      "name": "tabs",
+      "type": "list",
+      "label": "Tabs",
+      "itemLabel": "Tab",
+      "rowLabel": "label",
+      "max": 8,
+      "fields": [
+        {
+          "name": "label",
+          "type": "text",
+          "label": "Label",
+          "required": true
+        },
+        {
+          "name": "content",
+          "type": "rich-text",
+          "label": "Content",
+          "allowed": [
+            "paragraph",
+            "bold",
+            "italic",
+            "code",
+            "link",
+            "unordered-list",
+            "ordered-list",
+            "blockquote",
+            "heading-3",
+            "heading-4"
+          ]
+        }
+      ],
+      "platforms": {
+        "wordpress": {
+          "owes": "the section"
+        }
+      }
+    }
+  ]
+}

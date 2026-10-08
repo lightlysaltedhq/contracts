@@ -1,0 +1,45 @@
+{
+  "name": "@lightlysaltedhq/salt-contract",
+  "version": "0.1.0",
+  "private": true,
+  "description": "The platform-neutral Salt contract: section and component vocabulary, field definitions, markup, the shared stylesheets, extension points and fixtures that Salt for Next.js and Salt for WordPress both conform to. Rules and markup, never brand values.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lightlysaltedhq/contracts.git",
+    "directory": "salt-contract"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "publishConfig": {
+    "access": "public",
+    "@lightlysaltedhq:registry": "https://registry.npmjs.org"
+  },
+  "files": [
+    "contract",
+    "schema",
+    "styles",
+    "fixtures",
+    "README.md",
+    "CHANGELOG.md",
+    "RELEASE-POLICY.md",
+    "LICENSE"
+  ],
+  "exports": {
+    "./sections": "./contract/sections.json",
+    "./fields/*": "./contract/fields/*.json",
+    "./markup/*": "./contract/markup/*.json",
+    "./schema/sections": "./schema/sections.schema.json",
+    "./schema/field-definition": "./schema/field-definition.schema.json",
+    "./schema/markup": "./schema/markup.schema.json",
+    "./package.json": "./package.json"
+  },
+  "keywords": [
+    "salt",
+    "contract",
+    "design-system",
+    "wordpress",
+    "payload"
+  ]
+}

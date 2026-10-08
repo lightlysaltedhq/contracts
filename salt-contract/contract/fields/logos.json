@@ -1,0 +1,93 @@
+{
+  "$schema": "../../schema/field-definition.schema.json",
+  "version": "0.1.0",
+  "section": "logos",
+  "shared": {
+    "id": "section-settings"
+  },
+  "fields": [
+    {
+      "name": "heading",
+      "type": "text",
+      "label": "Heading",
+      "description": "Optional. Logo strips usually run without one, or with something like \"As featured in\"."
+    },
+    {
+      "name": "intro",
+      "type": "textarea",
+      "label": "Intro",
+      "maxLength": 300,
+      "description": "Optional. A line or two under the heading, drawn as one paragraph.",
+      "platforms": {
+        "wordpress": {
+          "owes": "the field"
+        }
+      }
+    },
+    {
+      "name": "columns",
+      "type": "select",
+      "label": "Columns",
+      "description": "The most items across. Fewer fit on narrow screens.",
+      "options": [
+        {
+          "value": "2",
+          "label": "2 across"
+        },
+        {
+          "value": "3",
+          "label": "3 across"
+        },
+        {
+          "value": "4",
+          "label": "4 across"
+        }
+      ],
+      "default": "4",
+      "platforms": {
+        "wordpress": {
+          "owes": "the field; the strip lays itself out today"
+        }
+      }
+    },
+    {
+      "name": "greyscale",
+      "type": "boolean",
+      "label": "Draw the logos in grey",
+      "default": true
+    },
+    {
+      "name": "items",
+      "type": "list",
+      "label": "Logos",
+      "itemLabel": "Logo",
+      "rowLabel": "name",
+      "fields": [
+        {
+          "name": "image",
+          "type": "image",
+          "label": "Logo",
+          "required": true
+        },
+        {
+          "name": "name",
+          "type": "text",
+          "label": "Name",
+          "description": "Names the row, the link and, when the image has none, the alternative text."
+        },
+        {
+          "name": "url",
+          "type": "text",
+          "format": "url",
+          "label": "Link",
+          "description": "Optional, such as the client's site or the press article."
+        }
+      ],
+      "platforms": {
+        "wordpress": {
+          "formerly": "logos"
+        }
+      }
+    }
+  ]
+}

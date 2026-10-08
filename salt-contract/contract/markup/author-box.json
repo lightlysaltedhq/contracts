@@ -1,0 +1,202 @@
+{
+  "$schema": "../../schema/markup.schema.json",
+  "version": "0.1.0",
+  "id": "author-box",
+  "kind": "component",
+  "root": {
+    "element": "aside",
+    "classes": [
+      "salt-author-box"
+    ],
+    "attributes": {
+      "aria-label": "from:labels.author"
+    }
+  },
+  "elements": [
+    {
+      "role": "media",
+      "element": "div",
+      "classes": [
+        "salt-author-box__media"
+      ],
+      "optional": true,
+      "when": "the author has a photo",
+      "children": [
+        {
+          "role": "image",
+          "component": "media",
+          "note": "context thumb"
+        }
+      ]
+    },
+    {
+      "role": "body",
+      "element": "div",
+      "classes": [
+        "salt-author-box__body"
+      ],
+      "children": [
+        {
+          "role": "label",
+          "element": "p",
+          "classes": [
+            "salt-author-box__label"
+          ],
+          "text": "from:labels.writtenBy"
+        },
+        {
+          "role": "name",
+          "element": "p",
+          "classes": [
+            "salt-author-box__name"
+          ],
+          "children": [
+            {
+              "role": "link",
+              "element": "a",
+              "attributes": {
+                "href": "from:author url"
+              },
+              "text": "from:name",
+              "optional": true,
+              "when": "the author has an archive"
+            }
+          ]
+        },
+        {
+          "role": "role",
+          "element": "p",
+          "classes": [
+            "salt-author-box__role"
+          ],
+          "text": "from:role",
+          "optional": true,
+          "when": "role is set"
+        },
+        {
+          "role": "bio",
+          "element": "p",
+          "classes": [
+            "salt-author-box__bio"
+          ],
+          "text": "from:bio",
+          "optional": true,
+          "when": "bio is set"
+        }
+      ]
+    }
+  ],
+  "headings": {
+    "provides": "never",
+    "level": "none"
+  },
+  "zeroState": "Not drawn without a name.",
+  "script": {
+    "kind": "none"
+  },
+  "uses": [
+    "media"
+  ],
+  "notes": [
+    {
+      "topic": "stylesheet-owes",
+      "text": "New vocabulary from WordPress; the shared stylesheets have no rules for it yet.",
+      "classes": [
+        "salt-author-box",
+        "salt-author-box__media",
+        "salt-author-box__body",
+        "salt-author-box__label",
+        "salt-author-box__name",
+        "salt-author-box__role",
+        "salt-author-box__bio"
+      ]
+    }
+  ],
+  "platforms": {
+    "nextjs": {
+      "formerly": [
+        {
+          "role": "root",
+          "element": "aside",
+          "classes": [
+            "salt-post__author"
+          ],
+          "note": "The example app's post view, not core"
+        },
+        {
+          "role": "name",
+          "element": "p",
+          "classes": [
+            "salt-post__author-name"
+          ]
+        },
+        {
+          "role": "role",
+          "element": "p",
+          "classes": [
+            "salt-post__author-role"
+          ]
+        }
+      ],
+      "owes": [
+        "The author box as a core component with this markup (sections.json)."
+      ]
+    },
+    "wordpress": {
+      "formerly": [
+        {
+          "role": "root",
+          "element": "aside",
+          "classes": [
+            "x-author-box"
+          ]
+        },
+        {
+          "role": "media",
+          "element": "div",
+          "classes": [
+            "x-author-box-media"
+          ]
+        },
+        {
+          "role": "body",
+          "element": "div",
+          "classes": [
+            "x-author-box-body"
+          ]
+        },
+        {
+          "role": "label",
+          "element": "p",
+          "classes": [
+            "x-author-box-label"
+          ]
+        },
+        {
+          "role": "name",
+          "element": "p",
+          "classes": [
+            "x-author-box-name"
+          ]
+        },
+        {
+          "role": "role",
+          "element": "p",
+          "classes": [
+            "x-author-box-role"
+          ]
+        },
+        {
+          "role": "bio",
+          "element": "p",
+          "classes": [
+            "x-author-box-bio"
+          ]
+        }
+      ],
+      "owes": [
+        "Rename x-author-box* to salt-author-box*; name the aside."
+      ]
+    }
+  }
+}

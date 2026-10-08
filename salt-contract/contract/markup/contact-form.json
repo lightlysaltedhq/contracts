@@ -1,0 +1,313 @@
+{
+  "$schema": "../../schema/markup.schema.json",
+  "version": "0.1.0",
+  "id": "contact-form",
+  "kind": "component",
+  "root": {
+    "element": "form",
+    "classes": [
+      "salt-contact__form"
+    ],
+    "attributes": {
+      "id": "from:form id (salt-contact-<n>)",
+      "method": "post",
+      "action": "from:platform endpoint",
+      "novalidate": ""
+    },
+    "note": "The action is platform-native (SC-003); the markup is not."
+  },
+  "elements": [
+    {
+      "role": "field",
+      "element": "div",
+      "classes": [
+        "salt-contact__field"
+      ],
+      "repeat": {
+        "from": "name, email, phone (when asked), enquiry type (two or more types), message"
+      },
+      "children": [
+        {
+          "role": "label",
+          "element": "label",
+          "classes": [
+            "salt-contact__label"
+          ],
+          "attributes": {
+            "for": "from:field id"
+          },
+          "text": "from:labels.<field>",
+          "children": [
+            {
+              "role": "optional",
+              "element": "span",
+              "classes": [
+                "salt-contact__optional"
+              ],
+              "text": "from:labels.optional",
+              "optional": true,
+              "when": "phone is optional"
+            }
+          ]
+        },
+        {
+          "role": "error",
+          "element": "p",
+          "classes": [
+            "salt-contact__error"
+          ],
+          "attributes": {
+            "id": "from:field id-error"
+          },
+          "text": "from:error",
+          "optional": true,
+          "when": "the field failed validation"
+        },
+        {
+          "role": "input",
+          "element": [
+            "input",
+            "select",
+            "textarea"
+          ],
+          "classes": [
+            "salt-contact__input"
+          ],
+          "attributes": {
+            "id": "from:field id",
+            "name": "from:field name",
+            "required": {
+              "value": "",
+              "when": "the field is required"
+            },
+            "aria-invalid": {
+              "value": "true",
+              "when": "error"
+            },
+            "aria-describedby": {
+              "value": "from:error id and status id",
+              "when": "error or challenge"
+            },
+            "autocomplete": {
+              "enum": [
+                "name",
+                "email",
+                "tel"
+              ]
+            }
+          },
+          "note": "textarea rows=6 for the message."
+        }
+      ]
+    },
+    {
+      "role": "challenge",
+      "element": "div",
+      "classes": [
+        "salt-contact__field"
+      ],
+      "optional": true,
+      "when": "the anti-spam credentials were issued",
+      "children": [
+        {
+          "role": "challenge-label",
+          "element": "label",
+          "classes": [
+            "salt-contact__label"
+          ],
+          "attributes": {
+            "for": "from:field id"
+          },
+          "text": "from:challenge.question"
+        },
+        {
+          "role": "challenge-error",
+          "element": "p",
+          "classes": [
+            "salt-contact__error"
+          ],
+          "optional": true,
+          "when": "the answer failed"
+        },
+        {
+          "role": "challenge-input",
+          "element": "input",
+          "classes": [
+            "salt-contact__input",
+            "salt-contact__input--short"
+          ],
+          "attributes": {
+            "type": "text",
+            "inputmode": "numeric",
+            "autocomplete": "off",
+            "required": "",
+            "aria-describedby": "from:status id"
+          }
+        }
+      ]
+    },
+    {
+      "role": "hidden",
+      "element": "input",
+      "attributes": {
+        "type": "hidden",
+        "name": "from:token and return fields"
+      },
+      "repeat": {
+        "from": "challenge token, form token, return path"
+      }
+    },
+    {
+      "role": "trap",
+      "element": "div",
+      "classes": [
+        "salt-sr-only",
+        "salt-contact__trap"
+      ],
+      "attributes": {
+        "aria-hidden": "true"
+      },
+      "note": "Honeypot: label + text input with tabindex -1, autocomplete off."
+    },
+    {
+      "role": "actions",
+      "element": "div",
+      "classes": [
+        "salt-contact__actions"
+      ],
+      "children": [
+        {
+          "role": "submit",
+          "component": "button",
+          "classes": [
+            "salt-contact__submit"
+          ],
+          "attributes": {
+            "type": "submit",
+            "data-style": "primary"
+          },
+          "text": "from:labels.submit"
+        }
+      ]
+    },
+    {
+      "role": "status",
+      "element": "p",
+      "classes": [
+        "salt-contact__status"
+      ],
+      "attributes": {
+        "id": "from:status id",
+        "role": "status",
+        "aria-live": "polite",
+        "tabindex": "-1",
+        "data-tone": {
+          "enum": [
+            "sending",
+            "sent",
+            "problem"
+          ],
+          "when": "a status is shown"
+        }
+      },
+      "text": "from:status.message",
+      "note": "Always present so the live region exists before it speaks; focused after a send."
+    }
+  ],
+  "headings": {
+    "provides": "never",
+    "level": "none"
+  },
+  "zeroState": "Drawn whenever the site accepts enquiries; otherwise the contact section draws its closed message instead.",
+  "dataAttributes": [
+    {
+      "name": "data-tone",
+      "on": "status",
+      "values": [
+        "sending",
+        "sent",
+        "problem"
+      ],
+      "when": "after a submission"
+    }
+  ],
+  "script": {
+    "kind": "progressive",
+    "withoutScript": "A native POST to the platform's endpoint that redirects back with the status.",
+    "withScript": "Submits in place, fetches the anti-spam credentials, fills the status region and moves focus to it."
+  },
+  "uses": [
+    "button"
+  ],
+  "ruleRefs": [
+    "section#focus-ring",
+    "section#target-size",
+    "section#sr-only"
+  ],
+  "hooks": [
+    {
+      "class": "salt-contact__trap",
+      "role": "trap",
+      "reason": "Identifies the honeypot; salt-sr-only hides it."
+    },
+    {
+      "class": "salt-contact__actions",
+      "role": "actions",
+      "reason": "The submit row; laid out by the form's gap."
+    },
+    {
+      "class": "salt-contact__submit",
+      "role": "submit",
+      "reason": "Names the submit button for scripts and tests; salt-button styles it."
+    }
+  ],
+  "notes": [
+    {
+      "topic": "open-question",
+      "text": "WordPress adds a privacy line when a privacy page is set, and renders its arithmetic challenge only inside noscript when a captcha provider is configured (its own field help says the reverse). Both need a ruling before fixtures."
+    },
+    {
+      "topic": "ruling",
+      "text": "Field names in the markup are the contract's; each platform maps them to its handler (SC-003)."
+    }
+  ],
+  "platforms": {
+    "wordpress": {
+      "formerly": [
+        {
+          "role": "root",
+          "element": "form",
+          "classes": [
+            "x-contact-form",
+            "flex",
+            "w-full",
+            "flex-col",
+            "gap-4"
+          ]
+        },
+        {
+          "role": "status",
+          "element": "div",
+          "classes": [
+            "x-contact-status"
+          ],
+          "attributes": [
+            "id=salt-contact-form",
+            "role=status",
+            "aria-live=polite",
+            "data-salt-contact-status"
+          ],
+          "note": "Before the form today; a div holding a p."
+        },
+        {
+          "role": "input",
+          "element": "input",
+          "note": "names salt_contact_name, salt_contact_email, salt_contact_message, salt_contact_type; honeypot salt_hp; time trap salt_time"
+        }
+      ],
+      "owes": [
+        "Field, label, error and status markup as above; status after the actions, inside the form; phone field per the site setting; one id per form (salt-contact-<n>) instead of a static id."
+      ]
+    }
+  }
+}

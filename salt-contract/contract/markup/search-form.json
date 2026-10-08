@@ -1,0 +1,109 @@
+{
+  "$schema": "../../schema/markup.schema.json",
+  "version": "0.1.0",
+  "id": "search-form",
+  "kind": "component",
+  "root": {
+    "element": "search",
+    "classes": [
+      "salt-search"
+    ],
+    "attributes": {
+      "aria-label": "from:labels.landmark"
+    }
+  },
+  "elements": [
+    {
+      "role": "form",
+      "element": "form",
+      "classes": [
+        "salt-search__form"
+      ],
+      "attributes": {
+        "action": "from:search path",
+        "method": "get"
+      },
+      "children": [
+        {
+          "role": "label",
+          "element": "label",
+          "classes": [
+            "salt-search__label"
+          ],
+          "attributes": {
+            "for": "from:id"
+          },
+          "text": "from:labels.field"
+        },
+        {
+          "role": "input",
+          "element": "input",
+          "classes": [
+            "salt-search__input"
+          ],
+          "attributes": {
+            "id": "from:id",
+            "type": "search",
+            "name": "q",
+            "maxlength": "from:query max",
+            "enterkeyhint": "search"
+          }
+        },
+        {
+          "role": "submit",
+          "element": "button",
+          "classes": [
+            "salt-button"
+          ],
+          "attributes": {
+            "type": "submit",
+            "data-style": "primary"
+          },
+          "text": "from:labels.submit"
+        }
+      ]
+    }
+  ],
+  "headings": {
+    "provides": "never",
+    "level": "none"
+  },
+  "script": {
+    "kind": "none"
+  },
+  "ruleRefs": [
+    "section#focus-ring",
+    "section#target-size",
+    "section#landmarks"
+  ],
+  "hooks": [
+    {
+      "class": "salt-search",
+      "role": "root",
+      "reason": "The search landmark; its form, label and input carry the rules."
+    }
+  ],
+  "notes": [
+    {
+      "topic": "open-question",
+      "text": "WordPress's query parameter is s; the contract writes q. Routing is native (SC-003), so each platform may map it, but the visible markup says q."
+    }
+  ],
+  "platforms": {
+    "wordpress": {
+      "formerly": [
+        {
+          "role": "root",
+          "element": "form",
+          "classes": [
+            "search-form"
+          ],
+          "note": "get_search_form(), WordPress core"
+        }
+      ],
+      "owes": [
+        "The contract's markup instead of core searchform."
+      ]
+    }
+  }
+}

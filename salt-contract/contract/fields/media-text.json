@@ -1,0 +1,133 @@
+{
+  "$schema": "../../schema/field-definition.schema.json",
+  "version": "0.1.0",
+  "section": "media-text",
+  "shared": {
+    "id": "section-settings"
+  },
+  "fields": [
+    {
+      "name": "mode",
+      "type": "select",
+      "label": "Mode",
+      "options": [
+        {
+          "value": "single",
+          "label": "One layout for every row"
+        },
+        {
+          "value": "alternating",
+          "label": "Alternate the sides automatically"
+        }
+      ],
+      "default": "single",
+      "description": "Alternating flips the image side on every row and ignores each row's own setting."
+    },
+    {
+      "name": "rows",
+      "type": "list",
+      "label": "Rows",
+      "itemLabel": "Row",
+      "rowLabel": "heading",
+      "description": "The first row's heading is the section's heading.",
+      "fields": [
+        {
+          "name": "image",
+          "type": "image",
+          "label": "Image",
+          "description": "Optional. A row with no image runs its text full width."
+        },
+        {
+          "name": "heading",
+          "type": "text",
+          "label": "Heading"
+        },
+        {
+          "name": "content",
+          "type": "rich-text",
+          "label": "Text",
+          "allowed": [
+            "paragraph",
+            "bold",
+            "italic",
+            "code",
+            "link",
+            "unordered-list",
+            "ordered-list",
+            "blockquote",
+            "heading-3",
+            "heading-4"
+          ]
+        },
+        {
+          "name": "mediaSide",
+          "type": "select",
+          "label": "Image side",
+          "options": [
+            {
+              "value": "left",
+              "label": "Image on the left"
+            },
+            {
+              "value": "right",
+              "label": "Image on the right"
+            }
+          ],
+          "default": "left",
+          "description": "Ignored when the mode is alternating.",
+          "platforms": {
+            "nextjs": {
+              "note": "Hidden when the section's mode is alternating, a condition on the parent that the contract cannot express; the description says it instead."
+            },
+            "wordpress": {
+              "formerly": "media_side"
+            }
+          }
+        },
+        {
+          "name": "buttons",
+          "type": "list",
+          "label": "Buttons",
+          "description": "Up to two.",
+          "max": 2,
+          "rowLabel": "link",
+          "itemLabel": "Button",
+          "fields": [
+            {
+              "name": "link",
+              "type": "link",
+              "label": "Link",
+              "required": true
+            },
+            {
+              "name": "style",
+              "type": "select",
+              "label": "Style",
+              "options": [
+                {
+                  "value": "primary",
+                  "label": "Primary"
+                },
+                {
+                  "value": "secondary",
+                  "label": "Secondary"
+                },
+                {
+                  "value": "ghost",
+                  "label": "Ghost"
+                }
+              ],
+              "default": "secondary"
+            }
+          ],
+          "platforms": {
+            "wordpress": {
+              "formerly": "cta",
+              "owes": "a list of up to two buttons in place of one link field: cta becomes buttons[0] with style secondary. Visible change: WordPress draws this link today with the link-arrow style (template-parts/sections/media-text.php), so migrated rows change appearance unless the contract adds a link style; and a row with only a second link must move it to buttons[0], closing the gap"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

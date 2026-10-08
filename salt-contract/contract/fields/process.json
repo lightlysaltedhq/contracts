@@ -1,0 +1,113 @@
+{
+  "$schema": "../../schema/field-definition.schema.json",
+  "version": "0.1.0",
+  "section": "process",
+  "shared": {
+    "id": "section-settings"
+  },
+  "fields": [
+    {
+      "name": "eyebrow",
+      "type": "text",
+      "label": "Eyebrow",
+      "description": "A short label above the heading. Drawn as a paragraph, never a heading."
+    },
+    {
+      "name": "heading",
+      "type": "text",
+      "label": "Heading"
+    },
+    {
+      "name": "intro",
+      "type": "textarea",
+      "label": "Intro",
+      "maxLength": 300,
+      "description": "Optional. A line or two under the heading, drawn as one paragraph.",
+      "platforms": {
+        "wordpress": {
+          "owes": "the field"
+        }
+      }
+    },
+    {
+      "name": "layout",
+      "type": "select",
+      "label": "Layout",
+      "options": [
+        {
+          "value": "timeline",
+          "label": "Timeline"
+        },
+        {
+          "value": "cards",
+          "label": "Cards"
+        }
+      ],
+      "default": "timeline"
+    },
+    {
+      "name": "steps",
+      "type": "list",
+      "label": "Steps",
+      "itemLabel": "Step",
+      "rowLabel": "title",
+      "fields": [
+        {
+          "name": "icon",
+          "type": "select",
+          "label": "Icon",
+          "optionsFrom": "icons",
+          "description": "Optional and decorative.",
+          "platforms": {
+            "wordpress": {
+              "owes": "a select of the site's icons in place of a text field holding an icon name"
+            }
+          }
+        },
+        {
+          "name": "image",
+          "type": "image",
+          "label": "Image",
+          "platforms": {
+            "wordpress": {
+              "owes": "the field"
+            }
+          }
+        },
+        {
+          "name": "title",
+          "type": "text",
+          "label": "Title",
+          "required": true,
+          "description": "The step number is drawn for you."
+        },
+        {
+          "name": "text",
+          "type": "textarea",
+          "label": "Text"
+        },
+        {
+          "name": "cta",
+          "type": "link",
+          "label": "Link",
+          "platforms": {
+            "wordpress": {
+              "owes": "the field"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "structuredData",
+      "type": "boolean",
+      "label": "Describe this as a how-to for search engines",
+      "default": false,
+      "platforms": {
+        "wordpress": {
+          "formerly": "schema_toggle"
+        }
+      }
+    }
+  ]
+}

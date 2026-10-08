@@ -1,0 +1,187 @@
+{
+  "$schema": "../../schema/markup.schema.json",
+  "version": "0.1.0",
+  "id": "process",
+  "kind": "section",
+  "tier": "core",
+  "root": {
+    "element": "div",
+    "classes": [
+      "salt-block"
+    ],
+    "attributes": {
+      "data-block": "process"
+    }
+  },
+  "elements": [
+    {
+      "role": "eyebrow",
+      "component": "eyebrow",
+      "optional": true,
+      "when": "eyebrow is set"
+    },
+    {
+      "role": "heading",
+      "component": "heading",
+      "attributes": {
+        "id": "from:plan.headingId"
+      },
+      "optional": true,
+      "when": "heading is set",
+      "note": "Level from the plan (section#heading-level)."
+    },
+    {
+      "role": "intro",
+      "element": "p",
+      "classes": [
+        "salt-intro"
+      ],
+      "text": "from:intro",
+      "optional": true,
+      "when": "intro is set"
+    },
+    {
+      "role": "list",
+      "element": "ol",
+      "classes": [
+        "salt-grid",
+        "salt-process"
+      ],
+      "attributes": {
+        "role": "list",
+        "data-layout": {
+          "enum": [
+            "timeline",
+            "cards"
+          ]
+        }
+      },
+      "optional": true,
+      "when": "a step has a title",
+      "children": [
+        {
+          "role": "step",
+          "component": "process-step",
+          "repeat": {
+            "from": "steps",
+            "min": 1
+          }
+        }
+      ]
+    }
+  ],
+  "variants": [
+    {
+      "field": "layout",
+      "sameOrder": true,
+      "options": {
+        "timeline": {
+          "elements": {
+            "list": {
+              "attributes": {
+                "data-layout": "timeline"
+              }
+            }
+          }
+        },
+        "cards": {
+          "elements": {
+            "list": {
+              "attributes": {
+                "data-layout": "cards"
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "headings": {
+    "provides": "when heading is set",
+    "role": "heading",
+    "level": "plan",
+    "labelledBy": true,
+    "rules": [
+      "section#heading-level",
+      "section#single-h1",
+      "section#labelled-by"
+    ],
+    "headingBeforeOwn": "no heading of its own and there are steps",
+    "children": "step titles at body base + 1"
+  },
+  "zeroState": "Eyebrow, heading, intro and steps all empty.",
+  "priorityMedia": {
+    "role": "list",
+    "when": "timeline: step 0's image; cards: the first step with an image; only when the plan grants priority and the section has no renderable background",
+    "rules": [
+      "section#priority-media"
+    ]
+  },
+  "dataAttributes": [
+    {
+      "name": "data-layout",
+      "on": "list",
+      "values": [
+        "timeline",
+        "cards"
+      ]
+    }
+  ],
+  "script": {
+    "kind": "none"
+  },
+  "uses": [
+    "section",
+    "section-intro",
+    "process-step",
+    "icon",
+    "media",
+    "button",
+    "arrow",
+    "eyebrow",
+    "heading"
+  ],
+  "ruleRefs": [
+    "section#list-semantics"
+  ],
+  "platforms": {
+    "wordpress": {
+      "formerly": [
+        {
+          "role": "eyebrow",
+          "element": "p",
+          "classes": [
+            "x-eyebrow",
+            "mb-2"
+          ]
+        },
+        {
+          "role": "heading",
+          "element": "h1|h2",
+          "classes": [
+            "x-heading",
+            "mb-6"
+          ],
+          "note": "No id; the WordPress section has no aria-labelledby."
+        },
+        {
+          "role": "list",
+          "element": "ol",
+          "classes": [
+            "x-process-list",
+            "x-process-timeline",
+            "x-process-cards",
+            "border-s",
+            "ps-8"
+          ]
+        }
+      ],
+      "owes": [
+        "Write the block root div.salt-block with data-block set to the contract id inside the section wrapper (section.json).",
+        "Give the section heading the plan's id and point the wrapper's aria-labelledby at it (section#labelled-by).",
+        "Drop Tailwind utility classes from the markup; the shared stylesheets style the salt-* classes.",
+        "data-layout instead of x-process-timeline/x-process-cards; role=list; the intro paragraph."
+      ]
+    }
+  }
+}

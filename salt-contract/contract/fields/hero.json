@@ -1,0 +1,179 @@
+{
+  "$schema": "../../schema/field-definition.schema.json",
+  "version": "0.1.0",
+  "section": "hero",
+  "shared": {
+    "id": "section-settings"
+  },
+  "fields": [
+    {
+      "name": "variant",
+      "type": "select",
+      "label": "Layout",
+      "options": [
+        {
+          "value": "full-bleed",
+          "label": "Full bleed"
+        },
+        {
+          "value": "split",
+          "label": "Split"
+        },
+        {
+          "value": "stacked",
+          "label": "Stacked"
+        },
+        {
+          "value": "minimal",
+          "label": "Minimal (text only)"
+        }
+      ],
+      "default": "full-bleed",
+      "description": "Full bleed sets the words over the section's background image; split puts them beside an image; stacked puts them above one; minimal is words alone.",
+      "platforms": {
+        "nextjs": {
+          "values": {
+            "fullBleed": "full-bleed"
+          },
+          "owes": "the stored value full-bleed in place of fullBleed"
+        },
+        "wordpress": {
+          "owes": "the stacked option",
+          "note": "Its full-bleed draws the hero image edge to edge above the text (open question 5)."
+        }
+      }
+    },
+    {
+      "name": "eyebrow",
+      "type": "text",
+      "label": "Eyebrow",
+      "description": "A short label above the heading. Drawn as a paragraph, never a heading."
+    },
+    {
+      "name": "heading",
+      "type": "text",
+      "label": "Heading",
+      "description": "The section's one heading. It becomes the page's main heading when no section above has one."
+    },
+    {
+      "name": "subheading",
+      "type": "textarea",
+      "label": "Subheading",
+      "description": "A plain paragraph under the heading."
+    },
+    {
+      "name": "image",
+      "type": "image",
+      "label": "Image",
+      "condition": {
+        "field": "variant",
+        "in": [
+          "split",
+          "stacked"
+        ]
+      },
+      "description": "Used by the split and stacked layouts. A full-bleed hero uses the section's background image.",
+      "platforms": {
+        "wordpress": {
+          "owes": "hiding it for full-bleed and minimal, and moving a full-bleed hero's image to the background image setting (open question 5)"
+        }
+      }
+    },
+    {
+      "name": "mediaSide",
+      "type": "select",
+      "label": "Image side",
+      "options": [
+        {
+          "value": "left",
+          "label": "Image on the left"
+        },
+        {
+          "value": "right",
+          "label": "Image on the right"
+        }
+      ],
+      "default": "left",
+      "condition": {
+        "field": "variant",
+        "equals": "split"
+      },
+      "platforms": {
+        "wordpress": {
+          "owes": "the field"
+        }
+      }
+    },
+    {
+      "name": "alignment",
+      "type": "select",
+      "label": "Alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "centre",
+          "label": "Centred"
+        }
+      ],
+      "default": "left",
+      "condition": {
+        "field": "variant",
+        "equals": "minimal"
+      },
+      "platforms": {
+        "wordpress": {
+          "owes": "the field"
+        }
+      }
+    },
+    {
+      "name": "buttons",
+      "type": "list",
+      "label": "Buttons",
+      "description": "Up to two.",
+      "max": 2,
+      "rowLabel": "link",
+      "itemLabel": "Button",
+      "fields": [
+        {
+          "name": "link",
+          "type": "link",
+          "label": "Link",
+          "required": true
+        },
+        {
+          "name": "style",
+          "type": "select",
+          "label": "Style",
+          "options": [
+            {
+              "value": "primary",
+              "label": "Primary"
+            },
+            {
+              "value": "secondary",
+              "label": "Secondary"
+            },
+            {
+              "value": "ghost",
+              "label": "Ghost"
+            }
+          ],
+          "default": "primary"
+        }
+      ],
+      "platforms": {
+        "wordpress": {
+          "formerly": [
+            "cta_primary",
+            "cta_secondary"
+          ],
+          "owes": "a list of up to two buttons in place of two link fields: cta_primary becomes buttons[0] with style primary, cta_secondary buttons[1] with style secondary; internal links store the document, not its address"
+        }
+      }
+    }
+  ]
+}

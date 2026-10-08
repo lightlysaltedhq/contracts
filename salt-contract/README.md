@@ -1,0 +1,40 @@
+# salt-contract — the Salt contract
+
+**What Salt for Next.js and Salt for WordPress both conform to. Neither is the reference.**
+
+Salt is Lightly Salted's platform for client websites, built twice: on Next.js with Payload, and
+as a WordPress parent theme. This package is the one thing both implementations pin. It holds:
+
+- the section and component **vocabulary** (`contract/sections.json`): every section's id, its
+  variants, and the names each implementation used before;
+- platform-neutral **field definitions** (`schema/field-definition.schema.json`,
+  `contract/fields/<section>.json`), from which each implementation generates its editor fields
+  (Payload blocks, ACF field groups);
+- the **markup contract** (`contract/markup/<section>.json`): element order, the `salt-*` class
+  vocabulary, data attributes and heading rules;
+- the one shared set of **stylesheets** (`styles/`), reaching colour only through custom
+  properties;
+- the **extension points** a client site may use, and **fixtures** proving the same content gives
+  the same HTML on both platforms (both to come).
+
+It sits on top of `@lightlysaltedhq/design-foundations` (the colour, type and scale rules every
+Lightly Salted product follows) and holds no brand values of its own.
+
+## What must match
+
+Decided by the owner on 08/10/2026 (`SC-003` in the decision log): **visitor output** (HTML,
+classes, data attributes, stylesheets, accessibility behaviour) and **editor fields** (names,
+types, choices, limits, descriptions). Admin screens, logins, form delivery and routing stay
+native to each CMS.
+
+## Status
+
+`0.x` is the drafting line and is not published. `1.0.0` is the first release, staged from CI by
+npm trusted publishing and approved by the owner. See `RELEASE-POLICY.md` for what each part of a
+version means.
+
+## Checks
+
+From the repository root, `npm run salt-contract` runs this package's gate: one version across
+every contract file, every contract file valid against its schema, no colour values anywhere, and
+a tarball that ships only what it declares. `npm run verify` runs every gate in the repository.

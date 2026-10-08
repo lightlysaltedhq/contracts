@@ -1,0 +1,141 @@
+{
+  "$schema": "../../schema/markup.schema.json",
+  "version": "0.1.0",
+  "id": "process-step",
+  "kind": "component",
+  "root": {
+    "element": "li",
+    "classes": [
+      "salt-process__step"
+    ]
+  },
+  "elements": [
+    {
+      "role": "number",
+      "element": "span",
+      "classes": [
+        "salt-process__number"
+      ],
+      "attributes": {
+        "aria-hidden": "true"
+      },
+      "text": "from:position",
+      "note": "Position from 1; hidden because the ol already announces it."
+    },
+    {
+      "role": "icon",
+      "component": "icon",
+      "attributes": {
+        "data-size": "lg"
+      },
+      "optional": true,
+      "when": "icon is set"
+    },
+    {
+      "role": "image",
+      "component": "media",
+      "classes": [
+        "salt-process__image"
+      ],
+      "optional": true,
+      "when": "image is set and resolves with dimensions"
+    },
+    {
+      "role": "title",
+      "component": "heading",
+      "note": "Level: body base + 1."
+    },
+    {
+      "role": "text",
+      "element": "p",
+      "classes": [
+        "salt-process__text"
+      ],
+      "text": "from:text",
+      "optional": true,
+      "when": "text is set"
+    },
+    {
+      "role": "action",
+      "component": "button",
+      "attributes": {
+        "data-style": "secondary"
+      },
+      "optional": true,
+      "when": "a call to action resolves"
+    }
+  ],
+  "headings": {
+    "provides": "always",
+    "role": "title",
+    "level": "given",
+    "rules": [
+      "section#body-heading-base"
+    ]
+  },
+  "zeroState": "Not drawn without a title.",
+  "script": {
+    "kind": "none"
+  },
+  "uses": [
+    "button",
+    "heading",
+    "icon",
+    "media"
+  ],
+  "platforms": {
+    "nextjs": {
+      "owes": [
+        "Nothing visible; process already renders this inline."
+      ]
+    },
+    "wordpress": {
+      "formerly": [
+        {
+          "role": "root",
+          "element": "li",
+          "classes": [
+            "x-process-item"
+          ]
+        },
+        {
+          "element": "div",
+          "classes": [
+            "x-process-step"
+          ]
+        },
+        {
+          "element": "div",
+          "classes": [
+            "x-process-step-marker"
+          ]
+        },
+        {
+          "role": "number",
+          "element": "span",
+          "classes": [
+            "x-process-step-number"
+          ]
+        },
+        {
+          "role": "title",
+          "element": "h",
+          "classes": [
+            "x-heading",
+            "x-process-step-title"
+          ]
+        },
+        {
+          "role": "text",
+          "element": "p",
+          "classes": [
+            "x-process-step-text"
+          ]
+        }
+      ],
+      "owes": [
+        "Flatten x-process-step and its marker div into the li; add the optional image and call to action."
+      ]
+    }
+  }
+}

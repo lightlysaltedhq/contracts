@@ -1,0 +1,166 @@
+{
+  "$schema": "../../schema/markup.schema.json",
+  "version": "0.1.0",
+  "id": "service",
+  "kind": "view",
+  "summary": "A service page.",
+  "root": {
+    "element": "main",
+    "attributes": {
+      "id": "main",
+      "tabindex": "-1"
+    },
+    "note": "Inside the document skeleton page.json draws once (section#landmarks)."
+  },
+  "elements": [
+    {
+      "role": "article",
+      "element": "article",
+      "children": [
+        {
+          "role": "header",
+          "element": "header",
+          "children": [
+            {
+              "role": "title",
+              "element": "h1",
+              "text": "from:service.title"
+            },
+            {
+              "role": "summary",
+              "element": "p",
+              "optional": true,
+              "when": "summary is set"
+            }
+          ]
+        },
+        {
+          "role": "intro",
+          "component": "rich-text-body",
+          "optional": true,
+          "when": "intro is set"
+        },
+        {
+          "role": "benefits",
+          "element": "section",
+          "attributes": {
+            "aria-labelledby": "from:benefits heading id"
+          },
+          "optional": true,
+          "when": "benefits are set",
+          "children": [
+            {
+              "role": "benefits-heading",
+              "element": "h2"
+            },
+            {
+              "role": "benefits-list",
+              "element": "ul",
+              "attributes": {
+                "role": "list"
+              }
+            }
+          ]
+        },
+        {
+          "role": "cta",
+          "component": "button",
+          "optional": true,
+          "when": "a call to action resolves"
+        }
+      ]
+    },
+    {
+      "role": "related",
+      "element": "section",
+      "attributes": {
+        "aria-labelledby": "from:related heading id"
+      },
+      "optional": true,
+      "when": "related services exist",
+      "children": [
+        {
+          "role": "related-heading",
+          "element": "h2"
+        },
+        {
+          "role": "related-list",
+          "element": "ul",
+          "classes": [
+            "salt-grid",
+            "salt-showcase"
+          ],
+          "attributes": {
+            "role": "list",
+            "data-layout": "grid"
+          },
+          "children": [
+            {
+              "role": "related-card",
+              "component": "card",
+              "repeat": {
+                "from": "related"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "headings": {
+    "provides": "always",
+    "level": "fixed",
+    "fixedLevel": 1,
+    "rules": [
+      "section#single-h1"
+    ],
+    "role": "title"
+  },
+  "script": {
+    "kind": "none"
+  },
+  "uses": [
+    "rich-text-body",
+    "button",
+    "card"
+  ],
+  "ruleRefs": [
+    "section#landmarks",
+    "section#single-h1"
+  ],
+  "notes": [
+    {
+      "topic": "open-question",
+      "text": "Only the landmark structure and the h1 are fixed here; the view body's class vocabulary is not yet in the contract (Next's example app writes salt-post__*, salt-service__* and salt-archive__*, which no shared stylesheet styles)."
+    }
+  ],
+  "platforms": {
+    "wordpress": {
+      "formerly": [
+        {
+          "role": "root",
+          "element": "main",
+          "note": "single-service.php"
+        }
+      ],
+      "owes": [
+        "The structure above."
+      ]
+    },
+    "nextjs": {
+      "formerly": [
+        {
+          "role": "article",
+          "element": "article",
+          "classes": [
+            "salt-service"
+          ],
+          "note": "apps/example catalogue-views.tsx; its benefits and related sections are unnamed today"
+        }
+      ],
+      "owes": [
+        "Name the benefits and related sections (aria-labelledby), or draw them as div (section#labelled-by)."
+      ]
+    }
+  }
+}

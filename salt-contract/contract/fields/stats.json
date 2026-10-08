@@ -1,0 +1,92 @@
+{
+  "$schema": "../../schema/field-definition.schema.json",
+  "version": "0.1.0",
+  "section": "stats",
+  "shared": {
+    "id": "section-settings"
+  },
+  "fields": [
+    {
+      "name": "heading",
+      "type": "text",
+      "label": "Heading"
+    },
+    {
+      "name": "intro",
+      "type": "textarea",
+      "label": "Intro",
+      "maxLength": 300,
+      "description": "Optional. A line or two under the heading, drawn as one paragraph.",
+      "platforms": {
+        "wordpress": {
+          "owes": "the field"
+        }
+      }
+    },
+    {
+      "name": "columns",
+      "type": "select",
+      "label": "Columns",
+      "description": "The most items across. Fewer fit on narrow screens.",
+      "options": [
+        {
+          "value": "2",
+          "label": "2 across"
+        },
+        {
+          "value": "3",
+          "label": "3 across"
+        },
+        {
+          "value": "4",
+          "label": "4 across"
+        }
+      ],
+      "default": "3"
+    },
+    {
+      "name": "items",
+      "type": "list",
+      "label": "Stats",
+      "itemLabel": "Stat",
+      "rowLabel": "value",
+      "fields": [
+        {
+          "name": "icon",
+          "type": "select",
+          "label": "Icon",
+          "optionsFrom": "icons",
+          "description": "Optional and decorative.",
+          "platforms": {
+            "wordpress": {
+              "owes": "the field"
+            }
+          }
+        },
+        {
+          "name": "value",
+          "type": "text",
+          "label": "Value",
+          "required": true,
+          "description": "Stored as text and shown as written.",
+          "platforms": {
+            "wordpress": {
+              "formerly": "number"
+            }
+          }
+        },
+        {
+          "name": "suffix",
+          "type": "text",
+          "label": "Suffix",
+          "description": "Optional unit, such as %, + or k."
+        },
+        {
+          "name": "label",
+          "type": "text",
+          "label": "Label"
+        }
+      ]
+    }
+  ]
+}

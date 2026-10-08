@@ -1,0 +1,170 @@
+{
+  "$schema": "../../schema/markup.schema.json",
+  "version": "0.1.0",
+  "id": "listing",
+  "kind": "section",
+  "tier": "core",
+  "root": {
+    "element": "div",
+    "classes": [
+      "salt-block"
+    ],
+    "attributes": {
+      "data-block": "listing"
+    }
+  },
+  "elements": [
+    {
+      "role": "eyebrow",
+      "component": "eyebrow",
+      "optional": true,
+      "when": "eyebrow is set"
+    },
+    {
+      "role": "heading",
+      "component": "heading",
+      "attributes": {
+        "id": "from:plan.headingId"
+      },
+      "optional": true,
+      "when": "heading is set",
+      "note": "Level from the plan (section#heading-level)."
+    },
+    {
+      "role": "intro",
+      "element": "p",
+      "classes": [
+        "salt-intro"
+      ],
+      "text": "from:intro",
+      "optional": true,
+      "when": "intro is set"
+    },
+    {
+      "role": "empty",
+      "element": "p",
+      "classes": [
+        "salt-listing__empty"
+      ],
+      "text": "from:labels.empty",
+      "optional": true,
+      "when": "the route supplies no cards"
+    },
+    {
+      "role": "list",
+      "element": "ul",
+      "classes": [
+        "salt-grid",
+        "salt-showcase"
+      ],
+      "attributes": {
+        "role": "list",
+        "data-layout": "grid"
+      },
+      "optional": true,
+      "when": "the route supplies cards",
+      "children": [
+        {
+          "role": "item",
+          "element": "li",
+          "repeat": {
+            "from": "cards",
+            "min": 1
+          },
+          "children": [
+            {
+              "role": "card",
+              "component": "card",
+              "note": "Generic style, context card."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "role": "pagination",
+      "component": "pagination",
+      "optional": true,
+      "when": "more than one page"
+    }
+  ],
+  "headings": {
+    "provides": "when heading is set",
+    "role": "heading",
+    "level": "plan",
+    "labelledBy": true,
+    "rules": [
+      "section#heading-level",
+      "section#single-h1",
+      "section#labelled-by"
+    ],
+    "headingBeforeOwn": "no heading of its own and there are cards",
+    "children": "card titles at body base + 1"
+  },
+  "zeroState": "Only when the route has nothing to list it at all; an empty page draws the empty message.",
+  "priorityMedia": {
+    "role": "card",
+    "when": "the first card's image under section#priority-media",
+    "rules": [
+      "section#priority-media"
+    ]
+  },
+  "script": {
+    "kind": "none"
+  },
+  "uses": [
+    "section",
+    "section-intro",
+    "card",
+    "pagination",
+    "eyebrow",
+    "heading"
+  ],
+  "ruleRefs": [
+    "section#list-semantics"
+  ],
+  "hooks": [
+    {
+      "class": "salt-listing__empty",
+      "role": "empty",
+      "reason": "The empty-result message; no default style, a hook for sites and tests."
+    }
+  ],
+  "omitted": [
+    {
+      "class": "salt-listing__list",
+      "platform": "nextjs",
+      "reason": "No rule styles it; [data-block='listing'] .salt-showcase reaches the list."
+    }
+  ],
+  "platforms": {
+    "nextjs": {
+      "formerly": [
+        {
+          "role": "list",
+          "element": "ul",
+          "classes": [
+            "salt-grid",
+            "salt-showcase",
+            "salt-listing__list"
+          ]
+        }
+      ],
+      "owes": [
+        "Drop salt-listing__list.",
+        "Give the first card priority only when the plan grants it; today it is unconditional."
+      ]
+    },
+    "wordpress": {
+      "formerly": [
+        {
+          "element": "main",
+          "note": "archive.php, category.php, tag.php, taxonomy.php, search.php render natively: header.x-archive-header, template-parts/content/card-*, the_posts_pagination()"
+        }
+      ],
+      "owes": [
+        "The section's markup on archive, category, tag, taxonomy and search templates."
+      ]
+    }
+  }
+}
