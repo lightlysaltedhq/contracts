@@ -317,7 +317,8 @@
       "default": false,
       "platforms": {
         "nextjs": {
-          "formerly": "settings.firstPageOnly"
+          "formerly": "settings.firstPageOnly",
+          "owes": "the default false in place of no default (SC-008)"
         },
         "wordpress": {
           "owes": "the field, with the listing section that paginates"
@@ -332,7 +333,8 @@
       "default": false,
       "platforms": {
         "nextjs": {
-          "formerly": "settings.divider"
+          "formerly": "settings.divider",
+          "owes": "the default false in place of no default (SC-008)"
         },
         "wordpress": {
           "formerly": "section_divider",

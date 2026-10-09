@@ -155,7 +155,7 @@
           }
         },
         "filled": {
-          "description": "true: the sibling has a value (a non-empty text, textarea or rich text, a chosen image, option or relationship, a ticked boolean or any number; a group, list, collection-query or link cannot be tested, which the gate enforces). false: it has none. A clause tests filled or compares a value, never both.",
+          "description": "true: the sibling has a value (a text, textarea or rich text with something visible left after removing whitespace and the zero-width characters U+200B to U+200D, U+2060 and U+FEFF, so text of nothing else is empty for conditions and for rendering (SC-009); a chosen image, option or relationship; a ticked boolean or any number; a group, list, collection-query or link cannot be tested, which the gate enforces). false: it has none. A clause tests filled or compares a value, never both. Salt for WordPress: ACF conditional logic's 'has any value' cannot express the text rule, so an editor who types only spaces still sees the dependent field, while the render treats the text as empty.",
           "type": "boolean"
         }
       },
@@ -476,7 +476,7 @@
           "$ref": "#/$defs/count"
         },
         "format": {
-          "description": "url: an absolute address (http, https, mailto or tel), ACF url on WordPress. anchor: slugified on save by WordPress's sanitize_title under the site's locale, then every run of underscores or %xx octets turned into one hyphen, repeated hyphens collapsed and hyphens trimmed (SC-014), so it is lower-case letters, digits and single hyphens and never contains __; an empty slug is no anchor; only the slug is stored. At render ids settle in one pass in page order: a landmark clash becomes <anchor>-section, and an id already taken takes the next free -2, -3 (SC-013); ids the system draws are <owner>__<part> and never meet one (markup/section#anchors, SC-012).",
+          "description": "url: an absolute address (http, https, mailto or tel); on WordPress an ACF text field carrying salt.format 'url', which the sanitiser reads. anchor: slugified on save by WordPress's sanitize_title under the site's locale, then every run of underscores or %xx octets turned into one hyphen, repeated hyphens collapsed and hyphens trimmed (SC-014), so it is lower-case letters, digits and single hyphens and never contains __; an empty slug is no anchor; only the slug is stored. At render ids settle in one pass in page order: a landmark clash becomes <anchor>-section, and an id already taken takes the next free -2, -3 (SC-013); ids the system draws are <owner>__<part> and never meet one (markup/section#anchors, SC-012).",
           "enum": [
             "url",
             "anchor"

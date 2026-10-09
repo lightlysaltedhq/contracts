@@ -55,6 +55,24 @@ Salted's decision log for Product Salt.
   honeypot is `<anchor>__website`.
 - The sections schema drops `openQuestions`.
 - Locations' open-now rule states one order, hours carried past midnight included.
+- Each collection source in `contract/sections.json` states whether it has a category taxonomy
+  (`categories`, SC-010): services, case studies, posts, team, FAQs and locations do; testimonials
+  do not. The sections schema requires it of every source with items, and the gate refuses a
+  source that answers two ways or a source a collection-query can read with no answer. Both
+  emitters read it (`categorisedSources` and `categorySources` in `emit/_contract.mjs`): a
+  collection-query offers its by-category mode and categories picker only for a source with
+  categories, and with a source select the picker shows only while the select holds one. Salt for
+  Next.js owes a location-area taxonomy with its locations section; its team categories were
+  already owed (SC-006). The Payload emitter names team's and locations' taxonomies `departments`
+  and `areas` by default; a site names its own through `sources`.
+- `emit/payload.mjs` (`./emit/payload`): generates each section's Payload block config from
+  `contract/fields`, as `toPayloadBlocks(options)` (upload collection, link targets, heading set,
+  icon registry, installed sources, the site's rich-text editor). `payloadSnapshot` serialises it
+  deterministically and `checkPayloadSnapshot` (or `node emit/payload.mjs --check`) fails a
+  consumer's committed snapshot when a contract change renames, retypes or re-limits a field.
+  `emit/_contract.mjs` holds what every emitter shares. `reports/round-trip-payload.md` (not
+  shipped) compares the output with Salt for Next.js 0.11.0's blocks: 118 differences, every one
+  recorded in the contract (SC-008 rules the two shared booleans' false default).
 - `styles/` (`./styles/<file>`): the one shared stylesheet set (SC-002). `sections.css`,
   `primitives.css`, `blocks.css` and `chrome.css` come from Salt for Next.js's
   `packages/core/styles` at 1472afdd, which it will re-export; `theme.css` stays with each

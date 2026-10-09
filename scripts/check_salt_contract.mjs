@@ -17,7 +17,8 @@
 //    property that takes colour, custom properties included. Selectors are never read as values.
 //    Allowed: var(), color-mix() over var(), currentColor, transparent, inherit and friends.
 // 4. THE TARBALL. `npm pack --dry-run` of the package lists only package.json and files under the
-//    directories and documents it declares, and every path in `exports` is in it.
+//    directories and documents it declares (the data directories and `emit/`, the emitters that
+//    generate each platform's fields), and every path in `exports` is in it.
 import { execFileSync } from 'node:child_process'
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
 import path from 'node:path'
@@ -116,7 +117,8 @@ for (const abs of contractFiles) {
 // shared.defaults name shared settings. Every literal data-icon in markup is a name sections.json
 // lists under icons (SC-007), and a select whose options come from icons defaults to a content
 // name. Every id the markup draws or points at is a landmark id, <anchor>, or <owner>__<part>
-// (SC-012). Applies only once contract/sections.json exists.
+// (SC-012). Every source a field may name states, once and consistently, whether it has
+// categories (SC-010). Applies only once contract/sections.json exists.
 const read = (p) => { try { return JSON.parse(readFileSync(path.join(dir, p), 'utf8')) } catch { return null } }
 const vocab = read('contract/sections.json')
 // A vocabulary whose entries are objects; a bare list of ids has nothing to cross-check.
@@ -131,6 +133,34 @@ if (vocab && (vocab.sections ?? []).every((x) => x && typeof x === 'object')) {
   for (const e of entries) {
     if (!has(`contract/markup/${e.id}.json`)) fails.push(`${e.id} has no contract/markup/${e.id}.json`)
   }
+  // Categories (SC-010): a source has one answer wherever it is listed, and every source a
+  // collection-query can read (its fixed source, or a source its sourceField select offers) has one,
+  // since both emitters offer by-category from it.
+  const categoriesOf = new Map()
+  for (const s of vocab.sections ?? []) {
+    for (const src of s.sources ?? []) {
+      if (typeof src?.categories !== 'boolean') continue
+      const seen = categoriesOf.get(src.id)
+      if (!seen) categoriesOf.set(src.id, { value: src.categories, at: s.id })
+      else if (seen.value !== src.categories) {
+        fails.push(`source ${src.id} has categories ${seen.value} in ${seen.at} but ${src.categories} in ${s.id}; one source has one answer (SC-010)`)
+      }
+    }
+  }
+  const itemSources = new Set(read('schema/field-definition.schema.json')?.$defs?.source?.enum ?? [])
+  const queried = new Set()
+  const walkQueries = (fields) => {
+    for (const f of fields ?? []) {
+      if (f?.type === 'collection-query' && f.source) queried.add(f.source)
+      if (f?.type === 'collection-query' && f.sourceField) {
+        const select = (fields ?? []).find((x) => x?.name === f.sourceField)
+        for (const o of select?.options ?? []) if (itemSources.has(o.value)) queried.add(o.value)
+      }
+      walkQueries(f?.fields)
+    }
+  }
+  for (const abs of walk('contract/fields', (p) => p.endsWith('.json'))) walkQueries(read(rel(abs))?.fields)
+  for (const id of queried) if (!categoriesOf.has(id)) fails.push(`source ${id} has no categories ruling in sections.json (SC-010)`)
   // Icon names (SC-007): both platforms draw every listed name, so a name outside the list is one
   // a platform may not draw. Editors choose only content names, so a field default must be one.
   // The schema requires icons; a vocabulary without them has already failed, and every name it
@@ -462,7 +492,7 @@ if (statSync(dir).isDirectory()) {
   const isDir = (f) => existsSync(path.join(dir, f)) && statSync(path.join(dir, f)).isDirectory()
   const allowedDirs = (pkg.files ?? []).filter(isDir)
   const allowedDocs = new Set(['package.json', ...(pkg.files ?? []).filter((f) => !isDir(f))])
-  const permitted = new Set(['contract', 'schema', 'styles', 'fixtures'])
+  const permitted = new Set(['contract', 'schema', 'styles', 'fixtures', 'emit'])
   for (const f of packed) {
     const top = f.split('/')[0]
     if (allowedDocs.has(f)) continue
