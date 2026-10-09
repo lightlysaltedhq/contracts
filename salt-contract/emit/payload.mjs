@@ -25,7 +25,7 @@ import { readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 
-import { clauses, collectionQueryShape, hasVisibleText, isFilled, LINK_SHAPE, loadContract, resolveSection, siblingValue, SOURCES } from './_contract.mjs'
+import { clauses, collectionQueryShape, hasVisibleText, isFilled, LINK_SHAPE, loadContract, normaliseLineEndings, resolveSection, siblingValue, SOURCES } from './_contract.mjs'
 
 /**
  * Each source's Payload collection and category taxonomy, as Salt for Next.js names them by
@@ -374,7 +374,8 @@ function diff(was, now, at, out) {
  * `blocks[hero].fields[heading] is in the snapshot and no longer generated`.
  */
 export function checkPayloadSnapshot(snapshot, options = {}) {
-  const now = payloadSnapshot(options)
+  const now = normaliseLineEndings(payloadSnapshot(options))
+  snapshot = normaliseLineEndings(snapshot)
   if (now === snapshot) return { ok: true, problems: [] }
   let was
   try { was = JSON.parse(snapshot) } catch (e) { return { ok: false, problems: [`the snapshot is not JSON: ${e.message}`] } }

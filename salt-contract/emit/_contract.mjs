@@ -91,6 +91,9 @@ export const siblingValue = (siblingData, name, defaults = {}) => {
   return raw === undefined ? defaults[name] : raw
 }
 
+/** Text with CRLF line endings as LF, so a Windows checkout of a committed snapshot compares equal. */
+export const normaliseLineEndings = (text) => text.replace(/\r\n/g, '\n')
+
 /** A condition as a list of clauses, all of which must hold; [] for none. */
 export const clauses = (condition) => (condition === undefined ? [] : [condition].flat())
 

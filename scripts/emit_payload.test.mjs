@@ -299,3 +299,8 @@ test('R8: a stored null is no value, and only a never-set sibling takes its defa
   assert.equal(shows(label, {}), true)
   assert.equal(shows(label, { viewAll: null }), false)
 })
+
+test('R4: a snapshot checked out with CRLF line endings still matches', () => {
+  const snapshot = payloadSnapshot({ icons })
+  assert.deepEqual(checkPayloadSnapshot(snapshot.replace(/\n/g, '\r\n'), { icons }), { ok: true, problems: [] })
+})
