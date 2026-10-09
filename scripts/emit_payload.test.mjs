@@ -422,3 +422,16 @@ test('S10: each section is resolved once per build', () => {
   assert.ok(Object.keys(reads).length > 0)
   for (const [id, n] of Object.entries(reads)) assert.equal(n, 1, id)
 })
+
+test('U7, U8, U9: planSections is the one plan, its source selects already narrowed', async () => {
+  const { planSections, unmetSources, sourceSelectsOf } = await import('../salt-contract/emit/_contract.mjs')
+  assert.equal(typeof unmetSources, 'function')
+  assert.equal(typeof sourceSelectsOf, 'function')
+  const plan = planSections(loadContract(), { installed: new Set(['posts']) })
+  const carousel = plan.sections.find((s) => s.id === 'carousel')
+  assert.deepEqual(carousel.fields.find((f) => f.name === 'source').options.map((o) => o.value), ['inline', 'posts'])
+  assert.deepEqual(plan.leftOut.map((s) => s.id), ['faq', 'locations'])
+  assert.deepEqual(plan.leftOut[0].needs, ['the source faqs (faq.query)'])
+  assert.deepEqual(plan.sections.map((s) => s.id), blocks({ sources: { posts: {} } }).map((b) => b.slug))
+  assert.throws(() => planSections(loadContract(), { installed: new Set(), sections: ['faq'] }), /section faq needs the source faqs/)
+})

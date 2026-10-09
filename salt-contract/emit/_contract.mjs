@@ -153,24 +153,81 @@ export function offeredSources(select, installed) {
   return { options, sources: options.map((o) => o.value).filter((v) => SOURCES.includes(v)) }
 }
 
+/** The names of the selects that a sibling collection-query reads its source from. */
+export const sourceSelectsOf = (fields) =>
+  new Set(fields.filter((f) => f.type === 'collection-query' && f.sourceField).map((f) => f.sourceField))
+
 /**
- * A section's fields with what the installed sources cannot reach left out: a collection-query
- * read from a source select that offers no installed source, and a field whose condition names a
- * source select only by values that select no longer offers (the carousel's showTags with no
- * source that has categories). Source selects themselves stay, narrowed by offeredSources; one left
- * with no option is the caller's to refuse. Top level only, where source selects live.
+ * A section's fields fitted to the installed sources. Each source select is replaced by a copy whose
+ * options are offeredSources' options, computed once here, so an emitter offers `options` as given
+ * and never re-applies the rule. Left out: a collection-query read from a select that offers no
+ * installed source, and a field whose condition names a source select only by values that select
+ * no longer offers (the carousel's showTags with no source that has categories). A select left
+ * with no option is unmetSources' to report. Top level only, where source selects live.
  */
 export function withinSources(fields, installed) {
-  const selects = new Map(fields.filter((f) => f.type === 'collection-query' && f.sourceField)
-    .map((f) => [f.sourceField, offeredSources(fields.find((s) => s.name === f.sourceField), installed)]))
+  const selects = sourceSelectsOf(fields)
+  const narrowed = fields.map((f) => (selects.has(f.name) ? { ...f, options: offeredSources(f, installed).options } : f))
+  const valuesOf = (name) => narrowed.find((s) => s.name === name).options.map((o) => o.value)
   const reachable = (f) => clauses(f.condition).every((c) => {
     // A malformed clause is checkedClauses' to refuse, with its own message.
-    const offered = isClause(c) ? selects.get(c.field) : undefined
-    if (!offered || 'filled' in c) return true
-    const values = offered.options.map((o) => o.value)
-    return ('equals' in c ? [c.equals] : c.in).some((v) => values.includes(v))
+    if (!isClause(c) || !selects.has(c.field) || 'filled' in c) return true
+    return ('equals' in c ? [c.equals] : c.in).some((v) => valuesOf(c.field).includes(v))
   })
-  return fields.filter((f) => !(f.type === 'collection-query' && f.sourceField && selects.get(f.sourceField).sources.length === 0) && reachable(f))
+  const queriesNothing = (f) => f.type === 'collection-query' && f.sourceField && selects.has(f.sourceField) &&
+    !valuesOf(f.sourceField).some((v) => SOURCES.includes(v))
+  return narrowed.filter((f) => !queriesNothing(f) && reachable(f))
+}
+
+/**
+ * What fields fitted by withinSources need from the site's sources and the site lacks, one line
+ * each, naming the field: a collection-query's fixed source or a relationship's source not
+ * installed, or a source select left with no option. `unfitted` is the same fields before fitting,
+ * which says which selects are source selects and what they offered. Payload refuses to start with
+ * a relationship to a collection it does not have, and ACF has nothing to point one at.
+ */
+export function unmetSources(fields, installed, at, unfitted = fields) {
+  const selects = sourceSelectsOf(unfitted)
+  return fields.flatMap((f) => {
+    const where = `${at}.${f.name}`
+    const need = f.type === 'collection-query' ? f.source : f.type === 'relationship' ? f.to : undefined
+    const own = need && !installed.has(need) ? [`the source ${need} (${where})`] : []
+    if (selects.has(f.name) && f.options.length === 0) {
+      const offered = unfitted.find((u) => u.name === f.name).options.map((o) => o.value).filter((v) => SOURCES.includes(v))
+      own.push(`one of the sources ${offered.join(', ')} (${where})`)
+    }
+    return [...own, ...(f.fields ? unmetSources(f.fields, installed, where) : [])]
+  })
+}
+
+/**
+ * The one entry point every emitter plans its sections with, so the emitters cannot disagree about
+ * which sections a site gets or what their source selects offer.
+ *
+ *   installed  a Set of the source ids the site has (every source when left out)
+ *   sections   the section ids asked for, in order; null or left out means every section in
+ *              sections.json, each left out when the site cannot carry it
+ *
+ * Returns { sections: [{ id, section, fields, settings }], leftOut: [{ id, needs }] }: fields and
+ * settings fitted by withinSources. A section asked for by name that the site cannot carry throws,
+ * naming what it needs. Each section is resolved once.
+ */
+export function planSections(contract, { installed = new Set(SOURCES), sections } = {}) {
+  const named = sections != null
+  const kept = []
+  const leftOut = []
+  for (const id of sections ?? contract.sections.map((s) => s.id)) {
+    const { section, fields: all, settings } = resolveSection(contract, id)
+    const fields = withinSources(all, installed)
+    const needs = [
+      ...unmetSources(fields, installed, id, all),
+      ...unmetSources(settings, installed, `${id}.settings`),
+    ]
+    if (needs.length && named) throw new Error(`section ${id} needs ${needs.join(', ')}, which options.sources does not install`)
+    if (needs.length) leftOut.push({ id, needs })
+    else kept.push({ id, section, fields, settings })
+  }
+  return { sections: kept, leftOut }
 }
 
 /**
