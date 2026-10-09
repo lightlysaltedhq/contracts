@@ -366,8 +366,8 @@
       "text": "Tone values are surface, surface-alt, brand-tint and surface-inverse; WordPress's stored 'inverse' maps to surface-inverse."
     },
     {
-      "topic": "open-question",
-      "text": "WordPress spacing and width are utility classes on a container div inside the section; the contract has no container element, the content div takes the measure from data-width. Checking that no WordPress client site styles the container div directly is work SC-006 leaves open."
+      "topic": "ruling",
+      "text": "The section has no container element: the content div (salt-section__content) takes the measure from the root's data-width (SC-007). WordPress's container div, which carries spacing and width as utility classes, goes. No client site runs Salt for WordPress today, so nothing migrates."
     }
   ],
   "platforms": {
@@ -427,6 +427,7 @@
         "Move spacing, tone, width, collapse and divider from classes to data-spacing, data-tone, data-tone-dark, data-width, data-collapse-top and data-divider.",
         "Draw a background image layer and scrim (salt-section__media, salt-section__scrim); WordPress has no background image setting today.",
         "Wrap the block in div.salt-section__content > div.salt-block[data-block].",
+        "Drop the container div: the content div takes the measure from data-width (SC-007).",
         "Write data-track per section#data-track.",
         "Settle anchors and generated ids per section#anchors: the generated id takes the suffix when it meets an editor's anchor (SC-007), and suffixes are never saved.",
         "Use salt-sr-only for the fallback h1 and the skip link's hidden state instead of visually-hidden."
