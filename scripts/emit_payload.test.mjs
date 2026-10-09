@@ -249,10 +249,10 @@ test('a collection-query with a fixed source is the fixed group against that col
   assert.equal(shows(order, { mode: 'manual' }), false)
   assert.equal(shows(order, {}), true)
   assert.deepEqual([count.min, count.max, count.defaultValue], [0, 24, 0])
-  // locations has no categories, so by-category is not offered and categories does not exist.
+  // locations has categories (an area, SC-010), so by-category is offered against its taxonomy.
   const loc = field(block(blocks(), 'locations').fields, 'query')
-  assert.deepEqual(loc.fields.map((f) => f.name), ['mode', 'items', 'order', 'count'])
-  assert.equal(loc.fields[0].enumName, 'enum_query_mode_automatic_manual')
+  assert.deepEqual(loc.fields.map((f) => f.name), ['mode', 'categories', 'items', 'order', 'count'])
+  assert.equal(field(loc.fields, 'categories').relationTo, 'areas')
 })
 
 test('a collection-query read against a source select offers only the chosen source\'s items', () => {
@@ -612,4 +612,33 @@ test('Q4: an empty flag value is refused, so an unset variable never runs as no 
   assert.throws(() => parseEmitterArguments(['--check', 'a.json', '--options', '']), /--options needs a value, not an empty one/)
   assert.throws(() => parseEmitterArguments(['--check', 'a.json', '--write', '']), /--write needs a value, not an empty one/)
   assert.throws(() => parseEmitterArguments(['--check', '']), /--check needs a value, not an empty one/)
+})
+
+test('SC-010: by-category is offered from the contract\'s categories, not from a platform slug', async () => {
+  const { categorisedSources, categorySources } = await import('../salt-contract/emit/_contract.mjs')
+  const contract = loadContract()
+  assert.deepEqual([...categorisedSources(contract)].sort(), ['case-studies', 'faqs', 'locations', 'posts', 'services', 'team'])
+  const select = { name: 'source', type: 'select', label: 'Show', options: ['inline', 'testimonials', 'posts'].map((value) => ({ value, label: value })) }
+  assert.deepEqual(categorySources({ sourceField: 'source' }, [select], categorisedSources(contract)), ['posts'])
+  assert.deepEqual(categorySources({ source: 'testimonials' }, [], categorisedSources(contract)), [])
+
+  // A fixed source with categories offers by-category; one without does not.
+  const query = (source) => field(toPayloadBlocks({ contract: { ...contract, ...probe([{ name: 'query', type: 'collection-query', label: 'Q', source }]), sections: [...probe([]).sections, ...contract.sections] }, sections: ['probe'] })[0].fields, 'query')
+  const team = query('team')
+  assert.deepEqual(team.fields[0].options.map((o) => o.value), ['automatic', 'by-category', 'manual'])
+  assert.equal(field(team.fields, 'categories').relationTo, 'departments')
+  const testimonials = query('testimonials')
+  assert.deepEqual(testimonials.fields.map((f) => f.name), ['mode', 'items', 'order', 'count'])
+  assert.throws(() => toPayloadBlocks({ contract, sections: ['locations'], sources: { locations: { taxonomy: null } } }),
+    /sources\.locations\.taxonomy: the contract gives locations categories \(SC-010\); name the collection that holds them/)
+})
+
+test('SC-010: with a source select, the categories picker shows only for a source that has categories', () => {
+  const carousel = block(blocks({ sources: { services: {}, testimonials: {} } }), 'carousel')
+  const categories = field(field(carousel.fields, 'query').fields, 'categories')
+  assert.deepEqual(categories.custom.salt.categoriesFor, ['services'])
+  const on = (source) => categories.admin.condition({}, { mode: 'by-category' }, { blockData: { source } })
+  assert.equal(on('services'), true)
+  assert.equal(on('testimonials'), false) // PR #7: testimonials were offered service categories
+  assert.equal(categories.admin.condition({}, { mode: 'manual' }, { blockData: { source: 'services' } }), false)
 })

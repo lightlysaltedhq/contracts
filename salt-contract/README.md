@@ -90,6 +90,12 @@ offered. The query, any field reached only by a missing source, and any field wh
 cannot hold once such a field is gone are left out; a kept field loses any clause on a field left
 out.
 
+**Categories.** A collection-query offers its by-category mode and categories picker only for
+sources that `sections.json` says have a category taxonomy (SC-010; `categorySources` in
+`emit/_contract.mjs`). With a source select, the picker shows only while the select holds such a
+source. On Payload each source's `taxonomy` in `options.sources` names the collection holding its
+categories, and a source the contract gives categories with no taxonomy named is refused.
+
 Faults in the contract's own shape are refused whatever the site installs: a malformed condition;
 a `sourceField` naming no sibling select, or one offering no source; and a collection-query that
 reads its source from a select anywhere but the section's top level (in a list, a group or the

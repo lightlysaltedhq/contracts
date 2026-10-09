@@ -24,20 +24,22 @@
 import { readFileSync, writeFileSync } from 'node:fs'
 
 import { clauseHolds, clauses, collectionQueryShape, hasVisibleText, isFilled, isMainModule, LINK_SHAPE, loadContract,
-  normaliseLineEndings, parseEmitterArguments, planSections, siblingValue, sourceValues, SOURCES } from './_contract.mjs'
+  categorisedSources, categorySources, normaliseLineEndings, parseEmitterArguments, planSections, siblingValue, sourceValues, SOURCES } from './_contract.mjs'
 
 /**
  * Each source's Payload collection and category taxonomy, as Salt for Next.js names them by
- * default. A site that renames a module passes `sources`. `null`: the source has no categories.
+ * default. A site that renames a module passes `sources`. Whether a source has categories is the
+ * contract's (SC-010, categorisedSources); `taxonomy` only names the collection holding them, and
+ * team's `departments` and locations' `areas` are the names Salt for Next.js owes.
  */
 export const SOURCE_DEFAULTS = {
   services: { collection: 'services', taxonomy: 'service-categories' },
   'case-studies': { collection: 'case-studies', taxonomy: 'case-study-types' },
   testimonials: { collection: 'testimonials', taxonomy: null },
   posts: { collection: 'posts', taxonomy: 'topics' },
-  team: { collection: 'users', taxonomy: null },
+  team: { collection: 'users', taxonomy: 'departments' },
   faqs: { collection: 'faqs', taxonomy: 'faq-categories' },
-  locations: { collection: 'locations', taxonomy: null },
+  locations: { collection: 'locations', taxonomy: 'areas' },
 }
 
 const HEADING_KINDS = { h2: 'heading-2', h3: 'heading-3', h4: 'heading-4' }
@@ -246,12 +248,16 @@ function collectionQuery(f, out, ctx) {
     offered = sourceValues(ctx.siblings.find((s) => s.name === f.sourceField))
     salt.sourceField = f.sourceField
   }
-  const slugs = offered.map((s) => ctx.sources[s])
-  const taxonomies = slugs.map((s) => s.taxonomy).filter(Boolean)
-  const collections = slugs.map((s) => s.collection)
+  const collections = offered.map((s) => ctx.sources[s].collection)
+  const withCategories = categorySources(f, ctx.siblings, ctx.categorised)
+  const taxonomies = withCategories.map((s) => {
+    const taxonomy = ctx.sources[s].taxonomy
+    if (!taxonomy) throw new Error(`sources.${s}.taxonomy: the contract gives ${s} categories (SC-010); name the collection that holds them`)
+    return taxonomy
+  })
   if (f.modes) salt.modes = f.modes
   if (f.max !== undefined) salt.max = f.max
-  const shape = collectionQueryShape({ modes: f.modes, max: f.max, hasCategories: taxonomies.length > 0 })
+  const shape = collectionQueryShape({ modes: f.modes, max: f.max, hasCategories: withCategories.length > 0 })
   const modeValues = shape[0].options.map((o) => o.value)
   // One Postgres type per vocabulary (salt-nextjs BD-035): the full mode set shares one name, a
   // narrowed set is named by its values.
@@ -261,6 +267,19 @@ function collectionQuery(f, out, ctx) {
     if (field.name !== 'categories' && field.name !== 'items') return field
     const targets = field.name === 'categories' ? taxonomies : collections
     const relation = { ...field, relationTo: targets.length === 1 ? targets[0] : targets }
+    if (field.name === 'categories' && f.sourceField) {
+      // The picker shows only while the block's source select holds a source with categories
+      // (SC-010). That select is on the block, a level above this group; Payload passes the block
+      // to a condition as blockData, and without it the mode alone decides.
+      const mode = relation.admin.condition
+      const select = ctx.siblings.find((s) => s.name === f.sourceField)
+      relation.admin = { ...relation.admin, condition: (data, siblingData, extra) => {
+        if (!mode(data, siblingData)) return false
+        if (!extra?.blockData) return true
+        return withCategories.includes(siblingValue(extra.blockData, f.sourceField, { [f.sourceField]: select.default }))
+      } }
+      relation.custom = { salt: { ...relation.custom.salt, categoriesFor: withCategories } }
+    }
     if (targets.length > 1) {
       // Several collections are offered by a sibling source select, so a picker offers only the
       // collection that select names. Its value lives on the block, a level above this group.
@@ -281,8 +300,9 @@ function build(options, snapshot) {
   const contract = options.contract ?? loadContract()
   const sources = sourcesFrom(options)
   const plan = planSections(contract, { installed: new Set(Object.keys(sources)), sections: options.sections })
+  const categorised = categorisedSources(contract)
   return plan.sections.map(({ id, section, fields, settings }) => {
-    const base = { options, snapshot, sources, scope: id, path: [] }
+    const base = { options, snapshot, sources, categorised, scope: id, path: [] }
     const out = convertFields(fields, base)
     if (settings.length) {
       out.push({

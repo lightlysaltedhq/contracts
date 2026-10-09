@@ -191,6 +191,22 @@ export function offeredSources(select, installed) {
   return { options, sources: sourceValues(select).filter((v) => installed.has(v)) }
 }
 
+/** The source ids sections.json says have a category taxonomy (SC-010). */
+export const categorisedSources = (contract) =>
+  new Set(contract.sections.flatMap((s) => (s.sources ?? []).filter((src) => src.categories === true).map((src) => src.id)))
+
+/**
+ * Which of a collection-query's sources may be queried by category (SC-010): its fixed source if
+ * that has categories, or those of the sources its source select offers (as planSections narrowed
+ * it, among `siblings`) that have them. An emitter offers the by-category mode and the categories
+ * picker only when this is not empty, and with a source select shows the picker only while the
+ * select holds one of these.
+ */
+export function categorySources(query, siblings, categorised) {
+  const sources = query.source ? [query.source] : sourceValues(siblings.find((s) => s.name === query.sourceField))
+  return sources.filter((s) => categorised.has(s))
+}
+
 /** The names of the selects that a sibling collection-query reads its source from. */
 export const sourceSelectsOf = (fields) =>
   new Set(fields.filter((f) => f.type === 'collection-query' && f.sourceField).map((f) => f.sourceField))
