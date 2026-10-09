@@ -216,26 +216,39 @@ salt-wordpress ships today. A difference is expected only when
 
 ## Stylesheets
 
-`styles/` is the one shared stylesheet set both implementations serve (SC-002). Load it in this
-order: `base.css`, `sections.css`, `primitives.css`, `blocks.css`, `chrome.css`, `views.css`.
+`styles/` is the one shared stylesheet set (SC-002): six sources, `base.css`, `sections.css`,
+`primitives.css`, `blocks.css`, `chrome.css` and `views.css`, in that load order. They carry long
+comments and are never served as they are. What both platforms serve is the bundle built from them.
 
-`base.css` is one `@layer base` block. Three set-ups are supported:
+**The bundle.** `styles/salt.css` (`@lightlysaltedhq/salt-contract/styles/salt.css`) is the six
+sources in load order, minified with every comment stripped, built by
+`scripts/build_salt_bundle.mjs` with the lockfile's esbuild, so the same sources always give the
+same bytes. `npm run salt-stylesheets` fails when the committed bundle is not what the sources
+build, or when `styles/` holds a source the build's load order does not name (or the order names
+one it does not hold); rebuild it with `npm run build:salt-bundle` after any change to `styles/`.
 
-- Tailwind v4: import it after `@import 'tailwindcss'`. Its rules join Tailwind's `base` layer
-  after preflight, beat preflight on source order, and yield to every unlayered rule.
-- Tailwind v3: import it into the stylesheet v3 processes. v3 consumes `@layer base` and emits the
-  rules unlayered, after its preflight and before its components and utilities. They rank by
-  specificity and source order: at (0,0,1) they beat preflight's element rules by coming after
-  them and lose to every rule keyed on a class; a host's element rule wins only if it comes later.
-- No Tailwind: load it first, as above. The layer yields to every unlayered rule.
+**Serving it (normative).** Both platforms serve `styles/salt.css` verbatim, as a stylesheet of its
+own: a separate `<link rel="stylesheet">` (or `wp_enqueue_style`) to a copy of the package's file,
+never imported into Tailwind, PostCSS or a bundler's CSS pipeline, which would rewrite its bytes.
+The conformance runner's stylesheet pin compares the file served with the package's, byte for
+byte, so re-processed CSS can never pass. Its place in the page:
 
-Two are not supported: importing it before `tailwindcss` in v4, where preflight comes later in the
-same layer and puts every heading back at body size; and serving it as a file of its own beside
-v3's output, where the layer survives and v3's unlayered preflight outranks it.
+- With Tailwind v4: after Tailwind's stylesheet. Tailwind v4's output opens with
+  `@layer theme, base, components, utilities;`, and cascade layers are ordered across the whole
+  document by their first declaration, so the bundle's `@layer base { … }` joins Tailwind's `base`
+  layer rather than starting a new one. Coming later in that layer, its element rules beat
+  preflight's on source order, and they yield to every unlayered rule. The rest of the bundle is
+  unlayered, so it outranks every Tailwind layer, utilities included.
+- With no Tailwind: first, before the site's own CSS. The layer yields to every unlayered rule.
 
-The set reads only the custom properties `contract/token-layer.json` names, which each
-implementation's runtime emits (its generated `theme.css`). The files carry long comments: serve
-them as one minified bundle, never as six render-blocking requests.
+Not supported: Tailwind v3 beside the bundle. v3 emits its preflight unlayered, so it outranks
+the bundle's `@layer base` and puts every heading back at body size, and importing the bundle into
+v3's pipeline instead re-processes it. Nor is the bundle served before Tailwind v4's stylesheet:
+its `base` layer would then come first in the document, ahead of `theme`, and preflight would
+follow it in the same layer.
+
+The bundle reads only the custom properties `contract/token-layer.json` names, which each
+implementation's runtime emits (its generated `theme.css`).
 
 ## Fixtures
 
@@ -324,3 +337,140 @@ written in the implementation's own repository; the contract fixes only its inte
   the URLs compare and the widths are the platform's own.
 - Form delivery, routing and admin stay native (SC-003): where a case needs a route's data, the
   case supplies it in `route`.
+
+## Conformance
+
+`conformance.mjs` (`@lightlysaltedhq/salt-contract/conformance`, and the `salt-conformance` bin) is
+the runner each implementation points at itself, in its own CI, against the contract version it
+pins. For every section it ships it checks four things:
+
+- **Fixtures.** Every case goes to the implementation's adapter (above), one process or request
+  per case, and the adapter's HTML and the case's expected HTML both go through `normalise`. A
+  mismatch names the section, the case and the first node that differs, by a CSS-like path
+  (`… > div.salt-hero__actions > a.salt-button:nth-of-type(2)`), with what was expected and what
+  was found: a missing or unexpected element, one out of order, another in its place, an attribute
+  or text. Each element's children are aligned first: identical nodes anchor the alignment, an
+  identical node at another position is `order`, and between anchors the rest pair by tag (the
+  most alike first), the nth left out with the nth found as one replaced by another. So a dropped,
+  added or moved sibling is reported as itself, not as every later one changed. A case that
+  renders nothing expects empty output. An adapter that exits non-zero, times out or answers other
+  than 200 fails that case, with its stderr (or the response body) in the report.
+- **Field parity.** The implementation's committed field snapshot is checked with the emitter's own
+  `checkPayloadSnapshot` or `checkAcfSnapshot` (the drift checks above), using the implementation's
+  real options, and each problem is filed under its section. Every shipped section must be in the
+  snapshot ("not in the field snapshot" otherwise). A problem under a block or layout that is no
+  contract section, or under a section declared not shipped, is about the whole snapshot and fails
+  every shipped section; so does a section declared not shipped whose fields are in the snapshot,
+  since shipped fields make it shipped.
+- **Classes.** Every `salt-*` class in the adapter's output is one an element in `contract/markup`
+  carries.
+- **Stylesheet pin.** The file the implementation serves as its Salt stylesheet (above,
+  "Serving it"), or that file fetched from a running site, is byte-identical to
+  `styles/salt.css`. A path inside the package itself is refused, since comparing the package's
+  file with itself proves nothing; a link elsewhere to it (a site's `public/salt.css`) serves the
+  right bytes and passes. There is no version form: a version the caller states says nothing of
+  the bytes served.
+
+An implementation conforms only when all four checks ran for every section it ships and all pass
+(SC-017). A section passes only when all four hold for it; one whose checks that ran all passed,
+but with a check left out, is `incomplete`. So a run without a field snapshot or a stylesheet pin
+fails. A run of some sections (`--sections`) or some checks is allowed only with `--partial`, and
+its report says "partial, not conforming": `ok` is false, `partial` is true and it exits 1. A run
+must ship at least one section, and a section declared not shipped (`--not-shipped`) must stay
+out of the output: a class only its markup draws, written by another section, fails the run.
+
+Salt for Next.js copies or links the package's file to a static path (`public/salt.css`), links
+it after Tailwind's stylesheet, and passes that file (or `--styles-url` with its URL on a preview):
+
+```sh
+npx salt-conformance --platform nextjs --implementation-version "$VERSION" \
+  --adapter "node scripts/salt-adapter.mjs" \
+  --payload-snapshot src/blocks.snapshot.json --fields-options src/blocks.options.json \
+  --styles public/salt.css \
+  --out conformance
+```
+
+or `node node_modules/@lightlysaltedhq/salt-contract/conformance.mjs` with the same flags. Salt for
+WordPress copies the package's file into its theme, enqueues that copy, and passes it with its
+snapshot:
+
+```sh
+npx salt-conformance --platform wordpress --implementation-version "$VERSION" \
+  --adapter "php bin/salt-adapter.php" \
+  --acf-snapshot acf/sections.json --fields-options acf/sections.options.json \
+  --styles assets/salt.css \
+  --out conformance
+```
+
+| Flag | What it takes |
+| --- | --- |
+| `--platform <name>` | Required. The implementation's name in the report (`nextjs`, `wordpress`). |
+| `--adapter <command>` | The adapter command, run through the shell once per case. |
+| `--endpoint <url>` | Or the adapter endpoint, POSTed each case. One of the two is required. |
+| `--payload-snapshot <file>` | The committed `payloadSnapshot(options)`. |
+| `--acf-snapshot <file>` | Or the committed `acfSnapshot(options)`. |
+| `--fields-options <file>` | The JSON options the snapshot was generated with (`{}` when left out). |
+| `--styles <file>` | The Salt stylesheet the implementation serves, compared byte for byte with `styles/salt.css`. |
+| `--styles-url <url>` | Or that file's URL on a running site, fetched and compared the same way. |
+| `--sections <id,…>` | Run only these sections. Needs `--partial`. |
+| `--not-shipped <id,…>` | Sections the implementation does not ship: reported "not shipped", not failed. |
+| `--implementation-version <v>` | The implementation's own version, for the report. |
+| `--out <dir>` | Write `conformance.json` and `conformance.md` there. The Markdown also goes to stdout. |
+| `--jobs <n>` | Cases run at once (the machine's parallelism by default; 1 for an adapter that cannot share). |
+| `--timeout <ms>` | How long one case may take (60000). |
+| `--partial` | Allow a run that leaves sections or checks out; it never conforms. Takes no value. |
+
+Every flag but `--partial` takes one value; an unknown, empty or repeated flag is refused. Exit 0
+is a conforming run, 1 any mismatch, missing check or partial run, 2 a usage error (and no
+report).
+
+**The report.** `conformance.json` is the parity matrix's input:
+
+```json
+{
+  "format": "salt-conformance/1",
+  "contract": { "package": "@lightlysaltedhq/salt-contract", "version": "0.1.0" },
+  "platform": "nextjs",
+  "implementation": { "version": "0.4.0" },
+  "adapter": { "kind": "command", "target": "node scripts/salt-adapter.mjs" },
+  "ok": false,
+  "partial": false,
+  "summary": { "pass": 15, "fail": 1, "incomplete": 0, "notShipped": 1 },
+  "fields": { "platform": "payload", "snapshot": "…", "options": "…", "problems": [] },
+  "problems": [],
+  "stylesheets": { "served": "…", "bundle": "styles/salt.css", "contract": "0.1.0", "ok": true, "status": "identical" },
+  "sections": [
+    {
+      "id": "hero",
+      "status": "fail",
+      "fixtures": { "total": 9, "passed": 8, "failed": 1, "failures": [
+        { "case": "split-image-left", "kind": "mismatch", "difference": "attribute",
+          "path": "section.salt-section > … > a.salt-button:nth-of-type(2)",
+          "name": "href", "expected": "/contact/", "found": "/contacts/" }
+      ] },
+      "fields": { "status": "pass", "problems": [] },
+      "classes": { "status": "pass", "unknown": [] },
+      "stylesheets": { "status": "pass" }
+    },
+    { "id": "pricing", "status": "not shipped" }
+  ]
+}
+```
+
+A section's `status` is `pass`, `fail`, `incomplete` or `not shipped`, and each check's `status`
+is `pass`, `fail` or `not run`. A failure's `kind` is `mismatch` (with
+`difference`: `missing`, `unexpected`, `order` (an identical node moved) with `expectedAt` and
+`foundAt` (its position among its siblings on each side, from 1), `element`, `attribute` with its `name`, or `text`; an
+absent side is `null`) or `adapter` (with `error` and `stderr`). `fields.problems` at the top holds what is
+about the whole snapshot (not JSON, sections out of order, formatting); a section's own are under
+it. `problems` holds what fails the run as a whole (a section declared not shipped whose classes
+the output uses). `stylesheets.status` is `identical`, `differs` (with `firstDifferingByte`),
+`missing` (no such file) or `unreachable` (the URL failed, with `error`). `conformance.md` is the same report for a person: a table of
+sections, then each failure on a line.
+
+The runner is also importable: `runConformance(options)` returns the report, `renderMarkdown(report)`
+its Markdown, and `firstDifference(expected, actual)` the first differing node of two fragments, for
+an implementation's own tests. `npm run salt-conformance` (`scripts/salt_conformance_self.mjs`)
+runs it here against `scripts/salt_fixture_reference_adapter.mjs` with all four checks, once with
+the Payload snapshot and once with the ACF snapshot the emitters give for one set of options, and
+both runs must conform.

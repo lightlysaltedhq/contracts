@@ -22,12 +22,16 @@
     "styles",
     "fixtures",
     "normalise.mjs",
+    "conformance.mjs",
     "emit",
     "README.md",
     "CHANGELOG.md",
     "RELEASE-POLICY.md",
     "LICENSE"
   ],
+  "bin": {
+    "salt-conformance": "./conformance.mjs"
+  },
   "exports": {
     "./sections": "./contract/sections.json",
     "./fields/*": "./contract/fields/*.json",
@@ -46,6 +50,7 @@
     "./schema/view-props": "./schema/view-props.schema.json",
     "./schema/replaced-logic": "./schema/replaced-logic.schema.json",
     "./normalise": "./normalise.mjs",
+    "./conformance": "./conformance.mjs",
     "./fixtures/*": "./fixtures/*",
     "./image-sizes": "./contract/image-sizes.json",
     "./schema/image-sizes": "./schema/image-sizes.schema.json",
