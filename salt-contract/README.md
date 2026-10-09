@@ -94,8 +94,12 @@ out.
 **Categories.** A collection-query offers its by-category mode and categories picker only for
 sources that `sections.json` says have a category taxonomy (SC-010; `categorySources` in
 `emit/_contract.mjs`). With a source select, the picker shows, and by-category is offered and
-accepted on save (`modeAllowed`), only while the select holds such a source. On Payload each source's `taxonomy` in `options.sources` names the collection holding its
-categories, and a source the contract gives categories with no taxonomy named is refused.
+accepted on save (`modeAllowed`), only while the select holds such a source. On Payload each
+source's `taxonomy` in `options.sources` names the collection holding its categories, and on ACF
+the WordPress taxonomy; either way a source the contract gives categories with no taxonomy named
+is refused. On ACF the picker's `conditional_logic` names the layout's source select, one OR group
+per source with categories; ACF cannot hide one mode choice per source, so the mode field records
+the rule in `salt.modeRequires` for the site's save check.
 
 Faults in the contract's own shape are refused whatever the site installs: a malformed condition;
 a `sourceField` naming no sibling select, or one offering no source; and a collection-query that

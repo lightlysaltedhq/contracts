@@ -29,12 +29,13 @@
 // timestamp, which a consumer loading the groups from code does not need.
 import { readFileSync, writeFileSync } from 'node:fs'
 
-import { allowedFor, clauses, collectionQueryShape, diffSnapshots, isMainModule, LINK_SHAPE, loadContract,
+import { allowedFor, categorisedSources, categorySources, clauses, collectionQueryShape, diffSnapshots, isMainModule, LINK_SHAPE, loadContract,
   normaliseLineEndings, parseEmitterArguments, planSections, sourceValues, SOURCES } from './_contract.mjs'
 
 /**
  * Each source's post type and category taxonomy, as Salt for WordPress registers them by default.
- * A site that renames a module passes `sources`. `null`: the source has no categories.
+ * A site that renames a module passes `sources`. Whether a source has categories is the contract's
+ * (SC-010, categorisedSources); `taxonomy` only names the taxonomy holding them.
  */
 export const SOURCE_DEFAULTS = {
   services: { postType: 'service', taxonomy: 'service_category' },
@@ -268,13 +269,18 @@ function collectionQuery(f, out, ctx) {
     offered = sourceValues(ctx.siblings.find((s) => s.name === f.sourceField))
     salt.sourceField = f.sourceField
   }
-  const targets = offered.map((s) => ctx.sources[s])
-  // Two sources a site maps to one post type or taxonomy are offered once.
-  const taxonomies = [...new Set(targets.map((t) => t.taxonomy).filter(Boolean))]
-  const postTypes = [...new Set(targets.map((t) => t.postType))]
+  // Which sources have categories is the contract's (SC-010); a site's taxonomy only names where
+  // they are held. Two sources a site maps to one post type or taxonomy are offered once.
+  const withCategories = categorySources(f, ctx.siblings, ctx.categorised)
+  const taxonomies = [...new Set(withCategories.map((s) => {
+    const taxonomy = ctx.sources[s].taxonomy
+    if (!taxonomy) throw new Error(`sources.${s}.taxonomy: the contract gives ${s} categories (SC-010); name the taxonomy that holds them`)
+    return taxonomy
+  }))]
+  const postTypes = [...new Set(offered.map((s) => ctx.sources[s].postType))]
   if (f.modes) salt.modes = f.modes
   if (f.max !== undefined) salt.max = f.max
-  const shape = collectionQueryShape({ modes: f.modes, max: f.max, hasCategories: taxonomies.length > 0 })
+  const shape = collectionQueryShape({ modes: f.modes, max: f.max, hasCategories: withCategories.length > 0 })
   // Each picker is retyped; its own provenance, if any, stays and comes last as on every field.
   const retyped = ({ salt: own, ...rest }, settings, extra) => {
     const merged = { ...own, ...extra }
@@ -283,13 +289,19 @@ function collectionQuery(f, out, ctx) {
   out.sub_fields = convertFields(shape.map(({ part, ...p }) => p), ctx).map((field) => {
     if (field.name === 'items') return retyped(field, { type: 'relationship', post_type: postTypes, filters: ['search'], return_format: 'id' })
     if (field.name !== 'categories') return field
+    // With a source select the field shows only while the select, on the layout above this group,
+    // holds a source with categories: one OR group per such source, added to each mode group. ACF
+    // finds a rule's field by key among the field's ancestors in the same layout row.
+    const forSource = f.sourceField
+      ? { conditional_logic: field.conditional_logic.flatMap((g) => withCategories.map((source) => [...g, { field: keyFor({ ...ctx, path: ctx.path.slice(0, -1) }, f.sourceField), operator: '==', value: source }])) }
+      : {}
+    const provenance = f.sourceField ? { categoriesFor: withCategories } : {}
     if (taxonomies.length === 1) {
-      return retyped(field, { type: 'taxonomy', taxonomy: taxonomies[0], field_type: 'multi_select', return_format: 'id', add_term: 0, save_terms: 0, load_terms: 0 })
+      return retyped(field, { ...forSource, type: 'taxonomy', taxonomy: taxonomies[0], field_type: 'multi_select', return_format: 'id', add_term: 0, save_terms: 0, load_terms: 0 }, provenance)
     }
-    // An ACF taxonomy field reads one taxonomy, and the source is chosen by a select outside this
-    // group, which ACF conditions cannot reach. So several taxonomies are a multiple select of term
-    // ids whose choices the site fills from the taxonomy of the chosen source.
-    return retyped(field, { type: 'select', choices: {}, multiple: 1, ui: 1, ajax: 1, return_format: 'value', allow_null: 1 }, { taxonomies })
+    // An ACF taxonomy field reads one taxonomy, so several are a multiple select of term ids whose
+    // choices the site fills from the taxonomy of the chosen source.
+    return retyped(field, { ...forSource, type: 'select', choices: {}, multiple: 1, ui: 1, ajax: 1, return_format: 'value', allow_null: 1 }, { taxonomies, ...provenance })
   })
   return salt
 }
@@ -300,9 +312,10 @@ function build(options) {
   const contract = options.contract ?? loadContract()
   const sources = sourcesFrom(options)
   const plan = planSections(contract, { installed: new Set(Object.keys(sources)), sections: options.sections })
+  const categorised = categorisedSources(contract)
   const keys = new Map()
   const layouts = plan.sections.map(({ id, section, fields, settings }) => {
-    const base = { options, sources, keys, scope: id, path: [] }
+    const base = { options, sources, categorised, keys, scope: id, path: [] }
     const shared = settings.length ? [{ name: 'settings', type: 'group', label: 'Section settings', fields: settings }] : []
     return {
       key: `layout_salt_${snake(id)}`,

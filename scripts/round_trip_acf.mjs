@@ -179,7 +179,9 @@ function compareConditions(e, n, ctx) {
   const theirLogic = logicOf(n)
   if (!mineLogic && !theirLogic) return null
   ctx = { fixed: {}, ...ctx }
-  const byKey = new Map(ctx.mine.map((s) => [s.key, s]))
+  // A rule may name a field above the group (SC-010: a query's categories read the layout's source
+  // select); salt-wordpress reads none, so it is sampled, or held at a folded layout's source.
+  const byKey = new Map([...(ctx.outer ?? []), ...ctx.mine].map((s) => [s.key, s]))
   const wpByKey = new Map(ctx.theirs.map((s) => [s.key, s]))
   const pairedName = new Map([...ctx.pairs].map(([name, wp]) => [wp.key, name]))
   const vars = new Map()
@@ -219,7 +221,7 @@ const clausesOf = (def) => clauses(def?.condition)
 const QUERY_PARTS = { source: 'mode', taxonomy_terms: 'categories', manual: 'items', orderby: 'order', order: 'direction', count: 'count' }
 
 // entries: [{ e, def, at, siblings }] at one level; theirs: salt-wordpress's fields at that level.
-function compareLevel(section, entries, theirs, prefix, parentDef, fixed = {}) {
+function compareLevel(section, entries, theirs, prefix, parentDef, fixed = {}, outer = []) {
   const wp = named(theirs)
   const claimed = new Map()
   const resolved = new Map()
@@ -243,8 +245,8 @@ function compareLevel(section, entries, theirs, prefix, parentDef, fixed = {}) {
     const found = resolved.get(entry)
     if (!found) { record(section, at, def, 'missing', 'not in salt-wordpress', parentDef); continue }
     if (found[0].name !== e.name) record(section, at, def, 'name', `stored as ${found.map((n) => n.name).join(', ')}`)
-    if (def?.type === 'collection-query') { compareQuery(section, `${at}.`, e, found, def); continue }
-    const ctx = { mine: entry.siblings, theirs: wp, pairs, defs, fixed }
+    if (def?.type === 'collection-query') { compareQuery(section, `${at}.`, e, found, def, fixed, entry.siblings); continue }
+    const ctx = { mine: entry.siblings, outer, theirs: wp, pairs, defs, fixed }
     if (found[0].key && found[0].name === e.name && found[0].key !== e.key) keyRows.push({ section, at, mine: e.key, theirs: found[0].key })
     compareOne(section, at, e, found[0], def, ctx)
   }
@@ -299,7 +301,7 @@ function compareOne(section, at, e, n, def, ctx) {
 
 // salt-wordpress stores a query as six fields on the layout; the query's note covers its parts,
 // its values keyed by part (values.source for mode, values.orderby for order).
-function compareQuery(section, prefix, e, found, def) {
+function compareQuery(section, prefix, e, found, def, fixed, outer) {
   const note = wpNote(def)
   const theirs = found.map((n) => ({ ...n, name: QUERY_PARTS[n.name] ?? n.name }))
   const partDef = (name) => {
@@ -308,7 +310,7 @@ function compareQuery(section, prefix, e, found, def) {
   }
   const before = rows.length
   const entries = e.sub_fields.map((c) => ({ e: c, def: partDef(c.name), at: c.name, siblings: e.sub_fields }))
-  compareLevel(section, entries, theirs, prefix, def)
+  compareLevel(section, entries, theirs, prefix, def, fixed, outer)
   // The parts carry no notes of their own beyond values. The query's note says how its old fields
   // fold into the parts' options; any other difference is part of the new group it owes.
   for (const r of rows.slice(before)) {

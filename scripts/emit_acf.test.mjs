@@ -243,9 +243,10 @@ test('a collection-query with a fixed source is the fixed group against its post
   assert.equal(shows(order, { mode: 'manual' }, query.sub_fields), false)
   assert.equal(shows(order, { mode: 'by-category' }, query.sub_fields), true)
   assert.deepEqual([count.min, count.max, count.default_value], [0, 24, 0])
-  // A source with no categories offers no by-category mode and no categories field.
-  const loc = field(layout(layoutsOf({ sources: { locations: { taxonomy: null } } }), 'locations').sub_fields, 'query')
-  assert.deepEqual(loc.sub_fields.map((f) => f.name), ['mode', 'items', 'order', 'count'])
+  // locations has categories (an area, SC-010), so by-category reads its taxonomy.
+  const loc = field(layout(layoutsOf(), 'locations').sub_fields, 'query')
+  assert.deepEqual(loc.sub_fields.map((f) => f.name), ['mode', 'categories', 'items', 'order', 'count'])
+  assert.equal(field(loc.sub_fields, 'categories').taxonomy, 'location_area')
 })
 
 test('a collection-query read against a source select offers every chosen source\'s post types', () => {
@@ -424,6 +425,17 @@ test('Payload and ACF leave out and keep the same sections, and offer the same s
       assert.deepEqual(l.sub_fields.map((f) => f.name), b.fields.map((f) => f.name), `${at} ${b.slug}`)
       const select = b.fields.find((f) => f.name === 'source')
       if (select) assert.deepEqual(Object.keys(field(l.sub_fields, 'source').choices), select.options.map((o) => o.value), `${at} ${b.slug}.source`)
+      // The same by-category offering (SC-010): the same modes, a categories picker on both or
+      // neither, and with a source select the same sources it shows for.
+      const query = b.fields.find((f) => f.name === 'query')
+      if (query) {
+        const acfQuery = field(l.sub_fields, 'query')
+        assert.deepEqual(Object.keys(acfQuery.sub_fields[0].choices), query.fields[0].options.map((o) => o.value), `${at} ${b.slug}.query.mode`)
+        const theirs = query.fields.find((f) => f.name === 'categories')
+        const mine = acfQuery.sub_fields.find((f) => f.name === 'categories')
+        assert.equal(!!mine, !!theirs, `${at} ${b.slug}.query.categories`)
+        if (theirs?.custom?.salt?.categoriesFor) assert.deepEqual(mine.salt.categoriesFor, theirs.custom.salt.categoriesFor, `${at} ${b.slug}.query.categories`)
+      }
     }
     for (const id of ['faq', 'collection-showcase', 'carousel', 'locations']) {
       let payloadError = null
@@ -533,4 +545,41 @@ test('finding 9: the CLI refuses a flag where a value belongs, an unknown argume
     assert.equal(r.code, 2, args.join(' '))
     assert.match(r.err, message, args.join(' '))
   }
+})
+
+test('SC-010: by-category is offered from the contract\'s categories, not from a site\'s taxonomy', () => {
+  const contract = loadContract()
+  const query = (source, sources) => field(toAcfFieldGroups({
+    contract: { ...contract, ...probe([{ name: 'query', type: 'collection-query', label: 'Q', source }]), sections: [...probe([]).sections, ...contract.sections] },
+    sections: ['probe'], sources,
+  })[0].fields[0].layouts[0].sub_fields, 'query')
+  const team = query('team')
+  assert.deepEqual(Object.keys(team.sub_fields[0].choices), ['automatic', 'by-category', 'manual'])
+  assert.equal(field(team.sub_fields, 'categories').taxonomy, 'department')
+  // A taxonomy a site gives testimonials does not give them categories.
+  const testimonials = query('testimonials', { testimonials: { taxonomy: 'mood' } })
+  assert.deepEqual(testimonials.sub_fields.map((f) => f.name), ['mode', 'items', 'order', 'count'])
+  assert.deepEqual(Object.keys(testimonials.sub_fields[0].choices), ['automatic', 'manual'])
+  assert.throws(() => toAcfFieldGroups({ sections: ['locations'], sources: { locations: { taxonomy: null } } }),
+    /sources\.locations\.taxonomy: the contract gives locations categories \(SC-010\); name the taxonomy that holds them/)
+})
+
+test('SC-010: with a source select, the categories field shows only for a source that has categories', () => {
+  const carousel = layout(layoutsOf({ sources: { services: {}, testimonials: {} } }), 'carousel')
+  const query = field(carousel.sub_fields, 'query')
+  const categories = field(query.sub_fields, 'categories')
+  // One taxonomy among the offered sources, so the native field; testimonials add none.
+  assert.deepEqual([categories.type, categories.taxonomy], ['taxonomy', 'service_category'])
+  assert.deepEqual(categories.salt, { categoriesFor: ['services'] })
+  assert.deepEqual(categories.conditional_logic, [[
+    { field: 'field_salt_carousel_query_mode', operator: '==', value: 'by-category' },
+    { field: 'field_salt_carousel_source', operator: '==', value: 'services' },
+  ]])
+  // One OR group per source with categories.
+  const showcase = layout(layoutsOf({ sources: { services: {}, testimonials: {}, posts: {} } }), 'collection-showcase')
+  const picker = field(field(showcase.sub_fields, 'query').sub_fields, 'categories')
+  assert.deepEqual(picker.conditional_logic.map((g) => g.map((r) => r.value)), [['by-category', 'services'], ['by-category', 'posts']])
+  assert.deepEqual(picker.salt, { taxonomies: ['service_category', 'category'], categoriesFor: ['services', 'posts'] })
+  // The rule names the layout's own source select.
+  assert.ok(showcase.sub_fields.some((f) => f.key === picker.conditional_logic[0][1].field))
 })
