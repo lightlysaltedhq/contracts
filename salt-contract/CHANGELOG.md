@@ -6,20 +6,22 @@ Salted's decision log for Product Salt.
 
 ## Unreleased (0.1.0, drafting)
 
-- The owner's rulings of 09/10/2026 (SC-007, SC-008, SC-012) are applied, and no open question remains;
+- The owner's rulings of 09/10/2026 (SC-007, SC-008, SC-012 to SC-014) are applied, and no open question remains;
   the markup schema drops the `open-question` note topic.
-  - Every id the system draws is `<owner>__<part>` (SC-012). The owner is the component, section
-    or view id as `sections.json` names it, or `<anchor>`, the section's settled id, for ids inside
-    a section. Parts are numbered from 1: `site-header__submenu-2`, `<anchor>__heading`,
-    `<anchor>__tab-2`, `service__benefits-heading`. An anchor is slugged to lower-case letters,
-    digits and single hyphens (Latin accents folded, other scripts dropped), on save and again at
-    render to whatever is stored, so it never contains `__` and never meets a drawn id; an empty
-    slug counts as no anchor. Only the landmark ids stay plain (`main`, `content`, `header`,
-    `footer`, `nav`, `site-navigation`, `search`, `skip-link`). Editors' anchors that are neither
-    landmarks nor repeats keep their ids first. A landmark clash then becomes `<anchor>-section` and
-    a repeat takes `-2`, `-3`, each skipping any anchor set anywhere on the page, so `faq, faq,
-    faq-2` renders `faq, faq-3, faq-2`. A section with no anchor mints its id from its section id
-    after every editor's anchor. Nothing is added to an anchor on save.
+  - Every id the system draws is `<owner>__<part>` (SC-012). The owner is the component, section or
+    view id as `sections.json` names it, or `<anchor>`, the section's settled id, for ids inside a
+    section. Parts are numbered from 1: `site-header__submenu-2`, `<anchor>__heading`,
+    `<anchor>__tab-2`, `service__benefits-heading`. Only the landmark ids stay plain (`main`,
+    `content`, `header`, `footer`, `nav`, `site-navigation`, `search`, `skip-link`). An anchor is
+    slugged as WordPress's `sanitize_title` slugs it under the site's locale, then every run of
+    underscores or `%xx` octets becomes one hyphen, repeated hyphens collapse and hyphens are
+    trimmed (SC-014), on save and again at render, so it never contains `__` and never meets a drawn
+    id; an empty slug counts as no anchor. "We're hiring" gives `were-hiring`; 'Straße' gives
+    `strase` on en_GB and `strasse` on de_DE; 'contact__form' gives `contact-form`. Anchors settle
+    in one pass in page order, as both platforms do (SC-013): an anchor equal to a landmark id
+    becomes `<anchor>-section`, an id already taken takes the next free `-2`, `-3`, and a section
+    with no anchor mints its id from its section id in the same pass. So `faq, main, faq, faq-2` and
+    an unanchored `pricing` render `faq, main-section, faq-2, faq-2-2, pricing`.
   - The post, service, archive and search view bodies are fixed as Salt for Next.js's example app
     writes them (`salt-post__*`, `salt-service__*`, `salt-related`, `salt-archive__*`,
     `salt-search__results`). The post's author is the shared `author-box` component, and Salt for
@@ -46,10 +48,11 @@ Salted's decision log for Product Salt.
   and any id the markup draws or points at (every id-referencing attribute, `href` fragments
   included) that is not a landmark id, `<anchor>` (only inside sections), or `<owner>__<part>`.
 - The markup records the custom properties the shared stylesheets read (the case study's aside rows
-  and measure, and the header's scriptless phone layout, a noscript style in the document head), and
-  that fit and focal point reach the `img` as inline `object-fit` and `object-position` (SC-011).
+  and measure, and the header's scriptless phone layout, a `noscript` style in the document head,
+  drawn in page.json's head), and that fit and focal point reach the `img` as inline `object-fit`
+  and `object-position` (SC-011).
 - The case study names its four sections by `case-study__<part>-heading`, and the contact form's
-  honeypot is `<anchor>__trap`.
+  honeypot is `<anchor>__website`.
 - The sections schema drops `openQuestions`.
 - Locations' open-now rule states one order, hours carried past midnight included.
 - The package exists, with its gate (`npm run salt-contract` at the repository root) and its
