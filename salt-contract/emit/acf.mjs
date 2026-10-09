@@ -265,8 +265,9 @@ function collectionQuery(f, out, ctx) {
     salt.sourceField = f.sourceField
   }
   const targets = offered.map((s) => ctx.sources[s])
-  const taxonomies = targets.map((t) => t.taxonomy).filter(Boolean)
-  const postTypes = targets.map((t) => t.postType)
+  // Two sources a site maps to one post type or taxonomy are offered once.
+  const taxonomies = [...new Set(targets.map((t) => t.taxonomy).filter(Boolean))]
+  const postTypes = [...new Set(targets.map((t) => t.postType))]
   if (f.modes) salt.modes = f.modes
   if (f.max !== undefined) salt.max = f.max
   const shape = collectionQueryShape({ modes: f.modes, max: f.max, hasCategories: taxonomies.length > 0 })

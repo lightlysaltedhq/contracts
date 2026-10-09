@@ -476,3 +476,11 @@ test('Y4: a single relationship that is not required can be cleared', () => {
   const button = field(field(layout(layoutsOf(), 'hero').sub_fields, 'buttons.link').sub_fields, 'document')
   assert.equal(button.allow_null, undefined) // the button's link is required
 })
+
+test('Y5: sources sharing a post type or taxonomy are offered once, so one taxonomy is the native field', () => {
+  const sources = { services: {}, posts: { taxonomy: 'service_category', postType: 'service' } }
+  const query = field(layout(layoutsOf({ sources }), 'collection-showcase').sub_fields, 'query')
+  const categories = field(query.sub_fields, 'categories')
+  assert.deepEqual([categories.type, categories.taxonomy], ['taxonomy', 'service_category'])
+  assert.deepEqual(field(query.sub_fields, 'items').post_type, ['service'])
+})
