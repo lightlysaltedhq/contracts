@@ -338,3 +338,9 @@ test('R5: a clause with no test, or with two, is refused by the schema and by th
     assert.throws(() => toPayloadBlocks({ contract: probe(fields) }), /probe\.text condition on on: a clause tests exactly one of equals, in or filled/)
   }
 })
+
+test('R6: the query pickers keep their conditions in the snapshot, so a change to them is drift', () => {
+  const query = JSON.parse(payloadSnapshot({ icons })).find((b) => b.slug === 'faq').fields.find((f) => f.name === 'query')
+  assert.deepEqual(field(query.fields, 'categories').custom.salt.condition, [{ field: 'mode', equals: 'by-category' }])
+  assert.deepEqual(field(query.fields, 'items').custom.salt.condition, [{ field: 'mode', equals: 'manual' }])
+})

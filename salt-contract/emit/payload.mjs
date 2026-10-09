@@ -267,7 +267,6 @@ function collectionQuery(f, out, ctx) {
     if (field.name !== 'categories' && field.name !== 'items') return field
     const targets = field.name === 'categories' ? taxonomies : collections
     const relation = { ...field, relationTo: targets.length === 1 ? targets[0] : targets }
-    delete relation.custom
     if (targets.length > 1) {
       // Several collections are offered by a sibling source select, so a picker offers only the
       // collection that select names. Its value lives on the block, a level above this group.
