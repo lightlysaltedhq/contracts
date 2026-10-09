@@ -36,7 +36,7 @@ longer occurs.
 | carousel | compared with carousel |
 | listing | compared with listing |
 | contact | compared with contact |
-| locations | not in salt-nextjs core (sections.json: owes, owes the section, planned as Salt for Next.js Epic WP8) |
+| locations | not in salt-nextjs core (sections.json: owes, owes the section, planned as Salt for Next.js Epic WP8, with a location-area taxonomy (SC-010)) |
 | pricing | not in salt-nextjs core (sections.json: edge) |
 
 ## Expected

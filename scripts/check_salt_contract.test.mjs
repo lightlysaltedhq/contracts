@@ -591,3 +591,33 @@ test('schema: a noscript > style node with CSS text passes the real markup schem
   })
   assert.equal(r.code, 0, r.out)
 })
+
+// ── SC-010: each collection source says whether it has a category taxonomy ──────────────────────
+const realSources = (sources) => crossRun((f) => {
+  f['schema/sections.schema.json'] = structuredClone(realSectionsSchema)
+  const both = { nextjs: { status: 'ships' }, wordpress: { status: 'ships' } }
+  f['contract/sections.json'].sections[0].platforms = both
+  f['contract/sections.json'].components[0].platforms = both
+  f['contract/sections.json'].icons = { content: ['star'], chrome: ['close'] }
+  f['contract/sections.json'].sections[0].sources = sources
+})
+test('schema: a source with items states its categories, and inline states none', () => {
+  assert.equal(realSources([{ id: 'inline', label: 'Inline' }, { id: 'posts', label: 'Posts', categories: true }]).code, 0)
+  const missing = realSources([{ id: 'posts', label: 'Posts' }])
+  assert.equal(missing.code, 1, missing.out); assert.match(missing.out, /contract\/sections\.json does not match/)
+  const inline = realSources([{ id: 'inline', label: 'Inline', categories: false }])
+  assert.equal(inline.code, 1, inline.out); assert.match(inline.out, /contract\/sections\.json does not match/)
+})
+crossFail('a source whose categories differ between two listings', (f) => {
+  f['contract/sections.json'].sections[0].sources = [{ id: 'posts', label: 'Posts', categories: true }, { id: 'team', label: 'Team', categories: false }]
+  f['contract/sections.json'].sections[0].sources.push({ id: 'posts', label: 'Posts', categories: false })
+}, /source posts has categories true in hero but false in hero; one source has one answer \(SC-010\)/)
+test('cross-file: every source a collection-query can read has a categories ruling', () => {
+  const r = crossRun((f) => {
+    f['schema/field-definition.schema.json'] = structuredClone(realFieldSchema)
+    f['contract/sections.json'].sections[0].sources = [{ id: 'posts', label: 'Posts', categories: true }]
+    f['contract/fields/hero.json'].fields.push({ name: 'query', type: 'collection-query', label: 'Query', source: 'services' })
+  })
+  assert.equal(r.code, 1, r.out)
+  assert.match(r.out, /source services has no categories ruling in sections\.json \(SC-010\)/)
+})

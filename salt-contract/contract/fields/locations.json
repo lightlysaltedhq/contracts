@@ -34,7 +34,7 @@
       "source": "locations",
       "platforms": {
         "nextjs": {
-          "owes": "the section"
+          "owes": "the section, with a location-area taxonomy so locations can be queried by category (SC-010)"
         },
         "wordpress": {
           "formerly": [

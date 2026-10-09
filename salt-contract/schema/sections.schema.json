@@ -88,9 +88,32 @@
           "type": "boolean",
           "description": "Whether each item has its own page, so a card can link to it."
         },
+        "categories": {
+          "type": "boolean",
+          "description": "Whether the source has a category taxonomy, so a collection-query may pick its items by category (SC-010). Every source with items states it, and the same source states it the same way wherever it is listed; inline content has no items to categorise and states nothing."
+        },
         "note": {
           "type": "string"
         }
+      },
+      "if": {
+        "properties": {
+          "id": {
+            "const": "inline"
+          }
+        }
+      },
+      "then": {
+        "not": {
+          "required": [
+            "categories"
+          ]
+        }
+      },
+      "else": {
+        "required": [
+          "categories"
+        ]
       }
     },
     "former": {
