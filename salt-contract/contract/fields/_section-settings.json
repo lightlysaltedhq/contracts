@@ -297,15 +297,15 @@
       "type": "text",
       "format": "anchor",
       "label": "Anchor",
-      "description": "Optional, for links to this section. Saved as a slug of lower-case letters, digits and single hyphens: accents are folded (Über uns becomes uber-uns), and any other run of characters, underscores and other scripts included, becomes one hyphen. An anchor that leaves nothing (日本語, !!!) counts as none. On the page, your anchor keeps its id unless it is one of the landmark ids main, content, header, footer, nav, site-navigation, search or skip-link (it becomes <anchor>-section) or repeats an earlier section's (it takes -2, -3); a suffix never takes an anchor another section set. Ids the page draws itself contain __, so they never meet yours. Nothing is added on save, as markup/section#anchors says. An anchor saved under an older rule is slugged again on the page, so contact__form renders contact-form.",
+      "description": "Optional, for links to this section. Saved as a slug of lower-case letters, digits and single hyphens: accents are folded (Über uns becomes uber-uns), and any other run of characters, underscores and other scripts included, becomes one hyphen. An anchor that leaves nothing (日本語, !!!) counts as none. On the page, an anchor that is one of the landmark ids main, content, header, footer, nav, site-navigation, search or skip-link becomes <anchor>-section, and one an earlier section has taken takes the next free -2, -3. Ids the page draws itself contain __, so they never meet yours. Nothing is added on save, as markup/section#anchors says. The slug is applied again on the page, to whatever is stored.",
       "platforms": {
         "nextjs": {
           "formerly": "settings.anchorId",
-          "owes": "reserving site-navigation in place of navigation, the id its header's main navigation takes (SC-006); slugging that collapses underscores with other separators; settling a landmark clash at render as <anchor>-section instead of refusing it at save, and repeats as -2, -3 (section#anchors, SC-012); slugging the stored value again at render, before settling"
+          "owes": "reserving site-navigation in place of navigation, the id its header's main navigation takes (SC-006); settling a landmark clash at render as <anchor>-section instead of refusing it at save (section#anchors, SC-012, SC-013)"
         },
         "wordpress": {
           "formerly": "section_anchor",
-          "owes": "storing it in the settings group; reserving site-navigation in place of primary-navigation, the id its header's main navigation takes (SC-006); slugging and settling as section#anchors says (SC-012); slugging the stored value again at render, before settling, since sanitize_title kept underscores (contact__form renders contact-form)"
+          "owes": "storing it in the settings group; reserving site-navigation in place of primary-navigation, the id its header's main navigation takes (SC-006); settling a landmark clash as <anchor>-section (section#anchors, SC-012, SC-013)"
         }
       }
     },
