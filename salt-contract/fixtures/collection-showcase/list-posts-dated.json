@@ -1,6 +1,6 @@
 {
   "section": "collection-showcase",
-  "$comment": "Display format chosen for card dates: \"12 March 2026\" (day, full month name, year, British English) inside time[datetime=YYYY-MM-DD]. The contract fixes only the datetime value.",
+  "$comment": "Card dates follow section#display-forms: time[datetime=YYYY-MM-DD], text in context.locale's long form (en-GB: 12 March 2026).",
   "summary": "Posts in the list layout (no data-columns), each with a date in a time element and a line of text. View all is off.",
   "values": {
     "heading": "From the journal",
@@ -23,7 +23,8 @@
     "headingRendered": true,
     "priorityMedia": false,
     "track": "collection-showcase-2",
-    "index": 2
+    "index": 2,
+    "locale": "en-GB"
   },
   "collections": {
     "posts": [

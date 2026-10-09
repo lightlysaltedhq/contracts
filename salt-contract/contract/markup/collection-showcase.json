@@ -468,7 +468,8 @@
   ],
   "ruleRefs": [
     "section#list-semantics",
-    "section#focus-ring"
+    "section#focus-ring",
+    "section#display-forms"
   ],
   "notes": [
     {

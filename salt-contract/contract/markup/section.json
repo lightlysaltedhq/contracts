@@ -365,6 +365,9 @@
     "new-tab": {
       "statement": "A link that opens a new tab carries target=_blank and rel=\"noopener noreferrer\"."
     },
+    "display-forms": {
+      "statement": "Dates, times and phone numbers display as the site's locale and settings say; what a machine reads is fixed (SC-016). A time element's datetime is ISO 8601: YYYY-MM-DD for a date, HH:MM (24-hour) for a time of day. Its text is the date in the locale's long form (en-GB: 12 March 2026, Intl.DateTimeFormat dateStyle long) or the time in the locale's hour and minute (en-GB: 09:00). A phone link's href is tel: and the digits as the number is written, a leading + kept; after a country code the trunk (0) goes, and after +44 a leading 0 too; a value with anything but digits, spaces, dots, hyphens, one leading + and one bracketed group draws no link. Its text is the number as stored. JSON in a data attribute (data-hours, data-labels) is written compact, with no escaped slashes, so both platforms' bytes match. Fixtures pin context.locale en-GB."
+    },
     "list-semantics": {
       "statement": "A list of items is ul or ol with role=list (so list semantics survive list-style: none), each item an li. Grids of cards, stats, logos, steps, tags and results are all lists."
     }
@@ -398,7 +401,8 @@
         "Rename the skip link's class skip-link to salt-skip-link (page.json).",
         "Section heading ids <anchor>__heading, built from the section's settled id, in place of uniqueAnchor('<slug>-heading') (lib/sections/plan.ts, SC-012).",
         "An anchor equal to a landmark id becomes <anchor>-section, where uniqueAnchor gives <anchor>-2 today; and a section with no anchor mints its id from its section id in the same pass, where anchorId is null today (lib/sections/plan.ts, SC-012, SC-013).",
-        "Anchors get a slug function of their own that follows SC-014 for the site's locale: sanitize_title's result under that locale, tidied. Today anchors go through slugify (fields/slug.ts), which folds by NFKD, so Straße gives stra-e (strase on en_GB, strasse on de_DE), Über uns gives uber-uns even on de_DE (ueber-uns), and a,b gives a-b where WordPress gives ab. slugify itself, which also derives URL slugs and site settings, is unchanged."
+        "Anchors get a slug function of their own that follows SC-014 for the site's locale: sanitize_title's result under that locale, tidied. Today anchors go through slugify (fields/slug.ts), which folds by NFKD, so Straße gives stra-e (strase on en_GB, strasse on de_DE), Über uns gives uber-uns even on de_DE (ueber-uns), and a,b gives a-b where WordPress gives ab. slugify itself, which also derives URL slugs and site settings, is unchanged.",
+        "Display forms (section#display-forms): dates and times in the site's locale rather than a fixed en-GB (collection-showcase and carousel construct Intl.DateTimeFormat('en-GB')) (SC-016)."
       ]
     },
     "wordpress": {
@@ -449,7 +453,8 @@
         "Use salt-sr-only for the fallback h1 and the skip link's hidden state instead of visually-hidden.",
         "An anchor equal to a landmark id becomes <anchor>-section, where salt_anchor_id gives <anchor>-2 today; and a section with no anchor mints its id from its section id in the same pass, where salt_anchor_id returns '' today (inc/render.php, SC-012, SC-013).",
         "The tidy step after sanitize_title in salt_anchor_id: every run of underscores or %xx octets becomes one hyphen, repeated hyphens collapse and hyphens are trimmed, so contact__form renders contact-form and 日本語 gives no anchor (SC-014).",
-        "Store the anchor's slug on save, as section#anchors says: the ACF text field section_anchor stores the raw text today, with no save filter (inc/acf.php)."
+        "Store the anchor's slug on save, as section#anchors says: the ACF text field section_anchor stores the raw text today, with no save filter (inc/acf.php).",
+        "Display forms (section#display-forms): dates with wp_date in the site's locale in its long form, tel: hrefs by the contract's rule, and JSON in data attributes with JSON_UNESCAPED_SLASHES (SC-016)."
       ]
     }
   }

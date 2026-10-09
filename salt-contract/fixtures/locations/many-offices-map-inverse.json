@@ -22,7 +22,8 @@
     "priorityMedia": false,
     "track": "locations-1",
     "index": 3,
-    "now": "2026-10-07T19:00:00+01:00"
+    "now": "2026-10-07T19:00:00+01:00",
+    "locale": "en-GB"
   },
   "collections": {
     "locations": [
@@ -35,7 +36,6 @@
           "BS1 6UD"
         ],
         "phone": "0117 496 0123",
-        "tel": "+441174960123",
         "email": "bristol@example.com",
         "hours": [
           {
@@ -78,7 +78,6 @@
           "BA1 1BZ"
         ],
         "phone": "01225 555 0142",
-        "tel": "+441225550142",
         "email": "bath@example.com",
         "hours": [
           {

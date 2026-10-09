@@ -367,6 +367,24 @@ test('counts: a tab set must draw a panel per tab and controls only when tabbed'
   expectFail(['tabs'], (io) => io.html('tabs/no-name-stacked.html', '<div class="salt-tabs">', '<div class="salt-tabs" data-tabbed>'), /carries data-tabbed, which the markup draws only when/)
 })
 
+// Display forms (SC-016, section#display-forms).
+const LIST = 'collection-showcase/list-posts-dated'
+test('display: a case that draws a date names its locale', () => {
+  expectFail(['collection-showcase'], (io) => io.json(`${LIST}.json`, (d) => { delete d.context.locale }), /draws a date, time or phone, so context\.locale must say/)
+})
+test('display: a date not in the locale\'s long form fails', () => {
+  expectFail(['collection-showcase'], (io) => io.html(`${LIST}.html`, '>12 March 2026<', '>12/03/2026<'), /reads "12\/03\/2026"; en-GB gives "12 March 2026"/)
+})
+test('display: a datetime that is not ISO 8601 fails', () => {
+  expectFail(['collection-showcase'], (io) => io.html(`${LIST}.html`, 'datetime="2026-03-12"', 'datetime="12/03/2026"'), /is not ISO 8601/)
+})
+test('display: a phone href not built by the rule fails', () => {
+  expectFail(['contact'], (io) => io.html('contact/closed-with-details.html', 'href="tel:01174960123"', 'href="tel:+441174960123"'), /has href tel:\+441174960123; section#display-forms gives tel:01174960123/)
+})
+test('display: JSON with escaped slashes in an attribute fails', () => {
+  expectFail(['locations'], (io) => io.html('locations/one-office-open.html', 'data-timezone="Europe/London"', 'data-timezone="Europe\\/London"'), /escapes a slash/)
+})
+
 // ── 4. The normaliser ─────────────────────────────────────────────────────────────────────────
 test('normaliser: one that drops an attribute fails the mutation check', () => {
   expectFail(HERO, (io) => {

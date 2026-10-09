@@ -157,6 +157,9 @@
     "withoutScript": "The form posts natively (contact-form).",
     "withScript": "In-place submission (contact-form)."
   },
+  "ruleRefs": [
+    "section#display-forms"
+  ],
   "uses": [
     "section",
     "section-intro",

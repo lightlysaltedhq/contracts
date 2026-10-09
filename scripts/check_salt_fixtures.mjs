@@ -194,7 +194,7 @@ function checkValue(f, v, p, c, siblings) {
   }
 }
 
-const CONTEXT_KEYS = ['headingLevel', 'headingRendered', 'priorityMedia', 'track', 'collapseTop', 'index', 'now']
+const CONTEXT_KEYS = ['headingLevel', 'headingRendered', 'priorityMedia', 'track', 'collapseTop', 'index', 'now', 'locale']
 const INPUT_KEYS = ['$comment', 'section', 'summary', 'values', 'context', 'media', 'documents', 'collections', 'route', 'site']
 
 function settingsFields(fieldsDoc) {
@@ -228,6 +228,7 @@ function checkInput(c) {
   if (typeof ctx.priorityMedia === 'boolean' && Number.isInteger(ctx.index) && ctx.priorityMedia !== (ctx.index === 1)) {
     fail(`${at}.json: context.priorityMedia is ${ctx.priorityMedia} for section ${ctx.index}; the plan grants it to the first section only (section#priority-media)`)
   }
+  if (ctx.locale !== undefined && !(typeof ctx.locale === 'string' && Intl.DateTimeFormat.supportedLocalesOf(ctx.locale).length)) fail(`${at}.json: context.locale must be a BCP 47 locale the platform knows, such as en-GB`)
   if (ctx.collapseTop === true && ctx.index === 1) fail(`${at}.json: context.collapseTop needs a section before it (section#adjacent-collapse)`)
   for (const [id, m] of Object.entries(input.media ?? {})) {
     const p = `${at}.json media.${id}`
@@ -417,6 +418,16 @@ function pageWindow(current, total) {
     previous = n
   }
   return shown
+}
+// section#display-forms: a written phone number as its tel: href, or null when it draws no link.
+function telHref(shown) {
+  if (!/^\+?[0-9 ().-]+$/.test(shown)) return null
+  if (/[()]/.test(shown) && !/^(?:\+[0-9]+)?[ .-]*\([0-9 ]+\)[ .-]*[0-9][^()]*$/.test(shown)) return null
+  const international = shown.startsWith('+')
+  const written = (international ? shown.replace('(0)', '') : shown).replace(/[^0-9]/g, '')
+  const digits = international && written.startsWith('440') ? `44${written.slice(3)}` : written
+  if (digits === '' || digits.length > 15) return null
+  return `tel:${international ? '+' : ''}${digits}`
 }
 const WHEN = {
   'section:root:data-media': (c) => background(c),
@@ -695,6 +706,28 @@ function checkMarkup(c) {
     })
     if (want.join(' ') !== got.join(' ')) fail(`${at}.html: the pagination draws [${got.join(', ')}]; page ${pages.current} of ${pages.total} gives [${want.join(', ')}] (pagination.json)`)
   }
+
+  // Display forms (section#display-forms, SC-016): the machine forms are fixed and the text is
+  // the locale's, so a case that draws a date, a time or a phone names its locale.
+  // A rich-text body is editor content: its links are written as stored, not derived.
+  const inBody = (e) => { for (let p = c.parents.get(e); p; p = c.parents.get(p)) if (classesOf(p).includes('salt-rich-text')) return true; return false }
+  const times = every().filter((e) => e.name === 'time' && !inBody(e))
+  const phones = every().filter((e) => e.name === 'a' && (attr(e, 'href') ?? '').startsWith('tel:') && !inBody(e))
+  if ((times.length || phones.length) && !input.context.locale) fail(`${at}.json: the case draws a date, time or phone, so context.locale must say how they display (section#display-forms)`)
+  const locale = input.context.locale
+  for (const t of times) {
+    const dt = attr(t, 'datetime') ?? ''
+    let text
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dt)) text = locale && new Intl.DateTimeFormat(locale, { dateStyle: 'long', timeZone: 'UTC' }).format(new Date(`${dt}T00:00:00Z`))
+    else if (/^([01]\d|2[0-3]):[0-5]\d$/.test(dt)) text = locale && new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' }).format(new Date(`1970-01-01T${dt}:00Z`))
+    else { fail(`${at}.html: <time datetime="${dt}"> is not ISO 8601 (YYYY-MM-DD or HH:MM) (section#display-forms)`); continue }
+    if (text && textOf(t) !== text) fail(`${at}.html: <time datetime="${dt}"> reads "${textOf(t)}"; ${locale} gives "${text}" (section#display-forms)`)
+  }
+  for (const a of phones) {
+    const want = telHref(textOf(a))
+    if (attr(a, 'href') !== want) fail(`${at}.html: the phone link "${textOf(a)}" has href ${attr(a, 'href')}; section#display-forms gives ${want ?? 'no link'}`)
+  }
+  for (const e of every()) for (const [name, value] of e.attrs) if (value.includes('\\/')) fail(`${at}.html: ${describe(e)} ${name} escapes a slash; JSON in an attribute is written without (section#display-forms)`)
 
   // A link-form button takes the site's arrow, in its label span, when the site supplies one
   // (button.json); a button-form control never does.

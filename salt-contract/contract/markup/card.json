@@ -403,7 +403,8 @@
   ],
   "ruleRefs": [
     "section#focus-ring",
-    "section#list-semantics"
+    "section#list-semantics",
+    "section#display-forms"
   ],
   "hooks": [
     {
