@@ -183,13 +183,19 @@
           "children": [
             {
               "role": "challenge-heading",
-              "element": "h2"
+              "element": "h2",
+              "attributes": {
+                "id": "case-study__challenge-heading"
+              }
             },
             {
               "role": "challenge-body",
               "component": "rich-text-body"
             }
-          ]
+          ],
+          "attributes": {
+            "aria-labelledby": "case-study__challenge-heading"
+          }
         },
         {
           "role": "solution",
@@ -202,13 +208,19 @@
           "children": [
             {
               "role": "solution-heading",
-              "element": "h2"
+              "element": "h2",
+              "attributes": {
+                "id": "case-study__solution-heading"
+              }
             },
             {
               "role": "solution-body",
               "component": "rich-text-body"
             }
-          ]
+          ],
+          "attributes": {
+            "aria-labelledby": "case-study__solution-heading"
+          }
         },
         {
           "role": "gallery",
@@ -221,7 +233,10 @@
           "children": [
             {
               "role": "gallery-heading",
-              "element": "h2"
+              "element": "h2",
+              "attributes": {
+                "id": "case-study__gallery-heading"
+              }
             },
             {
               "role": "gallery-list",
@@ -257,7 +272,10 @@
                 }
               ]
             }
-          ]
+          ],
+          "attributes": {
+            "aria-labelledby": "case-study__gallery-heading"
+          }
         },
         {
           "role": "live",
@@ -290,7 +308,10 @@
           "children": [
             {
               "role": "services-heading",
-              "element": "h2"
+              "element": "h2",
+              "attributes": {
+                "id": "case-study__services-heading"
+              }
             },
             {
               "role": "services-list",
@@ -313,7 +334,10 @@
                 }
               ]
             }
-          ]
+          ],
+          "attributes": {
+            "aria-labelledby": "case-study__services-heading"
+          }
         }
       ]
     }
@@ -380,12 +404,13 @@
       ],
       "owes": [
         "The case-study view's markup above.",
-        "The style custom properties --salt-case-study-view-aside-rows and --salt-case-study-view-measure on the article when the media is aside."
+        "The style custom properties --salt-case-study-view-aside-rows and --salt-case-study-view-measure on the article when the media is aside.",
+        "The section heading ids case-study__challenge-heading, case-study__solution-heading, case-study__gallery-heading and case-study__services-heading, each named by its section's aria-labelledby (SC-012)."
       ]
     },
     "nextjs": {
       "owes": [
-        "Name its sections (aria-labelledby on each h2) or draw them as div (section#labelled-by)."
+        "Name its four sections: the ids case-study__challenge-heading, case-study__solution-heading, case-study__gallery-heading and case-study__services-heading on their h2s, and aria-labelledby on each section (section#labelled-by, SC-012)."
       ]
     }
   }
