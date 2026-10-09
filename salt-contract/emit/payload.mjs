@@ -23,7 +23,7 @@
 // the clock, the environment or the file system's listing order.
 import { readFileSync, writeFileSync } from 'node:fs'
 
-import { clauses, collectionQueryShape, hasVisibleText, isFilled, isMainModule, LINK_SHAPE, loadContract,
+import { clauseHolds, clauses, collectionQueryShape, hasVisibleText, isFilled, isMainModule, LINK_SHAPE, loadContract,
   normaliseLineEndings, planSections, siblingValue, sourceValues, SOURCES } from './_contract.mjs'
 
 /**
@@ -51,12 +51,7 @@ export { hasVisibleText, isFilled }
 
 /** Whether every clause holds for these siblings, each read by siblingValue. */
 export function clausesHold(list, siblingData, defaults = {}) {
-  return list.every((c) => {
-    const value = siblingValue(siblingData, c.field, defaults)
-    if ('filled' in c) return isFilled(value) === c.filled
-    if ('equals' in c) return value === c.equals
-    return c.in.includes(value)
-  })
+  return list.every((c) => clauseHolds(c, siblingValue(siblingData, c.field, defaults)))
 }
 
 const conditionFor = (list, defaults) => (_data, siblingData) => clausesHold(list, siblingData, defaults)

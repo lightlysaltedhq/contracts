@@ -535,3 +535,14 @@ test('V3: a narrowed source select keeps its default only while it still offers 
   assert.equal(select({ posts: {}, team: {} }).defaultValue, 'team')
   assert.ok(!('defaultValue' in select({ posts: {} })), JSON.stringify(select({ posts: {} })))
 })
+
+test('V2: a dependant stays when its clause on a field left out still holds with that field absent', () => {
+  const extra = [
+    { name: 'showTags', type: 'boolean', label: 'Tags', condition: { field: 'source', equals: 'posts' } },
+    { name: 'note', type: 'text', label: 'Note', condition: { field: 'showTags', filled: false } },
+    { name: 'style', type: 'text', label: 'Style', condition: { field: 'showTags', filled: true } },
+  ]
+  const [b] = toPayloadBlocks({ contract: probe(sourced(extra)), sources: {} })
+  assert.deepEqual(b.fields.map((f) => f.name), ['source', 'note'])
+  assert.equal(shows(field(b.fields, 'note'), { source: 'inline' }), true)
+})
