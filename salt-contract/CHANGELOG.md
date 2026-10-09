@@ -25,7 +25,7 @@ Salted's decision log for Product Salt.
   once listed in the schema's description are ruled (SC-006).
 - `contract/markup/` (`./markup/<id>`, schema `./schema/markup`): element order, `salt-*` classes,
   data attributes, heading rules, zero state and priority media for all 17 sections, 29 components
-  and 7 views; 403 elements and 214 classes. The shared accessibility rules are written once in
+  and 7 views. The shared accessibility rules are written once in
   `markup/section`. Every `salt-*` class in salt-nextjs's four section and component stylesheets
   appears on a contract element. Notes marked `open-question` now record only the work SC-006
   leaves open.
