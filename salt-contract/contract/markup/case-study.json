@@ -27,6 +27,11 @@
         "data-media": {
           "value": "aside",
           "when": "media aside, an image and a sidebar part"
+        },
+        "style": {
+          "value": "--salt-case-study-view-aside-rows: <n>; --salt-case-study-view-measure: <measure>",
+          "when": "data-media is aside",
+          "note": "<n> is the number of grid rows the image spans beside the article's parts, counted by the view, since the grid cannot count them. <measure> is the band's measure, var(--container-5xl) for a default band unless a site that widened its bands passes the same width. The stylesheet (primitives.css) reads both."
         }
       },
       "children": [
@@ -374,7 +379,8 @@
         }
       ],
       "owes": [
-        "The case-study view's markup above."
+        "The case-study view's markup above.",
+        "The style custom properties --salt-case-study-view-aside-rows and --salt-case-study-view-measure on the article when the media is aside."
       ]
     },
     "nextjs": {

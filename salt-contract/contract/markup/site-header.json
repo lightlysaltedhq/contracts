@@ -18,6 +18,18 @@
   },
   "elements": [
     {
+      "role": "scriptless",
+      "element": "noscript",
+      "children": [
+        {
+          "role": "scriptless-style",
+          "element": "style",
+          "text": ".salt-header{--salt-header-phone-menu:inline-flex;--salt-header-phone-burger:none;--salt-header-phone-wrap:wrap}"
+        }
+      ],
+      "note": "First in the header. With no script, these three custom properties keep the menu and call to action on screen below the breakpoint, hide the burger nothing could open, and let the row wrap; chrome.css reads each through var() with the scripted value as its fallback."
+    },
+    {
       "role": "inner",
       "element": "div",
       "classes": [
@@ -515,7 +527,8 @@
         }
       ],
       "owes": [
-        "Rename to salt-header and salt-nav*; the burger, drawer, submenu disclosure, phone link and theme toggle; data-site-header. data-sticky in place of is-sticky, and the id site-navigation on the main navigation (SC-006). The bar's and the drawer's ids exactly as the ruling note fixes them (SC-012)."
+        "Rename to salt-header and salt-nav*; the burger, drawer, submenu disclosure, phone link and theme toggle; data-site-header. data-sticky in place of is-sticky, and the id site-navigation on the main navigation (SC-006). The bar's and the drawer's ids exactly as the ruling note fixes them (SC-012).",
+        "The noscript style setting --salt-header-phone-menu, --salt-header-phone-burger and --salt-header-phone-wrap, first in the header."
       ]
     }
   }
