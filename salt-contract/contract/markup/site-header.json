@@ -117,7 +117,7 @@
                             "false"
                           ]
                         },
-                        "aria-controls": "salt-header-nav-submenu-<n>",
+                        "aria-controls": "site-header__submenu-<n>",
                         "aria-label": "from:labels.submenu",
                         "aria-hidden": {
                           "value": "true",
@@ -148,7 +148,7 @@
                         "salt-nav__submenu"
                       ],
                       "attributes": {
-                        "id": "salt-header-nav-submenu-<n>",
+                        "id": "site-header__submenu-<n>",
                         "role": {
                           "value": "list",
                           "when": "ul"
@@ -353,7 +353,7 @@
                 "salt-drawer__panel"
               ],
               "text": "the nav again, the phone link, the call to action",
-              "note": "The drawer's copy of the nav carries ids of its own, so no id is on the page twice: -drawer follows the prefix of every id the bar draws. The nav is site-navigation-drawer; each submenu is salt-header-nav-drawer-submenu-<n>, and its toggle's aria-controls names that id. <n> is the same in both copies. All are reserved (section#anchors)."
+              "note": "The drawer's copy of the nav carries ids of its own, so no id is on the page twice: the nav is site-header__drawer-navigation, and each submenu is site-header__drawer-submenu-<n>, its toggle's aria-controls naming that id. <n> is the same in both copies (SC-012)."
             }
           ]
         }
@@ -432,11 +432,11 @@
   "notes": [
     {
       "topic": "ruling",
-      "text": "The header's sticky setting is drawn as data-sticky on the header on both platforms (SC-006); WordPress's is-sticky class goes. The main navigation takes the id site-navigation on both, so a section anchor of that id takes a numeric suffix (section#anchors)."
+      "text": "The header's sticky setting is drawn as data-sticky on the header on both platforms (SC-006); WordPress's is-sticky class goes. The main navigation takes the id site-navigation on both, a landmark id, so a section anchor of that id becomes site-navigation-section (section#anchors)."
     },
     {
       "topic": "ruling",
-      "text": "Every id the header draws is fixed, so both platforms write the same ones. In the bar: the nav is site-navigation, and a submenu is salt-header-nav-submenu-<n>, where <n> is its item's position in the top-level menu counting from 0, items without children included. In the drawer, -drawer follows each prefix: site-navigation-drawer and salt-header-nav-drawer-submenu-<n>. site-navigation and site-navigation-drawer are reserved ids, not generated ones: an editor's anchor that matches either takes the numeric suffix and the navigation keeps its id (section#anchors, SC-006, SC-008). The submenu ids are reserved forms too, because the header is drawn without sight of the page's sections and cannot suffix them: an editor's anchor that matches one takes the suffix, and the submenu ids and their aria-controls never change."
+      "text": "Every id the header draws is fixed, so both platforms write the same ones (SC-012). In the bar: the nav is site-navigation, a landmark id; a submenu is site-header__submenu-<n>, where <n> is its item's position in the top-level menu counting from 1, items without children included. In the drawer: the nav is site-header__drawer-navigation and a submenu is site-header__drawer-submenu-<n>. The drawer's nav takes a drawn id, not a landmark one: the skip link and fragment links target the bar's navigation, and the drawer's copy sits in a dialog nothing links to. A drawn id contains __, which no anchor can, so none of these can meet an editor's anchor."
     },
     {
       "topic": "ruling",
@@ -447,8 +447,8 @@
     "nextjs": {
       "owes": [
         "The sticky setting, drawn as data-sticky (SC-006).",
-        "The id site-navigation on the main navigation, in place of navigation (SC-006), and site-navigation-drawer on the drawer's copy.",
-        "Drop SiteHeader's overridable idPrefix prop, or fix it to salt-header-nav: an override moves its ids off the reserved forms (section#anchors)."
+        "The id site-navigation on the main navigation, in place of navigation (SC-006).",
+        "The ids site-header__submenu-<n>, site-header__drawer-navigation and site-header__drawer-submenu-<n>, counting from 1, in place of the salt-header-nav-submenu-<n> ones it builds from idPrefix and counts from 0 (SC-012). The idPrefix prop goes, since an override would write ids outside the contract."
       ]
     },
     "wordpress": {
@@ -515,7 +515,7 @@
         }
       ],
       "owes": [
-        "Rename to salt-header and salt-nav*; the burger, drawer, submenu disclosure, phone link and theme toggle; data-site-header. data-sticky in place of is-sticky, and the id site-navigation on the main navigation (SC-006). The bar's and the drawer's ids exactly as the ruling note fixes them."
+        "Rename to salt-header and salt-nav*; the burger, drawer, submenu disclosure, phone link and theme toggle; data-site-header. data-sticky in place of is-sticky, and the id site-navigation on the main navigation (SC-006). The bar's and the drawer's ids exactly as the ruling note fixes them (SC-012)."
       ]
     }
   }
