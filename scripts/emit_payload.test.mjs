@@ -377,3 +377,12 @@ test('S5: sections: null is unset, so a section the sources cannot carry is left
   const slugs = blocks({ sources: { posts: {} }, sections: null }).map((b) => b.slug)
   assert.ok(slugs.includes('hero') && !slugs.includes('faq'), slugs.join(', '))
 })
+
+test('S6: a source the shared settings need counts like one the section\'s own fields need', () => {
+  const contract = probe([{ name: 'heading', type: 'text', label: 'Heading' }])
+  contract.settings = [{ name: 'people', type: 'relationship', label: 'People', to: 'team' }]
+  contract.fields.probe.shared = { id: 'section-settings' }
+  assert.deepEqual(toPayloadBlocks({ contract, sources: { posts: {} } }), [])
+  assert.throws(() => toPayloadBlocks({ contract, sources: { posts: {} }, sections: ['probe'] }), /section probe needs the source team \(probe\.settings\.people\)/)
+  assert.equal(field(toPayloadBlocks({ contract, sources: { team: {} } })[0].fields, 'settings.people').relationTo, 'users')
+})

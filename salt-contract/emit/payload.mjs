@@ -305,7 +305,9 @@ function build(options, snapshot) {
   // Asked for by name, a section the site cannot carry is an error; by default it is left out.
   const named = options.sections != null
   const ids = (options.sections ?? contract.sections.map((s) => s.id)).filter((id) => {
-    const unmet = unmetSources(resolveSection(contract, id).fields, sources, id)
+    const resolved = resolveSection(contract, id)
+    // Everything the emitter converts: the section's own fields and its shared settings.
+    const unmet = [...unmetSources(resolved.fields, sources, id), ...unmetSources(resolved.settings, sources, `${id}.settings`)]
     if (unmet.length && named) throw new Error(`section ${id} needs ${unmet.join(', ')}, which options.sources does not install`)
     return unmet.length === 0
   })
