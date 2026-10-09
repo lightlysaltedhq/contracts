@@ -245,7 +245,7 @@ test('field parity: a matching snapshot passes, and a renamed field fails its ow
   }
 })
 
-test('stylesheet pin: one changed byte fails, and a version pin passes only at this version', async () => {
+test('stylesheet pin: one changed byte fails, a missing file fails, and a version string is no pin (review C4)', async () => {
   const dir = scratch()
   try {
     cpSync(path.join(pkg, 'styles'), dir, { recursive: true })
@@ -266,12 +266,12 @@ test('stylesheet pin: one changed byte fails, and a version pin passes only at t
     const gone = await run([...base, '--styles', dir])
     assert.equal(gone.report.stylesheets.files.find((f) => f.file === 'views.css').status, 'missing')
 
-    const pinned = await run([...base, '--styles-version', version])
-    assert.equal(section(pinned.report, 'faq').status, 'pass', pinned.out)
-    assert.deepEqual(pinned.report.stylesheets, { mode: 'version', pin: version, contract: version, ok: true, files: [] })
-    const behind = await run([...base, '--styles-version', '0.0.1'])
-    assert.equal(behind.code, 1)
-    assert.equal(section(behind.report, 'faq').stylesheets.status, 'fail')
+    assert.equal(gone.report.stylesheets.ok, false)
+
+    // A version the caller states proves nothing about the bytes served, so it is no pin.
+    const stated = await run([...base, '--styles-version', version])
+    assert.equal(stated.code, 2, stated.out)
+    assert.match(stated.out, /unknown argument --styles-version/)
   } finally {
     rmSync(dir, { recursive: true, force: true })
   }
@@ -316,7 +316,7 @@ test('arguments: unknown, empty, duplicated or contradictory flags are refused w
   assert.throws(() => parseConformanceArguments([...ok, '--sections']), /needs a value/)
   assert.throws(() => parseConformanceArguments([...ok, '--partial', '--sections', '--jobs']), /not the flag --jobs/)
   assert.throws(() => parseConformanceArguments([...ok, '--endpoint', 'http://x']), /cannot be used together/)
-  assert.throws(() => parseConformanceArguments([...ok, '--styles', 'a', '--styles-version', '1']), /cannot be used together/)
+  assert.throws(() => parseConformanceArguments([...ok, '--styles-version', '1']), /unknown argument --styles-version/)
   assert.throws(() => parseConformanceArguments(['--adapter', 'true']), /--platform/)
   assert.throws(() => parseConformanceArguments(['--platform', 'x']), /--adapter <command> or --endpoint <url>/)
   assert.throws(() => parseConformanceArguments([...ok, '--jobs', '0']), /at least 1/)

@@ -11,8 +11,9 @@
 //    contract generates with the implementation's options. Each problem is filed under its section.
 // 3. CLASSES. Every salt-* class in the adapter's output is one an element in contract/markup
 //    carries.
-// 4. STYLESHEET PIN. The stylesheets the implementation serves are byte-identical to styles/, or it
-//    re-exports them from a package version equal to this one.
+// 4. STYLESHEET PIN. The stylesheets the implementation serves, from the directory it serves them
+//    from, are byte-identical to styles/. A version string the caller states is no pin: it says
+//    nothing of the bytes served.
 //
 // An implementation conforms only when all four ran for every section it ships and all pass
 // (SC-017): a run without a field snapshot or a stylesheet pin fails. A run that leaves a check or
@@ -37,7 +38,7 @@ export const REPORT_FORMAT = 'salt-conformance/1'
 // ── Arguments ─────────────────────────────────────────────────────────────────────────────────
 
 const FLAGS = ['--platform', '--adapter', '--endpoint', '--payload-snapshot', '--acf-snapshot', '--fields-options',
-  '--styles', '--styles-version', '--sections', '--not-shipped', '--implementation-version', '--out', '--jobs', '--timeout']
+  '--styles', '--sections', '--not-shipped', '--implementation-version', '--out', '--jobs', '--timeout']
 // Flags that take no value.
 const SWITCHES = ['--partial']
 
@@ -64,7 +65,6 @@ export function parseConformanceArguments(argv) {
   const either = (a, b) => { if (values[a] && values[b]) throw new Error(`${a} and ${b} cannot be used together`) }
   either('--adapter', '--endpoint')
   either('--payload-snapshot', '--acf-snapshot')
-  either('--styles', '--styles-version')
   if (!values['--platform']) throw new Error('--platform <name> is required (nextjs, wordpress …), to name the implementation in the report')
   if (!values['--adapter'] && !values['--endpoint']) throw new Error('pass --adapter <command> or --endpoint <url>')
   // A run of some sections says nothing of the rest, so it is partial by construction.
@@ -85,7 +85,7 @@ export function parseConformanceArguments(argv) {
     fields: values['--payload-snapshot'] ? { platform: 'payload', snapshot: values['--payload-snapshot'], options: values['--fields-options'] }
       : values['--acf-snapshot'] ? { platform: 'acf', snapshot: values['--acf-snapshot'], options: values['--fields-options'] }
         : undefined,
-    styles: values['--styles'] ? { dir: values['--styles'] } : values['--styles-version'] ? { version: values['--styles-version'] } : undefined,
+    styles: values['--styles'] ? { dir: values['--styles'] } : undefined,
     sections: list(values['--sections']),
     notShipped: list(values['--not-shipped']),
     implementationVersion: values['--implementation-version'],
@@ -269,10 +269,6 @@ function checkFields(fields) {
 }
 
 function checkStyles(styles, version, dir) {
-  if (styles.version !== undefined) {
-    const ok = styles.version === version
-    return { mode: 'version', pin: styles.version, contract: version, ok, files: [] }
-  }
   const styleDir = path.join(dir, 'styles')
   const files = readdirSync(styleDir).filter((f) => f.endsWith('.css')).sort().map((file) => {
     const theirs = path.join(styles.dir, file)
@@ -284,7 +280,7 @@ function checkStyles(styles, version, dir) {
     while (at < a.length && at < b.length && a[at] === b[at]) at++
     return { file, status: 'differs', firstDifferingByte: at }
   })
-  return { mode: 'files', dir: styles.dir, contract: version, ok: files.every((f) => f.status === 'identical'), files }
+  return { dir: styles.dir, contract: version, ok: files.every((f) => f.status === 'identical'), files }
 }
 
 async function pool(items, jobs, work) {
@@ -410,8 +406,7 @@ export function renderMarkdown(report) {
   lines.push('')
   const st = report.stylesheets
   lines.push('## Stylesheet pin', '')
-  if (!st) lines.push('Not run, so no section conforms (SC-017): pass `--styles <dir>` or `--styles-version <version>`.')
-  else if (st.mode === 'version') lines.push(`${st.ok ? 'Pass' : 'Fail'}: the implementation re-exports the stylesheets of version ${code(st.pin)}; this contract is ${code(st.contract)}.`)
+  if (!st) lines.push('Not run, so no section conforms (SC-017): pass `--styles <dir>`.')
   else {
     lines.push(`${st.ok ? 'Pass' : 'Fail'}: ${code(st.dir)} against this contract's \`styles/\` (${st.contract}).`, '')
     for (const f of st.files) lines.push(`- ${f.file}: ${f.status}${f.status === 'differs' ? ` from byte ${f.firstDifferingByte}` : ''}`)
@@ -438,7 +433,7 @@ export function renderMarkdown(report) {
 
 const USAGE = `usage: conformance.mjs --platform <name> (--adapter <command> | --endpoint <url>)
   [--payload-snapshot <file> | --acf-snapshot <file>] [--fields-options <options.json>]
-  [--styles <dir> | --styles-version <version>] [--sections <id,…>] [--not-shipped <id,…>]
+  [--styles <dir>] [--sections <id,…>] [--not-shipped <id,…>]
   [--implementation-version <version>] [--out <dir>] [--jobs <n>] [--timeout <ms>] [--partial]`
 
 if (isMainModule(import.meta.url)) {

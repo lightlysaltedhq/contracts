@@ -343,25 +343,37 @@ pins. For every section it ships it checks four things:
   real options, and each problem is filed under its section.
 - **Classes.** Every `salt-*` class in the adapter's output is one an element in `contract/markup`
   carries.
-- **Stylesheet pin.** The stylesheets the implementation serves are byte-identical to `styles/`, or
-  the package version it re-exports them from is this one.
+- **Stylesheet pin.** The stylesheets in the directory the implementation serves them from are
+  byte-identical to `styles/`. There is no version form: a version the caller states says nothing
+  of the bytes served.
 
 An implementation conforms only when all four checks ran for every section it ships and all pass
 (SC-017). A section passes only when all four hold for it; one whose checks that ran all passed,
 but with a check left out, is `incomplete`. So a run without a field snapshot or a stylesheet pin
 fails. A run of some sections (`--sections`) or some checks is allowed only with `--partial`, and
-its report says "partial, not conforming": `ok` is false, `partial` is true and it exits 1. In CI:
+its report says "partial, not conforming": `ok` is false, `partial` is true and it exits 1.
+
+Salt for Next.js re-exports the stylesheets, so it passes the directory its build resolves them
+from:
 
 ```sh
 npx salt-conformance --platform nextjs --implementation-version "$VERSION" \
   --adapter "node scripts/salt-adapter.mjs" \
   --payload-snapshot src/blocks.snapshot.json --fields-options src/blocks.options.json \
-  --styles-version "$(node -p 'require("@lightlysaltedhq/salt-contract/package.json").version')" \
+  --styles "$(dirname "$(node -p 'require.resolve("@lightlysaltedhq/salt-contract/styles/base.css")')")" \
   --out conformance
 ```
 
 or `node node_modules/@lightlysaltedhq/salt-contract/conformance.mjs` with the same flags. Salt for
-WordPress passes `--acf-snapshot acf/sections.json` and `--styles <dir>` for its enqueued copy.
+WordPress passes its snapshot and the stylesheets in its built theme, the files it enqueues:
+
+```sh
+npx salt-conformance --platform wordpress --implementation-version "$VERSION" \
+  --adapter "php bin/salt-adapter.php" \
+  --acf-snapshot acf/sections.json --fields-options acf/sections.options.json \
+  --styles build/theme/assets/salt \
+  --out conformance
+```
 
 | Flag | What it takes |
 | --- | --- |
@@ -372,7 +384,6 @@ WordPress passes `--acf-snapshot acf/sections.json` and `--styles <dir>` for its
 | `--acf-snapshot <file>` | Or the committed `acfSnapshot(options)`. |
 | `--fields-options <file>` | The JSON options the snapshot was generated with (`{}` when left out). |
 | `--styles <dir>` | The directory holding the stylesheets served, compared file by file with `styles/`. |
-| `--styles-version <version>` | Or the version of this package the stylesheets are re-exported from. |
 | `--sections <id,…>` | Run only these sections. Needs `--partial`. |
 | `--not-shipped <id,…>` | Sections the implementation does not ship: reported "not shipped", not failed. |
 | `--implementation-version <v>` | The implementation's own version, for the report. |
@@ -398,7 +409,7 @@ report).
   "partial": false,
   "summary": { "pass": 15, "fail": 1, "incomplete": 0, "notShipped": 1 },
   "fields": { "platform": "payload", "snapshot": "…", "options": "…", "problems": [] },
-  "stylesheets": { "mode": "version", "pin": "0.1.0", "contract": "0.1.0", "ok": true, "files": [] },
+  "stylesheets": { "dir": "…", "contract": "0.1.0", "ok": true, "files": [{ "file": "base.css", "status": "identical" }] },
   "sections": [
     {
       "id": "hero",
@@ -422,7 +433,7 @@ is `pass`, `fail` or `not run`. A failure's `kind` is `mismatch` (with
 `difference`: `element`, `missing`, `unexpected`, `attribute` with its `name`, or `text`; an absent
 side is `null`) or `adapter` (with `error` and `stderr`). `fields.problems` at the top holds what is
 about the whole snapshot (not JSON, sections out of order, formatting); a section's own are under
-it. With `--styles`, `stylesheets.files` lists each file as `identical`, `differs` (with
+it. `stylesheets.files` lists each file as `identical`, `differs` (with
 `firstDifferingByte`) or `missing`. `conformance.md` is the same report for a person: a table of
 sections, then each failure on a line.
 
