@@ -69,3 +69,10 @@ test('R9: a difference is expected only when the reviewed list names it exactly'
   assert.equal(later.unexpected.length, 1)
   assert.deepEqual(later.unseen, list)
 })
+
+test('S7: a committed report checked out with CRLF line endings is still current', async () => {
+  const { reportIsCurrent } = await import('./round_trip_acf.mjs')
+  const text = '# ACF round trip\n\na | b\n'
+  assert.equal(reportIsCurrent(text.replace(/\n/g, '\r\n'), text), true)
+  assert.equal(reportIsCurrent(text.replace('a', 'c'), text), false)
+})

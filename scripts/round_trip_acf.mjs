@@ -32,7 +32,7 @@ import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import { clauses, isMainModule, loadContract, resolveSection, siblingValue } from '../salt-contract/emit/_contract.mjs'
+import { clauses, isMainModule, loadContract, normaliseLineEndings, resolveSection, siblingValue } from '../salt-contract/emit/_contract.mjs'
 import { toAcfFieldGroups } from '../salt-contract/emit/acf.mjs'
 import { classify } from './_round_trip.mjs'
 
@@ -60,6 +60,9 @@ export function parseArguments(argv, env = process.env) {
   if (!existsSync(path.join(wordpress, 'inc', 'fields'))) throw new Error(`salt-wordpress checkout not found: ${wordpress} has no inc/fields`)
   return { wordpress, check, suggest }
 }
+
+/** Whether the committed report matches the generated text, CRLF read as LF (a Windows checkout). */
+export const reportIsCurrent = (committed, text) => normaliseLineEndings(committed) === normaliseLineEndings(text)
 
 // ── Load salt-wordpress's field groups ─────────────────────────────────────────────────────────
 
@@ -445,7 +448,7 @@ async function main({ wordpress, check, suggest }) {
   if (check) {
     let committed = ''
     try { committed = readFileSync(reportPath, 'utf8') } catch { /* missing is stale */ }
-    if (committed !== text) { console.log(`✗ ${path.relative(process.cwd(), reportPath)} is stale; regenerate it`); process.exit(1) }
+    if (!reportIsCurrent(committed, text)) { console.log(`✗ ${path.relative(process.cwd(), reportPath)} is stale; regenerate it`); process.exit(1) }
     if (unexpected.length || unseen.length) {
       console.log(`✗ ${unexpected.length} unexpected difference(s) and ${unseen.length} listed but not found; see the report`)
       process.exit(1)
