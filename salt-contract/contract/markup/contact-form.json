@@ -171,7 +171,7 @@
       "attributes": {
         "aria-hidden": "true"
       },
-      "note": "Honeypot: a label and a text input out of the tab order. Its id is <anchor>__website, shaped like every real field's (<anchor>__<field>, after its field name website, as Next's contactFieldId(formId, 'website') drew it), so the ids do not tell a scraper which field is the trap. The class salt-contact__trap stays as a hook: a form filler matches field names and ids, not classes.",
+      "note": "Honeypot: a label and a text input out of the tab order. Its id is <anchor>__website, shaped like every real field's (<anchor>__<field>, after its field name website, as Next's contactFieldId(formId, 'website') drew it), so the ids do not tell a scraper which field is the trap. The class salt-contact__trap stays as a hook: a form filler matches field names and ids, not classes. The input carries no value attribute; it starts empty.",
       "children": [
         {
           "role": "trap-label",
@@ -189,8 +189,7 @@
             "name": "from:honeypot field name",
             "type": "text",
             "tabindex": "-1",
-            "autocomplete": "off",
-            "value": ""
+            "autocomplete": "off"
           }
         }
       ]
