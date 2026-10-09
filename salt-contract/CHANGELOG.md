@@ -9,12 +9,13 @@ Salted's decision log for Product Salt.
 - Image sizes (SC-016): `contract/image-sizes.json` (`./image-sizes`, schema `./schema/image-sizes`)
   fixes each image slot's default `sizes`, per band and per card column count, the candidate widths
   and the rule that picks them, the srcset capped at the upload's intrinsic width (listed itself
-  when it is no candidate), `src` the widest width listed, and the site logo's sizes as its drawn
-  width in px, from Salt for Next.js's table. `markup/media.json` and the section background read
-  it. A site that swaps a view or changes a layout declares its own sizes per slot in
+  when it is no candidate), `src` the URL at the intrinsic width, and the site logo's sizes as its
+  drawn width in px, from Salt for Next.js's table. `markup/media.json` and the section background
+  read it. A site that swaps a view or changes a layout declares its own sizes per slot in
   `salt-overrides.json` under `imageSizes`. Salt for WordPress owes matching sizes and registered
-  widths; Salt for Next.js owes the cap, and width and height on fill images (SC-007). Fixture media
-  records give a URL template per width; every image asserts its slot's default.
+  widths, with auto-sizes disabled and core's default sizes dropped from its srcset; Salt for
+  Next.js owes the cap, and width and height on fill images (SC-007). Fixture media records give a
+  URL template per width; every image asserts its slot's default.
 - `toneDark: auto` writes the section's tone, and the shared stylesheet draws its dark form; the
   label and the markup note say so (SC-016).
 - `section#display-forms` (SC-016): dates and times display in the site's locale, `<time datetime>`
