@@ -12,6 +12,7 @@
   },
   "context": {
     "headingLevel": 2,
+    "headingRendered": true,
     "priorityMedia": false,
     "track": "rich-text-2",
     "index": 2

@@ -19,9 +19,10 @@
   },
   "context": {
     "headingLevel": 2,
+    "headingRendered": true,
     "priorityMedia": false,
     "track": "collection-showcase-4",
-    "index": 2
+    "index": 4
   },
   "collections": {
     "testimonials": [

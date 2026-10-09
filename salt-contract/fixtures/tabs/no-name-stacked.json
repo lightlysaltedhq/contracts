@@ -18,9 +18,10 @@
   },
   "context": {
     "headingLevel": 2,
+    "headingRendered": true,
     "priorityMedia": false,
     "track": "tabs-1",
     "index": 2
   },
-  "$comment": "tabs.json requires aria-label on the tab-set root (from: heading or label) with no condition, and the checker demands the attribute; with no name there is no value, so the stacked set carries an empty aria-label."
+  "$comment": "With no heading and no label the set is unnamed, so the tab-set root carries no aria-label (tabs.json: only when named; ARIA 1.2 prohibits aria-label on a generic element)."
 }

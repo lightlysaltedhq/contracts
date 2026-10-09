@@ -11,6 +11,7 @@
   },
   "context": {
     "headingLevel": 2,
+    "headingRendered": true,
     "priorityMedia": false,
     "track": "listing-1",
     "index": 2

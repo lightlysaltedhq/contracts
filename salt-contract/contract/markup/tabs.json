@@ -44,7 +44,10 @@
       "role": "tab-set",
       "component": "tab-set",
       "attributes": {
-        "aria-label": "from:heading or label"
+        "aria-label": {
+          "value": "from:heading or label",
+          "when": "the set is named: a heading or a label is set. With neither, the attribute is absent, never empty"
+        }
       },
       "note": "Ids owned by the section's settled id (tab-set.json, SC-012); up to eight panels."
     }

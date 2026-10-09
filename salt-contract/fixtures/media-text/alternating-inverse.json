@@ -1,6 +1,6 @@
 {
   "section": "media-text",
-  "summary": "Alternating mode on the inverse band: three rows each with image and words. The rendered sides alternate, right on odd rows and left on even, whatever each row's own setting says.",
+  "summary": "Alternating mode on the inverse band: three rows each with image and words. The rendered sides alternate from row 0: left, right, left, whatever each row's own setting says.",
   "values": {
     "mode": "alternating",
     "rows": [
@@ -30,6 +30,7 @@
   },
   "context": {
     "headingLevel": 2,
+    "headingRendered": true,
     "priorityMedia": false,
     "track": "media-text-3",
     "index": 3

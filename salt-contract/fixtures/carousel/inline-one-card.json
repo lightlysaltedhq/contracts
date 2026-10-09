@@ -19,9 +19,10 @@
   },
   "context": {
     "headingLevel": 2,
+    "headingRendered": true,
     "priorityMedia": false,
     "track": "carousel-4",
-    "index": 1
+    "index": 4
   },
   "media": {
     "shed": {

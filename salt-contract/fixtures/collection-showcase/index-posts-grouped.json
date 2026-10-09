@@ -18,9 +18,10 @@
   },
   "context": {
     "headingLevel": 2,
+    "headingRendered": true,
     "priorityMedia": false,
     "track": "collection-showcase-5",
-    "index": 4
+    "index": 5
   },
   "collections": {
     "posts": [

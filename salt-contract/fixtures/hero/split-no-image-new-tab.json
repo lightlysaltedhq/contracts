@@ -6,9 +6,26 @@
     "heading": "Read our planting guide",
     "mediaSide": "right",
     "buttons": [
-      { "link": { "label": "Open the guide", "type": "external", "url": "https://guides.example/planting", "newTab": true }, "style": "primary" }
+      {
+        "link": {
+          "label": "Open the guide",
+          "type": "external",
+          "url": "https://guides.example/planting",
+          "newTab": true
+        },
+        "style": "primary"
+      }
     ],
-    "settings": { "anchorId": "guide", "spacing": "sm" }
+    "settings": {
+      "anchorId": "guide",
+      "spacing": "sm"
+    }
   },
-  "context": { "headingLevel": 2, "priorityMedia": false, "track": "hero-1", "index": 2 }
+  "context": {
+    "headingLevel": 2,
+    "headingRendered": true,
+    "priorityMedia": false,
+    "track": "hero-1",
+    "index": 2
+  }
 }

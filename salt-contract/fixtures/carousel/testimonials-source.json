@@ -16,6 +16,7 @@
   },
   "context": {
     "headingLevel": 2,
+    "headingRendered": true,
     "priorityMedia": false,
     "track": "carousel-5",
     "index": 5

@@ -22,6 +22,7 @@
   },
   "context": {
     "headingLevel": 2,
+    "headingRendered": true,
     "priorityMedia": false,
     "track": "call-to-action-3",
     "index": 3

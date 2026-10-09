@@ -8,8 +8,9 @@
   },
   "context": {
     "headingLevel": 2,
+    "headingRendered": true,
     "priorityMedia": false,
     "track": "call-to-action-1",
-    "index": 1
+    "index": 2
   }
 }

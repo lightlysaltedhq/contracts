@@ -16,6 +16,7 @@
   },
   "context": {
     "headingLevel": 2,
+    "headingRendered": true,
     "priorityMedia": false,
     "track": "gallery-2",
     "index": 3

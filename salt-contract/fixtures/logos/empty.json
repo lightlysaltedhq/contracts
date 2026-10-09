@@ -8,8 +8,9 @@
   },
   "context": {
     "headingLevel": 2,
+    "headingRendered": true,
     "priorityMedia": false,
     "track": "logos-1",
-    "index": 1
+    "index": 2
   }
 }

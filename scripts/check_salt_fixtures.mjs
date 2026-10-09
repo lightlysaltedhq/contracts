@@ -193,7 +193,7 @@ function checkValue(f, v, p, c, siblings) {
   }
 }
 
-const CONTEXT_KEYS = ['headingLevel', 'priorityMedia', 'track', 'collapseTop', 'index', 'now']
+const CONTEXT_KEYS = ['headingLevel', 'headingRendered', 'priorityMedia', 'track', 'collapseTop', 'index', 'now']
 const INPUT_KEYS = ['$comment', 'section', 'summary', 'values', 'context', 'media', 'documents', 'collections', 'route', 'site']
 
 function settingsFields(fieldsDoc) {
@@ -215,7 +215,19 @@ function checkInput(c) {
   if (typeof ctx.priorityMedia !== 'boolean') fail(`${at}.json: context.priorityMedia must be a boolean`)
   if (typeof ctx.track !== 'string' || !new RegExp(`^${section}-[1-9][0-9]*(@.+)?$`).test(ctx.track)) fail(`${at}.json: context.track must be ${section}-<n> (section#data-track)`)
   if (ctx.collapseTop !== undefined && typeof ctx.collapseTop !== 'boolean') fail(`${at}.json: context.collapseTop must be a boolean`)
-  if (ctx.index !== undefined && !(Number.isInteger(ctx.index) && ctx.index >= 1)) fail(`${at}.json: context.index counts sections from 1`)
+  if (!(Number.isInteger(ctx.index) && ctx.index >= 1)) fail(`${at}.json: context.index, the section's place on the page, counts from 1`)
+  if (ctx.headingRendered !== undefined && typeof ctx.headingRendered !== 'boolean') fail(`${at}.json: context.headingRendered must be a boolean`)
+  // The context must describe a page that can exist.
+  const n = Number(/-([1-9][0-9]*)(@.+)?$/.exec(ctx.track ?? '')?.[1])
+  if (Number.isInteger(ctx.index) && n > ctx.index) fail(`${at}.json: context.track ${ctx.track} counts ${n} ${section} sections, but the section is number ${ctx.index} on the page (section#data-track)`)
+  const level = ctx.headingRendered ? 2 : 1
+  if (Number.isInteger(ctx.headingLevel) && ctx.headingLevel !== level) {
+    fail(`${at}.json: context.headingLevel ${ctx.headingLevel} cannot be: ${ctx.headingRendered ? 'a heading rendered earlier, so this one is 2' : 'no heading rendered earlier (context.headingRendered), so this section claims the h1'} (section#single-h1)`)
+  }
+  if (typeof ctx.priorityMedia === 'boolean' && Number.isInteger(ctx.index) && ctx.priorityMedia !== (ctx.index === 1)) {
+    fail(`${at}.json: context.priorityMedia is ${ctx.priorityMedia} for section ${ctx.index}; the plan grants it to the first section only (section#priority-media)`)
+  }
+  if (ctx.collapseTop === true && ctx.index === 1) fail(`${at}.json: context.collapseTop needs a section before it (section#adjacent-collapse)`)
   for (const [id, m] of Object.entries(input.media ?? {})) {
     const p = `${at}.json media.${id}`
     if (typeof m.src !== 'string' || typeof m.sizes !== 'string' || typeof m.alt !== 'string') fail(`${p} needs src, sizes and alt strings`)
@@ -286,6 +298,16 @@ function applyOption(root, elements, option) {
 // A spec is { role, optional, repeat, alts: [{ tags, classes, attrs, children, doc, componentId }] }.
 // A component with variants of its own (the card's style) offers one alternative per option; the
 // section's own variant is chosen by the case's value.
+// Attributes with where each came from, so a `when` can be looked up as <file>:<role>:<name>.
+function withSources(sources) {
+  const attrs = {}
+  const from = {}
+  for (const [id, role, a] of sources) {
+    for (const [name, rule] of Object.entries(a ?? {})) { attrs[name] = rule; from[name.toLowerCase()] = `${id}:${role}:${name.toLowerCase()}` }
+  }
+  return { attrs, from }
+}
+
 function expand(nodes, doc) {
   return nodes.flatMap((n) => {
     if (n.component) {
@@ -301,7 +323,8 @@ function expand(nodes, doc) {
         return {
           tags: arr(n.element ?? root.element),
           classes: [...(root.classes ?? []), ...(n.classes ?? [])],
-          attrs: { ...(root.attributes ?? {}), ...dataRules(comp, 'root'), ...dataRules(doc, n.role), ...(n.attributes ?? {}), ...(n.extraAttrs ?? {}) },
+          ...withSources([[comp.id, 'root', root.attributes], [comp.id, 'root', dataRules(comp, 'root')],
+            [doc.id, n.role, dataRules(doc, n.role)], [doc.id, n.role, n.attributes], [n.extraId, 'root', n.extraAttrs]]),
           children: own ? elements : n.children ?? null,
           doc: own ? comp : doc,
           componentId: comp.id,
@@ -319,7 +342,7 @@ function expand(nodes, doc) {
       alts: [{
         tags: arr(n.element),
         classes: n.classes ?? [],
-        attrs: { ...media, ...dataRules(doc, n.role), ...(n.attributes ?? {}), ...(n.extraAttrs ?? {}) },
+        ...withSources([['media', 'root', media], [doc.id, n.role, dataRules(doc, n.role)], [doc.id, n.role, n.attributes], [n.extraId, 'root', n.extraAttrs]]),
         children: n.children ?? null,
         doc: n.childDoc ?? doc,
       }],
@@ -344,7 +367,49 @@ function templateMatch(tpl, value, name, anchor) {
   return new RegExp(`^${re}$`).test(canon(value))
 }
 
-function checkAttrs(alt, el, anchor) {
+// The `when` conditions a case can answer, by <file>:<role>:<attribute>. Each returns true (the
+// attribute must be drawn), false (it must not be) or undefined (the case cannot say). Every other
+// `when` in the markup is prose about state the case does not carry; the gate leaves those
+// attributes optional.
+const textOf = (el) => el.children.map((x) => (x.type === 'text' ? x.value : textOf(x))).join('').replace(/\s+/g, ' ').trim()
+const isImage = (c, id) => typeof id === 'string' && isObject(c.input.media?.[id])
+const background = (c) => isImage(c, c.input.values?.settings?.backgroundImage?.image)
+const scrimOn = (c) => background(c) && c.input.values.settings.backgroundImage.scrim !== false
+// The stored link a drawn button stands for, found by its label.
+function linkFor(c, el) {
+  const label = textOf(el)
+  const found = []
+  const walk = (v) => {
+    if (Array.isArray(v)) { v.forEach(walk); return }
+    if (!isObject(v)) return
+    if (typeof v.type === 'string' && ['internal', 'external'].includes(v.type) && v.label === label) found.push(v)
+    Object.values(v).forEach(walk)
+  }
+  walk(c.input.values)
+  return found.length === 1 ? found[0] : undefined
+}
+const newTab = (c, el) => { const link = linkFor(c, el); return link ? link.newTab === true : undefined }
+const WHEN = {
+  'section:root:data-media': (c) => background(c),
+  'section:root:data-divider': (c) => effectiveSetting(c, 'divider') === true,
+  'section:root:data-collapse-top': (c) => c.input.context.collapseTop === true,
+  'section:root:style': (c) => effectiveSetting(c, 'spacing') !== 'none',
+  'hero:root:data-media-side': (c) => effective(c, 'variant') === 'split' && isImage(c, c.input.values.image),
+  'hero:root:data-align': (c) => effective(c, 'variant') === 'minimal',
+  'button:root:target': newTab,
+  'button:root:rel': newTab,
+  'pagination:page-link:aria-current': (c, el) => (c.input.route?.pagination ? textOf(el) === String(c.input.route.pagination.current) : undefined),
+  'tabs:tab-set:aria-label': (c) => filledText(c.input.values.heading) || filledText(c.input.values.label),
+  'tab-set:input:checked': (c, el) => /__tab-1$/.test(attr(el, 'id') ?? ''),
+  // A row draws its side only when it has both an image and words.
+  'media-text:row:data-media-side': (c, el) => {
+    const kids = elementsOf(el).flatMap(classesOf)
+    return kids.includes('salt-media-text__media') && kids.includes('salt-media-text__body')
+  },
+}
+
+function checkAttrs(alt, el, c) {
+  const { anchor } = c
   const problems = []
   // The parser lower-cases names, as HTML does; the markup writes SVG's viewBox in its own case.
   const rules = Object.fromEntries(Object.entries(alt.attrs).map(([n, r]) => [n.toLowerCase(), r]))
@@ -357,8 +422,15 @@ function checkAttrs(alt, el, anchor) {
     if (!templateMatch(rule.value, value, name, anchor)) problems.push(`${describe(el)} ${name}="${value}" is not ${JSON.stringify(rule.value)}`)
   }
   for (const [name, rule] of Object.entries(rules)) {
-    const required = typeof rule === 'string' || rule.when === undefined
-    if (required && !hasAttr(el, name)) problems.push(`${describe(el)} lacks ${name}, which the markup requires`)
+    if (typeof rule === 'string' || rule.when === undefined) {
+      if (!hasAttr(el, name)) problems.push(`${describe(el)} lacks ${name}, which the markup requires`)
+      continue
+    }
+    // A conditional attribute: required where its condition holds, refused where it does not,
+    // whenever the condition can be read from the case.
+    const holds = WHEN[alt.from?.[name]]?.(c, el)
+    if (holds === true && !hasAttr(el, name)) problems.push(`${describe(el)} lacks ${name}, which the markup requires when ${rule.when}`)
+    if (holds === false && hasAttr(el, name)) problems.push(`${describe(el)} carries ${name}, which the markup draws only when ${rule.when}`)
   }
   const want = [...alt.classes].sort().join(' ')
   const got = [...new Set(classesOf(el))].sort().join(' ')
@@ -366,8 +438,8 @@ function checkAttrs(alt, el, anchor) {
   return problems
 }
 
-function matcher(anchor) {
-  // The most telling failure: the deepest element, then the furthest along its siblings, then a
+function matcher(c) {
+  // The most telling failure: the furthest element in document order the match reached, then a
   // problem with the element itself over a wrong tag over a gap in the sequence.
   let best = { rank: [-1], msg: 'no element matched' }
   const note = (rank, msg) => {
@@ -375,20 +447,29 @@ function matcher(anchor) {
       if (rank[k] > (best.rank[k] ?? -1)) { best = { rank, msg }; return }
       if (rank[k] < (best.rank[k] ?? -1)) return
     }
-    best = { rank, msg }
+    // A tie keeps the first: the markup's own element for that place was tried before the rest.
   }
   const memo = new Map()
+  const orders = new Map()
+  const order = (el) => {
+    if (!el) return -1
+    if (!orders.size) [c.root, ...descendants(c.root)].forEach((e, i) => orders.set(e, i))
+    return orders.get(el) ?? -1
+  }
 
   // Returns the role bindings of the subtree, or null.
   function one(spec, el, depth, index, where) {
     let byEl = memo.get(el)
     if (!byEl) memo.set(el, (byEl = new Map()))
     if (byEl.has(spec)) return byEl.get(spec)
+    // A subtree that matches in the end leaves no failure behind: what it tried on the way is
+    // not why the whole failed.
+    const before = best
     let result = null
     for (const alt of spec.alts) {
-      if (!alt.tags.includes(el.name)) { note([depth, index, 1], `${where}: ${describe(el)} where the markup has ${spec.role} (${alt.tags.join(' or ')})`); continue }
-      const problems = checkAttrs(alt, el, anchor)
-      if (problems.length) { note([depth, index, 2], `${where} [${spec.role}]: ${problems[0]}`); continue }
+      if (!alt.tags.includes(el.name)) { note([order(el), 1], `${where}: ${describe(el)} where the markup has ${spec.role} (${alt.tags.join(' or ')})`); continue }
+      const problems = checkAttrs(alt, el, c)
+      if (problems.length) { note([order(el), 2], `${where} [${spec.role}]: ${problems[0]}`); continue }
       let bindings = new Map()
       if (alt.children !== null) {
         const kids = seq(expand(alt.children, alt.doc), 0, elementsOf(el), 0, depth + 1, `${where} > ${describe(el)}`)
@@ -399,6 +480,7 @@ function matcher(anchor) {
       result = bindings
       break
     }
+    if (result) best = before
     byEl.set(spec, result)
     return result
   }
@@ -406,7 +488,7 @@ function matcher(anchor) {
   function seq(specs, si, els, ei, depth, where) {
     if (si === specs.length) {
       if (ei === els.length) return new Map()
-      note([depth, ei, 0], `${where}: ${describe(els[ei])} is not in the markup at this point`)
+      note([order(els[ei]), 0], `${where}: ${describe(els[ei])} is not in the markup at this point`)
       return null
     }
     const spec = specs[si]
@@ -425,7 +507,7 @@ function matcher(anchor) {
       return rest
     }
     const at = ei + taken.length
-    if (taken.length < lo) note([depth, at, 0], `${where}: the markup requires ${spec.role} here${els[at] ? `, found ${describe(els[at])}` : ''}`)
+    if (taken.length < lo) note([els[at] ? order(els[at]) : order(els[at - 1] ?? null), 0], `${where}: the markup requires ${spec.role} here${els[at] ? `, found ${describe(els[at])}` : ''}`)
     return null
   }
   return { one, best: () => best.msg }
@@ -451,15 +533,17 @@ function wrapperSpec(c) {
       classes: [...new Set([...(n.classes ?? []), ...(root.classes ?? [])])],
       children: elements,
       extraAttrs: { ...dataRules(doc, 'root'), ...(root.attributes ?? {}) },
+      extraId: doc.id,
       attributes: n.attributes,
       childDoc: doc,
     }
   })
   return {
     doc,
+    elements,
     spec: {
       role: 'root',
-      alts: [{ tags: arr(wrapper.root.element), classes: wrapper.root.classes ?? [], attrs: { ...dataRules(wrapper, 'root'), ...wrapper.root.attributes }, children, doc: wrapper }],
+      alts: [{ tags: arr(wrapper.root.element), classes: wrapper.root.classes ?? [], ...withSources([['section', 'root', dataRules(wrapper, 'root')], ['section', 'root', wrapper.root.attributes]]), children, doc: wrapper }],
     },
   }
 }
@@ -478,10 +562,33 @@ function checkMarkup(c) {
   c.renders = true
   if (top.length !== 1) { fail(`${at}.html must be one section wrapper; it has ${top.length} top-level elements`); return }
   const root = top[0]
-  const { doc, spec } = wrapperSpec(c)
-  const m = matcher(anchor)
+  c.root = root
+  const { doc, spec, elements } = wrapperSpec(c)
+  const m = matcher(c)
   const bindings = m.one(spec, root, 0, 0, '')
   if (!bindings) { fail(`${at}.html: ${m.best()}`); return }
+
+  // Optional elements whose condition the case answers: the background and its scrim, the
+  // hero's media, and every section element whose condition is "<field> is set".
+  const drawn = (role) => (bindings.get(role) ?? []).length > 0
+  const expectations = [
+    ['background', background(c), 'a background image is set'],
+    ['scrim', scrimOn(c), 'a background image is drawn and the scrim is on'],
+  ]
+  if (doc.id === 'hero') expectations.push(['media', ['split', 'stacked'].includes(effective(c, 'variant')) && isImage(c, input.values.image), 'variant split or stacked with an image'])
+  const fieldsByName = new Map(c.fieldsDoc.fields.map((f) => [f.name, f]))
+  const visitWhen = (nodes) => {
+    for (const n of nodes) {
+      const m = n.optional && /^([a-z][a-zA-Z0-9]*) is set$/.exec(n.when ?? '')
+      if (m && fieldsByName.has(m[1])) expectations.push([n.role, filled(fieldsByName.get(m[1]), input.values[m[1]]), n.when])
+      visitWhen(n.children ?? [])
+    }
+  }
+  visitWhen(elements)
+  for (const [role, holds, when] of expectations) {
+    if (holds && !drawn(role)) fail(`${at}.html: ${role} is not drawn, but ${when} (the markup draws it then)`)
+    if (!holds && drawn(role)) fail(`${at}.html: ${role} is drawn, but the markup draws it only when ${when}`)
+  }
 
   // Headings (section#labelled-by, section#heading-level, section#body-heading-base).
   const all = [root, ...descendants(root)]
@@ -536,13 +643,13 @@ function checkMarkup(c) {
     if (isPriority && hasAttr(img, 'loading')) fail(`${at}.html: the priority image carries loading; it is never lazy (SC-007)`)
     if (!isPriority && attr(img, 'loading') !== 'lazy') fail(`${at}.html: an img that is not the priority image must be loading="lazy" (section#priority-media)`)
   }
-  const background = bindings.get('background')?.[0]
+  const backgroundImg = bindings.get('background')?.[0]
   const role = doc.priorityMedia?.role
   const within = role ? (bindings.get(role) ?? []).flatMap((el) => (el.name === 'img' ? [el] : descendants(el).filter((d) => d.name === 'img'))) : []
-  const expected = !ctx.priorityMedia ? null : background ?? (within.length ? within : null)
+  const expected = !ctx.priorityMedia ? null : backgroundImg ?? (within.length ? within : null)
   if (!ctx.priorityMedia && priority.length) fail(`${at}.html: the plan grants no priority media, but an img carries fetchpriority=high`)
   if (expected && !(Array.isArray(expected) ? expected.includes(priority[0]) : priority[0] === expected)) {
-    fail(`${at}.html: the priority image must be ${background ? 'the section background' : `in ${doc.id}'s ${role}`} (section#priority-media)`)
+    fail(`${at}.html: the priority image must be ${backgroundImg ? 'the section background' : `in ${doc.id}'s ${role}`} (section#priority-media)`)
   }
   if (ctx.priorityMedia && !expected && priority.length) fail(`${at}.html: an img claims priority, but ${doc.id}'s markup gives priority to none here`)
 }

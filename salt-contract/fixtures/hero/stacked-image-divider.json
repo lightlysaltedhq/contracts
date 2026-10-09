@@ -7,17 +7,40 @@
     "heading": "A courtyard garden in Clifton",
     "image": "courtyard",
     "buttons": [
-      { "link": { "label": "Read the case study", "type": "internal", "document": "clifton" }, "style": "ghost" }
+      {
+        "link": {
+          "label": "Read the case study",
+          "type": "internal",
+          "document": "clifton"
+        },
+        "style": "ghost"
+      }
     ],
-    "settings": { "anchorId": "clifton", "width": "narrow", "divider": true }
+    "settings": {
+      "anchorId": "clifton",
+      "width": "narrow",
+      "divider": true
+    }
   },
-  "context": { "headingLevel": 2, "priorityMedia": false, "track": "hero-1", "index": 2 },
+  "context": {
+    "headingLevel": 2,
+    "headingRendered": true,
+    "priorityMedia": false,
+    "track": "hero-1",
+    "index": 2
+  },
   "media": {
     "courtyard": {
       "src": "https://uploads.example/courtyard-1600.jpg",
       "srcset": [
-        { "url": "https://uploads.example/courtyard-800.jpg", "width": 800 },
-        { "url": "https://uploads.example/courtyard-1600.jpg", "width": 1600 }
+        {
+          "url": "https://uploads.example/courtyard-800.jpg",
+          "width": 800
+        },
+        {
+          "url": "https://uploads.example/courtyard-1600.jpg",
+          "width": 1600
+        }
       ],
       "sizes": "(min-width: 64rem) 60rem, 100vw",
       "width": 1600,
@@ -25,5 +48,10 @@
       "alt": "A paved courtyard with olive trees in pots"
     }
   },
-  "documents": { "clifton": { "href": "/work/clifton-courtyard/", "title": "A courtyard garden in Clifton" } }
+  "documents": {
+    "clifton": {
+      "href": "/work/clifton-courtyard/",
+      "title": "A courtyard garden in Clifton"
+    }
+  }
 }

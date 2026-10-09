@@ -136,6 +136,21 @@ test('inputs: an anchor that is a landmark id fails', () => {
 test('inputs: a context heading level out of range fails', () => {
   expectFail(HERO, (io) => io.json(`${SPLIT}.json`, (d) => { d.context.headingLevel = 7 }), /context\.headingLevel must be 1 to 6/)
 })
+test('inputs: a track number beyond the section\'s place on the page fails', () => {
+  expectFail(HERO, (io) => io.json('hero/split-image-right-later.json', (d) => { d.context.track = 'hero-4' }), /context\.track hero-4 counts 4 hero sections, but the section is number 3/)
+})
+test('inputs: an h2 with no heading rendered before it fails (section#single-h1)', () => {
+  expectFail(HERO, (io) => io.json('hero/split-image-right-later.json', (d) => { delete d.context.headingRendered }), /this section claims the h1/)
+})
+test('inputs: an h1 after a heading has rendered fails', () => {
+  expectFail(HERO, (io) => io.json(`${SPLIT}.json`, (d) => { d.context.headingRendered = true }), /a heading rendered earlier, so this one is 2/)
+})
+test('inputs: priority media for a later section fails', () => {
+  expectFail(HERO, (io) => io.json('hero/split-image-right-later.json', (d) => { d.context.priorityMedia = true }), /the plan grants it to the first section only/)
+})
+test('inputs: a context with no index fails', () => {
+  expectFail(HERO, (io) => io.json(`${SPLIT}.json`, (d) => { delete d.context.index }), /context\.index, the section's place on the page/)
+})
 test('inputs: rich text with an element its field does not allow fails', () => {
   expectFail(['rich-text'], (io) => io.json('rich-text/left-eyebrow-heading-body.json', (d) => { d.values.body += '<table><tr><td>x</td></tr></table>' }), /values\.body uses <table>/)
 })
@@ -236,6 +251,45 @@ test('markup: two top-level elements fail', () => {
   expectFail(HERO, (io) => io.write(`fixtures/${SPLIT}.html`, readFileSync(path.join(pkg, 'fixtures', `${SPLIT}.html`), 'utf8') + '<p>x</p>\n'), /must be one section wrapper/)
 })
 
+// Conditional attributes and elements: required where the case says the condition holds,
+// refused where it says it does not (the seven mutations the review of #10 made).
+test('when: a section with a background image must carry data-media', () => {
+  expectFail(HERO, (io) => io.html('hero/full-bleed-background-inverse.html', ' data-media ', ' '), /lacks data-media, which the markup requires when/)
+})
+test('when: a background image with the scrim on must draw the scrim', () => {
+  expectFail(HERO, (io) => io.html('hero/full-bleed-background-inverse.html', '  <div class="salt-section__scrim" style="--salt-scrim-alpha: var(--scrim-strong)"></div>\n', ''), /scrim is not drawn, but a background image is drawn and the scrim is on/)
+})
+test('when: data-divider follows the divider setting, both ways', () => {
+  expectFail(HERO, (io) => io.html('hero/stacked-image-divider.html', ' data-divider', ''), /lacks data-divider, which the markup requires when/)
+  expectFail(HERO, (io) => io.html(`${SPLIT}.html`, 'data-track="hero-1"', 'data-divider data-track="hero-1"'), /carries data-divider, which the markup draws only when/)
+})
+test('when: target and rel follow the link\'s newTab, both ways', () => {
+  expectFail(HERO, (io) => io.html('hero/split-no-image-new-tab.html', ' target="_blank"', ''), /lacks target, which the markup requires when newTab/)
+  expectFail(HERO, (io) => io.html(`${SPLIT}.html`, 'data-track-control="cta">See our work', 'data-track-control="cta" rel="noopener noreferrer">See our work'), /carries rel, which the markup draws only when newTab/)
+})
+test('when: aria-current marks the current page and no other', () => {
+  expectFail(['listing'], (io) => {
+    io.html('listing/cards-with-pagination.html', ' aria-current="page">2', '>2')
+    io.html('listing/cards-with-pagination.html', 'aria-label="Page 1">1', 'aria-label="Page 1" aria-current="page">1')
+  }, /carries aria-current, which the markup draws only when|lacks aria-current, which the markup requires when/)
+})
+test('when: the first tab is checked and no other', () => {
+  expectFail(['tabs'], (io) => {
+    io.html('tabs/many-tabbed.html', 'id="tabs-many__tab-1" checked', 'id="tabs-many__tab-1"')
+    io.html('tabs/many-tabbed.html', 'id="tabs-many__tab-2"', 'id="tabs-many__tab-2" checked')
+  }, /lacks checked, which the markup requires when first panel|carries checked, which the markup draws only when first panel/)
+})
+test('when: a split hero with an image carries data-media-side', () => {
+  markupFails(' data-media-side="left"', '', /lacks data-media-side, which the markup requires when/)
+})
+test('when: an unnamed tab set carries no aria-label, a named one does', () => {
+  expectFail(['tabs'], (io) => io.html('tabs/no-name-stacked.html', '<div class="salt-tabs">', '<div class="salt-tabs" aria-label="">'), /carries aria-label, which the markup draws only when the set is named/)
+  expectFail(['tabs'], (io) => io.html('tabs/one-panel-stacked.html', /<div class="salt-tabs" aria-label="[^"]*">/.exec(readFileSync(path.join(pkg, 'fixtures/tabs/one-panel-stacked.html'), 'utf8'))[0], '<div class="salt-tabs">'), /lacks aria-label, which the markup requires when the set is named/)
+})
+test('when: an element whose field is set must be drawn', () => {
+  markupFails('<p class="salt-eyebrow">Bristol and Bath</p>\n', '', /eyebrow is not drawn, but eyebrow is set/)
+})
+
 // ── 4. The normaliser ─────────────────────────────────────────────────────────────────────────
 test('normaliser: one that drops an attribute fails the mutation check', () => {
   expectFail(HERO, (io) => {
@@ -262,10 +316,15 @@ const differ = (a, b) => assert.notEqual(normalise(a), normalise(b))
 test('normalise: attribute order and name case do not count', () => {
   same('<a href="/x" class="salt-button" data-style="primary">Go</a>', '<A DATA-STYLE="primary" CLASS="salt-button" HREF="/x">Go</A>')
 })
-test('normalise: indentation between tags does not count, a typed space does', () => {
+test('normalise: white space at block boundaries does not count, between inline elements it does', () => {
   same('<div>\n  <p>One</p>\n  <p>Two</p>\n</div>', '<div><p>One</p><p>Two</p></div>')
   same('<p>\n  Read   more\n</p>', '<p>Read more</p>')
+  same('<div>\n  <img src="a">\n</div>', '<div><img src="a"></div>')
   differ('<p><a>x</a> <a>y</a></p>', '<p><a>x</a><a>y</a></p>')
+  // A template's line break between two inline elements is a space a browser draws.
+  differ('<p><span>£49</span>\n  <span>a month</span></p>', '<p><span>£49</span><span>a month</span></p>')
+  same('<p><span>£49</span>\n  <span>a month</span></p>', '<p><span>£49</span> <span>a month</span></p>')
+  differ('<li><svg class="salt-icon"></svg>\n  Priority support</li>', '<li><svg class="salt-icon"></svg>Priority support</li>')
   differ('<p>Read more</p>', '<p>Readmore</p>')
 })
 test('normalise: boolean attribute forms are one form', () => {

@@ -198,9 +198,11 @@ them as one minified bundle, never as six render-blocking requests.
 Modelled on GOV.UK Frontend's component fixtures: one directory per section, and in it a pair of
 files per case. `<case>.json` is the input; `<case>.html` is the default HTML for it, or an empty
 file when the case renders nothing (section#zero-state). A case's name describes its state
-(`split-image-left`, `one-item`, `empty`). From the repository root,
-`node scripts/check_salt_fixtures.mjs` proves every input valid against `contract/fields`, every expected HTML valid against
-`contract/markup`, every variant option covered, and the normaliser sound.
+(`split-image-left`, `one-item`, `empty`). An implementation reads them from the package as
+`@lightlysaltedhq/salt-contract/fixtures/<section>/<case>.json` and `.html` (the `./fixtures/*`
+export). From the repository root, `node scripts/check_salt_fixtures.mjs` proves every input valid
+against `contract/fields`, every expected HTML valid against `contract/markup`, every variant
+option covered, and the normaliser sound.
 
 ### The input
 
@@ -209,7 +211,7 @@ file when the case renders nothing (section#zero-state). A case's name describes
 | `section` | The section id; the same as the directory. |
 | `summary` | What the case shows, in a sentence or two. |
 | `values` | The section's stored field values, named and shaped as `contract/fields/<section>.json` says, with the shared settings under `settings`. A field left out takes its default. |
-| `context` | What the page plan decides for this band: `headingLevel` (1 to 6, section#heading-level), `priorityMedia` (whether the plan grants this band the priority image, section#priority-media), `track` (its `data-track`, section#data-track), and where they apply `collapseTop` (section#adjacent-collapse), `index` (the section's position on the page from 1, which names an accordion group, `faq-<index>`) and `now` (an ISO 8601 time, for the locations' open-now status). |
+| `context` | What the page plan decides for this band, describing a page that can exist: `index` (the section's place on the page, from 1, which also names an accordion group, `faq-<index>`), `track` (its `data-track`, `<section>-<n>` with n no more than `index`, section#data-track), `headingLevel` (1 when no heading has rendered before the section, otherwise 2, section#single-h1), `headingRendered` (true when a heading rendered earlier on the page), `priorityMedia` (true for the first section only, section#priority-media), and where they apply `collapseTop` (section#adjacent-collapse, never on the first section) and `now` (an ISO 8601 time, for the locations' open-now status). |
 | `media` | The images the values name, by id: `src`, `srcset` (a list of `{ url, width }`), `sizes`, `width`, `height`, `alt`, and where set `caption` and `focalPoint` (`{ x, y }` in per cent). |
 | `documents` | The pages internal links name, by id: `{ href, title }`. |
 | `collections` | The items of each source the section reads (`faqs`, `services`, `team` …), in the collection's usual order, each with a string `id`. |
@@ -235,10 +237,12 @@ Conventions, so that every case is deterministic:
 
 ### The normaliser
 
-`normalise.mjs` (`@lightlysaltedhq/salt-contract/normalise`) exports `normalise(html)`, which
-returns a canonical string, and `compare(expected, actual)`. Both platforms run their output and the
-expected HTML through it and compare the results. It removes only what a visitor cannot see or the
-contract leaves to each platform: attribute order, class order, insignificant white space,
+`normalise.mjs`, imported as `@lightlysaltedhq/salt-contract/normalise` (the `./normalise`
+export), exports `normalise(html)`, which returns a canonical string, and
+`compare(expected, actual)`. Both platforms run their output and the expected HTML through it and
+compare the results. It removes only what a visitor cannot see or the contract leaves to each
+platform: attribute order, class order, white space a browser does not draw (at block boundaries;
+between two inline elements a run is one space and counts),
 boolean-attribute forms, character-reference forms, comments, the upload host in `src` and
 `srcset`, and the artwork inside `svg.salt-icon` (the glyph names are the contract, the artwork is
 each platform's, SC-007). It never touches ids, which SC-012 makes deterministic. The gate proves

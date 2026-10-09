@@ -9,8 +9,9 @@
   },
   "context": {
     "headingLevel": 2,
+    "headingRendered": true,
     "priorityMedia": false,
     "track": "process-1",
-    "index": 1
+    "index": 2
   }
 }

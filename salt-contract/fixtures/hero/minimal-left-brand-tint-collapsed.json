@@ -4,7 +4,18 @@
   "values": {
     "variant": "minimal",
     "subheading": "Planting, paving and aftercare across Bristol and Bath.",
-    "settings": { "anchorId": "intro", "tone": "brand-tint", "toneDark": "brand-tint" }
+    "settings": {
+      "anchorId": "intro",
+      "tone": "brand-tint",
+      "toneDark": "brand-tint"
+    }
   },
-  "context": { "headingLevel": 2, "priorityMedia": false, "track": "hero-2", "index": 2, "collapseTop": true }
+  "context": {
+    "headingLevel": 2,
+    "headingRendered": true,
+    "priorityMedia": false,
+    "track": "hero-2",
+    "index": 2,
+    "collapseTop": true
+  }
 }

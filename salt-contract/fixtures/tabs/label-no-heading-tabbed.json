@@ -20,6 +20,7 @@
   },
   "context": {
     "headingLevel": 2,
+    "headingRendered": true,
     "priorityMedia": false,
     "track": "tabs-1",
     "index": 2

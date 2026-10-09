@@ -8,17 +8,40 @@
     "image": "pruning",
     "mediaSide": "right",
     "buttons": [
-      { "link": { "label": "Aftercare plans", "type": "internal", "document": "aftercare" }, "style": "secondary" }
+      {
+        "link": {
+          "label": "Aftercare plans",
+          "type": "internal",
+          "document": "aftercare"
+        },
+        "style": "secondary"
+      }
     ],
-    "settings": { "anchorId": "aftercare", "tone": "surface-alt", "toneDark": "surface" }
+    "settings": {
+      "anchorId": "aftercare",
+      "tone": "surface-alt",
+      "toneDark": "surface"
+    }
   },
-  "context": { "headingLevel": 2, "priorityMedia": false, "track": "hero-2", "index": 3 },
+  "context": {
+    "headingLevel": 2,
+    "headingRendered": true,
+    "priorityMedia": false,
+    "track": "hero-2",
+    "index": 3
+  },
   "media": {
     "pruning": {
       "src": "https://uploads.example/pruning-1600.jpg",
       "srcset": [
-        { "url": "https://uploads.example/pruning-640.jpg", "width": 640 },
-        { "url": "https://uploads.example/pruning-1600.jpg", "width": 1600 }
+        {
+          "url": "https://uploads.example/pruning-640.jpg",
+          "width": 640
+        },
+        {
+          "url": "https://uploads.example/pruning-1600.jpg",
+          "width": 1600
+        }
       ],
       "sizes": "(min-width: 64rem) 30rem, 100vw",
       "width": 1600,
@@ -26,5 +49,10 @@
       "alt": "Secateurs shaping a box hedge"
     }
   },
-  "documents": { "aftercare": { "href": "/services/aftercare/", "title": "Aftercare" } }
+  "documents": {
+    "aftercare": {
+      "href": "/services/aftercare/",
+      "title": "Aftercare"
+    }
+  }
 }

@@ -22,9 +22,10 @@
   },
   "context": {
     "headingLevel": 2,
+    "headingRendered": true,
     "priorityMedia": false,
     "track": "carousel-3",
-    "index": 2
+    "index": 3
   },
   "site": {
     "arrow": "→",
