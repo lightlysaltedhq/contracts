@@ -497,3 +497,11 @@ crossFail('an empty data-icon in dataAttributes', (f) => {
 crossFail('an empty data-icon on a node', (f) => {
   withIcons(f); f['contract/markup/hero.json'].elements = [iconNode('')]
 }, /contract\/markup\/hero\.json draws icon "", which sections\.json icons does not list/)
+
+// A section variant that fails its own declaration is not compared with its fields file as well.
+test('cross-file: a section variant with a bad default prints one line, not a second for the fields file', () => {
+  const r = crossRun((f) => { f['contract/sections.json'].sections[0].variants[0].default = 'z' })
+  assert.equal(r.code, 1, r.out)
+  const lines = r.out.split('\n').filter((l) => l.startsWith('✗'))
+  assert.deepEqual(lines, ['✗ hero variant variant defaults to z, which is not one of its options in sections.json'])
+})

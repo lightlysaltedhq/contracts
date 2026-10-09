@@ -157,10 +157,14 @@ if (vocab && (vocab.sections ?? []).every((x) => x && typeof x === 'object')) {
   }
   // One rule for every variant in sections.json, section or component, so the two paths cannot
   // drift: each value offered once, the default one of them, and markup describing only those.
+  // A variant that fails here is not compared with its fields file too, so one defect prints one line.
+  const badVariants = new Set()
   const checkVariantDeclared = (owner, v) => {
+    const before = fails.length
     const values = (v.options ?? []).map((o) => o.value)
     for (const x of values.filter((x, i) => values.indexOf(x) !== i)) fails.push(`${owner} variant ${v.field} offers ${x} twice in sections.json`)
     if (!values.includes(v.default)) fails.push(`${owner} variant ${v.field} defaults to ${v.default}, which is not one of its options in sections.json`)
+    if (fails.length > before) badVariants.add(`${owner}#${v.field}`)
   }
   const checkVariantOptions = (owner, mv, offered, source) => {
     for (const key of Object.keys(mv.options ?? {})) {
@@ -238,6 +242,7 @@ if (vocab && (vocab.sections ?? []).every((x) => x && typeof x === 'object')) {
       if (settings) for (const n of named) if (!sharedNames.has(n)) fails.push(`${s.id} shared.${key} names ${n}, which is not a shared setting`)
     }
     for (const v of s.variants ?? []) {
+      if (badVariants.has(`${s.id}#${v.field}`)) continue
       const f = (doc.fields ?? []).find((x) => x.name === v.field)
       const want = v.options.map((o) => o.value).join(', ')
       if (!f || f.type !== 'select') { fails.push(`${s.id} variant ${v.field} has no select field of that name in its fields file`); continue }
