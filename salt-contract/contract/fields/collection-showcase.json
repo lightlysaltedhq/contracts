@@ -196,7 +196,7 @@
               "title": "title"
             }
           },
-          "owes": "one query group in place of six layout fields",
+          "owes": "one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes",
           "note": "Stored as the layout's own source, taxonomy_terms, manual, orderby, order and count; taxonomy_terms becomes categories, manual becomes items, orderby and order fold into order, count stays count. SC-006 offers neither oldest-first nor Z to A, so a stored order direction is dropped on migration."
         }
       }

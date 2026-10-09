@@ -1,0 +1,828 @@
+[
+  {
+    "section": "hero",
+    "path": "variant",
+    "kind": "values",
+    "difference": "options full-bleed, split, stacked, minimal; salt-nextjs fullBleed, split, stacked, minimal",
+    "evidence": "values: {\"fullBleed\":\"full-bleed\"}"
+  },
+  {
+    "section": "hero",
+    "path": "variant",
+    "kind": "values",
+    "difference": "default \"full-bleed\"; salt-nextjs \"fullBleed\"",
+    "evidence": "values: {\"fullBleed\":\"full-bleed\"}"
+  },
+  {
+    "section": "hero",
+    "path": "settings.toneDark",
+    "kind": "values",
+    "difference": "options auto, surface, surface-alt, brand-tint, surface-inverse; salt-nextjs (empty), surface, surface-alt, brand-tint, surface-inverse",
+    "evidence": "values: {\"\":\"auto\"}"
+  },
+  {
+    "section": "hero",
+    "path": "settings.toneDark",
+    "kind": "values",
+    "difference": "default \"auto\"; salt-nextjs \"\"",
+    "evidence": "values: {\"\":\"auto\"}"
+  },
+  {
+    "section": "hero",
+    "path": "settings.backgroundImage.position",
+    "kind": "values",
+    "difference": "options focal-point, top-left, top, top-right, left, centre, right, bottom-left, bottom, bottom-right; salt-nextjs (empty), top-left, top, top-right, left, centre, right, bottom-left, bottom, bottom-right",
+    "evidence": "values: {\"\":\"focal-point\"}"
+  },
+  {
+    "section": "hero",
+    "path": "settings.backgroundImage.position",
+    "kind": "values",
+    "difference": "default \"focal-point\"; salt-nextjs \"\"",
+    "evidence": "values: {\"\":\"focal-point\"}"
+  },
+  {
+    "section": "hero",
+    "path": "settings.firstPageOnly",
+    "kind": "default",
+    "difference": "default false; salt-nextjs none",
+    "evidence": "owes: the default false in place of no default (SC-008)"
+  },
+  {
+    "section": "hero",
+    "path": "settings.divider",
+    "kind": "default",
+    "difference": "default false; salt-nextjs none",
+    "evidence": "owes: the default false in place of no default (SC-008)"
+  },
+  {
+    "section": "rich-text",
+    "path": "(block slug)",
+    "kind": "name",
+    "difference": "slug rich-text; salt-nextjs richText",
+    "evidence": "sections.json formerly: richText"
+  },
+  {
+    "section": "rich-text",
+    "path": "settings.toneDark",
+    "kind": "values",
+    "difference": "options auto, surface, surface-alt, brand-tint, surface-inverse; salt-nextjs (empty), surface, surface-alt, brand-tint, surface-inverse",
+    "evidence": "values: {\"\":\"auto\"}"
+  },
+  {
+    "section": "rich-text",
+    "path": "settings.toneDark",
+    "kind": "values",
+    "difference": "default \"auto\"; salt-nextjs \"\"",
+    "evidence": "values: {\"\":\"auto\"}"
+  },
+  {
+    "section": "rich-text",
+    "path": "settings.backgroundImage.position",
+    "kind": "values",
+    "difference": "options focal-point, top-left, top, top-right, left, centre, right, bottom-left, bottom, bottom-right; salt-nextjs (empty), top-left, top, top-right, left, centre, right, bottom-left, bottom, bottom-right",
+    "evidence": "values: {\"\":\"focal-point\"}"
+  },
+  {
+    "section": "rich-text",
+    "path": "settings.backgroundImage.position",
+    "kind": "values",
+    "difference": "default \"focal-point\"; salt-nextjs \"\"",
+    "evidence": "values: {\"\":\"focal-point\"}"
+  },
+  {
+    "section": "rich-text",
+    "path": "settings.firstPageOnly",
+    "kind": "default",
+    "difference": "default false; salt-nextjs none",
+    "evidence": "owes: the default false in place of no default (SC-008)"
+  },
+  {
+    "section": "rich-text",
+    "path": "settings.divider",
+    "kind": "default",
+    "difference": "default false; salt-nextjs none",
+    "evidence": "owes: the default false in place of no default (SC-008)"
+  },
+  {
+    "section": "call-to-action",
+    "path": "(block slug)",
+    "kind": "name",
+    "difference": "slug call-to-action; salt-nextjs cta",
+    "evidence": "sections.json formerly: cta"
+  },
+  {
+    "section": "call-to-action",
+    "path": "settings.toneDark",
+    "kind": "values",
+    "difference": "options auto, surface, surface-alt, brand-tint, surface-inverse; salt-nextjs (empty), surface, surface-alt, brand-tint, surface-inverse",
+    "evidence": "values: {\"\":\"auto\"}"
+  },
+  {
+    "section": "call-to-action",
+    "path": "settings.toneDark",
+    "kind": "values",
+    "difference": "default \"auto\"; salt-nextjs \"\"",
+    "evidence": "values: {\"\":\"auto\"}"
+  },
+  {
+    "section": "call-to-action",
+    "path": "settings.backgroundImage.position",
+    "kind": "values",
+    "difference": "options focal-point, top-left, top, top-right, left, centre, right, bottom-left, bottom, bottom-right; salt-nextjs (empty), top-left, top, top-right, left, centre, right, bottom-left, bottom, bottom-right",
+    "evidence": "values: {\"\":\"focal-point\"}"
+  },
+  {
+    "section": "call-to-action",
+    "path": "settings.backgroundImage.position",
+    "kind": "values",
+    "difference": "default \"focal-point\"; salt-nextjs \"\"",
+    "evidence": "values: {\"\":\"focal-point\"}"
+  },
+  {
+    "section": "call-to-action",
+    "path": "settings.firstPageOnly",
+    "kind": "default",
+    "difference": "default false; salt-nextjs none",
+    "evidence": "owes: the default false in place of no default (SC-008)"
+  },
+  {
+    "section": "call-to-action",
+    "path": "settings.divider",
+    "kind": "default",
+    "difference": "default false; salt-nextjs none",
+    "evidence": "owes: the default false in place of no default (SC-008)"
+  },
+  {
+    "section": "media-text",
+    "path": "(block slug)",
+    "kind": "name",
+    "difference": "slug media-text; salt-nextjs mediaText",
+    "evidence": "sections.json formerly: mediaText"
+  },
+  {
+    "section": "media-text",
+    "path": "rows.mediaSide",
+    "kind": "condition",
+    "difference": "salt-nextjs decides it from the parent block, which a contract condition cannot read",
+    "evidence": "note: Hidden when the section's mode is alternating, a condition on the parent that the contract cannot express; the description says it instead."
+  },
+  {
+    "section": "media-text",
+    "path": "settings.toneDark",
+    "kind": "values",
+    "difference": "options auto, surface, surface-alt, brand-tint, surface-inverse; salt-nextjs (empty), surface, surface-alt, brand-tint, surface-inverse",
+    "evidence": "values: {\"\":\"auto\"}"
+  },
+  {
+    "section": "media-text",
+    "path": "settings.toneDark",
+    "kind": "values",
+    "difference": "default \"auto\"; salt-nextjs \"\"",
+    "evidence": "values: {\"\":\"auto\"}"
+  },
+  {
+    "section": "media-text",
+    "path": "settings.backgroundImage.position",
+    "kind": "values",
+    "difference": "options focal-point, top-left, top, top-right, left, centre, right, bottom-left, bottom, bottom-right; salt-nextjs (empty), top-left, top, top-right, left, centre, right, bottom-left, bottom, bottom-right",
+    "evidence": "values: {\"\":\"focal-point\"}"
+  },
+  {
+    "section": "media-text",
+    "path": "settings.backgroundImage.position",
+    "kind": "values",
+    "difference": "default \"focal-point\"; salt-nextjs \"\"",
+    "evidence": "values: {\"\":\"focal-point\"}"
+  },
+  {
+    "section": "media-text",
+    "path": "settings.firstPageOnly",
+    "kind": "default",
+    "difference": "default false; salt-nextjs none",
+    "evidence": "owes: the default false in place of no default (SC-008)"
+  },
+  {
+    "section": "media-text",
+    "path": "settings.divider",
+    "kind": "default",
+    "difference": "default false; salt-nextjs none",
+    "evidence": "owes: the default false in place of no default (SC-008)"
+  },
+  {
+    "section": "features",
+    "path": "settings.toneDark",
+    "kind": "values",
+    "difference": "options auto, surface, surface-alt, brand-tint, surface-inverse; salt-nextjs (empty), surface, surface-alt, brand-tint, surface-inverse",
+    "evidence": "values: {\"\":\"auto\"}"
+  },
+  {
+    "section": "features",
+    "path": "settings.toneDark",
+    "kind": "values",
+    "difference": "default \"auto\"; salt-nextjs \"\"",
+    "evidence": "values: {\"\":\"auto\"}"
+  },
+  {
+    "section": "features",
+    "path": "settings.backgroundImage.position",
+    "kind": "values",
+    "difference": "options focal-point, top-left, top, top-right, left, centre, right, bottom-left, bottom, bottom-right; salt-nextjs (empty), top-left, top, top-right, left, centre, right, bottom-left, bottom, bottom-right",
+    "evidence": "values: {\"\":\"focal-point\"}"
+  },
+  {
+    "section": "features",
+    "path": "settings.backgroundImage.position",
+    "kind": "values",
+    "difference": "default \"focal-point\"; salt-nextjs \"\"",
+    "evidence": "values: {\"\":\"focal-point\"}"
+  },
+  {
+    "section": "features",
+    "path": "settings.firstPageOnly",
+    "kind": "default",
+    "difference": "default false; salt-nextjs none",
+    "evidence": "owes: the default false in place of no default (SC-008)"
+  },
+  {
+    "section": "features",
+    "path": "settings.divider",
+    "kind": "default",
+    "difference": "default false; salt-nextjs none",
+    "evidence": "owes: the default false in place of no default (SC-008)"
+  },
+  {
+    "section": "stats",
+    "path": "settings.toneDark",
+    "kind": "values",
+    "difference": "options auto, surface, surface-alt, brand-tint, surface-inverse; salt-nextjs (empty), surface, surface-alt, brand-tint, surface-inverse",
+    "evidence": "values: {\"\":\"auto\"}"
+  },
+  {
+    "section": "stats",
+    "path": "settings.toneDark",
+    "kind": "values",
+    "difference": "default \"auto\"; salt-nextjs \"\"",
+    "evidence": "values: {\"\":\"auto\"}"
+  },
+  {
+    "section": "stats",
+    "path": "settings.backgroundImage.position",
+    "kind": "values",
+    "difference": "options focal-point, top-left, top, top-right, left, centre, right, bottom-left, bottom, bottom-right; salt-nextjs (empty), top-left, top, top-right, left, centre, right, bottom-left, bottom, bottom-right",
+    "evidence": "values: {\"\":\"focal-point\"}"
+  },
+  {
+    "section": "stats",
+    "path": "settings.backgroundImage.position",
+    "kind": "values",
+    "difference": "default \"focal-point\"; salt-nextjs \"\"",
+    "evidence": "values: {\"\":\"focal-point\"}"
+  },
+  {
+    "section": "stats",
+    "path": "settings.firstPageOnly",
+    "kind": "default",
+    "difference": "default false; salt-nextjs none",
+    "evidence": "owes: the default false in place of no default (SC-008)"
+  },
+  {
+    "section": "stats",
+    "path": "settings.divider",
+    "kind": "default",
+    "difference": "default false; salt-nextjs none",
+    "evidence": "owes: the default false in place of no default (SC-008)"
+  },
+  {
+    "section": "logos",
+    "path": "settings.toneDark",
+    "kind": "values",
+    "difference": "options auto, surface, surface-alt, brand-tint, surface-inverse; salt-nextjs (empty), surface, surface-alt, brand-tint, surface-inverse",
+    "evidence": "values: {\"\":\"auto\"}"
+  },
+  {
+    "section": "logos",
+    "path": "settings.toneDark",
+    "kind": "values",
+    "difference": "default \"auto\"; salt-nextjs \"\"",
+    "evidence": "values: {\"\":\"auto\"}"
+  },
+  {
+    "section": "logos",
+    "path": "settings.backgroundImage.position",
+    "kind": "values",
+    "difference": "options focal-point, top-left, top, top-right, left, centre, right, bottom-left, bottom, bottom-right; salt-nextjs (empty), top-left, top, top-right, left, centre, right, bottom-left, bottom, bottom-right",
+    "evidence": "values: {\"\":\"focal-point\"}"
+  },
+  {
+    "section": "logos",
+    "path": "settings.backgroundImage.position",
+    "kind": "values",
+    "difference": "default \"focal-point\"; salt-nextjs \"\"",
+    "evidence": "values: {\"\":\"focal-point\"}"
+  },
+  {
+    "section": "logos",
+    "path": "settings.firstPageOnly",
+    "kind": "default",
+    "difference": "default false; salt-nextjs none",
+    "evidence": "owes: the default false in place of no default (SC-008)"
+  },
+  {
+    "section": "logos",
+    "path": "settings.divider",
+    "kind": "default",
+    "difference": "default false; salt-nextjs none",
+    "evidence": "owes: the default false in place of no default (SC-008)"
+  },
+  {
+    "section": "gallery",
+    "path": "settings.toneDark",
+    "kind": "values",
+    "difference": "options auto, surface, surface-alt, brand-tint, surface-inverse; salt-nextjs (empty), surface, surface-alt, brand-tint, surface-inverse",
+    "evidence": "values: {\"\":\"auto\"}"
+  },
+  {
+    "section": "gallery",
+    "path": "settings.toneDark",
+    "kind": "values",
+    "difference": "default \"auto\"; salt-nextjs \"\"",
+    "evidence": "values: {\"\":\"auto\"}"
+  },
+  {
+    "section": "gallery",
+    "path": "settings.backgroundImage.position",
+    "kind": "values",
+    "difference": "options focal-point, top-left, top, top-right, left, centre, right, bottom-left, bottom, bottom-right; salt-nextjs (empty), top-left, top, top-right, left, centre, right, bottom-left, bottom, bottom-right",
+    "evidence": "values: {\"\":\"focal-point\"}"
+  },
+  {
+    "section": "gallery",
+    "path": "settings.backgroundImage.position",
+    "kind": "values",
+    "difference": "default \"focal-point\"; salt-nextjs \"\"",
+    "evidence": "values: {\"\":\"focal-point\"}"
+  },
+  {
+    "section": "gallery",
+    "path": "settings.firstPageOnly",
+    "kind": "default",
+    "difference": "default false; salt-nextjs none",
+    "evidence": "owes: the default false in place of no default (SC-008)"
+  },
+  {
+    "section": "gallery",
+    "path": "settings.divider",
+    "kind": "default",
+    "difference": "default false; salt-nextjs none",
+    "evidence": "owes: the default false in place of no default (SC-008)"
+  },
+  {
+    "section": "process",
+    "path": "settings.toneDark",
+    "kind": "values",
+    "difference": "options auto, surface, surface-alt, brand-tint, surface-inverse; salt-nextjs (empty), surface, surface-alt, brand-tint, surface-inverse",
+    "evidence": "values: {\"\":\"auto\"}"
+  },
+  {
+    "section": "process",
+    "path": "settings.toneDark",
+    "kind": "values",
+    "difference": "default \"auto\"; salt-nextjs \"\"",
+    "evidence": "values: {\"\":\"auto\"}"
+  },
+  {
+    "section": "process",
+    "path": "settings.backgroundImage.position",
+    "kind": "values",
+    "difference": "options focal-point, top-left, top, top-right, left, centre, right, bottom-left, bottom, bottom-right; salt-nextjs (empty), top-left, top, top-right, left, centre, right, bottom-left, bottom, bottom-right",
+    "evidence": "values: {\"\":\"focal-point\"}"
+  },
+  {
+    "section": "process",
+    "path": "settings.backgroundImage.position",
+    "kind": "values",
+    "difference": "default \"focal-point\"; salt-nextjs \"\"",
+    "evidence": "values: {\"\":\"focal-point\"}"
+  },
+  {
+    "section": "process",
+    "path": "settings.firstPageOnly",
+    "kind": "default",
+    "difference": "default false; salt-nextjs none",
+    "evidence": "owes: the default false in place of no default (SC-008)"
+  },
+  {
+    "section": "process",
+    "path": "settings.divider",
+    "kind": "default",
+    "difference": "default false; salt-nextjs none",
+    "evidence": "owes: the default false in place of no default (SC-008)"
+  },
+  {
+    "section": "faq",
+    "path": "query.mode",
+    "kind": "values",
+    "difference": "options automatic, by-category, manual; salt-nextjs auto, filtered, manual",
+    "evidence": "values: {\"auto\":\"automatic\",\"filtered\":\"by-category\",\"manual\":\"manual\"}"
+  },
+  {
+    "section": "faq",
+    "path": "query.mode",
+    "kind": "values",
+    "difference": "default \"automatic\"; salt-nextjs \"auto\"",
+    "evidence": "values: {\"auto\":\"automatic\",\"filtered\":\"by-category\",\"manual\":\"manual\"}"
+  },
+  {
+    "section": "faq",
+    "path": "query.order",
+    "kind": "values",
+    "difference": "options default, newest, title; salt-nextjs (empty), date, title",
+    "evidence": "values: {\"\":\"default\",\"date\":\"newest\",\"title\":\"title\"}"
+  },
+  {
+    "section": "faq",
+    "path": "query.order",
+    "kind": "values",
+    "difference": "default \"default\"; salt-nextjs \"\"",
+    "evidence": "values: {\"\":\"default\",\"date\":\"newest\",\"title\":\"title\"}"
+  },
+  {
+    "section": "faq",
+    "path": "settings.toneDark",
+    "kind": "values",
+    "difference": "options auto, surface, surface-alt, brand-tint, surface-inverse; salt-nextjs (empty), surface, surface-alt, brand-tint, surface-inverse",
+    "evidence": "values: {\"\":\"auto\"}"
+  },
+  {
+    "section": "faq",
+    "path": "settings.toneDark",
+    "kind": "values",
+    "difference": "default \"auto\"; salt-nextjs \"\"",
+    "evidence": "values: {\"\":\"auto\"}"
+  },
+  {
+    "section": "faq",
+    "path": "settings.backgroundImage.position",
+    "kind": "values",
+    "difference": "options focal-point, top-left, top, top-right, left, centre, right, bottom-left, bottom, bottom-right; salt-nextjs (empty), top-left, top, top-right, left, centre, right, bottom-left, bottom, bottom-right",
+    "evidence": "values: {\"\":\"focal-point\"}"
+  },
+  {
+    "section": "faq",
+    "path": "settings.backgroundImage.position",
+    "kind": "values",
+    "difference": "default \"focal-point\"; salt-nextjs \"\"",
+    "evidence": "values: {\"\":\"focal-point\"}"
+  },
+  {
+    "section": "faq",
+    "path": "settings.firstPageOnly",
+    "kind": "default",
+    "difference": "default false; salt-nextjs none",
+    "evidence": "owes: the default false in place of no default (SC-008)"
+  },
+  {
+    "section": "faq",
+    "path": "settings.divider",
+    "kind": "default",
+    "difference": "default false; salt-nextjs none",
+    "evidence": "owes: the default false in place of no default (SC-008)"
+  },
+  {
+    "section": "tabs",
+    "path": "settings.toneDark",
+    "kind": "values",
+    "difference": "options auto, surface, surface-alt, brand-tint, surface-inverse; salt-nextjs (empty), surface, surface-alt, brand-tint, surface-inverse",
+    "evidence": "values: {\"\":\"auto\"}"
+  },
+  {
+    "section": "tabs",
+    "path": "settings.toneDark",
+    "kind": "values",
+    "difference": "default \"auto\"; salt-nextjs \"\"",
+    "evidence": "values: {\"\":\"auto\"}"
+  },
+  {
+    "section": "tabs",
+    "path": "settings.backgroundImage.position",
+    "kind": "values",
+    "difference": "options focal-point, top-left, top, top-right, left, centre, right, bottom-left, bottom, bottom-right; salt-nextjs (empty), top-left, top, top-right, left, centre, right, bottom-left, bottom, bottom-right",
+    "evidence": "values: {\"\":\"focal-point\"}"
+  },
+  {
+    "section": "tabs",
+    "path": "settings.backgroundImage.position",
+    "kind": "values",
+    "difference": "default \"focal-point\"; salt-nextjs \"\"",
+    "evidence": "values: {\"\":\"focal-point\"}"
+  },
+  {
+    "section": "tabs",
+    "path": "settings.firstPageOnly",
+    "kind": "default",
+    "difference": "default false; salt-nextjs none",
+    "evidence": "owes: the default false in place of no default (SC-008)"
+  },
+  {
+    "section": "tabs",
+    "path": "settings.divider",
+    "kind": "default",
+    "difference": "default false; salt-nextjs none",
+    "evidence": "owes: the default false in place of no default (SC-008)"
+  },
+  {
+    "section": "collection-showcase",
+    "path": "(block slug)",
+    "kind": "name",
+    "difference": "slug collection-showcase; salt-nextjs collectionShowcase",
+    "evidence": "sections.json formerly: collectionShowcase"
+  },
+  {
+    "section": "collection-showcase",
+    "path": "source",
+    "kind": "default",
+    "difference": "default none; salt-nextjs \"services\"",
+    "evidence": "owes: no default source: the editor picks one, where today the first installed source is chosen (SC-006)"
+  },
+  {
+    "section": "collection-showcase",
+    "path": "query",
+    "kind": "name",
+    "difference": "stored as servicesQuery, caseStudiesQuery, testimonialsQuery, postsQuery, teamQuery",
+    "evidence": "formerly: servicesQuery, caseStudiesQuery, testimonialsQuery, postsQuery, teamQuery"
+  },
+  {
+    "section": "collection-showcase",
+    "path": "query",
+    "kind": "condition",
+    "difference": "condition differs (5 of 6 cases), e.g. {}: contract shows, salt-nextjs hides; {\"source\":\"case-studies\"}: contract shows, salt-nextjs hides",
+    "evidence": "owes: one query group read against the chosen source in place of one group per source; a team category taxonomy, so by-category is offered for team as on WordPress (SC-006)"
+  },
+  {
+    "section": "collection-showcase",
+    "path": "query.mode",
+    "kind": "values",
+    "difference": "options automatic, by-category, manual; salt-nextjs auto, filtered, manual",
+    "evidence": "values: {\"auto\":\"automatic\",\"filtered\":\"by-category\",\"manual\":\"manual\"}"
+  },
+  {
+    "section": "collection-showcase",
+    "path": "query.mode",
+    "kind": "values",
+    "difference": "default \"automatic\"; salt-nextjs \"auto\"",
+    "evidence": "values: {\"auto\":\"automatic\",\"filtered\":\"by-category\",\"manual\":\"manual\"}"
+  },
+  {
+    "section": "collection-showcase",
+    "path": "query.order",
+    "kind": "values",
+    "difference": "options default, newest, title; salt-nextjs (empty), date, title",
+    "evidence": "values: {\"\":\"default\",\"date\":\"newest\",\"title\":\"title\"}"
+  },
+  {
+    "section": "collection-showcase",
+    "path": "query.order",
+    "kind": "values",
+    "difference": "default \"default\"; salt-nextjs \"\"",
+    "evidence": "values: {\"\":\"default\",\"date\":\"newest\",\"title\":\"title\"}"
+  },
+  {
+    "section": "collection-showcase",
+    "path": "settings.toneDark",
+    "kind": "values",
+    "difference": "options auto, surface, surface-alt, brand-tint, surface-inverse; salt-nextjs (empty), surface, surface-alt, brand-tint, surface-inverse",
+    "evidence": "values: {\"\":\"auto\"}"
+  },
+  {
+    "section": "collection-showcase",
+    "path": "settings.toneDark",
+    "kind": "values",
+    "difference": "default \"auto\"; salt-nextjs \"\"",
+    "evidence": "values: {\"\":\"auto\"}"
+  },
+  {
+    "section": "collection-showcase",
+    "path": "settings.backgroundImage.position",
+    "kind": "values",
+    "difference": "options focal-point, top-left, top, top-right, left, centre, right, bottom-left, bottom, bottom-right; salt-nextjs (empty), top-left, top, top-right, left, centre, right, bottom-left, bottom, bottom-right",
+    "evidence": "values: {\"\":\"focal-point\"}"
+  },
+  {
+    "section": "collection-showcase",
+    "path": "settings.backgroundImage.position",
+    "kind": "values",
+    "difference": "default \"focal-point\"; salt-nextjs \"\"",
+    "evidence": "values: {\"\":\"focal-point\"}"
+  },
+  {
+    "section": "collection-showcase",
+    "path": "settings.firstPageOnly",
+    "kind": "default",
+    "difference": "default false; salt-nextjs none",
+    "evidence": "owes: the default false in place of no default (SC-008)"
+  },
+  {
+    "section": "collection-showcase",
+    "path": "settings.divider",
+    "kind": "default",
+    "difference": "default false; salt-nextjs none",
+    "evidence": "owes: the default false in place of no default (SC-008)"
+  },
+  {
+    "section": "carousel",
+    "path": "cards.role",
+    "kind": "condition",
+    "difference": "salt-nextjs decides it from the parent block, which a contract condition cannot read",
+    "evidence": "note: Shown only when the card style is quote, a condition on the parent that the contract cannot express."
+  },
+  {
+    "section": "carousel",
+    "path": "query",
+    "kind": "name",
+    "difference": "stored as servicesQuery, caseStudiesQuery, testimonialsQuery, postsQuery, teamQuery",
+    "evidence": "formerly: servicesQuery, caseStudiesQuery, testimonialsQuery, postsQuery, teamQuery"
+  },
+  {
+    "section": "carousel",
+    "path": "query",
+    "kind": "condition",
+    "difference": "condition differs (4 of 6 cases), e.g. {\"source\":\"case-studies\"}: contract shows, salt-nextjs hides; {\"source\":\"testimonials\"}: contract shows, salt-nextjs hides",
+    "evidence": "owes: one query group read against the chosen source in place of one group per source; a team category taxonomy, so by-category is offered for team as on WordPress (SC-006)"
+  },
+  {
+    "section": "carousel",
+    "path": "query.mode",
+    "kind": "values",
+    "difference": "options automatic, by-category, manual; salt-nextjs auto, filtered, manual",
+    "evidence": "values: {\"auto\":\"automatic\",\"filtered\":\"by-category\",\"manual\":\"manual\"}"
+  },
+  {
+    "section": "carousel",
+    "path": "query.mode",
+    "kind": "values",
+    "difference": "default \"automatic\"; salt-nextjs \"auto\"",
+    "evidence": "values: {\"auto\":\"automatic\",\"filtered\":\"by-category\",\"manual\":\"manual\"}"
+  },
+  {
+    "section": "carousel",
+    "path": "query.order",
+    "kind": "values",
+    "difference": "options default, newest, title; salt-nextjs (empty), date, title",
+    "evidence": "values: {\"\":\"default\",\"date\":\"newest\",\"title\":\"title\"}"
+  },
+  {
+    "section": "carousel",
+    "path": "query.order",
+    "kind": "values",
+    "difference": "default \"default\"; salt-nextjs \"\"",
+    "evidence": "values: {\"\":\"default\",\"date\":\"newest\",\"title\":\"title\"}"
+  },
+  {
+    "section": "carousel",
+    "path": "settings.toneDark",
+    "kind": "values",
+    "difference": "options auto, surface, surface-alt, brand-tint, surface-inverse; salt-nextjs (empty), surface, surface-alt, brand-tint, surface-inverse",
+    "evidence": "values: {\"\":\"auto\"}"
+  },
+  {
+    "section": "carousel",
+    "path": "settings.toneDark",
+    "kind": "values",
+    "difference": "default \"auto\"; salt-nextjs \"\"",
+    "evidence": "values: {\"\":\"auto\"}"
+  },
+  {
+    "section": "carousel",
+    "path": "settings.backgroundImage.position",
+    "kind": "values",
+    "difference": "options focal-point, top-left, top, top-right, left, centre, right, bottom-left, bottom, bottom-right; salt-nextjs (empty), top-left, top, top-right, left, centre, right, bottom-left, bottom, bottom-right",
+    "evidence": "values: {\"\":\"focal-point\"}"
+  },
+  {
+    "section": "carousel",
+    "path": "settings.backgroundImage.position",
+    "kind": "values",
+    "difference": "default \"focal-point\"; salt-nextjs \"\"",
+    "evidence": "values: {\"\":\"focal-point\"}"
+  },
+  {
+    "section": "carousel",
+    "path": "settings.firstPageOnly",
+    "kind": "default",
+    "difference": "default false; salt-nextjs none",
+    "evidence": "owes: the default false in place of no default (SC-008)"
+  },
+  {
+    "section": "carousel",
+    "path": "settings.divider",
+    "kind": "default",
+    "difference": "default false; salt-nextjs none",
+    "evidence": "owes: the default false in place of no default (SC-008)"
+  },
+  {
+    "section": "listing",
+    "path": "settings.toneDark",
+    "kind": "values",
+    "difference": "options auto, surface, surface-alt, brand-tint, surface-inverse; salt-nextjs (empty), surface, surface-alt, brand-tint, surface-inverse",
+    "evidence": "values: {\"\":\"auto\"}"
+  },
+  {
+    "section": "listing",
+    "path": "settings.toneDark",
+    "kind": "values",
+    "difference": "default \"auto\"; salt-nextjs \"\"",
+    "evidence": "values: {\"\":\"auto\"}"
+  },
+  {
+    "section": "listing",
+    "path": "settings.backgroundImage.position",
+    "kind": "values",
+    "difference": "options focal-point, top-left, top, top-right, left, centre, right, bottom-left, bottom, bottom-right; salt-nextjs (empty), top-left, top, top-right, left, centre, right, bottom-left, bottom, bottom-right",
+    "evidence": "values: {\"\":\"focal-point\"}"
+  },
+  {
+    "section": "listing",
+    "path": "settings.backgroundImage.position",
+    "kind": "values",
+    "difference": "default \"focal-point\"; salt-nextjs \"\"",
+    "evidence": "values: {\"\":\"focal-point\"}"
+  },
+  {
+    "section": "listing",
+    "path": "settings.divider",
+    "kind": "default",
+    "difference": "default false; salt-nextjs none",
+    "evidence": "owes: the default false in place of no default (SC-008)"
+  },
+  {
+    "section": "contact",
+    "path": "showPhone",
+    "kind": "missing",
+    "difference": "not in salt-nextjs",
+    "evidence": "owes: the field"
+  },
+  {
+    "section": "contact",
+    "path": "showEmail",
+    "kind": "missing",
+    "difference": "not in salt-nextjs",
+    "evidence": "owes: the field"
+  },
+  {
+    "section": "contact",
+    "path": "showAddress",
+    "kind": "missing",
+    "difference": "not in salt-nextjs",
+    "evidence": "owes: the field"
+  },
+  {
+    "section": "contact",
+    "path": "formIntro",
+    "kind": "missing",
+    "difference": "not in salt-nextjs",
+    "evidence": "owes: the field"
+  },
+  {
+    "section": "contact",
+    "path": "settings.toneDark",
+    "kind": "values",
+    "difference": "options auto, surface, surface-alt, brand-tint, surface-inverse; salt-nextjs (empty), surface, surface-alt, brand-tint, surface-inverse",
+    "evidence": "values: {\"\":\"auto\"}"
+  },
+  {
+    "section": "contact",
+    "path": "settings.toneDark",
+    "kind": "values",
+    "difference": "default \"auto\"; salt-nextjs \"\"",
+    "evidence": "values: {\"\":\"auto\"}"
+  },
+  {
+    "section": "contact",
+    "path": "settings.backgroundImage.position",
+    "kind": "values",
+    "difference": "options focal-point, top-left, top, top-right, left, centre, right, bottom-left, bottom, bottom-right; salt-nextjs (empty), top-left, top, top-right, left, centre, right, bottom-left, bottom, bottom-right",
+    "evidence": "values: {\"\":\"focal-point\"}"
+  },
+  {
+    "section": "contact",
+    "path": "settings.backgroundImage.position",
+    "kind": "values",
+    "difference": "default \"focal-point\"; salt-nextjs \"\"",
+    "evidence": "values: {\"\":\"focal-point\"}"
+  },
+  {
+    "section": "contact",
+    "path": "settings.firstPageOnly",
+    "kind": "default",
+    "difference": "default false; salt-nextjs none",
+    "evidence": "owes: the default false in place of no default (SC-008)"
+  },
+  {
+    "section": "contact",
+    "path": "settings.divider",
+    "kind": "default",
+    "difference": "default false; salt-nextjs none",
+    "evidence": "owes: the default false in place of no default (SC-008)"
+  }
+]

@@ -339,7 +339,8 @@
         {
           "id": "faqs",
           "label": "FAQs",
-          "linked": false
+          "linked": false,
+          "categories": true
         }
       ],
       "platforms": {
@@ -420,27 +421,32 @@
         {
           "id": "services",
           "label": "Services",
-          "linked": true
+          "linked": true,
+          "categories": true
         },
         {
           "id": "case-studies",
           "label": "Case studies",
-          "linked": true
+          "linked": true,
+          "categories": true
         },
         {
           "id": "testimonials",
           "label": "Testimonials",
-          "linked": false
+          "linked": false,
+          "categories": false
         },
         {
           "id": "posts",
           "label": "Posts",
-          "linked": true
+          "linked": true,
+          "categories": true
         },
         {
           "id": "team",
           "label": "Team",
-          "linked": false
+          "linked": false,
+          "categories": true
         }
       ],
       "platforms": {
@@ -513,27 +519,32 @@
         {
           "id": "services",
           "label": "Services",
-          "linked": true
+          "linked": true,
+          "categories": true
         },
         {
           "id": "case-studies",
           "label": "Case studies",
-          "linked": true
+          "linked": true,
+          "categories": true
         },
         {
           "id": "testimonials",
           "label": "Testimonials",
-          "linked": false
+          "linked": false,
+          "categories": false
         },
         {
           "id": "posts",
           "label": "Posts",
-          "linked": true
+          "linked": true,
+          "categories": true
         },
         {
           "id": "team",
           "label": "Team",
-          "linked": false
+          "linked": false,
+          "categories": true
         }
       ],
       "platforms": {
@@ -620,13 +631,14 @@
         {
           "id": "locations",
           "label": "Locations",
-          "linked": false
+          "linked": false,
+          "categories": true
         }
       ],
       "platforms": {
         "nextjs": {
           "status": "owes",
-          "owes": "the section, planned as Salt for Next.js Epic WP8"
+          "owes": "the section, planned as Salt for Next.js Epic WP8, with a location-area taxonomy (SC-010)"
         },
         "wordpress": {
           "status": "ships",
