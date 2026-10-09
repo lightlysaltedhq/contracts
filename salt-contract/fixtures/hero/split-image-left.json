@@ -9,28 +9,49 @@
     "image": "terrace",
     "mediaSide": "left",
     "buttons": [
-      { "link": { "label": "See our work", "type": "internal", "document": "work" }, "style": "primary" },
-      { "link": { "label": "Get in touch", "type": "internal", "document": "contact" }, "style": "secondary" }
+      {
+        "link": {
+          "label": "See our work",
+          "type": "internal",
+          "document": "work"
+        },
+        "style": "primary"
+      },
+      {
+        "link": {
+          "label": "Get in touch",
+          "type": "internal",
+          "document": "contact"
+        },
+        "style": "secondary"
+      }
     ],
-    "settings": { "anchorId": "hero-split" }
+    "settings": {
+      "anchorId": "hero-split"
+    }
   },
-  "context": { "headingLevel": 1, "priorityMedia": true, "track": "hero-1", "index": 1 },
+  "context": {
+    "headingLevel": 1,
+    "priorityMedia": true,
+    "track": "hero-1",
+    "index": 1
+  },
   "media": {
     "terrace": {
-      "src": "https://uploads.example/terrace-1600.jpg",
-      "srcset": [
-        { "url": "https://uploads.example/terrace-640.jpg", "width": 640 },
-        { "url": "https://uploads.example/terrace-1024.jpg", "width": 1024 },
-        { "url": "https://uploads.example/terrace-1600.jpg", "width": 1600 }
-      ],
-      "sizes": "(min-width: 64rem) 30rem, 100vw",
+      "url": "https://uploads.example/terrace-{width}.jpg",
       "width": 1600,
       "height": 1067,
       "alt": "A terrace of raised beds planted with lavender"
     }
   },
   "documents": {
-    "work": { "href": "/work/", "title": "Our work" },
-    "contact": { "href": "/contact/", "title": "Contact" }
+    "work": {
+      "href": "/work/",
+      "title": "Our work"
+    },
+    "contact": {
+      "href": "/contact/",
+      "title": "Contact"
+    }
   }
 }

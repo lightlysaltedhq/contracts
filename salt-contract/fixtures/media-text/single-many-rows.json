@@ -31,39 +31,13 @@
   },
   "media": {
     "path": {
-      "src": "https://uploads.example/path-1600.jpg",
-      "srcset": [
-        {
-          "url": "https://uploads.example/path-640.jpg",
-          "width": 640
-        },
-        {
-          "url": "https://uploads.example/path-1600.jpg",
-          "width": 1600
-        }
-      ],
-      "sizes": "(min-width: 64rem) 32rem, 100vw",
+      "url": "https://uploads.example/path-{width}.jpg",
       "width": 1600,
       "height": 1200,
       "alt": "A gravel path between box hedges"
     },
     "pond": {
-      "src": "https://uploads.example/pond-1600.jpg",
-      "srcset": [
-        {
-          "url": "https://uploads.example/pond-640.jpg",
-          "width": 640
-        },
-        {
-          "url": "https://uploads.example/pond-1024.jpg",
-          "width": 1024
-        },
-        {
-          "url": "https://uploads.example/pond-1600.jpg",
-          "width": 1600
-        }
-      ],
-      "sizes": "(min-width: 64rem) 32rem, 100vw",
+      "url": "https://uploads.example/pond-{width}.jpg",
       "width": 1600,
       "height": 1067,
       "alt": "A wildlife pond edged with reeds"

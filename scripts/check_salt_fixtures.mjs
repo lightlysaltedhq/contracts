@@ -38,6 +38,8 @@ const fails = []
 const fail = (msg) => fails.push(msg)
 const readJson = (p) => JSON.parse(readFileSync(path.join(dir, p), 'utf8'))
 const { normalise, parse, CONTAINERS } = await import(pathToFileURL(path.join(dir, 'normalise.mjs')).href)
+const { slotOf, sizesOf, sourcesOf } = await import(pathToFileURL(path.join(here, 'salt_image_slots.mjs')).href)
+const imageTable = existsSync(path.join(dir, 'contract/image-sizes.json')) ? readJson('contract/image-sizes.json') : null
 const { containersFrom } = await import(pathToFileURL(path.join(here, 'salt_normalise_containers.mjs')).href)
 
 const vocab = readJson('contract/sections.json')
@@ -232,9 +234,10 @@ function checkInput(c) {
   if (ctx.collapseTop === true && ctx.index === 1) fail(`${at}.json: context.collapseTop needs a section before it (section#adjacent-collapse)`)
   for (const [id, m] of Object.entries(input.media ?? {})) {
     const p = `${at}.json media.${id}`
-    if (typeof m.src !== 'string' || typeof m.sizes !== 'string' || typeof m.alt !== 'string') fail(`${p} needs src, sizes and alt strings`)
+    // The record names the upload, never its sizes or srcset: those are the slot's (SC-016).
+    for (const k of Object.keys(m)) if (!['url', 'width', 'height', 'alt', 'caption', 'focalPoint'].includes(k)) fail(`${p}.${k}: a media record holds url, width, height, alt, caption and focalPoint only; sizes and srcset come from contract/image-sizes.json`)
+    if (typeof m.url !== 'string' || !m.url.includes('{width}') || typeof m.alt !== 'string') fail(`${p} needs a url holding {width}, the template each candidate width fills, and an alt string`)
     if (!(Number.isInteger(m.width) && m.width > 0 && Number.isInteger(m.height) && m.height > 0)) fail(`${p} needs whole-number width and height`)
-    if (!Array.isArray(m.srcset) || !m.srcset.length || m.srcset.some((s) => typeof s.url !== 'string' || !Number.isInteger(s.width))) fail(`${p}.srcset must list { url, width } candidates`)
   }
   for (const [source, items] of Object.entries(input.collections ?? {})) {
     if (!Array.isArray(items) || items.some((i) => !isObject(i) || typeof i.id !== 'string')) fail(`${at}.json collections.${source} must be a list of items with string ids`)
@@ -789,6 +792,19 @@ function checkMarkup(c) {
   for (const img of imgs) {
     for (const name of ['src', 'srcset', 'sizes', 'width', 'height', 'alt']) if (!hasAttr(img, name)) fail(`${at}.html: an img lacks ${name} (SC-007)`)
     for (const name of ['width', 'height']) if (hasAttr(img, name) && !/^[1-9][0-9]*$/.test(attr(img, name))) fail(`${at}.html: an img's ${name} is not a whole number of pixels`)
+    // The slot's default sizes, srcset and src (contract/image-sizes.json, SC-016).
+    if (!imageTable) continue
+    const ancestors = []
+    for (let p = c.parents.get(img); p; p = c.parents.get(p)) ancestors.push(p)
+    const placed = slotOf(img, ancestors, doc.id, (f) => effective(c, f))
+    if (!placed) { fail(`${at}.html: ${describe(img)} takes no slot in contract/image-sizes.json's placements`); continue }
+    const sizes = sizesOf(imageTable, placed, effectiveSetting(c, 'width'))
+    if (attr(img, 'sizes') !== sizes) { fail(`${at}.html: ${describe(img)} sizes="${attr(img, 'sizes')}"; its slot (${placed.slot}${placed.band ? `, band ${effectiveSetting(c, 'width')}` : ''}${placed.columns ? `, ${placed.columns} columns` : ''}) gives "${sizes}"`); continue }
+    const record = Object.values(input.media ?? {}).find((m) => typeof m.url === 'string' && sourcesOf(imageTable, m, sizes).src === attr(img, 'src'))
+    if (!record) { fail(`${at}.html: ${describe(img)} src ${attr(img, 'src')} is not the widest candidate of any media record the case holds`); continue }
+    const want = sourcesOf(imageTable, record, sizes)
+    if (attr(img, 'srcset') !== want.srcset) fail(`${at}.html: ${describe(img)} srcset is not the candidates contract/image-sizes.json gives for its sizes: ${want.srcset}`)
+    for (const name of ['width', 'height']) if (attr(img, name) !== String(record[name])) fail(`${at}.html: ${describe(img)} ${name} is ${attr(img, name)}; the media record says ${record[name]}`)
   }
   const priority = imgs.filter((img) => attr(img, 'fetchpriority') === 'high')
   if (priority.length > 1) fail(`${at}.html: ${priority.length} images claim fetchpriority=high; at most one does (section#priority-media)`)

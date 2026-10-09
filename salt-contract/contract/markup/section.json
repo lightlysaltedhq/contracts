@@ -95,7 +95,7 @@
       },
       "optional": true,
       "when": "a background image is set and resolves",
-      "note": "Decorative by contract (section#background-decorative)."
+      "note": "Decorative by contract (section#background-decorative). Its sizes and srcset are the full slot's (contract/image-sizes.json): sizes 100vw."
     },
     {
       "role": "scrim",

@@ -28,35 +28,13 @@
   },
   "media": {
     "pruning": {
-      "src": "https://uploads.example/pruning-800.jpg",
-      "srcset": [
-        {
-          "url": "https://uploads.example/pruning-400.jpg",
-          "width": 400
-        },
-        {
-          "url": "https://uploads.example/pruning-800.jpg",
-          "width": 800
-        }
-      ],
-      "sizes": "(min-width: 64rem) 22rem, (min-width: 40rem) 45vw, 100vw",
+      "url": "https://uploads.example/pruning-{width}.jpg",
       "width": 800,
       "height": 600,
       "alt": "A gardener pruning an apple tree"
     },
     "borders": {
-      "src": "https://uploads.example/borders-800.jpg",
-      "srcset": [
-        {
-          "url": "https://uploads.example/borders-400.jpg",
-          "width": 400
-        },
-        {
-          "url": "https://uploads.example/borders-800.jpg",
-          "width": 800
-        }
-      ],
-      "sizes": "(min-width: 64rem) 22rem, (min-width: 40rem) 45vw, 100vw",
+      "url": "https://uploads.example/borders-{width}.jpg",
       "width": 800,
       "height": 600,
       "alt": "A mixed herbaceous border in late summer"

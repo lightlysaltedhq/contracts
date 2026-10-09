@@ -226,7 +226,10 @@ test('markup: a nested heading at the section heading\'s level fails', () => {
   }, /ranks at or above the section heading's level 2/)
 })
 test('markup: an img without sizes fails', () => {
-  markupFails(' sizes="(min-width: 64rem) 30rem, 100vw"', '', /lacks sizes/)
+  expectFail(HERO, (io) => {
+    const rel = `fixtures/${SPLIT}.html`
+    io.write(rel, readFileSync(path.join(io.dir, rel), 'utf8').replace(/ sizes="[^"]*"/, ''))
+  }, /lacks sizes/)
 })
 test('markup: an img without width fails (SC-007)', () => {
   markupFails(' width="1600"', '', /lacks width/)
@@ -399,6 +402,31 @@ test('form: a placeholder written for a value the normaliser does not mask fails
       .replace("['formToken', 'challengeToken'].includes(attrOf(el, 'name'))", "['formToken', 'challengeToken', 'returnTo'].includes(attrOf(el, 'name'))")
       .replace("PLACEHOLDERS[attrOf(el, 'name')]]", "PLACEHOLDERS[attrOf(el, 'name')] ?? '{{salt:return}}']"))
   }, /changing value on <input> does not change normalise's output/)
+})
+
+// Image sizes (SC-016, item 1).
+test('images: sizes other than the slot\'s default for the band fails', () => {
+  expectFail(HERO, (io) => {
+    const rel = `fixtures/${SPLIT}.html`
+    const text = readFileSync(path.join(io.dir, rel), 'utf8')
+    io.write(rel, text.replace(/sizes="[^"]*"/, 'sizes="100vw"'))
+  }, /sizes="100vw"; its slot \(half, band default\) gives/)
+})
+test('images: a srcset missing a candidate width fails', () => {
+  expectFail(HERO, (io) => io.html(`${SPLIT}.html`, 'https://uploads.example/terrace-32.jpg 32w, ', ''), /srcset is not the candidates contract\/image-sizes\.json gives/)
+})
+test('images: a src that is not the widest candidate fails', () => {
+  expectFail(HERO, (io) => io.html(`${SPLIT}.html`, 'src="https://uploads.example/terrace-3840.jpg"', 'src="https://uploads.example/terrace-1600.jpg"'), /is not the widest candidate of any media record/)
+})
+test('images: a media record that carries its own sizes fails', () => {
+  expectFail(HERO, (io) => io.json(`${SPLIT}.json`, (d) => { d.media.terrace.sizes = '100vw' }), /media\.terrace\.sizes: a media record holds url, width, height/)
+})
+test('images: the srcset rule drops candidates below the viewport floor only for a bare vw share', async () => {
+  const { widthsFor } = await import('./salt_image_slots.mjs')
+  const table = JSON.parse(readFileSync(path.join(pkg, 'contract/image-sizes.json'), 'utf8'))
+  assert.deepEqual(widthsFor(table, '100vw'), [640, 750, 828, 1080, 1200, 1920, 2048, 3840])
+  assert.deepEqual(widthsFor(table, '(min-width: 64rem) 19rem, (min-width: 40rem) 50vw, 100vw').at(0), 384)
+  assert.deepEqual(widthsFor(table, 'calc(100vw - 2rem)'), table.candidates)
 })
 
 // ── 4. The normaliser ─────────────────────────────────────────────────────────────────────────

@@ -6,9 +6,18 @@
   "root": {
     "element": "img",
     "attributes": {
-      "src": "from:image",
-      "srcset": "from:image",
-      "sizes": "from:context and band",
+      "src": {
+        "value": "from:image",
+        "note": "The URL of the widest candidate width (contract/image-sizes.json, srcset)."
+      },
+      "srcset": {
+        "value": "from:image",
+        "note": "Every candidate width contract/image-sizes.json leaves for the sizes below, ascending, each '<url> <width>w'. The URLs are the platform's image pipeline's; the widths are the contract's (SC-016)."
+      },
+      "sizes": {
+        "value": "from:image slot and band",
+        "note": "The default sizes of the image's slot (contract/image-sizes.json placements) for the band its section is drawn in, and for a card the grid's column count (SC-016). A client site that swaps the view or changes the layout may declare its own, in salt-overrides.json."
+      },
       "alt": "from:alt",
       "width": "from:image",
       "height": "from:image",
@@ -84,7 +93,8 @@
       "owes": [
         "Drop x-image; take the parent's class; derive sizes from the same contexts.",
         "Its picture_sources opt-in, which wraps the img in picture with source elements, is non-conforming (SC-007): drop it and negotiate formats in the image pipeline behind srcset.",
-        "Write the inline style object-fit and object-position when the parent passes a fit or a position: the nine positions as keyword pairs, and focal-point as the attachment's stored focal point as <x>% <y>%, left out when none is stored. It stores no focal point today, so focal-point draws the stylesheet's centre until it does."
+        "Write the inline style object-fit and object-position when the parent passes a fit or a position: the nine positions as keyword pairs, and focal-point as the attachment's stored focal point as <x>% <y>%, left out when none is stored. It stores no focal point today, so focal-point draws the stylesheet's centre until it does.",
+        "Image sizes (SC-016): each image's sizes from its slot in contract/image-sizes.json for its section's band, and registered image sizes at the contract's candidate widths, so srcset carries the same widths."
       ]
     }
   }

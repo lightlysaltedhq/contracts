@@ -33,22 +33,7 @@
   },
   "media": {
     "lawn": {
-      "src": "https://uploads.example/lawn-2400.jpg",
-      "srcset": [
-        {
-          "url": "https://uploads.example/lawn-1024.jpg",
-          "width": 1024
-        },
-        {
-          "url": "https://uploads.example/lawn-1600.jpg",
-          "width": 1600
-        },
-        {
-          "url": "https://uploads.example/lawn-2400.jpg",
-          "width": 2400
-        }
-      ],
-      "sizes": "100vw",
+      "url": "https://uploads.example/lawn-{width}.jpg",
       "width": 2400,
       "height": 1350,
       "alt": "A striped lawn in morning light"

@@ -37,56 +37,19 @@
   },
   "media": {
     "bed": {
-      "src": "https://uploads.example/bed-1600.jpg",
-      "srcset": [
-        {
-          "url": "https://uploads.example/bed-640.jpg",
-          "width": 640
-        },
-        {
-          "url": "https://uploads.example/bed-1024.jpg",
-          "width": 1024
-        },
-        {
-          "url": "https://uploads.example/bed-1600.jpg",
-          "width": 1600
-        }
-      ],
-      "sizes": "(min-width: 64rem) 32rem, 100vw",
+      "url": "https://uploads.example/bed-{width}.jpg",
       "width": 1600,
       "height": 1067,
       "alt": "A raised bed of lavender in flower"
     },
     "path": {
-      "src": "https://uploads.example/path-1600.jpg",
-      "srcset": [
-        {
-          "url": "https://uploads.example/path-640.jpg",
-          "width": 640
-        },
-        {
-          "url": "https://uploads.example/path-1600.jpg",
-          "width": 1600
-        }
-      ],
-      "sizes": "(min-width: 64rem) 32rem, 100vw",
+      "url": "https://uploads.example/path-{width}.jpg",
       "width": 1600,
       "height": 1200,
       "alt": "A gravel path between box hedges"
     },
     "shed": {
-      "src": "https://uploads.example/shed-1600.jpg",
-      "srcset": [
-        {
-          "url": "https://uploads.example/shed-640.jpg",
-          "width": 640
-        },
-        {
-          "url": "https://uploads.example/shed-1600.jpg",
-          "width": 1600
-        }
-      ],
-      "sizes": "(min-width: 64rem) 32rem, 100vw",
+      "url": "https://uploads.example/shed-{width}.jpg",
       "width": 1600,
       "height": 1200,
       "alt": "A timber potting shed with a green roof"

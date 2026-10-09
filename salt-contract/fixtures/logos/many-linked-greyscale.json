@@ -38,85 +38,25 @@
   },
   "media": {
     "hartley": {
-      "src": "https://uploads.example/hartley-logo-480.jpg",
-      "srcset": [
-        {
-          "url": "https://uploads.example/hartley-logo-120.jpg",
-          "width": 120
-        },
-        {
-          "url": "https://uploads.example/hartley-logo-240.jpg",
-          "width": 240
-        },
-        {
-          "url": "https://uploads.example/hartley-logo-480.jpg",
-          "width": 480
-        }
-      ],
-      "sizes": "(min-width: 64rem) 12rem, 40vw",
+      "url": "https://uploads.example/hartley-logo-{width}.jpg",
       "width": 480,
       "height": 240,
       "alt": "Hartley Gardens logo"
     },
     "bath-timber": {
-      "src": "https://uploads.example/bath-timber-logo-480.jpg",
-      "srcset": [
-        {
-          "url": "https://uploads.example/bath-timber-logo-120.jpg",
-          "width": 120
-        },
-        {
-          "url": "https://uploads.example/bath-timber-logo-240.jpg",
-          "width": 240
-        },
-        {
-          "url": "https://uploads.example/bath-timber-logo-480.jpg",
-          "width": 480
-        }
-      ],
-      "sizes": "(min-width: 64rem) 12rem, 40vw",
+      "url": "https://uploads.example/bath-timber-logo-{width}.jpg",
       "width": 480,
       "height": 240,
       "alt": "Bath Timber Co logo"
     },
     "avon-seeds": {
-      "src": "https://uploads.example/avon-seeds-logo-480.jpg",
-      "srcset": [
-        {
-          "url": "https://uploads.example/avon-seeds-logo-120.jpg",
-          "width": 120
-        },
-        {
-          "url": "https://uploads.example/avon-seeds-logo-240.jpg",
-          "width": 240
-        },
-        {
-          "url": "https://uploads.example/avon-seeds-logo-480.jpg",
-          "width": 480
-        }
-      ],
-      "sizes": "(min-width: 64rem) 12rem, 40vw",
+      "url": "https://uploads.example/avon-seeds-logo-{width}.jpg",
       "width": 480,
       "height": 240,
       "alt": "Avon Seeds logo"
     },
     "mendip": {
-      "src": "https://uploads.example/mendip-logo-480.jpg",
-      "srcset": [
-        {
-          "url": "https://uploads.example/mendip-logo-120.jpg",
-          "width": 120
-        },
-        {
-          "url": "https://uploads.example/mendip-logo-240.jpg",
-          "width": 240
-        },
-        {
-          "url": "https://uploads.example/mendip-logo-480.jpg",
-          "width": 480
-        }
-      ],
-      "sizes": "(min-width: 64rem) 12rem, 40vw",
+      "url": "https://uploads.example/mendip-logo-{width}.jpg",
       "width": 480,
       "height": 240,
       "alt": "Mendip Nurseries logo"

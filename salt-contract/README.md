@@ -254,7 +254,7 @@ option covered, and the normaliser sound.
 | `summary` | What the case shows, in a sentence or two. |
 | `values` | The section's stored field values, named and shaped as `contract/fields/<section>.json` says, with the shared settings under `settings`. A field left out takes its default. |
 | `context` | What the page plan decides for this band, describing a page that can exist: `index` (the section's place on the page, from 1, which also names an accordion group, `faq-<index>`), `track` (its `data-track`, `<section>-<n>` with n no more than `index`, section#data-track), `headingLevel` (1 when no heading has rendered before the section, otherwise 2, section#single-h1), `headingRendered` (true when a heading rendered earlier on the page), `priorityMedia` (true for the first section only, section#priority-media), and where they apply `collapseTop` (section#adjacent-collapse, never on the first section) `now` (an ISO 8601 time, for the locations' open-now status) and `locale` (a BCP 47 locale, `en-GB` in every case that draws a date, a time or a phone, which display as section#display-forms says). |
-| `media` | The images the values name, by id: `src`, `srcset` (a list of `{ url, width }`), `sizes`, `width`, `height`, `alt`, and where set `caption` and `focalPoint` (`{ x, y }` in per cent). |
+| `media` | The images the values name, by id: `url` (the upload's address with `{width}` where each candidate width goes), `width`, `height`, `alt`, and where set `caption` and `focalPoint` (`{ x, y }` in per cent). Never `sizes` or `srcset`: those are the image slot's. |
 | `documents` | The pages internal links name, by id: `{ href, title }`. |
 | `collections` | The items of each source the section reads (`faqs`, `services`, `team` …), in the collection's usual order, each with a string `id`. |
 | `route` | What the route hands a listing: its cards and pagination. |
@@ -270,10 +270,11 @@ Conventions, so that every case is deterministic:
   items, order, count }`. Rich text is an HTML string using only the field's allowed elements: the
   fixtures' interchange form, which each platform's adapter turns into its own (Lexical, the
   WordPress editor's HTML).
-- **Images.** `src`, `srcset` and `sizes` are written exactly as the media record gives them. The
-  contract fixes neither srcset widths nor a sizes table yet, so the record supplies both, and each
-  platform's adapter passes them through. Uploads live on `https://uploads.example`; the
-  normaliser drops the host.
+- **Images.** Each image declares its slot's default `sizes` for its section's band and the
+  `srcset` the candidate rule gives for them, both from `contract/image-sizes.json` (SC-016), with
+  `src` the widest candidate. The case's media record gives each candidate's URL through its
+  `{width}` template; the adapter makes its pipeline serve those URLs. Uploads live on
+  `https://uploads.example`, and the normaliser drops the host.
 - **Dark tone.** `toneDark: auto` is written as `data-tone-dark` equal to the tone: the shared
   stylesheet, not the markup, draws its dark form (SC-016).
 
@@ -312,6 +313,6 @@ written in the implementation's own repository; the contract fixes only its inte
   `text/html; charset=utf-8`. Any other status fails the case.
 - The adapter does not normalise; the runner normalises both sides. It loads the case's media,
   documents, collections and site data into the platform however suits it (fixtures in a test
-  database, mocks), and writes `srcset` and `sizes` from the media record.
+  database, mocks), and writes each image's `sizes` and `srcset` as `contract/image-sizes.json` gives them, with the candidate URLs from the media record's `{width}` template.
 - Form delivery, routing and admin stay native (SC-003): where a case needs a route's data, the
   case supplies it in `route`.
