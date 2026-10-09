@@ -346,8 +346,11 @@ pins. For every section it ships it checks four things:
 - **Stylesheet pin.** The stylesheets the implementation serves are byte-identical to `styles/`, or
   the package version it re-exports them from is this one.
 
-A section passes only when all four hold for it; field parity and the stylesheet pin are reported
-"not checked" when their flags are left out, and do not fail a run. In CI:
+An implementation conforms only when all four checks ran for every section it ships and all pass
+(SC-017). A section passes only when all four hold for it; one whose checks that ran all passed,
+but with a check left out, is `incomplete`. So a run without a field snapshot or a stylesheet pin
+fails. A run of some sections (`--sections`) or some checks is allowed only with `--partial`, and
+its report says "partial, not conforming": `ok` is false, `partial` is true and it exits 1. In CI:
 
 ```sh
 npx salt-conformance --platform nextjs --implementation-version "$VERSION" \
@@ -370,15 +373,17 @@ WordPress passes `--acf-snapshot acf/sections.json` and `--styles <dir>` for its
 | `--fields-options <file>` | The JSON options the snapshot was generated with (`{}` when left out). |
 | `--styles <dir>` | The directory holding the stylesheets served, compared file by file with `styles/`. |
 | `--styles-version <version>` | Or the version of this package the stylesheets are re-exported from. |
-| `--sections <id,…>` | Run only these sections. |
+| `--sections <id,…>` | Run only these sections. Needs `--partial`. |
 | `--not-shipped <id,…>` | Sections the implementation does not ship: reported "not shipped", not failed. |
 | `--implementation-version <v>` | The implementation's own version, for the report. |
 | `--out <dir>` | Write `conformance.json` and `conformance.md` there. The Markdown also goes to stdout. |
 | `--jobs <n>` | Cases run at once (the machine's parallelism by default; 1 for an adapter that cannot share). |
 | `--timeout <ms>` | How long one case may take (60000). |
+| `--partial` | Allow a run that leaves sections or checks out; it never conforms. Takes no value. |
 
-Every flag takes one value; an unknown, empty or repeated flag is refused. Exit 0 is every section
-run green, 1 any mismatch, 2 a usage error (and no report).
+Every flag but `--partial` takes one value; an unknown, empty or repeated flag is refused. Exit 0
+is a conforming run, 1 any mismatch, missing check or partial run, 2 a usage error (and no
+report).
 
 **The report.** `conformance.json` is the parity matrix's input:
 
@@ -390,7 +395,8 @@ run green, 1 any mismatch, 2 a usage error (and no report).
   "implementation": { "version": "0.4.0" },
   "adapter": { "kind": "command", "target": "node scripts/salt-adapter.mjs" },
   "ok": false,
-  "summary": { "pass": 15, "fail": 1, "notShipped": 1 },
+  "partial": false,
+  "summary": { "pass": 15, "fail": 1, "incomplete": 0, "notShipped": 1 },
   "fields": { "platform": "payload", "snapshot": "…", "options": "…", "problems": [] },
   "stylesheets": { "mode": "version", "pin": "0.1.0", "contract": "0.1.0", "ok": true, "files": [] },
   "sections": [
@@ -411,7 +417,8 @@ run green, 1 any mismatch, 2 a usage error (and no report).
 }
 ```
 
-A section's `status` is `pass`, `fail` or `not shipped`. A failure's `kind` is `mismatch` (with
+A section's `status` is `pass`, `fail`, `incomplete` or `not shipped`, and each check's `status`
+is `pass`, `fail` or `not run`. A failure's `kind` is `mismatch` (with
 `difference`: `element`, `missing`, `unexpected`, `attribute` with its `name`, or `text`; an absent
 side is `null`) or `adapter` (with `error` and `stderr`). `fields.problems` at the top holds what is
 about the whole snapshot (not JSON, sections out of order, formatting); a section's own are under
@@ -421,5 +428,7 @@ sections, then each failure on a line.
 
 The runner is also importable: `runConformance(options)` returns the report, `renderMarkdown(report)`
 its Markdown, and `firstDifference(expected, actual)` the first differing node of two fragments, for
-an implementation's own tests. `npm run salt-conformance` runs it here against
-`scripts/salt_fixture_reference_adapter.mjs`, which must pass every case.
+an implementation's own tests. `npm run salt-conformance` (`scripts/salt_conformance_self.mjs`)
+runs it here against `scripts/salt_fixture_reference_adapter.mjs` with all four checks, once with
+the Payload snapshot and once with the ACF snapshot the emitters give for one set of options, and
+both runs must conform.

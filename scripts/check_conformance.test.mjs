@@ -2,7 +2,7 @@
 // fails each kind of non-conformance, naming the section, the case and the first differing node:
 // against the reference adapter, a deliberately broken one, a broken field snapshot, a changed
 // stylesheet byte, and the endpoint form of the adapter protocol.
-import { test } from 'node:test'
+import { after, test } from 'node:test'
 import assert from 'node:assert/strict'
 import { execFile } from 'node:child_process'
 import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
@@ -46,10 +46,21 @@ async function run(args) {
 const section = (report, id) => report.sections.find((s) => s.id === id)
 const failure = (report, id, name) => section(report, id).fixtures.failures.find((f) => f.case === name)
 
-test('the reference adapter passes every section of every fixture, with the stylesheets pinned', async () => {
-  const r = await run(['--platform', 'reference', '--adapter', reference, '--styles', path.join(pkg, 'styles'), '--implementation-version', '9.9.9'])
+// One set of field options, and the snapshots the emitters give for it, as an implementation commits them.
+const ICONS = { icons: [{ value: 'star', label: 'Star' }, { value: 'leaf', label: 'Leaf' }] }
+const fieldsDir = mkdtempSync(path.join(tmpdir(), 'salt-conformance-fields-'))
+writeFileSync(path.join(fieldsDir, 'options.json'), JSON.stringify(ICONS))
+writeFileSync(path.join(fieldsDir, 'payload.json'), payloadSnapshot(ICONS))
+after(() => rmSync(fieldsDir, { recursive: true, force: true }))
+const withFields = ['--payload-snapshot', path.join(fieldsDir, 'payload.json'), '--fields-options', path.join(fieldsDir, 'options.json')]
+const withStyles = ['--styles', path.join(pkg, 'styles')]
+
+test('the reference adapter conforms: all four checks run and pass for every section', async () => {
+  const r = await run(['--platform', 'reference', '--adapter', reference, ...withFields, ...withStyles, '--implementation-version', '9.9.9'])
   assert.equal(r.code, 0, r.out)
   assert.equal(r.report.ok, true)
+  assert.equal(r.report.partial, false)
+  assert.deepEqual(r.report.summary, { pass: r.report.sections.length, fail: 0, incomplete: 0, notShipped: 0 })
   assert.equal(r.report.format, 'salt-conformance/1')
   assert.deepEqual(r.report.contract, { package: '@lightlysaltedhq/salt-contract', version })
   assert.equal(r.report.platform, 'reference')
@@ -60,9 +71,43 @@ test('the reference adapter passes every section of every fixture, with the styl
     assert.equal(s.status, 'pass', s.id)
     assert.ok(s.fixtures.total > 0 && s.fixtures.passed === s.fixtures.total, s.id)
     assert.equal(s.stylesheets.status, 'pass')
-    assert.equal(s.fields.status, 'not checked')
+    assert.equal(s.fields.status, 'pass')
+    assert.equal(s.classes.status, 'pass')
   }
   assert.match(r.out, /^# Salt conformance: reference 9\.9\.9 against @lightlysaltedhq\/salt-contract /)
+})
+
+test('a run without a field snapshot fails, every section incomplete (SC-017)', async () => {
+  const r = await run(['--platform', 'reference', '--adapter', reference, ...withStyles])
+  assert.equal(r.code, 1, r.out)
+  assert.equal(r.report.ok, false)
+  assert.equal(r.report.partial, false)
+  assert.equal(r.report.fields, null)
+  for (const s of r.report.sections) assert.deepEqual([s.status, s.fields.status, s.stylesheets.status], ['incomplete', 'not run', 'pass'], s.id)
+  assert.match(r.out, /^\*\*Fail\.\*\* 0 section\(s\) pass, 0 fail, 17 incomplete/m)
+  assert.match(r.out, /## Field parity\n\nNot run, so no section conforms \(SC-017\)/)
+})
+
+test('a run without a stylesheet pin fails, every section incomplete (SC-017)', async () => {
+  const r = await run(['--platform', 'reference', '--adapter', reference, ...withFields])
+  assert.equal(r.code, 1, r.out)
+  assert.equal(r.report.ok, false)
+  assert.equal(r.report.stylesheets, null)
+  for (const s of r.report.sections) assert.deepEqual([s.status, s.fields.status, s.stylesheets.status], ['incomplete', 'pass', 'not run'], s.id)
+  assert.match(r.out, /## Stylesheet pin\n\nNot run, so no section conforms \(SC-017\)/)
+})
+
+test('--partial writes the report labelled partial, not conforming, and exits 1 even when all it ran passes', async () => {
+  const r = await run(['--platform', 'reference', '--adapter', reference, ...withFields, ...withStyles, '--sections', 'faq', '--partial'])
+  assert.equal(r.code, 1, r.out)
+  assert.equal(r.report.ok, false)
+  assert.equal(r.report.partial, true)
+  assert.deepEqual(r.report.sections.map((s) => [s.id, s.status]), [['faq', 'pass']])
+  assert.match(r.out, /^\*\*Partial, not conforming\.\*\* 1 section\(s\) pass/m)
+  const fixturesOnly = await run(['--platform', 'reference', '--adapter', reference, '--partial'])
+  assert.equal(fixturesOnly.code, 1)
+  assert.equal(fixturesOnly.report.partial, true)
+  assert.ok(fixturesOnly.report.sections.every((s) => s.status === 'incomplete' && s.fixtures.failed === 0))
 })
 
 // A broken adapter: the reference adapter's output for a case, changed as `mutations` says.
@@ -106,7 +151,7 @@ test('a broken adapter fails each case it breaks, naming the section, the case a
     'hero/minimal-centre-inverse-dark-alt': { exit: 3, stderr: 'boom: no template for hero\n' },
   })
   try {
-    const r = await run(['--platform', 'broken', '--adapter', adapter.command, '--sections', 'hero'])
+    const r = await run(['--platform', 'broken', '--adapter', adapter.command, '--sections', 'hero', '--partial'])
     assert.equal(r.code, 1, r.out)
     assert.equal(r.report.ok, false)
     assert.deepEqual(r.report.sections.map((s) => s.id), ['hero'])
@@ -153,14 +198,14 @@ test('a broken adapter fails each case it breaks, naming the section, the case a
 })
 
 test('a section the implementation does not ship is reported as not shipped, not failed', async () => {
-  const r = await run(['--platform', 'reference', '--adapter', reference, '--sections', 'faq', '--not-shipped', 'pricing,tabs'])
+  const r = await run(['--platform', 'reference', '--adapter', reference, ...withFields, ...withStyles, '--not-shipped', 'pricing,tabs'])
   assert.equal(r.code, 0, r.out)
-  assert.deepEqual(r.report.sections.map((s) => [s.id, s.status]), [['faq', 'pass'], ['tabs', 'not shipped'], ['pricing', 'not shipped']])
-  assert.deepEqual(r.report.summary, { pass: 1, fail: 0, notShipped: 2 })
+  assert.equal(r.report.ok, true)
+  assert.deepEqual(r.report.sections.filter((s) => s.status !== 'pass').map((s) => s.id), ['tabs', 'pricing'])
+  assert.deepEqual(r.report.summary, { pass: 15, fail: 0, incomplete: 0, notShipped: 2 })
+  assert.deepEqual(section(r.report, 'pricing'), { id: 'pricing', status: 'not shipped' })
   assert.match(r.out, /\| pricing \| not shipped \|/)
 })
-
-const ICONS = { icons: [{ value: 'star', label: 'Star' }, { value: 'leaf', label: 'Leaf' }] }
 
 test('field parity: a matching snapshot passes, and a renamed field fails its own section only', async () => {
   const dir = scratch()
@@ -168,11 +213,10 @@ test('field parity: a matching snapshot passes, and a renamed field fails its ow
     writeFileSync(path.join(dir, 'options.json'), JSON.stringify(ICONS))
     writeFileSync(path.join(dir, 'blocks.json'), payloadSnapshot(ICONS))
     writeFileSync(path.join(dir, 'acf.json'), acfSnapshot(ICONS))
-    const base = ['--platform', 'reference', '--adapter', reference, '--sections', 'hero,faq', '--fields-options', path.join(dir, 'options.json')]
+    const base = ['--platform', 'reference', '--adapter', reference, '--sections', 'hero,faq', '--partial', ...withStyles, '--fields-options', path.join(dir, 'options.json')]
     for (const flag of ['--payload-snapshot', '--acf-snapshot']) {
       const ok = await run([...base, flag, path.join(dir, flag === '--payload-snapshot' ? 'blocks.json' : 'acf.json')])
-      assert.equal(ok.code, 0, ok.out)
-      assert.deepEqual(ok.report.sections.map((s) => s.fields.status), ['pass', 'pass'])
+      assert.deepEqual(ok.report.sections.map((s) => [s.status, s.fields.status]), [['pass', 'pass'], ['pass', 'pass']], ok.out)
     }
 
     const blocks = JSON.parse(payloadSnapshot(ICONS))
@@ -209,7 +253,7 @@ test('stylesheet pin: one changed byte fails, and a version pin passes only at t
     const bytes = readFileSync(file)
     bytes[100] = bytes[100] === 0x20 ? 0x09 : 0x20
     writeFileSync(file, bytes)
-    const base = ['--platform', 'reference', '--adapter', reference, '--sections', 'faq']
+    const base = ['--platform', 'reference', '--adapter', reference, '--sections', 'faq', '--partial', ...withFields]
     const r = await run([...base, '--styles', dir])
     assert.equal(r.code, 1, r.out)
     assert.equal(r.report.stylesheets.ok, false)
@@ -223,7 +267,7 @@ test('stylesheet pin: one changed byte fails, and a version pin passes only at t
     assert.equal(gone.report.stylesheets.files.find((f) => f.file === 'views.css').status, 'missing')
 
     const pinned = await run([...base, '--styles-version', version])
-    assert.equal(pinned.code, 0, pinned.out)
+    assert.equal(section(pinned.report, 'faq').status, 'pass', pinned.out)
     assert.deepEqual(pinned.report.stylesheets, { mode: 'version', pin: version, contract: version, ok: true, files: [] })
     const behind = await run([...base, '--styles-version', '0.0.1'])
     assert.equal(behind.code, 1)
@@ -249,7 +293,7 @@ test('the endpoint form: a POSTed case answered 200 passes, any other status fai
   })
   await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve))
   try {
-    const r = await run(['--platform', 'endpoint', '--endpoint', `http://127.0.0.1:${server.address().port}/render`, '--sections', 'faq'])
+    const r = await run(['--platform', 'endpoint', '--endpoint', `http://127.0.0.1:${server.address().port}/render`, '--sections', 'faq', '--partial'])
     assert.equal(r.code, 1, r.out)
     const faq = section(r.report, 'faq')
     assert.equal(faq.fixtures.passed, faq.fixtures.total - 1)
@@ -264,16 +308,20 @@ test('arguments: unknown, empty, duplicated or contradictory flags are refused w
   const ok = ['--platform', 'x', '--adapter', 'true']
   assert.throws(() => parseConformanceArguments([...ok, '--sectons', 'hero']), /unknown argument --sectons/)
   assert.throws(() => parseConformanceArguments([...ok, '--sections', '']), /not an empty one/)
-  assert.throws(() => parseConformanceArguments([...ok, '--sections', 'hero', '--sections', 'faq']), /--sections is given twice/)
+  assert.throws(() => parseConformanceArguments([...ok, '--sections', 'hero']), /pass --partial/)
+  assert.throws(() => parseConformanceArguments([...ok, '--partial', '--partial']), /--partial is given twice/)
+  assert.equal(parseConformanceArguments([...ok, '--partial', '--sections', 'hero']).partial, true)
+  assert.equal(parseConformanceArguments(ok).partial, false)
+  assert.throws(() => parseConformanceArguments([...ok, '--partial', '--sections', 'hero', '--sections', 'faq']), /--sections is given twice/)
   assert.throws(() => parseConformanceArguments([...ok, '--sections']), /needs a value/)
-  assert.throws(() => parseConformanceArguments([...ok, '--sections', '--jobs']), /not the flag --jobs/)
+  assert.throws(() => parseConformanceArguments([...ok, '--partial', '--sections', '--jobs']), /not the flag --jobs/)
   assert.throws(() => parseConformanceArguments([...ok, '--endpoint', 'http://x']), /cannot be used together/)
   assert.throws(() => parseConformanceArguments([...ok, '--styles', 'a', '--styles-version', '1']), /cannot be used together/)
   assert.throws(() => parseConformanceArguments(['--adapter', 'true']), /--platform/)
   assert.throws(() => parseConformanceArguments(['--platform', 'x']), /--adapter <command> or --endpoint <url>/)
   assert.throws(() => parseConformanceArguments([...ok, '--jobs', '0']), /at least 1/)
   assert.throws(() => parseConformanceArguments([...ok, '--fields-options', 'o.json']), /needs --payload-snapshot or --acf-snapshot/)
-  for (const args of [[...ok, '--sections', 'heroes'], [...ok, '--sections', 'hero', '--not-shipped', 'hero'], [...ok, '--bogus', '1']]) {
+  for (const args of [[...ok, '--partial', '--sections', 'heroes'], [...ok, '--partial', '--sections', 'hero', '--not-shipped', 'hero'], [...ok, '--sections', 'hero'], [...ok, '--bogus', '1']]) {
     const r = await run(args)
     assert.equal(r.code, 2, r.out)
     assert.equal(r.report, null)

@@ -14,8 +14,11 @@
 // 4. STYLESHEET PIN. The stylesheets the implementation serves are byte-identical to styles/, or it
 //    re-exports them from a package version equal to this one.
 //
+// An implementation conforms only when all four ran for every section it ships and all pass
+// (SC-017): a run without a field snapshot or a stylesheet pin fails. A run that leaves a check or
+// a section out is allowed only with --partial, and its report says "partial, not conforming".
 // It writes a JSON report (the parity matrix's input) and a Markdown one, and exits 1 on any
-// mismatch, 2 on a usage error. Plain Node, no dependencies.
+// mismatch or partial run, 2 on a usage error. Plain Node, no dependencies.
 import { spawn } from 'node:child_process'
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { availableParallelism } from 'node:os'
@@ -35,18 +38,21 @@ export const REPORT_FORMAT = 'salt-conformance/1'
 
 const FLAGS = ['--platform', '--adapter', '--endpoint', '--payload-snapshot', '--acf-snapshot', '--fields-options',
   '--styles', '--styles-version', '--sections', '--not-shipped', '--implementation-version', '--out', '--jobs', '--timeout']
+// Flags that take no value.
+const SWITCHES = ['--partial']
 
 /**
  * The runner's arguments, as `parseEmitterArguments` reads an emitter's: every flag takes a value,
- * and an unknown flag, a missing or empty value, a flag given as a value or a flag given twice
- * throws, so a typo never runs as a different check. Returns the options runConformance takes.
+ * but the --partial switch, and an unknown flag, a missing or empty value, a flag given as a value
+ * or a flag given twice throws, so a typo never runs as a different check. Returns the options runConformance takes.
  */
 export function parseConformanceArguments(argv) {
   const values = {}
   for (let i = 0; i < argv.length; i++) {
     const flag = argv[i]
-    if (!FLAGS.includes(flag)) throw new Error(`unknown argument ${flag}`)
+    if (!FLAGS.includes(flag) && !SWITCHES.includes(flag)) throw new Error(`unknown argument ${flag}`)
     if (flag in values) throw new Error(`${flag} is given twice`)
+    if (SWITCHES.includes(flag)) { values[flag] = true; continue }
     const value = argv[i + 1]
     if (value === undefined) throw new Error(`${flag} needs a value`)
     // An empty value is most often an unset variable; read as absent, it would check the wrong thing.
@@ -61,6 +67,8 @@ export function parseConformanceArguments(argv) {
   either('--styles', '--styles-version')
   if (!values['--platform']) throw new Error('--platform <name> is required (nextjs, wordpress …), to name the implementation in the report')
   if (!values['--adapter'] && !values['--endpoint']) throw new Error('pass --adapter <command> or --endpoint <url>')
+  // A run of some sections says nothing of the rest, so it is partial by construction.
+  if (values['--sections'] && !values['--partial']) throw new Error('--sections runs only some sections: pass --partial, and the run will not count as conforming')
   if (values['--fields-options'] && !values['--payload-snapshot'] && !values['--acf-snapshot']) {
     throw new Error('--fields-options needs --payload-snapshot or --acf-snapshot')
   }
@@ -81,6 +89,7 @@ export function parseConformanceArguments(argv) {
     sections: list(values['--sections']),
     notShipped: list(values['--not-shipped']),
     implementationVersion: values['--implementation-version'],
+    partial: values['--partial'] === true,
     out: values['--out'],
     jobs: whole('--jobs', 1),
     timeout: whole('--timeout', 1),
@@ -293,6 +302,7 @@ export async function runConformance(options) {
   for (const [flag, list] of [['--sections', options.sections], ['--not-shipped', options.notShipped]]) {
     for (const id of list ?? []) if (!ids.includes(id)) throw new Error(`${flag}: ${id} is not a section in contract/sections.json`)
   }
+  if (options.sections && !options.partial) throw new Error('sections runs only some sections: a run of some is partial, so pass partial')
   const notShipped = new Set(options.notShipped ?? [])
   for (const id of options.sections ?? []) {
     if (notShipped.has(id)) throw new Error(`${id} is in --sections and --not-shipped; a section is run or not shipped, not both`)
@@ -329,12 +339,14 @@ export async function runConformance(options) {
     const fixtures = { total: mine.length, passed: mine.length - failures.length, failed: failures.length, failures }
     const classes = { status: unknown.size ? 'fail' : 'pass', unknown: [...unknown].sort().map(([name, cases]) => ({ class: name, cases })) }
     const own = fields?.bySection.get(id) ?? []
-    const fieldParity = fields ? { status: own.length || fields.problems.length ? 'fail' : 'pass', problems: own } : { status: 'not checked', problems: [] }
-    const stylesheets = { status: styles ? (styles.ok ? 'pass' : 'fail') : 'not checked' }
+    const fieldParity = fields ? { status: own.length || fields.problems.length ? 'fail' : 'pass', problems: own } : { status: 'not run', problems: [] }
+    const stylesheets = { status: styles ? (styles.ok ? 'pass' : 'fail') : 'not run' }
     // A section with no fixture case cannot be shown to conform.
     const fixturesOk = fixtures.total > 0 && fixtures.failed === 0
-    const ok = fixturesOk && classes.status === 'pass' && fieldParity.status !== 'fail' && stylesheets.status !== 'fail'
-    return { id, status: ok ? 'pass' : 'fail', fixtures, fields: fieldParity, classes, stylesheets }
+    const checks = [fixturesOk ? 'pass' : 'fail', classes.status, fieldParity.status, stylesheets.status]
+    // Every check that ran passed, but not all four ran: not a pass (SC-017).
+    const status = checks.includes('fail') ? 'fail' : checks.includes('not run') ? 'incomplete' : 'pass'
+    return { id, status, fixtures, fields: fieldParity, classes, stylesheets }
   })
 
   const count = (status) => sections.filter((s) => s.status === status).length
@@ -344,8 +356,9 @@ export async function runConformance(options) {
     platform: options.platform,
     implementation: { version: options.implementationVersion ?? null },
     adapter: options.adapter.command ? { kind: 'command', target: options.adapter.command } : { kind: 'endpoint', target: options.adapter.endpoint },
-    ok: count('fail') === 0 && !(fields?.problems.length) && styles?.ok !== false,
-    summary: { pass: count('pass'), fail: count('fail'), notShipped: count('not shipped') },
+    ok: !options.partial && count('fail') === 0 && count('incomplete') === 0 && !(fields?.problems.length) && styles?.ok !== false,
+    partial: Boolean(options.partial),
+    summary: { pass: count('pass'), fail: count('fail'), incomplete: count('incomplete'), notShipped: count('not shipped') },
     fields: fields ? { platform: fields.platform, snapshot: fields.snapshot, options: fields.options, problems: fields.problems } : null,
     stylesheets: styles,
     sections,
@@ -375,8 +388,9 @@ export function renderMarkdown(report) {
   const lines = []
   const impl = report.implementation.version ? ` ${report.implementation.version}` : ''
   lines.push(`# Salt conformance: ${report.platform}${impl} against ${report.contract.package} ${report.contract.version}`, '')
-  const { pass, fail, notShipped } = report.summary
-  lines.push(`**${report.ok ? 'Pass' : 'Fail'}.** ${pass} section(s) pass, ${fail} fail, ${notShipped} not shipped. ` +
+  const { pass, fail, incomplete, notShipped } = report.summary
+  const verdict = report.partial ? 'Partial, not conforming' : report.ok ? 'Pass' : 'Fail'
+  lines.push(`**${verdict}.** ${pass} section(s) pass, ${fail} fail, ${incomplete} incomplete, ${notShipped} not shipped. ` +
     `Adapter: ${report.adapter.kind} ${code(report.adapter.target)}.`, '')
   lines.push('| Section | Fixtures | Field parity | Classes | Stylesheet pin |', '| --- | --- | --- | --- | --- |')
   for (const s of report.sections) {
@@ -388,14 +402,14 @@ export function renderMarkdown(report) {
   lines.push('')
   const st = report.stylesheets
   lines.push('## Stylesheet pin', '')
-  if (!st) lines.push('Not checked: pass `--styles <dir>` or `--styles-version <version>`.')
+  if (!st) lines.push('Not run, so no section conforms (SC-017): pass `--styles <dir>` or `--styles-version <version>`.')
   else if (st.mode === 'version') lines.push(`${st.ok ? 'Pass' : 'Fail'}: the implementation re-exports the stylesheets of version ${code(st.pin)}; this contract is ${code(st.contract)}.`)
   else {
     lines.push(`${st.ok ? 'Pass' : 'Fail'}: ${code(st.dir)} against this contract's \`styles/\` (${st.contract}).`, '')
     for (const f of st.files) lines.push(`- ${f.file}: ${f.status}${f.status === 'differs' ? ` from byte ${f.firstDifferingByte}` : ''}`)
   }
   lines.push('', '## Field parity', '')
-  if (!report.fields) lines.push('Not checked: pass `--payload-snapshot <file>` or `--acf-snapshot <file>`.')
+  if (!report.fields) lines.push('Not run, so no section conforms (SC-017): pass `--payload-snapshot <file>` or `--acf-snapshot <file>`.')
   else {
     lines.push(`${report.fields.platform} snapshot ${code(report.fields.snapshot)}${report.fields.options ? ` with options ${code(report.fields.options)}` : ''}.`)
     for (const p of report.fields.problems) lines.push(`- ${cell(p)}`)
@@ -417,7 +431,7 @@ export function renderMarkdown(report) {
 const USAGE = `usage: conformance.mjs --platform <name> (--adapter <command> | --endpoint <url>)
   [--payload-snapshot <file> | --acf-snapshot <file>] [--fields-options <options.json>]
   [--styles <dir> | --styles-version <version>] [--sections <id,…>] [--not-shipped <id,…>]
-  [--implementation-version <version>] [--out <dir>] [--jobs <n>] [--timeout <ms>]`
+  [--implementation-version <version>] [--out <dir>] [--jobs <n>] [--timeout <ms>] [--partial]`
 
 if (isMainModule(import.meta.url)) {
   let options
