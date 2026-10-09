@@ -29,7 +29,7 @@
 // timestamp, which a consumer loading the groups from code does not need.
 import { readFileSync, writeFileSync } from 'node:fs'
 
-import { allowedFor, clauses, collectionQueryShape, diffSnapshots, isMainModule, LINK_SHAPE, loadContract, normaliseLineEndings, resolveSection, SOURCES } from './_contract.mjs'
+import { allowedFor, checkedClauses, collectionQueryShape, diffSnapshots, isMainModule, LINK_SHAPE, loadContract, normaliseLineEndings, resolveSection, SOURCES } from './_contract.mjs'
 
 /**
  * Each source's post type and category taxonomy, as Salt for WordPress registers them by default.
@@ -115,7 +115,7 @@ function convertField(f, ctx) {
     out.type = type
     if (f.description) out.instructions = f.description
     if (f.required) out.required = 1
-    const list = clauses(f.condition)
+    const list = checkedClauses(f.condition, at)
     if (list.length) out.conditional_logic = conditionalLogic(list, ctx.keyOf)
   }
   if (f.deprecated) salt.deprecated = f.deprecated

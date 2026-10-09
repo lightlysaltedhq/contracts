@@ -321,3 +321,10 @@ test('R4: a snapshot checked out with CRLF line endings still matches', () => {
   const snapshot = acfSnapshot({ icons })
   assert.deepEqual(checkAcfSnapshot(snapshot.replace(/\n/g, '\r\n'), { icons }), { ok: true, problems: [] })
 })
+
+test('R5: a clause with no test, or with two, is refused by the emitter', () => {
+  for (const bad of [{ field: 'on' }, { field: 'on', equals: true, in: [true] }, { field: 'on', filled: true, equals: true }]) {
+    const fields = [{ name: 'on', type: 'boolean', label: 'On' }, { name: 'text', type: 'text', label: 'Text', condition: bad }]
+    assert.throws(() => probed(fields), /probe\.text condition on on: a clause tests exactly one of equals, in or filled/, JSON.stringify(bad))
+  }
+})
