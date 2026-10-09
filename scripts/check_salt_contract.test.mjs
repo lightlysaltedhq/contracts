@@ -524,7 +524,8 @@ const idNode = (attributes) => ({ role: 'box', element: 'div', attributes })
 test('cross-file: landmark, <anchor> and <owner>__<part> ids pass', () => {
   const r = crossRun((f) => {
     withLandmarks(f)
-    f['contract/markup/hero.json'].elements = [idNode({ id: 'main' }), idNode({ id: '<anchor>' }), idNode({ id: '<anchor>__heading' }),
+    f['contract/markup/section.json'].root = { element: 'section', attributes: { id: '<anchor>' } }
+    f['contract/markup/hero.json'].elements = [idNode({ id: 'main' }), idNode({ id: '<anchor>__heading' }),
       idNode({ 'aria-controls': 'button__menu-<n>', 'aria-describedby': { value: '<anchor>__email-error <anchor>__status' } })]
   })
   assert.equal(r.code, 0, r.out)
@@ -541,3 +542,16 @@ crossFail('a drawn id whose owner sections.json lacks', (f) => {
 crossFail('an id in a variant option that is no landmark', (f) => {
   withLandmarks(f); f['contract/markup/hero.json'].variants = [{ field: 'variant', options: { b: { root: { attributes: { id: 'navigation' } } } } }]
 }, /draws id navigation, which is neither a landmark id nor <owner>__<part>/)
+crossFail('a bare <anchor> anywhere but the section wrapper', (f) => {
+  withLandmarks(f); f['contract/markup/hero.json'].elements = [idNode({ id: '<anchor>' })]
+}, /contract\/markup\/hero\.json draws id <anchor>, which only the section wrapper \(section\.json's root\) may carry/)
+crossFail('an <anchor>__<part> id in a view', (f) => {
+  withLandmarks(f)
+  f['contract/sections.json'].views.push({ id: 'post', label: 'Post' })
+  f['contract/markup/post.json'] = { $schema: '../../schema/markup.schema.json', version: '0.1.0', id: 'post', kind: 'view', elements: [idNode({ id: '<anchor>__heading' })] }
+}, /contract\/markup\/post\.json draws id <anchor>__heading, but <anchor> names a section's id and this is drawn outside every section/)
+crossFail('an <anchor>__<part> id in the site header', (f) => {
+  withLandmarks(f)
+  f['contract/sections.json'].components.push({ id: 'site-header', label: 'Header' })
+  f['contract/markup/site-header.json'] = { $schema: '../../schema/markup.schema.json', version: '0.1.0', id: 'site-header', kind: 'component', elements: [idNode({ 'aria-controls': '<anchor>__menu' })] }
+}, /site-header\.json draws aria-controls <anchor>__menu, but <anchor> names a section's id/)

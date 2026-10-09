@@ -153,30 +153,40 @@ if (vocab && (vocab.sections ?? []).every((x) => x && typeof x === 'object')) {
   // Drawn ids (SC-012): every id the markup draws, and every id an attribute points at, is a
   // landmark id section#anchors reserves, the section's own <anchor>, or <owner>__<part>, the owner
   // an id in sections.json or <anchor>. A slugged anchor cannot contain __, so such an id never
-  // meets one; a plain or from: id could.
+  // meets one; a plain or from: id could. <anchor> is the section's settled id, so it means
+  // something only in a section: the bare <anchor> only on the section wrapper (section.json's
+  // root), and <anchor>__<part> only in section and component markup, never in the page, the
+  // views, or the header and footer, which are drawn outside every section.
+  const OUTSIDE_SECTIONS = new Set(['page', 'site-header', 'site-footer'])
   const landmarks = new Set(read('contract/markup/section.json')?.rules?.anchors?.reserved ?? [])
   const ID_ATTRIBUTES = ['id', 'for', 'aria-controls', 'aria-labelledby', 'aria-describedby']
-  const checkIds = (file, attributes) => {
+  const checkIds = (file, attributes, doc, atRoot) => {
+    const outside = doc.kind === 'view' || OUTSIDE_SECTIONS.has(doc.id)
     for (const key of ID_ATTRIBUTES) {
       const v = attributes?.[key]
       if (v === undefined) continue
       const values = typeof v === 'string' ? [v] : ['value' in v ? v.value : [], v.enum ?? []].flat()
       for (const id of values.flatMap((x) => String(x).split(/\s+/)).filter(Boolean)) {
-        if (landmarks.has(id) || id === '<anchor>') continue
+        if (landmarks.has(id)) continue
+        if (id === '<anchor>') {
+          if (!(doc.id === 'section' && atRoot && key === 'id')) fails.push(`${file} draws ${key} <anchor>, which only the section wrapper (section.json's root) may carry`)
+          continue
+        }
         const owner = /^(<anchor>|[a-z][a-z0-9-]*)__[a-z0-9<>-]+$/.exec(id)?.[1]
         if (!owner) { fails.push(`${file} draws ${key} ${id}, which is neither a landmark id nor <owner>__<part>`); continue }
+        if (owner === '<anchor>' && outside) fails.push(`${file} draws ${key} ${id}, but <anchor> names a section's id and this is drawn outside every section`)
         if (owner !== '<anchor>' && !entryIds.has(owner)) fails.push(`${file} draws ${key} ${id}, whose owner ${owner} is not an id in sections.json`)
       }
     }
   }
-  const checkAttributes = (file, attributes) => {
+  const checkAttributes = (file, attributes, doc, atRoot = false) => {
     checkIcons(file, attributes?.['data-icon'])
-    checkIds(file, attributes)
+    checkIds(file, attributes, doc, atRoot)
   }
-  const walkNodes = (file, nodes) => {
+  const walkNodes = (file, nodes, doc) => {
     for (const node of nodes ?? []) {
-      checkAttributes(file, node.attributes)
-      walkNodes(file, node.children)
+      checkAttributes(file, node.attributes, doc)
+      walkNodes(file, node.children, doc)
     }
   }
   // One rule for every variant in sections.json, section or component, so the two paths cannot
@@ -287,14 +297,14 @@ if (vocab && (vocab.sections ?? []).every((x) => x && typeof x === 'object')) {
     if (!doc) continue
     if (doc.id !== name) fails.push(`${rel(abs)} declares id ${doc.id}; its file name says ${name}`)
     if (!entryIds.has(name)) { fails.push(`${rel(abs)} describes nothing in sections.json`); continue }
-    checkAttributes(rel(abs), doc.root?.attributes)
-    walkNodes(rel(abs), doc.elements)
+    checkAttributes(rel(abs), doc.root?.attributes, doc, true)
+    walkNodes(rel(abs), doc.elements, doc)
     for (const da of (doc.dataAttributes ?? []).filter((x) => x.name === 'data-icon')) checkIcons(rel(abs), da.values)
     for (const mv of doc.variants ?? []) {
       for (const o of Object.values(mv.options ?? {})) {
-        checkAttributes(rel(abs), o.root?.attributes)
-        for (const diff of Object.values(o.elements ?? {})) checkAttributes(rel(abs), diff.attributes)
-        walkNodes(rel(abs), [...Object.values(o.replace ?? {}), ...(o.tree ?? [])])
+        checkAttributes(rel(abs), o.root?.attributes, doc, true)
+        for (const diff of Object.values(o.elements ?? {})) checkAttributes(rel(abs), diff.attributes, doc)
+        walkNodes(rel(abs), [...Object.values(o.replace ?? {}), ...(o.tree ?? [])], doc)
       }
     }
     for (const u of doc.uses ?? []) {
