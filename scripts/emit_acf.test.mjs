@@ -452,3 +452,9 @@ test('Payload and ACF leave out and keep the same sections, and offer the same s
   // The carousel keeps its inline cards with no sources, on both.
   assert.ok(toPayloadBlocks({ icons, richTextEditor: (allowed) => ({ allowed }), sources: {} }).some((b) => b.slug === 'carousel'))
 })
+
+test('Y2: rich text keeps the visual editor\'s full toolbar, as salt-wordpress has it, with media off', () => {
+  const body = field(layout(layoutsOf(), 'rich-text').sub_fields, 'body')
+  assert.deepEqual([body.tabs, body.toolbar, body.media_upload], ['visual', 'full', 0])
+  assert.ok(body.salt.allowed.length)
+})

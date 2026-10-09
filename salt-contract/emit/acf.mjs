@@ -137,9 +137,12 @@ function convertField(f, ctx) {
       break
     case 'rich-text': {
       typed('wysiwyg')
-      // The allowed list is enforced by the site's sanitiser on save and output; the toolbar only
-      // keeps the editor near it. Images are not an element kind, so the media button is off.
-      out.toolbar = 'basic'
+      // As salt-wordpress has it: the visual editor only (no HTML tab) with the full toolbar, so
+      // editors keep the heading menu. The allowed list (salt.allowed) is enforced by the site's
+      // sanitiser on save and output, not by the toolbar. Images are not an element kind, so the
+      // media button is off.
+      out.tabs = 'visual'
+      out.toolbar = 'full'
       out.media_upload = 0
       salt.allowed = allowedFor(f, options.headings)
       break
