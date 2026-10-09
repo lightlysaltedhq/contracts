@@ -2265,6 +2265,8 @@ const writeOf = (layer, property) => layer.writes.find((entry) => entry.property
 describe('the parse is whole, across every stylesheet in styles/', () => {
   itEach([
     ['a stylesheet the contracts are written against is missing', [removeFile('sections.css')], 'styles/sections.css is missing'],
+    /* An unclosed string ends at its line, as in a browser, so the rules after it are still read. */
+    ['an unclosed string hides a keyframe on the next line', [['blocks.css', appending(".salt-a::after { content: 'oops; }\n@keyframes zz { from { color: red; } }")]], 'Parsed 86 rules from blocks.css but the source contains 88 declaration blocks'],
     ['a rule nested inside another, which the parse cannot read', [['blocks.css', appending('.salt-note {\n  .salt-x {\n    margin: 0;\n  }\n}')]], 'The parse is dropping rules'],
     ['a declaration written straight into a media block', [['blocks.css', appending('@media (min-width: 48rem) {\n  margin: 0;\n}')]], "directly in an at-rule's block"],
     ['a new stylesheet that drops a focus outline, which a contract sweeping every file reads', [addFile('extra.css', '.salt-button {\n  outline: none;\n}\n')], 'extra.css .salt-button outline: declared outside the focus rules'],

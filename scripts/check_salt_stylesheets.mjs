@@ -205,12 +205,14 @@ const parseDeclarations = (body) => {
  * which of two declarations came last is the one thing the cascade decides inside a rule.
  */
 /* Where a quoted string that opens at `i` closes, escapes included: a brace or a semicolon inside
-   one (`content: '}'`) is text, not structure. An unclosed string runs to the end. */
+   one (`content: '}'`) is text, not structure. An unclosed string stops before an unescaped newline,
+   as the browser ends it, so it never hides the rules on the lines after it. */
 const stringEnd = (text, i) => {
   const quote = text[i]
   let j = i + 1
-  while (j < text.length && text[j] !== quote) j += text[j] === '\\' ? 2 : 1
-  return Math.min(j, text.length - 1)
+  while (j < text.length && text[j] !== quote && text[j] !== '\n') j += text[j] === '\\' ? 2 : 1
+  if (j >= text.length) return text.length - 1
+  return text[j] === quote ? j : j - 1
 }
 
 const parse = (css) => {
