@@ -55,7 +55,9 @@ the Salt page.
    its logic, which hands the new view exactly the props in `contract/view-props/<section>.json`.
    The swap is declared (`tier: "view"`) in the site's `salt-overrides.json`
    (`schema/replaced-logic.schema.json`); on WordPress, the child theme's `OVERRIDES.md` points at it
-   rather than repeating it. *On update, all of the section's logic, the section wrapper and the
+   rather than repeating it. A view that draws an image at another width declares that slot's
+   sizes there too, under `imageSizes` (SC-016); otherwise its images keep the slot's default from
+   `contract/image-sizes.json`. *On update, all of the section's logic, the section wrapper and the
    shared components still reach the site; core's default view of that section does not. A
    release that changes the section's view props, or the plan and shared types in
    `contract/view-props/_shared.json`, is flagged.*
