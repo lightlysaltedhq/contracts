@@ -55,6 +55,14 @@ Salted's decision log for Product Salt.
   honeypot is `<anchor>__website`.
 - The sections schema drops `openQuestions`.
 - Locations' open-now rule states one order, hours carried past midnight included.
+- `emit/payload.mjs` (`./emit/payload`): generates each section's Payload block config from
+  `contract/fields`, as `toPayloadBlocks(options)` (upload collection, link targets, heading set,
+  icon registry, installed sources, the site's rich-text editor). `payloadSnapshot` serialises it
+  deterministically and `checkPayloadSnapshot` (or `node emit/payload.mjs --check`) fails a
+  consumer's committed snapshot when a contract change renames, retypes or re-limits a field.
+  `emit/_contract.mjs` holds what every emitter shares. `reports/round-trip-payload.md` (not
+  shipped) compares the output with Salt for Next.js 0.11.0's blocks: 118 differences, every one
+  recorded in the contract (SC-008 rules the two shared booleans' false default).
 - The package exists, with its gate (`npm run salt-contract` at the repository root) and its
   release workflow on the `salt-contract-v*` tag prefix. It stays `private` until 1.0.0.
 - `RELEASE-POLICY.md`: one version for the package, what is major, minor and patch for every kind

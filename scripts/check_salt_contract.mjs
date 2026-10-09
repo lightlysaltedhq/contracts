@@ -17,7 +17,8 @@
 //    property that takes colour, custom properties included. Selectors are never read as values.
 //    Allowed: var(), color-mix() over var(), currentColor, transparent, inherit and friends.
 // 4. THE TARBALL. `npm pack --dry-run` of the package lists only package.json and files under the
-//    directories and documents it declares, and every path in `exports` is in it.
+//    directories and documents it declares (the data directories and `emit/`, the emitters that
+//    generate each platform's fields), and every path in `exports` is in it.
 import { execFileSync } from 'node:child_process'
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
 import path from 'node:path'
@@ -462,7 +463,7 @@ if (statSync(dir).isDirectory()) {
   const isDir = (f) => existsSync(path.join(dir, f)) && statSync(path.join(dir, f)).isDirectory()
   const allowedDirs = (pkg.files ?? []).filter(isDir)
   const allowedDocs = new Set(['package.json', ...(pkg.files ?? []).filter((f) => !isDir(f))])
-  const permitted = new Set(['contract', 'schema', 'styles', 'fixtures'])
+  const permitted = new Set(['contract', 'schema', 'styles', 'fixtures', 'emit'])
   for (const f of packed) {
     const top = f.split('/')[0]
     if (allowedDocs.has(f)) continue
