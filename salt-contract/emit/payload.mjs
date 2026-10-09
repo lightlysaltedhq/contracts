@@ -306,20 +306,19 @@ function build(options, snapshot) {
   const installed = new Set(Object.keys(sources))
   // Asked for by name, a section the site cannot carry is an error; by default it is left out.
   const named = options.sections != null
-  const ids = (options.sections ?? contract.sections.map((s) => s.id)).filter((id) => {
-    const resolved = resolveSection(contract, id)
-    // Everything the emitter converts: the section's own fields and its shared settings.
-    const unmet = [
-      ...unmetSources(withinSources(resolved.fields, installed), installed, id, sourceSelectsOf(resolved.fields)),
-      ...unmetSources(resolved.settings, installed, `${id}.settings`),
-    ]
-    if (unmet.length && named) throw new Error(`section ${id} needs ${unmet.join(', ')}, which options.sources does not install`)
-    return unmet.length === 0
-  })
-  return ids.map((id) => {
+  const resolved = (options.sections ?? contract.sections.map((s) => s.id)).flatMap((id) => {
     const { section, fields: all, settings } = resolveSection(contract, id)
     const sourceSelects = sourceSelectsOf(all)
     const fields = withinSources(all, installed)
+    // Everything the emitter converts: the section's own fields and its shared settings.
+    const unmet = [
+      ...unmetSources(fields, installed, id, sourceSelects),
+      ...unmetSources(settings, installed, `${id}.settings`),
+    ]
+    if (unmet.length && named) throw new Error(`section ${id} needs ${unmet.join(', ')}, which options.sources does not install`)
+    return unmet.length ? [] : [{ id, section, fields, settings, sourceSelects }]
+  })
+  return resolved.map(({ id, section, fields, settings, sourceSelects }) => {
     const base = { options, snapshot, sources, installed, sourceSelects, scope: id, path: [] }
     const out = convertFields(fields, base)
     if (settings.length) {

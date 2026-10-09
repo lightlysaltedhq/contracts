@@ -413,3 +413,12 @@ test('S9: offeredSources is the one rule for what a source select can offer', as
   const emitted = field(block(blocks({ sources: { team: {} } }), 'carousel').fields, 'source')
   assert.deepEqual(emitted.options.map((o) => o.value), ['inline', 'team'])
 })
+
+test('S10: each section is resolved once per build', () => {
+  const contract = loadContract()
+  const reads = {}
+  contract.fields = new Proxy(contract.fields, { get: (t, k) => { if (typeof k === 'string') reads[k] = (reads[k] ?? 0) + 1; return t[k] } })
+  blocks({ contract })
+  assert.ok(Object.keys(reads).length > 0)
+  for (const [id, n] of Object.entries(reads)) assert.equal(n, 1, id)
+})
