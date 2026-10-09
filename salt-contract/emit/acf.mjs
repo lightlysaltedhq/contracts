@@ -30,7 +30,7 @@
 import { readFileSync, writeFileSync } from 'node:fs'
 
 import { allowedFor, checkedClauses, collectionQueryShape, diffSnapshots, isMainModule, LINK_SHAPE, loadContract,
-  normaliseLineEndings, offeredSources, resolveSection, SOURCES, withinSources } from './_contract.mjs'
+  normaliseLineEndings, planSections, SOURCES } from './_contract.mjs'
 
 /**
  * Each source's post type and category taxonomy, as Salt for WordPress registers them by default.
@@ -160,9 +160,6 @@ function convertField(f, ctx) {
         }
         salt.optionsFrom = 'icons'
         opts = options.icons
-      } else if (ctx.path.length === 0 && ctx.sourceSelects.has(f.name)) {
-        // A select that picks a collection-query's source offers only what the site can satisfy.
-        opts = offeredSources(f, ctx.installed).options
       }
       out.choices = choicesOf(opts, at)
       if (f.default !== undefined) out.default_value = f.default
@@ -255,7 +252,8 @@ function collectionQuery(f, out, ctx) {
     offered = [f.source]
     salt.source = f.source
   } else {
-    offered = offeredSources(ctx.siblings.find((s) => s.name === f.sourceField), ctx.installed).sources
+    // The select comes narrowed by planSections, so its source values are the installed ones.
+    offered = ctx.siblings.find((s) => s.name === f.sourceField).options.map((o) => o.value).filter((v) => SOURCES.includes(v))
     salt.sourceField = f.sourceField
   }
   const targets = offered.map((s) => ctx.sources[s])
@@ -285,51 +283,20 @@ function collectionQuery(f, out, ctx) {
 
 // ── Field groups ───────────────────────────────────────────────────────────────────────────────
 
-// What a section needs from the site's sources and the site lacks, one line each: payload.mjs's
-// rule, with offeredSources deciding what a source select can still offer.
-function unmetSources(fields, installed, at, sourceSelects = new Set()) {
-  return fields.flatMap((f) => {
-    const where = `${at}.${f.name}`
-    const need = f.type === 'collection-query' ? f.source : f.type === 'relationship' ? f.to : undefined
-    const own = need && !installed.has(need) ? [`the source ${need} (${where})`] : []
-    // A source select left with no option the site can satisfy cannot be filled in.
-    if (sourceSelects.has(f.name) && offeredSources(f, installed).options.length === 0) {
-      own.push(`one of the sources ${f.options.map((o) => o.value).filter((v) => SOURCES.includes(v)).join(', ')} (${where})`)
-    }
-    return [...own, ...(f.fields ? unmetSources(f.fields, installed, where) : [])]
-  })
-}
-
-const sourceSelectsOf = (fields) =>
-  new Set(fields.filter((f) => f.type === 'collection-query' && f.sourceField).map((f) => f.sourceField))
-
 function build(options) {
   const contract = options.contract ?? loadContract()
   const sources = sourcesFrom(options)
-  const installed = new Set(Object.keys(sources))
-  // Asked for by name, a section the site cannot carry is an error; by default it is left out.
-  const named = options.sections != null
-  const resolved = (options.sections ?? contract.sections.map((s) => s.id)).flatMap((id) => {
-    const { section, fields: all, settings } = resolveSection(contract, id)
-    const sourceSelects = sourceSelectsOf(all)
-    const fields = withinSources(all, installed)
-    const unmet = [
-      ...unmetSources(fields, installed, id, sourceSelects),
-      ...unmetSources(settings, installed, `${id}.settings`),
-    ]
-    if (unmet.length && named) throw new Error(`section ${id} needs ${unmet.join(', ')}, which options.sources does not install`)
-    return unmet.length ? [] : [{ id, section, fields, settings, sourceSelects }]
-  })
+  const plan = planSections(contract, { installed: new Set(Object.keys(sources)), sections: options.sections })
   const keys = new Map()
-  const layouts = resolved.map(({ id, section, fields, settings, sourceSelects }) => {
-    const base = { options, sources, installed, sourceSelects, keys, scope: id, path: [] }
+  const layouts = plan.sections.map(({ id, section, fields, settings }) => {
+    const base = { options, sources, keys, scope: id, path: [] }
     const shared = settings.length ? [{ name: 'settings', type: 'group', label: 'Section settings', fields: settings }] : []
     return {
       key: `layout_salt_${snake(id)}`,
       name: id,
       label: section.label,
       display: 'block',
-      sub_fields: convertFields([...fields, ...shared], { ...base, sourceSelects }),
+      sub_fields: convertFields([...fields, ...shared], base),
     }
   })
   return [{
