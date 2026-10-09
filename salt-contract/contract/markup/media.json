@@ -33,6 +33,11 @@
       "aria-hidden": {
         "value": "true",
         "when": "decorative background"
+      },
+      "style": {
+        "value": "object-fit: <fit>; object-position: <position>",
+        "when": "the parent passes a fit or a position (a section background does)",
+        "note": "Fit is cover or contain. Position is the keyword pair for the nine positions (top left, top, top right, left, center, right, bottom left, bottom, bottom right), or, for focal-point, the image's stored focal point as <x>% <y>%; with no stored focal point the declaration is left out and the stylesheet's centre applies. The frame fill itself comes from the shared stylesheets (SC-011), so no inline fill is required; one a platform writes is redundant and harmless. No custom property carries the focal point: the stylesheets give way to this inline style."
       }
     },
     "note": "The image takes the class its parent gives it (salt-hero__image, salt-gallery__image and so on); media has no class of its own. sizes is derived from the image context (full, content, wide, aside, half, card, logo, thumb) and the band's width. Always one img, never inside picture and never beside source elements (SC-007)."

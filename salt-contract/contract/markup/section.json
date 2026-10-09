@@ -86,7 +86,12 @@
       ],
       "attributes": {
         "alt": "",
-        "aria-hidden": "true"
+        "aria-hidden": "true",
+        "style": {
+          "value": "object-fit: <fit>; object-position: <position>",
+          "when": "the background image's fit or position applies",
+          "note": "From the background image settings, written as media.json says; sections.css fills the band and gives way to it."
+        }
       },
       "optional": true,
       "when": "a background image is set and resolves",
