@@ -109,7 +109,7 @@ for (const abs of contractFiles) {
 // variant options the vocabulary offers, and uses only components that have markup; within a
 // fields file, sibling names and option values are unique, a select's default is one of its
 // options, a condition names a sibling other than itself and expects values that sibling offers
-// (or tests whether it is filled, which any type may be),
+// (or tests whether it is filled, which any type but a group, list or collection-query may be),
 // a rowLabel names a child, a list's min is not above its max, and shared.omit and
 // shared.defaults name shared settings. Applies only once contract/sections.json exists.
 const read = (p) => { try { return JSON.parse(readFileSync(path.join(dir, p), 'utf8')) } catch { return null } }
@@ -144,8 +144,12 @@ if (vocab && (vocab.sections ?? []).every((x) => x && typeof x === 'object')) {
         if (clause.field === f.name) { fails.push(`${owner}.${f.name} is conditioned on itself`); continue }
         const target = byName.get(clause.field)
         if (!target) { fails.push(`${owner}.${f.name} condition names ${clause.field}, which is not a sibling field`); continue }
-        // `filled` (SC-006) tests whether the sibling has a value, so it may name a field of any type.
+        // `filled` (SC-006) tests whether the sibling has a value, so it may name most field types;
+        // not a group, list or collection-query, which ACF conditional logic cannot target.
         if ('filled' in clause) {
+          if (['group', 'list', 'collection-query'].includes(target.type)) {
+            fails.push(`${owner}.${f.name} condition tests whether ${clause.field} is filled, a ${target.type} field; filled may not name a group, list or collection-query`)
+          }
           if (typeof clause.filled !== 'boolean') fails.push(`${owner}.${f.name} condition on ${clause.field}: filled is true or false`)
           if ('equals' in clause || 'in' in clause) fails.push(`${owner}.${f.name} condition on ${clause.field} tests filled and compares a value; a clause does one`)
           continue

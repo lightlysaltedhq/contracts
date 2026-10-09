@@ -370,3 +370,10 @@ test('schema: the field-definition schema refuses a clause that tests filled and
   const r = realSchemaRun({ field: 'variant', filled: true, equals: 'b' })
   assert.equal(r.code, 1, r.out); assert.match(r.out, /contract\/fields\/hero\.json does not match schema\/field-definition\.schema\.json/)
 })
+
+// ── Review of #4: ACF cannot condition on a group, a list or a collection-query ─────────────────
+for (const [type, extra] of [['group', { fields: [{ name: 'a', type: 'text' }] }], ['list', { fields: [{ name: 'a', type: 'text' }] }], ['collection-query', { source: 'posts' }]]) {
+  crossFail(`a filled condition on a ${type} sibling`, (f) => {
+    f['contract/fields/hero.json'].fields.push({ name: 'box', type, ...extra }, { name: 'x', type: 'text', condition: { field: 'box', filled: true } })
+  }, new RegExp(`hero\\.x condition tests whether box is filled, a ${type} field; filled may not name a group, list or collection-query`))
+}
