@@ -16,7 +16,7 @@
       "role": "heading",
       "component": "heading",
       "attributes": {
-        "id": "from:plan.headingId"
+        "id": "<anchor>__heading"
       },
       "optional": true,
       "when": "heading is set"

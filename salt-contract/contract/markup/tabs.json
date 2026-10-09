@@ -24,7 +24,7 @@
       "role": "heading",
       "component": "heading",
       "attributes": {
-        "id": "from:plan.headingId"
+        "id": "<anchor>__heading"
       },
       "optional": true,
       "when": "heading is set",
@@ -46,7 +46,7 @@
       "attributes": {
         "aria-label": "from:heading or label"
       },
-      "note": "baseId tabs-<section index>; up to eight panels."
+      "note": "Ids owned by the section's settled id (tab-set.json, SC-012); up to eight panels."
     }
   ],
   "headings": {

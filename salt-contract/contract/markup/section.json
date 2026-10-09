@@ -19,7 +19,7 @@
         "note": "section#anchors"
       },
       "aria-labelledby": {
-        "value": "from:plan.headingId",
+        "value": "<anchor>__heading",
         "when": "the section provides a heading; the element is then section, otherwise div"
       },
       "data-tone": {
@@ -231,7 +231,7 @@
       "statement": "Headings nested in a section rank under its heading. The body base is the section heading's level when it has one, otherwise the level it would have had. Rich-text headings start at base + 1; card, step, group and later-row titles are base + 1. A nested heading never outranks or skips past the section heading."
     },
     "labelled-by": {
-      "statement": "A section that provides a heading renders as section with aria-labelledby pointing at that heading's id; that id is '<section id>-heading', a generated id: a repeat, or one that equals an editor's anchor, takes the numeric suffix while the editor's anchor keeps its id (section#anchors), and aria-labelledby names the suffixed id. A section that provides none renders as div. An unnamed section element is never written."
+      "statement": "A section that provides a heading renders as section with aria-labelledby pointing at that heading's id; that id is <anchor>__heading, <anchor> the section's settled id (section#anchors, SC-012), so it is unique whenever the anchor is. A section that provides none renders as div. An unnamed section element is never written."
     },
     "fallback-heading": {
       "statement": "When no section claims the h1, the view draws a visually hidden h1 (h1.salt-sr-only) carrying the page's title, first in main, before any other heading. It is never display:none.",
@@ -382,7 +382,8 @@
       "owes": [
         "Write data-block and data-track from contract ids: rich-text, call-to-action, media-text, collection-showcase.",
         "Rename the skip link's class skip-link to salt-skip-link (page.json).",
-        "Settle ids at render in section#anchors' three-step order: reserve site-navigation-drawer and the reserved forms (salt-header-nav-submenu-<n> and the rest), not only the exact ids RESERVED_ANCHOR_IDS lists today (fields/section-settings.ts, lib/sections/settings.ts), and let generated ids yield to editors' anchors."
+        "Settle ids at render in section#anchors' three-step order: reserve site-navigation-drawer and the reserved forms (salt-header-nav-submenu-<n> and the rest), not only the exact ids RESERVED_ANCHOR_IDS lists today (fields/section-settings.ts, lib/sections/settings.ts), and let generated ids yield to editors' anchors.",
+        "Section heading ids <anchor>__heading, built from the section's settled id, in place of uniqueAnchor('<slug>-heading') (lib/sections/plan.ts, SC-012)."
       ]
     },
     "wordpress": {
