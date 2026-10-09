@@ -1489,7 +1489,7 @@
     }
   ],
   "icons": {
-    "note": "Every glyph name both platforms draw (SC-007): the union of their sets. content names are the ones an editor may choose (a select with optionsFrom icons offers these, plus any a site adds); chrome names are drawn only by the system: the caret, the close cross, the theme toggle's marks, and the social marks derived from a profile's address. A name may be in both. The artwork stays each platform's own; the names are the contract.",
+    "note": "Every glyph name both platforms draw (SC-007): the union of their sets. content names are the ones an editor may choose (a select with optionsFrom icons offers these, plus any a site adds); chrome names are drawn only by the system: the caret, the close cross, the theme toggle's marks, and the social marks derived from a profile's address. A name may be in both. The artwork stays each platform's own; the names are the contract. Both platforms accept every social name, but may draw the shared globe glyph for a social mark they do not ship, the link's accessible name carrying the platform (SC-008).",
     "content": [
       "check",
       "clock",

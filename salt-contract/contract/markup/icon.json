@@ -94,15 +94,10 @@
     },
     {
       "topic": "ruling",
-      "text": "The names are the union of both platforms' glyphs, listed in contract/sections.json under icons and split into content names an editor may choose and chrome names only the system draws (SC-007). Both platforms draw every name; the artwork stays each platform's own. The gate refuses an icon name in markup or fields that the list lacks."
+      "text": "The names are the union of both platforms' glyphs, listed in contract/sections.json under icons and split into content names an editor may choose and chrome names only the system draws (SC-007). Both platforms draw every name; the artwork stays each platform's own. For a social name (bluesky, facebook, github, instagram, linkedin, pinterest, reddit, tiktok, whatsapp, x, youtube), a platform that ships no mark of its own may draw the shared globe glyph; the markup is identical either way, data-icon keeps the social name, and the link's accessible name carries the platform (SC-008). The gate refuses an icon name in markup or fields that the list lacks."
     }
   ],
   "platforms": {
-    "nextjs": {
-      "owes": [
-        "Draw a glyph under each of the eleven platform names (bluesky, facebook, github, instagram, linkedin, pinterest, reddit, tiktok, whatsapp, x, youtube), which core leaves to a site's registry today (SC-007). The artwork is its own."
-      ]
-    },
     "wordpress": {
       "formerly": [
         {
