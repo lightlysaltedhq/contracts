@@ -154,6 +154,26 @@ export function offeredSources(select, installed) {
 }
 
 /**
+ * A section's fields with what the installed sources cannot reach left out: a collection-query
+ * read from a source select that offers no installed source, and a field whose condition names a
+ * source select only by values that select no longer offers (the carousel's showTags with no
+ * source that has categories). Source selects themselves stay, narrowed by offeredSources; one left
+ * with no option is the caller's to refuse. Top level only, where source selects live.
+ */
+export function withinSources(fields, installed) {
+  const selects = new Map(fields.filter((f) => f.type === 'collection-query' && f.sourceField)
+    .map((f) => [f.sourceField, offeredSources(fields.find((s) => s.name === f.sourceField), installed)]))
+  const reachable = (f) => clauses(f.condition).every((c) => {
+    // A malformed clause is checkedClauses' to refuse, with its own message.
+    const offered = isClause(c) ? selects.get(c.field) : undefined
+    if (!offered || 'filled' in c) return true
+    const values = offered.options.map((o) => o.value)
+    return ('equals' in c ? [c.equals] : c.in).some((v) => values.includes(v))
+  })
+  return fields.filter((f) => !(f.type === 'collection-query' && f.sourceField && selects.get(f.sourceField).sources.length === 0) && reachable(f))
+}
+
+/**
  * The link's fixed shape (field-definition schema, "link"). `withLabel: false` drops `label`.
  * `requiredWithLink` marks the parts a required link must have.
  */

@@ -23,7 +23,8 @@
 // the clock, the environment or the file system's listing order.
 import { readFileSync, writeFileSync } from 'node:fs'
 
-import { checkedClauses, collectionQueryShape, hasVisibleText, isFilled, isMainModule, LINK_SHAPE, offeredSources, loadContract, normaliseLineEndings, resolveSection, siblingValue, SOURCES } from './_contract.mjs'
+import { checkedClauses, collectionQueryShape, hasVisibleText, isFilled, isMainModule, LINK_SHAPE, loadContract,
+  normaliseLineEndings, offeredSources, resolveSection, siblingValue, SOURCES, withinSources } from './_contract.mjs'
 
 /**
  * Each source's Payload collection and category taxonomy, as Salt for Next.js names them by
@@ -283,20 +284,21 @@ function collectionQuery(f, out, ctx) {
 
 // What a section needs from the site's sources and the site lacks, one line each. Payload refuses
 // to start with a relationship to a collection it does not have.
-function unmetSources(fields, installed, at) {
+function unmetSources(fields, installed, at, sourceSelects = new Set()) {
   return fields.flatMap((f) => {
     const where = `${at}.${f.name}`
     const need = f.type === 'collection-query' ? f.source : f.type === 'relationship' ? f.to : undefined
     const own = need && !installed.has(need) ? [`the source ${need} (${where})`] : []
-    if (f.type === 'collection-query' && f.sourceField) {
-      const select = fields.find((s) => s.name === f.sourceField)
-      if (offeredSources(select, installed).sources.length === 0) {
-        own.push(`one of the sources ${select.options.map((o) => o.value).filter((v) => SOURCES.includes(v)).join(', ')} (${where})`)
-      }
+    // A source select left with no option the site can satisfy cannot be filled in.
+    if (sourceSelects.has(f.name) && offeredSources(f, installed).options.length === 0) {
+      own.push(`one of the sources ${f.options.map((o) => o.value).filter((v) => SOURCES.includes(v)).join(', ')} (${where})`)
     }
     return [...own, ...(f.fields ? unmetSources(f.fields, installed, where) : [])]
   })
 }
+
+const sourceSelectsOf = (fields) =>
+  new Set(fields.filter((f) => f.type === 'collection-query' && f.sourceField).map((f) => f.sourceField))
 
 function build(options, snapshot) {
   const contract = options.contract ?? loadContract()
@@ -307,13 +309,17 @@ function build(options, snapshot) {
   const ids = (options.sections ?? contract.sections.map((s) => s.id)).filter((id) => {
     const resolved = resolveSection(contract, id)
     // Everything the emitter converts: the section's own fields and its shared settings.
-    const unmet = [...unmetSources(resolved.fields, installed, id), ...unmetSources(resolved.settings, installed, `${id}.settings`)]
+    const unmet = [
+      ...unmetSources(withinSources(resolved.fields, installed), installed, id, sourceSelectsOf(resolved.fields)),
+      ...unmetSources(resolved.settings, installed, `${id}.settings`),
+    ]
     if (unmet.length && named) throw new Error(`section ${id} needs ${unmet.join(', ')}, which options.sources does not install`)
     return unmet.length === 0
   })
   return ids.map((id) => {
-    const { section, fields, settings } = resolveSection(contract, id)
-    const sourceSelects = new Set(fields.filter((f) => f.type === 'collection-query' && f.sourceField).map((f) => f.sourceField))
+    const { section, fields: all, settings } = resolveSection(contract, id)
+    const sourceSelects = sourceSelectsOf(all)
+    const fields = withinSources(all, installed)
     const base = { options, snapshot, sources, installed, sourceSelects, scope: id, path: [] }
     const out = convertFields(fields, base)
     if (settings.length) {

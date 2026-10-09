@@ -357,12 +357,25 @@ test('R2: a section whose fixed source the site lacks is left out, or refused wh
     /section probe needs the source team \(probe\.people\)/)
 })
 
-test('R3: a section reading its source from a select is left out when the site has none of them', () => {
+test('R3, S1: a source select none of whose options the site can satisfy leaves the section out', () => {
   const slugs = blocks({ sources: {} }).map((b) => b.slug)
-  assert.ok(!slugs.includes('collection-showcase') && !slugs.includes('carousel'), slugs.join(', '))
+  assert.ok(!slugs.includes('collection-showcase'), slugs.join(', '))
   assert.throws(() => blocks({ sources: {}, sections: ['collection-showcase'] }),
-    /section collection-showcase needs one of the sources services, case-studies, testimonials, posts, team \(collection-showcase\.query\)/)
+    /section collection-showcase needs one of the sources services, case-studies, testimonials, posts, team \(collection-showcase\.source\)/)
   assert.ok(blocks({ sources: { team: {} } }).some((b) => b.slug === 'collection-showcase'))
+})
+
+test('S1: with no sources the carousel keeps its inline cards and drops what only a source reaches', () => {
+  const carousel = block(blocks({ sources: {} }), 'carousel')
+  assert.ok(carousel)
+  assert.deepEqual(field(carousel.fields, 'source').options.map((o) => o.value), ['inline'])
+  const names = carousel.fields.map((f) => f.name)
+  assert.ok(names.includes('cards') && names.includes('cardStyle'), names.join(', '))
+  assert.ok(!names.includes('query') && !names.includes('showTags'), names.join(', '))
+  assert.doesNotThrow(() => blocks({ sources: {}, sections: ['carousel'] }))
+  // showTags stays while one of its sources is installed.
+  assert.ok(block(blocks({ sources: { posts: {} } }), 'carousel').fields.some((f) => f.name === 'showTags'))
+  assert.ok(!block(blocks({ sources: { team: {} } }), 'carousel').fields.some((f) => f.name === 'showTags'))
 })
 
 test('S4: the emitter refuses every clause shape the schema refuses, with its own message', () => {
