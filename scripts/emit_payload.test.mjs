@@ -589,3 +589,20 @@ test('X2-X5: a source select and its query belong at the section\'s top level, f
   assert.deepEqual(plan.leftOut, [])
   assert.equal(plan.sections.length, loadContract().sections.length)
 })
+
+test('(b) the emitter CLI refuses a flag without a value, a flag as a value, and --check with --write', async () => {
+  const { parseEmitterArguments } = await import('../salt-contract/emit/_contract.mjs')
+  assert.deepEqual(parseEmitterArguments(['--check', 'a.json', '--options', 'o.json']), { check: 'a.json', write: undefined, options: 'o.json' })
+  assert.deepEqual(parseEmitterArguments(['--write', 'a.json']), { check: undefined, write: 'a.json', options: undefined })
+  assert.throws(() => parseEmitterArguments(['--check']), /--check needs a value/)
+  assert.throws(() => parseEmitterArguments(['--check', '--options', 'o.json']), /--check needs a value, not the flag --options/)
+  assert.throws(() => parseEmitterArguments(['--check', 'a.json', '--write', 'b.json']), /--check and --write cannot be used together/)
+  assert.throws(() => parseEmitterArguments(['--chek', 'a.json']), /unknown argument --chek/)
+  assert.throws(() => parseEmitterArguments([]), /--check <snapshot> or --write <snapshot>/)
+  // Through the CLI: refused with exit 2 before anything is read or written.
+  let code = 0
+  let err = ''
+  try { execFileSync(process.execPath, [emitter, '--check', '--options', 'o.json'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }) } catch (e) { code = e.status; err = e.stderr }
+  assert.equal(code, 2)
+  assert.match(err, /--check needs a value, not the flag --options/)
+})

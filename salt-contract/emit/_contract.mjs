@@ -108,6 +108,29 @@ export function clauseHolds(c, value) {
   return c.in.includes(value)
 }
 
+/**
+ * An emitter CLI's arguments: `--check <snapshot>` or `--write <snapshot>`, not both, and an
+ * optional `--options <file>`. Throws on a flag with no value, a flag given as a value, an unknown
+ * argument, or neither action, so a typo never runs as something else. Returns
+ * { check, write, options }, each a path or undefined.
+ */
+export function parseEmitterArguments(argv) {
+  const values = { '--check': undefined, '--write': undefined, '--options': undefined }
+  for (let i = 0; i < argv.length; i++) {
+    const flag = argv[i]
+    if (!(flag in values)) throw new Error(`unknown argument ${flag}`)
+    const value = argv[i + 1]
+    if (value === undefined) throw new Error(`${flag} needs a value`)
+    if (value.startsWith('--')) throw new Error(`${flag} needs a value, not the flag ${value}`)
+    values[flag] = value
+    i++
+  }
+  const { '--check': check, '--write': write, '--options': options } = values
+  if (check && write) throw new Error('--check and --write cannot be used together')
+  if (!check && !write) throw new Error('pass --check <snapshot> or --write <snapshot>')
+  return { check, write, options }
+}
+
 /** Text with CRLF line endings as LF, so a Windows checkout of a committed snapshot compares equal. */
 export const normaliseLineEndings = (text) => text.replace(/\r\n/g, '\n')
 

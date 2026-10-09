@@ -24,7 +24,7 @@
 import { readFileSync, writeFileSync } from 'node:fs'
 
 import { clauseHolds, clauses, collectionQueryShape, hasVisibleText, isFilled, isMainModule, LINK_SHAPE, loadContract,
-  normaliseLineEndings, planSections, siblingValue, sourceValues, SOURCES } from './_contract.mjs'
+  normaliseLineEndings, parseEmitterArguments, planSections, siblingValue, sourceValues, SOURCES } from './_contract.mjs'
 
 /**
  * Each source's Payload collection and category taxonomy, as Salt for Next.js names them by
@@ -384,12 +384,14 @@ export function checkPayloadSnapshot(snapshot, options = {}) {
 // sections). A consumer with its options in code calls checkPayloadSnapshot instead.
 
 if (isMainModule(import.meta.url)) {
-  const args = process.argv.slice(2)
-  const flag = (name) => { const i = args.indexOf(name); return i === -1 ? undefined : args[i + 1] }
-  const optionsFile = flag('--options')
+  let args
+  try { args = parseEmitterArguments(process.argv.slice(2)) } catch (e) {
+    console.error(`✗ ${e.message}`)
+    console.error('usage: payload.mjs --check <snapshot.json> | --write <snapshot.json> [--options <options.json>]')
+    process.exit(2)
+  }
+  const { check, write, options: optionsFile } = args
   const options = optionsFile ? JSON.parse(readFileSync(optionsFile, 'utf8')) : {}
-  const check = flag('--check')
-  const write = flag('--write')
   if (write) {
     writeFileSync(write, payloadSnapshot(options))
     console.log(`wrote ${write}`)
@@ -401,8 +403,5 @@ if (isMainModule(import.meta.url)) {
       process.exit(1)
     }
     console.log(`PASS: ${check} matches the contract`)
-  } else {
-    console.error('usage: payload.mjs --check <snapshot.json> | --write <snapshot.json> [--options <options.json>]')
-    process.exit(2)
   }
 }
