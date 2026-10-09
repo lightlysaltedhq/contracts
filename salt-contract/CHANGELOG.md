@@ -6,8 +6,8 @@ Salted's decision log for Product Salt.
 
 ## Unreleased (0.1.0, drafting)
 
-- The owner's rulings of 09/10/2026 (SC-007, SC-008, SC-012 to SC-014) are applied, and no open question remains;
-  the markup schema drops the `open-question` note topic.
+- The owner's rulings of 09/10/2026 (SC-007, SC-008, SC-012 to SC-014) are applied, and no open
+  question remains; the markup schema drops the `open-question` note topic.
   - Every id the system draws is `<owner>__<part>` (SC-012). The owner is the component, section or
     view id as `sections.json` names it, or `<anchor>`, the section's settled id, for ids inside a
     section. Parts are numbered from 1: `site-header__submenu-2`, `<anchor>__heading`,
