@@ -2,11 +2,12 @@
 // The Payload round trip: what salt-contract/emit/payload.mjs generates for each section, against
 // the field half salt-nextjs ships today. Writes salt-contract/reports/round-trip-payload.md.
 //
-//   node scripts/round_trip_payload.mjs [--check | --suggest] [<salt-nextjs checkout>]
+//   node scripts/round_trip_payload.mjs [--check | --suggest] <salt-nextjs checkout>
+//   SALT_NEXTJS_DIR=<salt-nextjs checkout> node scripts/round_trip_payload.mjs [--check | --suggest]
 //
-// Needs a salt-nextjs checkout (by default the repository's sibling, salt-nextjs), so it is not
-// part of `npm run verify`. The report it writes is committed; --check fails when the committed one
-// is stale, when a difference is not on the expected list, or when a listed one no longer occurs.
+// Needs a salt-nextjs checkout, so it is not part of `npm run verify`. The report it writes is
+// committed; --check fails when the committed one is stale, when a difference is not on the
+// expected list, or when a listed one no longer occurs.
 // --suggest prints the unlisted differences as list entries, with the contract note that may
 // account for each, for a person to review before adding them.
 //
@@ -26,7 +27,7 @@
 // values note, or the SC ruling) that accounts for it. Anything else is UNEXPECTED, so a later
 // rename, retype or required change on a field that already owes something is not hidden by it.
 import { execFileSync } from 'node:child_process'
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
@@ -40,21 +41,23 @@ const reportPath = path.join(here, '..', 'salt-contract', 'reports', 'round-trip
 const expectedPath = path.join(here, '..', 'salt-contract', 'reports', 'round-trip-payload.expected.json')
 
 /**
- * The command line: flags anywhere, at most one positional argument, the salt-nextjs checkout. By
- * default that is the repository's sibling, as ~/Work/Products/Salt/{contracts,salt-nextjs} lays
- * them out.
+ * The command line: flags anywhere and at most one positional argument, the salt-nextjs checkout,
+ * or SALT_NEXTJS_DIR when there is none. Never guessed: checkouts sit in different places on
+ * different machines and in worktrees, and a guess that misses fails late and obscurely.
  */
-export function parseArguments(argv, scriptDir = here) {
+export function parseArguments(argv, env = process.env) {
   const flags = new Set(['--check', '--suggest'])
   const unknown = argv.filter((a) => a.startsWith('--') && !flags.has(a))
   if (unknown.length) throw new Error(`unknown option ${unknown.join(', ')}`)
   const positional = argv.filter((a) => !a.startsWith('--'))
   if (positional.length > 1) throw new Error(`one salt-nextjs checkout, not ${positional.length}`)
-  return {
-    nextjs: path.resolve(positional[0] ?? path.join(scriptDir, '..', '..', 'salt-nextjs')),
-    check: argv.includes('--check'),
-    suggest: argv.includes('--suggest'),
+  const given = positional[0] ?? env.SALT_NEXTJS_DIR
+  if (!given) throw new Error('pass the salt-nextjs checkout, or set SALT_NEXTJS_DIR')
+  const nextjs = path.resolve(given)
+  if (!existsSync(path.join(nextjs, 'packages', 'core', 'src', 'blocks', 'index.ts'))) {
+    throw new Error(`salt-nextjs checkout not found at ${nextjs} (no packages/core/src/blocks/index.ts)`)
   }
+  return { nextjs, check: argv.includes('--check'), suggest: argv.includes('--suggest') }
 }
 
 // ── Load salt-nextjs's field half ──────────────────────────────────────────────────────────────
@@ -392,4 +395,8 @@ async function main({ nextjs, check, suggest }) {
   }
 }
 
-if (isMainModule(import.meta.url)) await main(parseArguments(process.argv.slice(2)))
+if (isMainModule(import.meta.url)) {
+  let args
+  try { args = parseArguments(process.argv.slice(2)) } catch (e) { console.error(`✗ ${e.message}`); process.exit(2) }
+  await main(args)
+}

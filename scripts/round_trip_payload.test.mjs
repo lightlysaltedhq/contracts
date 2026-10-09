@@ -2,18 +2,32 @@
 // that importing it runs nothing.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { readFileSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import { classify, parseArguments } from './round_trip_payload.mjs'
 
-test('R10: flags may come first, and the default checkout is the repository\'s sibling', () => {
-  assert.deepEqual(parseArguments(['--check', '/x/salt-nextjs'], '/w/contracts/scripts'), { nextjs: '/x/salt-nextjs', check: true, suggest: false })
-  assert.deepEqual(parseArguments(['/x/salt-nextjs', '--check'], '/w/contracts/scripts'), { nextjs: '/x/salt-nextjs', check: true, suggest: false })
-  assert.deepEqual(parseArguments([], '/w/Products/Salt/contracts/scripts'), { nextjs: path.resolve('/w/Products/Salt/salt-nextjs'), check: false, suggest: false })
-  assert.throws(() => parseArguments(['--chek']), /unknown option --chek/)
-  assert.throws(() => parseArguments(['/a', '/b']), /one salt-nextjs checkout/)
+// A directory shaped like a salt-nextjs checkout, as far as parseArguments looks.
+function fakeCheckout() {
+  const dir = mkdtempSync(path.join(tmpdir(), 'salt-nextjs-'))
+  mkdirSync(path.join(dir, 'packages', 'core', 'src', 'blocks'), { recursive: true })
+  writeFileSync(path.join(dir, 'packages', 'core', 'src', 'blocks', 'index.ts'), '')
+  return dir
+}
+
+test('R10, S2: flags may come anywhere; the checkout is given or SALT_NEXTJS_DIR, never guessed', () => {
+  const dir = fakeCheckout()
+  try {
+    assert.deepEqual(parseArguments(['--check', dir], {}), { nextjs: dir, check: true, suggest: false })
+    assert.deepEqual(parseArguments([dir, '--check'], {}), { nextjs: dir, check: true, suggest: false })
+    assert.deepEqual(parseArguments([], { SALT_NEXTJS_DIR: dir }), { nextjs: dir, check: false, suggest: false })
+    assert.throws(() => parseArguments([], {}), /pass the salt-nextjs checkout, or set SALT_NEXTJS_DIR/)
+    assert.throws(() => parseArguments(['/no/such/salt-nextjs'], {}), /salt-nextjs checkout not found at \/no\/such\/salt-nextjs/)
+    assert.throws(() => parseArguments(['--chek', dir], {}), /unknown option --chek/)
+    assert.throws(() => parseArguments(['/a', '/b'], {}), /one salt-nextjs checkout/)
+  } finally { rmSync(dir, { recursive: true, force: true }) }
 })
 
 test('R9: a difference is expected only when the reviewed list names it exactly', () => {
