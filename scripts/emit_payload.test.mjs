@@ -512,8 +512,13 @@ test('V7: sourceValues is the one reading of the source values among a select\'s
   assert.deepEqual(sourceValues(undefined), [])
 })
 
-test('V8: conditions are validated once, by planSections, and the Payload emitter only reads them', () => {
-  assert.doesNotMatch(readFileSync(emitter, 'utf8'), /checkedClauses/)
+test('V8, X6: each clause is validated exactly once on the way to Payload blocks', () => {
+  // isClause is the only reader of a clause's own keys (Object.keys); count how often it runs.
+  let validations = 0
+  const clause = new Proxy({ field: 'on', equals: true }, { ownKeys: (t) => { validations++; return Reflect.ownKeys(t) } })
+  const fields = [{ name: 'on', type: 'boolean', label: 'On' }, { name: 'text', type: 'text', label: 'Text', condition: clause }]
+  toPayloadBlocks({ contract: probe(fields) })
+  assert.equal(validations, 1)
   const bad = [{ name: 'on', type: 'boolean', label: 'On' }, { name: 'text', type: 'text', label: 'Text', condition: { field: 'on' } }]
   assert.throws(() => toPayloadBlocks({ contract: probe(bad) }), /probe\.text condition:/)
 })

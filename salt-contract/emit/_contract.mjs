@@ -178,7 +178,8 @@ export const sourceSelectsOf = (fields) =>
  * installed source, and a field whose condition names a source select only by values that select
  * no longer offers (the carousel's showTags with no source that has categories), and any field
  * whose condition on a field left out cannot hold with that field absent, or whose source select is
- * left out. A select left with no option is unmetSources' to report.
+ * left out. A select left with no option is unmetSources' to report. Expects fields whose
+ * conditions checkedClauses has passed, as planSections ensures; it does not check them again.
  * At every depth: a list or group's own fields are fitted the same way.
  */
 export function withinSources(fields, installed) {
@@ -192,15 +193,14 @@ export function withinSources(fields, installed) {
   const narrowed = fields.map((f) => (selects.has(f.name) ? narrow(f) : f.fields ? { ...f, fields: withinSources(f.fields, installed) } : f))
   const valuesOf = (name) => narrowed.find((s) => s.name === name).options.map((o) => o.value)
   const reachable = (f) => clauses(f.condition).every((c) => {
-    // A malformed clause is checkedClauses' to refuse, with its own message.
-    if (!isClause(c) || !selects.has(c.field) || 'filled' in c) return true
+    if (!selects.has(c.field) || 'filled' in c) return true
     return ('equals' in c ? [c.equals] : c.in).some((v) => valuesOf(c.field).includes(v))
   })
   const queriesNothing = (f) => f.sourceField && sourceValues(narrowed.find((s) => s.name === f.sourceField)).length === 0
   // A field conditioned on one left out goes too, and so on down the chain, when that clause cannot
   // hold with the field absent; one that can (filled: false) still shows, reading no value there.
   const gone = new Set(narrowed.filter((f) => queriesNothing(f) || !reachable(f)).map((f) => f.name))
-  const hidden = (f) => clauses(f.condition).some((c) => isClause(c) && gone.has(c.field) && !clauseHolds(c, undefined))
+  const hidden = (f) => clauses(f.condition).some((c) => gone.has(c.field) && !clauseHolds(c, undefined))
   for (let grew = true; grew;) {
     grew = false
     for (const f of narrowed) {
