@@ -5,7 +5,7 @@
 import { after, test } from 'node:test'
 import assert from 'node:assert/strict'
 import { execFile } from 'node:child_process'
-import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { cpSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
 import { createServer } from 'node:http'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
@@ -285,8 +285,19 @@ test('stylesheet pin: the served CSS must be styles/salt.css byte for byte, from
     for (const own of [path.join(pkg, 'styles', 'salt.css'), path.join(pkg, 'styles'), path.join(pkg, 'styles', 'sections.css'), path.join(pkg, 'styles', '..', 'styles', 'salt.css')]) {
       const refused = await run([...base, '--styles', own])
       assert.equal(refused.code, 2, `${own}: ${refused.out}`)
-      assert.match(refused.out, /is this package's own styles\//)
+      assert.match(refused.out, /is inside this package/)
     }
+
+    // A link elsewhere to the package's own bundle serves the right bytes, so it is no refusal (review Q5).
+    const link = path.join(dir, 'public-salt.css')
+    symlinkSync(path.join(pkg, 'styles', 'salt.css'), link)
+    const linked = await run([...base, '--styles', link])
+    assert.equal(linked.report?.stylesheets.status, 'identical', linked.out)
+    assert.equal(section(linked.report, 'faq').stylesheets.status, 'pass')
+    // A directory link into the package still names the package's own file.
+    symlinkSync(path.join(pkg, 'styles'), path.join(dir, 'linked-styles'))
+    const throughDir = await run([...base, '--styles', path.join(dir, 'linked-styles', 'salt.css')])
+    assert.equal(throughDir.code, 2, throughDir.out)
 
     const fetched = await run([...base, '--styles-url', `${origin}/salt.css`])
     assert.equal(fetched.report.stylesheets.status, 'identical', fetched.out)

@@ -422,14 +422,21 @@ function checkFields(fields) {
 
 export const BUNDLE = 'styles/salt.css'
 
-/** Refuse a served file that is the package's own bundle or stylesheets: the pin would be vacuous. */
+/**
+ * Refuse a served path inside the package itself: comparing the package's own bundle with itself
+ * proves nothing. The path is judged as given, its directories followed but not the file, so a
+ * link elsewhere that resolves to the bundle (a site's public/salt.css) serves the right bytes and
+ * passes, while a path reached through a linked directory into the package is still refused.
+ */
 function refuseOwnStyles(styles, dir) {
   if (!styles.file) return
-  let served
-  try { served = realpathSync(styles.file) } catch { return } // a missing file is reported, not refused
-  const own = realpathSync(path.join(dir, 'styles'))
-  if (served === own || path.dirname(served) === own) {
-    throw new Error(`--styles ${styles.file} is this package's own styles/; name the CSS file the implementation serves (or --styles-url), which is compared with ${BUNDLE}`)
+  const own = realpathSync(dir)
+  const inside = (p) => p === own || p.startsWith(own + path.sep)
+  const given = path.resolve(styles.file)
+  let parent = path.dirname(given)
+  try { parent = realpathSync(parent) } catch { /* a missing directory is reported as a missing file */ }
+  if (inside(given) || inside(parent) || inside(path.join(parent, path.basename(given)))) {
+    throw new Error(`--styles ${styles.file} is inside this package; name the CSS file the implementation serves (or --styles-url), which is compared with ${BUNDLE}`)
   }
 }
 
