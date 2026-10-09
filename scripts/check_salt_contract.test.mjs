@@ -443,3 +443,20 @@ test('schema: the sections schema refuses a name listed twice in one list', () =
   const r = realVocab({ content: ['star', 'star'], chrome: ['close'] })
   assert.equal(r.code, 1, r.out); assert.match(r.out, /\/icons\/content must NOT have duplicate items/)
 })
+
+// SC-007 closed the last open question; the markup schema no longer offers the topic.
+const realMarkupSchema = JSON.parse(readFileSync(path.join(path.dirname(script), '..', 'salt-contract', 'schema', 'markup.schema.json'), 'utf8'))
+const realMarkupRun = (notes) => crossRun((f) => {
+  f['schema/markup.schema.json'] = structuredClone(realMarkupSchema)
+  f['contract/markup/hero.json'].root = { element: 'div' }
+  f['contract/markup/button.json'].root = { element: 'a' }
+  f['contract/markup/hero.json'].notes = notes
+})
+test('schema: the markup schema accepts a ruling note', () => {
+  const r = realMarkupRun([{ topic: 'ruling', text: 'x' }])
+  assert.equal(r.code, 0, r.out)
+})
+test('schema: the markup schema refuses an open-question note', () => {
+  const r = realMarkupRun([{ topic: 'open-question', text: 'x' }])
+  assert.equal(r.code, 1, r.out); assert.match(r.out, /contract\/markup\/hero\.json does not match schema\/markup\.schema\.json: \/notes\/0\/topic must be equal to one of the allowed values/)
+})
