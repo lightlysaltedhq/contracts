@@ -254,7 +254,7 @@
   "script": {
     "kind": "progressive",
     "withoutScript": "A native POST to the platform's endpoint that redirects back with the status.",
-    "withScript": "Submits in place, fetches the anti-spam credentials (or, with a captcha provider, the provider's token), fills the status region and moves focus to it."
+    "withScript": "Submits in place, fetches the anti-spam credentials (with a captcha provider, it sends the token the native widget produced), fills the status region and moves focus to it."
   },
   "uses": [
     "button"

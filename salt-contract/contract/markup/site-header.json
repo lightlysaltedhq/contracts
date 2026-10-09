@@ -431,7 +431,7 @@
   "notes": [
     {
       "topic": "ruling",
-      "text": "The header's sticky setting is drawn as data-sticky on the header on both platforms (SC-006); WordPress's is-sticky class goes. The main navigation takes the id site-navigation on both, which section anchors may not use."
+      "text": "The header's sticky setting is drawn as data-sticky on the header on both platforms (SC-006); WordPress's is-sticky class goes. The main navigation takes the id site-navigation on both, so a section anchor of that id takes a numeric suffix (section#anchors)."
     },
     {
       "topic": "ruling",

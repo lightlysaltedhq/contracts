@@ -193,7 +193,7 @@
                     "aria-label": "from:profile name"
                   },
                   "optional": true,
-                  "when": "a glyph exists for the profile; the name as text otherwise"
+                  "when": "a glyph exists for the profile"
                 },
                 {
                   "role": "social-name",
