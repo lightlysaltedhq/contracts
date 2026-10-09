@@ -107,7 +107,7 @@
         "salt-contact__field"
       ],
       "optional": true,
-      "when": "the anti-spam credentials were issued; inside a noscript element when a captcha provider is configured, whose widget is native. How credentials are issued and checked is form delivery, native to each platform (SC-003)",
+      "when": "the anti-spam credentials were issued. When a captcha provider is configured, the provider's widget is native, and this challenge is drawn inside a noscript element",
       "children": [
         {
           "role": "challenge-label",
@@ -254,7 +254,7 @@
   "script": {
     "kind": "progressive",
     "withoutScript": "A native POST to the platform's endpoint that redirects back with the status.",
-    "withScript": "Submits in place, fetches the anti-spam credentials, fills the status region and moves focus to it."
+    "withScript": "Submits in place, fetches the anti-spam credentials (or, with a captcha provider, the provider's token), fills the status region and moves focus to it."
   },
   "uses": [
     "button"
@@ -291,7 +291,7 @@
     },
     {
       "topic": "ruling",
-      "text": "The form shows a privacy line when a privacy page is set (SC-006). When a captcha provider is configured, its widget is native and the arithmetic challenge is drawn inside noscript, for visitors without JavaScript; without a provider the challenge is drawn as it is."
+      "text": "The form shows a privacy line when a privacy page is set (SC-006). When a captcha provider is configured, its widget is native and the arithmetic challenge is drawn inside noscript, so a visitor without JavaScript can still send the form: the challenge's credentials exist when the page is drawn, and a correct answer is accepted in place of a provider token. How each platform issues and checks them is native form delivery (SC-003). SC-006 accepts that the arithmetic path stays open beside a captcha. Without a provider the challenge is drawn as it is."
     },
     {
       "topic": "ruling",

@@ -31,10 +31,11 @@ Salted's decision log for Product Salt.
   leaves open.
 - The owner's rulings of 08/10/2026 (SC-006) are applied. A field condition may test whether a
   sibling is filled (`{ "field": "…", "filled": true }`, or `false` for empty), a MINOR addition
-  to the field schema that the gate checks; the background image's fit, position and tint, and
+  to the field schema that the gate checks (it may not name a group, list, collection-query or
+  link, which ACF conditional logic cannot target); the background image's fit, position and tint, and
   the tabs and carousel screen-reader names, use it. Pricing stays an edge recipe on both
-  platforms; section anchors may not take the ids main, content, header, footer, nav,
-  site-navigation, search or skip-link; the divider draws above the section; a full-bleed hero
+  platforms; a section anchor that is one of the ids main, content, header, footer, nav,
+  site-navigation, search or skip-link, or an id the page itself uses, takes a numeric suffix; the divider draws above the section; a full-bleed hero
   sets its words over the section's background image; the collection-showcase source has no
   default; team members carry categories on both. In the markup, a quote card names its person
   with a heading; team cards carry optional email, phone and social links; the consent banner is

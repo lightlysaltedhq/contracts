@@ -194,10 +194,15 @@
                   },
                   "optional": true,
                   "when": "a glyph exists for the profile; the name as text otherwise"
+                },
+                {
+                  "role": "social-name",
+                  "element": "span",
+                  "text": "from:profile name",
+                  "optional": true,
+                  "when": "no glyph exists for the profile"
                 }
-              ],
-              "text": "from:profile name",
-              "note": "The name is drawn as text only when no glyph exists for the profile; otherwise the icon carries it."
+              ]
             }
           ]
         }
