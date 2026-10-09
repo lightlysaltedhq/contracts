@@ -24,7 +24,8 @@
 //
 // Each difference is EXPECTED only when salt-contract/reports/round-trip-payload.expected.json lists
 // it: its section, field path, kind and exact wording, with the evidence (the owes, formerly or
-// values note, or the SC ruling) that accounts for it. Anything else is UNEXPECTED, so a later
+// values note, or the SC ruling) that accounts for it, which --check holds to a note of that field,
+// a field above it or its section (scripts/_round_trip.mjs). Anything else is UNEXPECTED, so a later
 // rename, retype or required change on a field that already owes something is not hidden by it.
 import { execFileSync } from 'node:child_process'
 import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
@@ -35,6 +36,9 @@ import { build } from 'esbuild'
 
 import { isMainModule, loadContract, normaliseLineEndings, resolveSection } from '../salt-contract/emit/_contract.mjs'
 import { toPayloadBlocks } from '../salt-contract/emit/payload.mjs'
+import { classify, misplacedEvidence } from './_round_trip.mjs'
+
+export { classify }
 
 const here = path.dirname(fileURLToPath(import.meta.url))
 const reportPath = path.join(here, '..', 'salt-contract', 'reports', 'round-trip-payload.md')
@@ -187,24 +191,6 @@ function suggestionFor(note, kind) {
 
 function record(section, at, def, kind, text, note = def?.platforms?.nextjs) {
   rows.push({ section, at, kind, text, suggestion: suggestionFor(note, kind) })
-}
-
-const keyOf = (r) => [r.section, r.path ?? r.at, r.kind, r.difference ?? r.text].join('\u0000')
-
-/**
- * Each row against the reviewed list: listed rows are expected, with the list's evidence; the rest
- * are unexpected. `unseen` is what the list names and the comparison no longer finds.
- */
-export function classify(found, list) {
-  const listed = new Map(list.map((e) => [keyOf(e), e]))
-  const seen = new Set()
-  const expected = []
-  const unexpected = []
-  for (const r of found) {
-    const entry = listed.get(keyOf(r))
-    if (entry) { seen.add(keyOf(r)); expected.push({ ...r, evidence: entry.evidence }) } else unexpected.push(r)
-  }
-  return { expected, unexpected, unseen: list.filter((e) => !seen.has(keyOf(e))) }
 }
 
 function compareFields(section, emittedFields, nextFields, defs, prefix) {
@@ -389,6 +375,9 @@ async function main({ nextjs, check, suggest }) {
     let committed = ''
     try { committed = readFileSync(reportPath, 'utf8') } catch { /* missing is stale */ }
     if (!reportIsCurrent(committed, text)) { console.log(`✗ ${path.relative(process.cwd(), reportPath)} is stale; regenerate it`); process.exit(1) }
+    const misplaced = misplacedEvidence(contract, list, 'nextjs')
+    for (const e of misplaced) console.log(`✗ ${e.section} ${e.path} (${e.kind}) cites evidence that is not a note of that field, its parents or its section: ${e.evidence}`)
+    if (misplaced.length) process.exit(1)
     if (unexpected.length || unseen.length) {
       console.log(`✗ ${unexpected.length} unexpected difference(s) and ${unseen.length} listed but not found; see the report`)
       process.exit(1)

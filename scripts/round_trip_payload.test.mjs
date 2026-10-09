@@ -65,3 +65,20 @@ test('S7: a committed report checked out with CRLF line endings is still current
   assert.equal(reportIsCurrent(text.replace(/\n/g, '\r\n'), text), true)
   assert.equal(reportIsCurrent(text.replace('a', 'c'), text), false)
 })
+
+test('(a) an expected entry\'s evidence must be a note of that field, its parents or its section', async () => {
+  const { misplacedEvidence } = await import('./_round_trip.mjs')
+  const { loadContract } = await import('../salt-contract/emit/_contract.mjs')
+  const contract = loadContract()
+  const file = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'salt-contract', 'reports', 'round-trip-payload.expected.json')
+  assert.deepEqual(misplacedEvidence(contract, JSON.parse(readFileSync(file, 'utf8')), 'nextjs'), [])
+  // A real owes note, but another field's.
+  const borrowed = { section: 'contact', path: 'showPhone', kind: 'missing', difference: 'not in salt-nextjs',
+    evidence: 'owes: no default source: the editor picks one, where today the first installed source is chosen (SC-006)' }
+  assert.deepEqual(misplacedEvidence(contract, [borrowed], 'nextjs'), [borrowed])
+  // A part of a query takes its query's note; a settings field its own.
+  const part = { section: 'faq', path: 'query.mode', kind: 'values', difference: 'x', evidence: 'values: {"auto":"automatic","filtered":"by-category","manual":"manual"}' }
+  assert.deepEqual(misplacedEvidence(contract, [part], 'nextjs'), [])
+  const slug = { section: 'call-to-action', path: '(block slug)', kind: 'name', difference: 'x', evidence: 'sections.json formerly: richText' }
+  assert.deepEqual(misplacedEvidence(contract, [slug], 'nextjs'), [slug])
+})
