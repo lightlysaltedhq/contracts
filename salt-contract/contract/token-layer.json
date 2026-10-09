@@ -79,12 +79,17 @@
     },
     {
       "id": "shape",
-      "what": "Corners, transparency and the focus ring's geometry.",
+      "what": "Corners, a card's shadow, transparency and the focus ring's geometry.",
       "tokens": [
         { "name": "--radius-sm", "meaning": "A small corner: tags, a post's image frame.", "source": "design-foundations", "ref": "scale-shape.json radius sm" },
         { "name": "--radius-md", "meaning": "A control's corner: buttons, inputs.", "source": "design-foundations", "ref": "scale-shape.json radius md" },
         { "name": "--radius-lg", "meaning": "A card's and a dialog's corner.", "source": "design-foundations", "ref": "scale-shape.json radius lg" },
         { "name": "--radius-full", "meaning": "A pill or a circle: chips and portraits.", "source": "design-foundations", "ref": "scale-shape.json radius full" },
+        { "name": "--salt-button-radius", "meaning": "The corner of every button-like control (a button, a pagination link, the copy-link button), set by the button-style dial; unset, the control corner (--radius-md).", "source": "salt", "ref": "dials.json button-style", "optional": true },
+        { "name": "--salt-card-shadow", "meaning": "A card's shadow, set by the shadows dial to a design-foundations --shadow-* rung's value; unset, none.", "source": "salt", "ref": "dials.json shadows", "optional": true },
+        { "name": "--color-shadow-sm", "meaning": "The smallest shadow's colour, which --shadow-sm's value references; emitted while the shadows dial is set, since no stylesheet reads it directly.", "source": "design-foundations", "ref": "vocabulary.json color.shadow.sm", "requiredBy": ["shadows"] },
+        { "name": "--color-shadow-md", "meaning": "The mid shadow's colour, which --shadow-md's value references.", "source": "design-foundations", "ref": "vocabulary.json color.shadow.md", "requiredBy": ["shadows"] },
+        { "name": "--color-shadow-lg", "meaning": "The largest shadow's colour, which the shadow family requires (scale-shape.json shadow requiresTokens).", "source": "design-foundations", "ref": "vocabulary.json color.shadow.lg", "requiredBy": ["shadows"] },
         { "name": "--opacity-medium", "meaning": "A carousel control at the end of its track.", "source": "design-foundations", "ref": "scale-shape.json opacity medium" },
         { "name": "--opacity-heavy", "meaning": "A disabled button.", "source": "design-foundations", "ref": "scale-shape.json opacity heavy" },
         { "name": "--scrim-subtle", "meaning": "The subtle scrim's alpha, which the markup writes into --salt-scrim-alpha.", "source": "salt" },

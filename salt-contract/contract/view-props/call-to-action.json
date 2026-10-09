@@ -1,0 +1,36 @@
+{
+  "$schema": "../../schema/view-props.schema.json",
+  "version": "0.1.0",
+  "section": "call-to-action",
+  "data": [
+    {
+      "name": "heading",
+      "kind": "text",
+      "nullable": true,
+      "from": "field",
+      "field": "heading"
+    },
+    {
+      "name": "body",
+      "kind": "rich-text",
+      "nullable": true,
+      "from": "field",
+      "field": "body"
+    },
+    {
+      "name": "buttons",
+      "kind": "list",
+      "of": "button",
+      "from": "field",
+      "field": "buttons"
+    }
+  ],
+  "platforms": {
+    "nextjs": {
+      "formerly": "CtaBlockData"
+    },
+    "wordpress": {
+      "owes": "a view template that takes these props, split from the section's logic"
+    }
+  }
+}

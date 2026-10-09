@@ -1,0 +1,46 @@
+{
+  "$schema": "../../schema/view-props.schema.json",
+  "version": "0.1.0",
+  "section": "rich-text",
+  "data": [
+    {
+      "name": "eyebrow",
+      "kind": "text",
+      "nullable": true,
+      "from": "field",
+      "field": "eyebrow"
+    },
+    {
+      "name": "heading",
+      "kind": "text",
+      "nullable": true,
+      "from": "field",
+      "field": "heading"
+    },
+    {
+      "name": "body",
+      "kind": "rich-text",
+      "nullable": true,
+      "from": "field",
+      "field": "body"
+    },
+    {
+      "name": "alignment",
+      "kind": "enum",
+      "values": [
+        "left",
+        "centre"
+      ],
+      "from": "field",
+      "field": "alignment"
+    }
+  ],
+  "platforms": {
+    "nextjs": {
+      "formerly": "RichTextBlockData"
+    },
+    "wordpress": {
+      "owes": "a view template that takes these props, split from the section's logic"
+    }
+  }
+}

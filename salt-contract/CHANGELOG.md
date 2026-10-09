@@ -6,6 +6,42 @@ Salted's decision log for Product Salt.
 
 ## Unreleased (0.1.0, drafting)
 
+- The extension points (ID-3606), with the customisation ladder as normative text in the README:
+  brand settings, dials and tokens, variants, swap a view, replace logic, a client-only section,
+  each saying what still reaches a site on update. No separate slots-and-hooks system.
+  - `contract/dials.json` (`./dials`, schema `./schema/dials`): the four admin-only design dials
+    1.0.0 ships (SC-015). Corners (`--radius-sm`, `-md`, `-lg`: square, soft, round), shadows
+    (`--salt-card-shadow`: none, subtle, raised, on design-foundations' `--shadow-sm` and
+    `--shadow-md`, requiring the shadow colour roles `--color-shadow-sm`, `-md` and `-lg`, which a
+    runtime emits while the dial is set), button style (`--salt-button-radius`, read by buttons,
+    pagination links and the copy-link button: square, soft, pill) and density
+    (`--space-section-sm`, `-md`, `-lg`: compact, comfortable, spacious). Each option points a token
+    at a rung, or 0, and the runtime writes that rung's value. Both platforms owe all four.
+  - Two component tokens the stylesheets read, both optional, so nothing changes until an admin
+    turns a dial: `.salt-card` reads `--salt-card-shadow` (fallback `none`) and `.salt-button`,
+    `.salt-pagination__link` and `.salt-copy-link__button` read `--salt-button-radius` (fallback
+    `--radius-md`). The token layer names 131 properties: the 128 the stylesheets and markup read,
+    and three a dial requires, each marked `requiredBy` (a new optional key in
+    `./schema/token-layer`).
+  - `contract/view-props/` (`./view-props/<section>`, schema `./schema/view-props`): the props each
+    section's view receives, as `data` per section and the page `plan` once in `_shared`, in kinds
+    both a TypeScript type and a PHP array shape can be generated from. A prop drawn from a field
+    takes the field's canonical name (SC-015) and is nullable whenever its field can come out empty
+    (SC-009 cleaning, a deleted upload), required or not; a value only the logic guarantees, by
+    dropping the row, comes from the logic. A team card carries its contact and social links, and a
+    carousel, gallery or tab set says whether it is named.
+  - `schema/replaced-logic.schema.json` (`./schema/replaced-logic`): the `salt-overrides.json` a
+    client site writes when it swaps a view or takes a section over, which the update flag reads. On
+    WordPress, `OVERRIDES.md` points at it (SC-015). A view swap is flagged when the section's view
+    props or `_shared.json` change.
+  - `npm run salt-extensions` (in `verify`, CI and the release workflow): every token a dial moves
+    is in the token layer, and every rung it points at is there or in design-foundations' scale
+    shape, and every token a rung's value references is required by the dial and named in the token
+    layer; every section has view props; every prop drawn from a field names a real one, takes its
+    name, is nullable whenever its field can come out empty, and offers its select's options; the
+    replaced-logic examples hold. `npm run salt-stylesheets` names the card's shadow as a focus-rule
+    exception and accepts a dial's radius token in front of a rung, and passes a token no stylesheet
+    reads only when a dial requires it, and the release workflow now runs it too.
 - Fixtures (`fixtures/<section>/<case>.json` and `.html`, `./fixtures/*`, ID-3604): 73 cases over
   the 17 sections. Each pairs a section's stored field values and its page context with the
   default HTML both platforms must render. Together they cover every variant option, the zero

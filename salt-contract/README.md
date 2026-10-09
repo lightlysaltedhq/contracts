@@ -17,7 +17,10 @@ as a WordPress parent theme. This package is the one thing both implementations 
 - **fixtures** (`fixtures/<section>/<case>`): sample content for every section, variant and state,
   with the default HTML both platforms must render for it, and the **normaliser**
   (`normalise.mjs`) both run their output through before comparing;
-- the **extension points** a client site may use (to come).
+- the **extension points** a client site may use (the customisation ladder, below): the design
+  dials (`contract/dials.json`), the props each section's view receives
+  (`contract/view-props/<section>.json`), and the declaration a site writes when it takes a section
+  over (`schema/replaced-logic.schema.json`).
 
 It sits on top of `@lightlysaltedhq/design-foundations` (the colour, type and scale rules every
 Lightly Salted product follows) and holds no brand values of its own.
@@ -28,6 +31,42 @@ Decided by the owner on 08/10/2026 (`SC-003` in the decision log): **visitor out
 classes, data attributes, stylesheets, accessibility behaviour) and **editor fields** (names,
 types, choices, limits, descriptions). Admin screens, logins, form delivery and routing stay
 native to each CMS.
+
+## The customisation ladder
+
+A client site customises Salt by climbing this ladder, and stops at the lowest tier that does the
+job. The lower the tier, the more of each Salt release still reaches the site. Both platforms
+offer every tier under the same names, with the same data and the same choices; only the mechanism
+underneath is native (a React component on one, a PHP template on the other). There is no separate
+system of slots and hooks: swapping a view does that job, and every hook not built is one less
+thing to hold identical. This section is normative, from the owner's decisions of 06/10/2026 on
+the Salt page.
+
+1. **Brand settings.** The site's colours, fonts, type scale and logos, set in the admin. *On
+   update, everything still reaches the site.*
+2. **Design dials and tokens.** Site-wide choices from a scale (corners, shadows, button style
+   and density), set in the admin by the admin role only (`contract/dials.json`). Any token in `contract/token-layer.json` may also be overridden in the site's code, for what the
+   dials do not cover. A site's own CSS reaches values through tokens, never hard-coded ones, so
+   dark mode, the contrast checks and the dials keep working on it. *On update, everything still
+   reaches the site.*
+3. **Variants.** A section's layout or style option, chosen by an editor (the `variants` in
+   `contract/sections.json`). *On update, everything still reaches the site.*
+4. **Swap a section's view.** The normal case. The site replaces how one section looks and keeps
+   its logic, which hands the new view exactly the props in `contract/view-props/<section>.json`.
+   The swap is declared (`tier: "view"`) in the site's `salt-overrides.json`
+   (`schema/replaced-logic.schema.json`); on WordPress, the child theme's `OVERRIDES.md` points at it
+   rather than repeating it. *On update, all of the section's logic, the section wrapper and the
+   shared components still reach the site; core's default view of that section does not. A
+   release that changes the section's view props, or the plan and shared types in
+   `contract/view-props/_shared.json`, is flagged.*
+5. **Replace a section's logic.** Rare. The site takes the section over entirely and declares it
+   (`tier: "logic"`). *On update, nothing reaches that section; it is flagged on every update.*
+6. **A client-only section.** A section only this site has, listed under `clientSections` so a
+   later contract section of the same id is caught. *Not affected by updates.*
+
+A custom view is written for one platform and will not run on the other; it is that client's own
+code. What the contract holds identical is the name of each extension point, the data a view
+receives and the choices on offer.
 
 ## Status
 
@@ -40,7 +79,10 @@ version means.
 From the repository root, `npm run salt-contract` runs this package's gate: one version across
 every contract file, every contract file valid against its schema, no colour values anywhere, and
 a tarball that ships only what it declares. `npm run salt-stylesheets` runs the shared stylesheets'
-gate. `npm run verify` runs every gate in the repository.
+gate. `node scripts/check_salt_extensions.mjs` runs the extension points' gate: every token a
+dial moves is in the token layer, every section has its view props and each prop drawn from a field
+names a real one, and the replaced-logic examples hold. `npm run verify` runs every gate in the
+repository.
 
 ## Generating Payload blocks
 

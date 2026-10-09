@@ -1,0 +1,79 @@
+{
+  "$schema": "../../schema/view-props.schema.json",
+  "version": "0.1.0",
+  "section": "media-text",
+  "data": [
+    {
+      "name": "mode",
+      "kind": "enum",
+      "values": [
+        "single",
+        "alternating"
+      ],
+      "from": "field",
+      "field": "mode"
+    },
+    {
+      "name": "rows",
+      "kind": "list",
+      "of": "row",
+      "from": "field",
+      "field": "rows"
+    }
+  ],
+  "types": {
+    "row": {
+      "props": [
+        {
+          "name": "image",
+          "kind": "object",
+          "of": "image",
+          "nullable": true,
+          "from": "field",
+          "field": "rows.image"
+        },
+        {
+          "name": "heading",
+          "kind": "text",
+          "nullable": true,
+          "from": "field",
+          "field": "rows.heading"
+        },
+        {
+          "name": "content",
+          "kind": "rich-text",
+          "nullable": true,
+          "from": "field",
+          "field": "rows.content"
+        },
+        {
+          "name": "mediaSide",
+          "kind": "enum",
+          "values": [
+            "left",
+            "right"
+          ],
+          "description": "The side resolved: in alternating mode, the logic alternates it by row.",
+          "from": "logic",
+          "field": "rows.mediaSide"
+        },
+        {
+          "name": "buttons",
+          "kind": "list",
+          "of": "button",
+          "from": "field",
+          "field": "rows.buttons"
+        }
+      ]
+    }
+  },
+  "platforms": {
+    "nextjs": {
+      "formerly": "MediaTextBlockData",
+      "owes": "a row's content and mediaSide, in place of body and side"
+    },
+    "wordpress": {
+      "owes": "a view template that takes these props, split from the section's logic"
+    }
+  }
+}

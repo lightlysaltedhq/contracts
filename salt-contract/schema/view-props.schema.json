@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "view-props.schema.json",
+  "title": "The props a section's view receives",
+  "description": "Tier 4 of the customisation ladder (README, 'The customisation ladder'). A client site that swaps a section's view keeps the section's logic, and the logic hands the view exactly these props, so a swapped view is written against a stable public type. Every view receives two things: `data`, described in contract/view-props/<section id>.json, and `plan`, the page plan's view of the section, described once as the `plan` type in contract/view-props/_shared.json. Salt for Next.js generates a TypeScript interface per file ({ data: <Section>Data; plan: Plan }, names in PascalCase) and Salt for WordPress a PHP array shape (array{data: array{...}, plan: array{...}}) for its view templates' docblocks and static analysis. Retyping or removing a prop is MAJOR, a new nullable prop MINOR (RELEASE-POLICY.md section 2).\n\nKINDS map to both languages and are the only ones allowed. text: string. integer: int. number: int|float (TypeScript number). boolean: bool. enum: one of `values`, which are strings or integers. icon: a content icon name from contract/sections.json `icons`, as a string. rich-text: the field's body, as the platform's own renderer takes it (Salt for Next.js: Lexical's JSON; Salt for WordPress: sanitised HTML); a view hands it to the platform's rich-text renderer and never parses it. object: a value of the named type in `of`. list: an ordered array of `of`, which is a type or a scalar kind. A `nullable` prop is null when it has no value (SC-009 says when text is empty), never an empty string; a list is never null unless `nullable` says so, and is empty instead.\n\nWHERE A PROP COMES FROM (`from`). field: the editor's value, cleaned (trimmed, emptied text as null, choices narrowed to their options), named by `field` and taking that field's name. logic: computed by the section's logic, from `field` where one is named. collection: items read from a collection, by the query `field` names. site: a site setting outside the section (contact details, labels). plan: the page plan (heading level, the settled anchor, priority media). The package gate (scripts/check_salt_extensions.mjs) checks: every section in contract/sections.json has a file and no file names another; every `field` names a real field in the section's fields file, through groups and list rows by dots (`buttons.link`), or a shared setting as `settings.<name>`; a `from: field` prop takes the field's name, and is nullable whenever its field can clean or resolve to nothing (a text, textarea, rich-text, image, link, relationship or number field, required or not, since SC-009 empties whitespace-only text and an upload can be deleted; or a select with no default that is not required); a non-null value backed by such a field comes `from: logic`, with a description saying how the logic guarantees it (it drops the row); an enum prop drawn from a select offers exactly its options; every `of` names a type in the file or in _shared.json, or a scalar kind.",
+  "type": "object",
+  "required": ["$schema", "version", "section"],
+  "additionalProperties": false,
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*$"
+    },
+    "propName": {
+      "type": "string",
+      "pattern": "^[a-z][a-zA-Z0-9]*$"
+    },
+    "prop": {
+      "type": "object",
+      "required": ["name", "kind", "from"],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "$ref": "#/$defs/propName" },
+        "kind": {
+          "enum": ["text", "integer", "number", "boolean", "enum", "icon", "rich-text", "object", "list"]
+        },
+        "of": {
+          "description": "For object, the type's id; for list, a type's id or a scalar kind.",
+          "$ref": "#/$defs/id"
+        },
+        "values": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": ["string", "integer"] }
+        },
+        "nullable": { "type": "boolean" },
+        "from": { "enum": ["field", "logic", "collection", "site", "plan"] },
+        "field": {
+          "type": "string",
+          "pattern": "^[a-z][a-zA-Z0-9]*(\\.[a-z][a-zA-Z0-9]*)*$"
+        },
+        "description": { "type": "string", "minLength": 1 }
+      },
+      "allOf": [
+        { "if": { "properties": { "kind": { "enum": ["object", "list"] } } }, "then": { "required": ["of"] }, "else": { "not": { "required": ["of"] } } },
+        { "if": { "properties": { "kind": { "const": "enum" } } }, "then": { "required": ["values"] }, "else": { "not": { "required": ["values"] } } },
+        { "if": { "properties": { "from": { "enum": ["field", "collection"] } } }, "then": { "required": ["field"] } }
+      ]
+    },
+    "props": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/prop" }
+    },
+    "platformNote": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": false,
+      "properties": {
+        "formerly": { "type": "string", "minLength": 1, "description": "The type or variable this platform's view received before the contract." },
+        "owes": { "type": "string", "minLength": 1, "description": "What this platform must add or change to conform." },
+        "note": { "type": "string", "minLength": 1 }
+      }
+    }
+  },
+  "properties": {
+    "$schema": { "type": "string" },
+    "version": { "type": "string" },
+    "$comment": { "type": "string" },
+    "section": {
+      "description": "The section id, which is also the file name; `shared` for _shared.json, which holds only types.",
+      "$ref": "#/$defs/id"
+    },
+    "data": { "$ref": "#/$defs/props" },
+    "types": {
+      "description": "Named object types, by id. A section file's types are its own; _shared.json's are every file's.",
+      "type": "object",
+      "propertyNames": { "$ref": "#/$defs/id" },
+      "additionalProperties": {
+        "type": "object",
+        "required": ["props"],
+        "additionalProperties": false,
+        "properties": {
+          "description": { "type": "string", "minLength": 1 },
+          "props": { "$ref": "#/$defs/props" }
+        }
+      }
+    },
+    "platforms": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "nextjs": { "$ref": "#/$defs/platformNote" },
+        "wordpress": { "$ref": "#/$defs/platformNote" }
+      }
+    }
+  },
+  "if": { "properties": { "section": { "const": "shared" } } },
+  "then": { "required": ["types"], "not": { "required": ["data"] } },
+  "else": { "required": ["data"] }
+}

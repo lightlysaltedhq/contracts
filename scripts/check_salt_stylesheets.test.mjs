@@ -1400,9 +1400,16 @@ describe('nothing outside the focus rules declares an outline or a box-shadow', 
     ['primitives.css', "[class*='salt-button'] {\n  box-shadow: none;\n}"],
     ['blocks.css', '.salt-block a {\n  outline: none;\n}'],
     ['primitives.css', '.salt-card {\n  all: unset;\n}'],
+    ['primitives.css', '.salt-card__body {\n  box-shadow: var(--salt-card-shadow, none);\n}'],
   ])('fails on %s given `%s`', (file, addition) => {
     const { code, output } = gate(file, appending(addition))
     expect(output).toContain('nothing outside the focus rules declares an outline or a box-shadow')
+    expect(code).toBe(1)
+  })
+
+  it('fails when the card’s shadow, a named exception, is gone', () => {
+    const { code, output } = gate('primitives.css', replacing('  box-shadow: var(--salt-card-shadow, none);\n', ''))
+    expect(output).toContain('primitives.css .salt-card box-shadow: a named exception not found exactly once')
     expect(code).toBe(1)
   })
 
@@ -1450,6 +1457,9 @@ describe('the scale tokens the stylesheets read', () => {
     ['a corner longhand written as a literal', 'blocks.css', appending('.salt-note {\n  border-top-left-radius: 4px;\n}'), 'writes `border-top-left-radius: 4px`'],
     ['a radius on a rung the token layer does not name', 'blocks.css', appending('.salt-note {\n  border-radius: var(--radius-xl);\n}'), 'contract/token-layer.json names no `--radius-xl`'],
     ['a radius !important', 'primitives.css', appending('.salt-note {\n  border-radius: var(--radius-sm) !important;\n}'), 'declares `border-radius` !important'],
+    ['a dial\u2019s radius token the token layer does not name', 'primitives.css', replacing('var(--salt-button-radius, var(--radius-md));\n', 'var(--salt-chip-radius, var(--radius-md));\n'), 'contract/token-layer.json names no `--salt-chip-radius`'],
+    ['a dial\u2019s radius token falling back to a literal', 'primitives.css', replacing('var(--salt-button-radius, var(--radius-md));\n', 'var(--salt-button-radius, 6px);\n'), 'writes `border-radius: var(--salt-button-radius, 6px)`'],
+    ['a dial\u2019s radius token falling back to a rung the layer does not name', 'primitives.css', replacing('var(--salt-button-radius, var(--radius-md));\n', 'var(--salt-button-radius, var(--radius-xl));\n'), 'contract/token-layer.json names no `--radius-xl`'],
     ['an opacity written as a literal', 'primitives.css', replacing('  opacity: var(--opacity-heavy);', '  opacity: 0.6;'), 'writes `opacity: 0.6`'],
     ['an opacity reading another family', 'primitives.css', replacing('  opacity: var(--opacity-medium);', '  opacity: var(--scrim-standard);'), 'reads a `--opacity-*` token'],
     ['a filter opacity()', 'primitives.css', appending('.salt-note {\n  filter: opacity(0.5);\n}'), '`opacity()` is a shape this contract does not rank'],
@@ -2287,6 +2297,14 @@ describe('the token layer names exactly what the stylesheets read', () => {
     ['a property with a fallback at every read is not marked optional', [tokenLayer((layer) => { delete tokenNamed(layer, '--salt-rating-fill').optional })], '--salt-rating-fill has a fallback at every read (blocks.css), so contract/token-layer.json marks it optional'],
     ['a read loses its fallback', [['chrome.css', replacing('var(--duration-moderate, 200ms)', 'var(--duration-moderate)')]], 'marks --duration-moderate optional, but 1 of its 1 read(s) have no fallback'],
     ['the token layer is not JSON', [['contract/token-layer.json', (text) => text.slice(1)]], 'contract/token-layer.json is missing or not JSON'],
+    /* A property only a dial's rungs read passes unread while the dial lists it under requires. */
+    ['a dial-required property the dial does not require', [['contract/dials.json', (text) => {
+      const dials = JSON.parse(text)
+      const shadows = dials.dials.find((d) => d.id === 'shadows')
+      shadows.requires = shadows.requires.filter((t) => t !== '--color-shadow-lg')
+      return JSON.stringify(dials)
+    }]], 'says --color-shadow-lg is required by shadows, but contract/dials.json gives no such dial that requires it'],
+    ['a dial-required property naming a dial that does not exist', [tokenLayer((layer) => { tokenNamed(layer, '--color-shadow-sm').requiredBy = ['elevation'] })], 'says --color-shadow-sm is required by elevation'],
     /* What the markup writes is read too (T2), through each placeholder's value map. */
     ['a token the markup writes into a band is dropped', [tokenLayer((layer) => { for (const g of layer.groups) g.tokens = g.tokens.filter((t) => t.name !== '--scrim-strong') })], 'contract/markup/section.json read(s) --scrim-strong, which contract/token-layer.json does not name'],
     ['a spacing the markup writes is dropped', [tokenLayer((layer) => { for (const g of layer.groups) g.tokens = g.tokens.filter((t) => t.name !== '--space-section-lg') })], 'contract/markup/section.json read(s) --space-section-lg, which contract/token-layer.json does not name'],

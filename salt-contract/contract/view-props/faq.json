@@ -1,0 +1,71 @@
+{
+  "$schema": "../../schema/view-props.schema.json",
+  "version": "0.1.0",
+  "section": "faq",
+  "data": [
+    {
+      "name": "eyebrow",
+      "kind": "text",
+      "nullable": true,
+      "from": "field",
+      "field": "eyebrow"
+    },
+    {
+      "name": "heading",
+      "kind": "text",
+      "nullable": true,
+      "from": "field",
+      "field": "heading"
+    },
+    {
+      "name": "intro",
+      "kind": "text",
+      "nullable": true,
+      "from": "field",
+      "field": "intro"
+    },
+    {
+      "name": "items",
+      "kind": "list",
+      "of": "faq-item",
+      "from": "collection",
+      "field": "query",
+      "description": "FAQs with both a question and an answer, in the query's order."
+    },
+    {
+      "name": "structuredData",
+      "kind": "boolean",
+      "from": "field",
+      "field": "structuredData"
+    }
+  ],
+  "types": {
+    "faq-item": {
+      "props": [
+        {
+          "name": "id",
+          "kind": "text",
+          "from": "logic"
+        },
+        {
+          "name": "question",
+          "kind": "text",
+          "from": "logic"
+        },
+        {
+          "name": "answer",
+          "kind": "rich-text",
+          "from": "logic"
+        }
+      ]
+    }
+  },
+  "platforms": {
+    "nextjs": {
+      "formerly": "FaqBlockData"
+    },
+    "wordpress": {
+      "owes": "a view template that takes these props, split from the section's logic"
+    }
+  }
+}

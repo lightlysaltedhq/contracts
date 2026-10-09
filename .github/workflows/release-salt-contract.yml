@@ -190,6 +190,9 @@ jobs:
       - name: The shared stylesheets' gate
         if: steps.registry.outputs.live == 'false'
         run: npm run salt-stylesheets
+      - name: The extension points' gate
+        if: steps.registry.outputs.live == 'false'
+        run: npm run salt-extensions
       - name: Every Salt section's fixtures, against its fields and markup, and the normaliser
         if: steps.registry.outputs.live == 'false'
         run: npm run salt-fixtures

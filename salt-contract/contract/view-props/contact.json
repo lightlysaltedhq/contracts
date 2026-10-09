@@ -1,0 +1,168 @@
+{
+  "$schema": "../../schema/view-props.schema.json",
+  "version": "0.1.0",
+  "section": "contact",
+  "data": [
+    {
+      "name": "heading",
+      "kind": "text",
+      "nullable": true,
+      "from": "field",
+      "field": "heading"
+    },
+    {
+      "name": "intro",
+      "kind": "text",
+      "nullable": true,
+      "from": "field",
+      "field": "intro"
+    },
+    {
+      "name": "showPhone",
+      "kind": "boolean",
+      "from": "field",
+      "field": "showPhone"
+    },
+    {
+      "name": "showEmail",
+      "kind": "boolean",
+      "from": "field",
+      "field": "showEmail"
+    },
+    {
+      "name": "showAddress",
+      "kind": "boolean",
+      "from": "field",
+      "field": "showAddress"
+    },
+    {
+      "name": "formIntro",
+      "kind": "text",
+      "nullable": true,
+      "from": "field",
+      "field": "formIntro"
+    },
+    {
+      "name": "details",
+      "kind": "object",
+      "of": "contact-details",
+      "description": "The site's contact details, each null where the section switches it off or it is unset.",
+      "from": "site"
+    },
+    {
+      "name": "form",
+      "kind": "object",
+      "of": "contact-form",
+      "nullable": true,
+      "description": "Null when the site takes no enquiries, which draws the zero state.",
+      "from": "site"
+    }
+  ],
+  "types": {
+    "contact-details": {
+      "props": [
+        {
+          "name": "organisation",
+          "kind": "text",
+          "nullable": true,
+          "description": "The organisation's name, drawn first; null when the site has none.",
+          "from": "site"
+        },
+        {
+          "name": "phone",
+          "kind": "text",
+          "nullable": true,
+          "from": "site"
+        },
+        {
+          "name": "phoneHref",
+          "kind": "text",
+          "nullable": true,
+          "description": "A tel: address, only when dialable digits survive.",
+          "from": "site"
+        },
+        {
+          "name": "email",
+          "kind": "text",
+          "nullable": true,
+          "from": "site"
+        },
+        {
+          "name": "address",
+          "kind": "list",
+          "of": "text",
+          "description": "The non-empty address lines.",
+          "from": "site"
+        }
+      ]
+    },
+    "contact-form": {
+      "props": [
+        {
+          "name": "id",
+          "kind": "text",
+          "description": "The form's id, <anchor>__form.",
+          "from": "logic"
+        },
+        {
+          "name": "action",
+          "kind": "text",
+          "description": "Where the form posts without script.",
+          "from": "site"
+        },
+        {
+          "name": "enquiryTypes",
+          "kind": "list",
+          "of": "enquiry-type",
+          "description": "Offered as a select only when there are two or more.",
+          "from": "site"
+        },
+        {
+          "name": "phone",
+          "kind": "enum",
+          "values": [
+            "off",
+            "optional",
+            "required"
+          ],
+          "from": "site"
+        },
+        {
+          "name": "privacyHref",
+          "kind": "text",
+          "nullable": true,
+          "from": "site"
+        },
+        {
+          "name": "captcha",
+          "kind": "boolean",
+          "description": "True when a captcha provider is configured, which adds the noscript arithmetic challenge (SC-006).",
+          "from": "site"
+        }
+      ]
+    },
+    "enquiry-type": {
+      "props": [
+        {
+          "name": "value",
+          "kind": "text",
+          "from": "site"
+        },
+        {
+          "name": "label",
+          "kind": "text",
+          "from": "site"
+        }
+      ]
+    }
+  },
+  "platforms": {
+    "nextjs": {
+      "formerly": "ContactBlockData",
+      "owes": "the showPhone, showEmail, showAddress and formIntro fields; details; the form settings as one nullable object"
+    },
+    "wordpress": {
+      "owes": "a view template that takes these props, split from the section's logic"
+    }
+  }
+}

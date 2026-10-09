@@ -40,6 +40,11 @@
     "./styles/*": "./styles/*",
     "./token-layer": "./contract/token-layer.json",
     "./schema/token-layer": "./schema/token-layer.schema.json",
+    "./dials": "./contract/dials.json",
+    "./schema/dials": "./schema/dials.schema.json",
+    "./view-props/*": "./contract/view-props/*.json",
+    "./schema/view-props": "./schema/view-props.schema.json",
+    "./schema/replaced-logic": "./schema/replaced-logic.schema.json",
     "./normalise": "./normalise.mjs",
     "./fixtures/*": "./fixtures/*",
     "./package.json": "./package.json"
