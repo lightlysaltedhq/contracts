@@ -43,7 +43,16 @@ gate. `npm run verify` runs every gate in the repository.
 ## Stylesheets
 
 `styles/` is the one shared stylesheet set both implementations serve (SC-002). Load it in this
-order: `base.css`, `sections.css`, `primitives.css`, `blocks.css`, `chrome.css`, `views.css`. It
-reads only the custom properties `contract/token-layer.json` names, which each implementation's
-runtime emits (its generated `theme.css`). The files carry long comments: serve them as one
-minified bundle, never as six render-blocking requests.
+order: `base.css`, `sections.css`, `primitives.css`, `blocks.css`, `chrome.css`, `views.css`.
+
+`base.css` is one `@layer base` block, so it yields to every unlayered rule. Three set-ups are
+supported: with Tailwind v4, import it after `@import 'tailwindcss'`, so its rules follow
+preflight in Tailwind's `base` layer; with Tailwind v3, import it into the stylesheet v3
+processes, where `@layer base` places it after v3's preflight; with no Tailwind, load it first,
+as above. Two are not: importing it before `tailwindcss` in v4, where preflight then comes later in
+the same layer and puts every heading back at body size, and serving it as a file of its own beside
+v3's output, which is unlayered and so outranks it.
+
+The set reads only the custom properties `contract/token-layer.json` names, which each
+implementation's runtime emits (its generated `theme.css`). The files carry long comments: serve
+them as one minified bundle, never as six render-blocking requests.
