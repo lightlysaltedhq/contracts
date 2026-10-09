@@ -25,7 +25,7 @@ import { readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 
-import { clauses, collectionQueryShape, LINK_SHAPE, loadContract, resolveSection, SOURCES } from './_contract.mjs'
+import { clauses, collectionQueryShape, hasVisibleText, isFilled, LINK_SHAPE, loadContract, resolveSection, SOURCES } from './_contract.mjs'
 
 /**
  * Each source's Payload collection and category taxonomy, as Salt for Next.js names them by
@@ -48,21 +48,7 @@ const pascal = (s) => s.split('-').map((w) => w.charAt(0).toUpperCase() + w.slic
 
 // ── Conditions ─────────────────────────────────────────────────────────────────────────────────
 
-const hasText = (node) =>
-  !!node && typeof node === 'object' &&
-  ((typeof node.text === 'string' && node.text.trim() !== '') || (Array.isArray(node.children) && node.children.some(hasText)))
-
-/** The schema's `filled`: a value an editor has given, by the sibling's type. */
-export function isFilled(value) {
-  if (value === undefined || value === null) return false
-  if (typeof value === 'string') return value.trim() !== ''
-  if (typeof value === 'boolean') return value
-  if (typeof value === 'number') return !Number.isNaN(value)
-  if (Array.isArray(value)) return value.length > 0
-  // Lexical stores an emptied editor as a root holding an empty paragraph, which is not a value.
-  if (typeof value === 'object' && 'root' in value) return hasText(value.root)
-  return true
-}
+export { hasVisibleText, isFilled }
 
 /**
  * Whether every clause holds for these siblings. An absent sibling reads as its contract default,

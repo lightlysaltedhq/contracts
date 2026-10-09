@@ -53,6 +53,34 @@ export function resolveSection(contract, id) {
   return { section, fields: doc.fields, settings }
 }
 
+/**
+ * Whether text holds anything visible (SC-009): what is left after removing whitespace and the
+ * zero-width characters U+200B to U+200D, U+2060 and U+FEFF. Text of nothing else is empty, for
+ * conditions and for rendering.
+ */
+export const hasVisibleText = (text) =>
+  typeof text === 'string' && text.replace(/[\s\u200B-\u200D\u2060\uFEFF]/g, '') !== ''
+
+// Every text node of a Lexical document, in order, so text split across nodes is judged whole.
+const textOf = (node) =>
+  !node || typeof node !== 'object' ? ''
+    : (typeof node.text === 'string' ? node.text : '') + (Array.isArray(node.children) ? node.children.map(textOf).join('') : '')
+
+/**
+ * The schema's `filled`: a value an editor has given, by the sibling's type. Text, textarea and
+ * rich text by hasVisibleText; a chosen image, option or relationship; a ticked boolean; any number.
+ */
+export function isFilled(value) {
+  if (value === undefined || value === null) return false
+  if (typeof value === 'string') return hasVisibleText(value)
+  if (typeof value === 'boolean') return value
+  if (typeof value === 'number') return !Number.isNaN(value)
+  if (Array.isArray(value)) return value.length > 0
+  // Lexical stores an emptied editor as a root holding an empty paragraph, which is not a value.
+  if (typeof value === 'object' && 'root' in value) return hasVisibleText(textOf(value.root))
+  return true
+}
+
 /** A condition as a list of clauses, all of which must hold; [] for none. */
 export const clauses = (condition) => (condition === undefined ? [] : [condition].flat())
 

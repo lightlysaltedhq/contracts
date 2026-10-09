@@ -9,7 +9,7 @@ import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import { loadContract } from '../salt-contract/emit/_contract.mjs'
+import { hasVisibleText, loadContract } from '../salt-contract/emit/_contract.mjs'
 import { checkPayloadSnapshot, isFilled, payloadSnapshot, toPayloadBlocks } from '../salt-contract/emit/payload.mjs'
 
 const emitter = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'salt-contract', 'emit', 'payload.mjs')
@@ -108,6 +108,26 @@ test('a filled condition shows the field only when the sibling has a value; fill
   assert.equal(isFilled([]), false)
   assert.equal(isFilled({ root: { children: [{ type: 'paragraph', children: [] }] } }), false)
   assert.equal(isFilled({ root: { children: [{ type: 'paragraph', children: [{ text: 'Hi' }] }] } }), true)
+})
+
+test('text is filled only when something visible is left after whitespace and zero-width characters (SC-009)', () => {
+  const label = field(block(blocks(), 'tabs').fields, 'label') // { field: 'heading', filled: false }
+  const cases = [
+    ['spaces only', ' \t\n ', false],
+    ['U+200B only', '\u200B', false],
+    ['every zero-width character', '\u200B\u200C\u200D\u2060\uFEFF', false],
+    ['zero-width and spaces mixed', ' \u200B \u2060\u00A0', false],
+    ['visible text among them', '\u200B Our work \uFEFF', true],
+    ['visible text', 'Our work', true],
+  ]
+  for (const [name, text, visible] of cases) {
+    assert.equal(hasVisibleText(text), visible, name)
+    assert.equal(isFilled(text), visible, name)
+    assert.equal(shows(label, { heading: text }), !visible, name)
+  }
+  const doc = (...texts) => ({ root: { children: [{ type: 'paragraph', children: texts.map((text) => ({ text })) }] } })
+  assert.equal(isFilled(doc('\u200B', '  ')), false)
+  assert.equal(isFilled(doc('\u200B', 'Hi')), true)
 })
 
 test('equals and in conditions read siblings, with an absent sibling as its default', () => {
