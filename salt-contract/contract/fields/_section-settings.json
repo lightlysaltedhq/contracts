@@ -297,7 +297,7 @@
       "type": "text",
       "format": "anchor",
       "label": "Anchor",
-      "description": "Optional, for links to this section. Made URL-safe on save. The reserved ids main, content, header, footer, nav, site-navigation, search and skip-link, and repeats on a page, take a numeric suffix (-2, -3), as markup/section#anchors says.",
+      "description": "Optional, for links to this section. Made URL-safe on save. The reserved ids main, content, header, footer, nav, site-navigation, search and skip-link, ids the page itself uses, and repeats on a page take a numeric suffix (-2, -3), as markup/section#anchors says.",
       "platforms": {
         "nextjs": {
           "formerly": "settings.anchorId",
