@@ -1,0 +1,75 @@
+{
+  "$schema": "../../schema/view-props.schema.json",
+  "version": "0.1.0",
+  "section": "tabs",
+  "data": [
+    {
+      "name": "eyebrow",
+      "kind": "text",
+      "nullable": true,
+      "from": "field",
+      "field": "eyebrow"
+    },
+    {
+      "name": "heading",
+      "kind": "text",
+      "nullable": true,
+      "from": "field",
+      "field": "heading"
+    },
+    {
+      "name": "intro",
+      "kind": "text",
+      "nullable": true,
+      "from": "field",
+      "field": "intro"
+    },
+    {
+      "name": "label",
+      "kind": "text",
+      "from": "logic",
+      "field": "label",
+      "description": "The tab list's accessible name: the field, or the heading, or the site's default label."
+    },
+    {
+      "name": "tabs",
+      "kind": "list",
+      "of": "tab",
+      "from": "field",
+      "field": "tabs"
+    }
+  ],
+  "types": {
+    "tab": {
+      "props": [
+        {
+          "name": "id",
+          "kind": "text",
+          "description": "Stable per tab, for <anchor>__tab-<n> and its panel.",
+          "from": "logic"
+        },
+        {
+          "name": "label",
+          "kind": "text",
+          "from": "field",
+          "field": "tabs.label"
+        },
+        {
+          "name": "content",
+          "kind": "rich-text",
+          "from": "field",
+          "field": "tabs.content"
+        }
+      ]
+    }
+  },
+  "platforms": {
+    "nextjs": {
+      "formerly": "TabsBlockData",
+      "owes": "label resolved, never null"
+    },
+    "wordpress": {
+      "owes": "a view template that takes these props, split from the section's logic"
+    }
+  }
+}

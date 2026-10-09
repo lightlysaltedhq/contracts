@@ -1,0 +1,99 @@
+{
+  "$schema": "../../schema/view-props.schema.json",
+  "version": "0.1.0",
+  "section": "pricing",
+  "data": [
+    {
+      "name": "eyebrow",
+      "kind": "text",
+      "nullable": true,
+      "from": "field",
+      "field": "eyebrow"
+    },
+    {
+      "name": "heading",
+      "kind": "text",
+      "nullable": true,
+      "from": "field",
+      "field": "heading"
+    },
+    {
+      "name": "plans",
+      "kind": "list",
+      "of": "pricing-plan",
+      "from": "field",
+      "field": "plans"
+    }
+  ],
+  "types": {
+    "pricing-plan": {
+      "props": [
+        {
+          "name": "name",
+          "kind": "text",
+          "from": "field",
+          "field": "plans.name"
+        },
+        {
+          "name": "price",
+          "kind": "text",
+          "nullable": true,
+          "from": "field",
+          "field": "plans.price"
+        },
+        {
+          "name": "period",
+          "kind": "text",
+          "nullable": true,
+          "from": "field",
+          "field": "plans.period"
+        },
+        {
+          "name": "features",
+          "kind": "list",
+          "of": "plan-feature",
+          "from": "field",
+          "field": "plans.features"
+        },
+        {
+          "name": "cta",
+          "kind": "object",
+          "of": "link",
+          "nullable": true,
+          "from": "field",
+          "field": "plans.cta"
+        },
+        {
+          "name": "featured",
+          "kind": "boolean",
+          "from": "field",
+          "field": "plans.featured"
+        }
+      ]
+    },
+    "plan-feature": {
+      "props": [
+        {
+          "name": "text",
+          "kind": "text",
+          "from": "field",
+          "field": "plans.features.text"
+        },
+        {
+          "name": "included",
+          "kind": "boolean",
+          "from": "field",
+          "field": "plans.features.included"
+        }
+      ]
+    }
+  },
+  "platforms": {
+    "nextjs": {
+      "note": "An edge recipe on both platforms (SC-006); a recipe that offers it takes these props."
+    },
+    "wordpress": {
+      "owes": "a view template that takes these props, split from the section's logic"
+    }
+  }
+}

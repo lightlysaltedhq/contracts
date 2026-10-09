@@ -1,0 +1,84 @@
+{
+  "$schema": "../../schema/view-props.schema.json",
+  "version": "0.1.0",
+  "section": "hero",
+  "data": [
+    {
+      "name": "variant",
+      "kind": "enum",
+      "values": [
+        "full-bleed",
+        "split",
+        "stacked",
+        "minimal"
+      ],
+      "from": "field",
+      "field": "variant"
+    },
+    {
+      "name": "eyebrow",
+      "kind": "text",
+      "nullable": true,
+      "from": "field",
+      "field": "eyebrow"
+    },
+    {
+      "name": "heading",
+      "kind": "text",
+      "nullable": true,
+      "from": "field",
+      "field": "heading"
+    },
+    {
+      "name": "subheading",
+      "kind": "text",
+      "nullable": true,
+      "from": "field",
+      "field": "subheading"
+    },
+    {
+      "name": "image",
+      "kind": "object",
+      "of": "image",
+      "nullable": true,
+      "description": "Null unless the variant is split or stacked and an image is set; a full-bleed hero draws the section's background image instead.",
+      "from": "field",
+      "field": "image"
+    },
+    {
+      "name": "mediaSide",
+      "kind": "enum",
+      "values": [
+        "left",
+        "right"
+      ],
+      "from": "field",
+      "field": "mediaSide"
+    },
+    {
+      "name": "alignment",
+      "kind": "enum",
+      "values": [
+        "left",
+        "centre"
+      ],
+      "from": "field",
+      "field": "alignment"
+    },
+    {
+      "name": "buttons",
+      "kind": "list",
+      "of": "button",
+      "from": "field",
+      "field": "buttons"
+    }
+  ],
+  "platforms": {
+    "nextjs": {
+      "formerly": "HeroBlockData"
+    },
+    "wordpress": {
+      "owes": "a view template that takes these props, split from the section's logic"
+    }
+  }
+}

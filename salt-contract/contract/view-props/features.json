@@ -1,0 +1,89 @@
+{
+  "$schema": "../../schema/view-props.schema.json",
+  "version": "0.1.0",
+  "section": "features",
+  "data": [
+    {
+      "name": "eyebrow",
+      "kind": "text",
+      "nullable": true,
+      "from": "field",
+      "field": "eyebrow"
+    },
+    {
+      "name": "heading",
+      "kind": "text",
+      "nullable": true,
+      "from": "field",
+      "field": "heading"
+    },
+    {
+      "name": "intro",
+      "kind": "text",
+      "nullable": true,
+      "from": "field",
+      "field": "intro"
+    },
+    {
+      "name": "columns",
+      "kind": "enum",
+      "values": [
+        "2",
+        "3",
+        "4"
+      ],
+      "from": "field",
+      "field": "columns"
+    },
+    {
+      "name": "items",
+      "kind": "list",
+      "of": "feature",
+      "from": "field",
+      "field": "items"
+    }
+  ],
+  "types": {
+    "feature": {
+      "props": [
+        {
+          "name": "icon",
+          "kind": "icon",
+          "nullable": true,
+          "from": "field",
+          "field": "items.icon"
+        },
+        {
+          "name": "title",
+          "kind": "text",
+          "from": "field",
+          "field": "items.title"
+        },
+        {
+          "name": "text",
+          "kind": "rich-text",
+          "nullable": true,
+          "from": "field",
+          "field": "items.text"
+        },
+        {
+          "name": "href",
+          "kind": "text",
+          "nullable": true,
+          "from": "logic",
+          "field": "items.url",
+          "description": "The item's link, when its address is safe to draw."
+        }
+      ]
+    }
+  },
+  "platforms": {
+    "nextjs": {
+      "formerly": "FeaturesBlockData",
+      "owes": "an item's text in place of body"
+    },
+    "wordpress": {
+      "owes": "a view template that takes these props, split from the section's logic"
+    }
+  }
+}

@@ -1,0 +1,78 @@
+{
+  "$schema": "../../schema/view-props.schema.json",
+  "version": "0.1.0",
+  "section": "listing",
+  "data": [
+    {
+      "name": "eyebrow",
+      "kind": "text",
+      "nullable": true,
+      "from": "field",
+      "field": "eyebrow"
+    },
+    {
+      "name": "heading",
+      "kind": "text",
+      "nullable": true,
+      "from": "field",
+      "field": "heading"
+    },
+    {
+      "name": "intro",
+      "kind": "text",
+      "nullable": true,
+      "from": "field",
+      "field": "intro"
+    },
+    {
+      "name": "page",
+      "kind": "integer",
+      "description": "The current page, from 1, from the route.",
+      "from": "site"
+    },
+    {
+      "name": "totalPages",
+      "kind": "integer",
+      "from": "logic"
+    },
+    {
+      "name": "cards",
+      "kind": "list",
+      "of": "card",
+      "description": "The current page's items of the route's collection.",
+      "from": "logic"
+    },
+    {
+      "name": "pages",
+      "kind": "list",
+      "of": "page-link",
+      "description": "Every page's address, so a view draws its own window (contract/markup/pagination.json).",
+      "from": "logic"
+    }
+  ],
+  "types": {
+    "page-link": {
+      "props": [
+        {
+          "name": "number",
+          "kind": "integer",
+          "from": "logic"
+        },
+        {
+          "name": "href",
+          "kind": "text",
+          "from": "logic"
+        }
+      ]
+    }
+  },
+  "platforms": {
+    "nextjs": {
+      "formerly": "ListingBlockData",
+      "owes": "pages as a list of addresses in place of the href(page) function, which no PHP array shape can hold"
+    },
+    "wordpress": {
+      "owes": "a view template that takes these props, split from the section's logic"
+    }
+  }
+}

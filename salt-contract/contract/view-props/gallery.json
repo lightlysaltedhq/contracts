@@ -1,0 +1,71 @@
+{
+  "$schema": "../../schema/view-props.schema.json",
+  "version": "0.1.0",
+  "section": "gallery",
+  "data": [
+    {
+      "name": "heading",
+      "kind": "text",
+      "nullable": true,
+      "from": "field",
+      "field": "heading"
+    },
+    {
+      "name": "intro",
+      "kind": "text",
+      "nullable": true,
+      "from": "field",
+      "field": "intro"
+    },
+    {
+      "name": "layout",
+      "kind": "enum",
+      "values": [
+        "grid",
+        "masonry",
+        "carousel"
+      ],
+      "from": "field",
+      "field": "layout"
+    },
+    {
+      "name": "columns",
+      "kind": "enum",
+      "values": [
+        "2",
+        "3",
+        "4"
+      ],
+      "from": "field",
+      "field": "columns"
+    },
+    {
+      "name": "label",
+      "kind": "text",
+      "from": "logic",
+      "field": "label",
+      "description": "The carousel's accessible name: the field, or the heading, or the site's default label."
+    },
+    {
+      "name": "captions",
+      "kind": "boolean",
+      "from": "field",
+      "field": "captions"
+    },
+    {
+      "name": "images",
+      "kind": "list",
+      "of": "image",
+      "from": "field",
+      "field": "images"
+    }
+  ],
+  "platforms": {
+    "nextjs": {
+      "formerly": "GalleryBlockData"
+    },
+    "wordpress": {
+      "owes": "a view template that takes these props, split from the section's logic"
+    }
+  }
+}

@@ -1,0 +1,81 @@
+{
+  "$schema": "../../schema/view-props.schema.json",
+  "version": "0.1.0",
+  "section": "logos",
+  "data": [
+    {
+      "name": "heading",
+      "kind": "text",
+      "nullable": true,
+      "from": "field",
+      "field": "heading"
+    },
+    {
+      "name": "intro",
+      "kind": "text",
+      "nullable": true,
+      "from": "field",
+      "field": "intro"
+    },
+    {
+      "name": "columns",
+      "kind": "enum",
+      "values": [
+        "2",
+        "3",
+        "4"
+      ],
+      "from": "field",
+      "field": "columns"
+    },
+    {
+      "name": "greyscale",
+      "kind": "boolean",
+      "from": "field",
+      "field": "greyscale"
+    },
+    {
+      "name": "items",
+      "kind": "list",
+      "of": "logo",
+      "from": "field",
+      "field": "items"
+    }
+  ],
+  "types": {
+    "logo": {
+      "props": [
+        {
+          "name": "image",
+          "kind": "object",
+          "of": "image",
+          "from": "field",
+          "field": "items.image"
+        },
+        {
+          "name": "name",
+          "kind": "text",
+          "nullable": true,
+          "from": "field",
+          "field": "items.name"
+        },
+        {
+          "name": "href",
+          "kind": "text",
+          "nullable": true,
+          "from": "logic",
+          "field": "items.url"
+        }
+      ]
+    }
+  },
+  "platforms": {
+    "nextjs": {
+      "formerly": "LogosBlockData",
+      "owes": "an item as {image, name, href} in place of the media fields spread beside href and linkLabel"
+    },
+    "wordpress": {
+      "owes": "a view template that takes these props, split from the section's logic"
+    }
+  }
+}

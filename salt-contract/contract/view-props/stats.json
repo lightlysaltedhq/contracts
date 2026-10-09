@@ -1,0 +1,80 @@
+{
+  "$schema": "../../schema/view-props.schema.json",
+  "version": "0.1.0",
+  "section": "stats",
+  "data": [
+    {
+      "name": "heading",
+      "kind": "text",
+      "nullable": true,
+      "from": "field",
+      "field": "heading"
+    },
+    {
+      "name": "intro",
+      "kind": "text",
+      "nullable": true,
+      "from": "field",
+      "field": "intro"
+    },
+    {
+      "name": "columns",
+      "kind": "enum",
+      "values": [
+        "2",
+        "3",
+        "4"
+      ],
+      "from": "field",
+      "field": "columns"
+    },
+    {
+      "name": "items",
+      "kind": "list",
+      "of": "stat",
+      "from": "field",
+      "field": "items"
+    }
+  ],
+  "types": {
+    "stat": {
+      "props": [
+        {
+          "name": "icon",
+          "kind": "icon",
+          "nullable": true,
+          "from": "field",
+          "field": "items.icon"
+        },
+        {
+          "name": "value",
+          "kind": "text",
+          "from": "field",
+          "field": "items.value"
+        },
+        {
+          "name": "suffix",
+          "kind": "text",
+          "nullable": true,
+          "from": "field",
+          "field": "items.suffix"
+        },
+        {
+          "name": "label",
+          "kind": "text",
+          "nullable": true,
+          "from": "field",
+          "field": "items.label"
+        }
+      ]
+    }
+  },
+  "platforms": {
+    "nextjs": {
+      "formerly": "StatsBlockData"
+    },
+    "wordpress": {
+      "owes": "a view template that takes these props, split from the section's logic"
+    }
+  }
+}

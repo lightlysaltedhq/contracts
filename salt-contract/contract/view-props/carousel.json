@@ -1,0 +1,76 @@
+{
+  "$schema": "../../schema/view-props.schema.json",
+  "version": "0.1.0",
+  "section": "carousel",
+  "data": [
+    {
+      "name": "eyebrow",
+      "kind": "text",
+      "nullable": true,
+      "from": "field",
+      "field": "eyebrow"
+    },
+    {
+      "name": "heading",
+      "kind": "text",
+      "nullable": true,
+      "from": "field",
+      "field": "heading"
+    },
+    {
+      "name": "intro",
+      "kind": "text",
+      "nullable": true,
+      "from": "field",
+      "field": "intro"
+    },
+    {
+      "name": "label",
+      "kind": "text",
+      "from": "logic",
+      "field": "label",
+      "description": "The carousel's accessible name: the field, or the heading, or the site's default label."
+    },
+    {
+      "name": "source",
+      "kind": "enum",
+      "values": [
+        "inline",
+        "services",
+        "case-studies",
+        "testimonials",
+        "posts",
+        "team"
+      ],
+      "from": "field",
+      "field": "source"
+    },
+    {
+      "name": "cardStyle",
+      "kind": "enum",
+      "values": [
+        "generic",
+        "quote"
+      ],
+      "from": "field",
+      "field": "cardStyle"
+    },
+    {
+      "name": "cards",
+      "kind": "list",
+      "of": "card",
+      "from": "collection",
+      "field": "query",
+      "description": "From the query, or from the inline cards field when the source is inline."
+    }
+  ],
+  "platforms": {
+    "nextjs": {
+      "formerly": "CarouselBlockData",
+      "owes": "label resolved, never null"
+    },
+    "wordpress": {
+      "owes": "a view template that takes these props, split from the section's logic"
+    }
+  }
+}

@@ -1,0 +1,145 @@
+{
+  "$schema": "../../schema/view-props.schema.json",
+  "version": "0.1.0",
+  "section": "collection-showcase",
+  "data": [
+    {
+      "name": "eyebrow",
+      "kind": "text",
+      "nullable": true,
+      "from": "field",
+      "field": "eyebrow"
+    },
+    {
+      "name": "heading",
+      "kind": "text",
+      "nullable": true,
+      "from": "field",
+      "field": "heading"
+    },
+    {
+      "name": "intro",
+      "kind": "text",
+      "nullable": true,
+      "from": "field",
+      "field": "intro"
+    },
+    {
+      "name": "source",
+      "kind": "enum",
+      "values": [
+        "services",
+        "case-studies",
+        "testimonials",
+        "posts",
+        "team"
+      ],
+      "from": "field",
+      "field": "source"
+    },
+    {
+      "name": "layout",
+      "kind": "enum",
+      "values": [
+        "grid",
+        "list",
+        "featured",
+        "accordion",
+        "index"
+      ],
+      "from": "field",
+      "field": "layout"
+    },
+    {
+      "name": "columns",
+      "kind": "enum",
+      "values": [
+        "2",
+        "3",
+        "4"
+      ],
+      "from": "field",
+      "field": "columns"
+    },
+    {
+      "name": "cards",
+      "kind": "list",
+      "of": "card",
+      "from": "collection",
+      "field": "query",
+      "description": "With icons, ratings and tags already left out where the section switches them off."
+    },
+    {
+      "name": "groups",
+      "kind": "list",
+      "of": "card-group",
+      "nullable": true,
+      "from": "logic",
+      "field": "groupByCategory",
+      "description": "The cards grouped by category, when grouping is on; null otherwise."
+    },
+    {
+      "name": "results",
+      "kind": "list",
+      "of": "result",
+      "from": "logic",
+      "description": "The featured case study's results, for the featured layout's lead card; empty otherwise."
+    },
+    {
+      "name": "viewAll",
+      "kind": "object",
+      "of": "link",
+      "nullable": true,
+      "from": "logic",
+      "field": "viewAll",
+      "description": "The link to the source's archive, when it is on and the archive exists; its label is viewAllLabel or the site's default."
+    }
+  ],
+  "types": {
+    "card-group": {
+      "props": [
+        {
+          "name": "id",
+          "kind": "text",
+          "nullable": true,
+          "from": "logic"
+        },
+        {
+          "name": "title",
+          "kind": "text",
+          "nullable": true,
+          "from": "logic"
+        },
+        {
+          "name": "cards",
+          "kind": "list",
+          "of": "card",
+          "from": "logic"
+        }
+      ]
+    },
+    "result": {
+      "props": [
+        {
+          "name": "stat",
+          "kind": "text",
+          "from": "logic"
+        },
+        {
+          "name": "label",
+          "kind": "text",
+          "from": "logic"
+        }
+      ]
+    }
+  },
+  "platforms": {
+    "nextjs": {
+      "formerly": "CollectionShowcaseData",
+      "owes": "viewAll with a resolved label, as a link"
+    },
+    "wordpress": {
+      "owes": "a view template that takes these props, split from the section's logic"
+    }
+  }
+}

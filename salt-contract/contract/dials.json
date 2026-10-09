@@ -1,0 +1,83 @@
+{
+  "$schema": "../schema/dials.schema.json",
+  "version": "0.1.0",
+  "$comment": "The design dials (ladder tier 2). The ruling of 06/10/2026 on the Salt page calls for about six to ten, naming corners, shadows, button style and density. Neither platform has a dial today: Salt for Next.js's brand global and salt-wordpress's options-brand.php offer brand settings only (colours, type scale, fonts, logos, dark mode), which are tier 1. So every dial here is owed by both. Only corners and density are listed, because only they move tokens the shared stylesheets already read. Shadows and button style wait on component tokens the stylesheets do not read yet (no rule draws a shadow, and a button shares --radius-md with every input), which is a stylesheet change for the owner to rule on. A dial's options point at rungs; the runtime writes the rung's value from its scale, on the root, after the theme and before any site override in code. Drafted 09/10/2026.",
+  "dials": [
+    {
+      "id": "corners",
+      "name": "corners",
+      "label": "Corners",
+      "description": "How rounded cards, buttons, inputs and image frames are. Pills and circles (tags, portraits) stay round whatever you choose.",
+      "role": "admin",
+      "tokens": ["--radius-sm", "--radius-md", "--radius-lg"],
+      "options": [
+        {
+          "value": "square",
+          "label": "Square",
+          "sets": { "--radius-sm": "0", "--radius-md": "0", "--radius-lg": "0" }
+        },
+        {
+          "value": "soft",
+          "label": "Soft",
+          "sets": {},
+          "note": "The theme's own corners."
+        },
+        {
+          "value": "round",
+          "label": "Round",
+          "sets": { "--radius-sm": "--radius-md", "--radius-md": "--radius-lg" },
+          "note": "Each corner takes the next rung up; a card's corner is already the largest rung short of full."
+        }
+      ],
+      "default": "soft",
+      "platforms": {
+        "nextjs": {
+          "status": "owes",
+          "owes": "the select in the brand global's Appearance tab, writable by the admin role only, and the brand stylesheet writing each re-pointed rung's value"
+        },
+        "wordpress": {
+          "status": "owes",
+          "owes": "the select in options-brand.php's Appearance tab, editable by the admin role only, and salt_brand_css() writing each re-pointed rung's value, once the radius rungs are in its token layer"
+        }
+      }
+    },
+    {
+      "id": "density",
+      "name": "density",
+      "label": "Density",
+      "description": "How much space sits above and below each section. Compact moves every section's spacing a step tighter, spacious a step looser; a section's own spacing setting still chooses among the steps.",
+      "role": "admin",
+      "tokens": ["--space-section-sm", "--space-section-md", "--space-section-lg"],
+      "options": [
+        {
+          "value": "compact",
+          "label": "Compact",
+          "sets": { "--space-section-md": "--space-section-sm", "--space-section-lg": "--space-section-md" }
+        },
+        {
+          "value": "comfortable",
+          "label": "Comfortable",
+          "sets": {},
+          "note": "The theme's own spacing."
+        },
+        {
+          "value": "spacious",
+          "label": "Spacious",
+          "sets": { "--space-section-sm": "--space-section-md", "--space-section-md": "--space-section-lg" }
+        }
+      ],
+      "default": "comfortable",
+      "platforms": {
+        "nextjs": {
+          "status": "owes",
+          "owes": "the select in the brand global's Appearance tab, writable by the admin role only, and the brand stylesheet writing each re-pointed rung's value"
+        },
+        "wordpress": {
+          "status": "owes",
+          "owes": "the select in options-brand.php's Appearance tab, editable by the admin role only, and salt_brand_css() writing each re-pointed rung's value, once the section space rungs are in its token layer"
+        }
+      },
+      "note": "Moves the bands only. The card joins (--space-card-*) are Salt's own tokens with no rung beside them to move to, so a density that reached inside cards needs a scale for them first."
+    }
+  ]
+}
