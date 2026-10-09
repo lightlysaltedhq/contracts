@@ -2,9 +2,9 @@
 // The Payload round trip: what salt-contract/emit/payload.mjs generates for each section, against
 // the field half salt-nextjs ships today. Writes salt-contract/reports/round-trip-payload.md.
 //
-//   node scripts/round_trip_payload.mjs <salt-nextjs checkout> [--check]
+//   node scripts/round_trip_payload.mjs [--check] [<salt-nextjs checkout>]
 //
-// Needs a salt-nextjs checkout beside it, so it is not part of `npm run verify`; the report it
+// Needs a salt-nextjs checkout (by default the repository's sibling, salt-nextjs), so it is not part of `npm run verify`; the report it
 // writes is committed, and --check fails when the committed one is stale.
 //
 // salt-nextjs's field files are TypeScript that import the Lexical editor. esbuild bundles
@@ -28,13 +28,28 @@ import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { build } from 'esbuild'
 
-import { loadContract, resolveSection } from '../salt-contract/emit/_contract.mjs'
+import { isMainModule, loadContract, resolveSection } from '../salt-contract/emit/_contract.mjs'
 import { toPayloadBlocks } from '../salt-contract/emit/payload.mjs'
 
 const here = path.dirname(fileURLToPath(import.meta.url))
 const reportPath = path.join(here, '..', 'salt-contract', 'reports', 'round-trip-payload.md')
-const nextjs = path.resolve(process.argv[2] ?? path.join(here, '..', '..', '..', 'Products', 'Salt', 'salt-nextjs'))
-const check = process.argv.includes('--check')
+
+/**
+ * The command line: flags anywhere, at most one positional argument, the salt-nextjs checkout. By
+ * default that is the repository's sibling, as ~/Work/Products/Salt/{contracts,salt-nextjs} lays
+ * them out.
+ */
+export function parseArguments(argv, scriptDir = here) {
+  const flags = new Set(['--check'])
+  const unknown = argv.filter((a) => a.startsWith('--') && !flags.has(a))
+  if (unknown.length) throw new Error(`unknown option ${unknown.join(', ')}`)
+  const positional = argv.filter((a) => !a.startsWith('--'))
+  if (positional.length > 1) throw new Error(`one salt-nextjs checkout, not ${positional.length}`)
+  return {
+    nextjs: path.resolve(positional[0] ?? path.join(scriptDir, '..', '..', 'salt-nextjs')),
+    check: argv.includes('--check'),
+  }
+}
 
 // ── Load salt-nextjs's field half ──────────────────────────────────────────────────────────────
 
@@ -48,49 +63,39 @@ export const HeadingFeature = (o) => ({ key: 'heading', sizes: o?.enabledHeading
 `
 const JSX_STUB = 'export const jsx = () => null, jsxs = () => null, Fragment = null'
 
-const work = mkdtempSync(path.join(tmpdir(), 'salt-round-trip-'))
-const bundle = path.join(work, 'blocks.mjs')
-await build({
-  entryPoints: [path.join(nextjs, 'packages', 'core', 'src', 'blocks', 'index.ts')],
-  bundle: true,
-  format: 'esm',
-  platform: 'node',
-  outfile: bundle,
-  logLevel: 'warning',
-  plugins: [{
-    name: 'stubs',
-    setup(b) {
-      b.onResolve({ filter: /^@payloadcms\/richtext-lexical$/ }, () => ({ path: 'lexical', namespace: 'stub' }))
-      b.onResolve({ filter: /^react\/jsx-runtime$/ }, () => ({ path: 'jsx', namespace: 'stub' }))
-      b.onResolve({ filter: /^[^./]/ }, (a) => ({ errors: [{ text: `unexpected runtime import ${a.path}; stub it` }] }))
-      b.onLoad({ filter: /.*/, namespace: 'stub' }, (a) => ({ contents: a.path === 'lexical' ? LEXICAL_STUB : JSX_STUB, loader: 'js' }))
-    },
-  }],
-})
-const nx = await import(pathToFileURL(bundle).href)
-rmSync(work, { recursive: true, force: true })
-const nextjsCommit = execFileSync('git', ['-C', nextjs, 'rev-parse', '--short', 'HEAD'], { encoding: 'utf8' }).trim()
-const nextjsVersion = JSON.parse(readFileSync(path.join(nextjs, 'packages', 'core', 'package.json'), 'utf8')).version
-
-// The options salt-nextjs's own example site passes, as near as the contract's options reach.
-const icons = [{ value: 'star', label: 'Star' }, { value: 'check', label: 'Check' }]
-const sources = { services: {}, 'case-studies': {}, testimonials: {}, posts: {}, team: {} }
-const BUILDERS = {
-  hero: () => nx.heroBlock(), 'rich-text': () => nx.richTextBlock(), 'call-to-action': () => nx.ctaBlock(),
-  'media-text': () => nx.mediaTextBlock(), features: () => nx.featuresBlock({ icons }), stats: () => nx.statsBlock({ icons }),
-  logos: () => nx.logosBlock(), gallery: () => nx.galleryBlock(), process: () => nx.processBlock({ icons }),
-  faq: () => nx.faqBlock(), tabs: () => nx.tabsBlock(), 'collection-showcase': () => nx.collectionShowcaseBlock({ sources }),
-  carousel: () => nx.carouselBlock({ sources }), listing: () => nx.listingBlock(), contact: () => nx.contactBlock(),
+async function loadNextjs(nextjs) {
+  const work = mkdtempSync(path.join(tmpdir(), 'salt-round-trip-'))
+  try {
+    const bundle = path.join(work, 'blocks.mjs')
+    await build({
+      entryPoints: [path.join(nextjs, 'packages', 'core', 'src', 'blocks', 'index.ts')],
+      bundle: true,
+      format: 'esm',
+      platform: 'node',
+      outfile: bundle,
+      logLevel: 'warning',
+      plugins: [{
+        name: 'stubs',
+        setup(b) {
+          b.onResolve({ filter: /^@payloadcms\/richtext-lexical$/ }, () => ({ path: 'lexical', namespace: 'stub' }))
+          b.onResolve({ filter: /^react\/jsx-runtime$/ }, () => ({ path: 'jsx', namespace: 'stub' }))
+          b.onResolve({ filter: /^[^./]/ }, (a) => ({ errors: [{ text: `unexpected runtime import ${a.path}; stub it` }] }))
+          b.onLoad({ filter: /.*/, namespace: 'stub' }, (a) => ({ contents: a.path === 'lexical' ? LEXICAL_STUB : JSX_STUB, loader: 'js' }))
+        },
+      }],
+    })
+    const nx = await import(pathToFileURL(bundle).href)
+    const nextjsCommit = execFileSync('git', ['-C', nextjs, 'rev-parse', '--short', 'HEAD'], { encoding: 'utf8' }).trim()
+    const nextjsVersion = JSON.parse(readFileSync(path.join(nextjs, 'packages', 'core', 'package.json'), 'utf8')).version
+    return { nx, nextjsCommit, nextjsVersion }
+  } finally {
+    rmSync(work, { recursive: true, force: true })
+  }
 }
-
-const contract = loadContract()
-// faq's own source, and locations so the report still lists it: the emitter leaves out a section
-// whose source the site lacks.
-const emitted = toPayloadBlocks({ icons, sources: { ...sources, faqs: {}, locations: {} }, richTextEditor: (allowed) => ({ allowed }) })
 
 // ── Compare ────────────────────────────────────────────────────────────────────────────────────
 
-const rows = []
+let rows = []
 const LIMITS = ['maxLength', 'min', 'max', 'minRows', 'maxRows', 'hasMany']
 const allowedOf = (n) => (n.editor?.features ?? []).flatMap((f) =>
   f.key === 'toolbar' ? [] : f.key === 'heading' ? f.sizes.map((s) => `heading-${s.slice(1)}`) : [f.key])
@@ -257,75 +262,97 @@ function compareQuery(section, prefix, mine, theirs, def) {
     if (r.verdict === 'unexpected' && note) { r.verdict = 'expected'; r.evidence = `note: ${note.note ?? note.owes}` }
   }
 }
+// ── Run ────────────────────────────────────────────────────────────────────────────────────────
 
-const sectionRows = []
-for (const block of emitted) {
-  const id = block.slug
-  const s = contract.sections.find((x) => x.id === id)
-  const build = BUILDERS[id]
-  if (!build) {
-    sectionRows.push({ id, status: `not in salt-nextjs core (sections.json: ${s.platforms?.nextjs?.status ?? 'none'}${s.platforms?.nextjs?.owes ? `, owes ${s.platforms.nextjs.owes}` : ''})` })
-    continue
+async function main({ nextjs, check }) {
+  const { nx, nextjsCommit, nextjsVersion } = await loadNextjs(nextjs)
+  rows = []
+  // The options salt-nextjs's own example site passes, as near as the contract's options reach.
+  const icons = [{ value: 'star', label: 'Star' }, { value: 'check', label: 'Check' }]
+  const sources = { services: {}, 'case-studies': {}, testimonials: {}, posts: {}, team: {} }
+  const BUILDERS = {
+    hero: () => nx.heroBlock(), 'rich-text': () => nx.richTextBlock(), 'call-to-action': () => nx.ctaBlock(),
+    'media-text': () => nx.mediaTextBlock(), features: () => nx.featuresBlock({ icons }), stats: () => nx.statsBlock({ icons }),
+    logos: () => nx.logosBlock(), gallery: () => nx.galleryBlock(), process: () => nx.processBlock({ icons }),
+    faq: () => nx.faqBlock(), tabs: () => nx.tabsBlock(), 'collection-showcase': () => nx.collectionShowcaseBlock({ sources }),
+    carousel: () => nx.carouselBlock({ sources }), listing: () => nx.listingBlock(), contact: () => nx.contactBlock(),
   }
-  const theirs = build()
-  const { fields, settings } = resolveSection(contract, id)
-  const formerName = s.platforms?.nextjs?.formerly?.[0]?.name
-  if (theirs.slug !== id) {
-    rows.push({ section: id, at: '(block slug)', kind: 'name', text: `slug ${id}; salt-nextjs ${theirs.slug}`,
-      verdict: formerName === theirs.slug ? 'expected' : 'unexpected', evidence: formerName ? `sections.json formerly: ${formerName}` : '' })
+
+  const contract = loadContract()
+  // faq's own source, and locations so the report still lists it: the emitter leaves out a section
+  // whose source the site lacks.
+  const emitted = toPayloadBlocks({ icons, sources: { ...sources, faqs: {}, locations: {} }, richTextEditor: (allowed) => ({ allowed }) })
+
+  const sectionRows = []
+  for (const block of emitted) {
+    const id = block.slug
+    const s = contract.sections.find((x) => x.id === id)
+    const build = BUILDERS[id]
+    if (!build) {
+      sectionRows.push({ id, status: `not in salt-nextjs core (sections.json: ${s.platforms?.nextjs?.status ?? 'none'}${s.platforms?.nextjs?.owes ? `, owes ${s.platforms.nextjs.owes}` : ''})` })
+      continue
+    }
+    const theirs = build()
+    const { fields, settings } = resolveSection(contract, id)
+    const formerName = s.platforms?.nextjs?.formerly?.[0]?.name
+    if (theirs.slug !== id) {
+      rows.push({ section: id, at: '(block slug)', kind: 'name', text: `slug ${id}; salt-nextjs ${theirs.slug}`,
+        verdict: formerName === theirs.slug ? 'expected' : 'unexpected', evidence: formerName ? `sections.json formerly: ${formerName}` : '' })
+    }
+    const defs = defsFor([...fields, { name: 'settings', type: 'group', fields: settings }], block.fields)
+    compareFields(id, block.fields, theirs.fields, defs, '')
+    sectionRows.push({ id, status: `compared with ${theirs.slug}` })
   }
-  const defs = defsFor([...fields, { name: 'settings', type: 'group', fields: settings }], block.fields)
-  compareFields(id, block.fields, theirs.fields, defs, '')
-  sectionRows.push({ id, status: `compared with ${theirs.slug}` })
-}
 
-// ── Report ─────────────────────────────────────────────────────────────────────────────────────
 
-const expected = rows.filter((r) => r.verdict === 'expected')
-const unexpected = rows.filter((r) => r.verdict === 'unexpected')
-const cell = (s) => String(s).replace(/\|/g, '\\|').replace(/\n/g, ' ')
-const lines = [
-  '# Payload round trip',
-  '',
-  `Generated by \`node scripts/round_trip_payload.mjs <salt-nextjs>\`; do not edit. It compares what`,
-  '`emit/payload.mjs` generates from this contract with the field half salt-nextjs ships',
-  `(@lightlysaltedhq/salt-nextjs ${nextjsVersion}, commit ${nextjsCommit}), section by section.`,
-  '',
-  'Compared: field names, types, option values, defaults, required, limits, the rich-text allowed',
-  'list, and conditions (by behaviour, over every combination of the siblings either side reads).',
-  'Not compared: labels and descriptions, which salt-nextjs mostly leaves to Payload or words',
-  'differently and SC-003 says must match, so adopting the emitter changes them throughout; and what',
-  'stays native to Payload (enum names, admin components, hooks, validators, row-label components).',
-  '',
-  '**Expected** means the contract records the difference in the field\'s `platforms.nextjs` note',
-  '(`formerly`, `values`, `owes`, or a note on the condition), or sections.json records the block\'s',
-  'former slug. **Unexpected** means nothing in the contract accounts for it.',
-  '',
-  `## Summary`,
-  '',
-  `${rows.length} differences: ${expected.length} expected, ${unexpected.length} unexpected.`,
-  '',
-  '| Section | Compared |',
-  '| --- | --- |',
-  ...sectionRows.map((s) => `| ${s.id} | ${cell(s.status)} |`),
-  '',
-]
-if (unexpected.length) {
-  lines.push('## Unexpected', '', '| Section | Field | Difference |', '| --- | --- | --- |')
-  for (const r of unexpected) lines.push(`| ${r.section} | \`${r.at}\` | ${cell(r.text)} |`)
+  const expected = rows.filter((r) => r.verdict === 'expected')
+  const unexpected = rows.filter((r) => r.verdict === 'unexpected')
+  const cell = (s) => String(s).replace(/\|/g, '\\|').replace(/\n/g, ' ')
+  const lines = [
+    '# Payload round trip',
+    '',
+    `Generated by \`node scripts/round_trip_payload.mjs <salt-nextjs>\`; do not edit. It compares what`,
+    '`emit/payload.mjs` generates from this contract with the field half salt-nextjs ships',
+    `(@lightlysaltedhq/salt-nextjs ${nextjsVersion}, commit ${nextjsCommit}), section by section.`,
+    '',
+    'Compared: field names, types, option values, defaults, required, limits, the rich-text allowed',
+    'list, and conditions (by behaviour, over every combination of the siblings either side reads).',
+    'Not compared: labels and descriptions, which salt-nextjs mostly leaves to Payload or words',
+    'differently and SC-003 says must match, so adopting the emitter changes them throughout; and what',
+    'stays native to Payload (enum names, admin components, hooks, validators, row-label components).',
+    '',
+    '**Expected** means the contract records the difference in the field\'s `platforms.nextjs` note',
+    '(`formerly`, `values`, `owes`, or a note on the condition), or sections.json records the block\'s',
+    'former slug. **Unexpected** means nothing in the contract accounts for it.',
+    '',
+    `## Summary`,
+    '',
+    `${rows.length} differences: ${expected.length} expected, ${unexpected.length} unexpected.`,
+    '',
+    '| Section | Compared |',
+    '| --- | --- |',
+    ...sectionRows.map((s) => `| ${s.id} | ${cell(s.status)} |`),
+    '',
+  ]
+  if (unexpected.length) {
+    lines.push('## Unexpected', '', '| Section | Field | Difference |', '| --- | --- | --- |')
+    for (const r of unexpected) lines.push(`| ${r.section} | \`${r.at}\` | ${cell(r.text)} |`)
+    lines.push('')
+  }
+  lines.push('## Expected', '', '| Section | Field | Difference | Recorded as |', '| --- | --- | --- | --- |')
+  for (const r of expected) lines.push(`| ${r.section} | \`${r.at}\` | ${cell(r.text)} | ${cell(r.evidence)} |`)
   lines.push('')
-}
-lines.push('## Expected', '', '| Section | Field | Difference | Recorded as |', '| --- | --- | --- | --- |')
-for (const r of expected) lines.push(`| ${r.section} | \`${r.at}\` | ${cell(r.text)} | ${cell(r.evidence)} |`)
-lines.push('')
-const text = lines.join('\n')
+  const text = lines.join('\n')
 
-if (check) {
-  let committed = ''
-  try { committed = readFileSync(reportPath, 'utf8') } catch { /* missing is stale */ }
-  if (committed !== text) { console.log(`✗ ${path.relative(process.cwd(), reportPath)} is stale; regenerate it`); process.exit(1) }
-  console.log('PASS: the round-trip report is current')
-} else {
-  writeFileSync(reportPath, text)
-  console.log(`wrote ${path.relative(process.cwd(), reportPath)}: ${expected.length} expected, ${unexpected.length} unexpected`)
+  if (check) {
+    let committed = ''
+    try { committed = readFileSync(reportPath, 'utf8') } catch { /* missing is stale */ }
+    if (committed !== text) { console.log(`✗ ${path.relative(process.cwd(), reportPath)} is stale; regenerate it`); process.exit(1) }
+    console.log('PASS: the round-trip report is current')
+  } else {
+    writeFileSync(reportPath, text)
+    console.log(`wrote ${path.relative(process.cwd(), reportPath)}: ${expected.length} expected, ${unexpected.length} unexpected`)
+  }
 }
+
+if (isMainModule(import.meta.url)) await main(parseArguments(process.argv.slice(2)))
