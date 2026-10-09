@@ -472,3 +472,10 @@ crossFail('a component variant offering one value twice', (f) => {
 crossFail('a section variant whose default is not one of its options', (f) => {
   f['contract/sections.json'].sections[0].variants[0].default = 'z'
 }, /hero variant variant defaults to z, which is not one of its options in sections\.json/)
+crossFail('an unlisted icon name in dataAttributes', (f) => {
+  withIcons(f); f['contract/markup/hero.json'].dataAttributes = [{ name: 'data-icon', on: 'glyph', values: ['star', 'rocket'] }]
+}, /contract\/markup\/hero\.json declares data-icon rocket in dataAttributes, which sections\.json icons does not list/)
+test('cross-file: a data-icon in dataAttributes read from content passes', () => {
+  const r = crossRun((f) => { withIcons(f); f['contract/markup/hero.json'].dataAttributes = [{ name: 'data-icon', on: 'glyph', values: 'from:name' }] })
+  assert.equal(r.code, 0, r.out)
+})

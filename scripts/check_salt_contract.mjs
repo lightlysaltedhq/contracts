@@ -254,6 +254,12 @@ if (vocab && (vocab.sections ?? []).every((x) => x && typeof x === 'object')) {
     if (!entryIds.has(name)) { fails.push(`${rel(abs)} describes nothing in sections.json`); continue }
     checkIcons(rel(abs), doc.root?.attributes)
     walkNodes(rel(abs), doc.elements)
+    // A data-icon declared in dataAttributes names its values there, not on a node.
+    for (const da of (doc.dataAttributes ?? []).filter((x) => x.name === 'data-icon')) {
+      for (const n of [da.values].flat()) {
+        if (typeof n === 'string' && n !== '' && !n.startsWith('from:') && !iconNames.has(n)) fails.push(`${rel(abs)} declares data-icon ${n} in dataAttributes, which sections.json icons does not list`)
+      }
+    }
     for (const mv of doc.variants ?? []) {
       for (const o of Object.values(mv.options ?? {})) {
         checkIcons(rel(abs), o.root?.attributes)
