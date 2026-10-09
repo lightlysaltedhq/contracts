@@ -353,7 +353,7 @@
                 "salt-drawer__panel"
               ],
               "text": "the nav again, the phone link, the call to action",
-              "note": "The drawer's copy of the nav carries ids of its own, so no id is on the page twice: -drawer follows the prefix of every id the bar draws. The nav is site-navigation-drawer; each submenu is salt-header-nav-drawer-submenu-<n>, and its toggle's aria-controls names that id. <n> is the same in both copies."
+              "note": "The drawer's copy of the nav carries ids of its own, so no id is on the page twice: -drawer follows the prefix of every id the bar draws. The nav is site-navigation-drawer; each submenu is salt-header-nav-drawer-submenu-<n>, and its toggle's aria-controls names that id. <n> is the same in both copies. All are reserved (section#anchors)."
             }
           ]
         }
@@ -436,7 +436,7 @@
     },
     {
       "topic": "ruling",
-      "text": "Every id the header draws is fixed, so both platforms write the same ones. In the bar: the nav is site-navigation, and a submenu is salt-header-nav-submenu-<n>, where <n> is its item's position in the top-level menu counting from 0, items without children included. In the drawer, -drawer follows each prefix: site-navigation-drawer and salt-header-nav-drawer-submenu-<n>. site-navigation and site-navigation-drawer are reserved ids, not generated ones: an editor's anchor that matches either takes the numeric suffix and the navigation keeps its id (section#anchors, SC-006, SC-008). The submenu ids are generated, and yield to an editor's anchor with their aria-controls following."
+      "text": "Every id the header draws is fixed, so both platforms write the same ones. In the bar: the nav is site-navigation, and a submenu is salt-header-nav-submenu-<n>, where <n> is its item's position in the top-level menu counting from 0, items without children included. In the drawer, -drawer follows each prefix: site-navigation-drawer and salt-header-nav-drawer-submenu-<n>. site-navigation and site-navigation-drawer are reserved ids, not generated ones: an editor's anchor that matches either takes the numeric suffix and the navigation keeps its id (section#anchors, SC-006, SC-008). The submenu ids are reserved forms too, because the header is drawn without sight of the page's sections and cannot suffix them: an editor's anchor that matches one takes the suffix, and the submenu ids and their aria-controls never change."
     },
     {
       "topic": "ruling",
