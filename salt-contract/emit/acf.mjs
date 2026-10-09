@@ -29,8 +29,8 @@
 // timestamp, which a consumer loading the groups from code does not need.
 import { readFileSync, writeFileSync } from 'node:fs'
 
-import { allowedFor, checkedClauses, collectionQueryShape, diffSnapshots, isMainModule, LINK_SHAPE, loadContract,
-  normaliseLineEndings, planSections, SOURCES } from './_contract.mjs'
+import { allowedFor, clauses, collectionQueryShape, diffSnapshots, isMainModule, LINK_SHAPE, loadContract,
+  normaliseLineEndings, planSections, sourceValues, SOURCES } from './_contract.mjs'
 
 /**
  * Each source's post type and category taxonomy, as Salt for WordPress registers them by default.
@@ -116,7 +116,8 @@ function convertField(f, ctx) {
     out.type = type
     if (f.description) out.instructions = f.description
     if (f.required) out.required = 1
-    const list = checkedClauses(f.condition, at)
+    // planSections has validated every clause; here they are only read.
+    const list = clauses(f.condition)
     if (list.length) out.conditional_logic = conditionalLogic(list, ctx.keyOf)
   }
   if (f.deprecated) salt.deprecated = f.deprecated
@@ -253,7 +254,7 @@ function collectionQuery(f, out, ctx) {
     salt.source = f.source
   } else {
     // The select comes narrowed by planSections, so its source values are the installed ones.
-    offered = ctx.siblings.find((s) => s.name === f.sourceField).options.map((o) => o.value).filter((v) => SOURCES.includes(v))
+    offered = sourceValues(ctx.siblings.find((s) => s.name === f.sourceField))
     salt.sourceField = f.sourceField
   }
   const targets = offered.map((s) => ctx.sources[s])

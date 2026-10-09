@@ -32,7 +32,7 @@ import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import { clauses, isMainModule, loadContract, normaliseLineEndings, resolveSection, siblingValue } from '../salt-contract/emit/_contract.mjs'
+import { clauseHolds, clauses, isMainModule, loadContract, normaliseLineEndings, resolveSection, siblingValue } from '../salt-contract/emit/_contract.mjs'
 import { toAcfFieldGroups } from '../salt-contract/emit/acf.mjs'
 import { classify } from './_round_trip.mjs'
 
@@ -356,7 +356,7 @@ async function main({ wordpress, check, suggest }) {
         if (value) fixed.source = value
       }
       if (former?.when) Object.assign(fixed, { selector: former.when.split(' ')[0], when: `${wl.name} when ${former.when}` })
-      const applies = (def) => clausesOf(def).every((c) => !(c.field in fixed) || ('equals' in c ? c.equals === fixed[c.field] : 'in' in c ? c.in.includes(fixed[c.field]) : true))
+      const applies = (def) => clausesOf(def).every((c) => !('source' in fixed && c.field === 'source') || clauseHolds(c, fixed.source))
       // The settings group's fields are stored on the layout itself today, so they are matched there.
       const settingsGroup = layout.sub_fields.find((f) => f.name === 'settings')
       const entries = [

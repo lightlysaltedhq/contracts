@@ -433,6 +433,22 @@ test('Payload and ACF leave out and keep the same sections, and offer the same s
       assert.equal(acfError, payloadError, `${at} sections: [${id}]`)
     }
   }
+  // A query choosing among several installed sources below the top level is refused by both, the
+  // same way; with one source installed both carry it.
+  const pair = [
+    { name: 'source', type: 'select', label: 'Show', options: [{ value: 'posts', label: 'Posts' }, { value: 'team', label: 'Team' }] },
+    { name: 'query', type: 'collection-query', label: 'Query', sourceField: 'source' },
+  ]
+  const nested = probe([{ name: 'rows', type: 'list', label: 'Rows', fields: pair }])
+  for (const sources of [undefined, { posts: {}, team: {} }, { team: {} }]) {
+    let payloadError = null
+    let acfError = null
+    try { toPayloadBlocks({ contract: nested, sources }) } catch (e) { payloadError = e.message }
+    try { toAcfFieldGroups({ contract: nested, sources }) } catch (e) { acfError = e.message }
+    assert.equal(acfError, payloadError, JSON.stringify(sources))
+    if (sources?.team && !sources.posts) assert.equal(acfError, null)
+    else assert.match(acfError, /probe\.rows\.query: a collection-query choosing among several sources must sit at the block's top level/)
+  }
   // The carousel keeps its inline cards with no sources, on both.
   assert.ok(toPayloadBlocks({ icons, richTextEditor: (allowed) => ({ allowed }), sources: {} }).some((b) => b.slug === 'carousel'))
 })
