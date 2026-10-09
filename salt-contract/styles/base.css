@@ -15,18 +15,23 @@
  *
  * ── Why a cascade layer, and why `base` ─────────────────────────────────────────
  *
- * A layered rule loses to every unlayered one, whatever its specificity, so this is the weakest
- * styling on the page by construction: every component rule in the shared set, every rule a host
- * theme writes and every utility class outranks it. Unlayered, these rules beat Tailwind v4's
- * utilities, and `<h2 class="text-sm">` in a section rendered at heading-2.
+ * Where the layer survives (Tailwind v4, no Tailwind), a layered rule loses to every unlayered one,
+ * whatever its specificity, so this is the weakest styling on the page by construction: every
+ * component rule in the shared set, every rule a host theme writes and every utility class outranks
+ * it. Unlayered, these rules beat Tailwind v4's utilities, and `<h2 class="text-sm">` in a section
+ * rendered at heading-2.
  *
  * - Tailwind v4 (both Salt implementations): `@import 'tailwindcss'` declares `theme, base,
  *   components, utilities`, so these rules join its `base` layer, after preflight when this file is
  *   imported after Tailwind. They beat the preflight that flattens headings on source order, and
  *   lose to every utility.
- * - Tailwind v3: its output is unlayered, so a host serving this file beside v3's would have its
- *   preflight win. Import this file into the stylesheet v3 processes, where `@layer base` is v3's
- *   own directive and places these rules after its preflight.
+ * - Tailwind v3: import this file into the stylesheet v3 processes. There `@layer base` is v3's own
+ *   directive, which v3 consumes: it emits these rules unlayered, after its preflight and before its
+ *   components and utilities. They then rank by specificity and source order. At (0,0,1) they beat
+ *   preflight's element rules of the same specificity by coming after them, and lose to every rule
+ *   keyed on a class (each component in the shared set, every utility); a host's own element rule
+ *   of the same specificity wins only if it comes later. Served as a file of its own beside v3's
+ *   output, the layer would survive and v3's unlayered preflight would win.
  * - No Tailwind: `base` is the only layer, and these rules beat only the user agent's, which is
  *   what a base is for.
  *
