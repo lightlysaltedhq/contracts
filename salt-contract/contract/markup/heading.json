@@ -15,7 +15,8 @@
     "attributes": {
       "id": {
         "value": "from:plan.headingId",
-        "when": "it names a section"
+        "when": "it names a section",
+        "note": "'<section id>-heading'. A generated id: when it equals an editor's anchor it takes the numeric suffix, never the anchor (section#anchors, SC-007)."
       }
     },
     "note": "No class: the stylesheet styles headings by context (.salt-block > h*, card titles). The level is data, never a tag the author picked."

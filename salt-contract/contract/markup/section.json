@@ -231,7 +231,7 @@
       "statement": "Headings nested in a section rank under its heading. The body base is the section heading's level when it has one, otherwise the level it would have had. Rich-text headings start at base + 1; card, step, group and later-row titles are base + 1. A nested heading never outranks or skips past the section heading."
     },
     "labelled-by": {
-      "statement": "A section that provides a heading renders as section with aria-labelledby pointing at that heading's id; the id is unique on the page ('<section id>-heading', suffixed on repeats). A section that provides none renders as div. An unnamed section element is never written."
+      "statement": "A section that provides a heading renders as section with aria-labelledby pointing at that heading's id; that id is '<section id>-heading', a generated id: a repeat, or one that equals an editor's anchor, takes the numeric suffix while the editor's anchor keeps its id (section#anchors), and aria-labelledby names the suffixed id. A section that provides none renders as div. An unnamed section element is never written."
     },
     "fallback-heading": {
       "statement": "When no section claims the h1, the view draws a visually hidden h1 (h1.salt-sr-only) carrying the page's title, first in main, before any other heading. It is never display:none.",
@@ -346,7 +346,7 @@
       "statement": "A section collapses its top spacing (data-collapse-top) when the previous section shares its tone and dark tone, neither has a background image, it has no divider, and neither section's spacing is none."
     },
     "anchors": {
-      "statement": "A section's id is its anchor, slugged. Ids reserved by the document (main, content, header, footer, nav, site-navigation, search, skip-link), ids the page itself uses and repeats take a numeric suffix (-2, -3)."
+      "statement": "A section's id is its anchor, slugged on save; only the slug is stored. Ids are settled at render, in three steps. First, the ids the document reserves (main, content, header, footer, nav, site-navigation, search, skip-link) are fixed by the skeleton and never change. Second, editors' anchors in page order: an anchor that is a reserved id or repeats an earlier anchor takes a numeric suffix, -2 then -3 and up, counting until the result equals no reserved id, no anchor set anywhere on the page and no id already settled, so an anchor main beside another section's anchor main-2 renders main-3. Third, generated ids (a section heading's '<section id>-heading', the header's navigation and submenu ids, a form's and its fields' ids, tab and panel ids): an id an editor set is never changed to make way for one (SC-007), so a generated id that equals any settled id takes the suffix, counted the same way, and every reference to it (aria-labelledby, aria-controls, aria-describedby, for) names the suffixed id. A suffix is applied at render only and is never stored on save, so reordering or removing sections never rewrites an editor's anchor."
     },
     "new-tab": {
       "statement": "A link that opens a new tab carries target=_blank and rel=\"noopener noreferrer\"."
@@ -428,6 +428,7 @@
         "Draw a background image layer and scrim (salt-section__media, salt-section__scrim); WordPress has no background image setting today.",
         "Wrap the block in div.salt-section__content > div.salt-block[data-block].",
         "Write data-track per section#data-track.",
+        "Settle anchors and generated ids per section#anchors: the generated id takes the suffix when it meets an editor's anchor (SC-007), and suffixes are never saved.",
         "Use salt-sr-only for the fallback h1 and the skip link's hidden state instead of visually-hidden."
       ]
     }

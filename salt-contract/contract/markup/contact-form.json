@@ -9,7 +9,10 @@
       "salt-contact__form"
     ],
     "attributes": {
-      "id": "from:form id (salt-contact-<n>)",
+      "id": {
+        "value": "from:form id (salt-contact-<n>)",
+        "note": "A generated id: when it equals an editor's anchor it takes the numeric suffix, never the anchor (section#anchors, SC-007). Its fields' ids, error ids and status id are built from it, so they follow."
+      },
       "method": "post",
       "action": "from:platform endpoint",
       "novalidate": ""

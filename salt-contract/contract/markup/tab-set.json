@@ -154,6 +154,10 @@
   "notes": [
     {
       "topic": "ruling",
+      "text": "The tab, label and panel ids are generated from baseId: when one equals an editor's anchor it takes the numeric suffix, never the anchor, and the for and aria-labelledby that name it follow (section#anchors, SC-007)."
+    },
+    {
+      "topic": "ruling",
       "text": "No script: radio inputs and :has(:checked) show the chosen panel. The group is a radiogroup, not an ARIA tablist, because it behaves as radios."
     }
   ],
