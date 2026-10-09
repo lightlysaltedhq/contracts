@@ -345,8 +345,10 @@ pins. For every section it ships it checks four things:
   mismatch names the section, the case and the first node that differs, by a CSS-like path
   (`… > div.salt-hero__actions > a.salt-button:nth-of-type(2)`), with what was expected and what
   was found: a missing or unexpected element, one out of order, another in its place, an attribute
-  or text. Each element's children are aligned first (the most pairs of one tag, then the most
-  alike), so a dropped sibling is reported as itself, not as every later one changed. A case that
+  or text. Each element's children are aligned first: identical nodes anchor the alignment, an
+  identical node at another position is `order`, and between anchors the rest pair by tag (the
+  most alike first), the nth left out with the nth found as one replaced by another. So a dropped,
+  added or moved sibling is reported as itself, not as every later one changed. A case that
   renders nothing expects empty output. An adapter that exits non-zero, times out or answers other
   than 200 fails that case, with its stderr (or the response body) in the report.
 - **Field parity.** The implementation's committed field snapshot is checked with the emitter's own
@@ -450,8 +452,8 @@ report).
 
 A section's `status` is `pass`, `fail`, `incomplete` or `not shipped`, and each check's `status`
 is `pass`, `fail` or `not run`. A failure's `kind` is `mismatch` (with
-`difference`: `missing`, `unexpected`, `order` with `expectedAt` and `foundAt` (its position
-among its siblings on each side, from 1), `element`, `attribute` with its `name`, or `text`; an
+`difference`: `missing`, `unexpected`, `order` (an identical node moved) with `expectedAt` and
+`foundAt` (its position among its siblings on each side, from 1), `element`, `attribute` with its `name`, or `text`; an
 absent side is `null`) or `adapter` (with `error` and `stderr`). `fields.problems` at the top holds what is
 about the whole snapshot (not JSON, sections out of order, formatting); a section's own are under
 it. `problems` holds what fails the run as a whole (a section declared not shipped whose classes

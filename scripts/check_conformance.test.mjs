@@ -498,3 +498,34 @@ test('firstDifference descends into an aligned pair for an attribute or text cha
   assert.deepEqual(firstDifference('<ul><li>a</li><li>b</li></ul>', '<ul><li>a</li><li>B</li></ul>'),
     { path: 'ul > li:nth-of-type(2) > #text', kind: 'text', expected: 'b', found: 'B' })
 })
+
+// ── Final review Q2 to Q4: identical nodes anchor the alignment ──────────────────────────────
+
+test('firstDifference reports a swap of like siblings as order, not as their contents changed (review Q2)', () => {
+  const expected = readFileSync(path.join(pkg, 'fixtures', 'faq', 'many.html'), 'utf8')
+  const items = [...expected.matchAll(/<details[\s\S]*?<\/details>/g)].map((m) => m[0])
+  assert.ok(items.length >= 2)
+  const swapped = expected.replace(items[0], '\u0000').replace(items[1], items[0]).replace('\u0000', items[1])
+  const d = firstDifference(expected, swapped)
+  assert.equal(d.kind, 'order', JSON.stringify(d))
+  assert.match(d.path, / > details\.salt-accordion__item:nth-of-type\(1\)$/)
+  assert.deepEqual([d.expectedAt, d.foundAt], [1, 2])
+
+  const rotated = firstDifference('<ol><li>1</li><li>2</li><li>3</li></ol>', '<ol><li>2</li><li>1</li><li>3</li></ol>')
+  assert.deepEqual(rotated, { path: 'ol > li:nth-of-type(1)', kind: 'order', expected: '<li>', found: '<li>', expectedAt: 1, foundAt: 2 })
+})
+
+test('firstDifference reports order only for an identical node: one dropped and another added are missing and unexpected (review Q3)', () => {
+  assert.deepEqual(firstDifference('<ul><li>1</li><li>2</li><li>3</li></ul>', '<ul><li>2</li><li>3</li><li>4</li></ul>'),
+    { path: 'ul > li:nth-of-type(1)', kind: 'missing', expected: '<li>', found: null })
+  assert.deepEqual(firstDifference('<ul><li>1</li><li>2</li></ul>', '<ul><li>1</li><li>2</li><li>9</li></ul>'),
+    { path: 'ul > li:nth-of-type(3)', kind: 'unexpected', expected: null, found: '<li>' })
+})
+
+test('firstDifference pairs replaced siblings within one gap, in order, as element (review Q4)', () => {
+  assert.deepEqual(firstDifference('<div><p class="a">x</p><p class="b">y</p><hr></div>', '<div><span>x</span><em>y</em><hr></div>'),
+    { path: 'div > p.a:nth-of-type(1)', kind: 'element', expected: '<p class="a">', found: '<span>' })
+  // One replaced and one dropped: the pair is element, the leftover missing.
+  assert.deepEqual(firstDifference('<div><hr><p class="b">y</p><h3>z</h3></div>', '<div><span>q</span><hr><h3>z</h3></div>'),
+    { path: 'div > span', kind: 'unexpected', expected: null, found: '<span>' })
+})

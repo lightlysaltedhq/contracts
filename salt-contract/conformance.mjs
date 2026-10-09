@@ -165,12 +165,49 @@ const kindOf = (node) => (node.type === 'element' ? node.name : '#text')
 // classes, then the same text, then the same node whole.
 const likeness = (x, y) => (shapeOf(x) === shapeOf(y) ? 4 : 0) + (textOf(x) === textOf(y) ? 2 : 0) + (same(x, y) ? 1 : 0)
 
+/** A step of a path: tag and classes, with :nth-of-type(n) when the parent has more than one of the tag. */
+function step(parent, el) {
+  const same = elementsOf(parent).filter((c) => c.name === el.name)
+  const nth = same.length > 1 ? `:nth-of-type(${same.indexOf(el) + 1})` : ''
+  return `${el.name}${classesOf(el).map((c) => `.${c}`).join('')}${nth}`
+}
+
+const SNIPPET = 200
+const startTag = (el) => {
+  const tag = `<${el.name}${el.attrs.map(([n, v]) => (v === '' ? ` ${n}` : ` ${n}="${v}"`)).join('')}>`
+  return tag.length > SNIPPET ? `${tag.slice(0, SNIPPET)}…` : tag
+}
+const show = (node) => (node === undefined ? null : node.type === 'text' ? `text ${JSON.stringify(node.value)}` : startTag(node))
+
 /**
- * Two lists of siblings aligned: the most pairs of one kind (tag, or text), in order, and among
- * alignments with as many, the most alike. Returns the steps in document order: ['match', i, j],
- * ['missing', i] (expected only) and ['unexpected', j] (found only).
+ * The pairs of a longest run of identical nodes common to two sibling lists, in order: the anchors
+ * every other difference is read between. On a tie the expected node is the one left out, so a
+ * moved node is the earlier one.
  */
-function align(xs, ys) {
+function anchors(xs, ys) {
+  const n = xs.length
+  const m = ys.length
+  const best = Array.from({ length: n + 1 }, () => new Array(m + 1).fill(0))
+  for (let i = n - 1; i >= 0; i--) {
+    for (let j = m - 1; j >= 0; j--) best[i][j] = same(xs[i], ys[j]) ? best[i + 1][j + 1] + 1 : Math.max(best[i + 1][j], best[i][j + 1])
+  }
+  const out = []
+  let i = 0
+  let j = 0
+  while (i < n && j < m) {
+    if (same(xs[i], ys[j]) && best[i][j] === best[i + 1][j + 1] + 1) out.push([i++, j++])
+    else if (best[i + 1][j] === best[i][j]) i++
+    else j++
+  }
+  return out
+}
+
+/**
+ * The nodes of one gap between anchors aligned: the most pairs of one kind (tag, or text), in
+ * order, and among alignments pairing as many, the most alike. Returns steps in document order:
+ * ['match', i, j], ['missing', i] and ['unexpected', j], indexing the lists given.
+ */
+function alignGap(xs, ys) {
   const n = xs.length
   const m = ys.length
   // best[i][j]: [pairs, likeness] for xs from i against ys from j.
@@ -196,31 +233,72 @@ function align(xs, ys) {
     if (i < n && (j === m || equal(best[i + 1][j], best[i][j]))) { steps.push(['missing', i++]); continue }
     steps.push(['unexpected', j++])
   }
-  return steps
+  // Within one gap, the nth node left out and the nth node found unmatched are one replaced by the
+  // other, reported where the first of the two falls.
+  const lost = steps.flatMap((st, k) => (st[0] === 'missing' ? [k] : []))
+  const extra = steps.flatMap((st, k) => (st[0] === 'unexpected' ? [k] : []))
+  const gone = new Set()
+  for (let k = 0; k < Math.min(lost.length, extra.length); k++) {
+    const [a, b] = [lost[k], extra[k]]
+    steps[Math.min(a, b)] = ['element', steps[a][1], steps[b][1]]
+    gone.add(Math.max(a, b))
+  }
+  return steps.filter((_, k) => !gone.has(k))
 }
 
-/** A step of a path: tag and classes, with :nth-of-type(n) when the parent has more than one of the tag. */
-function step(parent, el) {
-  const same = elementsOf(parent).filter((c) => c.name === el.name)
-  const nth = same.length > 1 ? `:nth-of-type(${same.indexOf(el) + 1})` : ''
-  return `${el.name}${classesOf(el).map((c) => `.${c}`).join('')}${nth}`
+/**
+ * Two sibling lists aligned, as steps in document order over their indices: ['same', i, j] for an
+ * anchor; ['order', i, j] for an identical node at another position; then, in each gap between
+ * anchors, ['match', i, j] to descend into, ['element', i, j] for one replaced by another,
+ * ['missing', i] and ['unexpected', j].
+ */
+function align(xs, ys) {
+  const pairs = anchors(xs, ys)
+  const anchoredX = new Set(pairs.map(([i]) => i))
+  const anchoredY = new Set(pairs.map(([, j]) => j))
+  // Only an identical node is said to have moved; anything less is missing on one side and
+  // unexpected on the other.
+  const movedTo = new Map()
+  const movedY = new Set()
+  xs.forEach((x, i) => {
+    if (anchoredX.has(i)) return
+    const j = ys.findIndex((y, k) => !anchoredY.has(k) && !movedY.has(k) && same(x, y))
+    if (j !== -1) { movedTo.set(i, j); movedY.add(j) }
+  })
+  const out = []
+  let pi = 0
+  let pj = 0
+  for (const [ai, aj] of [...pairs, [xs.length, ys.length]]) {
+    const gx = []
+    for (let i = pi; i < ai; i++) if (!movedTo.has(i)) gx.push(i)
+    const gy = []
+    for (let j = pj; j < aj; j++) if (!movedY.has(j)) gy.push(j)
+    const orders = []
+    for (let i = pi; i < ai; i++) if (movedTo.has(i)) orders.push(i)
+    // Each moved node is reported where it was expected, among the gap's own steps.
+    const flush = (upTo) => { while (orders.length && orders[0] < upTo) { const i = orders.shift(); out.push(['order', i, movedTo.get(i)]) } }
+    for (const [kind, p, q] of alignGap(gx.map((i) => xs[i]), gy.map((j) => ys[j]))) {
+      if (kind === 'unexpected') { out.push([kind, gy[p]]); continue }
+      flush(gx[p])
+      out.push(kind === 'missing' ? [kind, gx[p]] : [kind, gx[p], gy[q]])
+    }
+    flush(Infinity)
+    if (ai < xs.length) out.push(['same', ai, aj])
+    pi = ai + 1
+    pj = aj + 1
+  }
+  return out
 }
-
-const SNIPPET = 200
-const startTag = (el) => {
-  const tag = `<${el.name}${el.attrs.map(([n, v]) => (v === '' ? ` ${n}` : ` ${n}="${v}"`)).join('')}>`
-  return tag.length > SNIPPET ? `${tag.slice(0, SNIPPET)}…` : tag
-}
-const show = (node) => (node === undefined ? null : node.type === 'text' ? `text ${JSON.stringify(node.value)}` : startTag(node))
 
 /**
  * The first node at which two fragments differ once both are normalised, in document order, or
  * null when they are equivalent. Each element's children are aligned (align above) before they are
- * compared, so a dropped or added sibling is reported as itself, not as every later one changed.
+ * compared: identical nodes anchor the alignment, and the rest is aligned by tag between anchors,
+ * so a dropped, added or moved sibling is reported as itself, not as every later one changed.
  * `path` is a CSS-like path to the node from the fragment's top
  * (`section.salt-section > … > a.salt-button:nth-of-type(2)`), and `kind` says what differs:
- * `missing` (expected, absent), `unexpected` (present, not expected), `order` (present elsewhere
- * among its siblings, with `expectedAt` and `foundAt`, counted from 1), `element` (another element
+ * `missing` (expected, absent), `unexpected` (present, not expected), `order` (an identical node
+ * elsewhere among its siblings, with `expectedAt` and `foundAt`, counted from 1), `element` (another element
  * or text in its place), `attribute` (with `name`; null for an absent side) or `text`.
  */
 export function firstDifference(expectedHtml, actualHtml) {
@@ -239,39 +317,17 @@ export function firstDifference(expectedHtml, actualHtml) {
     const xs = a.children
     const ys = b.children
     const here = (node, parent) => (node.type === 'element' ? join(at, step(parent, node)) : join(at, '#text'))
-    const steps = align(xs, ys)
-    // A node left out on one side and found unmatched on the other has moved: the same node whole
-    // first, then one of the same tag and classes.
-    const movedTo = new Map()
-    const movedFrom = new Map()
-    const lost = steps.filter(([k]) => k === 'missing').map(([, i]) => i)
-    const extra = steps.filter(([k]) => k === 'unexpected').map(([, j]) => j)
-    for (const alike of [same, (x, y) => shapeOf(x) === shapeOf(y)]) {
-      for (const i of lost) {
-        if (movedTo.has(i)) continue
-        const j = extra.find((k) => !movedFrom.has(k) && alike(xs[i], ys[k]))
-        if (j !== undefined) { movedTo.set(i, j); movedFrom.set(j, i) }
-      }
-    }
-    const moved = (i, j) => ({ path: here(xs[i], a), kind: 'order', expected: show(xs[i]), found: show(ys[j]), expectedAt: i + 1, foundAt: j + 1 })
-    for (const [s, [kind, p, q]] of steps.entries()) {
-      const next = steps[s + 1]
-      if (kind === 'match') {
-        const x = xs[p]
-        const y = ys[q]
-        if (same(x, y)) continue
-        if (x.type === 'text') return { path: here(x, a), kind: 'text', expected: x.value, found: y.value }
-        return walk(x, y, here(x, a))
-      }
-      if (kind === 'missing') {
-        if (movedTo.has(p)) return moved(p, movedTo.get(p))
-        // Left out and something else in its place: replaced.
-        if (next?.[0] === 'unexpected' && !movedFrom.has(next[1])) return { path: here(xs[p], a), kind: 'element', expected: show(xs[p]), found: show(ys[next[1]]) }
-        return { path: here(xs[p], a), kind: 'missing', expected: show(xs[p]), found: null }
-      }
-      if (movedFrom.has(p)) return moved(movedFrom.get(p), p)
-      if (next?.[0] === 'missing' && !movedTo.has(next[1])) return { path: here(xs[next[1]], a), kind: 'element', expected: show(xs[next[1]]), found: show(ys[p]) }
-      return { path: here(ys[p], b), kind: 'unexpected', expected: null, found: show(ys[p]) }
+    for (const [kind, p, q] of align(xs, ys)) {
+      if (kind === 'same') continue
+      if (kind === 'order') return { path: here(xs[p], a), kind: 'order', expected: show(xs[p]), found: show(ys[q]), expectedAt: p + 1, foundAt: q + 1 }
+      if (kind === 'missing') return { path: here(xs[p], a), kind: 'missing', expected: show(xs[p]), found: null }
+      if (kind === 'unexpected') return { path: here(ys[p], b), kind: 'unexpected', expected: null, found: show(ys[p]) }
+      if (kind === 'element') return { path: here(xs[p], a), kind: 'element', expected: show(xs[p]), found: show(ys[q]) }
+      const x = xs[p]
+      const y = ys[q]
+      if (same(x, y)) continue
+      if (x.type === 'text') return { path: here(x, a), kind: 'text', expected: x.value, found: y.value }
+      return walk(x, y, here(x, a))
     }
     return null
   }
