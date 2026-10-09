@@ -490,3 +490,16 @@ test('U1: a source select and its query inside a list are fitted and checked lik
   assert.deepEqual(field(b.fields, 'rows.source').options.map((o) => o.value), ['posts'])
   assert.equal(field(field(b.fields, 'rows.query').fields, 'items').relationTo, 'posts')
 })
+
+test('U5: a source select in the shared settings is fitted and checked like a section field', () => {
+  const contract = probe([{ name: 'heading', type: 'text', label: 'Heading' }])
+  contract.settings = [
+    { name: 'source', type: 'select', label: 'Show', options: [{ value: 'posts', label: 'Posts' }, { value: 'team', label: 'Team' }] },
+    { name: 'query', type: 'collection-query', label: 'Query', sourceField: 'source' },
+  ]
+  contract.fields.probe.shared = { id: 'section-settings' }
+  const [b] = toPayloadBlocks({ contract, sources: { posts: {} } })
+  assert.deepEqual(field(b.fields, 'settings.source').options.map((o) => o.value), ['posts'])
+  assert.deepEqual(toPayloadBlocks({ contract, sources: {} }), [])
+  assert.throws(() => toPayloadBlocks({ contract, sources: {}, sections: ['probe'] }), /\(probe\.settings\.source\)/)
+})

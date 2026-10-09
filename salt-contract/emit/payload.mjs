@@ -318,7 +318,8 @@ function build(options, snapshot) {
  *                   all of them, with SOURCE_DEFAULTS' slugs, when left out
  *   richTextEditor  (allowed) => the Payload editor for that allowed list; required for rich text
  *   sections        the section ids to emit, in this order; one the site's sources cannot carry
- *                   throws. Left out: every section in sections.json the sources can carry
+ *                   throws. Left out or null: every section in sections.json the sources can
+ *                   carry. planSections in _contract.mjs decides, for every emitter
  *   contract        a loaded contract (loadContract()), for tests
  */
 export function toPayloadBlocks(options = {}) {

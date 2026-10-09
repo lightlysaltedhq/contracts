@@ -244,13 +244,15 @@ export function planSections(contract, { installed = new Set(SOURCES), sections 
   const kept = []
   const leftOut = []
   for (const id of sections ?? contract.sections.map((s) => s.id)) {
-    const { section, fields: all, settings } = resolveSection(contract, id)
+    // The section's own fields and its shared settings, treated alike.
+    const { section, fields: all, settings: allSettings } = resolveSection(contract, id)
     checkFields(all, id)
-    checkFields(settings, `${id}.settings`)
+    checkFields(allSettings, `${id}.settings`)
     const fields = withinSources(all, installed)
+    const settings = withinSources(allSettings, installed)
     const needs = [
       ...unmetSources(fields, installed, id, all),
-      ...unmetSources(settings, installed, `${id}.settings`),
+      ...unmetSources(settings, installed, `${id}.settings`, allSettings),
     ]
     if (needs.length && named) throw new Error(`section ${id} needs ${needs.join(', ')}, which options.sources does not install`)
     if (needs.length) leftOut.push({ id, needs })

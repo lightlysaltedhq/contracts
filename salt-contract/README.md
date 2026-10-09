@@ -76,9 +76,19 @@ difference by path. So a contract release that renames, retypes or re-limits a f
 consumer's check before anything type-checks, and the fix is to regenerate the snapshot, read its
 diff and migrate. Options that JSON can carry also work from the command line:
 `node emit/payload.mjs --check <snapshot> [--options <options.json>]` exits 1 on drift, and
-`--write <snapshot>` regenerates it. A section needing a source the site does not install is left
-out, or refused when `sections` names it; where a source select still has an option the site can
-satisfy (the carousel's inline cards), only the fields that a missing source alone reaches are left
-out. `reports/round-trip-payload.md`, which is not shipped,
-compares the output with the blocks salt-nextjs ships today. A difference is expected only when
-`reports/round-trip-payload.expected.json` lists it, with the note that accounts for it.
+`--write <snapshot>` regenerates it. CRLF line endings are read as LF.
+
+**Fitting the site's sources.** `planSections` in `emit/_contract.mjs` decides, for every emitter,
+which sections a site gets. A section that needs a source the site does not install (a fixed
+collection-query source, a relationship's source, or a source select with no option the site can
+satisfy, in its own fields or its shared settings, at any depth) is left out, or refused with the
+missing source and field named when `sections` lists it (`null` counts as not listing). Where a
+source select still has an option to offer, as the carousel's inline cards do, the section stays:
+the select offers only what the site can satisfy, and the query, any field reached only by a
+missing source, and anything conditioned on a field left out are left out. A malformed condition,
+or a `sourceField` naming no sibling select, is refused whatever the site installs. Conditions
+read a stored `null` as no value; only a sibling never set takes its default.
+
+`reports/round-trip-payload.md`, which is not shipped, compares the output with the blocks
+salt-nextjs ships today. A difference is expected only when `reports/round-trip-payload.expected.json`
+lists it, with the note that accounts for it.
