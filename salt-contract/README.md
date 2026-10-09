@@ -288,7 +288,12 @@ and between the children of a flex or grid container, a list `scripts/salt_norma
 derives from `styles/`; between two inline elements in normal flow a run is one space and counts),
 boolean-attribute forms, character-reference forms, comments, the upload host in `src` and
 `srcset`, and the artwork inside `svg.salt-icon` (the glyph names are the contract, the artwork is
-each platform's, SC-007). It never touches ids, which SC-012 makes deterministic. The gate proves
+each platform's, SC-007), and in the contact form, exactly four per-request values, which the
+expected HTML writes as declared placeholders: the form's `action` as `{{salt:form-action}}`, the
+hidden `formToken` and `challengeToken` values as `{{salt:form-token}}` and
+`{{salt:challenge-token}}`, and the challenge question (its label's text) as
+`{{salt:challenge-question}}` (SC-016). Each is matched by element, class and name, so a field's
+type and every other attribute still compares. It never touches ids, which SC-012 makes deterministic. The gate proves
 that removing or changing any one attribute of any expected HTML changes its output.
 
 ### The adapter protocol

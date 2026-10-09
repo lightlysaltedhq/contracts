@@ -442,6 +442,9 @@ const WHEN = {
   'pagination:page-first-link:aria-current': currentPage,
   'pagination:page-last-link:aria-current': currentPage,
   'tab-set:root:data-tabbed': tabbed,
+  'contact-form:input:type': (c, el) => el.name === 'input',
+  'contact-form:input:rows': (c, el) => el.name === 'textarea',
+  'contact-form:input:autocomplete': (c, el) => ['name', 'email', 'phone'].includes(attr(el, 'name')),
   'tab-set:panel:role': tabbed,
   'tab-set:panel:aria-labelledby': tabbed,
   'tab-set:panel:tabindex': tabbed,
@@ -490,6 +493,9 @@ const VALUE = {
   'section:root:data-width': (c) => effectiveSetting(c, 'width'),
   'accordion:item:name': (c) => (groupName[c.section] ? `${groupName[c.section]}-${c.input.context.index}` : undefined),
   'media-text:row:data-media-side': rowSide,
+  // A contact field's type and autocomplete follow its name (contact-form.json, SC-016).
+  'contact-form:input:type': (c, el) => ({ name: 'text', email: 'email', phone: 'tel' })[attr(el, 'name')],
+  'contact-form:input:autocomplete': (c, el) => ({ name: 'name', email: 'email', phone: 'tel' })[attr(el, 'name')],
 }
 
 function checkAttrs(alt, el, c) {
@@ -814,22 +820,31 @@ function raw(node) {
   return VOID.has(node.name) ? `<${node.name}${attrs}>` : `<${node.name}${attrs}>${inner}</${node.name}>`
 }
 
+const declaredMask = (el, name, insideForm) =>
+  (name === 'action' && el.name === 'form' && classesOf(el).includes('salt-contact__form')) ||
+  (insideForm && name === 'value' && el.name === 'input' && attr(el, 'type') === 'hidden' && ['formToken', 'challengeToken'].includes(attr(el, 'name')))
+
 function checkNormaliser(c) {
   if (!c.renders) return
   const canonical = normalise(c.html)
   if (normalise(canonical) !== canonical) fail(`${c.at}.html: normalise is not idempotent on it`)
   const tree = parse(c.html)
   if (normalise(raw(tree)) !== canonical) fail(`${c.at}.html: normalise changes its verdict when the same tree is reserialised`)
-  const visit = (el) => {
+  const visit = (el, inForm) => {
+    const inside = inForm || (el.name === 'form' && classesOf(el).includes('salt-contact__form'))
     // Icon artwork is dropped by design (SC-007); everything else must count.
-    if (el.name === 'svg' && classesOf(el).includes('salt-icon')) { mutate(el); return }
-    mutate(el)
-    for (const child of elementsOf(el)) visit(child)
+    if (el.name === 'svg' && classesOf(el).includes('salt-icon')) { mutate(el, inside); return }
+    mutate(el, inside)
+    for (const child of elementsOf(el)) visit(child, inside)
   }
-  const mutate = (el) => {
+  const mutate = (el, inside) => {
     for (let k = 0; k < el.attrs.length; k++) {
       const saved = el.attrs
       const [name, value] = saved[k]
+      // The contact form's declared per-request values are masked by design (SC-016). The list is
+      // the contract's, held here rather than asked of the normaliser, so a normaliser that masks
+      // more is caught by the mutations below.
+      if (declaredMask(el, name, inside)) continue
       for (const [what, attrs] of [
         ['removing', saved.filter((_, x) => x !== k)],
         ['changing', saved.map((a, x) => (x === k ? [name, `${value}-mutated`] : a))],
@@ -840,7 +855,7 @@ function checkNormaliser(c) {
       }
     }
   }
-  for (const el of elementsOf(tree)) visit(el)
+  for (const el of elementsOf(tree)) visit(el, false)
 }
 
 // ── The normaliser's containers agree with the stylesheets ──────────────────────────────────────

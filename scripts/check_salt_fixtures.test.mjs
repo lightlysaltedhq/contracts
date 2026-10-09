@@ -385,6 +385,22 @@ test('display: JSON with escaped slashes in an attribute fails', () => {
   expectFail(['locations'], (io) => io.html('locations/one-office-open.html', 'data-timezone="Europe/London"', 'data-timezone="Europe\\/London"'), /escapes a slash/)
 })
 
+// The contact form in the fixtures (SC-016, item 4).
+test('form: a field whose type does not follow its name fails', () => {
+  expectFail(['contact'], (io) => io.html('contact/form-open.html', 'name="email" type="email"', 'name="email" type="text"'), /type="text" disagrees with the case, which gives "email"/)
+})
+test('form: the message without rows fails', () => {
+  expectFail(['contact'], (io) => io.html('contact/form-open.html', ' rows="6"', ''), /<textarea\.salt-contact__input> lacks rows/)
+})
+test('form: a placeholder written for a value the normaliser does not mask fails the mutation proof', () => {
+  expectFail(['contact'], (io) => {
+    const src = readFileSync(path.join(pkg, 'normalise.mjs'), 'utf8')
+    io.write('normalise.mjs', src
+      .replace("['formToken', 'challengeToken'].includes(attrOf(el, 'name'))", "['formToken', 'challengeToken', 'returnTo'].includes(attrOf(el, 'name'))")
+      .replace("PLACEHOLDERS[attrOf(el, 'name')]]", "PLACEHOLDERS[attrOf(el, 'name')] ?? '{{salt:return}}']"))
+  }, /changing value on <input> does not change normalise's output/)
+})
+
 // ── 4. The normaliser ─────────────────────────────────────────────────────────────────────────
 test('normaliser: one that drops an attribute fails the mutation check', () => {
   expectFail(HERO, (io) => {
@@ -460,6 +476,17 @@ test('normalise: white space between the children of a flex or grid container do
   // Outside a container the same line break is a space a browser draws.
   differ('<div class="salt-hero__text">\n  <a href="/a">A</a>\n  <a href="/b">B</a>\n</div>', '<div class="salt-hero__text"><a href="/a">A</a><a href="/b">B</a></div>')
   differ('<p>Read <a class="salt-button" href="/x">Go</a> now</p>', '<p>Read<a class="salt-button" href="/x">Go</a>now</p>')
+})
+test('normalise: the contact form\'s per-request values are masked exactly, nothing else', () => {
+  const form = (action, token, question, type = 'email', ret = '/contact/', other = 'x') => `<form class="salt-contact__form" action="${action}"><label class="salt-contact__label" for="c__challenge">${question}</label><input class="salt-contact__input" name="email" type="${type}"><input type="hidden" name="formToken" value="${token}"><input type="hidden" name="challengeToken" value="${token}"><input type="hidden" name="returnTo" value="${ret}"><input type="hidden" name="other" value="${other}"></form>`
+  same(form('/api/contact', 'abc', 'What is 3 + 4?'), form('/wp-admin/admin-post.php', 'zzz', 'What is 2 + 9?'))
+  // A changed field type, the return path and any other hidden value still differ.
+  differ(form('/a', 't', 'q'), form('/a', 't', 'q', 'text'))
+  differ(form('/a', 't', 'q'), form('/a', 't', 'q', 'email', '/elsewhere/'))
+  differ(form('/a', 't', 'q'), form('/a', 't', 'q', 'email', '/contact/', 'y'))
+  // Outside the contact form nothing is masked.
+  differ('<form action="/a"></form>', '<form action="/b"></form>')
+  differ('<div><input type="hidden" name="formToken" value="a"></div>', '<div><input type="hidden" name="formToken" value="b"></div>')
 })
 test('normalise: comments do not count', () => {
   same('<p>One<!-- -->Two</p>', '<p>OneTwo</p>')
