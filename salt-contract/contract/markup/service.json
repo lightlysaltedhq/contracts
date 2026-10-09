@@ -215,7 +215,7 @@
   "notes": [
     {
       "topic": "ruling",
-      "text": "The view body is the markup Salt for Next.js's example app writes (apps/example/src/site/catalogue-views.tsx, ServiceView), in its order, with its salt-service__* and salt-related classes (SC-007). The related services sit inside the article, as Next draws them. The page draws no icon: the title names the service."
+      "text": "The view body is the markup Salt for Next.js's example app writes (apps/example/src/site/catalogue-views.tsx, ServiceView), in its order, with its salt-service__* and salt-related classes (SC-007). The related services sit inside the article, as Next draws them. The page draws no icon: the title names the service. The heading ids service-benefits-heading and service-related-heading are reserved (section#anchors): they are view chrome, never suffixed."
     },
     {
       "topic": "stylesheet-owes",

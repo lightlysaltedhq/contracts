@@ -127,7 +127,7 @@
   "notes": [
     {
       "topic": "ruling",
-      "text": "The view body is the markup Salt for Next.js's example app writes (apps/example/src/app/(site)/search/page.tsx), in its order: the h1, the form, then either the empty sentence or a named results section with its list and pagination (SC-007). The form's classes are search-form's (salt-search__form, salt-search__label, salt-search__input); the results list is salt-search__results. The id search-results is fixed; a page with sections never draws this view."
+      "text": "The view body is the markup Salt for Next.js's example app writes (apps/example/src/app/(site)/search/page.tsx), in its order: the h1, the form, then either the empty sentence or a named results section with its list and pagination (SC-007). The form's classes are search-form's (salt-search__form, salt-search__label, salt-search__input); the results list is salt-search__results. The id search-results is reserved (section#anchors): it is view chrome, never suffixed."
     },
     {
       "topic": "stylesheet-owes",
