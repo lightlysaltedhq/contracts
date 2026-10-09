@@ -479,3 +479,13 @@ test('cross-file: a data-icon in dataAttributes read from content passes', () =>
   const r = crossRun((f) => { withIcons(f); f['contract/markup/hero.json'].dataAttributes = [{ name: 'data-icon', on: 'glyph', values: 'from:name' }] })
   assert.equal(r.code, 0, r.out)
 })
+test('schema: the sections schema refuses openQuestions', () => {
+  const r = crossRun((f) => {
+    f['schema/sections.schema.json'] = structuredClone(realSectionsSchema)
+    const both = { nextjs: { status: 'ships' }, wordpress: { status: 'ships' } }
+    f['contract/sections.json'].sections[0].platforms = both
+    f['contract/sections.json'].components[0].platforms = both
+    f['contract/sections.json'].openQuestions = [{ id: 'q', question: 'x' }]
+  })
+  assert.equal(r.code, 1, r.out); assert.match(r.out, /contract\/sections\.json does not match schema\/sections\.schema\.json: \/ must NOT have additional properties/)
+})
