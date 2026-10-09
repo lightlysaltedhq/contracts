@@ -47,6 +47,8 @@
     "./schema/replaced-logic": "./schema/replaced-logic.schema.json",
     "./normalise": "./normalise.mjs",
     "./fixtures/*": "./fixtures/*",
+    "./image-sizes": "./contract/image-sizes.json",
+    "./schema/image-sizes": "./schema/image-sizes.schema.json",
     "./package.json": "./package.json"
   },
   "keywords": [
