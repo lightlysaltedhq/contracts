@@ -84,7 +84,8 @@ collection-query source, a relationship's source, or a source select with no opt
 satisfy, in its own fields or its shared settings, at any depth) is left out, or refused with the
 missing source and field named when `sections` lists it (`null` counts as not listing). Where a
 source select still has an option to offer, as the carousel's inline cards do, the section stays:
-the select offers only what the site can satisfy, and the query, any field reached only by a
+the select offers only what the site can satisfy (and has no default when its default is no
+longer offered), and the query, any field reached only by a
 missing source, and anything conditioned on a field left out are left out. A malformed condition,
 or a `sourceField` naming no sibling select, is refused whatever the site installs. Conditions
 read a stored `null` as no value; only a sibling never set takes its default.

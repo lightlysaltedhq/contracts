@@ -525,3 +525,13 @@ test('V5: a sourceField select that offers no source at all is refused, as U2 re
   ]
   assert.throws(() => toPayloadBlocks({ contract: probe(fields) }), /probe\.query: sourceField kind names no sibling select offering a source/)
 })
+
+test('V3: a narrowed source select keeps its default only while it still offers it', () => {
+  const fields = [
+    { name: 'source', type: 'select', label: 'Show', options: [{ value: 'posts', label: 'Posts' }, { value: 'team', label: 'Team' }], default: 'team' },
+    { name: 'query', type: 'collection-query', label: 'Query', sourceField: 'source' },
+  ]
+  const select = (sources) => field(toPayloadBlocks({ contract: probe(fields), sources })[0].fields, 'source')
+  assert.equal(select({ posts: {}, team: {} }).defaultValue, 'team')
+  assert.ok(!('defaultValue' in select({ posts: {} })), JSON.stringify(select({ posts: {} })))
+})

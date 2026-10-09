@@ -166,7 +166,8 @@ export const sourceSelectsOf = (fields) =>
 /**
  * A section's fields fitted to the installed sources. Each source select is replaced by a copy whose
  * options are offeredSources' options, computed once here, so an emitter offers `options` as given
- * and never re-applies the rule. Left out: a collection-query read from a select that offers no
+ * and never re-applies the rule; its default is kept only while it is still offered, so it may
+ * have none. Left out: a collection-query read from a select that offers no
  * installed source, and a field whose condition names a source select only by values that select
  * no longer offers (the carousel's showTags with no source that has categories), and any field
  * whose condition names a field left out. A select left with no option is unmetSources' to report.
@@ -174,8 +175,13 @@ export const sourceSelectsOf = (fields) =>
  */
 export function withinSources(fields, installed) {
   const selects = sourceSelectsOf(fields)
-  const narrowed = fields.map((f) => (selects.has(f.name) ? { ...f, options: offeredSources(f, installed).options }
-    : f.fields ? { ...f, fields: withinSources(f.fields, installed) } : f))
+  const narrow = (f) => {
+    const { default: was, ...rest } = f
+    const options = offeredSources(f, installed).options
+    // A default the select no longer offers is dropped, never emitted as a value it cannot hold.
+    return options.some((o) => o.value === was) ? { ...rest, options, default: was } : { ...rest, options }
+  }
+  const narrowed = fields.map((f) => (selects.has(f.name) ? narrow(f) : f.fields ? { ...f, fields: withinSources(f.fields, installed) } : f))
   const valuesOf = (name) => narrowed.find((s) => s.name === name).options.map((o) => o.value)
   const reachable = (f) => clauses(f.condition).every((c) => {
     // A malformed clause is checkedClauses' to refuse, with its own message.
