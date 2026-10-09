@@ -22,7 +22,8 @@
 //
 // Each difference is EXPECTED only when salt-contract/reports/round-trip-acf.expected.json lists it:
 // its section, field path, kind and exact wording, with the evidence (the owes, formerly, values or
-// note record) that accounts for it. Anything else is UNEXPECTED. --suggest prints the unlisted
+// note record) that accounts for it, which must be a note of that field, a field above it or its
+// section (scripts/_round_trip.mjs). Anything else is UNEXPECTED. --suggest prints the unlisted
 // differences as list entries, with the contract record that may account for each, for a person
 // to review before adding them; --check fails on a stale report, an unexpected difference, or a
 // listed one that no longer occurs.
@@ -34,7 +35,7 @@ import { fileURLToPath } from 'node:url'
 
 import { clauseHolds, clauses, isMainModule, loadContract, normaliseLineEndings, resolveSection, siblingValue } from '../salt-contract/emit/_contract.mjs'
 import { toAcfFieldGroups } from '../salt-contract/emit/acf.mjs'
-import { classify } from './_round_trip.mjs'
+import { classify, misplacedEvidence } from './_round_trip.mjs'
 
 const here = path.dirname(fileURLToPath(import.meta.url))
 const reportPath = path.join(here, '..', 'salt-contract', 'reports', 'round-trip-acf.md')
@@ -59,6 +60,17 @@ export function parseArguments(argv, env = process.env) {
   const wordpress = path.resolve(given)
   if (!existsSync(path.join(wordpress, 'inc', 'fields'))) throw new Error(`salt-wordpress checkout not found: ${wordpress} has no inc/fields`)
   return { wordpress, check, suggest }
+}
+
+/**
+ * The reviewed entries whose evidence is not a note of their own field, a field above it or their
+ * section (scripts/_round_trip.mjs). A layout folded into a section is labelled `section (layout)`;
+ * the rule reads the section.
+ */
+export function misplacedAcfEvidence(contract, list) {
+  const bySection = (e) => ({ ...e, section: e.section.replace(/ \(.*\)$/, '') })
+  const misplaced = new Set(misplacedEvidence(contract, list.map(bySection), 'wordpress').map((e) => JSON.stringify(e)))
+  return list.filter((e) => misplaced.has(JSON.stringify(bySection(e))))
 }
 
 /** Whether the committed report matches the generated text, CRLF read as LF (a Windows checkout). */
@@ -123,7 +135,7 @@ function suggestionFor(note, kind, parent) {
   if (kind === 'values' && note?.values) return `values: ${JSON.stringify(note.values)}`
   if (kind === 'condition' && note?.note) return `note: ${note.note}`
   if (note?.owes) return `owes: ${note.owes}`
-  if ((kind === 'missing' || kind === 'extra') && wpNote(parent)?.owes) return `parent owes: ${wpNote(parent).owes}`
+  if ((kind === 'missing' || kind === 'extra') && wpNote(parent)?.owes) return `owes: ${wpNote(parent).owes}`
   if (note?.note) return `note: ${note.note}`
   return ''
 }
@@ -239,7 +251,7 @@ function compareLevel(section, entries, theirs, prefix, parentDef, fixed = {}) {
   for (const n of wp) {
     if (claimed.has(n.name)) continue
     if (fixed.selector === n.name) {
-      record(section, `${prefix}${n.name}`, undefined, 'extra', 'in salt-wordpress, not in the contract', undefined, `sections.json formerly: ${fixed.when}`)
+      record(section, `${prefix}${n.name}`, undefined, 'extra', 'in salt-wordpress, not in the contract', undefined, `sections.json formerly: ${fixed.layout}`)
       continue
     }
     record(section, `${prefix}${n.name}`, undefined, 'extra', 'in salt-wordpress, not in the contract', parentDef)
@@ -276,12 +288,7 @@ function compareOne(section, at, e, n, def, ctx) {
     for (const k of ['post_type', 'taxonomy']) if (show(e[k]) !== show(n[k])) diffs.push(['relation', `${k} ${show(e[k])}; salt-wordpress ${show(n[k])}`])
   }
   const cond = compareConditions(e, n, ctx)
-  if (cond) {
-    // A condition on a sibling salt-wordpress does not have yet is owed with that sibling.
-    const owed = clausesOf(def).map((c) => ctx.defs.get(c.field)).find((d) => !ctx.pairs.has(d?.name) && wpNote(d)?.owes)
-    if (owed) record(section, at, def, 'condition', cond, undefined, `${owed.name} owes: ${wpNote(owed).owes}`)
-    else diffs.push(['condition', cond])
-  }
+  if (cond) diffs.push(['condition', cond])
   for (const [kind, text] of diffs) record(section, at, def, kind, text)
   if (sameType && e.sub_fields && n.sub_fields) {
     const childDefs = def?.type === 'link' ? [] : def?.fields ?? []
@@ -356,7 +363,7 @@ async function main({ wordpress, check, suggest }) {
         const value = /^source (\S+)$/.exec(former?.note ?? '')?.[1] ?? wpNote(sourceDef)?.values?.[wl.name]
         if (value) fixed.source = value
       }
-      if (former?.when) Object.assign(fixed, { selector: former.when.split(' ')[0], when: `${wl.name} when ${former.when}` })
+      if (former?.when) Object.assign(fixed, { selector: former.when.split(' ')[0], layout: wl.name })
       const applies = (def) => clausesOf(def).every((c) => !('source' in fixed && c.field === 'source') || clauseHolds(c, fixed.source))
       // The settings group's fields are stored on the layout itself today, so they are matched there.
       const settingsGroup = layout.sub_fields.find((f) => f.name === 'settings')
@@ -451,6 +458,9 @@ async function main({ wordpress, check, suggest }) {
     let committed = ''
     try { committed = readFileSync(reportPath, 'utf8') } catch { /* missing is stale */ }
     if (!reportIsCurrent(committed, text)) { console.log(`✗ ${path.relative(process.cwd(), reportPath)} is stale; regenerate it`); process.exit(1) }
+    const misplaced = misplacedAcfEvidence(contract, list)
+    for (const e of misplaced) console.log(`✗ ${e.section} ${e.path} (${e.kind}) cites evidence that is not a note of that field, its parents or its section: ${e.evidence}`)
+    if (misplaced.length) process.exit(1)
     if (unexpected.length || unseen.length) {
       console.log(`✗ ${unexpected.length} unexpected difference(s) and ${unseen.length} listed but not found; see the report`)
       process.exit(1)

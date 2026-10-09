@@ -2,7 +2,7 @@
 // and that importing it runs nothing.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, readFileSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -26,39 +26,22 @@ test('R10: flags may come anywhere; the checkout is a path or SALT_WORDPRESS_DIR
   } finally { rmSync(dir, { recursive: true, force: true }) }
 })
 
-test('R9: every entry on the reviewed list cites a note or record the contract really holds', () => {
-  const root = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'salt-contract')
-  const list = JSON.parse(readFileSync(path.join(root, 'reports', 'round-trip-acf.expected.json'), 'utf8'))
-  // Every WordPress note in the contract, by kind.
-  const notes = { owes: new Set(), note: new Set(), formerly: new Set(), values: new Set(), layouts: new Set() }
-  const walk = (x) => {
-    if (Array.isArray(x)) return x.forEach(walk)
-    if (!x || typeof x !== 'object') return
-    const wp = x.platforms?.wordpress
-    if (wp) {
-      if (wp.owes) notes.owes.add(wp.owes)
-      if (wp.note) notes.note.add(wp.note)
-      if (wp.formerly && typeof [wp.formerly].flat()[0] === 'string') notes.formerly.add([wp.formerly].flat().join(', '))
-      // A query's values are keyed by part, and a part's row cites its own map.
-      if (wp.values) for (const v of [wp.values, ...Object.values(wp.values).filter((x) => typeof x === 'object')]) notes.values.add(JSON.stringify(v))
-      for (const f of Array.isArray(wp.formerly) ? wp.formerly : []) {
-        if (f?.name) notes.layouts.add(f.name)
-        if (f?.when) notes.layouts.add(`${f.name} when ${f.when}`)
-      }
-    }
-    Object.values(x).forEach(walk)
-  }
-  for (const f of readdirSync(path.join(root, 'contract', 'fields'))) walk(JSON.parse(readFileSync(path.join(root, 'contract', 'fields', f), 'utf8')))
-  walk(JSON.parse(readFileSync(path.join(root, 'contract', 'sections.json'), 'utf8')))
+test('finding 8: every reviewed entry cites a note of its own field, a field above it or its section', async () => {
+  const { misplacedAcfEvidence } = await import('./round_trip_acf.mjs')
+  const { loadContract } = await import('../salt-contract/emit/_contract.mjs')
+  const contract = loadContract()
+  const file = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'salt-contract', 'reports', 'round-trip-acf.expected.json')
+  const list = JSON.parse(readFileSync(file, 'utf8'))
   assert.ok(list.length > 0)
-  for (const e of list) {
-    assert.deepEqual(Object.keys(e), ['section', 'path', 'kind', 'difference', 'evidence'])
-    const m = /^(owes|note|formerly|values|parent owes|[a-zA-Z]+ owes|sections\.json formerly): (.+)$/.exec(e.evidence)
-    assert.ok(m, JSON.stringify(e))
-    const [, kind, cited] = m
-    const pool = kind === 'sections.json formerly' ? notes.layouts : kind.endsWith('owes') ? notes.owes : notes[kind]
-    assert.ok(pool.has(cited), `${JSON.stringify(e)} cites text the contract does not hold`)
-  }
+  for (const e of list) assert.deepEqual(Object.keys(e), ['section', 'path', 'kind', 'difference', 'evidence'])
+  assert.deepEqual(misplacedAcfEvidence(contract, list), [])
+  // A folded layout's label names its section; a real note borrowed from a sibling is refused.
+  const borrowed = { section: 'collection-showcase (services)', path: 'columns', kind: 'condition', difference: 'x',
+    evidence: 'owes: the accordion and index layouts, and the field on work, team and blog_teaser; services has grid, list and featured; testimonials grid becomes source testimonials with layout grid' }
+  const layoutNote = contract.fields['collection-showcase'].fields.find((f) => f.name === 'layout').platforms.wordpress.owes
+  assert.deepEqual(misplacedAcfEvidence(contract, [{ ...borrowed, evidence: `owes: ${layoutNote}` }]).length, 1)
+  const own = contract.fields['collection-showcase'].fields.find((f) => f.name === 'columns').platforms.wordpress.owes
+  assert.deepEqual(misplacedAcfEvidence(contract, [{ ...borrowed, evidence: `owes: ${own}` }]), [])
 })
 
 test('R9: a difference is expected only when the reviewed list names it exactly', () => {

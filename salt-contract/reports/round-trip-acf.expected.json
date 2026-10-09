@@ -312,21 +312,21 @@
     "path": "buttons.link",
     "kind": "missing",
     "difference": "not in salt-wordpress",
-    "evidence": "parent owes: the link shape: label, url and style become link (label, type, document or url, newTab) and style; internal links and opening in a new tab are new"
+    "evidence": "owes: the link shape: label, url and style become link (label, type, document or url, newTab) and style; internal links and opening in a new tab are new"
   },
   {
     "section": "call-to-action",
     "path": "buttons.label",
     "kind": "extra",
     "difference": "in salt-wordpress, not in the contract",
-    "evidence": "parent owes: the link shape: label, url and style become link (label, type, document or url, newTab) and style; internal links and opening in a new tab are new"
+    "evidence": "owes: the link shape: label, url and style become link (label, type, document or url, newTab) and style; internal links and opening in a new tab are new"
   },
   {
     "section": "call-to-action",
     "path": "buttons.url",
     "kind": "extra",
     "difference": "in salt-wordpress, not in the contract",
-    "evidence": "parent owes: the link shape: label, url and style become link (label, type, document or url, newTab) and style; internal links and opening in a new tab are new"
+    "evidence": "owes: the link shape: label, url and style become link (label, type, document or url, newTab) and style; internal links and opening in a new tab are new"
   },
   {
     "section": "call-to-action",
@@ -1019,7 +1019,7 @@
     "path": "query.direction",
     "kind": "extra",
     "difference": "in salt-wordpress, not in the contract",
-    "evidence": "parent owes: one query group in place of six layout fields"
+    "evidence": "owes: one query group in place of six layout fields"
   },
   {
     "section": "faq",
@@ -1201,7 +1201,7 @@
     "path": "query.direction",
     "kind": "extra",
     "difference": "in salt-wordpress, not in the contract",
-    "evidence": "parent owes: one query group in place of six layout fields"
+    "evidence": "owes: one query group in place of six layout fields"
   },
   {
     "section": "collection-showcase (services)",
@@ -1341,7 +1341,7 @@
     "path": "columns",
     "kind": "condition",
     "difference": "condition differs (3 of 5 cases), e.g. {\"layout\":\"list\"}: contract hides, salt-wordpress shows; {\"layout\":\"accordion\"}: contract hides, salt-wordpress shows",
-    "evidence": "layout owes: the accordion and index layouts, and the field on work, team and blog_teaser; services has grid, list and featured; testimonials grid becomes source testimonials with layout grid"
+    "evidence": "owes: one section in place of five, and the accordion and index layouts"
   },
   {
     "section": "collection-showcase (work)",
@@ -1432,7 +1432,7 @@
     "path": "query.direction",
     "kind": "extra",
     "difference": "in salt-wordpress, not in the contract",
-    "evidence": "parent owes: one query group in place of six layout fields"
+    "evidence": "owes: one query group in place of six layout fields"
   },
   {
     "section": "collection-showcase (work)",
@@ -1558,7 +1558,7 @@
     "path": "columns",
     "kind": "condition",
     "difference": "condition differs (3 of 5 cases), e.g. {\"layout\":\"list\"}: contract hides, salt-wordpress shows; {\"layout\":\"accordion\"}: contract hides, salt-wordpress shows",
-    "evidence": "layout owes: the accordion and index layouts, and the field on work, team and blog_teaser; services has grid, list and featured; testimonials grid becomes source testimonials with layout grid"
+    "evidence": "owes: one section in place of five, and the accordion and index layouts"
   },
   {
     "section": "collection-showcase (team)",
@@ -1635,7 +1635,7 @@
     "path": "query.direction",
     "kind": "extra",
     "difference": "in salt-wordpress, not in the contract",
-    "evidence": "parent owes: one query group in place of six layout fields"
+    "evidence": "owes: one query group in place of six layout fields"
   },
   {
     "section": "collection-showcase (team)",
@@ -1775,7 +1775,7 @@
     "path": "query.categories",
     "kind": "missing",
     "difference": "not in salt-wordpress",
-    "evidence": "parent owes: one query group in place of six layout fields"
+    "evidence": "owes: one query group in place of six layout fields"
   },
   {
     "section": "collection-showcase (testimonials)",
@@ -1824,7 +1824,7 @@
     "path": "query.direction",
     "kind": "extra",
     "difference": "in salt-wordpress, not in the contract",
-    "evidence": "parent owes: one query group in place of six layout fields"
+    "evidence": "owes: one query group in place of six layout fields"
   },
   {
     "section": "collection-showcase (testimonials)",
@@ -1943,7 +1943,7 @@
     "path": "columns",
     "kind": "condition",
     "difference": "condition differs (3 of 5 cases), e.g. {\"layout\":\"list\"}: contract hides, salt-wordpress shows; {\"layout\":\"accordion\"}: contract hides, salt-wordpress shows",
-    "evidence": "layout owes: the accordion and index layouts, and the field on work, team and blog_teaser; services has grid, list and featured; testimonials grid becomes source testimonials with layout grid"
+    "evidence": "owes: one section in place of five, and the accordion and index layouts"
   },
   {
     "section": "collection-showcase (blog_teaser)",
@@ -2034,7 +2034,7 @@
     "path": "query.direction",
     "kind": "extra",
     "difference": "in salt-wordpress, not in the contract",
-    "evidence": "parent owes: one query group in place of six layout fields"
+    "evidence": "owes: one query group in place of six layout fields"
   },
   {
     "section": "collection-showcase (blog_teaser)",
@@ -2293,7 +2293,7 @@
     "path": "query.categories",
     "kind": "missing",
     "difference": "not in salt-wordpress",
-    "evidence": "parent owes: the query on scroll_carousel; only the testimonials layout has one today"
+    "evidence": "owes: the query on scroll_carousel; only the testimonials layout has one today"
   },
   {
     "section": "carousel (testimonials)",
@@ -2342,7 +2342,7 @@
     "path": "query.direction",
     "kind": "extra",
     "difference": "in salt-wordpress, not in the contract",
-    "evidence": "parent owes: the query on scroll_carousel; only the testimonials layout has one today"
+    "evidence": "owes: the query on scroll_carousel; only the testimonials layout has one today"
   },
   {
     "section": "carousel (testimonials)",
@@ -2412,7 +2412,7 @@
     "path": "layout",
     "kind": "extra",
     "difference": "in salt-wordpress, not in the contract",
-    "evidence": "sections.json formerly: testimonials when layout slider"
+    "evidence": "sections.json formerly: testimonials"
   },
   {
     "section": "contact",
@@ -2580,7 +2580,7 @@
     "path": "query.direction",
     "kind": "extra",
     "difference": "in salt-wordpress, not in the contract",
-    "evidence": "parent owes: one query group in place of six layout fields"
+    "evidence": "owes: one query group in place of six layout fields"
   },
   {
     "section": "locations",

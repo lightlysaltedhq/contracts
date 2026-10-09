@@ -106,9 +106,9 @@ Field groups not compared, because the contract defines no fields for them: grou
 | call-to-action | `(layout name)` | name | name call-to-action; salt-wordpress cta | sections.json formerly: cta |
 | call-to-action | `body` | name | stored as text | formerly: text |
 | call-to-action | `body` | type | type wysiwyg; salt-wordpress textarea | owes: rich text in place of a textarea; a stored plain text migrates as one paragraph |
-| call-to-action | `buttons.link` | missing | not in salt-wordpress | parent owes: the link shape: label, url and style become link (label, type, document or url, newTab) and style; internal links and opening in a new tab are new |
-| call-to-action | `buttons.label` | extra | in salt-wordpress, not in the contract | parent owes: the link shape: label, url and style become link (label, type, document or url, newTab) and style; internal links and opening in a new tab are new |
-| call-to-action | `buttons.url` | extra | in salt-wordpress, not in the contract | parent owes: the link shape: label, url and style become link (label, type, document or url, newTab) and style; internal links and opening in a new tab are new |
+| call-to-action | `buttons.link` | missing | not in salt-wordpress | owes: the link shape: label, url and style become link (label, type, document or url, newTab) and style; internal links and opening in a new tab are new |
+| call-to-action | `buttons.label` | extra | in salt-wordpress, not in the contract | owes: the link shape: label, url and style become link (label, type, document or url, newTab) and style; internal links and opening in a new tab are new |
+| call-to-action | `buttons.url` | extra | in salt-wordpress, not in the contract | owes: the link shape: label, url and style become link (label, type, document or url, newTab) and style; internal links and opening in a new tab are new |
 | call-to-action | `settings.spacing` | name | stored as section_spacing | formerly: section_spacing |
 | call-to-action | `settings.tone` | name | stored as section_background | formerly: section_background |
 | call-to-action | `settings.tone` | values | choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse | values: {"inverse":"surface-inverse"} |
@@ -207,7 +207,7 @@ Field groups not compared, because the contract defines no fields for them: grou
 | faq | `query.order` | condition | condition differs (1 of 3 cases), e.g. {"mode":"manual"}: contract hides, salt-wordpress shows | owes: one query group in place of six layout fields |
 | faq | `query.count` | limit | step 1; salt-wordpress none | owes: one query group in place of six layout fields |
 | faq | `query.count` | condition | condition differs (1 of 3 cases), e.g. {"mode":"manual"}: contract hides, salt-wordpress shows | owes: one query group in place of six layout fields |
-| faq | `query.direction` | extra | in salt-wordpress, not in the contract | parent owes: one query group in place of six layout fields |
+| faq | `query.direction` | extra | in salt-wordpress, not in the contract | owes: one query group in place of six layout fields |
 | faq | `structuredData` | name | stored as schema_toggle | formerly: schema_toggle |
 | faq | `settings.spacing` | name | stored as section_spacing | formerly: section_spacing |
 | faq | `settings.tone` | name | stored as section_background | formerly: section_background |
@@ -233,7 +233,7 @@ Field groups not compared, because the contract defines no fields for them: grou
 | collection-showcase (services) | `query.order` | condition | condition differs (1 of 3 cases), e.g. {"mode":"manual"}: contract hides, salt-wordpress shows | owes: one query group in place of six layout fields |
 | collection-showcase (services) | `query.count` | limit | step 1; salt-wordpress none | owes: one query group in place of six layout fields |
 | collection-showcase (services) | `query.count` | condition | condition differs (1 of 3 cases), e.g. {"mode":"manual"}: contract hides, salt-wordpress shows | owes: one query group in place of six layout fields |
-| collection-showcase (services) | `query.direction` | extra | in salt-wordpress, not in the contract | parent owes: one query group in place of six layout fields |
+| collection-showcase (services) | `query.direction` | extra | in salt-wordpress, not in the contract | owes: one query group in place of six layout fields |
 | collection-showcase (services) | `showIcons` | missing | not in salt-wordpress | owes: the field; services always draws its icon today |
 | collection-showcase (services) | `showTags` | missing | not in salt-wordpress | owes: the field |
 | collection-showcase (services) | `groupByCategory` | missing | not in salt-wordpress | owes: the field, with the index layout |
@@ -253,9 +253,9 @@ Field groups not compared, because the contract defines no fields for them: grou
 | collection-showcase (work) | `intro` | missing | not in salt-wordpress | owes: the field |
 | collection-showcase (work) | `source` | missing | not in salt-wordpress | owes: one section with a source select in place of five layouts; the former layout slug gives the source |
 | collection-showcase (work) | `layout` | missing | not in salt-wordpress | owes: the accordion and index layouts, and the field on work, team and blog_teaser; services has grid, list and featured; testimonials grid becomes source testimonials with layout grid |
-| collection-showcase (work) | `columns` | condition | condition differs (3 of 5 cases), e.g. {"layout":"list"}: contract hides, salt-wordpress shows; {"layout":"accordion"}: contract hides, salt-wordpress shows | layout owes: the accordion and index layouts, and the field on work, team and blog_teaser; services has grid, list and featured; testimonials grid becomes source testimonials with layout grid |
 | collection-showcase (work) | `columns` | options | choices 2, 3, 4; salt-wordpress 2, 3 | owes: one select with the strings 2, 3 and 4 on every source; work and blog_teaser offer 2 and 3 with an integer default 3, team uses bare-numeral labels, testimonials has none |
 | collection-showcase (work) | `columns` | default | default "3"; salt-wordpress 3 | owes: one select with the strings 2, 3 and 4 on every source; work and blog_teaser offer 2 and 3 with an integer default 3, team uses bare-numeral labels, testimonials has none |
+| collection-showcase (work) | `columns` | condition | condition differs (3 of 5 cases), e.g. {"layout":"list"}: contract hides, salt-wordpress shows; {"layout":"accordion"}: contract hides, salt-wordpress shows | owes: one section in place of five, and the accordion and index layouts |
 | collection-showcase (work) | `query` | name | stored as source, manual, taxonomy_terms, orderby, order, count | formerly: source, manual, taxonomy_terms, orderby, order, count |
 | collection-showcase (work) | `query.mode` | values | choices automatic, by-category, manual; salt-wordpress default, taxonomy, manual | values: {"default":"automatic","taxonomy":"by-category","manual":"manual"} |
 | collection-showcase (work) | `query.mode` | values | default "automatic"; salt-wordpress "default" | values: {"default":"automatic","taxonomy":"by-category","manual":"manual"} |
@@ -266,7 +266,7 @@ Field groups not compared, because the contract defines no fields for them: grou
 | collection-showcase (work) | `query.order` | condition | condition differs (1 of 3 cases), e.g. {"mode":"manual"}: contract hides, salt-wordpress shows | owes: one query group in place of six layout fields |
 | collection-showcase (work) | `query.count` | limit | step 1; salt-wordpress none | owes: one query group in place of six layout fields |
 | collection-showcase (work) | `query.count` | condition | condition differs (1 of 3 cases), e.g. {"mode":"manual"}: contract hides, salt-wordpress shows | owes: one query group in place of six layout fields |
-| collection-showcase (work) | `query.direction` | extra | in salt-wordpress, not in the contract | parent owes: one query group in place of six layout fields |
+| collection-showcase (work) | `query.direction` | extra | in salt-wordpress, not in the contract | owes: one query group in place of six layout fields |
 | collection-showcase (work) | `showTags` | missing | not in salt-wordpress | owes: the field |
 | collection-showcase (work) | `groupByCategory` | missing | not in salt-wordpress | owes: the field, with the index layout |
 | collection-showcase (work) | `viewAll` | name | stored as view_all | formerly: view_all |
@@ -284,7 +284,7 @@ Field groups not compared, because the contract defines no fields for them: grou
 | collection-showcase (team) | `intro` | missing | not in salt-wordpress | owes: the field |
 | collection-showcase (team) | `source` | missing | not in salt-wordpress | owes: one section with a source select in place of five layouts; the former layout slug gives the source |
 | collection-showcase (team) | `layout` | missing | not in salt-wordpress | owes: the accordion and index layouts, and the field on work, team and blog_teaser; services has grid, list and featured; testimonials grid becomes source testimonials with layout grid |
-| collection-showcase (team) | `columns` | condition | condition differs (3 of 5 cases), e.g. {"layout":"list"}: contract hides, salt-wordpress shows; {"layout":"accordion"}: contract hides, salt-wordpress shows | layout owes: the accordion and index layouts, and the field on work, team and blog_teaser; services has grid, list and featured; testimonials grid becomes source testimonials with layout grid |
+| collection-showcase (team) | `columns` | condition | condition differs (3 of 5 cases), e.g. {"layout":"list"}: contract hides, salt-wordpress shows; {"layout":"accordion"}: contract hides, salt-wordpress shows | owes: one section in place of five, and the accordion and index layouts |
 | collection-showcase (team) | `query` | name | stored as source, manual, taxonomy_terms, orderby, order, count | formerly: source, manual, taxonomy_terms, orderby, order, count |
 | collection-showcase (team) | `query.mode` | values | choices automatic, by-category, manual; salt-wordpress default, taxonomy, manual | values: {"default":"automatic","taxonomy":"by-category","manual":"manual"} |
 | collection-showcase (team) | `query.mode` | values | default "automatic"; salt-wordpress "default" | values: {"default":"automatic","taxonomy":"by-category","manual":"manual"} |
@@ -295,7 +295,7 @@ Field groups not compared, because the contract defines no fields for them: grou
 | collection-showcase (team) | `query.order` | condition | condition differs (1 of 3 cases), e.g. {"mode":"manual"}: contract hides, salt-wordpress shows | owes: one query group in place of six layout fields |
 | collection-showcase (team) | `query.count` | limit | step 1; salt-wordpress none | owes: one query group in place of six layout fields |
 | collection-showcase (team) | `query.count` | condition | condition differs (1 of 3 cases), e.g. {"mode":"manual"}: contract hides, salt-wordpress shows | owes: one query group in place of six layout fields |
-| collection-showcase (team) | `query.direction` | extra | in salt-wordpress, not in the contract | parent owes: one query group in place of six layout fields |
+| collection-showcase (team) | `query.direction` | extra | in salt-wordpress, not in the contract | owes: one query group in place of six layout fields |
 | collection-showcase (team) | `viewAll` | missing | not in salt-wordpress | owes: the default true on services, where it is false today; team has none |
 | collection-showcase (team) | `viewAllLabel` | missing | not in salt-wordpress | owes: the field; the wording is fixed per collection today |
 | collection-showcase (team) | `settings.spacing` | name | stored as section_spacing | formerly: section_spacing |
@@ -315,14 +315,14 @@ Field groups not compared, because the contract defines no fields for them: grou
 | collection-showcase (testimonials) | `query` | name | stored as source, manual, orderby, order, count | formerly: source, manual, taxonomy_terms, orderby, order, count |
 | collection-showcase (testimonials) | `query.mode` | values | choices automatic, by-category, manual; salt-wordpress default, taxonomy, manual | values: {"default":"automatic","taxonomy":"by-category","manual":"manual"} |
 | collection-showcase (testimonials) | `query.mode` | values | default "automatic"; salt-wordpress "default" | values: {"default":"automatic","taxonomy":"by-category","manual":"manual"} |
-| collection-showcase (testimonials) | `query.categories` | missing | not in salt-wordpress | parent owes: one query group in place of six layout fields |
+| collection-showcase (testimonials) | `query.categories` | missing | not in salt-wordpress | owes: one query group in place of six layout fields |
 | collection-showcase (testimonials) | `query.items` | relation | post_type ["service","work","testimonial","post","team_member"]; salt-wordpress ["testimonial"] | owes: one query group in place of six layout fields |
 | collection-showcase (testimonials) | `query.order` | options | choices default, newest, title; salt-wordpress (empty), menu_order, date, title | note: Stored as the layout's own source, taxonomy_terms, manual, orderby, order and count; taxonomy_terms becomes categories, manual becomes items, orderby and order fold into order, count stays count. SC-006 offers neither oldest-first nor Z to A, so a stored order direction is dropped on migration. |
 | collection-showcase (testimonials) | `query.order` | values | default "default"; salt-wordpress none | values: {"":"default","menu_order":"default","date":"newest","title":"title"} |
 | collection-showcase (testimonials) | `query.order` | condition | condition differs (1 of 3 cases), e.g. {"mode":"manual"}: contract hides, salt-wordpress shows | owes: one query group in place of six layout fields |
 | collection-showcase (testimonials) | `query.count` | limit | step 1; salt-wordpress none | owes: one query group in place of six layout fields |
 | collection-showcase (testimonials) | `query.count` | condition | condition differs (1 of 3 cases), e.g. {"mode":"manual"}: contract hides, salt-wordpress shows | owes: one query group in place of six layout fields |
-| collection-showcase (testimonials) | `query.direction` | extra | in salt-wordpress, not in the contract | parent owes: one query group in place of six layout fields |
+| collection-showcase (testimonials) | `query.direction` | extra | in salt-wordpress, not in the contract | owes: one query group in place of six layout fields |
 | collection-showcase (testimonials) | `showRatings` | missing | not in salt-wordpress | owes: the field; testimonials always draws a stored rating today |
 | collection-showcase (testimonials) | `viewAll` | missing | not in salt-wordpress | owes: the default true on services, where it is false today; team has none |
 | collection-showcase (testimonials) | `viewAllLabel` | missing | not in salt-wordpress | owes: the field; the wording is fixed per collection today |
@@ -339,9 +339,9 @@ Field groups not compared, because the contract defines no fields for them: grou
 | collection-showcase (blog_teaser) | `intro` | missing | not in salt-wordpress | owes: the field |
 | collection-showcase (blog_teaser) | `source` | missing | not in salt-wordpress | owes: one section with a source select in place of five layouts; the former layout slug gives the source |
 | collection-showcase (blog_teaser) | `layout` | missing | not in salt-wordpress | owes: the accordion and index layouts, and the field on work, team and blog_teaser; services has grid, list and featured; testimonials grid becomes source testimonials with layout grid |
-| collection-showcase (blog_teaser) | `columns` | condition | condition differs (3 of 5 cases), e.g. {"layout":"list"}: contract hides, salt-wordpress shows; {"layout":"accordion"}: contract hides, salt-wordpress shows | layout owes: the accordion and index layouts, and the field on work, team and blog_teaser; services has grid, list and featured; testimonials grid becomes source testimonials with layout grid |
 | collection-showcase (blog_teaser) | `columns` | options | choices 2, 3, 4; salt-wordpress 2, 3 | owes: one select with the strings 2, 3 and 4 on every source; work and blog_teaser offer 2 and 3 with an integer default 3, team uses bare-numeral labels, testimonials has none |
 | collection-showcase (blog_teaser) | `columns` | default | default "3"; salt-wordpress 3 | owes: one select with the strings 2, 3 and 4 on every source; work and blog_teaser offer 2 and 3 with an integer default 3, team uses bare-numeral labels, testimonials has none |
+| collection-showcase (blog_teaser) | `columns` | condition | condition differs (3 of 5 cases), e.g. {"layout":"list"}: contract hides, salt-wordpress shows; {"layout":"accordion"}: contract hides, salt-wordpress shows | owes: one section in place of five, and the accordion and index layouts |
 | collection-showcase (blog_teaser) | `query` | name | stored as source, manual, taxonomy_terms, orderby, order, count | formerly: source, manual, taxonomy_terms, orderby, order, count |
 | collection-showcase (blog_teaser) | `query.mode` | values | choices automatic, by-category, manual; salt-wordpress default, taxonomy, manual | values: {"default":"automatic","taxonomy":"by-category","manual":"manual"} |
 | collection-showcase (blog_teaser) | `query.mode` | values | default "automatic"; salt-wordpress "default" | values: {"default":"automatic","taxonomy":"by-category","manual":"manual"} |
@@ -352,7 +352,7 @@ Field groups not compared, because the contract defines no fields for them: grou
 | collection-showcase (blog_teaser) | `query.order` | condition | condition differs (1 of 3 cases), e.g. {"mode":"manual"}: contract hides, salt-wordpress shows | owes: one query group in place of six layout fields |
 | collection-showcase (blog_teaser) | `query.count` | limit | step 1; salt-wordpress none | owes: one query group in place of six layout fields |
 | collection-showcase (blog_teaser) | `query.count` | condition | condition differs (1 of 3 cases), e.g. {"mode":"manual"}: contract hides, salt-wordpress shows | owes: one query group in place of six layout fields |
-| collection-showcase (blog_teaser) | `query.direction` | extra | in salt-wordpress, not in the contract | parent owes: one query group in place of six layout fields |
+| collection-showcase (blog_teaser) | `query.direction` | extra | in salt-wordpress, not in the contract | owes: one query group in place of six layout fields |
 | collection-showcase (blog_teaser) | `showTags` | missing | not in salt-wordpress | owes: the field |
 | collection-showcase (blog_teaser) | `groupByCategory` | missing | not in salt-wordpress | owes: the field, with the index layout |
 | collection-showcase (blog_teaser) | `viewAll` | name | stored as view_all | formerly: view_all |
@@ -389,14 +389,14 @@ Field groups not compared, because the contract defines no fields for them: grou
 | carousel (testimonials) | `query` | name | stored as source, manual, orderby, order, count | formerly: source, manual, orderby, order, count |
 | carousel (testimonials) | `query.mode` | values | choices automatic, by-category, manual; salt-wordpress default, taxonomy, manual | values: {"default":"automatic","taxonomy":"by-category","manual":"manual"} |
 | carousel (testimonials) | `query.mode` | values | default "automatic"; salt-wordpress "default" | values: {"default":"automatic","taxonomy":"by-category","manual":"manual"} |
-| carousel (testimonials) | `query.categories` | missing | not in salt-wordpress | parent owes: the query on scroll_carousel; only the testimonials layout has one today |
+| carousel (testimonials) | `query.categories` | missing | not in salt-wordpress | owes: the query on scroll_carousel; only the testimonials layout has one today |
 | carousel (testimonials) | `query.items` | relation | post_type ["service","work","testimonial","post","team_member"]; salt-wordpress ["testimonial"] | owes: the query on scroll_carousel; only the testimonials layout has one today |
 | carousel (testimonials) | `query.order` | options | choices default, newest, title; salt-wordpress (empty), menu_order, date, title | note: Stored as the layout's own source, taxonomy_terms, manual, orderby, order and count; taxonomy_terms becomes categories, manual becomes items, orderby and order fold into order, count stays count. SC-006 offers neither oldest-first nor Z to A, so a stored order direction is dropped on migration. |
 | carousel (testimonials) | `query.order` | values | default "default"; salt-wordpress none | values: {"":"default","menu_order":"default","date":"newest","title":"title"} |
 | carousel (testimonials) | `query.order` | condition | condition differs (1 of 3 cases), e.g. {"mode":"manual"}: contract hides, salt-wordpress shows | owes: the query on scroll_carousel; only the testimonials layout has one today |
 | carousel (testimonials) | `query.count` | limit | step 1; salt-wordpress none | owes: the query on scroll_carousel; only the testimonials layout has one today |
 | carousel (testimonials) | `query.count` | condition | condition differs (1 of 3 cases), e.g. {"mode":"manual"}: contract hides, salt-wordpress shows | owes: the query on scroll_carousel; only the testimonials layout has one today |
-| carousel (testimonials) | `query.direction` | extra | in salt-wordpress, not in the contract | parent owes: the query on scroll_carousel; only the testimonials layout has one today |
+| carousel (testimonials) | `query.direction` | extra | in salt-wordpress, not in the contract | owes: the query on scroll_carousel; only the testimonials layout has one today |
 | carousel (testimonials) | `settings.spacing` | name | stored as section_spacing | formerly: section_spacing |
 | carousel (testimonials) | `settings.tone` | name | stored as section_background | formerly: section_background |
 | carousel (testimonials) | `settings.tone` | values | choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse | values: {"inverse":"surface-inverse"} |
@@ -406,7 +406,7 @@ Field groups not compared, because the contract defines no fields for them: grou
 | carousel (testimonials) | `settings.anchorId` | name | stored as section_anchor | formerly: section_anchor |
 | carousel (testimonials) | `settings.firstPageOnly` | missing | not in salt-wordpress | owes: the field, with the listing section that paginates |
 | carousel (testimonials) | `settings.divider` | name | stored as section_divider | formerly: section_divider |
-| carousel (testimonials) | `layout` | extra | in salt-wordpress, not in the contract | sections.json formerly: testimonials when layout slider |
+| carousel (testimonials) | `layout` | extra | in salt-wordpress, not in the contract | sections.json formerly: testimonials |
 | contact | `intro` | name | stored as text | formerly: text |
 | contact | `intro` | limit | maxlength 300; salt-wordpress none | owes: the 300-character limit |
 | contact | `showPhone` | name | stored as show_phone | formerly: show_phone |
@@ -430,7 +430,7 @@ Field groups not compared, because the contract defines no fields for them: grou
 | locations | `query.order` | condition | condition differs (1 of 3 cases), e.g. {"mode":"manual"}: contract hides, salt-wordpress shows | owes: one query group in place of six layout fields |
 | locations | `query.count` | limit | step 1; salt-wordpress none | owes: one query group in place of six layout fields |
 | locations | `query.count` | condition | condition differs (1 of 3 cases), e.g. {"mode":"manual"}: contract hides, salt-wordpress shows | owes: one query group in place of six layout fields |
-| locations | `query.direction` | extra | in salt-wordpress, not in the contract | parent owes: one query group in place of six layout fields |
+| locations | `query.direction` | extra | in salt-wordpress, not in the contract | owes: one query group in place of six layout fields |
 | locations | `settings.spacing` | name | stored as section_spacing | formerly: section_spacing |
 | locations | `settings.tone` | name | stored as section_background | formerly: section_background |
 | locations | `settings.tone` | values | choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse | values: {"inverse":"surface-inverse"} |
