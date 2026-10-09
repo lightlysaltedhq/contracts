@@ -222,8 +222,10 @@ function checkFields(fields, at) {
   for (const f of fields) {
     const where = `${at}.${f.name}`
     checkedClauses(f.condition, where)
-    if (f.sourceField && !fields.some((s) => s.name === f.sourceField && s.type === 'select')) {
-      throw new Error(`${where}: sourceField ${f.sourceField} names no sibling select`)
+    if (f.sourceField) {
+      const select = fields.find((s) => s.name === f.sourceField && s.type === 'select')
+      if (!select) throw new Error(`${where}: sourceField ${f.sourceField} names no sibling select`)
+      if (sourceValues(select).length === 0) throw new Error(`${where}: sourceField ${f.sourceField} names no sibling select offering a source`)
     }
     if (f.fields) checkFields(f.fields, where)
   }

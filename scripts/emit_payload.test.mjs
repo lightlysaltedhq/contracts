@@ -517,3 +517,11 @@ test('V8: conditions are validated once, by planSections, and the Payload emitte
   const bad = [{ name: 'on', type: 'boolean', label: 'On' }, { name: 'text', type: 'text', label: 'Text', condition: { field: 'on' } }]
   assert.throws(() => toPayloadBlocks({ contract: probe(bad) }), /probe\.text condition:/)
 })
+
+test('V5: a sourceField select that offers no source at all is refused, as U2 refuses a missing one', () => {
+  const fields = [
+    { name: 'kind', type: 'select', label: 'Kind', options: [{ value: 'inline', label: 'Inline' }, { value: 'other', label: 'Other' }] },
+    { name: 'query', type: 'collection-query', label: 'Query', sourceField: 'kind' },
+  ]
+  assert.throws(() => toPayloadBlocks({ contract: probe(fields) }), /probe\.query: sourceField kind names no sibling select offering a source/)
+})
