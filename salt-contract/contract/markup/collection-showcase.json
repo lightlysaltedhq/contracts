@@ -243,7 +243,7 @@
                   "note": "Each item's content. Testimonials: figure.salt-showcase__panel.salt-showcase__quote with rating, blockquote and a figcaption meta line."
                 }
               ],
-              "note": "The section passes the group name showcase-<section index> to the accordion, which writes it on each details, never on its own div. <section index> is the section's place on the page, counted from 1."
+              "note": "The section passes the group name showcase-<section index> to the accordion, which writes it on each details, never on its own div. <section index> is the plan's index (view-props/_shared.json plan.index): the section's position among the page's rendered sections, counted from 0, as both platforms count it."
             }
           },
           "note": "Summary is the title; no image and no heading in a panel."
@@ -587,7 +587,7 @@
         "Give the section heading the id <anchor>__heading and point the wrapper's aria-labelledby at it (section#labelled-by, SC-012).",
         "Drop Tailwind utility classes from the markup; the shared stylesheets style the salt-* classes.",
         "One section in place of services, work, team, testimonials and blog_teaser; ul/li in every layout; a flat featured list; the accordion and index layouts.",
-        "Write the accordion layout's group name showcase-<section index> on each details only, never on div.salt-accordion, with the index counted from 1.",
+        "Write the accordion layout's group name showcase-<section index> on each details only, never on div.salt-accordion, with the index counted from 0 (plan.index).",
         "The index layout as the tree gives it: the ungrouped index is one ul.salt-showcase__index with no group wrapper or heading."
       ]
     }

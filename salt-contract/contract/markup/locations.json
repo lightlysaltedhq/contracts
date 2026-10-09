@@ -49,7 +49,7 @@
           "attributes": {
             "name": {
               "value": "locations-<section index>",
-              "note": "<section index> is the section's place on the page, counted from 1."
+              "note": "<section index> is the plan's index (view-props/_shared.json plan.index): the section's position among the page's rendered sections, counted from 0, as both platforms count it."
             }
           },
           "repeat": {

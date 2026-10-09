@@ -255,7 +255,7 @@ option covered, and the normaliser sound.
 | `section` | The section id; the same as the directory. |
 | `summary` | What the case shows, in a sentence or two. |
 | `values` | The section's stored field values, named and shaped as `contract/fields/<section>.json` says, with the shared settings under `settings`. A field left out takes its default. |
-| `context` | What the page plan decides for this band, describing a page that can exist: `index` (the section's place on the page, from 1, which also names an accordion group, `faq-<index>`), `track` (its `data-track`, `<section>-<n>` with n no more than `index`, section#data-track), `headingLevel` (1 when no heading has rendered before the section, otherwise 2, section#single-h1), `headingRendered` (true when a heading rendered earlier on the page), `priorityMedia` (true for the first section only, section#priority-media), and where they apply `collapseTop` (section#adjacent-collapse, never on the first section) `now` (an ISO 8601 time, for the locations' open-now status) and `locale` (a BCP 47 locale, `en-GB` in every case that draws a date, a time or a phone, which display as section#display-forms says). |
+| `context` | What the page plan decides for this band, describing a page that can exist: `index` (the plan's index, the section's position among the page's sections from 0, view-props/_shared.json, which also names an accordion group, `faq-<index>`), `track` (its `data-track`, `<section>-<n>` with n no more than `index` + 1, section#data-track), `headingLevel` (1 when no heading has rendered before the section, otherwise 2, section#single-h1), `headingRendered` (true when a heading rendered earlier on the page), `priorityMedia` (true for the first section, index 0, only, section#priority-media), and where they apply `collapseTop` (section#adjacent-collapse, never on the first section) `now` (an ISO 8601 time, for the locations' open-now status) and `locale` (a BCP 47 locale, `en-GB` in every case that draws a date, a time or a phone, which display as section#display-forms says). |
 | `media` | The images the values name, by id: `url` (the upload's address with `{width}` where each candidate width goes), `width`, `height`, `alt`, and where set `caption` and `focalPoint` (`{ x, y }` in per cent). Never `sizes` or `srcset`: those are the image slot's. |
 | `documents` | The pages internal links name, by id: `{ href, title }`. |
 | `collections` | The items of each source the section reads (`faqs`, `services`, `team` …), in the collection's usual order, each with a string `id`. |
@@ -315,6 +315,11 @@ written in the implementation's own repository; the contract fixes only its inte
   `text/html; charset=utf-8`. Any other status fails the case.
 - The adapter does not normalise; the runner normalises both sides. It loads the case's media,
   documents, collections and site data into the platform however suits it (fixtures in a test
-  database, mocks), and writes each image's `sizes` and `srcset` as `contract/image-sizes.json` gives them, with the candidate URLs from the media record's `{width}` template.
+  database, mocks). It renders as the platform renders: it never writes an image's `sizes`,
+  `srcset`, `src`, width or height itself, so the platform's own image code must produce the
+  values `contract/image-sizes.json` gives, and the comparison fails when it does not. The one
+  thing it may set is where the pipeline's URLs point: each candidate's URL comes from the media
+  record's `{width}` template (a custom loader on Next.js, an upload URL filter on WordPress), so
+  the URLs compare and the widths are the platform's own.
 - Form delivery, routing and admin stay native (SC-003): where a case needs a route's data, the
   case supplies it in `route`.

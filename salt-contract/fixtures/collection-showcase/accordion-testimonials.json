@@ -1,6 +1,6 @@
 {
   "section": "collection-showcase",
-  "$comment": "accordion.json's content role has no declared children, so the panel is laid out as collection-showcase.json's replace node describes: figure.salt-showcase__panel.salt-showcase__quote with the rating, a blockquote and a figcaption holding the meta line. The group name showcase-<context.index> is written on the accordion root (the checker requires it there, from the replace node's attributes) and on each details. The rating label reads \"Rated 5 of 5\": labels.rating followed by \"{n} of {N}\".",
+  "$comment": "accordion.json's content role has no declared children, so the panel is laid out as collection-showcase.json's replace node describes: figure.salt-showcase__panel.salt-showcase__quote with the rating, a blockquote and a figcaption holding the meta line. The group name showcase-<context.index> (plan.index, from 0) is written on each details only.",
   "summary": "Testimonials as an accordion on the inverse band: each person's name is the summary, and the panel holds the rating, the quote and a caption line with their role. All closed by default.",
   "values": {
     "heading": "What clients say",
@@ -22,7 +22,7 @@
     "headingRendered": true,
     "priorityMedia": false,
     "track": "collection-showcase-4",
-    "index": 4
+    "index": 3
   },
   "collections": {
     "testimonials": [

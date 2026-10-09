@@ -138,7 +138,7 @@ test('inputs: a context heading level out of range fails', () => {
   expectFail(HERO, (io) => io.json(`${SPLIT}.json`, (d) => { d.context.headingLevel = 7 }), /context\.headingLevel must be 1 to 6/)
 })
 test('inputs: a track number beyond the section\'s place on the page fails', () => {
-  expectFail(HERO, (io) => io.json('hero/split-image-right-later.json', (d) => { d.context.track = 'hero-4' }), /context\.track hero-4 counts 4 hero sections, but the section is number 3/)
+  expectFail(HERO, (io) => io.json('hero/split-image-right-later.json', (d) => { d.context.track = 'hero-4' }), /context\.track hero-4 counts 4 hero sections, but only 3 sections come up to this one/)
 })
 test('inputs: an h2 with no heading rendered before it fails (section#single-h1)', () => {
   expectFail(HERO, (io) => io.json('hero/split-image-right-later.json', (d) => { delete d.context.headingRendered }), /this section claims the h1/)
@@ -147,10 +147,10 @@ test('inputs: an h1 after a heading has rendered fails', () => {
   expectFail(HERO, (io) => io.json(`${SPLIT}.json`, (d) => { d.context.headingRendered = true }), /a heading rendered earlier, so this one is 2/)
 })
 test('inputs: priority media for a later section fails', () => {
-  expectFail(HERO, (io) => io.json('hero/split-image-right-later.json', (d) => { d.context.priorityMedia = true }), /the plan grants it to the first section only/)
+  expectFail(HERO, (io) => io.json('hero/split-image-right-later.json', (d) => { d.context.priorityMedia = true }), /the plan grants it to the first section \(index 0\) only/)
 })
 test('inputs: a context with no index fails', () => {
-  expectFail(HERO, (io) => io.json(`${SPLIT}.json`, (d) => { delete d.context.index }), /context\.index, the section's place on the page/)
+  expectFail(HERO, (io) => io.json(`${SPLIT}.json`, (d) => { delete d.context.index }), /context\.index, the plan's index/)
 })
 test('inputs: rich text with an element its field does not allow fails', () => {
   expectFail(['rich-text'], (io) => io.json('rich-text/left-eyebrow-heading-body.json', (d) => { d.values.body += '<table><tr><td>x</td></tr></table>' }), /values\.body uses <table>/)
@@ -300,8 +300,8 @@ test('values: data-tone and data-tone-dark must be the settings\' tones', () => 
 test('values: an accordion group named for another section index fails', () => {
   expectFail(['collection-showcase'], (io) => {
     const rel = 'fixtures/collection-showcase/accordion-testimonials.html'
-    io.write(rel, readFileSync(path.join(io.dir, rel), 'utf8').replaceAll('name="showcase-4"', 'name="showcase-2"'))
-  }, /name="showcase-2" (is not "showcase-<section index>"|disagrees with the case, which gives "showcase-4")/)
+    io.write(rel, readFileSync(path.join(io.dir, rel), 'utf8').replaceAll('name="showcase-3"', 'name="showcase-1"'))
+  }, /name="showcase-1" (is not "showcase-<section index>"|disagrees with the case, which gives "showcase-3")/)
 })
 test('values: alternating media-text sides count from 0', () => {
   expectFail(['media-text'], (io) => {
@@ -429,6 +429,12 @@ test('images: the srcset rule drops candidates below the viewport floor only for
   assert.deepEqual(widthsFor(table, 'calc(100vw - 2rem)'), table.candidates)
 })
 
+test('form: a normaliser that masks an empty token fails the mutation proof', () => {
+  expectFail(['contact'], (io) => {
+    const src = readFileSync(path.join(pkg, 'normalise.mjs'), 'utf8')
+    io.write('normalise.mjs', src.replace(" && attrOf(el, 'value') !== ''\n", '\n'))
+  }, /emptying value on <input> does not change normalise's output/)
+})
 // ── 4. The normaliser ─────────────────────────────────────────────────────────────────────────
 test('normaliser: one that drops an attribute fails the mutation check', () => {
   expectFail(HERO, (io) => {
@@ -515,6 +521,15 @@ test('normalise: the contact form\'s per-request values are masked exactly, noth
   // Outside the contact form nothing is masked.
   differ('<form action="/a"></form>', '<form action="/b"></form>')
   differ('<div><input type="hidden" name="formToken" value="a"></div>', '<div><input type="hidden" name="formToken" value="b"></div>')
+})
+test('normalise: the challenge mask takes only the question\'s text, and only non-empty values', () => {
+  const label = (q, marker) => `<form class="salt-contact__form" action="/a"><label class="salt-contact__label" for="c__challenge">${q}<span class="salt-contact__optional">${marker}</span></label></form>`
+  same(label('What is 3 + 4?', '(required)'), label('What is 2 + 9?', '(required)'))
+  differ(label('What is 3 + 4?', '(required)'), label('What is 3 + 4?', '(needed)'))
+  const token = (v) => `<form class="salt-contact__form" action="/a"><input type="hidden" name="formToken" value="${v}"></form>`
+  same(token('abc'), token('xyz'))
+  differ(token(''), token('xyz'))
+  differ('<form class="salt-contact__form" action=""></form>', '<form class="salt-contact__form" action="/a"></form>')
 })
 test('normalise: comments do not count', () => {
   same('<p>One<!-- -->Two</p>', '<p>OneTwo</p>')

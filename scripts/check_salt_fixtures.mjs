@@ -218,20 +218,20 @@ function checkInput(c) {
   if (typeof ctx.priorityMedia !== 'boolean') fail(`${at}.json: context.priorityMedia must be a boolean`)
   if (typeof ctx.track !== 'string' || !new RegExp(`^${section}-[1-9][0-9]*(@.+)?$`).test(ctx.track)) fail(`${at}.json: context.track must be ${section}-<n> (section#data-track)`)
   if (ctx.collapseTop !== undefined && typeof ctx.collapseTop !== 'boolean') fail(`${at}.json: context.collapseTop must be a boolean`)
-  if (!(Number.isInteger(ctx.index) && ctx.index >= 1)) fail(`${at}.json: context.index, the section's place on the page, counts from 1`)
+  if (!(Number.isInteger(ctx.index) && ctx.index >= 0)) fail(`${at}.json: context.index, the plan's index (view-props/_shared.json), counts the page's sections from 0`)
   if (ctx.headingRendered !== undefined && typeof ctx.headingRendered !== 'boolean') fail(`${at}.json: context.headingRendered must be a boolean`)
   // The context must describe a page that can exist.
   const n = Number(/-([1-9][0-9]*)(@.+)?$/.exec(ctx.track ?? '')?.[1])
-  if (Number.isInteger(ctx.index) && n > ctx.index) fail(`${at}.json: context.track ${ctx.track} counts ${n} ${section} sections, but the section is number ${ctx.index} on the page (section#data-track)`)
+  if (Number.isInteger(ctx.index) && n > ctx.index + 1) fail(`${at}.json: context.track ${ctx.track} counts ${n} ${section} sections, but only ${ctx.index + 1} sections come up to this one (index ${ctx.index}, from 0) (section#data-track)`)
   const level = ctx.headingRendered ? 2 : 1
   if (Number.isInteger(ctx.headingLevel) && ctx.headingLevel !== level) {
     fail(`${at}.json: context.headingLevel ${ctx.headingLevel} cannot be: ${ctx.headingRendered ? 'a heading rendered earlier, so this one is 2' : 'no heading rendered earlier (context.headingRendered), so this section claims the h1'} (section#single-h1)`)
   }
-  if (typeof ctx.priorityMedia === 'boolean' && Number.isInteger(ctx.index) && ctx.priorityMedia !== (ctx.index === 1)) {
-    fail(`${at}.json: context.priorityMedia is ${ctx.priorityMedia} for section ${ctx.index}; the plan grants it to the first section only (section#priority-media)`)
+  if (typeof ctx.priorityMedia === 'boolean' && Number.isInteger(ctx.index) && ctx.priorityMedia !== (ctx.index === 0)) {
+    fail(`${at}.json: context.priorityMedia is ${ctx.priorityMedia} for section ${ctx.index}; the plan grants it to the first section (index 0) only (section#priority-media)`)
   }
   if (ctx.locale !== undefined && !(typeof ctx.locale === 'string' && Intl.DateTimeFormat.supportedLocalesOf(ctx.locale).length)) fail(`${at}.json: context.locale must be a BCP 47 locale the platform knows, such as en-GB`)
-  if (ctx.collapseTop === true && ctx.index === 1) fail(`${at}.json: context.collapseTop needs a section before it (section#adjacent-collapse)`)
+  if (ctx.collapseTop === true && ctx.index === 0) fail(`${at}.json: context.collapseTop needs a section before it (section#adjacent-collapse)`)
   for (const [id, m] of Object.entries(input.media ?? {})) {
     const p = `${at}.json media.${id}`
     // The record names the upload, never its sizes or srcset: those are the slot's (SC-016).
@@ -857,13 +857,14 @@ function checkNormaliser(c) {
     for (let k = 0; k < el.attrs.length; k++) {
       const saved = el.attrs
       const [name, value] = saved[k]
-      // The contact form's declared per-request values are masked by design (SC-016). The list is
-      // the contract's, held here rather than asked of the normaliser, so a normaliser that masks
-      // more is caught by the mutations below.
-      if (declaredMask(el, name, inside)) continue
+      // The contact form's declared per-request values are masked by design (SC-016): another
+      // value is no difference, but a missing or empty one is. The list is the contract's, held
+      // here rather than asked of the normaliser, so a normaliser that masks more is caught.
+      const masked = declaredMask(el, name, inside)
       for (const [what, attrs] of [
         ['removing', saved.filter((_, x) => x !== k)],
-        ['changing', saved.map((a, x) => (x === k ? [name, `${value}-mutated`] : a))],
+        ...(masked ? [['emptying', saved.map((a, x) => (x === k ? [name, ''] : a))]] : []),
+        ...(masked ? [] : [['changing', saved.map((a, x) => (x === k ? [name, `${value}-mutated`] : a))]]),
       ]) {
         el.attrs = attrs
         if (normalise(raw(tree)) === canonical) fail(`${c.at}.html: ${what} ${name} on ${describe(el)} does not change normalise's output; the normaliser hides a real difference`)

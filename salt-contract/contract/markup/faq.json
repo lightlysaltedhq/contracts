@@ -43,7 +43,7 @@
     {
       "role": "accordion",
       "component": "accordion",
-      "note": "Summary: the question; content: the answer as div.salt-rich-text. No item open. The section passes the group name faq-<section index> to the accordion, which writes it on each details (accordion.json), never on its own div. <section index> is the section's place on the page, counted from 1."
+      "note": "Summary: the question; content: the answer as div.salt-rich-text. No item open. The section passes the group name faq-<section index> to the accordion, which writes it on each details (accordion.json), never on its own div. <section index> is the plan's index (view-props/_shared.json plan.index): the section's position among the page's rendered sections, counted from 0, as both platforms count it."
     }
   ],
   "headings": {
@@ -106,7 +106,7 @@
         "Give the section heading the id <anchor>__heading and point the wrapper's aria-labelledby at it (section#labelled-by, SC-012).",
         "Drop Tailwind utility classes from the markup; the shared stylesheets style the salt-* classes.",
         "Answers wrapped in div.salt-rich-text; the intro paragraph.",
-        "Write the accordion's group name faq-<section index> on each details only, never on div.salt-accordion, with the index counted from 1."
+        "Write the accordion's group name faq-<section index> on each details only, never on div.salt-accordion, with the index counted from 0 (plan.index)."
       ]
     }
   }
