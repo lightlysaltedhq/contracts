@@ -371,3 +371,41 @@ test('R3: a source-select section with none of its sources is left out, unless i
   assert.ok(carousel.sub_fields.some((f) => f.name === 'cards'))
   assert.doesNotThrow(() => layoutsOf({ sources: {}, sections: ['carousel'] }))
 })
+
+test('R6: no field loses its provenance or its condition on the way into the snapshot', () => {
+  const contract = loadContract()
+  const snap = JSON.parse(acfSnapshot({ icons, contract }))[0].fields[0].layouts
+  const checked = []
+  const walk = (defs, fields, at) => {
+    for (const def of defs) {
+      const f = fields.find((x) => x.name === def.name)
+      assert.ok(f, `${at}.${def.name} is emitted`)
+      const where = `${at}.${def.name}`
+      if (def.condition) assert.ok(f.conditional_logic?.length, `${where} keeps its condition`)
+      if (def.deprecated) assert.deepEqual(f.salt?.deprecated, def.deprecated, where)
+      if (def.format) assert.equal(f.salt?.format, def.format, where)
+      if (def.type === 'rich-text') assert.ok(f.salt?.allowed?.length, where)
+      if (def.optionsFrom) assert.equal(f.salt?.optionsFrom, def.optionsFrom, where)
+      if (def.rowLabel) assert.ok(f.salt?.rowLabel?.startsWith(def.rowLabel), where)
+      if (def.type === 'link') assert.equal(f.salt?.link, true, where)
+      if (def.type === 'relationship') assert.equal(f.salt?.to, def.to, where)
+      if (def.type === 'collection-query') {
+        assert.ok(f.salt?.source ?? f.salt?.sourceField, where)
+        // The pickers and the controls that follow mode keep their conditions.
+        for (const part of f.sub_fields.filter((p) => p.name !== 'mode')) assert.ok(part.conditional_logic?.length, `${where}.${part.name}`)
+      }
+      if (def.type === 'link') for (const part of ['document', 'url']) assert.ok(field(f.sub_fields, part).conditional_logic?.length, `${where}.${part}`)
+      checked.push(where)
+      if (def.fields && (def.type === 'list' || def.type === 'group')) walk(def.fields, f.sub_fields, where)
+    }
+  }
+  for (const l of snap) {
+    const { fields, settings } = { fields: contract.fields[l.name].fields, settings: l.sub_fields.find((f) => f.name === 'settings') }
+    walk(fields, l.sub_fields, l.name)
+    if (settings) walk(contract.settings.filter((d) => settings.sub_fields.some((f) => f.name === d.name)), settings.sub_fields, `${l.name}.settings`)
+  }
+  assert.ok(checked.length > 100, String(checked.length))
+  // A deprecation on a field the contract builds in code is kept too.
+  const [old] = probed([{ name: 'old', type: 'text', label: 'Old', deprecated: { since: '0.2.0', replacedBy: null } }])
+  assert.deepEqual(old.salt, { deprecated: { since: '0.2.0', replacedBy: null } })
+})

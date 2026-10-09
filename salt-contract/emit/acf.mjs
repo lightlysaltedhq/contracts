@@ -264,20 +264,21 @@ function collectionQuery(f, out, ctx) {
   if (f.modes) salt.modes = f.modes
   if (f.max !== undefined) salt.max = f.max
   const shape = collectionQueryShape({ modes: f.modes, max: f.max, hasCategories: taxonomies.length > 0 })
+  // Each picker is retyped; its own provenance, if any, stays and comes last as on every field.
+  const retyped = ({ salt: own, ...rest }, settings, extra) => {
+    const merged = { ...own, ...extra }
+    return { ...rest, ...settings, ...(Object.keys(merged).length ? { salt: merged } : {}) }
+  }
   out.sub_fields = convertFields(shape.map(({ part, ...p }) => p), ctx).map((field) => {
-    if (field.name === 'items') {
-      const { salt: _drop, ...rest } = field
-      return { ...rest, type: 'relationship', post_type: postTypes, filters: ['search'], return_format: 'id' }
-    }
+    if (field.name === 'items') return retyped(field, { type: 'relationship', post_type: postTypes, filters: ['search'], return_format: 'id' })
     if (field.name !== 'categories') return field
-    const { salt: _drop, ...rest } = field
     if (taxonomies.length === 1) {
-      return { ...rest, type: 'taxonomy', taxonomy: taxonomies[0], field_type: 'multi_select', return_format: 'id', add_term: 0, save_terms: 0, load_terms: 0 }
+      return retyped(field, { type: 'taxonomy', taxonomy: taxonomies[0], field_type: 'multi_select', return_format: 'id', add_term: 0, save_terms: 0, load_terms: 0 })
     }
     // An ACF taxonomy field reads one taxonomy, and the source is chosen by a select outside this
     // group, which ACF conditions cannot reach. So several taxonomies are a multiple select of term
     // ids whose choices the site fills from the taxonomy of the chosen source.
-    return { ...rest, type: 'select', choices: {}, multiple: 1, ui: 1, ajax: 1, return_format: 'value', allow_null: 1, salt: { taxonomies } }
+    return retyped(field, { type: 'select', choices: {}, multiple: 1, ui: 1, ajax: 1, return_format: 'value', allow_null: 1 }, { taxonomies })
   })
   return salt
 }
