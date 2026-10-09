@@ -436,7 +436,7 @@
     },
     {
       "topic": "ruling",
-      "text": "Every id the header draws is fixed, so both platforms write the same ones. In the bar: the nav is site-navigation, and a submenu is salt-header-nav-submenu-<n>, where <n> is its item's position in the top-level menu counting from 0, items without children included. In the drawer, -drawer follows each prefix: site-navigation-drawer and salt-header-nav-drawer-submenu-<n>. These are generated ids, so an editor's anchor that matches one keeps its id and the generated one takes the suffix, its aria-controls following (section#anchors)."
+      "text": "Every id the header draws is fixed, so both platforms write the same ones. In the bar: the nav is site-navigation, and a submenu is salt-header-nav-submenu-<n>, where <n> is its item's position in the top-level menu counting from 0, items without children included. In the drawer, -drawer follows each prefix: site-navigation-drawer and salt-header-nav-drawer-submenu-<n>. site-navigation and site-navigation-drawer are reserved ids, not generated ones: an editor's anchor that matches either takes the numeric suffix and the navigation keeps its id (section#anchors, SC-006, SC-008). The submenu ids are generated, and yield to an editor's anchor with their aria-controls following."
     },
     {
       "topic": "ruling",
