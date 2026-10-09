@@ -83,14 +83,15 @@ which sections a site gets. A section that needs a source the site does not inst
 collection-query source, a relationship's source, or a source select with no option the site can
 satisfy, in its own fields or its shared settings, at any depth) is left out, or refused with the
 missing source and field named when `sections` lists it (`null` counts as not listing). Where a
-source select still has an option to offer, as the carousel's inline cards do, the section stays:
-the select offers only what the site can satisfy (and has no default when its default is no
-longer offered), and the query, any field reached only by a
-missing source, and anything conditioned on a field left out are left out. A malformed condition,
-or a `sourceField` naming no sibling select or one offering no source, is refused whatever the site
-installs. A query choosing among several installed sources is refused anywhere but the block's top
-level, where its pickers can find the select. Conditions
-read a stored `null` as no value; only a sibling never set takes its default.
+source select still has an option to offer, as the carousel's inline cards do, the section stays.
+The select offers only what the site can satisfy, with no default when its default is no longer
+offered. The query, any field reached only by a missing source, and any field whose condition
+cannot hold once such a field is gone are left out.
+
+Some faults are refused whatever the site installs: a malformed condition, and a `sourceField`
+naming no sibling select or one offering no source. A query choosing among several installed
+sources is refused anywhere but the block's top level, where its pickers can find the select.
+Conditions read a stored `null` as no value; only a sibling never set takes its default.
 
 `reports/round-trip-payload.md`, which is not shipped, compares the output with the blocks
 salt-nextjs ships today. A difference is expected only when `reports/round-trip-payload.expected.json`
