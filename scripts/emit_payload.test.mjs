@@ -372,3 +372,8 @@ test('S4: the emitter refuses every clause shape the schema refuses, with its ow
     assert.throws(() => toPayloadBlocks({ contract: probe(fields) }), /probe\.text condition: .*a clause is an object with a field name and exactly one of equals, an in list or a true or false filled/, JSON.stringify(clause))
   }
 })
+
+test('S5: sections: null is unset, so a section the sources cannot carry is left out, not refused', () => {
+  const slugs = blocks({ sources: { posts: {} }, sections: null }).map((b) => b.slug)
+  assert.ok(slugs.includes('hero') && !slugs.includes('faq'), slugs.join(', '))
+})

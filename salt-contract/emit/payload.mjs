@@ -303,7 +303,7 @@ function build(options, snapshot) {
   const contract = options.contract ?? loadContract()
   const sources = sourcesFrom(options)
   // Asked for by name, a section the site cannot carry is an error; by default it is left out.
-  const named = options.sections !== undefined
+  const named = options.sections != null
   const ids = (options.sections ?? contract.sections.map((s) => s.id)).filter((id) => {
     const unmet = unmetSources(resolveSection(contract, id).fields, sources, id)
     if (unmet.length && named) throw new Error(`section ${id} needs ${unmet.join(', ')}, which options.sources does not install`)
