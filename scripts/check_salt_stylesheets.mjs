@@ -64,19 +64,29 @@ const textRoleDeclarations = (role) => [
    gate run, or one test file's run, and no longer. Keys are the argument values themselves in
    nested maps, so a cached stylesheet costs a reference to text already held, never a copy. No
    caller modifies a cached result. */
+let memoEntries = 0
 const memo = (fn) => {
+  /* Keyed on the arguments the function declares and no more: passed straight to `.map`, it is
+     also handed an index and the array, which would make every call a new key. */
+  const arity = fn.length
   const root = new Map()
   const done = Symbol('result')
-  return (...args) => {
+  return (...given) => {
+    const args = given.slice(0, arity)
     let node = root
     for (const arg of args) {
       if (!node.has(arg)) node.set(arg, new Map())
       node = node.get(arg)
     }
-    if (!node.has(done)) node.set(done, fn(...args))
+    if (!node.has(done)) {
+      node.set(done, fn(...args))
+      memoEntries += 1
+    }
     return node.get(done)
   }
 }
+/** How many results the memoised helpers hold, for the test that the caches stay bounded. */
+export const memoSize = () => memoEntries
 
 /* A selector with every `:not(…)` taken out, nested parentheses included: `:focus-visible` inside a
    negation is the unfocused state. An unbalanced `:not(` is left as it is rather than guessed at. */
@@ -104,8 +114,16 @@ const splitTopUnmemoised = (input, separator) => {
   const parts = []
   let depth = 0
   let current = ''
+  let quote = null
   for (const char of input) {
-    if (char === '(' || char === '[') depth += 1
+    /* Inside a string nothing is structure: `content: ';'` is one declaration. */
+    if (quote !== null) {
+      if (char === quote && !current.endsWith('\\')) quote = null
+      current += char
+      continue
+    }
+    if (char === '"' || char === "'") quote = char
+    else if (char === '(' || char === '[') depth += 1
     else if (char === ')' || char === ']') depth -= 1
     if (char === separator && depth === 0) {
       parts.push(current)
@@ -186,6 +204,15 @@ const parseDeclarations = (body) => {
  * written wins), and every property and value in the order written, duplicates and all, because
  * which of two declarations came last is the one thing the cascade decides inside a rule.
  */
+/* Where a quoted string that opens at `i` closes, escapes included: a brace or a semicolon inside
+   one (`content: '}'`) is text, not structure. An unclosed string runs to the end. */
+const stringEnd = (text, i) => {
+  const quote = text[i]
+  let j = i + 1
+  while (j < text.length && text[j] !== quote) j += text[j] === '\\' ? 2 : 1
+  return Math.min(j, text.length - 1)
+}
+
 const parse = (css) => {
   const source = css.replace(/\/\*[\s\S]*?\*\//g, ' ')
   const rules = []
@@ -197,6 +224,12 @@ const parse = (css) => {
 
   for (let i = 0; i < source.length; i += 1) {
     const char = source[i] ?? ''
+    if (char === '"' || char === "'") {
+      const end = stringEnd(source, i)
+      prelude += source.slice(i, end + 1)
+      i = end
+      continue
+    }
     /*
      * A statement at-rule — `@layer primitives;`, `@import …;`, `@charset …;` — has no
      * block. Without this its text merged into the NEXT rule's prelude, that rule was
@@ -225,6 +258,12 @@ const parse = (css) => {
       let body = ''
       i += 1
       for (; i < source.length && depth > 0; i += 1) {
+        if (source[i] === '"' || source[i] === "'") {
+          const end = stringEnd(source, i)
+          body += source.slice(i, end + 1)
+          i = end
+          continue
+        }
         if (source[i] === '{') {
           depth += 1
           braces += 1
@@ -1441,8 +1480,10 @@ const ROLE_OWNER = new Map(
  * without naming its class, so the component contract could not see it take the link back to `body`.
  *
  * And base.css's element convention, which Salt for Next.js's `theme.css` applied in `@layer base`:
- * excused only in base.css and only inside its `@layer base` block, where every unlayered rule
- * outranks it. The same selector anywhere else, or unlayered, would set text past every component.
+ * excused only in base.css and only inside its `@layer base` block (a media query within it
+ * included). There it cannot outrank a component: where the layer survives, every unlayered rule
+ * beats it, and under Tailwind v3, which emits it unlayered, it is (0,0,1) before every class-keyed
+ * rule. The same selector anywhere else would rank with the components, and set text past them.
  */
 const CLASSLESS_SUBJECTS = new Set(
   ['.salt-card :is(h1, h2, h3, h4, h5, h6)', '.salt-hero__text > :is(h1, h2, h3, h4, h5, h6)', '.salt-rich-text blockquote', '.salt-rich-text code'].map(
@@ -1451,7 +1492,7 @@ const CLASSLESS_SUBJECTS = new Set(
 )
 const BASE = ':where(#main, .salt-header, .salt-footer)'
 const BASE_SUBJECTS = new Set(['body', `${BASE} h1`, `${BASE} h2`, `${BASE} h3`, `${BASE} :is(h4, h5, h6)`].map((selector) => normalise(selector)))
-const inBaseLayer = (file, rule) => file === 'base.css' && rule.at.length === 1 && /^@layer\s+base$/i.test(rule.at[0].trim())
+const inBaseLayer = (file, rule) => file === 'base.css' && /^@layer\s+base$/i.test((rule.at[0] ?? '').trim())
 
 /* The controls whose `font: inherit` is excused, each by its selector. */
 const INHERITING_CONTROLS = ['.salt-contact__input', '.salt-search__input']
@@ -5704,14 +5745,24 @@ const varReads = memo((text) =>
    writes both skip them, so prose never counts as markup. */
 const NOT_ELEMENTS = new Set(['platforms', 'rules', 'notes', 'hooks', 'omitted'])
 
-/* Every attribute value an element in a markup file writes: a plain string, or an entry's `value`. */
-const attributeValuesIn = (node) => {
-  if (Array.isArray(node)) return node.flatMap(attributeValuesIn)
+/*
+ * Every custom property an element in a markup file writes, with the value written: from its
+ * attribute values (a plain string, an entry's `value`, each of an `enum`'s values), and from the
+ * CSS a `style` element holds in its `text`, such as the header's noscript style. Nothing else is
+ * read from `text`, which is otherwise what an element says, not what it sets.
+ */
+const markupWritesIn = (node) => {
+  if (Array.isArray(node)) return node.flatMap(markupWritesIn)
   if (!node || typeof node !== 'object') return []
-  const own = node.attributes && typeof node.attributes === 'object'
-    ? Object.values(node.attributes).flatMap((value) => (typeof value === 'string' ? [value] : typeof value?.value === 'string' ? [value.value] : []))
+  const values = node.attributes && typeof node.attributes === 'object'
+    ? Object.values(node.attributes).flatMap((value) =>
+      typeof value === 'string' ? [value]
+        : !value || typeof value !== 'object' ? []
+          : [...(typeof value.value === 'string' ? [value.value] : []), ...(Array.isArray(value.enum) ? value.enum.filter((v) => typeof v === 'string') : [])])
     : []
-  return [...own, ...Object.entries(node).filter(([key]) => !NOT_ELEMENTS.has(key) && key !== 'attributes').flatMap(([, value]) => attributeValuesIn(value))]
+  if (node.element === 'style' && typeof node.text === 'string') values.push(node.text.replace(/\/\*[\s\S]*?\*\//g, ' '))
+  const own = values.flatMap((text) => [...text.matchAll(/(--[a-z][\w-]*)\s*:\s*([^;{}]+)/g)].map((m) => ({ property: m[1], value: m[2].trim() })))
+  return [...own, ...Object.entries(node).filter(([key]) => !NOT_ELEMENTS.has(key) && key !== 'attributes').flatMap(([, value]) => markupWritesIn(value))]
 }
 
 /* Every `var()` in a written value, nested ones and fallbacks included: its name, split at a
@@ -5786,7 +5837,7 @@ const sourceFindings = memo((file, text) => {
      outrank Tailwind's utilities and a host's own rules, which is what the layer exists to stop. */
   if (file === 'base.css') {
     const preludes = [...source.matchAll(/@layer\b([^{;]*)([{;])/gi)].map((m) => `${m[1].trim()}${m[2]}`)
-    const outside = parseOnce(text).rules.filter((rule) => !rule.at.some((prelude) => /^@layer\b/i.test(prelude)))
+    const outside = parse(source).rules.filter((rule) => !rule.at.some((prelude) => /^@layer\b/i.test(prelude)))
     if (preludes.length !== 1 || preludes[0] !== 'base{') {
       out.push(`base.css holds ${preludes.length === 0 ? 'no `@layer base` block' : preludes.map((p) => `\`@layer ${p.slice(0, -1)}\``).join(', ')}; it is one \`@layer base { … }\` block`)
     } else if (outside.length > 0) {
@@ -5799,7 +5850,8 @@ const sourceFindings = memo((file, text) => {
 /**
  * Every check, over the package's files: a map from each path in the package (`styles/blocks.css`,
  * `contract/token-layer.json`, `contract/markup/hero.json`) to its text. Returns the failures, one
- * line each, and the summary a passing run prints.
+ * line each, the summary a passing run prints, and `reached`: `parse` when the run stopped at a parse
+ * that is not whole, `all` when every check ran.
  */
 export function checkStylesheets(files) {
   FILES = files
@@ -5890,7 +5942,7 @@ export function checkStylesheets(files) {
   }
 
   /* Every contract below reads the parse, so a parse that is not whole stops here. */
-  if (fails.length > 0) return { fails, summary: '' }
+  if (fails.length > 0) return { fails, summary: '', reached: 'parse' }
 
   // ── 2. The decision contracts ───────────────────────────────────────────────────────────────
   const all = new Map([...parsed].map(([file, { rules }]) => [file, rules]))
@@ -5925,40 +5977,48 @@ export function checkStylesheets(files) {
      (`_section-settings#scrimStrength`): each option is a token the runtime must emit. */
   const markupWrites = new Map()
   for (const file of markupFiles) {
-    for (const text of attributeValuesIn(readJson(file))) {
-      for (const m of text.matchAll(/(--[a-z][\w-]*)\s*:\s*([^;]+)/g)) {
-        if (!markupWrites.has(m[1])) markupWrites.set(m[1], [])
-        markupWrites.get(m[1]).push({ file, value: m[2].trim() })
-      }
+    for (const { property, value } of markupWritesIn(readJson(file))) {
+      if (!markupWrites.has(property)) markupWrites.set(property, [])
+      markupWrites.get(property).push({ file, value })
     }
   }
   if (!TOKEN_LAYER) fails.push('contract/token-layer.json is missing or not JSON; it names what a runtime emits for these stylesheets')
   else {
     for (const group of TOKEN_LAYER.groups ?? []) {
       for (const token of group.tokens ?? []) {
-        if (token.values && !markupWrites.has(token.name)) {
-          fails.push(`contract/token-layer.json gives ${token.name} values, but only a property the markup writes has them`)
-        }
         if (token.source === 'markup' && !markupWrites.has(token.name)) {
           fails.push(`contract/token-layer.json says the markup writes ${token.name}, but no file in contract/markup/ does`)
         }
       }
     }
+    /* A value map per written property, token or not, and per placeholder name in it. */
+    const maps = new Map()
+    for (const entry of TOKEN_LAYER.writes ?? []) {
+      if (maps.has(entry.property)) fails.push(`contract/token-layer.json lists writes for ${entry.property} twice`)
+      maps.set(entry.property, entry.values ?? {})
+      if (!markupWrites.has(entry.property)) fails.push(`contract/token-layer.json lists writes for ${entry.property}, which no markup element writes`)
+    }
+    const used = new Set()
     for (const [property, writes] of markupWrites) {
-      const token = TOKEN_NAMES.get(property)
       for (const { file, value } of writes) {
         for (const { name, placeholder, rest, fallback } of varsWritten(value)) {
           if (placeholder === undefined) { addRead(name, file, fallback); continue }
-          const spelt = `var(${name}<${placeholder}>${rest})`
-          if (!token?.values) { fails.push(`${file} writes ${property} as ${spelt}, and contract/token-layer.json gives no values for <${placeholder}>`); continue }
-          const [fieldFile, fieldName] = String(token.values.field).split('#')
+          const map = maps.get(property)?.[placeholder]
+          if (!map) { fails.push(`${file} writes ${property} as var(${name}<${placeholder}>${rest}), and contract/token-layer.json's writes give no values for <${placeholder}>`); continue }
+          used.add(`${property} <${placeholder}>`)
+          const [fieldFile, fieldName] = String(map.field).split('#')
           const field = fieldNamed(readJson(`contract/fields/${fieldFile}.json`), fieldName)
-          if (!field || !Array.isArray(field.options)) { fails.push(`contract/token-layer.json takes ${property}'s values from ${token.values.field}, which is not a field with options`); continue }
+          if (!field || !Array.isArray(field.options)) { fails.push(`contract/token-layer.json fills ${property}'s <${placeholder}> from ${map.field}, which is not a field with options`); continue }
           for (const option of field.options) {
-            if ((token.values.except ?? []).includes(option.value)) continue
+            if ((map.except ?? []).includes(option.value)) continue
             addRead(`${name}${option.value}${rest}`, file, fallback)
           }
         }
+      }
+    }
+    for (const [property, values] of maps) {
+      for (const placeholder of Object.keys(values)) {
+        if (markupWrites.has(property) && !used.has(`${property} <${placeholder}>`)) fails.push(`contract/token-layer.json fills <${placeholder}> in ${property}, which no markup element writes`)
       }
     }
     const seen = new Set()
@@ -6037,6 +6097,7 @@ export function checkStylesheets(files) {
   const named = [...reads.keys()].filter((name) => !declaredHere.has(name))
   return {
     fails,
+    reached: 'all',
     summary: `PASS: ${String(parsed.size)} stylesheet(s) parse whole; ${String(CONTRACTS.length)} decision contract(s) hold; ` +
       `the token layer names the ${String(named.length)} custom properties they and the markup read (${String(named.filter((n) => reads.get(n).withFallback === reads.get(n).count).length)} optional); ` +
       `${String(styled.size)} salt-* classes styled, ${String(UNMARKED.length)} of them listed in UNMARKED.`,
@@ -6069,11 +6130,18 @@ export function readPackage(dir) {
 /*
  * Whether this module is the script being run. Real paths, because a symlinked invocation names the
  * link, and comparing URLs then read as "imported", printed nothing and exited 0. The same check as
- * `isMainModule` in #5's `emit/_contract.mjs`; one copy once both have merged.
+ * `isMainModule` in #5's `emit/_contract.mjs`; one copy once both have merged. When a real path
+ * cannot be read the gate runs. Comparing resolved paths instead cannot settle it: equal paths
+ * mean run, and unequal ones may still be a link this could not follow. Running by mistake prints a
+ * verdict; skipping by mistake is a silent pass.
  */
-const isMainModule = (moduleUrl) => {
-  if (!process.argv[1]) return false
-  try { return realpathSync(process.argv[1]) === realpathSync(fileURLToPath(moduleUrl)) } catch { return false }
+export const isMainModule = (moduleUrl, entry = process.argv[1], real = realpathSync) => {
+  if (!entry) return false
+  try {
+    return real(entry) === real(fileURLToPath(moduleUrl))
+  } catch {
+    return true
+  }
 }
 
 if (isMainModule(import.meta.url)) {

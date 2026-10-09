@@ -42,16 +42,6 @@
         "optional": {
           "description": "True when every read in the stylesheets carries a fallback, so a runtime may leave the property unset.",
           "type": "boolean"
-        },
-        "values": {
-          "description": "For a property the markup writes as var(--x-<placeholder>): the setting whose options fill the placeholder, as '<fields file>#<field name>', less any option in except (which writes nothing). Each resulting --x-<option> is a token the runtime emits.",
-          "type": "object",
-          "required": ["field"],
-          "additionalProperties": false,
-          "properties": {
-            "field": { "type": "string", "pattern": "^[\\w-]+#[\\w]+$" },
-            "except": { "type": "array", "items": { "type": "string" } }
-          }
         }
       }
     },
@@ -105,6 +95,32 @@
     },
     "$comment": {
       "type": "string"
+    },
+    "writes": {
+      "description": "Each property the markup writes as a var() with a <placeholder>, token or not, and what fills each placeholder: a setting, as '<fields file>#<field name>', whose options (less any in except, which write nothing) each name a token the runtime emits.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["property", "values"],
+        "additionalProperties": false,
+        "properties": {
+          "property": { "type": "string", "pattern": "^--[a-z][a-z0-9]*(-[a-z0-9]+)*$" },
+          "values": {
+            "type": "object",
+            "minProperties": 1,
+            "propertyNames": { "pattern": "^[a-z][a-z0-9-]*$" },
+            "additionalProperties": {
+              "type": "object",
+              "required": ["field"],
+              "additionalProperties": false,
+              "properties": {
+                "field": { "type": "string", "pattern": "^[\\w-]+#[\\w]+$" },
+                "except": { "type": "array", "items": { "type": "string" } }
+              }
+            }
+          }
+        }
+      }
     },
     "groups": {
       "type": "array",

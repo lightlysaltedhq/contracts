@@ -2,6 +2,10 @@
   "$schema": "../schema/token-layer.schema.json",
   "version": "0.1.0",
   "$comment": "Every custom property the shared stylesheets (styles/*.css) read and do not define, which a runtime must therefore emit for them to work (SC-002). Names only: each value is the implementation's, generated from design-foundations and its brand engine, and the stylesheets reach colour through these alone. A property marked optional has a fallback at every read. Drafted 09/10/2026 from the stylesheets Salt for Next.js shipped at 1472afdd.",
+  "writes": [
+    { "property": "--salt-section-space", "values": { "spacing": { "field": "_section-settings#spacing", "except": ["none"] } } },
+    { "property": "--salt-scrim-alpha", "values": { "strength": { "field": "_section-settings#scrimStrength" } } }
+  ],
   "groups": [
     {
       "id": "colour",
@@ -102,8 +106,8 @@
       "id": "set-by-markup",
       "what": "Written on an element by the markup itself, from editor content or a section setting.",
       "tokens": [
-        { "name": "--salt-section-space", "meaning": "A band's block space: var(--space-section-<spacing>), absent when spacing is none.", "source": "markup", "ref": "contract/markup/section.json", "values": { "field": "_section-settings#spacing", "except": ["none"] }, "optional": true },
-        { "name": "--salt-scrim-alpha", "meaning": "The scrim's strength over a background image: var(--scrim-<strength>).", "source": "markup", "ref": "contract/markup/section.json", "values": { "field": "_section-settings#scrimStrength" } },
+        { "name": "--salt-section-space", "meaning": "A band's block space: var(--space-section-<spacing>), absent when spacing is none.", "source": "markup", "ref": "contract/markup/section.json", "optional": true },
+        { "name": "--salt-scrim-alpha", "meaning": "The scrim's strength over a background image: var(--scrim-<strength>).", "source": "markup", "ref": "contract/markup/section.json" },
         { "name": "--salt-rating-fill", "meaning": "How much of a rating's five stars is filled, as a percentage.", "source": "markup", "ref": "contract/markup/card.json", "optional": true },
         { "name": "--salt-case-study-view-aside-rows", "meaning": "How many of a case study band's rows its aside spans.", "source": "markup", "ref": "contract/markup/case-study.json (not yet recorded there)" },
         { "name": "--salt-case-study-view-measure", "meaning": "A case study band's measure, when it sets one.", "source": "markup", "ref": "contract/markup/case-study.json (not yet recorded there)", "optional": true },

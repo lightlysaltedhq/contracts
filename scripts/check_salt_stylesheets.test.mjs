@@ -44,7 +44,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url'
 const HERE = path.dirname(fileURLToPath(import.meta.url))
 const GATE = path.join(HERE, 'check_salt_stylesheets.mjs')
 const PACKAGE = path.resolve(HERE, '../salt-contract')
-const { readPackage, report } = await import(pathToFileURL(GATE).href)
+const { checkStylesheets, isMainModule, memoSize, readPackage, report } = await import(pathToFileURL(GATE).href)
 
 /* vitest's spelling over node:assert, for the cases ported as they were written. */
 const expect = (actual) => ({
@@ -2260,6 +2260,7 @@ const tokenLayer = (edit) => ['contract/token-layer.json', (text) => {
   return JSON.stringify(layer, null, 2)
 }]
 const tokenNamed = (layer, name) => layer.groups.flatMap((group) => group.tokens).find((token) => token.name === name)
+const writeOf = (layer, property) => layer.writes.find((entry) => entry.property === property)
 
 describe('the parse is whole, across every stylesheet in styles/', () => {
   itEach([
@@ -2297,15 +2298,24 @@ describe('the token layer names exactly what the stylesheets read', () => {
     /* What the markup writes is read too (T2), through each placeholder's value map. */
     ['a token the markup writes into a band is dropped', [tokenLayer((layer) => { for (const g of layer.groups) g.tokens = g.tokens.filter((t) => t.name !== '--scrim-strong') })], 'contract/markup/section.json read(s) --scrim-strong, which contract/token-layer.json does not name'],
     ['a spacing the markup writes is dropped', [tokenLayer((layer) => { for (const g of layer.groups) g.tokens = g.tokens.filter((t) => t.name !== '--space-section-lg') })], 'contract/markup/section.json read(s) --space-section-lg, which contract/token-layer.json does not name'],
-    ['the value map loses its exception, so `none` would be a token', [tokenLayer((layer) => { delete tokenNamed(layer, '--salt-section-space').values.except })], 'read(s) --space-section-none, which contract/token-layer.json does not name'],
-    ['a placeholder the token layer gives no values for', [tokenLayer((layer) => { delete tokenNamed(layer, '--salt-scrim-alpha').values })], 'writes --salt-scrim-alpha as var(--scrim-<strength>), and contract/token-layer.json gives no values for <strength>'],
-    ['a value map naming no field', [tokenLayer((layer) => { tokenNamed(layer, '--salt-scrim-alpha').values.field = '_section-settings#strength' })], "takes --salt-scrim-alpha's values from _section-settings#strength, which is not a field with options"],
-    ['a value map on a token the markup does not write', [tokenLayer((layer) => { tokenNamed(layer, '--color-ink').values = { field: '_section-settings#spacing' } })], 'gives --color-ink values, but only a property the markup writes has them'],
+    ['the value map loses its exception, so `none` would be a token', [tokenLayer((layer) => { delete writeOf(layer, '--salt-section-space').values.spacing.except })], 'read(s) --space-section-none, which contract/token-layer.json does not name'],
+    ['a placeholder the token layer gives no values for', [tokenLayer((layer) => { layer.writes = layer.writes.filter((entry) => entry.property !== '--salt-scrim-alpha') })], "writes --salt-scrim-alpha as var(--scrim-<strength>), and contract/token-layer.json's writes give no values for <strength>"],
+    ['a value map naming no field', [tokenLayer((layer) => { writeOf(layer, '--salt-scrim-alpha').values.strength.field = '_section-settings#strength' })], "fills --salt-scrim-alpha's <strength> from _section-settings#strength, which is not a field with options"],
+    ['value maps for a property no markup writes', [tokenLayer((layer) => { layer.writes.push({ property: '--color-ink', values: { spacing: { field: '_section-settings#spacing' } } }) })], 'lists writes for --color-ink, which no markup element writes'],
+    /* Each placeholder by name (Z4): one map does not stand in for another, and a stale one fails. */
+    ['a placeholder named differently from its map', [tokenLayer((layer) => { const entry = writeOf(layer, '--salt-scrim-alpha'); entry.values = { alpha: entry.values.strength } })], "give no values for <strength>"],
+    ['a map for a placeholder the markup does not write', [tokenLayer((layer) => { writeOf(layer, '--salt-scrim-alpha').values.opacity = { field: '_section-settings#scrimStrength' } })], 'fills <opacity> in --salt-scrim-alpha, which no markup element writes'],
+    ['a second placeholder in one value, with no map of its own', [addFile('contract/markup/zz-write.json', JSON.stringify({ root: { attributes: { style: '--salt-scrim-alpha: var(--scrim-<strength>, var(--scrim-<fallback>))' } } }))], 'give no values for <fallback>'],
+    ['writes listed twice for one property', [tokenLayer((layer) => { layer.writes.push(structuredClone(writeOf(layer, '--salt-scrim-alpha'))) })], 'lists writes for --salt-scrim-alpha twice'],
+    /* What a markup element writes (Z1, Z3): a style element's CSS, and each value of an enum. */
+    ['a style element writes a token the layer does not name', [addFile('contract/markup/zz-write.json', JSON.stringify({ elements: [{ element: 'noscript', children: [{ element: 'style', text: '.salt-header { --salt-header-phone-menu: var(--phone-unnamed); }' }] }] }))], 'contract/markup/zz-write.json read(s) --phone-unnamed, which contract/token-layer.json does not name'],
+    ['an enum value writes a token the layer does not name', [addFile('contract/markup/zz-write.json', JSON.stringify({ root: { attributes: { style: { enum: ['--salt-rating-fill: 0%', '--salt-rating-fill: var(--rating-enum)'] } } } }))], 'read(s) --rating-enum, which contract/token-layer.json does not name'],
+    ["an element's text is not a write, unless the element is a style", [addFile('contract/markup/zz-write.json', JSON.stringify({ elements: [{ element: 'p', text: '--header-height: 4rem' }] })), tokenLayer((layer) => { tokenNamed(layer, '--header-height').source = 'markup' })], 'says the markup writes --header-height, but no file in contract/markup/ does'],
     /* Every write the markup makes is read, into any property, fallbacks and nested var()s included. */
     ['a markup write reads a token only in its fallback', [addFile('contract/markup/zz-write.json', JSON.stringify({ root: { attributes: { style: '--salt-rating-fill: var(--rating-unnamed, 0%)' } } }))], 'contract/markup/zz-write.json read(s) --rating-unnamed, which contract/token-layer.json does not name'],
     ['a markup write reads a token nested in a fallback', [addFile('contract/markup/zz-write.json', JSON.stringify({ root: { attributes: { style: '--salt-rating-fill: var(--salt-x, var(--rating-nested))' } } }))], 'read(s) --rating-nested, which contract/token-layer.json does not name'],
     ['a markup write into a property the stylesheets declare', [addFile('contract/markup/zz-write.json', JSON.stringify({ root: { attributes: { style: { value: '--logo-height: var(--logo-unnamed)' } } } }))], 'contract/markup/zz-write.json read(s) --logo-unnamed, which contract/token-layer.json does not name'],
-    ['a placeholder written into a property with no value map', [addFile('contract/markup/zz-write.json', JSON.stringify({ root: { attributes: { style: '--logo-height: var(--logo-<size>)' } } }))], 'writes --logo-height as var(--logo-<size>), and contract/token-layer.json gives no values for <size>'],
+    ['a placeholder written into a property with no value map', [addFile('contract/markup/zz-write.json', JSON.stringify({ root: { attributes: { style: '--logo-height: var(--logo-<size>)' } } }))], "writes --logo-height as var(--logo-<size>), and contract/token-layer.json's writes give no values for <size>"],
     /* Prose never counts as a write: a note, a rule, a platform's former markup. */
     ['a token whose only "write" is a note', [addFile('contract/markup/zz-write.json', JSON.stringify({ notes: [{ text: '--header-height: 4rem' }], rules: { r: { statement: '--header-height: 4rem' } }, platforms: { nextjs: { formerly: [{ attributes: { style: '--header-height: 4rem' } }] } } })), tokenLayer((layer) => { tokenNamed(layer, '--header-height').source = 'markup' })], 'says the markup writes --header-height, but no file in contract/markup/ does'],
     /* A token said to come from the markup is written by some markup file (T5). */
@@ -2381,9 +2391,24 @@ describe('the script, run as CI runs it', () => {
   })
 
   /* The tripwire for the stand-in: once the real markup writes any of the five, delete it. */
-  it('still needs the PENDING stand-in for #6', () => {
-    const { output } = report(readPackage(PACKAGE))
-    const carried = PENDING_FAILS.filter((line) => !output.includes(line)).map((line) => line.match(/writes (--[\w-]+)/)[1])
+  /* Which of the five the markup now writes, or null when the run stopped before the token layer and
+     so says nothing about them (other cases report why). */
+  const pendingCarried = (files) => {
+    const { fails, reached } = checkStylesheets(files)
+    if (reached !== 'all') return null
+    const output = fails.map((f) => `✗ ${f}`).join('\n')
+    return PENDING_FAILS.filter((line) => !output.includes(line)).map((line) => line.match(/writes (--[\w-]+)/)[1])
+  }
+
+  it('judges the stand-in only when the token layer stage ran', () => {
+    const broken = readPackage(PACKAGE)
+    broken.set('styles/blocks.css', `${broken.get('styles/blocks.css')}\n.salt-x { .salt-y { margin: 0; } }\n`)
+    expect(pendingCarried(broken)).toBe(null)
+  })
+
+  it('still needs the PENDING stand-in for #6', (t) => {
+    const carried = pendingCarried(readPackage(PACKAGE))
+    if (carried === null) { t.skip('the gate stopped before the token layer'); return }
     assert.deepEqual(carried, [], `the markup now writes ${carried.join(', ')}: delete the stand-in, PENDING_WRITES and PENDING_FAILS (and UNMARKED's pending block)`)
   })
 
@@ -2399,6 +2424,43 @@ describe('the script, run as CI runs it', () => {
     } finally {
       rmSync(root, { recursive: true, force: true })
     }
+  })
+})
+
+describe('the fixes a value map and a layered base allow', () => {
+  itEach([
+    /* A placeholder written into a property the stylesheets declare has a fix: a value map in writes (Z5). */
+    ['a placeholder written into a stylesheet-declared property, with its value map', [addFile('contract/markup/zz-write.json', JSON.stringify({ root: { attributes: { style: '--logo-height: var(--space-section-<spacing>)' } } })), tokenLayer((layer) => { layer.writes.push({ property: '--logo-height', values: { spacing: { field: '_section-settings#spacing', except: ['none'] } } }) })]],
+    /* A body or heading rule under a query inside base.css's layer is still in the layer (Z10). */
+    ['a heading rule under a media query inside the base layer', [['base.css', (css) => css.replace('@layer base {\n', '@layer base {\n  @media (min-width: 48rem) {\n    :where(#main, .salt-header, .salt-footer) h1 {\n      font-size: var(--text-heading-1);\n      line-height: var(--text-heading-1--line-height);\n      letter-spacing: var(--text-heading-1--letter-spacing);\n      font-weight: var(--text-heading-1--font-weight);\n      font-family: var(--text-heading-1--font-family);\n    }\n  }\n\n')]]],
+    /* A brace in a string does not end the layer (Z8). */
+    ['a brace inside a string in the base layer', [['base.css', (css) => css.replace('@layer base {\n', "@layer base {\n  :where(#main, .salt-header, .salt-footer) h1::after {\n    content: '}';\n  }\n\n")]]],
+  ])('passes %s', (_case, edits) => {
+    const { code, output } = run(...edits)
+    expect(output).toContain('PASS: ')
+    expect(code).toBe(0)
+  })
+
+  /* Z2: the memoised helpers key on the arguments they use, so the cache stops growing. */
+  it('holds the caches steady across repeated runs and maps', () => {
+    const files = readPackage(PACKAGE)
+    checkStylesheets(files)
+    const before = memoSize()
+    for (let i = 0; i < 3; i += 1) checkStylesheets(new Map(files))
+    expect(memoSize()).toBe(before)
+  })
+})
+
+/* Z9: the main-module check never skips the gate silently. */
+describe('the gate knows when it is the script being run', () => {
+  const self = pathToFileURL(GATE).href
+  it('runs when the entry is this file', () => expect(isMainModule(self, GATE)).toBe(true))
+  it('does not run when imported, with another entry', () => expect(isMainModule(self, path.join(HERE, 'check_salt_contract.mjs'))).toBe(false))
+  it('does not run with no entry', () => expect(isMainModule(self, undefined)).toBe(false))
+  it('runs when a real path cannot be read, rather than passing silently', () => {
+    const broken = () => { throw new Error('EACCES') }
+    expect(isMainModule(self, path.join(HERE, 'elsewhere.mjs'), broken)).toBe(true)
+    expect(isMainModule(self, GATE, broken)).toBe(true)
   })
 })
 
