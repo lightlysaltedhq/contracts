@@ -55,7 +55,8 @@ the Salt page.
    (`schema/replaced-logic.schema.json`); on WordPress, the child theme's `OVERRIDES.md` points at it
    rather than repeating it. *On update, all of the section's logic, the section wrapper and the
    shared components still reach the site; core's default view of that section does not. A
-   release that changes the section's view props is flagged.*
+   release that changes the section's view props, or the plan and shared types in
+   `contract/view-props/_shared.json`, is flagged.*
 5. **Replace a section's logic.** Rare. The site takes the section over entirely and declares it
    (`tier: "logic"`). *On update, nothing reaches that section; it is flagged on every update.*
 6. **A client-only section.** A section only this site has, listed under `clientSections` so a

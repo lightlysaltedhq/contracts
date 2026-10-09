@@ -139,8 +139,9 @@
           "name": "image",
           "kind": "object",
           "of": "image",
-          "from": "field",
-          "field": "settings.backgroundImage.image"
+          "from": "logic",
+          "field": "settings.backgroundImage.image",
+          "description": "Always present: the background object is null unless the image resolves."
         },
         {
           "name": "fit",
@@ -360,6 +361,34 @@
           "from": "logic"
         },
         {
+          "name": "email",
+          "kind": "text",
+          "nullable": true,
+          "description": "A team member's email address; the card draws it as a mailto: link.",
+          "from": "logic"
+        },
+        {
+          "name": "phone",
+          "kind": "text",
+          "nullable": true,
+          "description": "A team member's phone number as entered, drawn as the link text.",
+          "from": "logic"
+        },
+        {
+          "name": "phoneHref",
+          "kind": "text",
+          "nullable": true,
+          "description": "The tel: address, only when the phone normalises to one; with none, the phone is not drawn.",
+          "from": "logic"
+        },
+        {
+          "name": "profiles",
+          "kind": "list",
+          "of": "profile",
+          "description": "A team member's social profiles, in order; empty for every other source.",
+          "from": "logic"
+        },
+        {
           "name": "tags",
           "kind": "list",
           "of": "tag",
@@ -378,6 +407,42 @@
         {
           "name": "title",
           "kind": "text",
+          "from": "logic"
+        }
+      ]
+    },
+    "profile": {
+      "description": "A social profile on a team card (contract/markup/card.json, socials).",
+      "props": [
+        {
+          "name": "name",
+          "kind": "text",
+          "description": "The profile's name, which names the link (its accessible name, or its text when no glyph is drawn).",
+          "from": "logic"
+        },
+        {
+          "name": "href",
+          "kind": "text",
+          "from": "logic"
+        },
+        {
+          "name": "network",
+          "kind": "enum",
+          "values": [
+            "bluesky",
+            "facebook",
+            "github",
+            "instagram",
+            "linkedin",
+            "pinterest",
+            "reddit",
+            "tiktok",
+            "whatsapp",
+            "x",
+            "youtube"
+          ],
+          "nullable": true,
+          "description": "The social glyph the address matches, from the chrome icon names; null when none does, which draws the name as text.",
           "from": "logic"
         }
       ]

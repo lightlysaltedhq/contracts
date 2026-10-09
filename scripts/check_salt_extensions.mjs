@@ -9,7 +9,10 @@
 //    a dial can only move what the stylesheets read. Every rung an option points at is named there
 //    too, or is a rung of design-foundations' scale shape (foundations/contract/scale-shape.json,
 //    beside this package): the runtime writes the rung's value, so it need not emit the rung. An
-//    option sets only its dial's tokens and never a token to itself. Dial ids and names are unique,
+//    option sets only its dial's tokens and never a token to itself. A design-foundations rung whose
+//    family's values reference other tokens (its requiresTokens) makes the dial require them, so a
+//    runtime emits them while it is set: each is in the dial's requires, and requires agrees with
+//    the token layer's requiredBy both ways. Dial ids and names are unique,
 //    option values are unique within a dial, and the default is one of them.
 // 2. VIEW PROPS (contract/view-props/). Every section in contract/sections.json has a file, no file
 //    names anything else, and each file's section is its file name (`shared` for _shared.json, which
@@ -17,6 +20,8 @@
 //    through groups and list rows by dots, or a shared setting the section keeps as
 //    `settings.<name>`. A `from: field` prop takes its field's name, and an enum drawn from a
 //    select offers exactly the select's options, so a generated type cannot drift from the editor.
+//    It is nullable exactly when its field can be left empty (any text, image, link, relationship or
+//    number field not marked required).
 //    Every `of` names a type in the file or in _shared.json; a list may also hold a scalar kind.
 // 3. REPLACED LOGIC (schema/replaced-logic.schema.json). Its examples validate against it, name
 //    only contract sections, and list no contract section as client-only.
@@ -38,9 +43,10 @@ const sectionIds = new Set((vocab?.sections ?? []).map((s) => s.id))
 // ── 1 ─────────────────────────────────────────────────────────────────────────────────────────
 const layer = read('contract/token-layer.json')
 const layerNames = new Set()
+const layerEntries = new Map()
 for (const g of layer?.groups ?? []) {
   for (const t of g.tokens ?? []) {
-    if (t.name) layerNames.add(t.name)
+    if (t.name) { layerNames.add(t.name); layerEntries.set(t.name, t) }
     // A text role is five properties, as the token-layer schema says.
     if (t.textRole) {
       for (const s of ['', '--line-height', '--letter-spacing', '--font-weight', '--font-family']) layerNames.add(`--text-${t.textRole}${s}`)
@@ -49,13 +55,15 @@ for (const g of layer?.groups ?? []) {
 }
 // The scale shape is design-foundations', which this repository holds beside the package; a
 // family's rungs are its css pattern with each step, or the pattern itself when it has no steps.
-const scaleRungs = new Set()
+const scaleRungs = new Map() // rung -> the properties its family's values reference
 try {
   const shape = JSON.parse(readFileSync(path.join(here, '..', 'foundations', 'contract', 'scale-shape.json'), 'utf8'))
   for (const f of Object.values(shape.families ?? {})) {
     if (typeof f.css !== 'string') continue
-    if (f.css.includes('{k}')) for (const k of f.steps ?? []) scaleRungs.add(f.css.replace('{k}', k))
-    else scaleRungs.add(f.css)
+    // A colour role id is its CSS name with each dot a hyphen (vocabulary.json): color.shadow.sm.
+    const needs = (f.requiresTokens ?? []).map((t) => `--${t.replaceAll('.', '-')}`)
+    if (f.css.includes('{k}')) for (const k of f.steps ?? []) scaleRungs.set(f.css.replace('{k}', k), needs)
+    else scaleRungs.set(f.css, needs)
   }
 } catch (e) {
   fails.push(`foundations/contract/scale-shape.json could not be read (${e.message}); a dial's rungs are checked against it`)
@@ -87,11 +95,32 @@ if (dials) {
       }
     }
     if (!values.has(d.default)) fails.push(`${at}: defaults to ${d.default}, which it does not offer`)
+    const requires = new Set(d.requires ?? [])
+    for (const o of d.options ?? []) {
+      for (const to of Object.values(o.sets ?? {})) {
+        for (const need of scaleRungs.get(to) ?? []) {
+          if (!requires.has(need)) fails.push(`${at}.${o.value}: points at ${to}, whose value references ${need}, which the dial does not list under requires`)
+        }
+      }
+    }
+    for (const t of requires) {
+      const entry = layerEntries.get(t)
+      if (!entry) fails.push(`${at}: requires ${t}, which contract/token-layer.json does not name`)
+      else if (!(entry.requiredBy ?? []).includes(d.id)) fails.push(`${at}: requires ${t}, but contract/token-layer.json does not list ${d.id} in its requiredBy`)
+    }
+  }
+}
+
+for (const [name, t] of layerEntries) {
+  for (const id of t.requiredBy ?? []) {
+    const dial = (dials?.dials ?? []).find((d) => d.id === id)
+    if (!dial || !(dial.requires ?? []).includes(name)) fails.push(`contract/token-layer.json says ${name} is required by ${id}, but no dial ${id} lists it under requires`)
   }
 }
 
 // ── 2 ─────────────────────────────────────────────────────────────────────────────────────────
 const SCALARS = new Set(['text', 'integer', 'number', 'boolean', 'icon'])
+const CAN_BE_EMPTY = new Set(['text', 'textarea', 'rich-text', 'image', 'link', 'relationship', 'number'])
 const propsDir = path.join(dir, 'contract/view-props')
 const propFiles = existsSync(propsDir) ? readdirSync(propsDir).filter((f) => f.endsWith('.json')) : []
 if (vocab) {
@@ -136,6 +165,12 @@ function checkProps(file, owner, props, fieldsDoc, types) {
     }
     if (!field) { fails.push(`${at}: field ${prop.field} is not a field of this section`); continue }
     if (prop.from === 'field' && prop.name !== steps.at(-1)) fails.push(`${at}: comes from field ${prop.field}, so it takes that field's name, ${steps.at(-1)}`)
+    // A field an editor can leave empty gives a nullable prop, and a required one a prop that is
+    // never null. A value the logic guarantees (a row it drops when empty) comes `from: logic`.
+    if (prop.from === 'field' && CAN_BE_EMPTY.has(field.type) && !field.many && !['list', 'boolean', 'enum'].includes(prop.kind)) {
+      if (field.required && prop.nullable) fails.push(`${at}: field ${prop.field} is required, so the prop is never null; drop nullable`)
+      if (!field.required && !prop.nullable) fails.push(`${at}: field ${prop.field} may be left empty, so the prop is nullable`)
+    }
     if (prop.from === 'field' && prop.kind === 'enum' && field.type === 'select' && Array.isArray(field.options)) {
       const want = field.options.map((o) => o.value)
       const got = prop.values ?? []

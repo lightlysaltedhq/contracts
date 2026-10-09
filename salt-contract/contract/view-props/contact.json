@@ -62,6 +62,13 @@
     "contact-details": {
       "props": [
         {
+          "name": "organisation",
+          "kind": "text",
+          "nullable": true,
+          "description": "The organisation's name, drawn first; null when the site has none.",
+          "from": "site"
+        },
+        {
           "name": "phone",
           "kind": "text",
           "nullable": true,

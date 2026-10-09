@@ -6045,7 +6045,16 @@ export function checkStylesheets(files) {
           seen.add(name)
           const read = reads.get(name)
           if (declaredHere.has(name)) { fails.push(`contract/token-layer.json names ${name}, which the stylesheets declare themselves; it is not the runtime's to emit`); continue }
-          if (!read) { fails.push(`contract/token-layer.json names ${name}, which neither a stylesheet nor a value the markup writes reads`); continue }
+          if (!read) {
+            /* A property a dial's rungs reference (requiredBy) is emitted for the dial, not for a
+               stylesheet; it passes unread only when every dial it names lists it under requires. */
+            const dials = readJson('contract/dials.json')?.dials ?? []
+            const by = token.requiredBy ?? []
+            const unlisted = by.filter((id) => !(dials.find((d) => d.id === id)?.requires ?? []).includes(name))
+            if (by.length === 0) fails.push(`contract/token-layer.json names ${name}, which neither a stylesheet nor a value the markup writes reads`)
+            else if (unlisted.length > 0) fails.push(`contract/token-layer.json says ${name} is required by ${unlisted.join(', ')}, but contract/dials.json gives no such dial that requires it`)
+            continue
+          }
           const optional = read.withFallback === read.count
           if ((token.optional === true) !== optional) {
             fails.push(optional

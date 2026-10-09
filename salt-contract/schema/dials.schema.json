@@ -2,9 +2,13 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "dials.schema.json",
   "title": "The Salt contract's design dials",
-  "description": "Tier 2 of the customisation ladder (README, 'The customisation ladder'). A dial is a site-wide choice from a short scale, set in the admin by the admin role only, that moves one or more tokens at once. Each option names what it does to each token the dial sets: another token's rung, as the runtime's scale supplies that rung's value before any dial applies (never a var() to it, so no option can chain or loop), or 0. An option that sets nothing leaves every token where the theme put it. Names only, never values: the rungs' values are the implementation's, generated from design-foundations. Both platforms generate one select per dial from this file, in their brand settings. The package gate (scripts/check_salt_extensions.mjs) checks what a schema cannot: every token a dial sets is named in contract/token-layer.json, and every rung an option points at is named there or in design-foundations' scale shape; option values are unique and the default is one of them; an option sets only the dial's own tokens, never a token to itself.",
+  "description": "Tier 2 of the customisation ladder (README, 'The customisation ladder'). A dial is a site-wide choice from a short scale, set in the admin by the admin role only, that moves one or more tokens at once. Each option names what it does to each token the dial sets: another token's rung, as the runtime's scale supplies that rung's value before any dial applies (never a var() to it, so no option can chain or loop), or 0. An option that sets nothing leaves every token where the theme put it. Names only, never values: the rungs' values are the implementation's, generated from design-foundations. Both platforms generate one select per dial from this file, in their brand settings. The package gate (scripts/check_salt_extensions.mjs) checks what a schema cannot: every token a dial sets is named in contract/token-layer.json, and every rung an option points at is named there or in design-foundations' scale shape; a rung's required tokens are in the dial's requires, and requires and the token layer's requiredBy agree; option values are unique and the default is one of them; an option sets only the dial's own tokens, never a token to itself.",
   "type": "object",
-  "required": ["$schema", "version", "dials"],
+  "required": [
+    "$schema",
+    "version",
+    "dials"
+  ],
   "additionalProperties": false,
   "$defs": {
     "id": {
@@ -22,74 +26,133 @@
     },
     "option": {
       "type": "object",
-      "required": ["value", "label", "sets"],
+      "required": [
+        "value",
+        "label",
+        "sets"
+      ],
       "additionalProperties": false,
       "properties": {
-        "value": { "$ref": "#/$defs/id" },
-        "label": { "type": "string", "minLength": 1 },
+        "value": {
+          "$ref": "#/$defs/id"
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1
+        },
         "sets": {
           "description": "Token to what it takes under this option: another token's rung, or 0. Empty for the option that leaves the theme as it is.",
           "type": "object",
-          "propertyNames": { "$ref": "#/$defs/token" },
+          "propertyNames": {
+            "$ref": "#/$defs/token"
+          },
           "additionalProperties": {
             "anyOf": [
-              { "$ref": "#/$defs/token" },
-              { "const": "0" }
+              {
+                "$ref": "#/$defs/token"
+              },
+              {
+                "const": "0"
+              }
             ]
           }
         },
-        "note": { "type": "string" }
+        "note": {
+          "type": "string"
+        }
       }
     },
     "former": {
       "type": "object",
-      "required": ["name"],
+      "required": [
+        "name"
+      ],
       "additionalProperties": false,
       "properties": {
-        "name": { "type": "string", "minLength": 1 },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
         "values": {
           "type": "object",
-          "additionalProperties": { "$ref": "#/$defs/id" }
+          "additionalProperties": {
+            "$ref": "#/$defs/id"
+          }
         },
-        "note": { "type": "string" }
+        "note": {
+          "type": "string"
+        }
       }
     },
     "platform": {
       "type": "object",
-      "required": ["status"],
+      "required": [
+        "status"
+      ],
       "additionalProperties": false,
       "properties": {
         "status": {
-          "enum": ["ships", "owes", "partial"],
+          "enum": [
+            "ships",
+            "owes",
+            "partial"
+          ],
           "description": "ships: has it under a former name or this one; owes: does not have it yet; partial: has it with options missing."
         },
         "formerly": {
           "type": "array",
-          "items": { "$ref": "#/$defs/former" }
+          "items": {
+            "$ref": "#/$defs/former"
+          }
         },
         "owes": {
           "type": "string",
           "description": "What this platform must add or change to conform."
         },
-        "note": { "type": "string" }
+        "note": {
+          "type": "string"
+        }
       }
     }
   },
   "properties": {
-    "$schema": { "type": "string" },
-    "version": { "type": "string" },
-    "$comment": { "type": "string" },
+    "$schema": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string"
+    },
+    "$comment": {
+      "type": "string"
+    },
     "dials": {
       "type": "array",
       "minItems": 1,
       "items": {
         "type": "object",
-        "required": ["id", "name", "label", "description", "role", "tokens", "options", "default", "platforms"],
+        "required": [
+          "id",
+          "name",
+          "label",
+          "description",
+          "role",
+          "tokens",
+          "options",
+          "default",
+          "platforms"
+        ],
         "additionalProperties": false,
         "properties": {
-          "id": { "$ref": "#/$defs/id" },
-          "name": { "$ref": "#/$defs/fieldName" },
-          "label": { "type": "string", "minLength": 1 },
+          "id": {
+            "$ref": "#/$defs/id"
+          },
+          "name": {
+            "$ref": "#/$defs/fieldName"
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1
+          },
           "description": {
             "description": "The editor-facing help text, which both platforms show beside the select.",
             "type": "string",
@@ -104,24 +167,48 @@
             "type": "array",
             "minItems": 1,
             "uniqueItems": true,
-            "items": { "$ref": "#/$defs/token" }
+            "items": {
+              "$ref": "#/$defs/token"
+            }
+          },
+          "requires": {
+            "description": "Properties the values of this dial's rungs reference, which a runtime must emit while the dial is set: for a design-foundations rung, its family's requiresTokens (scale-shape.json). Each is named in contract/token-layer.json with this dial in its requiredBy.",
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "$ref": "#/$defs/token"
+            }
           },
           "options": {
             "type": "array",
             "minItems": 2,
-            "items": { "$ref": "#/$defs/option" }
-          },
-          "default": { "$ref": "#/$defs/id" },
-          "platforms": {
-            "type": "object",
-            "required": ["nextjs", "wordpress"],
-            "additionalProperties": false,
-            "properties": {
-              "nextjs": { "$ref": "#/$defs/platform" },
-              "wordpress": { "$ref": "#/$defs/platform" }
+            "items": {
+              "$ref": "#/$defs/option"
             }
           },
-          "note": { "type": "string" }
+          "default": {
+            "$ref": "#/$defs/id"
+          },
+          "platforms": {
+            "type": "object",
+            "required": [
+              "nextjs",
+              "wordpress"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "nextjs": {
+                "$ref": "#/$defs/platform"
+              },
+              "wordpress": {
+                "$ref": "#/$defs/platform"
+              }
+            }
+          },
+          "note": {
+            "type": "string"
+          }
         }
       }
     }

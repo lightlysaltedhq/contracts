@@ -70,6 +70,22 @@ test('a component token the layer drops fails the dial that sets it', () => {
     for (const g of d.groups) g.tokens = g.tokens.filter((t) => t.name !== '--salt-button-radius')
   }), /button-style: sets --salt-button-radius, which contract\/token-layer\.json does not name/)
 })
+test('a rung whose value references a token the dial does not require fails', () => {
+  expectFail((json) => json('contract/dials.json', (d) => { dial(d, 'shadows').requires = dial(d, 'shadows').requires.filter((t) => t !== '--color-shadow-md') }), /raised: points at --shadow-md, whose value references --color-shadow-md, which the dial does not list under requires/)
+})
+test('a dial requiring a token the layer does not name fails', () => {
+  expectFail((json) => json('contract/dials.json', (d) => { dial(d, 'shadows').requires.push('--color-shadow-xl') }), /requires --color-shadow-xl, which contract\/token-layer\.json does not name/)
+})
+test('a required token whose layer entry does not name the dial fails', () => {
+  expectFail((json) => json('contract/token-layer.json', (d) => {
+    for (const g of d.groups) for (const t of g.tokens) if (t.name === '--color-shadow-sm') delete t.requiredBy
+  }), /requires --color-shadow-sm, but contract\/token-layer\.json does not list shadows in its requiredBy/)
+})
+test('a layer entry required by a dial that does not require it fails', () => {
+  expectFail((json) => json('contract/token-layer.json', (d) => {
+    for (const g of d.groups) for (const t of g.tokens) if (t.name === '--color-shadow-sm') t.requiredBy.push('corners')
+  }), /--color-shadow-sm is required by corners, but no dial corners lists it under requires/)
+})
 test('an option setting a token outside its dial fails', () => {
   expectFail((json) => json('contract/dials.json', (d) => { dial(d, 'corners').options[0].sets['--radius-full'] = '0' }), /sets --radius-full, which is not one of the dial's tokens/)
 })
@@ -121,6 +137,12 @@ test('a field prop not named for its field fails', () => {
 })
 test('an enum prop offering other values than its select fails', () => {
   expectFail((json) => json('contract/view-props/hero.json', (d) => { props(d, 'variant').values.pop() }), /offers full-bleed\|split\|stacked, but field variant offers/)
+})
+test('a prop from an optional field that is not nullable fails', () => {
+  expectFail((json) => json('contract/view-props/tabs.json', (d) => { delete d.types.tab.props.find((p) => p.name === 'content').nullable }), /tab\.content: field tabs\.content may be left empty, so the prop is nullable/)
+})
+test('a prop from a required field that is nullable fails', () => {
+  expectFail((json) => json('contract/view-props/tabs.json', (d) => { d.types.tab.props.find((p) => p.name === 'label').nullable = true }), /tab\.label: field tabs\.label is required, so the prop is never null/)
 })
 test('an object of an unknown type fails', () => {
   expectFail((json) => json('contract/view-props/hero.json', (d) => { props(d, 'image').of = 'picture' }), /of picture names no type/)

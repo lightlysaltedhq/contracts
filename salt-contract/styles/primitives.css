@@ -1487,7 +1487,7 @@ body:has(.salt-consent-banner)::after {
   min-inline-size: max(2.75rem, 24px);
   padding-inline: 0.75rem;
   border: 1px solid transparent;
-  border-radius: var(--radius-md);
+  border-radius: var(--salt-button-radius, var(--radius-md)); /* the button-style dial, as .salt-button */
   color: var(--salt-section-ink, var(--color-ink));
   text-decoration: underline;
 }
@@ -1557,7 +1557,7 @@ body:has(.salt-consent-banner)::after {
   min-inline-size: max(2.75rem, 24px);
   padding-inline: 0.75rem;
   border: 1px solid currentColor;
-  border-radius: var(--radius-md);
+  border-radius: var(--salt-button-radius, var(--radius-md)); /* the button-style dial, as .salt-button */
   color: var(--salt-section-ink, var(--color-ink));
 }
 

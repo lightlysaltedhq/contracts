@@ -7,7 +7,7 @@
       "id": "corners",
       "name": "corners",
       "label": "Corners",
-      "description": "How rounded cards, inputs and image frames are, and buttons unless the button style says otherwise. Pills and circles (tags, portraits) stay round whatever you choose.",
+      "description": "How rounded the site's corners are: small ones (image frames, tags, inline code), controls (inputs, and buttons unless the button style says otherwise) and large ones (cards, dialogs). Pills and circles (step numbers, portraits) stay round whatever you choose.",
       "role": "admin",
       "tokens": [
         "--radius-sm",
@@ -50,7 +50,8 @@
           "status": "owes",
           "owes": "the select in options-brand.php's Appearance tab, editable by the admin role only, and salt_brand_css() writing each re-pointed rung's value, once the radius rungs are in its token layer"
         }
-      }
+      },
+      "note": "Tags read the small corner on purpose: the token layer gives --radius-sm to tags, so they square up with the rest of the site. Only what reads --radius-full is a pill."
     },
     {
       "id": "shadows",
@@ -60,6 +61,11 @@
       "role": "admin",
       "tokens": [
         "--salt-card-shadow"
+      ],
+      "requires": [
+        "--color-shadow-sm",
+        "--color-shadow-md",
+        "--color-shadow-lg"
       ],
       "options": [
         {
@@ -87,20 +93,20 @@
       "platforms": {
         "nextjs": {
           "status": "owes",
-          "owes": "the select in the brand global's Appearance tab, writable by the admin role only, and the brand stylesheet writing the chosen design-foundations --shadow-* rung's value into --salt-card-shadow, with the shadow colour roles it references"
+          "owes": "the select in the brand global's Appearance tab, writable by the admin role only, and the brand stylesheet writing the chosen design-foundations --shadow-* rung's value into --salt-card-shadow and emitting the shadow colour roles it requires (--color-shadow-sm, -md and -lg) in light and dark"
         },
         "wordpress": {
           "status": "owes",
-          "owes": "the select in options-brand.php's Appearance tab, editable by the admin role only, and salt_brand_css() writing the chosen design-foundations --shadow-* rung's value into --salt-card-shadow, with the shadow colour roles it references"
+          "owes": "the select in options-brand.php's Appearance tab, editable by the admin role only, and salt_brand_css() writing the chosen design-foundations --shadow-* rung's value into --salt-card-shadow and emitting the shadow colour roles it requires (--color-shadow-sm, -md and -lg) in light and dark"
         }
       },
-      "note": "The rungs are design-foundations' shadow family, whose values reference the shadow colour roles, so a shadow deepens in dark mode without a dark variant here. Only cards draw it; a dialog or menu that should lift takes the same token in a later release."
+      "note": "The rungs are design-foundations' shadow family, whose values reference the shadow colour roles (scale-shape.json requiresTokens), so the dial requires them: a runtime emits them while it is set, and a shadow deepens in dark mode without a dark variant here. Only cards draw it; a dialog or menu that should lift takes the same token in a later release."
     },
     {
       "id": "button-style",
       "name": "buttonStyle",
       "label": "Button style",
-      "description": "The corners of buttons: square, the same as the site’s other controls, or fully rounded pills.",
+      "description": "The corners of buttons and button-like controls (pagination links, the copy-link button): square, the same as the site's other controls, or fully rounded pills.",
       "role": "admin",
       "tokens": [
         "--salt-button-radius"
@@ -143,7 +149,7 @@
       "id": "density",
       "name": "density",
       "label": "Density",
-      "description": "How much space sits above and below each section. Compact moves every section's spacing a step tighter, spacious a step looser; a section's own spacing setting still chooses among the steps.",
+      "description": "How much space sits above and below each section. Compact tightens the medium and large steps to the step below (small stays as it is); spacious loosens the small and medium steps to the step above (large stays). A section's own spacing setting still chooses among the steps, and the case-study page's gaps, which read the same steps, move with them.",
       "role": "admin",
       "tokens": [
         "--space-section-sm",
@@ -185,7 +191,7 @@
           "owes": "the select in options-brand.php's Appearance tab, editable by the admin role only, and salt_brand_css() writing each re-pointed rung's value, once the section space rungs are in its token layer"
         }
       },
-      "note": "Moves the bands only. The card joins (--space-card-*) are Salt's own tokens with no rung beside them to move to, so a density that reached inside cards needs a scale for them first."
+      "note": "The case-study view reads --space-section-sm between its parts and beside an aside, and --space-section-md above itself, so it moves with the bands by design: it is laid out on the same rhythm. The card joins (--space-card-*) are Salt's own tokens with no rung beside them to move to, so a density that reached inside cards needs a scale for them first."
     }
   ]
 }
