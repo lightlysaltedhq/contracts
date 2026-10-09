@@ -26,9 +26,10 @@ Salted's decision log for Product Salt.
   - `contract/view-props/` (`./view-props/<section>`, schema `./schema/view-props`): the props each
     section's view receives, as `data` per section and the page `plan` once in `_shared`, in kinds
     both a TypeScript type and a PHP array shape can be generated from. A prop drawn from a field
-    takes the field's canonical name (SC-015) and is nullable exactly when its field can be left
-    empty. A team card carries its contact and social links, and a carousel, gallery or tab set says
-    whether it is named.
+    takes the field's canonical name (SC-015) and is nullable whenever its field can come out empty
+    (SC-009 cleaning, a deleted upload), required or not; a value only the logic guarantees, by
+    dropping the row, comes from the logic. A team card carries its contact and social links, and a
+    carousel, gallery or tab set says whether it is named.
   - `schema/replaced-logic.schema.json` (`./schema/replaced-logic`): the `salt-overrides.json` a
     client site writes when it swaps a view or takes a section over, which the update flag reads. On
     WordPress, `OVERRIDES.md` points at it (SC-015). A view swap is flagged when the section's view
@@ -37,7 +38,7 @@ Salted's decision log for Product Salt.
     is in the token layer, and every rung it points at is there or in design-foundations' scale
     shape, and every token a rung's value references is required by the dial and named in the token
     layer; every section has view props; every prop drawn from a field names a real one, takes its
-    name, is nullable exactly when its field can be empty, and offers its select's options; the
+    name, is nullable whenever its field can come out empty, and offers its select's options; the
     replaced-logic examples hold. `npm run salt-stylesheets` names the card's shadow as a focus-rule
     exception and accepts a dial's radius token in front of a rung, and passes a token no stylesheet
     reads only when a dial requires it, and the release workflow now runs it too.
