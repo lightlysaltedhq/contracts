@@ -24,7 +24,7 @@
 import { readFileSync, writeFileSync } from 'node:fs'
 
 import { checkedClauses, collectionQueryShape, hasVisibleText, isFilled, isMainModule, LINK_SHAPE, loadContract,
-  normaliseLineEndings, planSections, siblingValue, SOURCES } from './_contract.mjs'
+  normaliseLineEndings, planSections, siblingValue, sourceValues, SOURCES } from './_contract.mjs'
 
 /**
  * Each source's Payload collection and category taxonomy, as Salt for Next.js names them by
@@ -247,7 +247,7 @@ function collectionQuery(f, out, ctx) {
     salt.source = f.source
   } else {
     // The select comes narrowed by planSections, so its source values are the installed ones.
-    offered = ctx.siblings.find((s) => s.name === f.sourceField).options.map((o) => o.value).filter((v) => SOURCES.includes(v))
+    offered = sourceValues(ctx.siblings.find((s) => s.name === f.sourceField))
     salt.sourceField = f.sourceField
   }
   const slugs = offered.map((s) => ctx.sources[s])

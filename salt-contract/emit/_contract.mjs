@@ -142,6 +142,9 @@ export function checkedClauses(condition, where) {
 /** Source ids that hold items (field-definition schema, $defs.source). */
 export const SOURCES = ['services', 'case-studies', 'testimonials', 'posts', 'team', 'faqs', 'locations']
 
+/** The source ids among a select's options, in its order; [] for no select. */
+export const sourceValues = (select) => (select?.options ?? []).map((o) => o.value).filter((v) => SOURCES.includes(v))
+
 /**
  * What a select that picks a collection-query's source (its sourceField) can offer a site.
  *
@@ -153,7 +156,7 @@ export const SOURCES = ['services', 'case-studies', 'testimonials', 'posts', 'te
  */
 export function offeredSources(select, installed) {
   const options = (select?.options ?? []).filter((o) => !SOURCES.includes(o.value) || installed.has(o.value))
-  return { options, sources: options.map((o) => o.value).filter((v) => SOURCES.includes(v)) }
+  return { options, sources: sourceValues({ options }) }
 }
 
 /** The names of the selects that a sibling collection-query reads its source from. */
@@ -180,7 +183,7 @@ export function withinSources(fields, installed) {
     return ('equals' in c ? [c.equals] : c.in).some((v) => valuesOf(c.field).includes(v))
   })
   const queriesNothing = (f) => f.type === 'collection-query' && f.sourceField && selects.has(f.sourceField) &&
-    !valuesOf(f.sourceField).some((v) => SOURCES.includes(v))
+    sourceValues(narrowed.find((s) => s.name === f.sourceField)).length === 0
   // A field conditioned on one left out could never show, so it goes too, and so on down the chain.
   const gone = new Set(narrowed.filter((f) => queriesNothing(f) || !reachable(f)).map((f) => f.name))
   for (let grew = true; grew;) {
@@ -206,8 +209,7 @@ export function unmetSources(fields, installed, at, unfitted = fields) {
     const need = f.type === 'collection-query' ? f.source : f.type === 'relationship' ? f.to : undefined
     const own = need && !installed.has(need) ? [`the source ${need} (${where})`] : []
     if (selects.has(f.name) && f.options.length === 0) {
-      const offered = unfitted.find((u) => u.name === f.name).options.map((o) => o.value).filter((v) => SOURCES.includes(v))
-      own.push(`one of the sources ${offered.join(', ')} (${where})`)
+      own.push(`one of the sources ${sourceValues(unfitted.find((u) => u.name === f.name)).join(', ')} (${where})`)
     }
     const below = unfitted.find((u) => u.name === f.name)?.fields ?? f.fields
     return [...own, ...(f.fields ? unmetSources(f.fields, installed, where, below) : [])]

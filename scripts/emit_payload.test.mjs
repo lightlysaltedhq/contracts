@@ -503,3 +503,11 @@ test('U5: a source select in the shared settings is fitted and checked like a se
   assert.deepEqual(toPayloadBlocks({ contract, sources: {} }), [])
   assert.throws(() => toPayloadBlocks({ contract, sources: {}, sections: ['probe'] }), /\(probe\.settings\.source\)/)
 })
+
+test('V7: sourceValues is the one reading of the source values among a select\'s options', async () => {
+  const { sourceValues } = await import('../salt-contract/emit/_contract.mjs')
+  const carousel = loadContract().fields.carousel.fields.find((f) => f.name === 'source')
+  assert.deepEqual(sourceValues(carousel), ['services', 'case-studies', 'testimonials', 'posts', 'team'])
+  assert.deepEqual(sourceValues({ options: [{ value: 'inline', label: 'Inline' }] }), [])
+  assert.deepEqual(sourceValues(undefined), [])
+})
