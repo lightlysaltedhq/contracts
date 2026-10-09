@@ -5,7 +5,7 @@
 // what a link or a collection-query holds.
 //
 // Pure data: reads the package's own JSON files and imports nothing outside Node.
-import { readdirSync, readFileSync } from 'node:fs'
+import { readdirSync, readFileSync, realpathSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -89,6 +89,16 @@ export function isFilled(value) {
 export const siblingValue = (siblingData, name, defaults = {}) => {
   const raw = siblingData?.[name]
   return raw === undefined ? defaults[name] : raw
+}
+
+/**
+ * Whether the module at `moduleUrl` is the script Node was asked to run. By real path: run through
+ * a symlink (a pnpm or npm bin, a workspace link) argv[1] is the link while import.meta.url is the
+ * file it points at, and a plain comparison would skip the CLI and exit 0.
+ */
+export function isMainModule(moduleUrl) {
+  if (!process.argv[1]) return false
+  try { return realpathSync(process.argv[1]) === realpathSync(fileURLToPath(moduleUrl)) } catch { return false }
 }
 
 /** Text with CRLF line endings as LF, so a Windows checkout of a committed snapshot compares equal. */

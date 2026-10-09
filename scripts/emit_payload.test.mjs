@@ -4,7 +4,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { execFileSync } from 'node:child_process'
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -303,4 +303,21 @@ test('R8: a stored null is no value, and only a never-set sibling takes its defa
 test('R4: a snapshot checked out with CRLF line endings still matches', () => {
   const snapshot = payloadSnapshot({ icons })
   assert.deepEqual(checkPayloadSnapshot(snapshot.replace(/\n/g, '\r\n'), { icons }), { ok: true, problems: [] })
+})
+
+test('R1: the CLI runs, and fails on drift, when invoked through a symlink as pnpm and npm link it', () => {
+  const dir = mkdtempSync(path.join(tmpdir(), 'emit-payload-'))
+  const link = path.join(dir, 'salt-emit-payload.mjs')
+  const snap = path.join(dir, 'blocks.json')
+  const opts = path.join(dir, 'options.json')
+  try {
+    symlinkSync(emitter, link)
+    writeFileSync(opts, JSON.stringify({ icons }))
+    writeFileSync(snap, payloadSnapshot({ icons }).replace('"name": "subheading"', '"name": "strapline"'))
+    let code = 0
+    let out = ''
+    try { out = execFileSync(process.execPath, [link, '--check', snap, '--options', opts], { encoding: 'utf8' }) } catch (e) { code = e.status; out = e.stdout }
+    assert.equal(code, 1)
+    assert.match(out, /strapline/)
+  } finally { rmSync(dir, { recursive: true, force: true }) }
 })

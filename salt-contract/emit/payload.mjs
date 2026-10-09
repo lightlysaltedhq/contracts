@@ -22,10 +22,8 @@
 // Byte-stable: objects are built in the contract's order with a fixed key order, and nothing reads
 // the clock, the environment or the file system's listing order.
 import { readFileSync, writeFileSync } from 'node:fs'
-import path from 'node:path'
-import { pathToFileURL } from 'node:url'
 
-import { clauses, collectionQueryShape, hasVisibleText, isFilled, LINK_SHAPE, loadContract, normaliseLineEndings, resolveSection, siblingValue, SOURCES } from './_contract.mjs'
+import { clauses, collectionQueryShape, hasVisibleText, isFilled, isMainModule, LINK_SHAPE, loadContract, normaliseLineEndings, resolveSection, siblingValue, SOURCES } from './_contract.mjs'
 
 /**
  * Each source's Payload collection and category taxonomy, as Salt for Next.js names them by
@@ -392,7 +390,7 @@ export function checkPayloadSnapshot(snapshot, options = {}) {
 // The options file holds the JSON-expressible options (mediaSlug, linkTo, headings, icons, sources,
 // sections). A consumer with its options in code calls checkPayloadSnapshot instead.
 
-if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
+if (isMainModule(import.meta.url)) {
   const args = process.argv.slice(2)
   const flag = (name) => { const i = args.indexOf(name); return i === -1 ? undefined : args[i + 1] }
   const optionsFile = flag('--options')
