@@ -207,7 +207,7 @@ function convertField(f, ctx) {
       typed(f.many ? 'relationship' : 'post_object')
       // A link's document and a collection-query's parts have no `to`; their callers set it.
       if (f.to) {
-        out.post_type = [(ctx.sources[f.to] ?? SOURCE_DEFAULTS[f.to]).postType]
+        out.post_type = [ctx.sources[f.to].postType]
         salt.to = f.to
       } else if (ctx.link) {
         out.post_type = [...(options.linkTo ?? ['page'])]
@@ -258,7 +258,7 @@ function collectionQuery(f, out, ctx) {
     offered = (select?.options ?? []).map((o) => o.value).filter((v) => SOURCES.includes(v) && v in ctx.sources)
     salt.sourceField = f.sourceField
   }
-  const targets = offered.map((s) => ctx.sources[s] ?? SOURCE_DEFAULTS[s])
+  const targets = offered.map((s) => ctx.sources[s])
   const taxonomies = targets.map((t) => t.taxonomy).filter(Boolean)
   const postTypes = targets.map((t) => t.postType)
   if (f.modes) salt.modes = f.modes
@@ -284,14 +284,46 @@ function collectionQuery(f, out, ctx) {
 
 // ── Field groups ───────────────────────────────────────────────────────────────────────────────
 
+// A source select's collection sources the site installs, and whether it also offers something
+// that needs none (carousel's cards written in place).
+function offeredBy(fields, query, sources) {
+  const values = (fields.find((s) => s.name === query.sourceField)?.options ?? []).map((o) => o.value)
+  return { all: values.filter((v) => SOURCES.includes(v)), installed: values.filter((v) => SOURCES.includes(v) && v in sources), inline: values.some((v) => !SOURCES.includes(v)) }
+}
+
+// What a section needs from the site's sources and the site lacks, one line each. The rule is
+// payload.mjs's, but a source select that also offers inline items is never unmet: the section
+// still works with those, and its query is left out (see build).
+function unmetSources(fields, sources, at) {
+  return fields.flatMap((f) => {
+    const where = `${at}.${f.name}`
+    const need = f.type === 'collection-query' ? f.source : f.type === 'relationship' ? f.to : undefined
+    const own = need && !(need in sources) ? [`the source ${need} (${where})`] : []
+    if (f.type === 'collection-query' && f.sourceField) {
+      const offered = offeredBy(fields, f, sources)
+      if (!offered.installed.length && !offered.inline) own.push(`one of the sources ${offered.all.join(', ')} (${where})`)
+    }
+    return [...own, ...(f.fields ? unmetSources(f.fields, sources, where) : [])]
+  })
+}
+
 function build(options) {
   const contract = options.contract ?? loadContract()
-  const ids = options.sections ?? contract.sections.map((s) => s.id)
   const sources = sourcesFrom(options)
+  // Asked for by name, a section the site cannot carry is an error; by default it is left out.
+  const named = options.sections !== undefined
+  const ids = (options.sections ?? contract.sections.map((s) => s.id)).filter((id) => {
+    const unmet = unmetSources(resolveSection(contract, id).fields, sources, id)
+    if (unmet.length && named) throw new Error(`section ${id} needs ${unmet.join(', ')}, which options.sources does not install`)
+    return unmet.length === 0
+  })
   const keys = new Map()
   const layouts = ids.map((id) => {
-    const { section, fields, settings } = resolveSection(contract, id)
-    const sourceSelects = new Set(fields.filter((f) => f.type === 'collection-query' && f.sourceField).map((f) => f.sourceField))
+    const resolved = resolveSection(contract, id)
+    const { section, settings } = resolved
+    // A query whose select offers none of the site's sources has nothing to query.
+    const fields = resolved.fields.filter((f) => !(f.type === 'collection-query' && f.sourceField && !offeredBy(resolved.fields, f, sources).installed.length))
+    const sourceSelects = new Set(resolved.fields.filter((f) => f.type === 'collection-query' && f.sourceField).map((f) => f.sourceField))
     const base = { options, sources, sourceSelects, keys, scope: id, path: [] }
     const shared = settings.length ? [{ name: 'settings', type: 'group', label: 'Section settings', fields: settings }] : []
     return {
@@ -329,7 +361,8 @@ function build(options) {
  *   sources    { [source id]: { postType?, taxonomy? } } for the sources the site has; all of
  *              them, with SOURCE_DEFAULTS' slugs, when left out
  *   postTypes  where the sections group shows (['page'])
- *   sections   the section ids to emit, in this order (every section in sections.json)
+ *   sections   the section ids to emit, in this order; one the site's sources cannot carry
+ *              throws. Left out: every section in sections.json the sources can carry
  *   contract   a loaded contract (loadContract()), for tests
  */
 export function toAcfFieldGroups(options = {}) {

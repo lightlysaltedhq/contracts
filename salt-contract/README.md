@@ -149,6 +149,8 @@ const { ok, problems } = checkAcfSnapshot(readFileSync('acf/sections.json', 'utf
 Every option is JSON, so the command line takes them all:
 `node emit/acf.mjs --check <snapshot> [--options <options.json>]` exits 1 on drift, and `--write
 <snapshot>` regenerates it. salt-wordpress's `bin/check-fields-from-contract.php` runs this in CI.
+As with Payload, a section needing a source the site does not install is left out, or refused when
+`sections` names it; a carousel with no collection sources stays, offering its inline cards alone.
 
 **The slug gate still holds.** salt-wordpress's FLEET07 gate (`bin/extract-slugs.php`,
 `bin/check-slug-stability.php`) reads the groups the theme registers, not the code that built

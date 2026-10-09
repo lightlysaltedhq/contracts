@@ -344,3 +344,30 @@ test('R8: a stored null is no value, and only a never-set sibling takes its defa
   assert.equal(shows(label, {}, showcase), true)
   assert.equal(shows(label, { viewAll: null }, showcase), false)
 })
+
+test('R2: a section whose fixed source the site lacks is left out, or refused when asked for', () => {
+  const names = layoutsOf({ sources: { posts: {} } }).map((l) => l.name)
+  assert.ok(!names.includes('faq') && !names.includes('locations'), names.join(', '))
+  assert.ok(names.includes('hero'))
+  assert.throws(() => layoutsOf({ sources: { posts: {} }, sections: ['faq'] }),
+    /section faq needs the source faqs \(faq\.query\), which options\.sources does not install/)
+  const fields = [{ name: 'people', type: 'relationship', label: 'People', to: 'team' }]
+  assert.deepEqual(toAcfFieldGroups({ contract: probe(fields), sources: { posts: {} } })[0].fields[0].layouts, [])
+  assert.throws(() => toAcfFieldGroups({ contract: probe(fields), sources: { posts: {} }, sections: ['probe'] }),
+    /section probe needs the source team \(probe\.people\)/)
+})
+
+test('R3: a source-select section with none of its sources is left out, unless it offers inline items', () => {
+  const list = layoutsOf({ sources: {} })
+  assert.ok(!list.some((l) => l.name === 'collection-showcase'), list.map((l) => l.name).join(', '))
+  assert.throws(() => layoutsOf({ sources: {}, sections: ['collection-showcase'] }),
+    /section collection-showcase needs one of the sources services, case-studies, testimonials, posts, team \(collection-showcase\.query\)/)
+  assert.ok(layoutsOf({ sources: { team: {} } }).some((l) => l.name === 'collection-showcase'))
+  // The carousel's cards are written in place, so it stays, offering only that, with no query.
+  const carousel = layout(list, 'carousel')
+  assert.ok(carousel, 'carousel is kept')
+  assert.deepEqual(Object.keys(field(carousel.sub_fields, 'source').choices), ['inline'])
+  assert.ok(!carousel.sub_fields.some((f) => f.name === 'query'))
+  assert.ok(carousel.sub_fields.some((f) => f.name === 'cards'))
+  assert.doesNotThrow(() => layoutsOf({ sources: {}, sections: ['carousel'] }))
+})
