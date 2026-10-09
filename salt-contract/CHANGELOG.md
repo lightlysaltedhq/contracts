@@ -72,9 +72,8 @@ Salted's decision log for Product Salt.
   primitives, blocks, chrome, views.
 - `contract/token-layer.json` (`./token-layer`, schema `./schema/token-layer`): the 126 custom
   properties the stylesheets read, or the markup writes into one they read, and a runtime emits,
-  grouped, each with its meaning and source; a property the markup fills from a setting names that
-  setting's values, and a `writes` list gives each property the markup writes with a `<placeholder>`
-  the setting that fills it, by placeholder name. Names only, never values.
+  grouped, each with its meaning and source. A `writes` list gives each property the markup writes
+  with a `<placeholder>` the setting that fills it, by placeholder name. Names only, never values.
 - `npm run salt-stylesheets`: the stylesheets parse whole; 46 decision contracts hold, 45 ported
   from Salt for Next.js (five that read its runtime stay there) and one new (every framed image
   fills its frame); the token layer names exactly what the stylesheets read and every `var()` a
