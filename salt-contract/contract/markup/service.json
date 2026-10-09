@@ -131,7 +131,7 @@
   "notes": [
     {
       "topic": "open-question",
-      "text": "Only the landmark structure and the h1 are fixed here; the view body's class vocabulary is not yet in the contract (Next's example app writes salt-post__*, salt-service__* and salt-archive__*, which no shared stylesheet styles)."
+      "text": "Only the landmark structure and the h1 are fixed here. The view body's class vocabulary is work SC-006 leaves open: Next's example app writes salt-post__*, salt-service__* and salt-archive__*, which no shared stylesheet styles."
     }
   ],
   "platforms": {

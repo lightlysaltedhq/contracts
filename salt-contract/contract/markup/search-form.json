@@ -85,7 +85,7 @@
   ],
   "notes": [
     {
-      "topic": "open-question",
+      "topic": "ruling",
       "text": "WordPress's query parameter is s; the contract writes q. Routing is native (SC-003), so each platform may map it, but the visible markup says q."
     }
   ],

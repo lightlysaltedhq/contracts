@@ -232,8 +232,8 @@
       "text": "Platforms differ: WordPress draws the badge before the plan name; Next's recipe the name first. Ruled: name first, so a screen reader meets the plan before its badge."
     },
     {
-      "topic": "open-question",
-      "text": "sections.json openQuestions pricing-tier: edge on both is recommended, not yet ruled."
+      "topic": "ruling",
+      "text": "An edge recipe on both platforms (SC-006); Salt for WordPress moves its pricing layout into a Grain for WordPress recipe."
     }
   ],
   "platforms": {

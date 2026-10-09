@@ -110,6 +110,16 @@
       ]
     },
     {
+      "role": "form-intro",
+      "element": "p",
+      "classes": [
+        "salt-intro"
+      ],
+      "text": "from:formIntro",
+      "optional": true,
+      "when": "formIntro is set and the form is drawn"
+    },
+    {
       "role": "form",
       "component": "contact-form",
       "optional": true,
@@ -174,17 +184,18 @@
     },
     {
       "topic": "order",
-      "text": "Platforms differ: WordPress draws a two-column grid (details, then a form column with its own intro), and a mailto button when the form is off; Next draws heading, intro, form. Ruled: heading, intro, details, then form or the closed message; the mailto button goes (the details carry the email)."
+      "text": "Platforms differ: WordPress draws a two-column grid (details, then a form column with its own intro), and a mailto button when the form is off; Next draws heading, intro, form. Ruled: heading, intro, details, then the form intro and form, or the closed message; the mailto button goes (the details carry the email)."
     },
     {
-      "topic": "open-question",
-      "text": "WordPress's separate form intro paragraph has no Next counterpart; whether it stays (as a second p.salt-intro) needs a ruling. Its zero state (draws nothing when nothing to show) differs from Next's (always draws); ruled Next's."
+      "topic": "ruling",
+      "text": "The form intro stays, as an optional second p.salt-intro directly above the form (SC-006). The zero state follows Salt for Next.js: the section always draws."
     }
   ],
   "platforms": {
     "nextjs": {
       "owes": [
-        "The details block (salt-contact__details), read from site settings."
+        "The details block (salt-contact__details), read from site settings.",
+        "The form intro, a second p.salt-intro above the form (SC-006)."
       ]
     },
     "wordpress": {

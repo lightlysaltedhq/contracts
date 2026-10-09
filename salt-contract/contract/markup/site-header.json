@@ -9,7 +9,11 @@
       "salt-header"
     ],
     "attributes": {
-      "data-site-header": ""
+      "data-site-header": "",
+      "data-sticky": {
+        "value": "",
+        "when": "the header's sticky setting is on"
+      }
     }
   },
   "elements": [
@@ -31,6 +35,7 @@
             "salt-nav"
           ],
           "attributes": {
+            "id": "site-navigation",
             "aria-label": "from:labels.navigation"
           },
           "optional": true,
@@ -365,6 +370,12 @@
       "values": ""
     },
     {
+      "name": "data-sticky",
+      "on": "root",
+      "values": "",
+      "when": "the header's sticky setting is on"
+    },
+    {
       "name": "data-enhanced",
       "on": "item",
       "values": ""
@@ -419,8 +430,8 @@
   ],
   "notes": [
     {
-      "topic": "open-question",
-      "text": "WordPress's sticky header is a class (is-sticky); Next has no sticky option on the header element. Needs a ruling (data-sticky) before either migrates."
+      "topic": "ruling",
+      "text": "The header's sticky setting is drawn as data-sticky on the header on both platforms (SC-006); WordPress's is-sticky class goes. The main navigation takes the id site-navigation on both, which section anchors may not use."
     },
     {
       "topic": "ruling",
@@ -428,6 +439,12 @@
     }
   ],
   "platforms": {
+    "nextjs": {
+      "owes": [
+        "The sticky setting, drawn as data-sticky (SC-006).",
+        "The id site-navigation on the main navigation, in place of navigation (SC-006)."
+      ]
+    },
     "wordpress": {
       "formerly": [
         {
@@ -492,7 +509,7 @@
         }
       ],
       "owes": [
-        "Rename to salt-header and salt-nav*; the burger, drawer, submenu disclosure, phone link and theme toggle; data-site-header."
+        "Rename to salt-header and salt-nav*; the burger, drawer, submenu disclosure, phone link and theme toggle; data-site-header. data-sticky in place of is-sticky, and the id site-navigation on the main navigation (SC-006)."
       ]
     }
   }

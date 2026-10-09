@@ -107,7 +107,7 @@
         "salt-contact__field"
       ],
       "optional": true,
-      "when": "the anti-spam credentials were issued",
+      "when": "the anti-spam credentials were issued; inside a noscript element when a captcha provider is configured",
       "children": [
         {
           "role": "challenge-label",
@@ -168,6 +168,26 @@
         "aria-hidden": "true"
       },
       "note": "Honeypot: label + text input with tabindex -1, autocomplete off."
+    },
+    {
+      "role": "privacy",
+      "element": "p",
+      "classes": [
+        "salt-contact__privacy"
+      ],
+      "optional": true,
+      "when": "a privacy page is set",
+      "children": [
+        {
+          "role": "privacy-link",
+          "element": "a",
+          "attributes": {
+            "href": "from:privacy page url"
+          },
+          "text": "from:labels.privacy"
+        }
+      ],
+      "note": "The sentence around the link comes from labels.privacyLine."
     },
     {
       "role": "actions",
@@ -263,8 +283,15 @@
   ],
   "notes": [
     {
-      "topic": "open-question",
-      "text": "WordPress adds a privacy line when a privacy page is set, and renders its arithmetic challenge only inside noscript when a captcha provider is configured (its own field help says the reverse). Both need a ruling before fixtures."
+      "topic": "stylesheet-owes",
+      "text": "The privacy line, from WordPress (SC-006); no rule yet.",
+      "classes": [
+        "salt-contact__privacy"
+      ]
+    },
+    {
+      "topic": "ruling",
+      "text": "The form shows a privacy line when a privacy page is set (SC-006). When a captcha provider is configured, its widget is native and the arithmetic challenge is drawn inside noscript, for visitors without JavaScript; without a provider the challenge is drawn as it is."
     },
     {
       "topic": "ruling",
@@ -272,6 +299,11 @@
     }
   ],
   "platforms": {
+    "nextjs": {
+      "owes": [
+        "The privacy line when a privacy page is set, and the arithmetic challenge inside noscript when a captcha provider is configured (SC-006)."
+      ]
+    },
     "wordpress": {
       "formerly": [
         {
@@ -306,7 +338,8 @@
         }
       ],
       "owes": [
-        "Field, label, error and status markup as above; status after the actions, inside the form; phone field per the site setting; one id per form (salt-contact-<n>) instead of a static id."
+        "Field, label, error and status markup as above; status after the actions, inside the form; phone field per the site setting; one id per form (salt-contact-<n>) instead of a static id.",
+        "The privacy line as p.salt-contact__privacy before the actions (SC-006)."
       ]
     }
   }

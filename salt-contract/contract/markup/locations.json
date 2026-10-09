@@ -248,7 +248,7 @@
     },
     {
       "topic": "open-question",
-      "text": "The open-now status is computed at render time in the site's timezone, so cached HTML can go stale; whether it moves to the client is a platform question, the markup is fixed here."
+      "text": "The open-now status is computed at render time in the site's timezone, so cached HTML can go stale. Whether it moves to the client is work SC-006 leaves open; the markup is fixed here."
     }
   ],
   "platforms": {

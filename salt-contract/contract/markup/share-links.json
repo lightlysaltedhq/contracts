@@ -157,8 +157,8 @@
   ],
   "notes": [
     {
-      "topic": "open-question",
-      "text": "WordPress draws icon-only links named by aria-label and opens them in a new tab; Next draws text links in the same tab. The contract follows Next (text, same tab) until the owner rules."
+      "topic": "ruling",
+      "text": "Share links are text links that open in the same tab (SC-006). WordPress draws icon-only links named by aria-label in a new tab today."
     }
   ],
   "platforms": {
@@ -220,7 +220,7 @@
         }
       ],
       "owes": [
-        "role=group with a name; text links with data-share; the copy control as span.salt-copy-link after the list."
+        "role=group with a name; text links with data-share, in the same tab (no target=_blank); the copy control as span.salt-copy-link after the list."
       ]
     }
   }

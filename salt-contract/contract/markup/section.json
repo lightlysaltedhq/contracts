@@ -367,7 +367,7 @@
     },
     {
       "topic": "open-question",
-      "text": "WordPress spacing and width are utility classes on a container div inside the section; the contract has no container element, the content div takes the measure from data-width. Confirm no WordPress site styles the container div directly."
+      "text": "WordPress spacing and width are utility classes on a container div inside the section; the contract has no container element, the content div takes the measure from data-width. Checking that no WordPress client site styles the container div directly is work SC-006 leaves open."
     }
   ],
   "platforms": {
