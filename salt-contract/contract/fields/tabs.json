@@ -45,10 +45,11 @@
       "type": "text",
       "label": "Tab set name",
       "description": "Names the tab set for screen readers when there is no heading. Never shown.",
+      "condition": {
+        "field": "heading",
+        "filled": false
+      },
       "platforms": {
-        "nextjs": {
-          "note": "Shown only while the heading is empty, a condition the contract cannot express (open question 3)."
-        },
         "wordpress": {
           "owes": "the section"
         }

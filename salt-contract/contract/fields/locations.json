@@ -59,7 +59,7 @@
             }
           },
           "owes": "one query group in place of six layout fields",
-          "note": "Stored as the layout's own source, taxonomy_terms, manual, orderby, order and count; taxonomy_terms becomes categories, manual becomes items, orderby and order fold into order, count stays count. Order ascending/descending has no contract equivalent (open question 2)."
+          "note": "Stored as the layout's own source, taxonomy_terms, manual, orderby, order and count; taxonomy_terms becomes categories, manual becomes items, orderby and order fold into order, count stays count. SC-006 offers neither oldest-first nor Z to A, so a stored order direction is dropped on migration."
         }
       }
     }

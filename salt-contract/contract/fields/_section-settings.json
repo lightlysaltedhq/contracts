@@ -166,7 +166,6 @@
           "name": "fit",
           "type": "select",
           "label": "Fit",
-          "description": "Applies when an image is set.",
           "options": [
             {
               "value": "cover",
@@ -178,17 +177,15 @@
             }
           ],
           "default": "cover",
-          "platforms": {
-            "nextjs": {
-              "note": "Shown only when an image is set; the contract cannot express that condition (open question 3)."
-            }
+          "condition": {
+            "field": "image",
+            "filled": true
           }
         },
         {
           "name": "position",
           "type": "select",
           "label": "Position",
-          "description": "Applies when an image is set.",
           "options": [
             {
               "value": "focal-point",
@@ -232,13 +229,16 @@
             }
           ],
           "default": "focal-point",
+          "condition": {
+            "field": "image",
+            "filled": true
+          },
           "platforms": {
             "nextjs": {
               "values": {
                 "": "focal-point"
               },
-              "owes": "the value focal-point in place of an empty string",
-              "note": "Shown only when an image is set (open question 3)."
+              "owes": "the value focal-point in place of an empty string"
             }
           }
         },
@@ -246,12 +246,10 @@
           "name": "scrim",
           "type": "boolean",
           "label": "Tint the image with the section's colour behind the text",
-          "description": "Applies when an image is set.",
           "default": true,
-          "platforms": {
-            "nextjs": {
-              "note": "Shown only when an image is set (open question 3)."
-            }
+          "condition": {
+            "field": "image",
+            "filled": true
           }
         },
         {
@@ -273,15 +271,16 @@
             }
           ],
           "default": "strong",
-          "condition": {
-            "field": "scrim",
-            "equals": true
-          },
-          "platforms": {
-            "nextjs": {
-              "note": "Also hidden until an image is set (open question 3)."
+          "condition": [
+            {
+              "field": "image",
+              "filled": true
+            },
+            {
+              "field": "scrim",
+              "equals": true
             }
-          }
+          ]
         }
       ],
       "platforms": {
@@ -298,16 +297,15 @@
       "type": "text",
       "format": "anchor",
       "label": "Anchor",
-      "description": "Optional, for links to this section. Made URL-safe on save; ids the page itself uses are refused, and duplicates on a page get a number added.",
+      "description": "Optional, for links to this section. Made URL-safe on save; the reserved ids main, content, header, footer, nav, site-navigation, search and skip-link are refused, as are ids the page itself uses, and duplicates on a page get a number added.",
       "platforms": {
         "nextjs": {
           "formerly": "settings.anchorId",
-          "note": "Reserved ids: main, content, header, footer, nav, navigation, search, skip-link (open question 7)."
+          "owes": "reserving site-navigation in place of navigation, the id its header's main navigation takes (SC-006)"
         },
         "wordpress": {
           "formerly": "section_anchor",
-          "owes": "storing it in the settings group",
-          "note": "Reserved ids: main, content, header, footer, nav, primary-navigation, search, skip-link (open question 7)."
+          "owes": "storing it in the settings group; reserving site-navigation in place of primary-navigation, the id its header's main navigation takes (SC-006)"
         }
       }
     },
@@ -338,8 +336,8 @@
         },
         "wordpress": {
           "formerly": "section_divider",
-          "owes": "storing it in the settings group",
-          "note": "Labelled Divider line; draws the rule after the content (open question 9)."
+          "owes": "storing it in the settings group; drawing the rule above the section, not after its content (SC-006)",
+          "note": "Labelled Divider line; draws the rule after the content today."
         }
       }
     }
