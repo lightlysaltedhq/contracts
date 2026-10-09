@@ -63,3 +63,5 @@ jobs:
         run: npm ci --ignore-scripts
       - name: The Salt contract's own gate
         run: npm run salt-contract
+      - name: The shared stylesheets' gate
+        run: npm run salt-stylesheets

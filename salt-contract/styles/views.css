@@ -1,0 +1,189 @@
+/*
+ * The view bodies: a post, a topic or author archive, and a service page.
+ *
+ * SC-007 (09/10/2026) fixed these views' class vocabulary as the one Salt for Next.js's example
+ * app writes (`salt-post__*`, `salt-archive__*`, `salt-service__*`, `salt-search__*`), styled by the
+ * shared stylesheets. These rules are that app's `site.css` of 09/10/2026, with what was left out
+ * or changed, and why:
+ *
+ * - `.salt-blog__list`'s margin: the index's own class, which SC-007 does not adopt.
+ * - The post's `salt-post__author*` and `__portrait` rules: SC-008 makes that block the shared
+ *   author-box, so the same declarations are on `salt-author-box__*` below.
+ * - The current breadcrumb's bold weight: no rule sets a state's weight (the owner's ruling of
+ *   28/09/2026, which the stylesheet gate holds).
+ * - The fill rule for each framed image, which Salt for Next.js wrote inline (SC-011), is added.
+ *
+ * The search view's body has no rule of its own: its form is `primitives.css`'s and its results are
+ * a listing section's.
+ *
+ * A file of its own rather than more of `sections.css`, which is the section band and nothing else.
+ *
+ * Each value is a token or a stated floor, and no colour is written down.
+ */
+
+/*
+ * ── A post ──────────────────────────────────────────────────────────────────────
+ *
+ * A post's image frame is fixed at 16:9, the showcase's post card's proportion, so the image
+ * reserves its space before it loads and the page does not shift under the reader.
+ */
+.salt-post__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+  margin-block-start: 0;
+  color: var(--color-ink-muted);
+}
+
+.salt-post__media {
+  margin-block: 2rem;
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+}
+
+/*
+ * Each link here stands alone in a row rather than in a sentence, so 2.5.8's inline exception does
+ * not reach it: every one is floored at 24px tall, and the pieces in a row are spaced by a gap
+ * rather than by separator characters a screen reader would read out.
+ */
+.salt-post__breadcrumb ol,
+.salt-post__tags,
+.salt-post__adjacent ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.salt-post__breadcrumb a,
+.salt-post__category a,
+.salt-post__tags a,
+.salt-post__adjacent a,
+.salt-post__byline a,
+.salt-author-box__name a {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: 24px;
+}
+
+/* The current page is marked by its place at the end of the trail and by losing the link's line, not
+   by weight: no rule sets a state's weight (the owner's ruling of 28/09/2026, which the stylesheet
+   gate holds). The example app's own copy of this rule set it bold. */
+.salt-post__breadcrumb a[aria-current='page'] {
+  text-decoration: none;
+}
+
+.salt-post__category {
+  margin-block: 1rem 0;
+}
+
+.salt-post__footer {
+  display: grid;
+  gap: 1.5rem;
+  margin-block: 2rem;
+}
+
+/*
+ * The author box under a post (SC-008: the shared author-box component, in place of the example
+ * app's own `salt-post__author*` classes), drawn as the example app drew its author block. The
+ * portrait is the archive's frame, fixed before the image loads, for the archive's reason. The
+ * box's label and bio take the running text's defaults.
+ */
+.salt-author-box__media {
+  position: relative;
+  inline-size: 8rem;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: var(--radius-full);
+}
+
+.salt-author-box__name {
+  margin-block-end: 0;
+  font-weight: var(--weight-bold);
+}
+
+.salt-author-box__role {
+  margin-block: 0;
+  color: var(--color-ink-muted);
+}
+
+.salt-post__adjacent {
+  margin-block: 2rem;
+}
+
+.salt-post__adjacent a {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.salt-post__adjacent-label {
+  color: var(--color-ink-muted);
+}
+
+/*
+ * ── Topic and author archives ───────────────────────────────────────────────────
+ *
+ * The list below is the index's, so an archive needs only the block above it. The portrait is a
+ * fixed square with its space reserved before the image loads, for the reason the post's image
+ * frame is fixed: a portrait arriving late pushes the whole list down.
+ */
+.salt-archive__profile {
+  margin-block: 1.5rem;
+}
+
+.salt-archive__portrait {
+  position: relative;
+  inline-size: 8rem;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: var(--radius-full);
+}
+
+.salt-archive__strapline {
+  margin-block-end: 0;
+  color: var(--color-ink-muted);
+}
+
+/*
+ * ── A service ───────────────────────────────────────────────────────────────────
+ *
+ * The service page draws its related cards with the showcase's own classes, so what is left is the
+ * measure of its opening text and its price's label.
+ */
+.salt-service__summary,
+.salt-service__intro {
+  max-inline-size: var(--container-2xl);
+}
+
+.salt-service__price-label {
+  color: var(--color-ink-muted);
+}
+
+.salt-service__price-label::after {
+  content: ':';
+}
+
+/* The service's related cards, which draw themselves with the showcase's classes. */
+.salt-related__list {
+  margin-block: 2rem;
+}
+
+/*
+ * ── Framed images ───────────────────────────────────────────────────────────────
+ *
+ * Each image fills its frame (SC-011): absolutely positioned against the frame and covering it.
+ * An inline `object-position` the markup writes for a focal point outranks the default centre.
+ */
+.salt-post__media > img,
+.salt-archive__portrait > img,
+.salt-author-box__media > img {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}

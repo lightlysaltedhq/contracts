@@ -1,0 +1,1116 @@
+/*
+ * The site chrome: the header, its menu, its theme toggle, and the logo.
+ *
+ * REQUIRES the token layer. Every colour resolves through a semantic role, so a client repo
+ * retunes the header by retuning the brand and never by editing this file.
+ *
+ * The focus indicator is NOT here. It is declared once in `primitives.css`, over a list this
+ * file's controls join, because a second geometry is a second thing to keep clearing 3:1 —
+ * and `verify:stylesheet-contracts` reads that file and only that file.
+ */
+
+/*
+ * ── The header ──────────────────────────────────────────────────────────────────
+ *
+ * Sticky rather than fixed. Fixed takes the header out of flow, so every page underneath
+ * needs a top padding that somebody has to keep equal to a height nobody measures; sticky
+ * leaves the space it occupies and stops at the top. The reveal-on-scroll machine (WP9
+ * unit 3) drives this same element by `[data-site-header]`.
+ *
+ * `z-index` is a bare number rather than a token because this package stacks almost nothing —
+ * this against the page, and the drawer's close button against the menu beside it inside the
+ * dialog's own top-layer context — and a scale invented for that is a scale nobody can place a
+ * third member on. The drawer itself needs no number at all: the top layer is above every
+ * stacking context on the page by definition.
+ */
+.salt-header {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 10;
+  background: var(--color-surface);
+  border-block-end: 1px solid var(--color-border);
+  color: var(--color-ink);
+}
+
+.salt-header__inner {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  max-inline-size: var(--container-7xl);
+  margin-inline: auto;
+  padding-inline: var(--space-gutter);
+  /*
+   * A floor rather than a height: the header is as tall as the tallest thing in it, and the
+   * logo is sized by the brand global, which can put it above this.
+   */
+  min-block-size: 4rem;
+}
+
+/* The menu takes the middle and pushes the call to action to the end. */
+.salt-nav {
+  margin-inline-start: auto;
+}
+
+.salt-header__cta {
+  flex: none;
+}
+
+/*
+ * ── The phone number (BD-177) ───────────────────────────────────────────────────
+ *
+ * A link, not a button: it goes somewhere, a `tel:` address. It does not give way when the
+ * row runs out of room, for the reason the toggle and the burger do not: the logo is the one
+ * thing in the row that shrinks (see below), and a number that shrank would break between its
+ * digit groups onto two lines, which is harder to read and to copy than one. `white-space:
+ * nowrap` holds it on one line for the same reason.
+ *
+ * No padding of its own. The row's gap already separates it from its neighbours, and at
+ * 320 CSS px each pixel given to padding here is a pixel taken from the logo. The target is
+ * the text's width by the button's floor in height, and the text is always wider than 24 CSS
+ * px, so WCAG 2.5.8 is met on both axes.
+ *
+ * Set in the contract's `label`, as the menu's links and the call to action are (BD-185): it is
+ * one of the header's controls, and a number in the body size beside them would read as a
+ * different kind of thing.
+ */
+.salt-header__phone {
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+  min-block-size: max(2.75rem, 24px);
+  white-space: nowrap;
+  color: inherit;
+  text-decoration: none;
+  font-size: var(--text-label);
+  line-height: var(--text-label--line-height);
+  letter-spacing: var(--text-label--letter-spacing);
+  font-weight: var(--text-label--font-weight);
+  font-family: var(--text-label--font-family);
+}
+
+.salt-header__phone:hover {
+  text-decoration: underline;
+}
+
+/* The glyph is the bar's narrow-screen form, drawn only below the width in the query below. */
+.salt-header__phone > .salt-icon {
+  display: none;
+}
+
+/*
+ * ── Below the width where the whole number fits: a phone glyph (BD-187) ─────────
+ *
+ * Ollie's ruling of 28/09/2026, amending BD-177, which moved the number into the drawer alone
+ * when the bar could not hold it. The bar keeps a tap-to-call link and draws it as the glyph,
+ * the number staying inside it for a screen reader (the declarations are `.salt-sr-only`'s),
+ * and the drawer shows the whole number at every width.
+ *
+ * Where it switches, and why that is `sm`, 40rem. The row at those widths holds the logo, the
+ * theme toggle (44px), the number and the burger (44px), with three 1.5rem gaps and a 1rem
+ * gutter each side: 192px that are neither the logo nor the number. The number is sized for the
+ * longest way a UK number is commonly written, "+44 (0)1234 567890"; the logo's legible minimum
+ * is 8rem, the frame `IMAGE_SIZES.thumb` gives every mark on a logo wall, the width core already
+ * judged a logo readable at. Measured in chrome-headless-shell 148.0.7778.96 on 28/09/2026, on the
+ * built example with the whole number forced into the bar, in `label`, and a 240px-wide image
+ * logo: the number draws 146.6px at 470, and the logo is squeezed to 126.7px at 468 and 130.5px at
+ * 472, so the whole number fits beside a legible logo from about 470 CSS px ("01234 567890",
+ * 103px, from about 424). No breakpoint token sits there: every `@media` width in core is a
+ * `--breakpoint-*` value (BD-169), and a 30rem step was moved to `sm` by Ollie's ruling of
+ * 26/09/2026 rather than given a rung. So the switch is the next token up, `sm`: the glyph shows
+ * up to 640 CSS px where the whole number would fit from about 470. That is the safe direction;
+ * a switch below the fit would squeeze the logo past legible, and past that overflow.
+ *
+ * A site that moves the theme toggle to the footer (BD-181) frees its 44px and one gap, 68px
+ * (measured at 1280, where the menu moves right by exactly that), so by arithmetic rather than a
+ * second sweep the whole number would fit from about 402. The switch stays at `sm` all the same: no
+ * token sits lower, and a stylesheet cannot tell which placement a site chose (BD-190).
+ *
+ * A media query and not a container query, because the question is the viewport's: the row is
+ * the whole header's width below 48rem, so a container would answer the same number, and would
+ * be a way round BD-169's rule rather than a reason to leave it. It does NOT read the stored
+ * number, so a shorter one shows as the glyph up to 640 too. That is the cost of a stylesheet
+ * that cannot measure content.
+ *
+ * The same with and without a script: the glyph is a link, so a scriptless phone dials too.
+ */
+@media (max-width: 40rem) {
+  .salt-header__inner > .salt-header__phone {
+    justify-content: center;
+    min-inline-size: max(2.75rem, 24px);
+  }
+
+  .salt-header__inner > .salt-header__phone > .salt-icon {
+    display: block;
+  }
+
+  .salt-header__inner > .salt-header__phone > .salt-header__phone-number {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
+}
+
+/*
+ * ── The logo ────────────────────────────────────────────────────────────────────
+ *
+ * `--logo-height` is declared here as the default and overridden per site by the inline
+ * style `<SiteLogo>` writes from the brand global. Declared on the element that USES it, so
+ * a site that sets neither still draws a logo at a sensible size.
+ *
+ * 2rem is duplicated in TypeScript as `LOGO_DEFAULT_HEIGHT_PX` in `components/image-sizes.ts`,
+ * because `<SiteLogo>` computes the image's drawn width from it and cannot read a stylesheet.
+ * The two move together.
+ *
+ * ── The logo is the one thing in the row that gives way ────────────────────────
+ *
+ * Below the breakpoint the row is the logo, the theme toggle and the burger, and the two
+ * controls are `flex: none` behind 44px floors that WCAG 2.5.8 and the drawer depend on. So
+ * when the row runs out of room something has to give, and the logo is the only candidate.
+ * With `flex: none` here, which is what it was before the toggle joined the phone row, the
+ * row needed the logo plus 136px where it had needed the logo plus 68: at 320 wide with the
+ * 16px gutter, a logo over 152 CSS px pushed the burger into the gutter and one over 168
+ * scrolled the page sideways (WCAG 1.4.10), against 220 and 236 with the burger alone.
+ *
+ * Measured in chrome-headless-shell 148.0.7778.96 on 22/09/2026, over these stylesheets with
+ * the tokens unwrapped from `@theme`: at 320 and 375 wide, for image logos drawn 103, 160,
+ * 180, 220 and 300px wide at the default height and at `--logo-height: 64px`, and for three
+ * text wordmarks (two words, four words, one 33-letter word), the page never scrolls sideways,
+ * the burger's right edge sits exactly at the gutter, and nothing the logo draws reaches past
+ * its own box into the toggle's. It also closes the overflow `main` already had for a 300px
+ * logo or a long wordmark. At 1024, 820 and 1280 with one menu item, every image logo and
+ * every one-line wordmark draws exactly as it did before.
+ *
+ * ── What the give costs in HEIGHT, on a phone ───────────────────────────────────
+ *
+ * An image logo never gets taller: it is drawn smaller inside a `--logo-height` box. A
+ * wordmark that no longer fits on one line wraps, and each wrapped line adds height to a
+ * header that is `position: sticky` — so on a short viewport the header takes the screen.
+ * That is why a wrapped wordmark takes a TEXT line-height below rather than `--logo-height`:
+ * when the line-height was `--logo-height`, every wrapped line cost a full logo height, and a
+ * site with no upload named "Pembrokeshire Coast Holiday Cottages and Glamping" at
+ * `--logo-height: 64px` drew a 257px header over a 256px viewport at 320x256, which is the
+ * 400% zoom case, so no content was ever visible; 321px at 280x256.
+ *
+ * The wordmark is set in `heading-4` (BD-173), so its line is the role's leading. Measured in
+ * chrome-headless-shell 148.0.7778.96 on 26/09/2026 on the example's `/about` with the page's own
+ * padding removed, so the header's gutter is the only inset, `balanced` and the system family, at
+ * 320x256 and 280x256, at the default height and at 64px alike (the line does not depend on it):
+ * "Example Ltd" gives a 65px header at both widths; the 33-letter word
+ * "Pneumonoultramicroscopicsilicovol" 75.86px at both; and "Pembrokeshire Coast Holiday Cottages
+ * and Glamping" 100.81px at 320 and 150.72px at 280. The same strings under the rule this replaced,
+ * 1.125rem at a line height of 1.25, gave 65, 65 and 68.5, and 91 and 136. **The last name is
+ * more than a third of a 256px viewport (85.3px) at both widths, and this rule does not claim
+ * otherwise.** A long enough wordmark on a short enough screen still costs a sticky header a
+ * large share of it, and what to give up for that (a smaller wordmark, a clamped one, or the
+ * header not being sticky there) is a decision rather than a fix, and it is left open here.
+ *
+ * Where the WIDE row runs out of room, the logo gives way there too, and that is a change
+ * from before rather than a free one. The wordmark figures in this paragraph were measured on
+ * 22/09/2026 with the 18px wordmark BD-173 replaced, and were not re-measured: the example renders
+ * no menu, and a hand-built one did not reproduce them, so they describe the old size only. With eight menu items, a 220px image logo draws 209.9px
+ * wide at 1024 (its height is unchanged; the mark inside is drawn smaller), and at 820 any
+ * logo is squeezed to about 85px. At 820 that stops the page scrolling sideways, which it did
+ * before (863px against 820). A two-word wordmark squeezed that far wraps to two lines, 45px
+ * of text inside the 64px row, so the header stays 64; a four-word one wraps to four and makes
+ * a 90px header. At 1024 with eight items a four-word wordmark wraps to two lines in a 64px
+ * header, where it was one line before. Eight items at 820 was already
+ * a menu the header could not hold (see the phone query below); this moves where the cost
+ * lands, and does not create it.
+ *
+ * ── Which declaration does what, measured rather than assumed ──────────────────
+ *
+ * Four declarations make this work, and they are not equally load-bearing. Each was removed
+ * on its own and the grid above re-run, in the same Chrome build on the same day:
+ *
+ *   `flex: 0 1 auto` back to `flex: none`: a 220px logo at 320 scrolls the page to 372px, with
+ *   the burger's right edge at 372. This is the one that shrinks the logo at all.
+ *
+ *   `max-inline-size: 100%` on the image back to `none`: no sideways scroll, and the image
+ *   draws 220px wide inside a 152px link, over the theme toggle. `scrollWidth` does not see it.
+ *
+ *   `overflow-wrap: anywhere` on the wordmark removed: a one-word wordmark runs 147px past its
+ *   link, over the toggle and the burger. Same blind spot.
+ *
+ *   `min-inline-size: 0` removed, or moved onto `.salt-header__inner`: NOTHING CHANGES in
+ *   Chrome 148. A flex item's automatic minimum is its min-content size, and the image cap and
+ *   the wordmark's wrap already make that nearly nothing — an image with a percentage
+ *   `max-inline-size` counts as compressible, and `anywhere` lets a word break between any two
+ *   letters. It is kept because it is the one half that does not rest on how an engine sizes
+ *   the logo's CONTENT: with it the link's box can shrink whatever is inside, and without it
+ *   the shrink depends on the compressible-replaced-element rule, which has not been measured
+ *   in Safari or Firefox. That makes it a guarantee against an engine this repository has not
+ *   run, and not a fix for one it has.
+ *
+ * `verify:stylesheet-contracts` holds this by SHAPE, not by reading values, because two
+ * rounds of review walked eleven wrong edits past a version that tried to read them as a
+ * browser would. Each governed property (the `flex` family, the minimum and maximum widths,
+ * `object-fit`, and every property that decides wrapping) has exactly one accepted spelling,
+ * in exactly one unconditional rule keyed on its element's own class: `flex: 0 1 auto` and
+ * `min-inline-size: 0` on `.salt-logo`, `max-inline-size: 100%` and `object-fit: contain`
+ * on `.salt-logo__image`, `overflow-wrap: anywhere` on `.salt-logo__wordmark`, and the row's
+ * own `max-inline-size`. The basis is part of the spelling: `flex: 0 1 0` collapses the logo
+ * to nothing, and `flex: 1 1 auto` makes it grow and pushes the toggle away (at 375, a
+ * 105px logo's link went to 207px and the toggle from x145 to x247). A second declaration of
+ * a governed property in that rule is refused whatever its order, and so is any other rule,
+ * in any core stylesheet, that declares one without being provably none of these elements,
+ * or, for the properties that inherit, provably not one of the wordmark's ancestors. A
+ * correct but different spelling (`object-fit: scale-down`, say) is refused too, with the
+ * spelling to write rather than a claim that it is wrong.
+ *
+ * Nothing moves where the row has room. Flex items shrink only against negative free space.
+ */
+.salt-logo {
+  --logo-height: 2rem;
+
+  display: inline-flex;
+  align-items: center;
+  flex: 0 1 auto;
+  min-inline-size: 0;
+  /* The row height a one-line wordmark is centred in, now that its own line-height is text's.
+     An image is already this tall, so for an image this changes nothing. */
+  min-block-size: var(--logo-height);
+  color: inherit;
+  text-decoration: none;
+}
+
+/*
+ * The image follows the link's box down when it shrinks, and never up. `max-inline-size:
+ * 100%` caps it at the link's width, and `object-fit: contain` keeps the mark's proportions
+ * inside the box that cap leaves — so a squeezed logo is drawn smaller, never narrower. The
+ * box keeps `--logo-height` rather than letting the height follow from the width, because
+ * the height is a design value from the brand global and the width attribute is the
+ * upload's, not the drawn one (`<SiteLogo>`): `block-size: auto` would draw a 1600x200
+ * upload at 1600 pixels wherever it has room. The painted mark's height is what follows the
+ * width; the row's height does not change.
+ *
+ * `max-inline-size: 100%` also still does the job the `none` it replaces did. The cap is the
+ * link's width, which is the drawn width wherever there is room, so a site's own
+ * `img { max-width: 100% }` reset cannot cap it at the intrinsic width instead.
+ */
+.salt-logo__image {
+  block-size: var(--logo-height);
+  inline-size: auto;
+  max-inline-size: 100%;
+  object-fit: contain;
+  object-position: left center;
+}
+
+/* A wordmark wraps rather than overflows, down to a single word — and inside a single word
+   too, if one word is wider than what is left of the row. Each wrapped line costs a text
+   line, not a logo height; see "What the give costs in HEIGHT" above.
+
+   Set in `heading-4`, the contract's minor heading, where it was 1.125rem, 600 and 1.25 of its
+   own (BD-173): a site's name reads as a title, and the role puts it in the heading family an
+   editor chooses. */
+.salt-logo__wordmark {
+  font-size: var(--text-heading-4);
+  line-height: var(--text-heading-4--line-height);
+  letter-spacing: var(--text-heading-4--letter-spacing);
+  font-weight: var(--text-heading-4--font-weight);
+  font-family: var(--text-heading-4--font-family);
+  overflow-wrap: anywhere;
+}
+
+/*
+ * The mode swap, in CSS and nowhere else.
+ *
+ * `[data-swaps]` is set only when BOTH uploads resolved, so a site with one logo draws it in
+ * both modes rather than having dark mode hide the only mark it has.
+ */
+.salt-logo__dark {
+  display: none;
+}
+
+[data-theme='dark'] .salt-logo[data-swaps] .salt-logo__light {
+  display: none;
+}
+
+[data-theme='dark'] .salt-logo[data-swaps] .salt-logo__dark {
+  display: block;
+}
+
+/*
+ * ── The theme toggle ────────────────────────────────────────────────────────────
+ *
+ * Icon-only, so WCAG 2.5.8's 24-pixel floor has to come from the box rather than from
+ * anything inside it — the mark is a 16px glyph at `sm`, the same as the submenu's caret.
+ *
+ * `max(2.75rem, 24px)` rather than a bare `2.75rem`, which is the same rule `primitives.css`
+ * enforces on every `.salt-button` and for the same reason: 2.75rem is 44px only while the
+ * root size is 16px, and a client repo that sets a smaller root — or a later unit that
+ * tightens the header to a 32px control — takes the box under 24 CSS px without changing
+ * anything that reads as a hit-area decision. The `px` half is the criterion; the `rem` half
+ * is the design. `verify:stylesheet-contracts` holds both the selector and the value.
+ *
+ * The sizing is on the CLASS and not on `button.salt-theme-toggle`, and that is the other
+ * half of the same rule. The control is mount-gated: the server sends a `<span>` of this
+ * class, because only the browser knows which mode a reader is in, and the button replaces
+ * it in place. Qualifying the box with the element type reads as tidier and collapses the
+ * placeholder to nothing, so the header's free space — handed to the row by `.salt-nav`'s
+ * `margin-inline-start: auto` — absorbs a 2.75rem control at hydration and every item in the
+ * header moves. That is an unprompted layout shift on every page load, inside the window
+ * Cumulative Layout Shift is measured over.
+ *
+ * The pointer is the one thing that belongs to the button alone, for the reason the submenu
+ * toggle gives: a box that looks pressable and is not is the one way the placeholder could
+ * lie. With JavaScript on that lie would last as long as the bundle takes to arrive; with
+ * JavaScript off the placeholder is the whole of what the reader ever gets — a permanent
+ * empty 44px square in the header, claiming nothing and doing nothing. That is cosmetic and
+ * breaches no criterion: it is `aria-hidden`, so it is not in the accessibility tree and not
+ * a control that cannot be operated. It is stated here because "for the length of the
+ * hydration window" is only true of the readers who get a hydration window.
+ *
+ * The control adds no colour pairing of its own — `color: inherit` and no background, so the
+ * mark is the header's ink on the header's surface, which is the audited `ink`/`surface`
+ * pair. Measured on the default brand on 22/09/2026 in chrome-headless-shell 148.0.7778.96:
+ * 14.593:1 light and 15.149:1 dark, against AA's 4.5:1. A seeded brand moves the surface and
+ * not this rule, so what is owed on other brands is the seeded-page check WP13 already
+ * carries for the chrome as a whole.
+ */
+.salt-theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  min-inline-size: max(2.75rem, 24px);
+  min-block-size: max(2.75rem, 24px);
+  padding: 0;
+  background: none;
+  border: 0;
+  color: inherit;
+}
+
+button.salt-theme-toggle {
+  cursor: pointer;
+}
+
+/*
+ * ── The menu ────────────────────────────────────────────────────────────────────
+ */
+.salt-nav__list,
+.salt-nav__submenu {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.salt-nav__list {
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.salt-nav__item {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.salt-nav__link,
+.salt-nav__sublink,
+.salt-nav__toggle {
+  display: inline-flex;
+  align-items: center;
+  /* WCAG 2.5.8 wants 24 CSS px, and a menu link is not prose, so the exception for inline
+     text links does not apply to it. `max(…, 24px)` rather than a bare rem because the
+     criterion is in CSS pixels and 2.75rem is 44 of them only at a 16px root. */
+  min-block-size: max(2.75rem, 24px);
+  padding-inline: 0.75rem;
+  color: inherit;
+  text-decoration: none;
+}
+
+/* A menu link is the contract's `label`, "navigation" (BD-185), in the row and in the drawer. The
+   toggle is not in this rule: it draws an icon and no text, so a role there would set nothing. */
+.salt-nav__link,
+.salt-nav__sublink {
+  font-size: var(--text-label);
+  line-height: var(--text-label--line-height);
+  letter-spacing: var(--text-label--letter-spacing);
+  font-weight: var(--text-label--font-weight);
+  font-family: var(--text-label--font-family);
+}
+
+.salt-nav__link:hover,
+.salt-nav__sublink:hover {
+  text-decoration: underline;
+}
+
+/*
+ * The current page, marked by a rule under the word, never by colour alone (WCAG 1.4.1). The
+ * rule is drawn in `currentColor`, so it inherits whatever the tone gave the text and cannot
+ * become a pairing nobody measured. At rest no other menu link is underlined.
+ *
+ * No weight of its own. It keeps `label`'s weight, the same as every other item, by Ollie's
+ * ruling of 28/09/2026 (BD-185); it was semibold beside regular links until the links took the
+ * role, and a current item drawn heavier than the rest is not the menu's design.
+ */
+.salt-nav__link[aria-current='page'],
+.salt-nav__sublink[aria-current='page'] {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.35em;
+}
+
+/*
+ * The ANCESTOR of the current page, which is a different claim and gets a different mark.
+ *
+ * Hydrated, a closed submenu is `display: none` and out of the accessibility tree, so the
+ * `aria-current="page"` on the child inside it is unreachable while the parent on screen says
+ * nothing at all. A second `aria-current` here would be a lie — the parent is not the current
+ * page — so the signal is presentational, and deliberately unlike the current-page one: a
+ * dotted rule rather than a solid one, at the weight every item has. Neither is colour, and the
+ * two are told apart at a glance.
+ *
+ * `:not([aria-current='page'])` because a parent CAN be both: a group page relinked at the
+ * top of its own submenu is the current page and an ancestor at once. This selector outranks
+ * the current-page one — three compound parts against two — so without the exclusion it won
+ * the cascade and drew the dotted ancestor mark on an element carrying `aria-current="page"`,
+ * with the visual state contradicting the attribute.
+ */
+.salt-nav__item[data-current-section] > .salt-nav__link:not([aria-current='page']) {
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.35em;
+}
+
+/* An item whose destination did not resolve is a label. It keeps the link's box so the menu
+   does not change shape, and loses the pointer affordance so nobody presses it twice. */
+span.salt-nav__link,
+span.salt-nav__sublink {
+  color: var(--color-ink-muted);
+}
+
+/*
+ * ── The submenu, and the two ways it opens ──────────────────────────────────────
+ *
+ * Exactly one of them is ever in charge, and `[data-enhanced]` is the switch.
+ *
+ * Without JavaScript there is no toggle button, and FOCUS alone reveals the list. Because the
+ * closed state is `display: none`, its links are not focusable while it is closed, so focus
+ * reaches them only after the parent link has opened it — which is what makes the fallback a
+ * real keyboard path.
+ *
+ * ── Hover does not open it, and WCAG 1.4.13 is NOT fully met in this mode ───────
+ *
+ * State what holds and what does not, because an earlier version of this comment claimed
+ * compliance it did not have and that is how an auditor finds it instead of a reader.
+ *
+ * 1.4.13 covers content made visible by pointer hover OR by keyboard focus, and asks three
+ * things of it: dismissible, hoverable, persistent. Hover used to open this list and now does
+ * not, so the pointer half of the trigger is gone — a magnifier user who pauses over "About"
+ * no longer gets a panel over their reading position. **Focus still opens it, and that half
+ * is not dismissible:** there is no handler to dismiss with, so a reader clears the list only
+ * by moving focus off the item. Hoverable and persistent hold; dismissible does not.
+ *
+ * It cannot be closed in a mode defined by having no script. The alternative is not revealing
+ * submenus without JavaScript at all, which makes every child unreachable by any input — a
+ * worse failure, and one this file has already shipped once. So the residual is accepted,
+ * bounded to the scriptless fallback, and recorded as a decision rather than left here.
+ *
+ * Enhanced, none of it applies: the toggle is the trigger, and neither hover nor focus opens
+ * the list, so there is no hover-or-focus-revealed content for the criterion to be about at
+ * all. Escape closes it, which is what Dismissible would ask for if it did apply — a way to
+ * clear the content without having to move focus to do it. Where focus lands AFTERWARDS,
+ * back on the toggle when Escape came from inside the submenu, is this component's own rule
+ * and not something any criterion asks for.
+ *
+ * The other cost is that a mouse user with no JavaScript never sees the submenu. They reach
+ * the parent page, whose own content is where those children belong. A keyboard reaches every
+ * child — including under a parent whose own page did not resolve, which is why that parent is
+ * made focusable in `site-header.tsx` rather than left as a dead end.
+ *
+ * With JavaScript the toggle exists and `[data-open]` follows its `aria-expanded`.
+ * Focus-within stops opening it, and it has to: Escape returns focus to the trigger, which is
+ * inside the item, so a focus-within rule would reopen what Escape had just closed.
+ */
+.salt-nav__submenu {
+  display: none;
+  position: absolute;
+  inset-block-start: 100%;
+  inset-inline-start: 0;
+  flex-direction: column;
+  min-inline-size: 12rem;
+  padding-block: 0.5rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+}
+
+.salt-nav__item:not([data-enhanced]):focus-within > .salt-nav__submenu,
+.salt-nav__item[data-open] > .salt-nav__submenu {
+  display: flex;
+}
+
+.salt-nav__subitem {
+  display: flex;
+}
+
+.salt-nav__sublink {
+  flex: 1;
+}
+
+/*
+ * The toggle is icon-only, so 2.5.8's floor has to come from the padding rather than from
+ * anything it contains — the caret is a 16px box at `sm`.
+ *
+ * `max(2.75rem, 24px)` for the reason the theme toggle's comment gives at length: a bare rem
+ * floor is 44px only at a 16px root, and the criterion is in CSS pixels.
+ */
+.salt-nav__toggle {
+  min-inline-size: max(2.75rem, 24px);
+  justify-content: center;
+  padding-inline: 0.5rem;
+  background: none;
+  border: 0;
+}
+
+/*
+ * The pointer belongs to the button and not to the box the server reserves for it.
+ *
+ * Before hydration that box is a `<span>` holding the same caret at the same size, so the
+ * menu does not move when the button replaces it. Giving it a pointer cursor as well would
+ * be the one way it lies: a thing that looks pressable and is not, for as long as the bundle
+ * takes to arrive.
+ */
+button.salt-nav__toggle {
+  cursor: pointer;
+}
+
+.salt-nav__toggle[aria-expanded='true'] .salt-icon {
+  transform: rotate(180deg);
+}
+
+/*
+ * ── The phone drawer ────────────────────────────────────────────────────────────
+ *
+ * Below `48rem` the menu and the call to action leave this row and live in a modal dialog
+ * behind one control. `48rem` is the step the shared grid and `mediaText` already turn at
+ * (`blocks.css`), so the chrome changes shape where the content does rather than at a number
+ * invented for it.
+ *
+ * ── The breakpoint is written HERE and nowhere else ─────────────────────────────
+ *
+ * `mobile-nav.tsx` has to know when the burger has gone, because that is when it closes a
+ * drawer whose only pointer exit has just disappeared. It asks the burger's computed
+ * `display` rather than repeating this query in `matchMedia`, so moving the step is an edit
+ * to one file. What that defeats is the breakpoint drifting — one copy of `48rem` moved and
+ * the other left behind — and it is worth saying plainly that it does not defeat the
+ * likelier edit to this pair: the three `var()`s below carry names, and the names are
+ * written out again in `site-header.tsx`. Nothing in the language couples them, and a rename
+ * on one side alone leaves every declaration valid, every fallback in force and a scriptless
+ * phone with no menu, no call to action and no burger — the state the `<noscript>` exists to
+ * prevent. `verify:stylesheet-contracts` is what compares the two files; it reads the names
+ * out of `SCRIPTLESS_CHROME` and requires each of them inside a `var()` here.
+ *
+ * They carry no colour and no size, only the values a `<noscript>` needs to override, and
+ * they exist because scripting is the one condition CSS cannot ask about.
+ */
+.salt-header__burger {
+  display: none;
+
+  /*
+   * Icon-only, so WCAG 2.5.8's floor comes from the box rather than from anything inside it.
+   * `max(2.75rem, 24px)`, not a bare `2.75rem`: the criterion is stated in CSS pixels and
+   * `rem` is not, so a consuming repo setting `html { font-size: 62.5% }` would otherwise
+   * drop this control to 27.5px on one axis and under the bar on neither — which is the
+   * arithmetic `primitives.css` spells out for `.salt-button`.
+   */
+  min-inline-size: max(2.75rem, 24px);
+  min-block-size: max(2.75rem, 24px);
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  margin-inline-start: auto;
+  padding: 0;
+  background: none;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+}
+
+@media (max-width: 48rem) {
+  /*
+   * The child combinator is load-bearing. The drawer renders the same `.salt-nav` and the
+   * same `.salt-header__cta`, and a descendant selector would hide the copies inside it —
+   * leaving a drawer that opens onto nothing at exactly the width it is drawn for.
+   */
+  .salt-header__inner > .salt-nav,
+  .salt-header__inner > .salt-header__cta {
+    display: var(--salt-header-phone-menu, none);
+  }
+
+  .salt-header__burger {
+    display: var(--salt-header-phone-burger, inline-flex);
+  }
+
+  /*
+   * The number sits beside the burger rather than beside the toggle, so the free space in the
+   * row goes between the toggle and the number and the two things a phone reader reaches for
+   * with the same thumb end up together. The burger's own `auto` margin is what pushes it to
+   * the end when there is no number, so with one it hands that margin over; two `auto` margins
+   * would split the space and leave the number stranded in the middle of the row.
+   */
+  .salt-header__inner > .salt-header__phone {
+    margin-inline-start: auto;
+  }
+
+  .salt-header__phone ~ .salt-header__burger {
+    margin-inline-start: 0;
+  }
+
+  /*
+   * The row wraps for one configuration and one only: a phone with no script, where the menu
+   * and the call to action stay in it because there is nothing to open a drawer with. The
+   * value comes from the same `<noscript>` that reveals them, so the wrap and the thing being
+   * wrapped arrive together and neither can be left behind; `nowrap` is the initial value, so
+   * the fallback changes nothing for anybody else.
+   *
+   * It shipped unconditional, on `.salt-header__inner` itself, with a comment claiming
+   * nothing above the breakpoint ever needs a second line. Measured in chrome-headless-shell
+   * 148.0.7778.96 on the built example under `next start`, 22/09/2026, with an eight-item
+   * menu: at 820px the row became three — inner height 175px, the menu at y88, the call to
+   * action at y163 — and `--header-height` published 176.1875px, which `scroll-padding-top`
+   * (WP9 unit 7) applies to every fragment anchor on the site. 1024px did the same. Scoped as
+   * below both come back to one 64px row with `--header-height` at 65px, and the case the rule
+   * was added for is unchanged: no script at 390px, three items, three rows, 168px tall, no
+   * horizontal overflow.
+   *
+   * What comes back with the one row is what was there before this unit: eight items do not
+   * fit across 820px, so at that width the menu overflows horizontally (measured true, both
+   * with a script and without). That is a question about the width a menu is authored for and
+   * it predates the drawer; wrapping the header to three rows at every viewport was not an
+   * answer to it.
+   *
+   * At 320px, where WCAG 1.4.10 asks, the answer depends on the script, and the sentence that
+   * stood here said otherwise. Measured at 320 by 480 with eight items: WITH a script the
+   * burger is `flex`, the menu is in the drawer, and `scrollWidth` 320 equals `clientWidth`
+   * 320. WITHOUT one the burger is `none`, the menu is in this row, and `scrollWidth` is 589
+   * against 320. Three items fit either way. So the scriptless phone overflows once the menu
+   * is long enough — as it did before this unit, when there was no scriptless mode and no
+   * `flex-wrap` in this file at all. Neither introduced by this rule nor fixed by it, and it
+   * is the configuration this rule is written for, so it is said here rather than left to the
+   * paragraph above.
+   */
+  .salt-header__inner {
+    flex-wrap: var(--salt-header-phone-wrap, nowrap);
+  }
+}
+
+/*
+ * The dialog fills the viewport and paints nothing; the panel inside it is the drawer.
+ *
+ * That split is what makes the outside click one comparison instead of a hit test: everything
+ * a reader can press beside the panel is this element, so `event.target === event.currentTarget`
+ * answers it, and a press on the panel's own padding — inside the drawer, and outside any
+ * rectangle a coordinate test would have drawn — is correctly not a dismissal.
+ *
+ * `[open]` on the display rule, so the attribute still governs. The browser's own
+ * `dialog:not([open]) { display: none }` is what hides a closed dialog, and a bare
+ * `display: flex` here would override it for any consumer who renders one closed.
+ *
+ * The backdrop is left to the browser, for the reason `.salt-consent-panel` gives: a tint needs
+ * a colour, and a colour written here is a colour literal in a file that ships. What the
+ * browser then draws is faint — Chrome's user-agent default measured `rgba(0, 0, 0, 0.1)` in
+ * chrome-headless-shell 148.0.7778.96 on 22/09/2026 — and that is worth saying plainly rather
+ * than leaving the sentence above to imply the default is what was wanted. It is what is
+ * affordable until a scrim token exists; at 320 CSS pixels the panel fills the viewport and
+ * there is no backdrop in view at all.
+ */
+.salt-drawer {
+  max-inline-size: none;
+  max-block-size: none;
+  inline-size: 100%;
+  block-size: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+}
+
+.salt-drawer[open] {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.salt-drawer__panel {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 1rem;
+  inline-size: min(20rem, 100%);
+  block-size: 100%;
+  /* The menu can be longer than the viewport, and the page behind it is locked, so the panel
+     is the only thing left that can scroll. */
+  overflow-y: auto;
+  padding-block: 1rem;
+  /* The close button is out of the flow, over the toggle's box (below), so the panel's first
+     child starts a gap under that box rather than under nothing. The fallbacks are a 44px
+     button at the top, which is where the button sat before it moved. */
+  padding-block-start: calc(
+    var(--salt-drawer-toggle-block-start, 0px) + var(--salt-drawer-toggle-block-size, max(2.75rem, 24px)) + 1rem
+  );
+  padding-inline: var(--space-gutter);
+  background: var(--color-surface);
+  border-inline-start: 1px solid var(--color-border);
+  color: var(--color-ink);
+}
+
+/* Focus lands on the panel's dialog, not on a scroll position, so the outline the browser
+   draws around a `tabindex="-1"` container is suppressed — the announcement is the point, and
+   a ring around the whole drawer tells a sighted reader nothing about where they are. */
+.salt-drawer:focus {
+  outline: none;
+}
+
+/*
+ * The close button stays on screen however far the menu is scrolled, and at 320 CSS pixels
+ * that is the difference between a drawer with an exit and one without.
+ *
+ * `min(20rem, 100%)` makes the panel the whole viewport at that width, so there is no dimmed
+ * strip beside it to press and the close button is the only pointer exit left — Escape is not
+ * a key a touch reader has. In normal flow it scrolled away with the menu. Measured in
+ * chrome-headless-shell 148.0.7778.96 on the built example under `next start`, 22/09/2026, at
+ * 320 by 480 with a twenty-three item menu: the panel filled {0, 0, 320, 480},
+ * `elementFromPoint(4, 240)` returned the panel itself rather than the dialog, and with the
+ * panel scrolled to the end of its 1164px of content the button sat at y −668. It was
+ * recoverable by scrolling back, so it was never a trap; it was an exit off screen at exactly
+ * the width WCAG 1.4.10 is tested at.
+ *
+ * It was sticky, holding the top of the panel. It is now fixed, at the toggle's own box, which
+ * `mobile-nav.tsx` measures on open and writes on the dialog as five custom properties: Ollie
+ * ruled on 06/10/2026 that the burger turns into the cross (BD-207), and a cross that is not
+ * where the burger was is two controls rather than one that changed shape. Fixed keeps what
+ * sticky was for, an exit that never scrolls away. It is a child of the dialog, before the
+ * panel, and not of the panel: a fixed box is placed against the viewport only while no
+ * ancestor is transformed, filtered or backdrop-filtered, and a site may do any of those to the
+ * panel to slide it in; inside it, the button went with the panel, to x 393 in a 390px viewport
+ * for good (#230 re-review, measured in chrome-headless-shell 148.0.7778.96). The dialog is
+ * core's, and a site must not transform `.salt-drawer` itself. It carries the panel's background because the
+ * menu passes underneath it. A site whose toggle is not over the panel gets a cross over the
+ * dimmed area, which still closes the drawer: the press lands on the button, not the dialog.
+ *
+ * And `z-index`, which is not decoration. `.salt-nav__item` is `position: relative` and every
+ * menu item comes after this button in the document, so without it the items paint over the
+ * sticky button: measured at 320 by 480 with the panel scrolled, `elementFromPoint` at the
+ * button's own centre returned a `.salt-nav__link`, and a press there followed the link
+ * instead of closing the drawer — a dismissal that looks like it works because the drawer does
+ * go away. 1 against those items' auto, inside the dialog's own top-layer context, so it
+ * stacks nothing on the page.
+ */
+.salt-drawer__close {
+  position: fixed;
+  /* The toggle's box, measured on every open. The fallbacks put it at the top of the panel's end
+     edge, and are only ever read by a dialog rendered without the measurement. */
+  inset-block-start: var(--salt-drawer-toggle-block-start, 0px);
+  inset-inline-start: var(--salt-drawer-toggle-inline-start, auto);
+  inset-inline-end: var(--salt-drawer-toggle-inline-end, var(--space-gutter));
+  inline-size: var(--salt-drawer-toggle-inline-size, auto);
+  block-size: var(--salt-drawer-toggle-block-size, auto);
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  min-inline-size: max(2.75rem, 24px);
+  min-block-size: max(2.75rem, 24px);
+  padding: 0;
+  background: var(--color-surface);
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+}
+
+/*
+ * ── The burger turns into the cross, and back ──────────────────────────────────
+ *
+ * Ollie's ruling of 06/10/2026 (BD-207). The toggle and the close button draw the same three
+ * bars (`MenuMorph` in `site-header.tsx`), and the close button sits on the toggle's box, so
+ * the two read as one control. At rest the toggle's bars are bars and the close button's are a
+ * cross: the outer two moved 5px to the middle line and turned a quarter each way, a little
+ * longer so the cross spans what the `close` glyph does, and the middle one gone.
+ *
+ * Opening, the close button arrives as bars and turns into the cross; closing, the dialog has
+ * already left the document (it is unmounted, and a closing animation on it would need the
+ * drawer kept in the page after it closed, with the page still inert), so the toggle does the
+ * second half: `mobile-nav.tsx` marks it `data-morph='closing'` as the drawer closes and it
+ * turns from the cross back into bars where the close button was.
+ *
+ * Under reduced motion neither animates: the drawer opens on a cross and closes on bars, which
+ * is every shape the morph has, with nothing moving between them (WCAG 2.3.3).
+ *
+ * The time is the contract's `moderate` rung and the curve Tailwind's `in-out`. Core's token
+ * layer emits neither rung yet, so each has its fallback until it does; section 7 carries that.
+ */
+.salt-menu-morph__bar {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.salt-menu-morph__bar:nth-child(1) {
+  --salt-menu-morph-cross: translateY(5px) rotate(45deg) scaleX(1.06);
+}
+
+.salt-menu-morph__bar:nth-child(2) {
+  --salt-menu-morph-cross: scaleX(0);
+}
+
+.salt-menu-morph__bar:nth-child(3) {
+  --salt-menu-morph-cross: translateY(-5px) rotate(-45deg) scaleX(1.06);
+}
+
+.salt-drawer__close .salt-menu-morph__bar {
+  transform: var(--salt-menu-morph-cross);
+}
+
+@keyframes salt-menu-morph {
+  from {
+    transform: var(--salt-menu-morph-cross);
+  }
+
+  to {
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .salt-drawer__close .salt-menu-morph__bar,
+  .salt-header__burger[data-morph='closing'] .salt-menu-morph__bar {
+    animation-name: salt-menu-morph;
+    animation-duration: var(--duration-moderate, 200ms);
+    animation-timing-function: var(--ease-in-out, ease-in-out);
+    animation-fill-mode: both;
+  }
+
+  /* Bars to cross is the same movement run backwards. */
+  .salt-drawer__close .salt-menu-morph__bar {
+    animation-direction: reverse;
+  }
+}
+
+/*
+ * The menu, stacked.
+ *
+ * The same markup the header's own row draws, so every rule above still applies to it and
+ * only the axis changes. A submenu goes from an absolutely-positioned panel to an indented
+ * block in the flow: `flex-basis: 100%` puts it on its own line under the parent's link and
+ * toggle, which is what `flex-wrap: wrap` on the item is for.
+ */
+.salt-drawer .salt-nav {
+  margin-inline-start: 0;
+}
+
+.salt-drawer .salt-nav__list {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+}
+
+.salt-drawer .salt-nav__item {
+  flex-wrap: wrap;
+}
+
+.salt-drawer .salt-nav__link {
+  flex: 1;
+}
+
+.salt-drawer .salt-nav__submenu {
+  position: static;
+  flex-basis: 100%;
+  min-inline-size: 0;
+  padding-block: 0;
+  padding-inline-start: 1rem;
+  background: none;
+  border: 0;
+}
+
+/*
+ * ── The footer ──────────────────────────────────────────────────────────────────
+ *
+ * On its tone's roles, which `sections.css` declares for it in the rules that declare them for a
+ * band (BD-204): `<SiteFooter>` always writes `data-tone`, `surface` unless the site asks for
+ * another, so the footer it always drew is the `surface` band's ground, ink and hairline, the
+ * same the header uses. Every colour below reads a `--salt-section-*` role, and the fallback is the
+ * `surface` role it names, for a site that has not imported `sections.css`.
+ * `verify:stylesheet-contracts` refuses a footer colour on a mode role, which is what would put a
+ * light-ground colour on an inverted footer and pass every contrast row.
+ *
+ * The link grid wraps to one column on a narrow viewport, and nothing is hidden at any width: the
+ * footer has no collapsed state of its own, which matters because the consent control lives in it
+ * (the panel it opens is portalled to `<body>` either way).
+ */
+.salt-footer {
+  background-color: var(--salt-section-bg, var(--color-surface));
+  border-block-start: 1px solid var(--salt-section-border, var(--color-border));
+  color: var(--salt-section-ink, var(--color-ink));
+}
+
+/*
+ * The footer's logo shows the upload drawn for its GROUND, which on a toned footer is not the
+ * reader's mode. In light mode only `surface-inverse` is a dark ground; in dark mode every tone is,
+ * except `surface-inverse` (`--color-surface-inverse` is `neutral-100` there, `theme.css`). So an
+ * inverted footer in light mode shows the dark-ground upload, and one whose dark tone is
+ * `surface-inverse` shows the light one in dark mode; anywhere else the header's own swap above
+ * already shows the right one. Only where both uploads resolved (`[data-swaps]`), for the header's
+ * reason: a site with one logo draws it everywhere.
+ */
+.salt-footer[data-tone='surface-inverse'] .salt-logo[data-swaps] .salt-logo__light {
+  display: none;
+}
+
+.salt-footer[data-tone='surface-inverse'] .salt-logo[data-swaps] .salt-logo__dark {
+  display: block;
+}
+
+[data-theme='dark'] .salt-footer[data-tone-dark='surface-inverse'] .salt-logo[data-swaps] .salt-logo__light {
+  display: block;
+}
+
+[data-theme='dark'] .salt-footer[data-tone-dark='surface-inverse'] .salt-logo[data-swaps] .salt-logo__dark {
+  display: none;
+}
+
+.salt-footer__inner {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  max-inline-size: var(--container-7xl);
+  margin-inline: auto;
+  padding-block: 2.5rem;
+  padding-inline: var(--space-gutter);
+}
+
+/*
+ * The columns wrap by width rather than at the drawer's breakpoint, so this file still writes
+ * `48rem` in one query only — the one `verify:stylesheet-contracts` holds the scriptless
+ * handshake to. `auto-fit` collapses the tracks no column fills, so two columns share the row
+ * rather than leaving a third of it empty.
+ */
+.salt-footer__nav {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(12rem, 100%), 1fr));
+  gap: 1.5rem;
+}
+
+/*
+ * A column's name over its links: a minor heading, so the contract's `heading-4`, in the heading face
+ * (BD-195, Ollie's ruling of 30/09/2026). It was `label`, the links' own role (BD-173), and a column's
+ * name then read as one more of its links: same face, same size, same weight, told apart only by not
+ * being underlined on hover. `heading-4` is a card title's role too, which is the rank a column's name
+ * has. The gap under it is rung 3, 12px. Measured on 30/09/2026 in the default system face, from 1024
+ * CSS px up, where the rows are 32px, that puts the name's baseline 29px above its first link's capitals
+ * and each link 21px below the one before, so the links read as one group under their name; before,
+ * the name sat 29.9px from its first link and the links 32.7px apart, so it read as the first of them.
+ */
+.salt-footer__title {
+  margin: 0 0 var(--space-3);
+  font-size: var(--text-heading-4);
+  line-height: var(--text-heading-4--line-height);
+  letter-spacing: var(--text-heading-4--letter-spacing);
+  font-weight: var(--text-heading-4--font-weight);
+  font-family: var(--text-heading-4--font-family);
+}
+
+.salt-footer__links,
+.salt-footer__social {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/*
+ * Block-level rows at the 2.5.8 floor rather than inline text: a footer list is not prose,
+ * so the exception for a link inside a sentence does not cover it. `max(…, 24px)` for the
+ * reason `.salt-header__burger` gives — the criterion is in CSS pixels and `rem` is not.
+ *
+ * The contract's `small`, at weight 400, by Ollie's ruling of 30/09/2026 (BD-195), which overturns
+ * BD-185's `label` for these links: at `label`'s semibold a column of links carried the same weight
+ * as its name and as every button on the page. `small` is `label`'s size, so a link keeps its size
+ * and only its weight and leading move, which draws it a little narrower. The menu's links in the
+ * header stay on `label`.
+ */
+.salt-footer__link {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: max(2.75rem, 24px);
+  color: inherit;
+  font-size: var(--text-small);
+  line-height: var(--text-small--line-height);
+  letter-spacing: var(--text-small--letter-spacing);
+  font-weight: var(--text-small--font-weight);
+  font-family: var(--text-small--font-family);
+}
+
+/*
+ * 32px rows from the `lg` breakpoint, 1024 CSS px, by the same ruling: a column of 44px rows is a
+ * touch floor spent on a pointer, and it spread the links further apart than the name above them.
+ * Still over 2.5.8's 24 CSS px, which the `max()` holds at any root size. Below `lg`, where a tablet
+ * or a phone is the likelier reader, the 44px floor above stands.
+ */
+@media (min-width: 64rem) {
+  .salt-footer__link {
+    min-block-size: max(2rem, 24px);
+  }
+}
+
+/* An unresolved link is a label, drawn as the header draws one. */
+span.salt-footer__link {
+  color: var(--salt-section-ink-muted, var(--color-ink-muted));
+}
+
+/* Not colour, as the header's current item is marked: a rule under the word, and no weight of its
+   own, since a current link keeps its role's weight as the others do (BD-185, BD-195). The thickness
+   alone draws nothing without the line it thickens. */
+.salt-footer__link[aria-current='page'] {
+  text-decoration-line: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.35em;
+}
+
+.salt-footer__base {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem 2rem;
+  padding-block-start: 1.5rem;
+  border-block-start: 1px solid var(--salt-section-border, var(--color-border));
+}
+
+.salt-footer__text {
+  flex: 1 1 20rem;
+  color: var(--salt-section-ink-muted, var(--color-ink-muted));
+}
+
+.salt-footer__text > :first-child {
+  margin-block-start: 0;
+}
+
+.salt-footer__text > :last-child {
+  margin-block-end: 0;
+}
+
+.salt-footer__social {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+/*
+ * Icon-only, so the floor comes from the box, on both axes, exactly as the burger's does.
+ * A profile the registry cannot draw renders its name in words, so the box grows to fit.
+ */
+.salt-footer__social-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-inline-size: max(2.75rem, 24px);
+  min-block-size: max(2.75rem, 24px);
+  color: inherit;
+}

@@ -1,0 +1,1548 @@
+/*
+ * The blocks' own layout, on top of the band `sections.css` draws and the primitives
+ * `primitives.css` styles.
+ *
+ * REQUIRES both, and the token layer under them. Nothing here names a colour: a block sits
+ * inside a section, the section resolves the tone, and every foreground a block needs is
+ * already inherited or already available as `--salt-section-*`.
+ *
+ * ── One root class, one data attribute ──────────────────────────────────────────
+ *
+ * Every block renders inside `<div class="salt-block" data-block="{slug}">`. The class
+ * carries what is true of all of them — the vertical rhythm between an eyebrow, a heading
+ * and a body — and the attribute is what a per-block rule keys on. The slug in the DOM is
+ * also what makes a rendered page legible to WP13's outline harness, which has to say which
+ * block an offending heading came from.
+ */
+
+/*
+ * The rhythm between a block's own top-level parts.
+ *
+ * A lobotomised owl, so only the gaps BETWEEN parts are set: no leading margin to collapse
+ * against the section's padding and no trailing one to fight the next block's. `rem` rather
+ * than the `em` `.salt-rich-text` uses, deliberately — the gap between a heading and the
+ * body beneath it is page rhythm, and scaling it with whichever of the two sets the font
+ * size would make it larger under a big heading and smaller under a small one.
+ */
+.salt-block > * + * {
+  margin-block-start: 1rem;
+}
+
+/* An eyebrow belongs to the heading under it, so the pair sits tighter than the rest. */
+.salt-block > .salt-eyebrow + * {
+  margin-block-start: 0.5rem;
+}
+
+/*
+ * The block's own heading carries no margin of its own, so the owl above is the only thing
+ * setting space around it.
+ *
+ * Direct children only: a heading inside `.salt-rich-text` is body copy and belongs to that
+ * component's rhythm. Written out because a consuming repo without a CSS reset still has
+ * the user agent's `<h2>` margins, which would stack with the owl and put a different gap
+ * above a heading than below it.
+ */
+.salt-block > :is(h1, h2, h3, h4, h5, h6) {
+  margin: 0;
+}
+
+/*
+ * ── Alignment ───────────────────────────────────────────────────────────────────
+ *
+ * `centre` is stored; `center` is the CSS keyword. The mapping is at the point of use, as
+ * `OBJECT_POSITIONS` does for the nine-way crop — a stored value that is also a stylesheet
+ * fragment is a stored value nobody can change the rendering of later.
+ */
+.salt-block[data-align='centre'] {
+  text-align: center;
+}
+
+/*
+ * Centred prose brings its list markers with it.
+ *
+ * `list-style-position: outside` puts the marker in the padding, at the line box's start
+ * edge — which under `text-align: center` is nowhere near the text it belongs to. The
+ * result is a column of bullets hard against the left of the measure and the items floating
+ * in the middle, which reads as a broken layout rather than a centred one. Nothing in a test
+ * suite can see it: the markup is identical either way, and only the paint differs.
+ *
+ * Every list, nested ones included — a sub-list's markers strand themselves exactly as
+ * readily as a top-level list's.
+ */
+.salt-block[data-align='centre'] .salt-rich-text :is(ul, ol) {
+  list-style-position: inside;
+}
+
+/*
+ * Only the OUTERMOST list gives up the indent that was holding the marker's place.
+ *
+ * Written as a child combinator rather than folded into the rule above, which is where it
+ * started. `.salt-rich-text :is(ul, ol)` reaches every list at every depth, so zeroing the
+ * padding there flattened a nested list onto its parent's items: in centred text, where
+ * indentation is already the only thing distinguishing a sub-list, that leaves no hierarchy
+ * at all. The two declarations govern different sets, so they are two rules.
+ */
+.salt-block[data-align='centre'] .salt-rich-text > :is(ul, ol) {
+  padding-inline-start: 0;
+}
+
+/*
+ * ── The call to action ──────────────────────────────────────────────────────────
+ *
+ * No layout rule beyond the row of buttons: the block is centred through
+ * `data-align="centre"`, which it emits with no field behind it, so it inherits the
+ * alignment and centred-list rules above rather than restating them.
+ */
+
+/*
+ * The actions sit on one row and wrap onto two rather than shrinking.
+ *
+ * `flex-wrap` rather than a narrower button: WCAG 2.5.8's 24px floor is enforced on the
+ * control itself, and a row that squeezes its children to fit is how a control drops under
+ * it on a narrow viewport while measuring correctly on the one somebody tested.
+ *
+ * `justify-content: center` because the block is centred and a left-aligned row under
+ * centred copy reads as a mistake. Written here rather than inherited: `text-align` centres
+ * inline content, and a flex container's items are not inline content — the buttons would
+ * have sat hard against the start edge with the words above them centred.
+ */
+.salt-cta__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+/*
+ * ── The column grid ─────────────────────────────────────────────────────────────
+ *
+ * A layout primitive, like `.salt-card`, rather than one block's private rule: `features`
+ * and `stats` both lay a collection of small items across two, three or four columns, and
+ * `logos` and `gallery` will. One rule set means one reflow guarantee and one contract
+ * behind it, instead of four near-copies each needing their own.
+ *
+ * The editor's column count is a MAXIMUM, not a fixed number. It is what the grid runs at
+ * when there is room, and the grid steps down on its own below that — which is the whole
+ * accessibility argument for the rule and the reason it is under contract.
+ *
+ * WCAG 1.4.10 asks for content to reflow at 320 CSS pixels without a second scrollbar, and
+ * 1.4.4 asks the same of 200% zoom, which a browser reports as a narrower viewport. Four
+ * cards across a 320px viewport gives each one 62px: a title breaks mid-word and the icon is
+ * wider than the column. Nothing in a test suite can see it — the markup is identical at
+ * every width, and only the paint differs.
+ *
+ * 62, not the 68 this paragraph claimed. 320 less three 1.5rem gaps is 248, over four tracks
+ * is 62 — measured, and the same figure the comment below reports from the pre-fix file. 68
+ * is the answer for a 1rem gap, which this grid has never had.
+ *
+ * The steps are unconditional CSS rather than a container query so they hold with no layout
+ * containment anywhere above them; a client repo constraining the section further only ever
+ * makes the columns narrower, never wider.
+ */
+.salt-grid {
+  --salt-grid-columns: 3;
+
+  display: grid;
+  grid-template-columns: repeat(var(--salt-grid-columns), minmax(0, 1fr));
+  gap: 1.5rem;
+
+  /*
+   * A run of characters with nowhere to break wraps rather than spilling into the next
+   * column.
+   *
+   * `minmax(0, 1fr)` fixes the track width, so a word wider than the track paints over its
+   * neighbour instead of widening the document — which means no second scrollbar and nothing
+   * a test can see, exactly as the reflow steps above. Measured in Chrome at 1200px with
+   * four across: the tracks are 282px, and `£1,234,567,890` reports a `scrollWidth` of 361px
+   * and `1234567890123456` 476px. Both read 282 with this declared.
+   *
+   * `overflow-wrap` is inherited, and it is declared here rather than on `.salt-stat__value`
+   * so it reaches every block using the shared class — a feature title, a stat, and the logo
+   * and gallery captions to come.
+   *
+   * `break-word` rather than `anywhere`: the two wrap identically, and they differ in that
+   * `anywhere` also counts the break when a box is sized by its content. Measured — a box at
+   * `inline-size: min-content` around the same sixteen digits is 149px under `break-word` and
+   * 10px under `anywhere`. Nothing here is min-content sized today, so the choice is only
+   * about what happens when something later is.
+   */
+  overflow-wrap: break-word;
+
+  /*
+   * It is a list, and its markers and indent are chrome the grid does not want.
+   *
+   * `list-style: none` costs the list its SEMANTICS in WebKit, which drops the `list` and
+   * `listitem` roles from a list whose markers are removed — so a six-item grid is
+   * announced to VoiceOver as six ungrouped items, and "list, 6 items" is exactly the thing
+   * `features`, `stats` and `logos` each give as their reason for being a `<ul>` at all.
+   * Every block using this class carries `role="list"` on the `<ul>` to put it back. That
+   * obligation belongs beside the declaration that creates it.
+   */
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/*
+ * ── `:where()`, and it is the whole reason the steps below work ─────────────────
+ *
+ * A media query adds NO specificity. So `.salt-grid[data-columns='4']` at (0,2,0)
+ * beats `@media (max-width: 40rem) { .salt-grid }` at (0,1,0) — at every viewport,
+ * including 320px. Written the obvious way, the reflow steps fired only for the DEFAULT
+ * three columns, which is the one value with no attribute rule; a grid an editor set to two
+ * or four never stepped at all.
+ *
+ * Measured in Chrome at exactly 320 CSS pixels before this was fixed: a four-across grid
+ * gave each card a 62px track, and the `lg` icon inside it is 40px wide in a 14px content
+ * box. `minmax(0, 1fr)` keeps the document from overflowing, so there is no second scrollbar
+ * to notice — the content simply overlaps. That is the defect the rule above describes and
+ * BD-040 claimed was prevented.
+ *
+ * `:where()` contributes zero specificity, so these land at (0,1,0) alongside the base rule
+ * and the media queries, and source order decides — which is what the comment below always
+ * said was happening.
+ */
+.salt-grid:where([data-columns='2']) {
+  --salt-grid-columns: 2;
+}
+
+.salt-grid:where([data-columns='4']) {
+  --salt-grid-columns: 4;
+}
+
+/*
+ * Two across where three or four will not fit, then one. Written as max-width so the
+ * narrower rule always wins on source order, and applied to every count — a two-column grid
+ * has the same problem at 320px that a four-column one has at 768px.
+ *
+ * The widths are the `md` and `sm` breakpoints, written as literals because `@media` cannot read
+ * `var()`; `verify:stylesheet-contracts` holds each equal to its `--breakpoint-*` token. The single
+ * column was at 30rem, a width no breakpoint names, and moved to `sm`, 40rem, by Ollie's ruling of
+ * 26/09/2026 (BD-169): a grid between 481 and 640 CSS px is one column where it was two.
+ */
+@media (max-width: 48rem) {
+  .salt-grid {
+    --salt-grid-columns: 2;
+  }
+}
+
+@media (max-width: 40rem) {
+  .salt-grid {
+    --salt-grid-columns: 1;
+  }
+}
+
+/*
+ * ── A grid of cards: rows further apart than anything inside a card (BD-195) ─────
+ *
+ * `--space-card-row`, 32 to 40 CSS px, where the grid's own 1.5rem sets both axes. A row gap smaller
+ * than the gaps inside a card let two rows of cards read as one block of text, measured on
+ * Floorworkz's preview on 30/09/2026. Only a grid whose items are cards: a gallery's photographs, a
+ * logo wall and a row of figures have no gaps inside them to outgrow, so they keep 1.5rem both ways.
+ * The column gap is untouched, which is what `IMAGE_SIZES.card` divides the measure by.
+ *
+ * `:has()`, as the tab set's rules are gated. An engine without it drops this rule and keeps 1.5rem,
+ * which is the grid as it was rather than a broken one. (0,2,1), so it beats `.salt-grid`'s `gap`
+ * whatever the order of the two.
+ */
+.salt-grid:has(> li > .salt-card) {
+  row-gap: var(--space-card-row);
+}
+
+/*
+ * A card's own parts, stacked and grouped by proximity (BD-195).
+ *
+ * The carousel block's cards too, which sit in a slide or stand alone rather than on the grid:
+ * they are the showcase's cards, and without these a slide's card had its title against its border.
+ *
+ * No `gap`, and that is the change. One flat 0.75rem put the title as close to the photograph as to
+ * its own summary, so the title clung to the picture and the words drifted off it; a feature card's
+ * icon sat 18px from its title, optically, and the title 24px from its text, which groups the icon
+ * with the title and leaves the text on its own. The rules below space each join by what it joins,
+ * each a token a site retunes in one place: `--space-card-media` after the picture, `--space-card-title`
+ * after the title, `--space-card-body` between the body's parts.
+ *
+ * `block-size: 100%` fills the grid cell or the carousel slide the card sits in, and `border-box` makes
+ * that 100% the card's outer height rather than its content box's. Without it the padding and the
+ * border are added to the 100%: measured in headless Brave 154.1.96.59 (Chromium 154.0.8037.58) on
+ * the example app on 05/10/2026, with every element forced to `content-box`, the stand-in for a consuming repository with no CSS reset, each carousel card ran
+ * 50px past its slide, and the track, which scrolls, gained a 50px vertical scroll; a grid card ran
+ * 50px past its cell (BD-205).
+ */
+.salt-grid .salt-card,
+.salt-block[data-block='carousel'] .salt-card {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  padding: 1.5rem;
+  block-size: 100%;
+}
+
+/*
+ * A reset first, for a consuming repository without one: the user agent's `<h3>` and `<p>` margins do
+ * not collapse inside a flex column, so they would add to every gap below. Before the owls, at their
+ * specificity, so each owl's `margin-block-start` wins on source order.
+ */
+.salt-grid .salt-card > *,
+.salt-block[data-block='carousel'] .salt-card > * {
+  margin-block: 0;
+}
+
+/*
+ * And inside a card's rich text, a feature card's words, the outer edges of its first and last
+ * blocks (#211 review, 5). A card part is a flex item, which starts a formatting context of its own,
+ * so a paragraph's user-agent margin does not collapse through it: with no reset, a feature's title
+ * sat 32.68px from its text optically at 360 CSS px, measured, against 21.47px from its icon, which
+ * is the grouping upside down again. The gaps between its paragraphs are rich text's own owl.
+ */
+.salt-grid .salt-card > .salt-rich-text > :first-child,
+.salt-block[data-block='carousel'] .salt-card > .salt-rich-text > :first-child {
+  margin-block-start: 0;
+}
+
+.salt-grid .salt-card > .salt-rich-text > :last-child,
+.salt-block[data-block='carousel'] .salt-card > .salt-rich-text > :last-child {
+  margin-block-end: 0;
+}
+
+/*
+ * Between the body's parts, the default join: the meta line and the summary, the summary and the
+ * results, the chips. (0,2,0), so it beats the parts' own `margin: 0` at (0,1,0), `.salt-showcase__meta`'s
+ * and the results strip's `.salt-grid` among them.
+ */
+.salt-grid .salt-card > * + *,
+.salt-block[data-block='carousel'] .salt-card > * + * {
+  margin-block-start: var(--space-card-body);
+}
+
+/*
+ * After the title, and between two meta lines: a post's date under a client line reads with the title,
+ * not with the summary. More specific than the body's owl, so it wins; it never meets the media's.
+ */
+.salt-grid .salt-card > :is(h1, h2, h3, h4, h5, h6) + *,
+.salt-block[data-block='carousel'] .salt-card > :is(h1, h2, h3, h4, h5, h6) + *,
+.salt-grid .salt-card > .salt-showcase__meta + .salt-showcase__meta,
+.salt-block[data-block='carousel'] .salt-card > .salt-showcase__meta + .salt-showcase__meta {
+  margin-block-start: var(--space-card-title);
+}
+
+/*
+ * After the picture: a card's photograph, or its icon, which is a feature card's and a service card's
+ * picture. A service card carrying both has the gap after each.
+ */
+.salt-grid .salt-card > :is(.salt-showcase__media, .salt-icon) + *,
+.salt-block[data-block='carousel'] .salt-card > :is(.salt-showcase__media, .salt-icon) + * {
+  margin-block-start: var(--space-card-media);
+}
+
+/*
+ * The icon takes the brand colour rather than the band's ink, which is the one place in a
+ * feature card or a stat where colour carries emphasis. It is decorative, so nothing depends
+ * on it. A service card in the carousel block carries the same icon, so the same colour.
+ */
+.salt-grid .salt-icon,
+.salt-block[data-block='carousel'] .salt-icon {
+  color: var(--color-brand);
+}
+
+/*
+ * Not the arrow after a linked title (BD-195). It is part of the link, so it takes the link's ink,
+ * which the contrast manifest proves on every tone as the title's own colour; the brand colour above
+ * is proved on none of them as a foreground, which a decorative icon can afford and an arrow drawn in
+ * the title's line should not have to. A site that wants it branded says so in its own stylesheet.
+ */
+.salt-grid .salt-arrow > .salt-icon,
+.salt-block[data-block='carousel'] .salt-arrow > .salt-icon {
+  color: inherit;
+}
+
+/*
+ * A carousel card has no `.salt-grid` above it to inherit the grid's wrap from, and a slide is
+ * `min(100%, 20rem)` wide, so a title or a URL with nowhere to break paints over the next slide.
+ * The grid's declaration and reason, given to the card. `break-word` for the reason the grid
+ * gives against `anywhere`. It is a wrap, not one of the suppressors the grid's wrap contract
+ * refuses, so that contract is unaffected.
+ *
+ * Measured in chrome-headless-shell 148.0.7778.96 against the example app's built stylesheet on
+ * 14/09/2026, with a 44-letter word as a slide card's linked title. Without this rule, at 1200 CSS
+ * pixels the title's text ended at 642px, past its card's edge at 601.84px and over the next card,
+ * which starts at 625.84px; at 320 it ended at 400.16px against a card edge of 265px. With it, the
+ * text ended inside the card at both widths, and a lone card's 72-letter title did the same. The
+ * icon rule above was measured in the same run: the icon computed the brand colour with it and the
+ * band's ink without it.
+ */
+.salt-block[data-block='carousel'] .salt-card {
+  overflow-wrap: break-word;
+}
+
+/*
+ * ── A stat ──────────────────────────────────────────────────────────────────────
+ *
+ * Two paragraphs and no heading. The value is drawn large because it is the thing being
+ * shown, and drawing it large is the whole temptation to mark it up as a heading — which
+ * would give a screen-reader user navigating by heading an outline made of numbers. The
+ * size lives here and the semantics stay in the markup, which is the split the pattern
+ * vocabulary asks for.
+ */
+.salt-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+/* The contract's `stat`, "a figure shown as the thing itself" (BD-173). */
+.salt-stat__value {
+  margin: 0;
+  font-size: var(--text-stat);
+  line-height: var(--text-stat--line-height);
+  letter-spacing: var(--text-stat--letter-spacing);
+  font-weight: var(--text-stat--font-weight);
+  font-family: var(--text-stat--font-family);
+}
+
+/*
+ * The suffix rides with the figure rather than beside it: it is inside the same `<p>`, so it
+ * is announced as one continuous phrase, and it is drawn smaller so the figure still reads
+ * as the thing being shown. `em` so it tracks whatever the value clamps to.
+ */
+.salt-stat__suffix {
+  font-size: 0.6em;
+  margin-inline-start: 0.1em;
+}
+
+.salt-stat__label {
+  margin: 0;
+  color: var(--salt-section-ink-muted, var(--color-ink-muted));
+}
+
+/*
+ * ── The logo strip ──────────────────────────────────────────────────────────────
+ *
+ * A row of other people's marks, laid out on the shared column grid. Its own rules are
+ * three: a slot of a fixed size for every mark, the greyscale default, and the colour that
+ * comes back under a pointer OR a keyboard.
+ */
+
+/*
+ * ── No caption treatment on the strip's heading, and that is a decision ─────────
+ *
+ * It had one: `font-size: 0.875rem` and muted ink, on PLAN §4's note that the predecessor
+ * theme drew this heading "sm, muted". Removed in review, for two reasons that both point
+ * the same way.
+ *
+ * The first is an outline that contradicts itself. A heading-providing block claims the
+ * page's `<h1>` when it is the first one, which is the system's uniform rule and not
+ * something this block should opt out of — so a page laid out as `[logos, richText]` put
+ * `<h1>As featured in</h1>` on the page at 14px — at the default root size; `primitives.css`
+ * records that a client repo setting `html { font-size: 62.5% }` makes it 8.75px — in muted
+ * ink, with the real page heading
+ * demoted to `<h2>` and drawn three times its size. Whichever half you call wrong, the two
+ * disagreed.
+ *
+ * The second is that `0.875rem` was a number with nothing behind it. This system has no
+ * typography tokens yet, so the rule hard-coded a size no other heading anywhere agrees
+ * with — the drift the token discipline exists to prevent, in the one place nothing
+ * checked. The heading is left to the theme, as every other block's is.
+ */
+
+/*
+ * The mark sits in the middle of its track, and this rule is why it fits in a small one.
+ *
+ * It reads as pure alignment and it is not. Measured at 1200px in a 300px-wide grid set to
+ * four across, which gives 57px tracks: with `display: flex` the 8rem frame shrinks to 57
+ * and stays inside; written as `display: block` it stays 8rem and paints 71px over the next
+ * column, with `scrollWidth` still equal to `clientWidth` — no second scrollbar, nothing a
+ * test can see. That is the same defect the grid's own `overflow-wrap` note describes,
+ * arriving through an alignment rule nobody would suspect. It is under contract for it.
+ *
+ * `justify-content: center` is load-bearing too: without it the frame sits hard against the
+ * start of a 222px track, measured at offset 0 rather than 47.
+ *
+ * `align-items: center` is the honest exception. Every frame is exactly 2.5rem and every
+ * row is therefore 2.5rem, so removing it changes nothing today, measured. It is kept as
+ * the pair to `justify-content` rather than left for whoever first makes a row's height
+ * vary to discover it is missing.
+ */
+.salt-logos__item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/*
+ * The frame is the image's slot, and its size is not decoration.
+ *
+ * `<Media fill>` positions the image against its nearest positioned ancestor, so this
+ * element decides how large every logo is drawn — which is what makes a strip of marks
+ * with wildly different proportions read as one band rather than as a jumble. `contain`
+ * on the image keeps each one whole inside it.
+ *
+ * **8rem is `IMAGE_SIZES.thumb`, and the two have to agree.** `sizes` is what the browser
+ * picks a rendition from, and it takes no `var()` — so the number is written once in
+ * `image-sizes.ts` and once here, and nothing but a contract in
+ * `verify-stylesheet-contracts.ts` connects them. Widen this box without widening that
+ * string and every logo asks for a rendition too small for its slot: no error, no layout
+ * change, just soft marks on the band whose whole job is to look credible. That is the
+ * quiet failure. Deleting a declaration here is loud — measured in a headless Chrome, the
+ * frame goes to 0 wide or 0 tall and the strip disappears, and dropping `position:
+ * relative` sizes the image against the viewport instead, at 1200×900.
+ *
+ * ── What happens in a track narrower than the frame, measured rather than assumed ──
+ *
+ * `max-inline-size: 100%` was here for it, and it does nothing: the frame is a flex item
+ * of `.salt-logos__item`, so it already shrinks. Measured at 1200px in a 300px-wide grid
+ * set to four across — 57px tracks, and the frame reports 57px with the line and 57px
+ * without it. Its content is absolutely positioned, so the automatic minimum size is zero
+ * and there is nothing to stop the shrink. The line was written on the reasoning that the
+ * tracks are `minmax(0, 1fr)` and the frame would paint over its neighbour, which is a
+ * real failure that this rule does not have; it is deleted rather than kept as a
+ * reassurance nobody has run.
+ *
+ * The shrink only ever makes the slot narrower than `sizes` claims, which is the safe
+ * direction, and never wider: a flex item does not grow. `flex-shrink: 0` here would put
+ * the overflow straight back — measured, 35.5px over the next column in a 57px track — so
+ * the contract refuses the flex properties on this rule as well as the box ones.
+ *
+ * `display: block` is redundant while `.salt-logos__item` is a flex container, because a
+ * flex item is blockified; measured, removing it changes nothing. It stays because an `<a>`
+ * given an inline size should say it is a block rather than inherit the fact from a rule
+ * three declarations up, and because the rule that blockifies it is now under contract, so
+ * the redundancy cannot quietly become a defect.
+ */
+.salt-logos__frame {
+  position: relative;
+  display: block;
+  inline-size: 8rem;
+  block-size: 2.5rem;
+}
+
+/* The logo fills its frame (SC-011), `contain` so each mark stays whole. A rule of the image's own,
+   so nothing here touches the frame's box. */
+.salt-logos__image {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: contain;
+}
+
+/*
+ * Greyscale, on by default, in pure CSS.
+ *
+ * A row of other people's brand colours competes with the page's own, and the strip is
+ * making one claim rather than six. WCAG 2.2 exempts logotypes from both 1.4.3 and 1.4.11,
+ * so desaturating a mark is not a contrast failure — and nothing here depends on the
+ * colour, because the mark's meaning is carried by its `alt`.
+ */
+.salt-logos[data-greyscale='true'] .salt-logos__image {
+  filter: grayscale(1);
+}
+
+/*
+ * And the colour comes back on hover OR on keyboard focus.
+ *
+ * `:focus-visible` is the half that gets dropped, and dropping it makes the whole effect
+ * pointer-only: a keyboard user tabbing through a strip of links gets a focus ring and no
+ * other change, while a mouse user gets the mark they are pointing at. Nothing in a test
+ * suite can see the difference — the markup is identical and only the paint differs — so
+ * it is under contract.
+ *
+ * The filter is on the IMAGE rather than the frame because a filter applies to everything
+ * an element paints, its focus outline included, and a greyed focus ring on a coloured
+ * logo is the wrong way round.
+ */
+.salt-logos[data-greyscale='true']
+  :is(.salt-logos__frame:hover, .salt-logos__frame:focus-visible)
+  .salt-logos__image {
+  filter: none;
+}
+
+/*
+ * ── The gallery ─────────────────────────────────────────────────────────────────
+ *
+ * Three layouts over one set of photographs. Two of them are laid out here and the third is
+ * not: a carousel is `.salt-carousel` in `primitives.css`, shared with WP5, and this block
+ * adds nothing to it.
+ *
+ * `grid` reuses `.salt-grid` wholesale — the track list, the reflow steps and the
+ * `--salt-grid-columns` variable are already there and already under contract, so a gallery
+ * gets WCAG 1.4.10's reflow guarantee by joining the class rather than by re-typing it.
+ */
+
+/*
+ * A `<figure>` carries a user-agent margin of 40px on both inline sides, which would inset
+ * every image in the grid inside its own track for no reason anybody chose. Zeroed here
+ * rather than assumed away: a consuming repo without a CSS reset still has it.
+ *
+ * Nothing else. The lone-figure case is a direct child of `.salt-block`, so it is full width
+ * because a block-level element is, and it takes its gap from the block's own owl rule — no
+ * width, no max-width and no alignment here, which is what keeps "one image is one
+ * full-width figure in every layout" true without a rule saying so.
+ */
+.salt-gallery__figure {
+  margin: 0;
+}
+
+/*
+ * The image fills the width it is given and keeps its own proportions.
+ *
+ * `<Media>` renders each photograph with its intrinsic `width` and `height` rather than
+ * `fill` — the block's own note says why, and the short version is that a masonry of
+ * uniformly-cropped boxes is not a masonry. Those attributes are an intrinsic SIZE, though,
+ * so without this an 1800px upload is painted 1800px wide and overflows its column.
+ *
+ * `block-size: auto` alongside, so the ratio the attributes declare is what is drawn and the
+ * space the browser reserves before the bytes arrive is the space the image ends up in —
+ * which is the whole of this block's contribution to CLS.
+ *
+ * `display: block` removes the inline baseline gap under the image, which otherwise sits
+ * between the picture and its caption and reads as an inconsistent gutter.
+ */
+.salt-gallery__image {
+  display: block;
+  inline-size: 100%;
+  block-size: auto;
+}
+
+/*
+ * The caption sits under the image it belongs to, in the band's muted ink.
+ *
+ * Set in the contract's `caption` (BD-185), never a size of its own: BD-043 records what happened
+ * the last time a block invented one, a hard-coded `0.875rem` that no other text on the site
+ * agreed with, in the one place nothing checked. The colour is a token that resolves through the
+ * section's tone, so a caption on a dark band is muted against that band rather than against white.
+ */
+.salt-gallery__caption {
+  margin-block-start: 0.5rem;
+  color: var(--salt-section-ink-muted, var(--color-ink-muted));
+  font-size: var(--text-caption);
+  line-height: var(--text-caption--line-height);
+  letter-spacing: var(--text-caption--letter-spacing);
+  font-weight: var(--text-caption--font-weight);
+  font-family: var(--text-caption--font-family);
+}
+
+/*
+ * ── Masonry, which is CSS multi-column ──────────────────────────────────────────
+ *
+ * `columns` reads `--salt-grid-columns`, the same variable the shared grid's track list
+ * reads, so the narrow-viewport reflow steps apply here unchanged — two columns at 48rem,
+ * one at 40rem — rather than being re-typed against the same breakpoints and drifting from
+ * them.
+ *
+ * `column-gap` restates the gutter `.salt-grid`'s `gap` shorthand already sets — multi-column
+ * honours `column-gap` and ignores `row-gap` — so it is redundant today and kept so the rule
+ * states its own gutter rather than inheriting one from a class three hundred lines up.
+ *
+ * ── The selector is (0,2,0) on purpose, and it was (0,1,0) ──────────────────────
+ *
+ * Written `:where([data-layout='masonry'])` this tied with `.salt-grid` at (0,1,0), so
+ * `display: block` beat `display: grid` on SOURCE ORDER alone — and every masonry gallery
+ * would have gone back to being a three-across grid the day somebody alphabetised this file
+ * or split it into partials. The markup is byte-identical either way, so no test could see
+ * it and no contract covered it. Found in review of the commit that introduced it.
+ *
+ * The `:where()` was copied from the grid's own `[data-columns]` rules, where contributing
+ * no specificity is the point because those rules are meant to tie. Here the rule is meant
+ * to WIN, and the plain attribute selector says so in the cascade rather than in a comment.
+ * Nothing overrides these declarations from a media query, so the tie bought nothing.
+ *
+ * ── The reading order changes, and that is a decision rather than an accident ────
+ *
+ * Multi-column fills a column before it starts the next. Measured in the headless Chrome
+ * (Chrome for Testing 148.0.7778.96) against THIS stylesheet rather than a sketch of it —
+ * a 960px container, nine captioned figures with sources from 400x220 to 400x500: at three
+ * columns the columns hold items 1-2-3, 4-5-6 and 7-8-9, so the top visual
+ * row reads **1, 4, 7** while the DOM, the focus order and the screen-reader order are 1…9.
+ * At two columns the columns are 1-5 and 6-9 and the top row reads **1, 6**. At one column —
+ * the narrow-viewport step the shared variable already provides — the divergence disappears
+ * entirely. The grid layout's top row reads 1, 2, 3, matching the DOM.
+ *
+ * So masonry puts the second image BELOW the first rather than beside it. That is acceptable
+ * for photographs, which carry no sequence between them, and it is what the `layout` field's
+ * description tells an editor in plain terms. It would not be acceptable for anything read
+ * in order, which is why no other block gets this layout.
+ *
+ * The same nine figures measure 962px tall as a masonry against 1152px as a grid at three
+ * columns — 190px, 16.5% shorter. That is this fixture rather than a rule, and it is the
+ * reason the layout exists: uneven photographs leave no dead space under the short ones.
+ */
+.salt-gallery[data-layout='masonry'] {
+  display: block;
+  columns: var(--salt-grid-columns);
+  column-gap: 1.5rem;
+}
+
+/*
+ * ── The break guard, which is under contract ────────────────────────────────────
+ *
+ * A multi-column fragment breaks wherever the column ends, and a `<figure>` is as breakable
+ * as a paragraph unless it says otherwise. Measured with this declaration removed, same
+ * fixture: item 6 — the tallest — is drawn in TWO pieces across the column boundary
+ * (`element.getClientRects().length === 2`), and column two's own sequence stops being
+ * monotonic, rendering 4, 6, 5. At two columns it is item 5 that splits, and column one
+ * renders 1, 5, 2, 3, 4. So the guard prevents both a photograph cut in half and a column
+ * whose contents are out of order with themselves.
+ *
+ * Its cost is 26px of container height at three columns — 962px guarded against 936px
+ * unguarded, 2.7% — which is the packing the fragmentation was buying.
+ *
+ * Declared on every gallery item rather than only inside the masonry rule. `break-inside`
+ * governs fragmentation, and a grid item is not fragmented on screen, so it is inert
+ * there — and one unconditional rule reaching every item is a shape a stylesheet contract
+ * can read without ranking two of them. It is exactly the kind of declaration a tidy-up
+ * deletes as a line that appears to do nothing, and nothing in the test suite can see it
+ * go: the markup is byte-identical and only the paint differs.
+ */
+.salt-gallery__item {
+  break-inside: avoid;
+}
+
+/*
+ * And the row gap, which multi-column has no property for.
+ *
+ * `row-gap` does not apply to a multi-column container, so the space between one image and
+ * the next DOWN a column has to be a margin on the item. Masonry only: in the grid layout
+ * `.salt-grid`'s own `gap` sets both axes, and a margin here as well would put 1.5rem of
+ * margin under every card on top of 1.5rem of gap.
+ */
+.salt-gallery[data-layout='masonry'] .salt-gallery__item {
+  margin-block-end: 1.5rem;
+}
+
+/*
+ * ── Media and text ──────────────────────────────────────────────────────────────
+ *
+ * Rows of a photograph beside a passage of copy, and one declaration in the whole section
+ * that an editor's choice changes: `order`.
+ *
+ * The DOM is media-then-body in every row. `section.tsx` writes the two children in one
+ * order and never swaps them, and PLAN §4 generalises that to WP6's hero as "the mediaText
+ * DOM-invariance precedent" — so the visual flip has to be CSS, and `order` is what does
+ * it. That makes this the block whose most important property is the one nothing in the
+ * test suite can see: the markup of a left-hand row and a right-hand row differs by one
+ * attribute value, and everything that value means is in this file. It is under a
+ * stylesheet contract for exactly that reason.
+ */
+
+/*
+ * The gap BETWEEN rows, which is larger than the gap inside one — two rows read as two
+ * passages, and a row's image and copy read as one thing.
+ *
+ * A container of its own rather than the block's owl rule, which sets 1rem between a
+ * block's top-level parts and would put a row's copy as close to the next row as to its
+ * own photograph.
+ */
+.salt-media-text {
+  display: grid;
+  gap: 3rem;
+}
+
+/*
+ * The row is a grid, and being one is a precondition rather than a style.
+ *
+ * `order` reorders the children of a flex or grid container and does nothing at all
+ * anywhere else, so a tidy-up making this `display: block` would leave every right-hand row
+ * drawn media-first with the markup byte-identical and every test green. The contract reads
+ * this declaration first for that reason, and refuses a value it cannot rank.
+ *
+ * One column here and two below, so a row with a single child — a text-only row, and the
+ * media-only mirror of it — takes the whole measure rather than half of it with an empty
+ * track alongside.
+ */
+.salt-media-text__row {
+  display: grid;
+  gap: 2rem;
+  align-items: center;
+}
+
+/*
+ * Two columns for a row that has something to put in both. The component emits the side
+ * attribute only for those, so the selector is the PRESENCE of a side rather than either of
+ * its values — a text-only row carries none and stays one column by falling through.
+ */
+.salt-media-text__row[data-media-side] {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+/*
+ * And one column again where two will not fit.
+ *
+ * WCAG 1.4.10 asks for reflow at 320 CSS pixels with no second scrollbar, and 1.4.4 asks
+ * the same of 200% zoom, which a browser reports as a narrower viewport. Half of 320 is
+ * 160px, which is not a track a photograph and a paragraph can share. Written as max-width
+ * so the narrower rule wins on source order, which is how the shared grid's steps above are
+ * written and for the reason recorded there.
+ *
+ * `minmax(0, 1fr)` rather than `1fr`, so an unbreakable string in the copy cannot widen the
+ * track past the measure. That is the shared grid's own guarantee, restated here rather
+ * than inherited, because this row is not on `.salt-grid`.
+ */
+@media (max-width: 48rem) {
+  .salt-media-text__row[data-media-side] {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/*
+ * ── The flip, which is the only thing separating a left row from a right one ─────
+ *
+ * The media is written FIRST in the DOM and the body second, so the body already sits at
+ * the initial `order: 0`; moving the photograph past it needs a value above zero. One
+ * declaration, unconditional, on a rule that selects the attribute value directly.
+ *
+ * The reordering is visual only. `order` does not move an element in the accessibility tree
+ * or in the tab order — which is the whole reason the DOM order is fixed rather than
+ * flipped in the component — so the sequence a screen reader and a keyboard meet is the
+ * same in a left row and a right one, and WCAG 1.3.2's meaningful sequence is the DOM's
+ * rather than the paint's.
+ *
+ * **Nothing here has been measured in a browser.** The behaviour is what CSS Box Alignment
+ * and Flexbox specify for `order` and what Grid takes from them; confirming the paint is
+ * WP13's DOM harness, and this comment does not claim to have done it.
+ *
+ * ── It is NOT undone at one column, and that is a decision rather than an omission ──
+ *
+ * Below the breakpoint above, a right-hand row stacks body then media while a left-hand row
+ * stacks media then body, so a phone does not get a uniform section. Evening that up means
+ * a second `order` declaration for the same property on the same element inside a media
+ * query — which is a rank `verify-stylesheet-contracts.ts` refuses to attempt, on that
+ * file's standing position that a checker which cannot rank must forbid. Three contracts in
+ * it have already been defeated by exactly that shape: a value undone inside a media query,
+ * green. The uneven stacking is the cheaper of the two — it is each row's own visual order
+ * carried down, and no reader loses anything by it.
+ */
+.salt-media-text__row[data-media-side='right'] .salt-media-text__media {
+  order: 1;
+}
+
+/*
+ * The photograph fills the track it is given and keeps its own proportions.
+ *
+ * `<Media>` draws it with the upload's intrinsic `width` and `height` rather than `fill`, as
+ * `gallery` does and for the same reason: a row's image is a photograph, not a mark in a
+ * frame of a fixed size. Those attributes are an intrinsic SIZE, so without this an 1800px
+ * upload paints 1800px wide and overflows its track. `block-size: auto` keeps the ratio the
+ * attributes declare, which is also what reserves the right space before the bytes arrive;
+ * `display: block` removes the inline baseline gap under it.
+ */
+.salt-media-text__image {
+  display: block;
+  inline-size: 100%;
+  block-size: auto;
+}
+
+/*
+ * The actions sit on one row and wrap onto two rather than shrinking, for the reason
+ * `.salt-cta__actions` gives: WCAG 2.5.8's 24px floor is enforced on the control itself, and
+ * a row that squeezes its children to fit is how a control drops under it on a narrow
+ * viewport while measuring correctly on the one somebody tested.
+ *
+ * No `justify-content`, unlike the call to action's: this block is never centred, so the
+ * pair starts where the copy above it starts.
+ */
+.salt-media-text__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+/*
+ * The rhythm inside a row's copy.
+ *
+ * `.salt-block > * + *` sets the gap between a BLOCK's top-level parts, and a row's heading,
+ * body and actions are two levels below that. The same owl, restated where it reaches them,
+ * rather than the block rule loosened to a descendant selector that would then also set the
+ * space inside a rich-text passage.
+ */
+.salt-media-text__body > * + * {
+  margin-block-start: 1rem;
+}
+
+/*
+ * ── The process ─────────────────────────────────────────────────────────────────
+ *
+ * Numbered steps, in one of two layouts, and the whole difference between them is in this
+ * file. `section.tsx` writes ONE markup and emits `data-layout`; nothing about the elements,
+ * the order or the numbering changes when an editor switches the select. That is what makes
+ * the resolver's silent fallback to `timeline` honest — a wrong layout is a wrong
+ * appearance and nothing else — and it is why the timeline's column count is under a
+ * stylesheet contract: the markup is byte-identical either way, so nothing in the suite can
+ * see the rule go.
+ *
+ * The list is on `.salt-grid`, which is what the cards layout IS: the track list, the
+ * reflow steps, the markerless list and the brand-coloured icon are already there and
+ * already under contract, so the cards get WCAG 1.4.10's reflow guarantee by joining the
+ * class rather than by re-typing it. The timeline is the same class with the count taken
+ * down to one.
+ */
+
+/*
+ * ── The timeline: one column, whatever the grid's default is ────────────────────
+ *
+ * `--salt-grid-columns` is the variable `.salt-grid`'s track list reads, so setting it here
+ * is the whole layout rather than a second `grid-template-columns` that would have to be
+ * kept in step with the shared one.
+ *
+ * The selector is (0,2,0) and it has to be. `.salt-grid` sets the same variable to 3 at
+ * (0,1,0), and the reflow steps set it to 2 and 1 inside media queries — which add no
+ * specificity, as the note above `.salt-grid:where([data-columns='2'])` records at length.
+ * So a plain attribute selector wins at every viewport, and a `:where()` here would TIE with
+ * `.salt-grid` and leave source order to decide, which is the exact defect the masonry rule
+ * was found with. Written plainly for that reason.
+ *
+ * Without it a timeline draws three across: the same steps, in the same order, in the same
+ * elements, laid out as the cards layout the editor did not choose — and the rule below runs
+ * down the side of the whole block instead of beside a column of steps.
+ */
+.salt-process[data-layout='timeline'] {
+  --salt-grid-columns: 1;
+
+  /*
+   * The connector, which is a border on the LIST rather than on each step.
+   *
+   * On the steps it would be broken by the 1.5rem gap between them, and closing that gap
+   * means overriding the shared grid's `gap` and putting the space back as padding on every
+   * item — two declarations to draw one line. On the list it is one continuous rule beside
+   * the whole sequence, which is what a timeline's connector is.
+   *
+   * `--salt-section-boundary` rather than `--salt-section-border`, which is the role
+   * `.salt-rich-text blockquote` already takes for the rule beside a passage of copy. Both
+   * resolve through the band's tone, so a timeline on an inverse band draws against that
+   * band rather than against white.
+   *
+   * BD-033 rejected the heavier role for `.salt-card`'s edge on the grounds that a hairline
+   * the length of a large box reads as a control, and `primitives.css` records the split it
+   * settled on: by the SIZE of the thing being outlined, with cards on
+   * `--salt-section-border` and an inline `<code>` chip on `--salt-section-boundary`,
+   * because a 1.435:1 hairline around a few characters is a smudge rather than a boundary.
+   * A 2px rule beside a column of steps is the blockquote's case rather than the card's.
+   */
+  border-inline-start: 2px solid var(--salt-section-boundary, var(--color-border-strong));
+
+  /*
+   * The longhand, and it beats `.salt-grid`'s `padding: 0` shorthand on specificity rather
+   * than on source order — (0,2,0) against (0,1,0). The shorthand is what zeroes the list
+   * indent the user agent puts there, and this puts back a gutter of our own so the numerals
+   * are not drawn on top of the line.
+   */
+  padding-inline-start: 1.5rem;
+}
+
+/*
+ * A step's own parts, stacked.
+ *
+ * `justify-items: start` so the numeral's circle is its own width rather than the column's:
+ * a grid item stretches by default, and a 2.5rem circle stretched across a 20rem card is an
+ * ellipse.
+ *
+ * `align-content: start` for the same failure in the other axis, and BD-120 is what made it
+ * worth a declaration. A step in the cards layout is a grid item stretched to the tallest
+ * card in the row, and a grid's default `align-content: stretch` hands that surplus height
+ * to the step's own auto rows — so every box in the shorter card grows, the BUTTON included.
+ * It was reachable before, through a step with three lines of text beside one with one; a
+ * photograph in one step and none in its neighbour makes it the ordinary case.
+ *
+ * Measured in chrome-headless-shell 148.0.7778.96 at 1024×700, three cards with the middle
+ * one photographless and a call to action on each. Without the declaration the middle card's
+ * **button box was 98.25px tall against its neighbours' 46px** — a control drawn at twice its
+ * height with its label floating in the middle of it, which is the plainest of the symptoms
+ * and the one worth the rule. Its title box was 79.25px against their 27px.
+ *
+ * The surplus is shared by every card that has any, not only the photographless one: the
+ * third card, whose sentence is ONE line against the first card's two — 18px of text against
+ * 36px — took 30.59px of title and 49.61px of button and had its photograph pushed to
+ * y=51.59. Its photograph is not the shorter one; at 183.00px against the first's 182.98px it
+ * is a subpixel taller, the two columns being 325.34 and 325.33 wide. The amount of surplus
+ * is what the text length decides, and the declaration is what stops it being spent on the
+ * boxes. With it every box is its own height again: 46px buttons, 27px titles, both
+ * photographs at y=48.
+ *
+ * **What it does NOT do is level the cards, and the first version of this comment claimed it
+ * did.** A step without a photograph has its title roughly one photograph-height above its
+ * neighbours' by design — measured at y=48 against y=238.98 and y=239 — which is the whole
+ * point of drawing nothing in the photograph's place. The declaration stops the boxes
+ * stretching; it does not move the content down to meet a picture that is not there.
+ *
+ * **The cost, measured and taken:** with the boxes their own height the surplus collects at
+ * the foot of each card, so a row of steps that all carry a call to action draws its buttons
+ * at three heights — 317.98, 109 and 300, a 208.98px spread. Left ragged deliberately. No
+ * block in this package pins a card's action to a shared baseline: `.salt-card` is a flex
+ * column at `block-size: 100%` and nothing inside a card carries an auto margin, so a feature
+ * card's or a showcase card's link already sits under its own words. (The two auto margins in
+ * these stylesheets are centring rather than pinning — `.salt-section__content`'s
+ * `margin-inline` centres a reading measure, and the consent panel's `margin` centres a
+ * dialog in the viewport — so neither is a precedent either way.) Pinning here
+ * would need either a flex rewrite of the step or a synthetic flexible row to absorb the
+ * surplus, and it would detach each button from the step it belongs to. The wireframe's bands
+ * are the timeline, where each step is its own band and the spread cannot arise: the
+ * declaration is inert there, measured identical in both directions.
+ */
+.salt-process__step {
+  display: grid;
+  align-content: start;
+  justify-items: start;
+  gap: 0.5rem;
+}
+
+/*
+ * The margins the user agent puts on a heading and a paragraph, zeroed so the grid's own
+ * `gap` is the only thing setting space inside a step.
+ *
+ * Direct children only, and written out rather than assumed away: a consuming repo with no
+ * CSS reset still has them, and they would stack with the gap to give a different space
+ * above a step's title than below it. `.salt-block > :is(h1, … h6)` does the same job one
+ * level up and does not reach here.
+ */
+.salt-process__step > :is(h1, h2, h3, h4, h5, h6, p) {
+  margin: 0;
+}
+
+/*
+ * A step's photograph (BD-120).
+ *
+ * `.salt-media-text__image`'s three declarations, for its reason. `<Media>` draws it with the
+ * upload's intrinsic `width` and `height` rather than `fill`, so without `inline-size: 100%`
+ * an 1800px upload paints 1800px wide and leaves the step's column — and in a timeline, whose
+ * single track is sized to its content, it takes the block's whole layout with it.
+ * `block-size: auto` keeps the ratio those attributes declare, which is also what reserves
+ * the right space before the bytes arrive, so a photograph arriving late does not push the
+ * title and the button down the page. `display: block` removes the inline baseline gap under
+ * it, which would otherwise be added to the step grid's own `gap` on the one child that has
+ * a baseline.
+ *
+ * Nothing here crops, and that is a decision rather than an omission: an upload's own
+ * proportions govern, as they do in a media-and-text row, so a block of steps whose
+ * photographs are different shapes draws them at different heights rather than cutting each
+ * one to a ratio nobody chose. A step with no photograph draws no box at all — the element is
+ * simply absent, and `justify-items: start` above means the step's grid closes up around what
+ * is there.
+ */
+.salt-process__image {
+  display: block;
+  inline-size: 100%;
+  block-size: auto;
+}
+
+/*
+ * The numeral, drawn in a circle.
+ *
+ * It is `aria-hidden` in the markup — the `<ol>` carries the ordinal and this is the painted
+ * copy of it — so nothing here has an accessibility obligation beyond staying legible.
+ *
+ * `--salt-section-boundary`, the same role the rule above takes and the one the split
+ * recorded in `primitives.css` gives to a SMALL outlined thing: a 2.5rem circle is nearer an
+ * inline chip than a card edge, and a 1.435:1 hairline around it would not resolve as a
+ * circle at all. Tone-aware either way, so it is a line on every band rather than a hard
+ * light outline on the inverse one (BD-033).
+ *
+ * A fixed box in both axes, so the circle is a circle whether the numeral inside it is one
+ * digit or two. `line-height: 1` because the flex centring is what positions the digit, and
+ * an inherited line height taller than the box would push it off centre.
+ */
+.salt-process__number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 2.5rem;
+  block-size: 2.5rem;
+  border: 1px solid var(--salt-section-boundary, var(--color-border-strong));
+  border-radius: var(--radius-full);
+  font-weight: var(--weight-bold);
+  line-height: 1;
+}
+
+/* The step's own words, in the band's ink, at the body text they inherit. */
+.salt-process__text {
+  color: var(--salt-section-ink-muted, var(--color-ink-muted));
+}
+
+/*
+ * ── The collection showcase ─────────────────────────────────────────────────────
+ *
+ * Cards on the shared grid, in one of three layouts, and like `process` the difference
+ * between the layouts is almost entirely here. `section.tsx` writes one `<ul>` of cards and
+ * emits `data-layout`; a list is that list in one column, and featured is the grid with its
+ * first item marked, which the rule further down gives the whole row.
+ */
+
+/*
+ * ── The list: one column, whatever the editor's column count says ───────────────
+ *
+ * `process`'s timeline, for its reason. `--salt-grid-columns` is what `.salt-grid`'s track list
+ * reads, the base rule sets it to 3 at (0,1,0) and the reflow steps set it inside media queries
+ * that add no specificity, so an attribute selector at (0,2,0) wins at every viewport. Written
+ * plainly rather than inside `:where()`, which would tie with `.salt-grid` and leave source
+ * order to decide.
+ *
+ * The markup does not carry `data-columns` in a list, so `.salt-grid:where([data-columns='4'])`
+ * never reaches it; the stored count is still in the row, hidden in the admin rather than
+ * cleared, and this rule is what keeps it from mattering. Without it a list draws three across,
+ * which is the grid the editor did not choose, and the markup is byte-identical either way
+ * apart from the attribute, so nothing in the suite can see it go. Under contract in
+ * `verify-stylesheet-contracts.ts`.
+ *
+ * Measured in chrome-headless-shell 148.0.7778.96 against the example app's built stylesheet on
+ * 14/09/2026, five cards stored at three across: one column at 1200 and at 320 CSS pixels with
+ * this rule, three columns at 1200 with it deleted.
+ */
+.salt-showcase[data-layout='list'] {
+  --salt-grid-columns: 1;
+}
+
+/*
+ * ── Featured: the first card takes the row ──────────────────────────────────────
+ *
+ * The predecessor's featured services led with the first card and put the rest in the grid
+ * below. `1 / -1` spans from the first line to the last whatever the column count is, including
+ * one, so the reflow steps need no rule of their own here. Measured in the same build: at 1200
+ * the first card is the list's full 621px and the four after it run three across; at 320 all five
+ * are one column.
+ */
+.salt-showcase[data-layout='featured'] > [data-featured='true'] {
+  grid-column: 1 / -1;
+}
+
+/*
+ * A card image's frame. `fill` sizes the image against its positioned ancestor, so the frame
+ * decides the shape, and every card in a row is the same height above its title whatever was
+ * uploaded. 16:9 is the predecessor's post card; its work card was 4:3, and one proportion
+ * across every source keeps a grid of mixed sources, which a site can build from two
+ * showcases, lined up.
+ *
+ * `position: relative` is the anchor `fill` needs. It does not lift the frame above the card's
+ * stretched link: both are positioned with no `z-index`, so the link's `::after`, later in the
+ * document, paints over the image and a click on the photograph follows the title's link.
+ * Measured in the same build with `elementFromPoint` at the centre of a card's image, in all
+ * three layouts at 1200 and at 320: the hit was inside the card's link each time.
+ */
+.salt-showcase__media {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+}
+
+/* The photograph fills the frame (SC-011): the card image and the testimonial avatar alike. */
+.salt-showcase__media > img {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}
+
+/* A testimonial's photograph is a small round avatar beside who said it, not a card image. */
+.salt-showcase__quote .salt-showcase__media {
+  inline-size: 3rem;
+  aspect-ratio: 1;
+  border-radius: var(--radius-full);
+}
+
+.salt-showcase__quote {
+  margin: 0;
+}
+
+.salt-showcase__quote blockquote {
+  margin: 0;
+}
+
+/* A testimonial's words are the contract's `quote`, "a pull quote or testimonial" (BD-185), on the
+   card and in an accordion's panel. Only inside the quotation pattern: a card's summary carries the
+   same class and stays the body's. */
+.salt-showcase__quote .salt-showcase__text {
+  font-size: var(--text-quote);
+  line-height: var(--text-quote--line-height);
+  letter-spacing: var(--text-quote--letter-spacing);
+  font-weight: var(--text-quote--font-weight);
+  font-family: var(--text-quote--font-family);
+}
+
+.salt-showcase__caption {
+  display: grid;
+  gap: 0.25rem;
+}
+
+/* The client, the job title, the role and company, a post's date: supporting, so the tone's muted
+   ink, as the eyebrow takes it, which the contrast manifest proves on every tone, and the
+   contract's `small`, "meta lines" (BD-185). */
+.salt-showcase__meta {
+  margin: 0;
+  color: var(--salt-section-ink-muted, var(--color-ink-muted));
+  font-size: var(--text-small);
+  line-height: var(--text-small--line-height);
+  letter-spacing: var(--text-small--letter-spacing);
+  font-weight: var(--text-small--font-weight);
+  font-family: var(--text-small--font-family);
+}
+
+.salt-showcase__text,
+.salt-showcase__rating {
+  margin: 0;
+}
+
+/*
+ * A rating drawn as its stored proportion: the filled row laid exactly over the outline row and
+ * clipped to `--salt-rating-fill`, which the section writes as the rating's share of five.
+ *
+ * Clipped with `clip-path` rather than by narrowing the filled row. A narrowed row would wrap its
+ * stars onto a second line, because `.salt-grid` makes `overflow-wrap: break-word` inherited, and
+ * holding it on one line with `white-space: nowrap` is what the shared grid's wrap contract refuses
+ * in this file. At full width the filled row is exactly as wide as the outline row it covers, so it
+ * has nothing to wrap. `inset()` is physical, so a right-to-left page clips from the other side.
+ *
+ * The edge lands where the proportion says only if the outline and filled glyphs are the same
+ * width. Measured in chrome-headless-shell 148.0.7778.96 on 14/09/2026 with the example app's built
+ * stylesheet and its default font stack, at 1200 and 320 CSS pixels: an outline row of five stars and
+ * a filled row of five both 79.69px, the filled row the outline's size (so one line), and for 4.5, 2.5
+ * and 0.5, each on a left-to-right and on a right-to-left page, a point 2% of the row inside the edge
+ * hit the filled row and 2% outside it the outline row. A site font whose two stars differ in width
+ * shifts the edge, and that was not measured.
+ *
+ * No colour of its own: both rows take the band's ink, which the contrast manifest proves on every
+ * tone, and the outline and the fill differ in shape rather than in colour.
+ */
+.salt-showcase__stars {
+  position: relative;
+  display: inline-block;
+}
+
+.salt-showcase__stars-fill {
+  position: absolute;
+  inset: 0;
+  clip-path: inset(0 calc(100% - var(--salt-rating-fill, 0%)) 0 0);
+}
+
+.salt-showcase__stars-fill:dir(rtl) {
+  clip-path: inset(0 0 0 calc(100% - var(--salt-rating-fill, 0%)));
+}
+
+/*
+ * ── The tag chips on a card ─────────────────────────────────────────────────────
+ *
+ * The categories a document is filed under (BD-117), drawn as small outlined chips in a row that
+ * wraps. A flex row rather than a grid: the chips are as wide as their words, and a grid track
+ * list would either stretch them to a column or need a column count nobody can know, since the
+ * number of categories varies card by card.
+ *
+ * `list-style: none` is what obliges the `<ul>` to carry `role="list"` (BD-043), and
+ * `verify-list-roles.ts` names this class for that reason. The padding and margin go with it,
+ * because a consuming repository without Tailwind's preflight still has the user agent's indent,
+ * which would push the first chip in from the card's edge.
+ *
+ * `--salt-section-boundary` rather than `--salt-section-border`: the split `primitives.css`
+ * records is by the SIZE of the thing outlined, and a chip around a couple of words is the inline
+ * `<code>` case rather than the card edge's. Tone-aware, so a chip on an inverse band draws
+ * against that band. No background fill and no colour of its own beyond the muted ink the meta
+ * line already takes, which the contrast manifest proves on every tone; a filled chip would need
+ * a surface token per tone and a contrast proof for each.
+ *
+ * No `font-size`: this system has no typography tokens yet, and BD-043 records what happened the
+ * last time a block invented one. The chips read smaller than the card's text by being short
+ * rather than by being shrunk.
+ *
+ * ── `min-width: 0` is what makes the inherited wrap reach a chip ────────────────
+ *
+ * A chip is a flex item, so its automatic minimum size is its min-content contribution, and
+ * `.salt-grid`'s inherited `overflow-wrap: break-word` does not reduce min-content — the note on
+ * `.salt-grid` measures exactly that distinction and ends by saying the choice only matters the day
+ * something is min-content sized. A chip is that day. Without the floor released, a category titled
+ * as one unbroken token cannot shrink to its card, and it paints over the column beside it.
+ *
+ * Measured in chrome-headless-shell 148.0.7778.96 against the example app's built stylesheet on
+ * 22/09/2026. The container is a shipped one and the numbers travel with it, so it is named: a
+ * four-across showcase inside `.salt-section[data-width='wide'] > .salt-section__content`, on a
+ * zero-margin, zero-padding body, at 1200 and at 320 CSS pixels. That makes every figure derivable
+ * — `--space-gutter` is 32px at 1200, so the grid is 1136, a track is (1136 - 72) / 4 = 266, and a
+ * card's content box is 266 less 48px of padding and 2px of border, 216. At 320 the gutter is 16,
+ * the grid reflows to one column of 288, and a card's content box is 238.
+ *
+ * With no floor released, a chip holding 20 repeated capital As is 227.38px, 28 are 311.13px, 40
+ * are 436.75px and 60 are 646.13px, each on one line whatever it is put in. At 1200 they spill
+ * 11.38px, 95.13px, 220.75px and 430.13px past the card, and the document's `scrollWidth` reads
+ * 1573 against the 1200 viewport — it over-paints the neighbouring column AND widens the document.
+ * At 320 the 20-character chip fits the wider single-column card and the other three spill 73.13px,
+ * 198.75px and 408.13px, with `scrollWidth` at 687. With `min-width: 0` every chip that did not fit
+ * is held to the card — 216px at 1200, 238px at 320 — and wraps, `scrollWidth` returns to the
+ * viewport, and the one that already fitted is untouched at 227.38px.
+ *
+ * Two things the numbers do not say. The character counts are a wide glyph's: a real German
+ * compound of 28 letters measured 223.22px against 311.13px for 28 As, so the width at which a chip
+ * starts to spill depends on the letters in it, and the shape of the failure does not. And a
+ * `default`-width section is narrower than the `wide` one measured here, so these spills are the
+ * smaller of the two a shipped page can produce.
+ */
+.salt-showcase__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.salt-showcase__tag {
+  /* Releases the flex item's automatic minimum, so the inherited `break-word` above can break
+     a category with nowhere to break. The paragraph over this rule has the measurements. */
+  min-width: 0;
+  padding: 0.125rem 0.5rem;
+  border: 1px solid var(--salt-section-boundary, var(--color-border-strong));
+  border-radius: var(--radius-sm);
+  color: var(--salt-section-ink-muted, var(--color-ink-muted));
+}
+
+.salt-showcase__view-all {
+  margin: 0;
+}
+
+/*
+ * ── The accordion and the index ─────────────────────────────────────────────────
+ *
+ * The accordion is the shared `.salt-accordion`, styled in `primitives.css`; all this adds is the
+ * spacing inside a panel, which holds a few short paragraphs where a `faq` answer holds rich text.
+ */
+.salt-showcase__panel,
+.salt-showcase__group {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.5rem;
+}
+
+/*
+ * Both grids above and the index below take one `minmax(0, 1fr)` track and `.salt-grid`'s
+ * `overflow-wrap`, for that rule's reason. An `auto` track is as wide as its widest word, so a title
+ * with nowhere to break widens the panel, the group and the page. Measured in
+ * chrome-headless-shell 148.0.7778.96 at 320 CSS px against the example app's built stylesheet on
+ * 14/09/2026, over an accordion and an index each holding a 78-character service name: with these
+ * declarations deleted the document was 328px wider than the viewport, and with them it fitted.
+ */
+.salt-showcase__panel,
+.salt-showcase__group,
+.salt-showcase__index {
+  overflow-wrap: break-word;
+}
+
+/*
+ * An index: links, one to a row, with no markers. `list-style: none` is what obliges the `<ul>` to
+ * carry `role="list"`, and `verify-list-roles.ts` names this class for that reason.
+ *
+ * The target size is the link's own, below. The floor sat on the `<li>` first, reasoning that rows
+ * at least 24px tall keep neighbouring links' centres 24px apart whatever the font size. A row is
+ * as tall as its link only while the link is one line: at an 8px root and 320 CSS px an entry that
+ * wrapped to two lines made a 21px row with the next link's centre 22px away, which fails the
+ * spacing exception. A floor on the link holds however its words wrap.
+ */
+.salt-showcase__index {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/*
+ * The accordion's link to the document and every index entry. The band's own ink with an underline,
+ * as the `link` button style takes, for its reasons: `brand-strong` as text fails on an inverse
+ * band, and the underline is what says "link" without colour (WCAG 1.4.1). Not the `link` button
+ * itself, which is a call to action; these are the listing's own words.
+ *
+ * ── The target is at least 24 by 24 CSS px, on the link itself ───────────────────
+ *
+ * WCAG 2.5.8. Neither link is in a sentence, so the inline exception does not cover it. The link
+ * was a line of text, under 24px tall, and a panel holding nothing but the link puts it directly
+ * under the `<summary>`, another target: its 24px circle overlapped the summary by 0.5px at a 16px
+ * root and 6.5px at an 8px root (chrome-headless-shell 148.0.7778.96, the example app's built
+ * stylesheet with Tailwind's preflight). Floored on the link, both axes, it meets the size itself
+ * and needs no spacing from anything, whatever its neighbour and however its words wrap.
+ *
+ * `inline-block` so the floor applies to an inline element, with `max-inline-size: 100%` so a title
+ * with nowhere to break is held to its container and wraps under the inherited `overflow-wrap`:
+ * an inline-block's shrink-to-fit width is never narrower than its longest word otherwise, which
+ * `break-word` does not shorten. `24px` rather than a `rem`, because the criterion is stated in CSS
+ * px and a site shrinking its root size would otherwise shrink the floor with it.
+ */
+.salt-showcase__link {
+  display: inline-block;
+  min-block-size: 24px;
+  min-inline-size: 24px;
+  max-inline-size: 100%;
+  color: var(--salt-section-ink, var(--color-ink));
+  text-decoration: underline;
+}
+
+/*
+ * ── The hero ────────────────────────────────────────────────────────────────────
+ *
+ * Four variants, one markup. `section.tsx` writes the text block first and the picture
+ * second in every one of them, emits `data-variant` always and `data-media-side` or
+ * `data-align` for the single variant that reads each, and changes nothing else. So the
+ * whole difference between a left-hand split and a right-hand one, and between a left and a
+ * centred minimal, is in this file — which is what the brief means by generalising the
+ * mediaText DOM-invariance precedent, and why the flip below is under a stylesheet contract.
+ *
+ * `fullBleed` has no rule of its own. Its photograph is the WRAPPER's background image,
+ * drawn edge to edge by `<Section>` behind whatever measure the band is set to, and with no
+ * image set the wrapper's tone is the band — the colour-hero path, which needs no CSS
+ * because it is the absence of an image rather than a layout.
+ */
+
+/*
+ * A grid in every variant, and being one is a precondition rather than a style.
+ *
+ * `order` reorders the children of a flex or grid container and does nothing anywhere else,
+ * so a tidy-up making this `display: block` would leave every left-hand split drawn
+ * text-first with the markup byte-identical and every test green. `.salt-media-text__row`
+ * carries the same note for the same reason, and the contract reads this declaration first.
+ *
+ * One column here and two below, so `stacked` and `minimal` take the whole measure rather
+ * than half of it with an empty track alongside.
+ */
+.salt-hero {
+  display: grid;
+  gap: 2rem;
+}
+
+/*
+ * Two tracks for the split, selected on the PRESENCE of a side. The component emits the
+ * attribute only for a split that has a picture to put in the second track, so a split whose
+ * upload was deleted falls through to one column rather than reserving an empty half.
+ */
+.salt-hero[data-media-side] {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: center;
+}
+
+/*
+ * And one column again where two will not fit. WCAG 1.4.10 asks for reflow at 320 CSS pixels
+ * and 1.4.4 asks the same of 200% zoom, which a browser reports as a narrower viewport; half
+ * of 320 is 160px, which is not a track a photograph and a heading can share. Written as
+ * max-width so the narrower rule wins on source order, as the shared grid's steps are.
+ */
+@media (max-width: 48rem) {
+  .salt-hero[data-media-side] {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/*
+ * ── The flip, which is the only thing separating a left hero from a right one ────
+ *
+ * The mirror of `mediaText`'s. There the photograph is written FIRST and a positive `order`
+ * moves it past the copy; here the words are written first — because the heading must paint
+ * before the picture in `stacked`, and because the words are what the page is about — so
+ * moving the picture in FRONT of them needs a value below the initial `order: 0`.
+ *
+ * The reordering is visual only. `order` moves nothing in the accessibility tree and nothing
+ * in the tab order, which is the whole reason the DOM order is fixed rather than flipped in
+ * the component: the sequence a screen reader and a keyboard meet is identical in a left
+ * hero and a right one, and WCAG 1.3.2's meaningful sequence is the DOM's rather than the
+ * paint's.
+ *
+ * **Measured**, unlike `mediaText`'s note, which records that it was not. In
+ * chrome-headless-shell 148.0.7778.96 at 1024 by 700, over the example app's own built CSS
+ * and with the band's markup in the shape the block's tests pin: a left-hand split drew its
+ * picture to the left of its words, a right-hand one the reverse, and `.salt-hero`'s first
+ * element child read `salt-hero__text` in both. The computed `order` on the media was `-1`
+ * and `0` respectively. Those four facts are what the flip is, and none of them depends on
+ * how wide the band happens to be.
+ *
+ * The pixel widths that run also produced are deliberately NOT repeated here, because they
+ * are the example app's furniture rather than this block's: its scaffold stylesheet caps
+ * `main` at `--container-2xl`, so the section's own measure never governs there. BD-108
+ * records them with that container named, which is the only way they mean anything.
+ *
+ * It is NOT undone at one column, and that is a decision rather than an omission. Below the
+ * breakpoint above, a left hero stacks picture-then-words and a right one words-then-picture
+ * — measured in the same build at 320 by 256, one track, with
+ * `document.documentElement.scrollWidth` equal to its `clientWidth`, so no second scrollbar
+ * (WCAG 1.4.10). Evening the stacking up means a second `order` on the same element inside a
+ * media query, which is the shape `verify-stylesheet-contracts.ts` refuses to rank and which
+ * has defeated three contracts in it already. The uneven stacking is each hero's own visual
+ * order carried down, and no reader loses anything by it.
+ */
+.salt-hero[data-media-side='left'] .salt-hero__media {
+  order: -1;
+}
+
+/*
+ * The centred minimal takes `text-align` from `.salt-block[data-align='centre']` above, which
+ * centres inline content. A flex container's items are not inline content, so the row of
+ * actions needs saying separately — the same correction `.salt-cta__actions` records, made
+ * conditional here because only one of the hero's four variants is centred.
+ */
+.salt-hero[data-align='centre'] .salt-hero__actions {
+  justify-content: center;
+}
+
+/*
+ * The actions sit on one row and wrap onto two rather than shrinking, for the reason
+ * `.salt-cta__actions` gives: WCAG 2.5.8's 24px floor is enforced on the control itself, and
+ * a row that squeezes its children to fit is how a control drops under it on a narrow
+ * viewport while measuring correctly on the one somebody tested.
+ */
+.salt-hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+/*
+ * The rhythm inside the text block. `.salt-block > * + *` sets the gap between a BLOCK's
+ * top-level parts, and the hero's eyebrow, heading, subheading and actions are one level
+ * below that. The same owl restated where it reaches them, and the eyebrow's tighter pairing
+ * with the heading, rather than the block rules loosened to descendant selectors that would
+ * then also set the space inside anything else a band ever holds.
+ */
+.salt-hero__text > * + * {
+  margin-block-start: 1rem;
+}
+
+.salt-hero__text > .salt-eyebrow + * {
+  margin-block-start: 0.5rem;
+}
+
+/* The heading carries no margin of its own here either, for the reason the block rule gives:
+   a consuming repo without a reset still has the user agent's margins. */
+.salt-hero__text > :is(h1, h2, h3, h4, h5, h6) {
+  margin: 0;
+}
+
+/*
+ * The hero's headline is the contract's `display`, whatever level the plan gave it (BD-173). The
+ * base styles set a heading by its element, and a hero's heading is usually the page's `h1`, which
+ * the element convention sets as `heading-1`; `display` is the role the contract names for it.
+ */
+.salt-hero__text > :is(h1, h2, h3, h4, h5, h6) {
+  font-size: var(--text-display);
+  line-height: var(--text-display--line-height);
+  letter-spacing: var(--text-display--letter-spacing);
+  font-weight: var(--text-display--font-weight);
+  font-family: var(--text-display--font-family);
+}
+
+/* The supporting line under the headline is the contract's `lead`, as a section's introduction is
+   (BD-185). */
+.salt-hero__subheading {
+  font-size: var(--text-lead);
+  line-height: var(--text-lead--line-height);
+  letter-spacing: var(--text-lead--letter-spacing);
+  font-weight: var(--text-lead--font-weight);
+  font-family: var(--text-lead--font-family);
+}
+
+/*
+ * The picture fills the track it is given and keeps its own proportions.
+ *
+ * `<Media>` draws it with the upload's intrinsic `width` and `height` rather than `fill`, as
+ * `mediaText` and `gallery` do: a hero's picture is a photograph, not a mark in a frame of a
+ * fixed size. Those attributes are an intrinsic SIZE, so without this an 1800px upload paints
+ * 1800px wide and overflows its track. `block-size: auto` keeps the ratio the attributes
+ * declare, which is also what reserves the space before the bytes arrive — and this band is
+ * usually the page's LCP element, so that reservation is what stops it shifting as it loads.
+ */
+.salt-hero__image {
+  display: block;
+  inline-size: 100%;
+  block-size: auto;
+}
