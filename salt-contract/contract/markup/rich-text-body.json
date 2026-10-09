@@ -14,6 +14,7 @@
       "role": "content",
       "element": [
         "p",
+        "h2",
         "h3",
         "h4",
         "h5",
@@ -25,7 +26,7 @@
       "repeat": {
         "from": "body nodes"
       },
-      "note": "Allowed inline: a (href; http, https, mailto, tel, or an internal link), strong, em, code, br. Headings rank from the base level (section#body-heading-base); a heading outside the allowed set renders as p."
+      "note": "Allowed inline: a (href; http, https, mailto, tel, or an internal link), strong, em, code, br. Headings rank from the base level (section#body-heading-base); a heading outside the allowed set renders as p. A body heading is never h1: at base level 1 the first heading tag renders as h2 (base + 1)."
     }
   ],
   "headings": {

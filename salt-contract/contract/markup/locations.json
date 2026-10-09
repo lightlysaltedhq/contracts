@@ -47,7 +47,10 @@
             "salt-accordion__item"
           ],
           "attributes": {
-            "name": "locations-<section index>"
+            "name": {
+              "value": "locations-<section index>",
+              "note": "<section index> is the section's place on the page, counted from 1."
+            }
           },
           "repeat": {
             "from": "offices",

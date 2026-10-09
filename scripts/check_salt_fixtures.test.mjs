@@ -229,7 +229,7 @@ test('markup: an img without sizes fails', () => {
   markupFails(' sizes="(min-width: 64rem) 30rem, 100vw"', '', /lacks sizes/)
 })
 test('markup: an img without width fails (SC-007)', () => {
-  markupFails(' width="1600"', '', /an img lacks width/)
+  markupFails(' width="1600"', '', /lacks width/)
 })
 test('markup: a picture element fails (SC-007)', () => {
   markupFails('<img class="salt-hero__image"', '<picture><source srcset="/a.avif"></picture>\n        <img class="salt-hero__image"', /picture|<source>/)
@@ -283,10 +283,6 @@ test('when: the first tab is checked and no other', () => {
 test('when: a split hero with an image carries data-media-side', () => {
   markupFails(' data-media-side="left"', '', /lacks data-media-side, which the markup requires when/)
 })
-test('when: an unnamed tab set carries no aria-label, a named one does', () => {
-  expectFail(['tabs'], (io) => io.html('tabs/no-name-stacked.html', '<div class="salt-tabs">', '<div class="salt-tabs" aria-label="">'), /carries aria-label, which the markup draws only when the set is named/)
-  expectFail(['tabs'], (io) => io.html('tabs/one-panel-stacked.html', /<div class="salt-tabs" aria-label="[^"]*">/.exec(readFileSync(path.join(pkg, 'fixtures/tabs/one-panel-stacked.html'), 'utf8'))[0], '<div class="salt-tabs">'), /lacks aria-label, which the markup requires when the set is named/)
-})
 test('when: an element whose field is set must be drawn', () => {
   markupFails('<p class="salt-eyebrow">Bristol and Bath</p>\n', '', /eyebrow is not drawn, but eyebrow is set/)
 })
@@ -332,6 +328,43 @@ test('containers: a conditional or contextual flex rule is not a container', asy
     writeFileSync(path.join(dir, 'a.css'), '@layer base { .salt-a { display: grid; } }\n@media (min-width: 40rem) { .salt-b { display: flex; } }\n.salt-grid .salt-c { display: flex; }\n.salt-d[open] { display: flex; }\n.salt-e, .salt-f { display: inline-flex; }\n.salt-g { display: block; }\n')
     assert.deepEqual(containersFrom(dir), ['salt-a', 'salt-e', 'salt-f'])
   } finally { rmSync(dir, { recursive: true, force: true }) }
+})
+
+// The contract gaps the fixtures found, closed (SC-016 unit, item 5) and the counts the case
+// fixes (item 6).
+test('gaps: a name on the accordion\'s own div fails; it belongs on each details', () => {
+  expectFail(['faq'], (io) => io.html('faq/many.html', '<div class="salt-accordion">', '<div class="salt-accordion" name="faq-2">'), /<div\.salt-accordion> carries name, which the markup does not declare/)
+})
+test('gaps: an aria-label on the tab set\'s generic div fails; it belongs on the radiogroup', () => {
+  expectFail(['tabs'], (io) => io.html('tabs/many-tabbed.html', '<div class="salt-tabs" data-tabbed>', '<div class="salt-tabs" data-tabbed aria-label="Services">'), /<div\.salt-tabs> carries aria-label, which the markup does not declare/)
+})
+test('gaps: a body h2 under a level-2 section heading fails, at base 1 it is right', () => {
+  expectFail(['rich-text'], (io) => io.html('rich-text/body-only-no-heading.html', '<h3>Our approach</h3>', '<h2>Our approach</h2>'), /ranks at or above the section heading's level 2/)
+})
+test('gaps: a lone carousel card granted priority must take it', () => {
+  expectFail(['carousel'], (io) => io.html('carousel/inline-one-card.html', ' fetchpriority="high"', ' loading="lazy"'), /the priority image must be in carousel's track,list,single/)
+})
+test('gaps: a background with no focal point writes the fit alone', () => {
+  expectFail(HERO, (io) => io.html('hero/full-bleed-background-no-focal-point.html', 'style="object-fit: cover"', 'style="object-fit: cover; object-position: center"'), /style="object-fit: cover; object-position: center" disagrees with the case, which gives "object-fit: cover"/)
+})
+test('gaps: a link-form button without the site\'s arrow fails, and one with it on a site with none', () => {
+  expectFail(['process'], (io) => io.html('process/timeline-many.html', '<span class="salt-button__label">Book a visit<span class="salt-arrow" aria-hidden="true">&#x2060;→</span></span>', 'Book a visit'), /"Book a visit" draws no arrow, but the site supplies one/)
+  expectFail(HERO, (io) => io.html(`${SPLIT}.html`, '>See our work</a>', '><span class="salt-button__label">See our work<span class="salt-arrow" aria-hidden="true">&#x2060;→</span></span></a>'), /draws an arrow, which the site does not supply/)
+})
+test('gaps: the ungrouped index is one list with no group', () => {
+  expectFail(['collection-showcase'], (io) => io.html('collection-showcase/index-posts-ungrouped.html', '<ul class="salt-showcase__index" role="list">', '<div class="salt-showcase__group">\n      <ul class="salt-showcase__index" role="list">'), /index-posts-ungrouped\.html/)
+})
+test('counts: the pagination window must be the one the page gives', () => {
+  expectFail(['listing'], (io) => io.html('listing/cards-pagination-gaps.html', '          <li class="salt-pagination__gap" aria-hidden="true">…</li>\n', ''), /the pagination draws \[previous, 1, 4, 5, 6, gap, 9, next\]; page 5 of 9 gives \[previous, 1, gap, 4, 5, 6, gap, 9, next\]/)
+  expectFail(['listing'], (io) => io.html('listing/cards-with-pagination.html', '<li><a class="salt-pagination__link" data-step="next"', '<li><a class="salt-pagination__link" data-step="nextx"'), /cards-with-pagination\.html/)
+})
+test('counts: a tab set must draw a panel per tab and controls only when tabbed', () => {
+  expectFail(['tabs'], (io) => {
+    const rel = 'fixtures/tabs/many-tabbed.html'
+    const text = readFileSync(path.join(io.dir, rel), 'utf8')
+    io.write(rel, text.replace(/\n *<div class="salt-tabs__panel" id="tabs-many__panel-3"[\s\S]*?\n {10}<\/div>(?=\n {8}<\/div>)/, ''))
+  }, /tab panels drawn; the case has 3 tabs|many-tabbed\.html/)
+  expectFail(['tabs'], (io) => io.html('tabs/no-name-stacked.html', '<div class="salt-tabs">', '<div class="salt-tabs" data-tabbed>'), /carries data-tabbed, which the markup draws only when/)
 })
 
 // ── 4. The normaliser ─────────────────────────────────────────────────────────────────────────

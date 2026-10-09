@@ -62,14 +62,14 @@
         "salt-button__label"
       ],
       "optional": true,
-      "when": "an arrow follows the text",
+      "when": "link form (a) and the site supplies an arrow; a button-form control (a submit, the map's load button) draws none",
       "children": [
         {
           "role": "arrow",
           "component": "arrow"
         }
       ],
-      "note": "Text and arrow together, so the arrow wraps with the last word."
+      "note": "Text and arrow together, so the arrow wraps with the last word. Every link-form button a section draws (its calls to action, a step's action, the showcase's view-all link) takes the site's arrow when there is one, as Salt for Next.js draws it."
     }
   ],
   "headings": {
@@ -152,7 +152,8 @@
         }
       ],
       "owes": [
-        "Style as data-style, not a class per style; add data-track-control='cta'; draw the arrow through the arrow component inside span.salt-button__label."
+        "Style as data-style, not a class per style; add data-track-control='cta'; draw the arrow through the arrow component inside span.salt-button__label.",
+        "Draw the site's arrow in span.salt-button__label on every link-form button a section draws, and on no button-form control."
       ]
     }
   }

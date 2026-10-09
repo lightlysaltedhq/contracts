@@ -1,0 +1,124 @@
+{
+  "section": "listing",
+  "$comment": "route shape: { cards: [card items], pagination: { current, total, hrefs: { \"<n>\": \"<path>\" } } }. Cards are card items as in collections, resolved for display; their images name entries of media. Pagination links: page link aria-label is labels.page then the number (\"Page 2\"); previous and next link to the neighbouring page's href. Page 5 of 9: the window is 1, a gap, 4 to 6, a gap and 9 (pagination.json).",
+  "summary": "A later page of a blog index: page 5 of 9, so the pagination draws previous, page 1, a gap, pages 4 to 6, a gap, page 9 and next. Not the first band: heading h2 and every image lazy.",
+  "values": {
+    "heading": "The journal",
+    "settings": {
+      "anchorId": "journal-page-5"
+    }
+  },
+  "context": {
+    "headingLevel": 2,
+    "headingRendered": true,
+    "priorityMedia": false,
+    "track": "listing-1",
+    "index": 2
+  },
+  "media": {
+    "soil": {
+      "src": "https://uploads.example/soil-health-800.jpg",
+      "srcset": [
+        {
+          "url": "https://uploads.example/soil-health-400.jpg",
+          "width": 400
+        },
+        {
+          "url": "https://uploads.example/soil-health-800.jpg",
+          "width": 800
+        }
+      ],
+      "sizes": "(min-width: 64rem) 22rem, (min-width: 40rem) 45vw, 100vw",
+      "width": 800,
+      "height": 600,
+      "alt": "Hands holding a handful of dark compost"
+    },
+    "hedge": {
+      "src": "https://uploads.example/hedge-laying-800.jpg",
+      "srcset": [
+        {
+          "url": "https://uploads.example/hedge-laying-400.jpg",
+          "width": 400
+        },
+        {
+          "url": "https://uploads.example/hedge-laying-800.jpg",
+          "width": 800
+        }
+      ],
+      "sizes": "(min-width: 64rem) 22rem, (min-width: 40rem) 45vw, 100vw",
+      "width": 800,
+      "height": 600,
+      "alt": "A freshly laid hedge along a field edge"
+    },
+    "pots": {
+      "src": "https://uploads.example/winter-pots-800.jpg",
+      "srcset": [
+        {
+          "url": "https://uploads.example/winter-pots-400.jpg",
+          "width": 400
+        },
+        {
+          "url": "https://uploads.example/winter-pots-800.jpg",
+          "width": 800
+        }
+      ],
+      "sizes": "(min-width: 64rem) 22rem, (min-width: 40rem) 45vw, 100vw",
+      "width": 800,
+      "height": 600,
+      "alt": "Terracotta pots wrapped in fleece"
+    }
+  },
+  "route": {
+    "cards": [
+      {
+        "id": "soil",
+        "title": "Feeding your soil, not your plants",
+        "href": "/journal/feeding-your-soil/",
+        "image": "soil",
+        "date": "2026-03-12",
+        "text": "Why compost does more than any bottle of feed."
+      },
+      {
+        "id": "hedge",
+        "title": "A beginner's guide to hedge laying",
+        "href": "/journal/hedge-laying/",
+        "image": "hedge",
+        "date": "2026-02-26",
+        "text": "An old craft that still keeps livestock in and wildlife housed."
+      },
+      {
+        "id": "pots",
+        "title": "Overwintering pots without a greenhouse",
+        "href": "/journal/overwintering-pots/",
+        "image": "pots",
+        "date": "2026-01-15",
+        "text": "Fleece, feet and a sheltered wall."
+      }
+    ],
+    "pagination": {
+      "current": 5,
+      "total": 9,
+      "hrefs": {
+        "1": "/journal/",
+        "2": "/journal/page/2/",
+        "3": "/journal/page/3/",
+        "4": "/journal/page/4/",
+        "5": "/journal/page/5/",
+        "6": "/journal/page/6/",
+        "7": "/journal/page/7/",
+        "8": "/journal/page/8/",
+        "9": "/journal/page/9/"
+      }
+    }
+  },
+  "site": {
+    "arrow": "→",
+    "labels": {
+      "nav": "Pagination",
+      "previous": "Previous",
+      "next": "Next",
+      "page": "Page",
+      "empty": "There are no posts to show yet."
+    }
+  }
+}

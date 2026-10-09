@@ -1,0 +1,16 @@
+{
+  "section": "rich-text",
+  "summary": "Body only, first on the page with no heading before it (headingLevel 1): the stored h3 and h4 render as h2 and h3 (base + 1 and base + 2). No heading of its own, so the wrapper is a div.",
+  "values": {
+    "body": "<h3>Our approach</h3><p>We design for how you live outdoors.</p><h4>Materials</h4><p>Local stone and peat-free compost wherever we can.</p>",
+    "settings": {
+      "anchorId": "approach-first"
+    }
+  },
+  "context": {
+    "headingLevel": 1,
+    "priorityMedia": true,
+    "track": "rich-text-1",
+    "index": 1
+  }
+}

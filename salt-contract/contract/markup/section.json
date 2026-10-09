@@ -90,7 +90,7 @@
         "style": {
           "value": "object-fit: <fit>; object-position: <position>",
           "when": "the background image's fit or position applies",
-          "note": "From the background image settings, written as media.json says; sections.css fills the band and gives way to it."
+          "note": "From the background image settings, written as media.json says; sections.css fills the band and gives way to it. The object-position declaration is left out when the position is focal-point and the image has no stored focal point, so the style is then \"object-fit: <fit>\" alone (media.json)."
         }
       },
       "optional": true,

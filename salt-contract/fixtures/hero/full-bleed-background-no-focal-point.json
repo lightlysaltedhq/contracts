@@ -1,0 +1,63 @@
+{
+  "section": "hero",
+  "summary": "Full bleed over a background image with no stored focal point and the default position, so its style is the fit alone; the scrim at subtle strength. Not first on the page: the background is lazy and the heading an h2.",
+  "values": {
+    "variant": "full-bleed",
+    "eyebrow": "Garden design",
+    "heading": "Outdoor rooms for every season",
+    "subheading": "Planting plans, hard landscaping and aftercare from one small team.",
+    "buttons": [
+      {
+        "link": {
+          "label": "Book a visit",
+          "type": "internal",
+          "document": "contact"
+        }
+      }
+    ],
+    "settings": {
+      "anchorId": "garden-tour",
+      "tone": "surface",
+      "backgroundImage": {
+        "image": "lawn",
+        "scrimStrength": "subtle"
+      }
+    }
+  },
+  "context": {
+    "headingLevel": 2,
+    "headingRendered": true,
+    "priorityMedia": false,
+    "track": "hero-2",
+    "index": 2
+  },
+  "media": {
+    "lawn": {
+      "src": "https://uploads.example/lawn-2400.jpg",
+      "srcset": [
+        {
+          "url": "https://uploads.example/lawn-1024.jpg",
+          "width": 1024
+        },
+        {
+          "url": "https://uploads.example/lawn-1600.jpg",
+          "width": 1600
+        },
+        {
+          "url": "https://uploads.example/lawn-2400.jpg",
+          "width": 2400
+        }
+      ],
+      "sizes": "100vw",
+      "width": 2400,
+      "height": 1350,
+      "alt": "A striped lawn in morning light"
+    }
+  },
+  "documents": {
+    "contact": {
+      "href": "/contact/",
+      "title": "Contact"
+    }
+  }
+}

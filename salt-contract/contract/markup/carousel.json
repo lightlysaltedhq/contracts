@@ -125,8 +125,12 @@
   },
   "zeroState": "The source is not installed or no card survives.",
   "priorityMedia": {
-    "role": "track",
-    "when": "the first card's image (not for quotes), when the plan grants priority and the section has no renderable background",
+    "role": [
+      "track",
+      "list",
+      "single"
+    ],
+    "when": "the first card's image (not for quotes), in the track, the unnamed list or a lone card, when the plan grants priority and the section has no renderable background",
     "rules": [
       "section#priority-media"
     ]

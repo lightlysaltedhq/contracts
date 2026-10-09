@@ -399,6 +399,25 @@ function linkFor(c, el) {
   return found.length === 1 ? found[0] : undefined
 }
 const newTab = (c, el) => { const link = linkFor(c, el); return link ? link.newTab === true : undefined }
+const currentPage = (c, el) => (c.input.route?.pagination ? textOf(el) === String(c.input.route.pagination.current) : undefined)
+// The tabs section: how many panels render, and whether they are tabbed (tab-set.json: more than
+// one panel and a name, the heading or else the label).
+const panelsOf = (c) => (c.input.values?.tabs ?? []).filter((t) => filledText(t.label)).length
+const tabbed = (c) => (c.section === 'tabs' ? panelsOf(c) > 1 && (filledText(c.input.values.heading) || filledText(c.input.values.label)) : undefined)
+// The page window pagination.json fixes: the first, the last, and the current page with one
+// neighbour each side; a run left out is one gap (null), and a one-page gap is drawn as the page.
+function pageWindow(current, total) {
+  const offered = (n) => n === 1 || n === total || Math.abs(n - current) <= 1
+  const shown = []
+  let previous = 0
+  for (let n = 1; n <= total; n++) {
+    if (!offered(n) && !(offered(n - 1) && offered(n + 1))) continue
+    if (n - previous > 1) shown.push(null)
+    shown.push(n)
+    previous = n
+  }
+  return shown
+}
 const WHEN = {
   'section:root:data-media': (c) => background(c),
   'section:root:data-divider': (c) => effectiveSetting(c, 'divider') === true,
@@ -408,8 +427,13 @@ const WHEN = {
   'hero:root:data-align': (c) => effective(c, 'variant') === 'minimal',
   'button:root:target': newTab,
   'button:root:rel': newTab,
-  'pagination:page-link:aria-current': (c, el) => (c.input.route?.pagination ? textOf(el) === String(c.input.route.pagination.current) : undefined),
-  'tabs:tab-set:aria-label': (c) => filledText(c.input.values.heading) || filledText(c.input.values.label),
+  'pagination:page-link:aria-current': currentPage,
+  'pagination:page-first-link:aria-current': currentPage,
+  'pagination:page-last-link:aria-current': currentPage,
+  'tab-set:root:data-tabbed': tabbed,
+  'tab-set:panel:role': tabbed,
+  'tab-set:panel:aria-labelledby': tabbed,
+  'tab-set:panel:tabindex': tabbed,
   'tab-set:input:checked': (c, el) => /__tab-1$/.test(attr(el, 'id') ?? ''),
   // A row draws its side only when it has both an image and words.
   'media-text:row:data-media-side': (c, el) => {
@@ -435,7 +459,19 @@ function rowSide(c, el) {
   const row = shown[k]
   return row ? row.mediaSide ?? byName.get('mediaSide').default : undefined
 }
+// The background's inline style, as media.json writes it: the fit, and the position unless it is
+// the focal point of an image that stores none.
+const KEYWORD = { 'top-left': 'top left', top: 'top', 'top-right': 'top right', left: 'left', centre: 'center', right: 'right',
+  'bottom-left': 'bottom left', bottom: 'bottom', 'bottom-right': 'bottom right' }
+function backgroundStyle(c) {
+  const bg = c.input.values?.settings?.backgroundImage ?? {}
+  const position = bg.position ?? 'focal-point'
+  const focal = c.input.media?.[bg.image]?.focalPoint
+  const at = position === 'focal-point' ? (focal ? `${focal.x}% ${focal.y}%` : null) : KEYWORD[position]
+  return `object-fit: ${bg.fit ?? 'cover'}${at ? `; object-position: ${at}` : ''}`
+}
 const VALUE = {
+  'section:background:style': backgroundStyle,
   'section:root:data-track': (c) => c.input.context.track,
   'section:root:data-tone': (c) => effectiveSetting(c, 'tone'),
   'section:root:data-tone-dark': darkTone,
@@ -454,13 +490,16 @@ function checkAttrs(alt, el, c) {
     if (name === 'class') continue
     const rule = rules[name]
     if (rule === undefined) { problems.push(`${describe(el)} carries ${name}, which the markup does not declare`); continue }
+    // Where the case fixes the value exactly, that is the test, and the template's shape is not.
+    const want = VALUE[alt.from?.[name]]?.(c, el)
+    if (typeof want === 'string') {
+      const canon = name === 'style' ? canonStyle : (x) => x
+      if (canon(value) !== canon(want)) problems.push(`${describe(el)} ${name}="${value}" disagrees with the case, which gives ${JSON.stringify(want)}`)
+      continue
+    }
     if (typeof rule === 'string') { if (!templateMatch(rule, value, name, c)) problems.push(`${describe(el)} ${name}="${value}" is not ${JSON.stringify(rule)}`); continue }
     if (rule.enum) { if (!rule.enum.includes(value)) problems.push(`${describe(el)} ${name}="${value}" is not one of ${rule.enum.join(', ')}`); continue }
     if (!templateMatch(rule.value, value, name, c)) problems.push(`${describe(el)} ${name}="${value}" is not ${JSON.stringify(rule.value)}`)
-  }
-  for (const [name, value] of el.attrs) {
-    const want = VALUE[alt.from?.[name]]?.(c, el)
-    if (typeof want === 'string' && value !== want) problems.push(`${describe(el)} ${name}="${value}" disagrees with the case, which gives ${JSON.stringify(want)}`)
   }
   for (const [name, rule] of Object.entries(rules)) {
     if (typeof rule === 'string' || rule.when === undefined) {
@@ -604,6 +643,7 @@ function checkMarkup(c) {
   if (top.length !== 1) { fail(`${at}.html must be one section wrapper; it has ${top.length} top-level elements`); return }
   const root = top[0]
   c.root = root
+  const every = () => [root, ...descendants(root)]
   c.parents = new Map()
   for (const el of [root, ...descendants(root)]) for (const child of elementsOf(el)) c.parents.set(child, el)
   const { doc, spec, elements } = wrapperSpec(c)
@@ -631,6 +671,38 @@ function checkMarkup(c) {
   for (const [role, holds, when] of expectations) {
     if (holds && !drawn(role)) fail(`${at}.html: ${role} is not drawn, but ${when} (the markup draws it then)`)
     if (!holds && drawn(role)) fail(`${at}.html: ${role} is drawn, but the markup draws it only when ${when}`)
+  }
+
+  // Counts the case fixes: a tab set's panels and controls, and the pagination's window.
+  if (doc.id === 'tabs') {
+    const n = panelsOf(c)
+    const panels = every().filter((e) => classesOf(e).includes('salt-tabs__panel')).length
+    const controls = every().filter((e) => classesOf(e).includes('salt-tabs__control')).length
+    if (panels !== n) fail(`${at}.html: ${panels} tab panels drawn; the case has ${n} tabs with a label`)
+    if (controls !== (tabbed(c) ? n : 0)) fail(`${at}.html: ${controls} tab controls drawn; the case gives ${tabbed(c) ? n : 0} (tab-set.json: tabbed only with more than one panel and a name)`)
+  }
+  const pages = input.route?.pagination
+  const nav = every().find((e) => classesOf(e).includes('salt-pagination'))
+  if (pages) {
+    const want = pages.total > 1
+      ? [...(pages.current > 1 ? ['previous'] : []), ...pageWindow(pages.current, pages.total).map((n) => (n === null ? 'gap' : String(n))), ...(pages.current < pages.total ? ['next'] : [])]
+      : []
+    const items = nav ? elementsOf(elementsOf(nav)[0] ?? { children: [] }) : []
+    const got = items.map((li) => {
+      if (classesOf(li).includes('salt-pagination__gap')) return 'gap'
+      const a = elementsOf(li)[0]
+      return a && attr(a, 'data-step') ? attr(a, 'data-step') : a ? textOf(a) : '?'
+    })
+    if (want.join(' ') !== got.join(' ')) fail(`${at}.html: the pagination draws [${got.join(', ')}]; page ${pages.current} of ${pages.total} gives [${want.join(', ')}] (pagination.json)`)
+  }
+
+  // A link-form button takes the site's arrow, in its label span, when the site supplies one
+  // (button.json); a button-form control never does.
+  for (const el of [root, ...descendants(root)].filter((e) => classesOf(e).includes('salt-button'))) {
+    const arrowed = elementsOf(el).some((k) => classesOf(k).includes('salt-button__label'))
+    const wants = el.name === 'a' && filledText(input.site?.arrow)
+    if (wants && !arrowed) fail(`${at}.html: ${describe(el)} "${textOf(el)}" draws no arrow, but the site supplies one (button.json)`)
+    if (!wants && arrowed) fail(`${at}.html: ${describe(el)} "${textOf(el)}" draws an arrow, which ${el.name === 'a' ? 'the site does not supply' : 'a button-form control never takes'} (button.json)`)
   }
 
   // Headings (section#labelled-by, section#heading-level, section#body-heading-base).
@@ -687,8 +759,9 @@ function checkMarkup(c) {
     if (!isPriority && attr(img, 'loading') !== 'lazy') fail(`${at}.html: an img that is not the priority image must be loading="lazy" (section#priority-media)`)
   }
   const backgroundImg = bindings.get('background')?.[0]
+  // A role, or the roles the first item may sit in (the carousel's track, list or lone card).
   const role = doc.priorityMedia?.role
-  const within = role ? (bindings.get(role) ?? []).flatMap((el) => (el.name === 'img' ? [el] : descendants(el).filter((d) => d.name === 'img'))) : []
+  const within = arr(role ?? []).flatMap((r) => bindings.get(r) ?? []).flatMap((el) => (el.name === 'img' ? [el] : descendants(el).filter((d) => d.name === 'img')))
   const expected = !ctx.priorityMedia ? null : backgroundImg ?? (within.length ? within : null)
   if (!ctx.priorityMedia && priority.length) fail(`${at}.html: the plan grants no priority media, but an img carries fetchpriority=high`)
   if (expected && !(Array.isArray(expected) ? expected.includes(priority[0]) : priority[0] === expected)) {

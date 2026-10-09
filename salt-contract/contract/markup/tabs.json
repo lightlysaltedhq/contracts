@@ -43,13 +43,7 @@
     {
       "role": "tab-set",
       "component": "tab-set",
-      "attributes": {
-        "aria-label": {
-          "value": "from:heading or label",
-          "when": "the set is named: a heading or a label is set. With neither, the attribute is absent, never empty"
-        }
-      },
-      "note": "Ids owned by the section's settled id (tab-set.json, SC-012); up to eight panels."
+      "note": "Ids owned by the section's settled id (tab-set.json, SC-012); up to eight panels. The section passes its name, the heading or else the label, to the tab set, which writes it as the radiogroup's aria-label (tab-set.json) and nowhere else: ARIA 1.2 prohibits aria-label on the generic div.salt-tabs. With neither, the set is unnamed and drawn stacked."
     }
   ],
   "headings": {
@@ -82,7 +76,8 @@
   "platforms": {
     "wordpress": {
       "owes": [
-        "The section."
+        "The section.",
+        "Name the tab set only on its radiogroup (div.salt-tabs__list), never with aria-label on div.salt-tabs."
       ]
     }
   }

@@ -1,7 +1,6 @@
 {
   "section": "collection-showcase",
-  "$comment": "Items carry categories as [{ title }], the same shape as tags. The entry with no category is drawn first, in the unheaded index list, as the index option's tree says.",
-  "summary": "Posts in the index layout, grouped: the one post with no category first in an unheaded list, then one group per category, each a heading (body base + 1) and its list of links.",
+  "summary": "Posts in the index layout, ungrouped: every post in one unheaded index list, with no group wrapper or heading.",
   "values": {
     "heading": "All our guides",
     "source": "posts",
@@ -10,18 +9,18 @@
       "mode": "automatic",
       "count": 4
     },
-    "groupByCategory": true,
+    "groupByCategory": false,
     "viewAll": false,
     "settings": {
-      "anchorId": "journal-index"
+      "anchorId": "journal-all"
     }
   },
   "context": {
     "headingLevel": 2,
     "headingRendered": true,
     "priorityMedia": false,
-    "track": "collection-showcase-5",
-    "index": 5
+    "track": "collection-showcase-1",
+    "index": 2
   },
   "collections": {
     "posts": [
