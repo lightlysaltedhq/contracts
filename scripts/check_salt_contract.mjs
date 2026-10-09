@@ -115,7 +115,8 @@ for (const abs of contractFiles) {
 // a rowLabel names a child, a list's min is not above its max, and shared.omit and
 // shared.defaults name shared settings. Every literal data-icon in markup is a name sections.json
 // lists under icons (SC-007), and a select whose options come from icons defaults to a content
-// name. Applies only once contract/sections.json exists.
+// name. Every id the markup draws or points at is a landmark id, <anchor>, or <owner>__<part>
+// (SC-012). Applies only once contract/sections.json exists.
 const read = (p) => { try { return JSON.parse(readFileSync(path.join(dir, p), 'utf8')) } catch { return null } }
 const vocab = read('contract/sections.json')
 // A vocabulary whose entries are objects; a bare list of ids has nothing to cross-check.
@@ -149,9 +150,32 @@ if (vocab && (vocab.sections ?? []).every((x) => x && typeof x === 'object')) {
       fails.push(`${file} draws icon ${n === '' ? '""' : n}, which sections.json icons does not list`)
     }
   }
+  // Drawn ids (SC-012): every id the markup draws, and every id an attribute points at, is a
+  // landmark id section#anchors reserves, the section's own <anchor>, or <owner>__<part>, the owner
+  // an id in sections.json or <anchor>. A slugged anchor cannot contain __, so such an id never
+  // meets one; a plain or from: id could.
+  const landmarks = new Set(read('contract/markup/section.json')?.rules?.anchors?.reserved ?? [])
+  const ID_ATTRIBUTES = ['id', 'for', 'aria-controls', 'aria-labelledby', 'aria-describedby']
+  const checkIds = (file, attributes) => {
+    for (const key of ID_ATTRIBUTES) {
+      const v = attributes?.[key]
+      if (v === undefined) continue
+      const values = typeof v === 'string' ? [v] : ['value' in v ? v.value : [], v.enum ?? []].flat()
+      for (const id of values.flatMap((x) => String(x).split(/\s+/)).filter(Boolean)) {
+        if (landmarks.has(id) || id === '<anchor>') continue
+        const owner = /^(<anchor>|[a-z][a-z0-9-]*)__[a-z0-9<>-]+$/.exec(id)?.[1]
+        if (!owner) { fails.push(`${file} draws ${key} ${id}, which is neither a landmark id nor <owner>__<part>`); continue }
+        if (owner !== '<anchor>' && !entryIds.has(owner)) fails.push(`${file} draws ${key} ${id}, whose owner ${owner} is not an id in sections.json`)
+      }
+    }
+  }
+  const checkAttributes = (file, attributes) => {
+    checkIcons(file, attributes?.['data-icon'])
+    checkIds(file, attributes)
+  }
   const walkNodes = (file, nodes) => {
     for (const node of nodes ?? []) {
-      checkIcons(file, node.attributes?.['data-icon'])
+      checkAttributes(file, node.attributes)
       walkNodes(file, node.children)
     }
   }
@@ -263,13 +287,13 @@ if (vocab && (vocab.sections ?? []).every((x) => x && typeof x === 'object')) {
     if (!doc) continue
     if (doc.id !== name) fails.push(`${rel(abs)} declares id ${doc.id}; its file name says ${name}`)
     if (!entryIds.has(name)) { fails.push(`${rel(abs)} describes nothing in sections.json`); continue }
-    checkIcons(rel(abs), doc.root?.attributes?.['data-icon'])
+    checkAttributes(rel(abs), doc.root?.attributes)
     walkNodes(rel(abs), doc.elements)
     for (const da of (doc.dataAttributes ?? []).filter((x) => x.name === 'data-icon')) checkIcons(rel(abs), da.values)
     for (const mv of doc.variants ?? []) {
       for (const o of Object.values(mv.options ?? {})) {
-        checkIcons(rel(abs), o.root?.attributes?.['data-icon'])
-        for (const diff of Object.values(o.elements ?? {})) checkIcons(rel(abs), diff.attributes?.['data-icon'])
+        checkAttributes(rel(abs), o.root?.attributes)
+        for (const diff of Object.values(o.elements ?? {})) checkAttributes(rel(abs), diff.attributes)
         walkNodes(rel(abs), [...Object.values(o.replace ?? {}), ...(o.tree ?? [])])
       }
     }

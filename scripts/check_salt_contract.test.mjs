@@ -514,3 +514,30 @@ test('cross-file: a value offered three times is reported once, with its count',
   const lines = r.out.split('\n').filter((l) => l.startsWith('✗'))
   assert.deepEqual(lines, ['✗ button variant style offers ghost 3 times in sections.json'])
 })
+
+// ── SC-012: every drawn id is a landmark id, <anchor>, or <owner>__<part> ───────────────────────
+const withLandmarks = (f) => {
+  f['contract/sections.json'].components.push({ id: 'section', label: 'Section' })
+  f['contract/markup/section.json'] = { $schema: '../../schema/markup.schema.json', version: '0.1.0', id: 'section', kind: 'component', rules: { anchors: { statement: 'x', reserved: ['main'] } } }
+}
+const idNode = (attributes) => ({ role: 'box', element: 'div', attributes })
+test('cross-file: landmark, <anchor> and <owner>__<part> ids pass', () => {
+  const r = crossRun((f) => {
+    withLandmarks(f)
+    f['contract/markup/hero.json'].elements = [idNode({ id: 'main' }), idNode({ id: '<anchor>' }), idNode({ id: '<anchor>__heading' }),
+      idNode({ 'aria-controls': 'button__menu-<n>', 'aria-describedby': { value: '<anchor>__email-error <anchor>__status' } })]
+  })
+  assert.equal(r.code, 0, r.out)
+})
+crossFail('a plain drawn id that is no landmark', (f) => {
+  withLandmarks(f); f['contract/markup/hero.json'].elements = [idNode({ id: 'hero-heading' })]
+}, /contract\/markup\/hero\.json draws id hero-heading, which is neither a landmark id nor <owner>__<part>/)
+crossFail('a drawn id read from content', (f) => {
+  withLandmarks(f); f['contract/markup/hero.json'].elements = [idNode({ 'aria-labelledby': 'from:plan.headingId' })]
+}, /draws aria-labelledby from:plan\.headingId, which is neither a landmark id nor <owner>__<part>/)
+crossFail('a drawn id whose owner sections.json lacks', (f) => {
+  withLandmarks(f); f['contract/markup/hero.json'].elements = [idNode({ for: 'consent-banner__title' })]
+}, /draws for consent-banner__title, whose owner consent-banner is not an id in sections\.json/)
+crossFail('an id in a variant option that is no landmark', (f) => {
+  withLandmarks(f); f['contract/markup/hero.json'].variants = [{ field: 'variant', options: { b: { root: { attributes: { id: 'navigation' } } } } }]
+}, /draws id navigation, which is neither a landmark id nor <owner>__<part>/)
