@@ -1,20 +1,28 @@
 {
   "$schema": "../schema/dials.schema.json",
   "version": "0.1.0",
-  "$comment": "The design dials (ladder tier 2). The ruling of 06/10/2026 on the Salt page calls for about six to ten, naming corners, shadows, button style and density. Neither platform has a dial today: Salt for Next.js's brand global and salt-wordpress's options-brand.php offer brand settings only (colours, type scale, fonts, logos, dark mode), which are tier 1. So every dial here is owed by both. Only corners and density are listed, because only they move tokens the shared stylesheets already read. Shadows and button style wait on component tokens the stylesheets do not read yet (no rule draws a shadow, and a button shares --radius-md with every input), which is a stylesheet change for the owner to rule on. A dial's options point at rungs; the runtime writes the rung's value from its scale, on the root, after the theme and before any site override in code. Drafted 09/10/2026.",
+  "$comment": "The design dials (ladder tier 2): four, by the owner's ruling recorded as SC-015, from the ruling of 06/10/2026 on the Salt page that named corners, shadows, button style and density. Neither platform has a dial today: Salt for Next.js's brand global and salt-wordpress's options-brand.php offer brand settings only (colours, type scale, fonts, logos, dark mode), which are tier 1. So every dial here is owed by both. Shadows and button style move component tokens the shared stylesheets read with a fallback (--salt-card-shadow, --salt-button-radius), so a site renders as before until an admin turns them. A dial's options point at rungs; the runtime writes the rung's value from its scale, on the root, after the theme and before any site override in code. Drafted 09/10/2026.",
   "dials": [
     {
       "id": "corners",
       "name": "corners",
       "label": "Corners",
-      "description": "How rounded cards, buttons, inputs and image frames are. Pills and circles (tags, portraits) stay round whatever you choose.",
+      "description": "How rounded cards, inputs and image frames are, and buttons unless the button style says otherwise. Pills and circles (tags, portraits) stay round whatever you choose.",
       "role": "admin",
-      "tokens": ["--radius-sm", "--radius-md", "--radius-lg"],
+      "tokens": [
+        "--radius-sm",
+        "--radius-md",
+        "--radius-lg"
+      ],
       "options": [
         {
           "value": "square",
           "label": "Square",
-          "sets": { "--radius-sm": "0", "--radius-md": "0", "--radius-lg": "0" }
+          "sets": {
+            "--radius-sm": "0",
+            "--radius-md": "0",
+            "--radius-lg": "0"
+          }
         },
         {
           "value": "soft",
@@ -25,7 +33,10 @@
         {
           "value": "round",
           "label": "Round",
-          "sets": { "--radius-sm": "--radius-md", "--radius-md": "--radius-lg" },
+          "sets": {
+            "--radius-sm": "--radius-md",
+            "--radius-md": "--radius-lg"
+          },
           "note": "Each corner takes the next rung up; a card's corner is already the largest rung short of full."
         }
       ],
@@ -42,17 +53,111 @@
       }
     },
     {
+      "id": "shadows",
+      "name": "shadows",
+      "label": "Shadows",
+      "description": "Whether cards sit flat on the page or lift off it with a shadow.",
+      "role": "admin",
+      "tokens": [
+        "--salt-card-shadow"
+      ],
+      "options": [
+        {
+          "value": "none",
+          "label": "None",
+          "sets": {},
+          "note": "Unset, the card reads its fallback, none."
+        },
+        {
+          "value": "subtle",
+          "label": "Subtle",
+          "sets": {
+            "--salt-card-shadow": "--shadow-sm"
+          }
+        },
+        {
+          "value": "raised",
+          "label": "Raised",
+          "sets": {
+            "--salt-card-shadow": "--shadow-md"
+          }
+        }
+      ],
+      "default": "none",
+      "platforms": {
+        "nextjs": {
+          "status": "owes",
+          "owes": "the select in the brand global's Appearance tab, writable by the admin role only, and the brand stylesheet writing the chosen design-foundations --shadow-* rung's value into --salt-card-shadow, with the shadow colour roles it references"
+        },
+        "wordpress": {
+          "status": "owes",
+          "owes": "the select in options-brand.php's Appearance tab, editable by the admin role only, and salt_brand_css() writing the chosen design-foundations --shadow-* rung's value into --salt-card-shadow, with the shadow colour roles it references"
+        }
+      },
+      "note": "The rungs are design-foundations' shadow family, whose values reference the shadow colour roles, so a shadow deepens in dark mode without a dark variant here. Only cards draw it; a dialog or menu that should lift takes the same token in a later release."
+    },
+    {
+      "id": "button-style",
+      "name": "buttonStyle",
+      "label": "Button style",
+      "description": "The corners of buttons: square, the same as the site’s other controls, or fully rounded pills.",
+      "role": "admin",
+      "tokens": [
+        "--salt-button-radius"
+      ],
+      "options": [
+        {
+          "value": "square",
+          "label": "Square",
+          "sets": {
+            "--salt-button-radius": "0"
+          }
+        },
+        {
+          "value": "soft",
+          "label": "Soft",
+          "sets": {},
+          "note": "Unset, a button reads its fallback, --radius-md, so it follows the corners dial with every other control."
+        },
+        {
+          "value": "pill",
+          "label": "Pill",
+          "sets": {
+            "--salt-button-radius": "--radius-full"
+          }
+        }
+      ],
+      "default": "soft",
+      "platforms": {
+        "nextjs": {
+          "status": "owes",
+          "owes": "the select in the brand global's Appearance tab, writable by the admin role only, and the brand stylesheet writing the chosen rung's value into --salt-button-radius"
+        },
+        "wordpress": {
+          "status": "owes",
+          "owes": "the select in options-brand.php's Appearance tab, editable by the admin role only, and salt_brand_css() writing the chosen rung's value into --salt-button-radius"
+        }
+      }
+    },
+    {
       "id": "density",
       "name": "density",
       "label": "Density",
       "description": "How much space sits above and below each section. Compact moves every section's spacing a step tighter, spacious a step looser; a section's own spacing setting still chooses among the steps.",
       "role": "admin",
-      "tokens": ["--space-section-sm", "--space-section-md", "--space-section-lg"],
+      "tokens": [
+        "--space-section-sm",
+        "--space-section-md",
+        "--space-section-lg"
+      ],
       "options": [
         {
           "value": "compact",
           "label": "Compact",
-          "sets": { "--space-section-md": "--space-section-sm", "--space-section-lg": "--space-section-md" }
+          "sets": {
+            "--space-section-md": "--space-section-sm",
+            "--space-section-lg": "--space-section-md"
+          }
         },
         {
           "value": "comfortable",
@@ -63,7 +168,10 @@
         {
           "value": "spacious",
           "label": "Spacious",
-          "sets": { "--space-section-sm": "--space-section-md", "--space-section-md": "--space-section-lg" }
+          "sets": {
+            "--space-section-sm": "--space-section-md",
+            "--space-section-md": "--space-section-lg"
+          }
         }
       ],
       "default": "comfortable",

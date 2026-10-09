@@ -5,8 +5,10 @@
 // customisation ladder"). Each check is proved able to fail by check_salt_extensions.test.mjs.
 // check_salt_contract.mjs already validates every file here against its schema.
 //
-// 1. DIALS (contract/dials.json). Every token a dial sets, and every rung an option points at, is
-//    named in contract/token-layer.json, so a dial can only move what the stylesheets read. An
+// 1. DIALS (contract/dials.json). Every token a dial sets is named in contract/token-layer.json, so
+//    a dial can only move what the stylesheets read. Every rung an option points at is named there
+//    too, or is a rung of design-foundations' scale shape (foundations/contract/scale-shape.json,
+//    beside this package): the runtime writes the rung's value, so it need not emit the rung. An
 //    option sets only its dial's tokens and never a token to itself. Dial ids and names are unique,
 //    option values are unique within a dial, and the default is one of them.
 // 2. VIEW PROPS (contract/view-props/). Every section in contract/sections.json has a file, no file
@@ -45,6 +47,19 @@ for (const g of layer?.groups ?? []) {
     }
   }
 }
+// The scale shape is design-foundations', which this repository holds beside the package; a
+// family's rungs are its css pattern with each step, or the pattern itself when it has no steps.
+const scaleRungs = new Set()
+try {
+  const shape = JSON.parse(readFileSync(path.join(here, '..', 'foundations', 'contract', 'scale-shape.json'), 'utf8'))
+  for (const f of Object.values(shape.families ?? {})) {
+    if (typeof f.css !== 'string') continue
+    if (f.css.includes('{k}')) for (const k of f.steps ?? []) scaleRungs.add(f.css.replace('{k}', k))
+    else scaleRungs.add(f.css)
+  }
+} catch (e) {
+  fails.push(`foundations/contract/scale-shape.json could not be read (${e.message}); a dial's rungs are checked against it`)
+}
 const dials = read('contract/dials.json')
 if (dials) {
   const ids = new Set()
@@ -66,7 +81,9 @@ if (dials) {
       for (const [token, to] of Object.entries(o.sets ?? {})) {
         if (!own.has(token)) fails.push(`${at}.${o.value}: sets ${token}, which is not one of the dial's tokens`)
         if (to === token) fails.push(`${at}.${o.value}: sets ${token} to itself`)
-        else if (to !== '0' && !layerNames.has(to)) fails.push(`${at}.${o.value}: points ${token} at ${to}, which contract/token-layer.json does not name`)
+        else if (to !== '0' && !layerNames.has(to) && !scaleRungs.has(to)) {
+          fails.push(`${at}.${o.value}: points ${token} at ${to}, which neither contract/token-layer.json nor design-foundations' scale shape names`)
+        }
       }
     }
     if (!values.has(d.default)) fails.push(`${at}: defaults to ${d.default}, which it does not offer`)
@@ -171,5 +188,5 @@ if (fails.length) {
   for (const f of fails) console.log(`✗ ${f}`)
   process.exit(1)
 }
-console.log(`PASS: ${(dials?.dials ?? []).length} dial(s) move only tokens the layer names; ` +
+console.log(`PASS: ${(dials?.dials ?? []).length} dial(s) move only tokens the layer names, to rungs that exist; ` +
   `${propFiles.length} view-props file(s), one per section, each field a real one; the replaced-logic examples hold.`)

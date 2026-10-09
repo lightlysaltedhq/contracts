@@ -284,7 +284,9 @@ body {
   padding-inline: 1.25rem;
 
   border: 1px solid transparent;
-  border-radius: var(--radius-md);
+  /* The button-style dial's component token (contract/dials.json); unset, a button keeps the
+     control corner every input shares. */
+  border-radius: var(--salt-button-radius, var(--radius-md));
 
   /*
    * The contract's `label`, "buttons, form labels, navigation" (BD-185), on every style, the link
@@ -398,6 +400,10 @@ body {
      declaration, the design decision reversed by the band (BD-033). */
   border: 1px solid var(--salt-section-border, var(--color-border));
   border-radius: var(--radius-lg);
+  /* The shadows dial's component token (contract/dials.json), which a runtime writes as a
+     design-foundations --shadow-* rung's value; unset, a card is flat. A card is never the focused
+     element (its link is), so this shadow never meets the focus ring's. */
+  box-shadow: var(--salt-card-shadow, none);
 }
 
 /*

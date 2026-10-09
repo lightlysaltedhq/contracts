@@ -1400,9 +1400,16 @@ describe('nothing outside the focus rules declares an outline or a box-shadow', 
     ['primitives.css', "[class*='salt-button'] {\n  box-shadow: none;\n}"],
     ['blocks.css', '.salt-block a {\n  outline: none;\n}'],
     ['primitives.css', '.salt-card {\n  all: unset;\n}'],
+    ['primitives.css', '.salt-card__body {\n  box-shadow: var(--salt-card-shadow, none);\n}'],
   ])('fails on %s given `%s`', (file, addition) => {
     const { code, output } = gate(file, appending(addition))
     expect(output).toContain('nothing outside the focus rules declares an outline or a box-shadow')
+    expect(code).toBe(1)
+  })
+
+  it('fails when the card’s shadow, a named exception, is gone', () => {
+    const { code, output } = gate('primitives.css', replacing('  box-shadow: var(--salt-card-shadow, none);\n', ''))
+    expect(output).toContain('primitives.css .salt-card box-shadow: a named exception not found exactly once')
     expect(code).toBe(1)
   })
 
@@ -1450,6 +1457,9 @@ describe('the scale tokens the stylesheets read', () => {
     ['a corner longhand written as a literal', 'blocks.css', appending('.salt-note {\n  border-top-left-radius: 4px;\n}'), 'writes `border-top-left-radius: 4px`'],
     ['a radius on a rung the token layer does not name', 'blocks.css', appending('.salt-note {\n  border-radius: var(--radius-xl);\n}'), 'contract/token-layer.json names no `--radius-xl`'],
     ['a radius !important', 'primitives.css', appending('.salt-note {\n  border-radius: var(--radius-sm) !important;\n}'), 'declares `border-radius` !important'],
+    ['a dial\u2019s radius token the token layer does not name', 'primitives.css', replacing('var(--salt-button-radius, var(--radius-md))', 'var(--salt-chip-radius, var(--radius-md))'), 'contract/token-layer.json names no `--salt-chip-radius`'],
+    ['a dial\u2019s radius token falling back to a literal', 'primitives.css', replacing('var(--salt-button-radius, var(--radius-md))', 'var(--salt-button-radius, 6px)'), 'writes `border-radius: var(--salt-button-radius, 6px)`'],
+    ['a dial\u2019s radius token falling back to a rung the layer does not name', 'primitives.css', replacing('var(--salt-button-radius, var(--radius-md))', 'var(--salt-button-radius, var(--radius-xl))'), 'contract/token-layer.json names no `--radius-xl`'],
     ['an opacity written as a literal', 'primitives.css', replacing('  opacity: var(--opacity-heavy);', '  opacity: 0.6;'), 'writes `opacity: 0.6`'],
     ['an opacity reading another family', 'primitives.css', replacing('  opacity: var(--opacity-medium);', '  opacity: var(--scrim-standard);'), 'reads a `--opacity-*` token'],
     ['a filter opacity()', 'primitives.css', appending('.salt-note {\n  filter: opacity(0.5);\n}'), '`opacity()` is a shape this contract does not rank'],

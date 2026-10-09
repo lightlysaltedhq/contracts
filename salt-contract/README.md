@@ -42,9 +42,8 @@ the Salt page.
 
 1. **Brand settings.** The site's colours, fonts, type scale and logos, set in the admin. *On
    update, everything still reaches the site.*
-2. **Design dials and tokens.** Site-wide choices from a scale, such as corners and density, set
-   in the admin by the admin role only (`contract/dials.json`); each moves several tokens at once.
-   Any token in `contract/token-layer.json` may also be overridden in the site's code, for what the
+2. **Design dials and tokens.** Site-wide choices from a scale (corners, shadows, button style
+   and density), set in the admin by the admin role only (`contract/dials.json`). Any token in `contract/token-layer.json` may also be overridden in the site's code, for what the
    dials do not cover. A site's own CSS reaches values through tokens, never hard-coded ones, so
    dark mode, the contrast checks and the dials keep working on it. *On update, everything still
    reaches the site.*
@@ -53,9 +52,10 @@ the Salt page.
 4. **Swap a section's view.** The normal case. The site replaces how one section looks and keeps
    its logic, which hands the new view exactly the props in `contract/view-props/<section>.json`.
    The swap is declared (`tier: "view"`) in the site's `salt-overrides.json`
-   (`schema/replaced-logic.schema.json`). *On update, all of the section's logic, the section
-   wrapper and the shared components still reach the site; core's default view of that section
-   does not. A release that changes the section's view props is flagged.*
+   (`schema/replaced-logic.schema.json`); on WordPress, the child theme's `OVERRIDES.md` points at it
+   rather than repeating it. *On update, all of the section's logic, the section wrapper and the
+   shared components still reach the site; core's default view of that section does not. A
+   release that changes the section's view props is flagged.*
 5. **Replace a section's logic.** Rare. The site takes the section over entirely and declares it
    (`tier: "logic"`). *On update, nothing reaches that section; it is flagged on every update.*
 6. **A client-only section.** A section only this site has, listed under `clientSections` so a

@@ -3497,7 +3497,12 @@ const CONTRACTS = [
       'one, which is how a subject-based version of this check was passed three times. The named ' +
       'exceptions are listed one declaration each, and the conformance test holds the same list.',
     check: (_rules, all) => {
-      const EXCEPTIONS = ["primitives.css .salt-contact__input[aria-invalid='true']:not(:focus-visible) box-shadow"]
+      /* The card's shadow is the shadows dial's (contract/dials.json): a card is never the focused
+         element, its stretched link is, so the ring is never drawn on the box this shadow paints. */
+      const EXCEPTIONS = [
+        "primitives.css .salt-contact__input[aria-invalid='true']:not(:focus-visible) box-shadow",
+        'primitives.css .salt-card box-shadow',
+      ]
       const found = []
       for (const [file, rules] of all) {
         for (const rule of rules) {
@@ -4915,7 +4920,15 @@ const CONTRACTS = [
               scrims += 1
               continue
             }
-            const token = /^var\(\s*(--[\w-]+)\s*\)$/i.exec(value)
+            /* A dial's component token (contract/dials.json) may stand in front of the rung, as
+               `var(--salt-<component>-radius, var(--radius-<rung>))`: unset, the rung applies, and the
+               component token must be one the token layer names. */
+            const dialled = family === 'radius' ? /^var\(\s*(--salt-[\w-]+-radius)\s*,\s*(var\(\s*--[\w-]+\s*\))\s*\)$/i.exec(value) : null
+            if (dialled !== null) {
+              const component = themeValue(dialled[1] ?? '')
+              if ('missing' in component) return `${where} reads \`${dialled[1] ?? ''}\`, and ${component.missing}`
+            }
+            const token = /^var\(\s*(--[\w-]+)\s*\)$/i.exec(dialled === null ? value : (dialled[2] ?? ''))
             if (token === null || !(token[1] ?? '').startsWith(`--${family}-`)) {
               return `${where} writes \`${property}: ${value}\`; it reads a \`--${family}-*\` token, exactly \`var(--${family}-<rung>)\``
             }

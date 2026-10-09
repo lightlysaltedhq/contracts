@@ -60,7 +60,15 @@ test('a token the layer drops fails the dial that sets it', () => {
   }), /corners: sets --radius-sm, which contract\/token-layer\.json does not name/)
 })
 test('an option pointing at a rung the layer does not name fails', () => {
-  expectFail((json) => json('contract/dials.json', (d) => { dial(d, 'corners').options[2].sets['--radius-md'] = '--radius-xl' }), /points --radius-md at --radius-xl/)
+  expectFail((json) => json('contract/dials.json', (d) => { dial(d, 'corners').options[2].sets['--radius-md'] = '--radius-xl' }), /points --radius-md at --radius-xl, which neither contract\/token-layer\.json nor design-foundations' scale shape names/)
+})
+test('an option pointing at a rung neither the layer nor the scale shape names fails', () => {
+  expectFail((json) => json('contract/dials.json', (d) => { dial(d, 'shadows').options[2].sets['--salt-card-shadow'] = '--shadow-2xl' }), /points --salt-card-shadow at --shadow-2xl/)
+})
+test('a component token the layer drops fails the dial that sets it', () => {
+  expectFail((json) => json('contract/token-layer.json', (d) => {
+    for (const g of d.groups) g.tokens = g.tokens.filter((t) => t.name !== '--salt-button-radius')
+  }), /button-style: sets --salt-button-radius, which contract\/token-layer\.json does not name/)
 })
 test('an option setting a token outside its dial fails', () => {
   expectFail((json) => json('contract/dials.json', (d) => { dial(d, 'corners').options[0].sets['--radius-full'] = '0' }), /sets --radius-full, which is not one of the dial's tokens/)
