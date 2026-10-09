@@ -1,0 +1,1951 @@
+/*
+ * The primitive set: buttons, cards, eyebrows.
+ *
+ * REQUIRES the token layer. Every colour resolves through a semantic role and every length
+ * through a token or a stated floor, so a client repo retunes all of it in one place.
+ */
+
+/*
+ * ── Which palette the browser itself paints with ────────────────────────────────
+ *
+ * `color-scheme` decides the things no stylesheet draws: the canvas behind the document,
+ * scrollbars, form controls, the caret. It follows `data-theme` and never the operating
+ * system, because `data-theme` is the one thing that decides which mode this document is in
+ * (WP9 unit 4) — the pre-paint script resolves the OS preference into it before first paint,
+ * so by the time anything paints, the attribute is the answer and the media query is not.
+ *
+ * `light dark` here would be the plausible wrong edit: it reads as "this site supports both
+ * now", and it hands the decision back to the OS for exactly the parts of the page CSS does
+ * not cover. An OS-dark reader who has chosen light gets a dark canvas and dark scrollbars
+ * around white sections — which is the mismatch the example app's scaffold stylesheet pinned
+ * `color-scheme: light` to avoid before there was a toggle, and the reason that pin is gone
+ * rather than moved.
+ *
+ * **The order of these two blocks is load-bearing and is not visible in either of them.**
+ * `:root` and `[data-theme='dark']` are both (0,1,0), so the dark declaration wins because it
+ * comes second and for no other reason. Swap them and every selector still reads correctly
+ * while a reader in dark mode gets a light canvas.
+ *
+ * `verify:stylesheet-contracts` holds it by resolving SPECIFICITY AND SOURCE ORDER rather
+ * than by checking a list of blocks: it works out which `color-scheme` declaration wins on a
+ * document carrying the attribute and on one without it, and requires each winner to be the
+ * right one. Highest specificity, last declaration on a tie. That is what it takes to catch
+ * a second `:root { color-scheme: light }` appended below — an edit that disturbs nothing
+ * already here and is one line of "restore the pin".
+ *
+ * It is NOT a cascade engine and does not claim to be. Layer order and importance both
+ * outrank everything it models, so a `color-scheme` declaration inside `@layer` or carrying
+ * `!important` is refused as unrankable rather than ranked wrongly. If these stylesheets
+ * ever start using layers, that refusal is where the conversation begins.
+ *
+ * This comment has now claimed a gate twice and been wrong twice: first when no check
+ * existed at all, then when the check held these two blocks and their order and was walked
+ * past four more ways. So, precisely: the eight RANKING verdicts were checked against a real
+ * browser's computed `color-scheme` WHEN THEY WERE WRITTEN, on 22/09/2026 — the gate's test
+ * records them. The refusal verdicts above were not and could not be: two of them
+ * deliberately disagree with the browser, because a contract that cannot rank a declaration
+ * should say so rather than be right by luck. Nothing re-runs the comparison either way, as
+ * no browser runs in the gate's test.
+ *
+ * A document with no `data-theme` at all — a site that renders no `<ThemeScript>`, or one
+ * whose reader has JavaScript off — is light, which is what every stylesheet here draws
+ * for it.
+ */
+:root {
+  color-scheme: light;
+}
+
+[data-theme='dark'] {
+  color-scheme: dark;
+}
+
+/*
+ * ── The page ground ─────────────────────────────────────────────────────────────
+ *
+ * The brand's `surface` with its `ink`, the pair the contrast manifest measures as "the page",
+ * in both modes because both roles re-point under `[data-theme='dark']` (BD-162).
+ *
+ * `color-scheme` above decides the browser's canvas, and a canvas is not a ground: in dark mode
+ * it is the engine's own #121212 rather than the brand's dark surface, and text outside a band
+ * sits on it in the browser's `CanvasText`. A reader sees enough contrast. axe-core cannot: it
+ * resolves a transparent `<html>` and `<body>` to white, and reported the consent control at
+ * 1.19:1 in dark mode where the pixel under it measured 15.66:1 (BD-149). A ground a reader can
+ * see and a checker cannot is one nothing holds.
+ *
+ * It was the example app's and salt-site's to paint, each in its own `site.css`, so any other
+ * site got the canvas. Core paints it now. `body` rather than `html` because the root carries
+ * no background here, so the body's propagates to the canvas and fills the viewport past the
+ * end of a short page, which is the one thing the canvas was doing right. A site's own `body`
+ * rule after this stylesheet and outside any cascade layer still wins on source order. One
+ * inside a layer does not, `@layer base` or a Tailwind `bg-*` utility on `<body>` among them:
+ * this rule is unlayered, and an unlayered declaration beats a layered one whatever the order.
+ * It stays unlayered on purpose, so a utility cannot quietly repaint the page.
+ * `verify:stylesheet-contracts` holds that nothing else in core paints the root or the body.
+ */
+body {
+  background-color: var(--color-surface);
+  color: var(--color-ink);
+}
+
+/*
+ * ── The focus indicator ─────────────────────────────────────────────────────────
+ *
+ * Two parts, everywhere, and BD-016/BD-023 are why. A single ring cannot clear 3:1 on all
+ * four tones for every brand seed — the pairing is over-constrained, not unlucky — so the
+ * indicator is the focus-token ring plus a keyline drawn from the tone's paired foreground.
+ *
+ * ── The geometry, which is the whole of it ──────────────────────────────────────
+ *
+ * What matters is not that both parts exist. It is **which part touches the band**, because
+ * that is the pairing the records measured.
+ *
+ * The outline paints OVER the box-shadow, so `offset: 2px` + `spread: 4px` gives
+ * `[band][ring][keyline][fill]` — the shadow's outer half covered, the ring adjacent to the
+ * tone. Measured in Chromium, that puts `surface-inverse` at **2.775:1 light and 2.235:1
+ * dark**: precisely the pairing BD-016 proved no seed can fix, arrived at by a stylesheet
+ * that quotes BD-016 four lines above.
+ *
+ * `spread: 6px` gives `[band][keyline][ring][keyline][fill]` — three bands, with the
+ * keyline outermost. The outer boundary is then the tone's own body ink against the tone,
+ * which the AA text guarantee already holds at 4.5:1 and which measures **at worst 12.197:1
+ * across the swept seeds**, in both modes, on `surface-alt`. (Not "13.354 light / 12.197
+ * dark on every tone" — those are two specific tones at the default seed, and stating a
+ * per-tone measurement as a universal is the same over-claim this file was correcting.)
+ *
+ * The offset is still load-bearing, but not for the reason first given. It does not expose
+ * the tone — the shadow fills that gap — it decides the ORDER of the two parts. At offset 0
+ * the keyline is outermost too, so **BD-025's** "never `outline-offset: 0`" reasoned from an
+ * assumption the box-shadow falsifies. (BD-025, not BD-023; the two were conflated here.)
+ * The rule that survives is the one this file can check: the keyline must be the part
+ * adjacent to the band.
+ *
+ * ── What this geometry does NOT deliver ─────────────────────────────────────────
+ *
+ * Two things, both recorded in BD-027 rather than left in a comment.
+ *
+ * The ring is now interior, so it touches the keyline on both sides and the band on
+ * neither. Across the 766 swept seeds that boundary bottoms at **2.356:1 in light** (seed
+ * `#b33cff`) and **2.087:1 in dark** (`#00a310`) — the same pairing as the defect this
+ * replaced, relocated rather than resolved. It is not a 1.4.11 failure, since the criterion
+ * asks about the indicator's outer boundary, but the two parts may not be distinguishable
+ * FROM EACH OTHER.
+ *
+ * (2.775 and 2.235 are the DEFAULT-SEED values. An earlier version of this comment gave
+ * them as the sweep minima, in the paragraph objecting to a per-tone measurement stated as
+ * a universal. `roles.ts` and `pairings.ts` already carried the right numbers.)
+ *
+ * Which matters for the case BD-023 decided and nothing here implements: over a photograph
+ * with the scrim off, only the outermost part touches the image, and it is one pole, not
+ * two. `focus-over-image` measures a both-poles composition this stylesheet does not draw.
+ */
+.salt-button:focus-visible,
+.salt-card__link:focus-visible,
+.salt-accordion__summary:focus-visible,
+/* The tab's indicator is drawn on the LABEL and triggered by the INPUT, because the input is
+   what takes focus and it is clipped to a pixel. Every other entry in this list is one
+   element; this one is two, and it is written out rather than folded into the `:is()` below,
+   which appends `:focus-visible` to each of its members and so cannot express a combinator. */
+.salt-tabs__input:focus-visible + .salt-tabs__tab,
+.salt-tabs__panel:focus-visible,
+.salt-showcase__link:focus-visible,
+.salt-pagination__link:focus-visible,
+.salt-share__link:focus-visible,
+.salt-copy-link__button:focus-visible,
+.salt-search__input:focus-visible,
+.salt-consent-panel__checkbox:focus-visible,
+/* The chrome's controls join this list rather than declaring a second geometry in
+   `chrome.css`: one indicator, one set of measurements, one contract reading one file. */
+.salt-logo:focus-visible,
+.salt-nav__link:focus-visible,
+.salt-nav__sublink:focus-visible,
+.salt-nav__toggle:focus-visible,
+.salt-header__burger:focus-visible,
+.salt-drawer__close:focus-visible,
+.salt-theme-toggle:focus-visible,
+.salt-header__phone:focus-visible,
+.salt-footer__link:focus-visible,
+.salt-footer__social-link:focus-visible,
+/* The contact form's fields (WP7 unit 7). A text field matches `:focus-visible` on a click as well
+   as a key, which is the browser's rule for anything that takes typing and is what a field wants. */
+.salt-contact__input:focus-visible,
+/* Three that drew the browser's own ring until BD-167: an editor's link in rich text, a linked
+   logo, and the carousel track when it is a tab stop because its slides hold nothing focusable.
+   The rich-text link is named through its container because the renderer gives it no class of
+   its own, and the tag sits in `:where()` so it adds no specificity: in the image-backed rule's
+   `:is()` a bare `a` would lift that whole rule from (0,4,0) to (0,4,1). `contract-conformance.test.ts` now requires every focusable element core renders to
+   be in this list or named there with a reason, which is what found them. */
+.salt-rich-text :where(a):focus-visible,
+/* The case study's link back to its index (BD-206). */
+.salt-case-study-view__back-link:focus-visible,
+.salt-logos__frame:focus-visible,
+.salt-carousel__track:focus-visible,
+/* The contact form's status message, which script focuses after a send so a screen reader
+   announces the result (BD-155). It is not a control, and it takes the ring anyway, as GOV.UK's
+   error summary does, because a sighted keyboard user has to see where focus went (BD-167). */
+.salt-contact__status:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-focus);
+  outline-offset: var(--focus-ring-offset);
+  /*
+   * The ring's offset and width plus 2px: 6px at the default tokens. The outline covers the
+   * shadow out to offset + width, so a spread of exactly that leaves the RING against the band,
+   * and 2px more leaves the KEYLINE against it — which is the part BD-016 proves clears the bar
+   * on every tone at every seed. Derived from the ring's tokens rather than written as 6px, so a
+   * site that widens `--focus-ring-width` keeps a 2px keyline outermost instead of burying it
+   * under the ring (#189 review, MEDIUM 2).
+   */
+  box-shadow: 0 0 0 calc(var(--focus-ring-offset) + var(--focus-ring-width) + 2px) var(--salt-section-ink, var(--color-ink));
+}
+
+/*
+ * ── The indicator over a photograph ─────────────────────────────────────────────
+ *
+ * BD-023 decided this and BD-027 records that it went unimplemented for a unit: an
+ * image-backed section's indicator carries BOTH poles, not the tone's single one.
+ *
+ * The flat-tone indicator is correct on a flat band and no answer at all on a photograph.
+ * Its outer part is whichever pole the tone pairs with — `ink` on `surface`, `ink-inverse`
+ * on `surface-inverse` — and a photograph that happens to match it leaves a keyboard user
+ * with nothing. The ring cannot rescue it, because at `spread > offset + width` the ring is
+ * interior and touches the image nowhere. Scrim-off is a state `sectionSettings()` permits
+ * and describes to the editor as their choice, so this is a shipped configuration.
+ *
+ * Two shadows, and the ORDER is the whole of it. Earlier shadows in the list paint over
+ * later ones, so the contra pole covers out to the ring's offset and width plus 2px (6px at the
+ * default tokens) and the tone ink shows only in the 2px beyond it (6→8):
+ *
+ *     [image][ink 2px][contra 2px][ring 2px][contra 2px][fill]
+ *              ↑ outermost, so a flat or scrimmed band still measures the pairing the
+ *                audit proved — 12.197:1 at worst — rather than an arbitrary pole
+ *
+ * Why that survives any photograph, from BD-023's closed form: whichever pole contrasts is
+ * the one the eye finds, because the pole that matches the image simply merges into it and
+ * the next band out reads against the image instead. The guarantee is one inequality — the
+ * indicator survives any image iff the two poles clear 9:1 against each other — and `ink`
+ * against `ink-inverse` measures 13.354:1 in light and 12.197:1 in dark. So the worst any
+ * photograph can do is 3.654:1 and 3.492:1, both over the 3:1 bar.
+ *
+ * 8px rather than 6px, and only here. An indicator this heavy on every band would be
+ * chrome; on the one configuration where the alternative is no indicator at all, it is the
+ * cost of the promise WP2 made.
+ */
+/* The chrome's controls are named here too. The header and the footer are never inside a
+   `.salt-section`, so this rule can never match one — but the contract reads the flat-tone
+   list and requires the image composition to cover every control in it, and weakening that to
+   allow an exception is how a card link quietly drops back to the one-pole indicator. */
+.salt-section[data-media] :is(.salt-button, .salt-card__link, .salt-accordion__summary, .salt-tabs__panel, .salt-showcase__link, .salt-pagination__link, .salt-search__input, .salt-share__link, .salt-copy-link__button, .salt-consent-panel__checkbox, .salt-logo, .salt-nav__link, .salt-nav__sublink, .salt-nav__toggle, .salt-header__burger, .salt-drawer__close, .salt-theme-toggle, .salt-header__phone, .salt-footer__link, .salt-footer__social-link, .salt-contact__input, .salt-rich-text :where(a), .salt-case-study-view__back-link, .salt-logos__frame, .salt-carousel__track, .salt-contact__status):focus-visible,
+/* The tab, in the same rule rather than a second one. The contract reads a rule at a time and
+   asks that it cover every control the flat-tone list names, so a tab in its own rule would be
+   a rule that covers one control and fails, and the flat-tone list names `.salt-tabs__input`. */
+.salt-section[data-media] .salt-tabs__input:focus-visible + .salt-tabs__tab {
+  /*
+   * The ring is restated rather than inherited from the base rule. It is two lines of
+   * duplication and it buys a checkable invariant: EVERY `:focus-visible` rule in this file
+   * declares its whole geometry, so the contract can read one rule and know which part is
+   * outermost. A rule that overrode only the keyline would need the gate to resolve the
+   * cascade, which it cannot do, and the contract would have to be weakened to let it pass.
+   */
+  outline: var(--focus-ring-width) solid var(--color-focus);
+  outline-offset: var(--focus-ring-offset);
+  /*
+   * Both `var()`s carry a fallback, and that is not defensive habit. A `var()` with no
+   * fallback that resolves to nothing makes the whole declaration invalid at computed-value
+   * time, so `box-shadow` would fall back to `none` and BOTH poles would vanish — a bare
+   * 2px ring over a photograph, worse than the single-pole version this replaced. The
+   * fallbacks are the light-mode poles, matching the base rule's own.
+   */
+  box-shadow:
+    0 0 0 calc(var(--focus-ring-offset) + var(--focus-ring-width) + 2px) var(--salt-section-ink-contra, var(--color-ink-inverse)),
+    0 0 0 calc(var(--focus-ring-offset) + var(--focus-ring-width) + 4px) var(--salt-section-ink, var(--color-ink));
+}
+
+/*
+ * ── The WCAG 2.5.8 floor ────────────────────────────────────────────────────────
+ *
+ * 24×24 CSS pixels, and an icon-only control is the case that fails it: a 16px glyph in
+ * tight padding measures fine to a mouse and is a miss to a thumb. Enforced here rather
+ * than asked of each caller.
+ *
+ * Inline text links inside prose are exempt under 2.5.8's own exception, which is why the
+ * `link` style carries no minimum — a link in a sentence cannot be padded without breaking
+ * the line box it lives in.
+ */
+.salt-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5em;
+
+  /*
+   * Floored in CSS pixels here, once, so every button inherits it — including the icon-only
+   * ones. WCAG 2.5.8 is stated in CSS pixels and `rem` is not, so a consuming repo setting
+   * `html { font-size: 62.5% }` would otherwise drop every control below the bar.
+   */
+  min-block-size: max(2.75rem, 24px);
+  padding-inline: 1.25rem;
+
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+
+  /*
+   * The contract's `label`, "buttons, form labels, navigation" (BD-185), on every style, the link
+   * style included: the one link-style button core draws is the showcase's "View all", a call to
+   * action under the cards rather than a word in a sentence. It replaces `font: inherit`, which a
+   * role cannot sit beside.
+   */
+  font-size: var(--text-label);
+  line-height: var(--text-label--line-height);
+  letter-spacing: var(--text-label--letter-spacing);
+  font-weight: var(--text-label--font-weight);
+  font-family: var(--text-label--font-family);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/*
+ * Icon-only controls are square at the text-button height, not shrunk to the floor.
+ *
+ * `24px` inside the `max()`, never a bare `1.5rem`: WCAG 2.5.8 is stated in CSS pixels and
+ * `rem` is not, so a client repo adding `html { font-size: 62.5% }` — a widespread rem-math
+ * convention — would otherwise drop every control to a 15px minimum. `max()` scales up with
+ * a larger root and refuses to scale below the criterion.
+ *
+ * This rule used to set both axes to `max(1.5rem, 24px)`, and because it is (0,2,0) against
+ * the base's (0,1,0) it REPLACED the 2.75rem height rather than adding to it: a "floor" that
+ * lowered a 44px control to 24px, so a close button rendered 24px tall beside a 44px Send.
+ * 2.5.8 was satisfied either way, which is why nothing caught it. The word in the brief is
+ * "pad to the floor" — raise what is under it, not cap what is over it.
+ *
+ * The block axis is now the base rule's business and is not restated here. The inline axis
+ * has to be, because a button's width comes from its content and one glyph is not 44px wide.
+ */
+.salt-button[data-icon-only] {
+  min-inline-size: max(2.75rem, 24px);
+  padding-inline: 0.5rem;
+}
+
+.salt-button[data-style='primary'] {
+  background-color: var(--color-brand);
+  color: var(--color-on-brand);
+}
+
+.salt-button[data-style='secondary'] {
+  background-color: transparent;
+  color: var(--salt-section-ink, var(--color-ink));
+  border-color: var(--salt-section-boundary, var(--color-border-strong));
+}
+
+.salt-button[data-style='ghost'] {
+  background-color: transparent;
+  color: var(--salt-section-ink, var(--color-ink));
+}
+
+/*
+ * The `link` style is a link, so it opts out of the button box entirely — including the
+ * hit-area floor, under 2.5.8's inline-exception. Padding it would break the line box.
+ */
+/*
+ * `:not([data-icon-only])` rather than relying on source order.
+ *
+ * Both selectors were (0,2,0), so the later one won — and the later one was this, which
+ * sets `min-block-size: 0` and `display: inline`. An icon-only link measured 24×22 on a
+ * `<button>` and 16×17 on an `<a>`, below the floor at the DEFAULT root size. 2.5.8's
+ * inline exception cannot cover it either: the exception is for a link in a sentence, and
+ * an icon-only control is not in a sentence.
+ */
+.salt-button[data-style='link']:not([data-icon-only]) {
+  display: inline;
+  min-block-size: 0;
+  padding-inline: 0;
+  border: none;
+  background: none;
+  /*
+   * The tone's own ink, not `brand-strong`.
+   *
+   * `FOREGROUND_SCOPE` scopes `brand-strong` to `on: []` — "a fill… darker than `brand` and
+   * therefore more tempting as text, which is precisely why it needs saying rather than
+   * assuming" — and this rule was the thing it was warning about. Measured across the swept
+   * seeds, `brand-strong` on `surface-inverse` bottoms at 1.715:1 in light and 1.486:1 in
+   * dark. A text link in an inverted hero was very nearly invisible.
+   *
+   * The underline is what marks it as a link, which is also what WCAG 1.4.1 asks for: the
+   * affordance cannot be carried by colour alone. Brand-coloured links need a link role
+   * derived to meet the text obligation, which core does not emit — BD-028.
+   */
+  color: var(--salt-section-ink, var(--color-ink));
+  text-decoration: underline;
+}
+
+.salt-button:disabled {
+  cursor: not-allowed;
+  opacity: var(--opacity-heavy);
+}
+
+/*
+ * ── The stretched link ──────────────────────────────────────────────────────────
+ *
+ * The card is the positioned ancestor; the link's `::after` grows to cover it. One real
+ * anchor, full-card hit area, and the accessible name is the title rather than "read more"
+ * — which is what stops a screen-reader user's link list becoming a column of identical
+ * entries (WCAG 2.4.4).
+ *
+ * Exactly one per card. Two overlapping stretched links leave the earlier one announced but
+ * unreachable by mouse, which is worse than either alone.
+ */
+.salt-card {
+  position: relative;
+  /* The band's own hairline, not the light-mode one. `var(--color-border)` here was a
+     hairline on three tones and a hard light outline on `surface-inverse` — the same
+     declaration, the design decision reversed by the band (BD-033). */
+  border: 1px solid var(--salt-section-border, var(--color-border));
+  border-radius: var(--radius-lg);
+}
+
+/*
+ * A heading in a card is the contract's `heading-4`, "a card title", whatever its element (BD-173).
+ * The plan gives a card's title the level below the heading it sits under, so the same title is an
+ * `h3` on one page and an `h4` on another, and the base styles, which set a heading by its element,
+ * would draw it at `heading-3` under a section's `h2`: a section heading's rank inside every card.
+ * A heading in the card's rich text takes the role too; a card is too small a place for a ladder.
+ */
+.salt-card :is(h1, h2, h3, h4, h5, h6) {
+  font-size: var(--text-heading-4);
+  line-height: var(--text-heading-4--line-height);
+  letter-spacing: var(--text-heading-4--letter-spacing);
+  font-weight: var(--text-heading-4--font-weight);
+  font-family: var(--text-heading-4--font-family);
+}
+
+/*
+ * Scoped to `.salt-card`, and that is a fix rather than tidiness.
+ *
+ * `inset: 0` resolves against the nearest POSITIONED ancestor, and `sections.css` gives
+ * `.salt-section__content` `position: relative`. So an unscoped rule meant a `CardLink`
+ * rendered outside a `Card` — both are exported independently, with nothing tying them
+ * together — grew its hit area to the entire section band. Measured: a stray link captured
+ * every hit test inside two sibling cards, including their own titles. Invisible, keyboard
+ * unaffected, mouse-only.
+ */
+.salt-card .salt-card__link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+/*
+ * Anything genuinely interactive inside the card sits above the overlay, so it keeps its
+ * own clicks. Without this the stretched link swallows a nested control silently — it still
+ * focuses by keyboard, so the defect shows only to a mouse.
+ *
+ * The first list was the obvious five and missed `summary` and `label`. Measured inside a
+ * card: clicking a `<summary>` navigated instead of expanding, and a `<label>`'s text hit
+ * the card link because the `<input>` was raised and its label was not. A FAQ card using
+ * `<details>` and a card carrying a checkbox are both ordinary shapes.
+ *
+ * ── Why `[tabindex]` is NOT in this list ────────────────────────────────────────
+ *
+ * It was, briefly, and it caused the exact failure the rule prevents. `[tabindex]` matches
+ * far more than controls: a `<div tabindex="0">` making a scroll region keyboard-reachable,
+ * or a `<div tabindex="-1">` used as a focus target after a route change, is a layout box
+ * that often spans the whole card. Raising it puts an inert div over the stretched link and
+ * the card stops being clickable — a nested-control defect caused by the nested-control fix.
+ *
+ * Widget roles are real controls, so they stay, but in their own rule: an attribute selector
+ * would lift the element list from (0,2,1) to (0,3,0), and a consuming repo's
+ * `.salt-card a.pin { position: absolute }` — (0,2,1), previously winning on source order —
+ * would silently start losing. Splitting keeps that override working for the common case.
+ */
+.salt-card :is(a, button, input, select, textarea, summary, label):not(.salt-card__link) {
+  position: relative;
+  z-index: 1;
+}
+
+.salt-card :is([role='button'], [role='link'], [role='checkbox'], [role='tab']) {
+  position: relative;
+  z-index: 1;
+}
+
+/*
+ * The eyebrow takes the tone's muted foreground rather than an opacity, so it is
+ * de-emphasised by the palette and keeps the contrast the audit proved.
+ */
+.salt-eyebrow {
+  margin: 0;
+  color: var(--salt-section-ink-muted, var(--color-ink-muted));
+  text-transform: uppercase;
+  font-size: var(--text-eyebrow);
+  line-height: var(--text-eyebrow--line-height);
+  letter-spacing: var(--text-eyebrow--letter-spacing);
+  font-weight: var(--text-eyebrow--font-weight);
+  font-family: var(--text-eyebrow--font-family);
+}
+
+/*
+ * The supporting paragraph under a section heading (BD-117).
+ *
+ * `margin: 0` and nothing else. The space around it is `.salt-block`'s owl, as it is for the
+ * heading above it; the declaration is here rather than inherited from a reset because core's
+ * stylesheets have to hold in a consuming repo that ships none, which is the same reason the
+ * block's heading rule is written out.
+ *
+ * ── `:where()`, because a bare class here is a cascade tie the import order breaks ──
+ *
+ * The owl this rule depends on, `blocks.css`'s `.salt-block > * + *`, is also specificity
+ * (0,1,0): a universal selector counts nothing. Two rules, the same specificity, the same
+ * property — so source order alone decides, and the order of these two stylesheets is a
+ * consumer's. The README fixes `theme` before `sections` before `primitives` and says only
+ * that `blocks.css` goes "alongside" them, which is not an order.
+ *
+ * Measured in chrome-headless-shell 148.0.7778.96 at 1024 by 700, on a document linking this
+ * package's two stylesheets with no CSS reset, with `margin: 0` on a bare `.salt-intro`:
+ * primitives first gave the intro a `margin-block-start` of 16px, and blocks first gave it
+ * **0px** — every introduction on all nine blocks flush against its heading, in a consumer
+ * that imported the two the other way round. No gate sees it, because `apps/example` imports
+ * primitives first.
+ *
+ * `:where()` zeroes the selector's specificity, so this rule still beats the user agent's
+ * `<p>` margins on origin — which is the whole reason it exists — and loses to the owl at any
+ * source order. Re-measured in the same build: 16px above and 0 below in BOTH orders.
+ *
+ * Scoping it to `.salt-block > .salt-intro` instead would be the opposite failure. At (0,2,0)
+ * it outranks the owl everywhere, and the gap between a heading and the introduction under it
+ * disappears in every import order rather than one.
+ *
+ * No colour. An eyebrow is muted because it is a label; an introduction is the section's first
+ * words, and a block's ink is already the band's. Its size is the rule below's.
+ */
+:where(.salt-intro) {
+  margin: 0;
+}
+
+/*
+ * The contract's `lead`, "the standfirst under a heading" (BD-185). A rule of its own rather than
+ * the one above, so the margin keeps its zero specificity and the text does not: at (0,1,0) a
+ * site's `p { … }` does not take the introduction back to the body's size.
+ */
+.salt-intro {
+  font-size: var(--text-lead);
+  line-height: var(--text-lead--line-height);
+  letter-spacing: var(--text-lead--letter-spacing);
+  font-weight: var(--text-lead--font-weight);
+  font-family: var(--text-lead--font-family);
+}
+
+/*
+ * Icons take their colour from the text they sit with, never their own.
+ *
+ * Every glyph draws in `currentColor`, so an icon inside an inverted band inverts with it
+ * and an icon inside a button follows that button's foreground. Nothing here needs a tone
+ * lookup, and nothing here can drift from the contrast the audit proved — which is the
+ * reason the glyph table carries no colour at all.
+ *
+ * `flex: none` because an icon in a flex row is the thing that must not squash: without it
+ * a long label shrinks a 24px glyph to a smear, and the 2.5.8 floor the button enforces on
+ * its own box says nothing about what is drawn inside it.
+ *
+ * Sizes are rem, not em, so an icon beside a small label does not shrink with it — three
+ * fixed steps rather than whatever the surrounding font-size happens to be.
+ *
+ * The stroke weight is NOT consistent across them, and an earlier version of this comment
+ * claimed it was. The 24-unit viewBox scales with the box, so the 2-unit stroke paints at
+ * about 1.33px at `sm` and 3.33px at `lg`. That is how line-work icon sets normally behave
+ * and it reads correctly at each size; `vector-effect: non-scaling-stroke` would be needed
+ * to make the claim true, and would make `lg` look thin rather than better.
+ *
+ * Nothing is needed for forced colours. `currentColor` resolves to the forced text colour,
+ * so the glyph follows it — the one case in this stylesheet where the default is right.
+ */
+.salt-icon {
+  --salt-icon-size: 1.5rem;
+
+  flex: none;
+  inline-size: var(--salt-icon-size);
+  block-size: var(--salt-icon-size);
+  vertical-align: text-bottom;
+}
+
+.salt-icon[data-size='sm'] {
+  --salt-icon-size: 1rem;
+}
+
+.salt-icon[data-size='lg'] {
+  --salt-icon-size: 2.5rem;
+}
+
+/*
+ * ── The arrow after a way onward (BD-195) ───────────────────────────────────────
+ *
+ * `<Arrow>` wraps an icon from the site's own registry, after a linked card title, a view-all label or
+ * a button's label, so a site stops faking one with a text glyph. A `→` in a font sits on that font's
+ * maths axis, which in the faces measured on Floorworkz's preview was 4 to 7px below the middle of the
+ * capitals it followed.
+ *
+ * Sized to the text rather than the icon scale's rem steps, because it belongs to the words: 0.7em
+ * beside a title, which is 16px at a 22.5px card title, and 1.125em inside a button, 18px beside a
+ * 16px label, with a gap of 0.3em and 0.625em (10px there). Its centre sits on the capitals' middle:
+ * `vertical-align` raises the box's bottom edge, which for a replaced element is its baseline, by
+ * half the cap height less half the box, so the box's centre lands `0.5cap` above the text's
+ * baseline whatever the face. `middle` first, for an engine without the `cap` unit (Safari before
+ * 17.2, Chrome before 118), which drops the second declaration and puts the centre half an x-height
+ * up instead: a little low, and never a broken layout. The `cap` declaration is written out, half of
+ * each size as a literal, and never through `var(--salt-icon-size)`: a declaration holding a `var()`
+ * is accepted at parse time whatever it contains, so an engine without `cap` kept it, found it
+ * invalid at computed-value time, and fell back to `baseline`, not `middle`, which put the arrow's
+ * foot on the baseline (#211 review, 3; Chrome 148's parser, with an unknown unit standing in for
+ * `cap`, computed `baseline` for the `var()` form and `middle` for the literal one). So a site that
+ * changes an arrow's `--salt-icon-size` writes its `vertical-align` beside it, half the new size. Both arrows sit inside their line's own box at every role's leading, so the line is
+ * no taller with the arrow than without it.
+ *
+ * An inline `<svg>`, drawn by the site's `<Icon>`, and never a CSS `mask` or background image. Core's
+ * marketing policy is `img-src 'self'` with no `data:`, so a `data:` mask is refused and paints
+ * nothing, while every computed style still reads correctly; an inline `<svg>` fetches nothing for
+ * the policy to refuse. Measured under that policy, as `marketingSecurityHeaders()` composes it,
+ * in chrome-headless-shell 148.0.7778.96 on 30/09/2026: every arrow painted, and a `data:` mask
+ * beside them was refused and painted nothing (BD-195).
+ *
+ * `nowrap` on the wrapper, which also holds a word joiner before the icon: Chrome 148 took the space
+ * between a word and an inline `<svg>` as a break opportunity even with a joiner or a no-break space
+ * before it, and dropped the arrow alone onto the next line; only a joiner inside a `nowrap` box kept
+ * it with the last word (measured in chrome-headless-shell 148.0.7778.96 on 30/09/2026). The wrapper
+ * is `aria-hidden`, so neither the joiner nor the icon reaches the link's accessible name.
+ *
+ * No motion here. A site that moves it on hover writes that, behind `prefers-reduced-motion`.
+ */
+.salt-arrow {
+  white-space: nowrap;
+}
+
+.salt-arrow > .salt-icon {
+  --salt-icon-size: 0.7em;
+
+  /* Tailwind's preflight makes every `<svg>` a block, which would put the arrow on a line of its
+     own inside the wrapper, as tall as the arrow and under the title's last word. */
+  display: inline-block;
+  margin-inline-start: 0.3em;
+  vertical-align: middle;
+  vertical-align: calc(0.5cap - 0.35em);
+}
+
+.salt-button .salt-arrow > .salt-icon {
+  --salt-icon-size: 1.125em;
+
+  margin-inline-start: 0.625em;
+  vertical-align: calc(0.5cap - 0.5625em);
+}
+
+/*
+ * The arrow points the way the line reads (#211 review, 4). Its margin is logical, so in right-to-left
+ * text it already sits to the left of the word; the glyph is drawn pointing right, so it is mirrored
+ * there. `:dir()` reads the direction the text actually has, an island of left-to-right inside a
+ * right-to-left page included, which the last rule puts back. The two attribute rules are for an
+ * engine without `:dir()` (Chrome before 120, Safari before 16.4), each in a rule of its own so the
+ * `:dir()` rules are not dropped with them: the first mirrors the arrow under a right-to-left page,
+ * and the second puts back an island of left-to-right inside it (#211 re-review, 4). The second's
+ * outer part is in `:where()`, so it is (0,3,0) like the rest and source order ranks them: after the
+ * first, and before `:dir(rtl)`, which an engine with `:dir()` then lets win for a right-to-left block
+ * inside that island. Written without `:where()` it would be (0,4,0) and beat `:dir(rtl)` there. An
+ * engine without `:dir()` still draws that doubly nested case pointing right, which is the one limit.
+ * A transform, so nothing moves in the layout.
+ */
+[dir='rtl'] .salt-arrow > .salt-icon {
+  scale: -1 1;
+}
+
+:where([dir='rtl']) [dir='ltr'] .salt-arrow > .salt-icon {
+  scale: none;
+}
+
+.salt-arrow:dir(rtl) > .salt-icon {
+  scale: -1 1;
+}
+
+.salt-arrow:dir(ltr) > .salt-icon {
+  scale: none;
+}
+
+/*
+ * ── Body copy ───────────────────────────────────────────────────────────────────
+ *
+ * `.salt-rich-text` was the only class this package emits with no rule at all, and the
+ * omission was not cosmetic. `apps/example` imports Tailwind, whose preflight strips the
+ * markers and the indent from every list and zeroes every margin — so the one component
+ * whose entire job is rendering prose shipped with no bullets, no numbering, no
+ * indentation, and every paragraph running into the next.
+ *
+ * Read out of the installed `tailwindcss@4.3.3`'s own `preflight.css`, that is two rules
+ * rather than one: `ol, ul, menu { list-style: none }`, and a universal
+ * `*, ::after, ::before, ::backdrop, ::file-selector-button` reset carrying `margin: 0;
+ * padding: 0`. This paragraph quoted them as a single `ol, ul { list-style: none; margin: 0;
+ * padding: 0 }`, which was written from memory rather than read: Tailwind entered this
+ * repository already at 4.3.3 and has never moved, so there was no upgrade to carry a note
+ * past, and the selector is wrong about `menu` besides. The correction to it first said the
+ * opposite — that it was an older spelling left unmaintained — which is a second unchecked
+ * claim in place of the first, and is recorded here rather than quietly replaced.
+ * The consequence for the reset below is nil; the consequence for
+ * `verify-list-roles.ts`, which cites this note as the record of the obligation, is that
+ * `<menu>` is named by the preflight too and owes the role the day core writes one.
+ *
+ * A reset that thorough is right for application chrome and wrong for a document, which is
+ * why this restores flow rather than styling it. Spacing is a lobotomised owl (`* + *`) so
+ * only the gaps BETWEEN blocks are set: no leading margin to collapse against the section's
+ * own padding, and no trailing one to fight the next block's.
+ *
+ * `em` rather than `rem` throughout, deliberately and unlike `.salt-icon`. Prose rhythm
+ * tracks its own text size — a paragraph inside a smaller card wants proportionally smaller
+ * gaps — where an icon's stroke does not.
+ */
+.salt-rich-text > * + * {
+  margin-block-start: 1em;
+}
+
+.salt-rich-text :is(ul, ol) {
+  padding-inline-start: 1.5em;
+  list-style-position: outside;
+}
+
+.salt-rich-text ul {
+  list-style-type: disc;
+}
+
+.salt-rich-text ol {
+  list-style-type: decimal;
+}
+
+/* A nested list sits tight against its parent item rather than taking a full block gap. */
+.salt-rich-text li > :is(ul, ol) {
+  margin-block-start: 0.25em;
+}
+
+.salt-rich-text li + li {
+  margin-block-start: 0.25em;
+}
+
+/*
+ * The quote is marked by a rule and an indent, never by italics or a colour: italic body
+ * text is harder to read at length, and colour alone would be a distinction the contrast
+ * audit has no row for. The boundary is tone-aware, so an inverted band inverts with it.
+ *
+ * Set in the contract's `quote`, "a pull quote or testimonial" (BD-185, Ollie's ruling of
+ * 28/09/2026). The indent and the gap above it are `em`, so both grow with it.
+ */
+.salt-rich-text blockquote {
+  padding-inline-start: 1em;
+  border-inline-start: 2px solid var(--salt-section-boundary, var(--color-border-strong));
+  font-size: var(--text-quote);
+  line-height: var(--text-quote--line-height);
+  letter-spacing: var(--text-quote--letter-spacing);
+  font-weight: var(--text-quote--font-weight);
+  font-family: var(--text-quote--font-family);
+}
+
+/*
+ * Marked by its shape, not by a colour of its own.
+ *
+ * This was `background-color: var(--color-surface-alt)` — a mode token on a band-tinted
+ * element, four lines below a blockquote rule whose own comment says the boundary is
+ * tone-aware so an inverted band inverts with it. On a `surface-inverse` section the text is
+ * `ink-inverse` and the chip was `surface-alt`: 1.095:1 in light and **1.000:1 in dark**,
+ * where the word is exactly the colour of the thing behind it.
+ *
+ * The replacement was a `color-mix` of the band's own ink and background, which reads
+ * correctly and does not survive the build: Lightning CSS reduced
+ * `color-mix(in oklch, var(--salt-section-ink) 10%, var(--salt-section-bg))` to
+ * `var(--salt-section-ink, #26292e)` in the emitted chunk — the chip becoming the ink, so
+ * the text would have been invisible again, differently. `verify:colour-literals` caught it
+ * because that gate reads BUILT css, which is the whole reason it does.
+ *
+ * So: no fill at all. A line in the same tone-paired role the blockquote uses. Nothing to
+ * invert, no new token, and no pairing the audit has no row for — `border-strong` against
+ * every tone is already measured.
+ *
+ * ── Why this keeps control weight now that a hairline exists ────────────────────
+ *
+ * BD-033 added `--salt-section-border`, a tone-aware hairline, and rejected
+ * `--salt-section-boundary` for `.salt-card` on the grounds that every card would read as an
+ * input. That argument does not carry here, and the difference is size. A card edge runs the
+ * length of a large box, where 5.259:1 reads as a control. A `<code>` chip is a few
+ * characters of inline text, and a 1.435:1 hairline around something that small is not a
+ * chip — it is a smudge nobody resolves as a boundary at all. The heavier role is the one
+ * that makes a short span legible as marked-up text.
+ *
+ * Deliberate, then, rather than left over: cards take `--salt-section-border`, inline chips
+ * take `--salt-section-boundary`, and the split is by the size of the thing being outlined.
+ *
+ * And no `font-family` either. `<code>` is monospace in every user agent, and Tailwind's
+ * preflight points it at the consuming site's configured mono face. This file is unlayered,
+ * so a stack written here would beat that outright — giving a site its chosen font for every
+ * `<code>` on the page EXCEPT the ones inside body copy, which is the inconsistency nobody
+ * goes looking for.
+ */
+.salt-rich-text code {
+  padding: 0.1em 0.3em;
+  border: 1px solid var(--salt-section-boundary, var(--color-border-strong));
+  /* The `sm` rung, a rem, where this was `0.25em` of the chip's own 0.9em: 3.6px at a 16px root
+     and 4px now, measured in chrome-headless-shell 148.0.7778.96 (BD-169). */
+  border-radius: var(--radius-sm);
+  font-size: 0.9em;
+}
+
+/*
+ * A link in body copy is underlined, because nothing else tells it from the words around it.
+ *
+ * Tailwind's preflight sets `a { color: inherit; text-decoration: inherit }`, and nothing in
+ * core styled `.salt-rich-text a`, so every editor's link in every body — a block, a post, the
+ * footer's line — drew in the text's own colour, weight and decoration. Measured in
+ * chrome-headless-shell 148.0.7778.96 on 22/09/2026: a footer link and its paragraph both
+ * computed `rgb(78, 86, 97)`, `text-decoration-line: none`, weight 400. That fails WCAG 1.4.1
+ * at Level A, and it fails it everywhere `restrictedRichText` renders, which is why the fix is
+ * here and not in the footer.
+ *
+ * An underline and no colour of its own. The link keeps the text's ink, so its contrast is the
+ * pairing the text already clears on every tone, and a brand-coloured link would need a link
+ * role derived to meet the text obligation, which core does not emit (BD-028). The underline
+ * is the cue, and it is not a colour. `verify:stylesheet-contracts` holds this rule to every
+ * body rather than to one block.
+ */
+.salt-rich-text a {
+  text-decoration-line: underline;
+  text-underline-offset: 0.15em;
+}
+
+/*
+ * ── The carousel ────────────────────────────────────────────────────────────────
+ *
+ * A scroll-snap track that works with no JavaScript at all. The component's script adds two
+ * buttons to something already usable by a pointer, a touch and a trackpad, rather than
+ * being the thing that makes it work — which is why the buttons are mount-gated and why
+ * everything below stands on its own.
+ */
+.salt-carousel {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/*
+ * The track.
+ *
+ * `--salt-carousel-slide` is the knob a block or a client repo turns: the slide takes that
+ * width or the whole track, whichever is smaller, so a narrow viewport shows one slide and
+ * a wide one shows several. Nothing here needs to know how many.
+ *
+ * `overscroll-behavior-x: contain` keeps a horizontal swipe inside the track. Without it a
+ * trackpad swipe that reaches the end of the slides carries on into the browser's own
+ * back-navigation gesture, which loses the reader's place on the page — the failure is
+ * indistinguishable from a mis-tap and it is entirely silent.
+ */
+.salt-carousel__track {
+  --salt-carousel-slide: 20rem;
+
+  display: flex;
+  gap: 1.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+}
+
+/*
+ * `scroll-behavior: smooth` ONLY where motion is welcome, and the guard governs the ARROW
+ * KEYS rather than the buttons.
+ *
+ * The buttons defend themselves. `scrollBy({ behavior: 'auto' })` does not mean "jump" — per
+ * CSSOM View it means "use the element's computed `scroll-behavior`" — so the component asks
+ * for `'instant'` under reduced motion, which overrides this rule outright. Measured in
+ * Chromium against a control: with `left: 344`, `'auto'` moves a track computing `auto` to
+ * 344 synchronously and a track computing `smooth` to 0, while `'instant'` moves both to 344.
+ *
+ * What this query is for is the scrolling the component never sees. The track is a tab stop
+ * where its slides hold nothing focusable, and a reader who then presses the arrow keys gets
+ * the browser's own scrolling, which obeys this property and nothing else. Written
+ * unconditionally, that reader has asked for reduced motion and every arrow press glides
+ * anyway — the same defect as the buttons, on the path the component cannot reach.
+ *
+ * Inside the query the two agree: under `no-preference` the buttons ask for `smooth` and the
+ * arrow keys match; under `reduce` this does not apply, the computed value stays `auto`, and
+ * both jump. Under contract, because "add smooth scrolling to the carousel" is a one-line
+ * change that reads as an improvement.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  .salt-carousel__track {
+    scroll-behavior: smooth;
+  }
+}
+
+/*
+ * A slide does not shrink, and it snaps by its start edge.
+ *
+ * `flex: 0 0 auto` rather than a basis, so the width below is the only thing setting it —
+ * a shrinking slide is one that stops matching the scroll step the component computes from
+ * it, and the track then lands a little further short on every press.
+ */
+.salt-carousel__slide {
+  flex: 0 0 auto;
+  inline-size: min(100%, var(--salt-carousel-slide));
+  scroll-snap-align: start;
+}
+
+/*
+ * The slide's wrapper is as tall as the slide, so a card in it can be.
+ *
+ * The track is a flex row, so every `<li>` is already stretched to the tallest slide's height, and a
+ * stretched flex item's height is definite: a percentage inside it resolves. But the `<li>` holds the
+ * slide's `role="group"` wrapper rather than the card, and the wrapper's height was its content's, so
+ * the carousel card's `block-size: 100%` in `blocks.css` resolved against the card itself and every
+ * card was as tall as its own words. Measured on Floorworkz's /services in headless Brave 154.1.96.59
+ * (Chromium 154.0.8037.58) on 05/10/2026: three visible testimonial cards of 471, 309 and 434px in
+ * 638px slides, so a caption pushed to the card's foot sat 162px higher on one card than the next
+ * (BD-205).
+ *
+ * The wrapper alone, not what is in it: a gallery's figure keeps its own height and its photograph
+ * its proportions, since nothing in a figure asks for a percentage of this.
+ */
+.salt-carousel__slide-inner {
+  block-size: 100%;
+}
+
+/*
+ * The controls sit at the inline end of the band, and the row is logical rather than
+ * physical: in a right-to-left document `flex-end` is the left, which is where a reader of
+ * that script expects them.
+ */
+.salt-carousel__controls {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+/*
+ * An `aria-disabled` control is dimmed but NOT removed from the tab order — that is the
+ * whole reason it is `aria-disabled` and not `disabled`, and the stylesheet has to agree
+ * with the markup or a reader sees an available button that does nothing.
+ *
+ * `cursor: default` rather than `not-allowed`: the control is genuinely reachable and
+ * genuinely does nothing at this end, and `not-allowed` reads as an error the reader has
+ * made rather than an edge of the track.
+ */
+.salt-carousel__control[aria-disabled='true'] {
+  opacity: var(--opacity-medium);
+  cursor: default;
+}
+
+/*
+ * ── The accordion ───────────────────────────────────────────────────────────────
+ *
+ * Native `<details>`, so everything that makes it work is the browser's and nothing here is
+ * needed for it to open. What is here is the band around each item and the size of the
+ * control.
+ *
+ * The disclosure marker is the user agent's own. A drawn chevron would need a glyph in the
+ * markup or a masked pseudo-element, and the native marker already turns with the item's
+ * state.
+ *
+ * The rule between items takes the band's hairline, as `.salt-card`'s edge does (BD-033):
+ * it resolves through the tone, so an accordion on `surface-inverse` rules its items against
+ * that band rather than drawing light-mode lines across it.
+ */
+.salt-accordion__item {
+  border-block-end: 1px solid var(--salt-section-border, var(--color-border));
+}
+
+/*
+ * A title or an answer with nowhere to break wraps rather than widening the page, as `.salt-grid`
+ * does for its cards. Inherited, so it reaches the summary and the panel alike. Measured in
+ * chrome-headless-shell 148.0.7778.96 at 320 CSS px against the example app's built stylesheet on
+ * 14/09/2026: a 78-character `collectionShowcase` title with no break in it made the `<summary>`
+ * 364px wider than the viewport, and nothing with this declared. The `faq` block's questions sit in
+ * the same element.
+ */
+.salt-accordion {
+  overflow-wrap: break-word;
+}
+
+.salt-accordion__item:first-child {
+  border-block-start: 1px solid var(--salt-section-border, var(--color-border));
+}
+
+/*
+ * The `<summary>` is the control, and the whole row is its hit area.
+ *
+ * It is a block-level box as wide as the accordion, so the WCAG 2.5.8 question is its
+ * height alone, and the floor is the one `.salt-button` takes: `max(2.75rem, 24px)`, which
+ * holds 24 CSS px even on a site that shrinks the root font size. Measured in headless
+ * Chromium 148.0.7778.96 on 14/09/2026 with this stylesheet and no reset, so the floor applied
+ * to the content box: 68px tall at a 16px root and 36px at an 8px root. Under a
+ * `box-sizing: border-box` reset, which Tailwind's preflight is, the padding comes out of the
+ * floor rather than adding to it, and the 16px-root figure was not measured that way.
+ */
+/* The question is the contract's `heading-4`, which names "an FAQ question" (BD-173). It is not a
+   heading element, for the reason `accordion.tsx` gives, so only its class can give it the role. */
+.salt-accordion__summary {
+  min-block-size: max(2.75rem, 24px);
+  padding-block: 0.75rem;
+  cursor: pointer;
+  font-size: var(--text-heading-4);
+  line-height: var(--text-heading-4--line-height);
+  letter-spacing: var(--text-heading-4--letter-spacing);
+  font-weight: var(--text-heading-4--font-weight);
+  font-family: var(--text-heading-4--font-family);
+}
+
+.salt-accordion__content {
+  padding-block-end: 1rem;
+}
+
+/*
+ * ── The tab set ─────────────────────────────────────────────────────────────────
+ *
+ * `<Tabs>` is a radio group and nothing else: an `<input type="radio">` and a `<label>` per
+ * tab, and every panel written out in full. **This stylesheet is the whole of the switching**,
+ * which is the opposite of where the old island put it — there, the markup changed at
+ * hydration and this file drew one shape. There is no hydration now, so the markup is one
+ * shape and the cascade chooses what shows.
+ *
+ * That puts the failure mode here, and it is a good one PROVIDED the hiding is gated on the
+ * same thing the showing is. A page whose stylesheet does not arrive, and a browser without
+ * `:has()`, fall to the same SHAPE: every panel showing, one after another, each under its
+ * own `.salt-tabs__label`, every word present and in order.
+ *
+ * They do not fall to the same BAND, and the difference is this file. A browser that merely
+ * lacks `:has()` still has everything else here and measures 601.69px at 1024×900 on the
+ * page `components/tabs.tsx` describes; with no stylesheet at all the same page measures
+ * 420px, and the inputs paint as 13×13 radio dots rather than the 1×1 `.salt-sr-only` clips
+ * them to, since that rule is in this file as well.
+ *
+ * Which rules carry that 181.69px is worth knowing before anyone trims it, because one of
+ * them runs the other way. Added back alone to the bare page: `.salt-tabs`'s grid and gap
+ * +32px, `.salt-tabs__panels`'s +80px, the tab's `min-block-size` +0px on its own because
+ * the bare `<label>` is inline, and +72px only with the tab's `display: inline-flex` beside it
+ * — and `.salt-tabs__label { margin: 0 }` **−16px**, because the label is a `<p>` and this is
+ * the rule suppressing the user agent's `margin: 1em 0`. Losing this file makes that term
+ * TALLER. Those sum to +168px but net +120px together, so the effects do not add up. The
+ * narrower measure is worth +54px more as the copy re-wraps, and about 8px is elsewhere here.
+ * Same words, same order, two different bands.
+ */
+.salt-tabs {
+  display: grid;
+  gap: 1rem;
+}
+
+/*
+ * The row of tabs, wrapping rather than scrolling.
+ *
+ * A horizontally scrolling tab strip needs its own controls, its own edge affordance and its
+ * own keyboard story — `.salt-carousel__track` is what that costs — and a set of three or
+ * four short labels does not earn any of it. Wrapping puts a long set on two lines at 320px
+ * and leaves the reading order and the arrow keys exactly as they are.
+ *
+ * The rule under the row takes the band's hairline, as the accordion's does (BD-033): it
+ * resolves through the tone, so a tab set on `surface-inverse` rules against that band
+ * rather than drawing a light-mode line across it.
+ */
+.salt-tabs__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  border-block-end: 1px solid var(--salt-section-border, var(--color-border));
+}
+
+/*
+ * One tab: the radio and its label, kept together.
+ *
+ * `position: relative` because the input wears `.salt-sr-only`, which is `position:
+ * absolute` — so the input is clipped to a 1px box at the label's own corner rather than at
+ * the page's. That matters for one reason beyond tidiness: focusing a clipped input scrolls
+ * the element into view, and an input positioned at the top of the document would scroll a
+ * reader away from the tab they just arrowed onto.
+ */
+.salt-tabs__control {
+  position: relative;
+  display: inline-flex;
+}
+
+/*
+ * The label, which is the control a reader sees and presses. It is a `<label>` rather than a
+ * `<button>`, so it starts with none of the user agent's button painting and needs none
+ * taken off; what it does need is the geometry, because a bare label is inline text.
+ *
+ * `max(2.75rem, 24px)` in both axes, the floor `.salt-button` and `.salt-pagination__link`
+ * take: WCAG 2.5.8 wants 24 CSS px, and the `max()` holds it even on a site that shrinks the
+ * root font size. A tab is a standalone control rather than a link inside a sentence, so
+ * 2.5.8's inline exception — the one `.salt-button[data-style='link']` takes — does not
+ * apply to it. The label IS the hit area: clicking anywhere in it selects the radio, which
+ * is the behaviour `for` gives and the reason the input can be clipped to a pixel.
+ *
+ * The selected tab is marked by a 2px rule under it AND by the ink stepping from muted to
+ * full, which is two signals rather than one: WCAG 1.4.1 asks that colour not be the only
+ * carrier, and the rule is a shape. The unselected weight is NOT lighter than the selected
+ * one, deliberately — a weight change resizes the label, which moves every tab after it
+ * along the row each time the selection moves.
+ *
+ * The transparent border is declared on the base rule rather than added to the selected one,
+ * so the box is the same height in both states and the row does not jump by 2px when a
+ * reader arrows along it.
+ */
+.salt-tabs__tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-block-size: max(2.75rem, 24px);
+  min-inline-size: max(2.75rem, 24px);
+  padding-inline: 0.75rem;
+  border-block-end: 2px solid transparent;
+  color: var(--salt-section-ink-muted, var(--color-ink-muted));
+  cursor: pointer;
+}
+
+.salt-tabs__input:checked + .salt-tabs__tab {
+  border-block-end-color: currentColor;
+  color: var(--salt-section-ink, var(--color-ink));
+}
+
+/*
+ * A label with nowhere to break wraps rather than widening the page, as the accordion's
+ * summary does. Inherited, so it reaches the panel's copy as well.
+ */
+.salt-tabs__tab,
+.salt-tabs__panel {
+  overflow-wrap: break-word;
+}
+
+/*
+ * The panels, stacked, which is what a set that is not a tab set draws and what EVERY set
+ * draws with this stylesheet absent.
+ */
+.salt-tabs__panels {
+  display: grid;
+  gap: 1rem;
+}
+
+/*
+ * The label above a panel. It is written for every panel in every shape and hidden only
+ * where the row above carries it, so losing this file loses the hiding rather than the
+ * label. The weight is what makes it read as a label rather than as the panel's first
+ * sentence, and the zeroed margin leaves the grid's `gap` as the only thing setting space.
+ */
+.salt-tabs__label {
+  margin: 0;
+  font-size: var(--text-label);
+  line-height: var(--text-label--line-height);
+  letter-spacing: var(--text-label--letter-spacing);
+  font-weight: var(--text-label--font-weight);
+  font-family: var(--text-label--font-family);
+}
+
+/*
+ * **The hide is gated on `:has()`, and that is the whole of the fallback.**
+ *
+ * The first spelling of this rule was not, and the bug it shipped is worth stating because
+ * it is the exact opposite of what this file claimed. An engine that does not know `:has()`
+ * drops the rules that use it and KEEPS the ones that do not — so an ungated hide left every
+ * label and every panel `display: none`, with only the row of tab labels painted over empty
+ * space. The copy was in the DOM and unreachable by any interaction: total content loss,
+ * silent, on Firefox 115 ESR, Safari before 15.4, Chromium before 105 and the WebViews on
+ * those engines.
+ *
+ * Gated, all three rules stand or fall together, and falling together is the stacked
+ * labelled band. The guard names no position because any checked input will do; the rules
+ * below need the position, which is why they are eight and this is one.
+ */
+.salt-tabs[data-tabbed]:has(> .salt-tabs__list > .salt-tabs__control > .salt-tabs__input:checked) > .salt-tabs__panels > .salt-tabs__panel > .salt-tabs__label {
+  display: none;
+}
+
+/*
+ * ── Which panel shows ───────────────────────────────────────────────────────────
+ *
+ * Hidden first, then one shown, and the order is the whole of it: a rule that showed the
+ * selected panel without hiding the rest would leave a set that has never been touched
+ * showing all of them, and the defect would be invisible on any page where the first tab is
+ * the one wanted.
+ *
+ * `display: none` rather than `[hidden]`, because nothing here writes an attribute — and
+ * rather than `visibility: hidden`, because a hidden panel must take no space and no tab
+ * stop. Its `tabindex="0"` is inert while it is not displayed, which is what keeps the tab
+ * sequence to the row and the one panel showing.
+ *
+ * **The hide carries the same `:has()` guard as the shows**, for the reason spelled out
+ * above `.salt-tabs__label`'s: an engine that does not know `:has()` drops every rule that
+ * uses it and keeps every rule that does not, so an ungated hide is a band with nothing in
+ * it. The guard here names no position, because any checked input means the set is being
+ * switched; the eight below name one each, because switching is what needs a position.
+ *
+ * ── Why the pairs are enumerated ────────────────────────────────────────────────
+ *
+ * CSS can ask whether the first control is checked and it can select the first panel; what
+ * it cannot do is say "the same position in both" once. So the pairs are written out, eight
+ * of them, and `TABS_CAP` in `components/tabs.tsx` is that eight. The field refuses a ninth
+ * row and the resolver drops one, so nothing can store a tab whose panel no rule can show —
+ * which would be a silent blank, not an error.
+ *
+ * Every combinator inside a `:has()` is a CHILD combinator, on purpose, and `tabs.test.tsx`
+ * refuses any other. With descendant combinators a set nested inside another set's panel
+ * answers for its parent: measured on a nested fixture, selecting the inner set's second
+ * tab left the outer set showing two panels at once. Nothing nests one today — a panel is a
+ * `restrictedRichText()` document and holds no block — so the assertion is a gate rather
+ * than a fix, and it is there because prose claiming a combinator held nothing for a day.
+ */
+.salt-tabs[data-tabbed]:has(> .salt-tabs__list > .salt-tabs__control > .salt-tabs__input:checked) > .salt-tabs__panels > .salt-tabs__panel {
+  display: none;
+}
+
+.salt-tabs[data-tabbed]:has(> .salt-tabs__list > .salt-tabs__control:nth-child(1) > .salt-tabs__input:checked) > .salt-tabs__panels > .salt-tabs__panel:nth-child(1),
+.salt-tabs[data-tabbed]:has(> .salt-tabs__list > .salt-tabs__control:nth-child(2) > .salt-tabs__input:checked) > .salt-tabs__panels > .salt-tabs__panel:nth-child(2),
+.salt-tabs[data-tabbed]:has(> .salt-tabs__list > .salt-tabs__control:nth-child(3) > .salt-tabs__input:checked) > .salt-tabs__panels > .salt-tabs__panel:nth-child(3),
+.salt-tabs[data-tabbed]:has(> .salt-tabs__list > .salt-tabs__control:nth-child(4) > .salt-tabs__input:checked) > .salt-tabs__panels > .salt-tabs__panel:nth-child(4),
+.salt-tabs[data-tabbed]:has(> .salt-tabs__list > .salt-tabs__control:nth-child(5) > .salt-tabs__input:checked) > .salt-tabs__panels > .salt-tabs__panel:nth-child(5),
+.salt-tabs[data-tabbed]:has(> .salt-tabs__list > .salt-tabs__control:nth-child(6) > .salt-tabs__input:checked) > .salt-tabs__panels > .salt-tabs__panel:nth-child(6),
+.salt-tabs[data-tabbed]:has(> .salt-tabs__list > .salt-tabs__control:nth-child(7) > .salt-tabs__input:checked) > .salt-tabs__panels > .salt-tabs__panel:nth-child(7),
+.salt-tabs[data-tabbed]:has(> .salt-tabs__list > .salt-tabs__control:nth-child(8) > .salt-tabs__input:checked) > .salt-tabs__panels > .salt-tabs__panel:nth-child(8) {
+  display: block;
+}
+
+/*
+ * ── The consent banner ──────────────────────────────────────────────────────────
+ */
+
+/*
+ * The banner's stacking level, and the one place it is written.
+ *
+ * It was `z-index: 1`, on the reasoning that every section isolates its own stacking context.
+ * That holds inside a `<Section>` and nowhere else: a `<Card>` in `<main>` outside one raises
+ * its controls to `z-index: 1` with `position: relative`, and being later in the document it
+ * painted over the banner and took its clicks, measured at 1024 by 700 in
+ * chrome-headless-shell 148.0.7778.96.
+ *
+ * 100 is above every `z-index` core's stylesheets write, which are 0 and 1, with room between
+ * for a site's own raised content, and a test holds every other declaration in core below it.
+ * It is a custom property so that whatever has to sit above the banner says so in terms of it,
+ * `calc(var(--salt-consent-banner-layer) + 1)`, rather than by guessing a bigger number: core's
+ * preferences panel, opened from the banner, and WP9's navigation drawer, which covers the page
+ * the banner sits over.
+ */
+:root {
+  --salt-consent-banner-layer: 100;
+}
+
+/*
+ * Fixed to the foot of the viewport rather than placed in the flow, and that is a Core Web
+ * Vitals decision. The banner can only be rendered once the client has read the consent
+ * cookie, which is after hydration and after first paint; in the flow it would push the
+ * page for every first-time visitor, and fixed it moves nothing.
+ *
+ * It paints on `surface` with `ink`, draws its edge in `border-strong`, and its controls are
+ * `.salt-button`s taking their colours from the same roles. Every one of those pairings is a
+ * row in `CONTRAST_PAIRINGS`, which the hue sweep holds to AA across every seed in both modes;
+ * a real browser's reading of the rendered banner is owed to WP13 (section 7).
+ *
+ * The section variables are pinned rather than inherited. `.salt-button` reads
+ * `--salt-section-ink` before `--color-ink`, and a site that renders the banner inside an
+ * inverted band would otherwise hand a secondary control `ink-inverse` on this `surface`.
+ *
+ * It stacks at `--salt-consent-banner-layer`, declared once above, whose note says why.
+ *
+ * The edge is a border in a role, not a shadow, because a shadow needs a colour this file may
+ * not write.
+ */
+.salt-consent-banner {
+  --salt-section-ink: var(--color-ink);
+  --salt-section-ink-contra: var(--color-ink-inverse);
+  --salt-section-ink-muted: var(--color-ink-muted);
+  --salt-section-border: var(--color-border);
+  --salt-section-boundary: var(--color-border-strong);
+
+  position: fixed;
+  inset-inline: 0;
+  inset-block-end: 0;
+  z-index: var(--salt-consent-banner-layer);
+
+  /*
+   * At most half the viewport, scrolling inside itself beyond that, and capped at the border
+   * so the cap is the whole of what it covers. Uncapped, at 400% zoom (320 by 256 CSS pixels)
+   * it stood 325px tall, so the top of the message was above the viewport where nothing could
+   * reach it (WCAG 1.4.10), and the height it published as clearance was more than the
+   * viewport, so a focused link had nowhere to be that the banner did not cover (2.4.11). The
+   * component publishes the border-box height, which this caps, so the clearance is capped by
+   * the same declaration.
+   *
+   * Measured in chrome-headless-shell 148.0.7778.96 on the built example app, the page
+   * lengthened by forty links. At 320 by 256 the banner is 128px, its contents scroll within
+   * it with the message's top in view when it appears, the arrow keys scroll it back to that
+   * top from a focused button, every control is inside the viewport when focused, and none of
+   * the forty links is covered even in part. At 640 by 360 it is 144px and needs no cap; no
+   * link is fully covered, and four lay partly under its top edge once scrolling settled,
+   * which 2.4.11's minimum allows. Safari and Firefox were not measured.
+   *
+   * `dvh` rather than `vh`, so the half is of the viewport actually showing when a mobile
+   * browser's toolbars are.
+   */
+  box-sizing: border-box;
+  max-block-size: 50dvh;
+  overflow-y: auto;
+
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-block: 1rem;
+  padding-inline: 1.5rem;
+
+  border-block-start: 1px solid var(--color-border-strong);
+  background-color: var(--color-surface);
+  color: var(--color-ink);
+}
+
+.salt-consent-banner__message {
+  max-inline-size: var(--container-2xl);
+}
+
+.salt-consent-banner__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+/*
+ * While the banner is open, the page keeps what it covers reachable, which WCAG 2.4.11 (Focus
+ * Not Obscured, Minimum) asks of it.
+ *
+ * The component publishes the banner's height as `--salt-consent-banner-size`. On the root it
+ * becomes the viewport's bottom scroll padding, so a browser scrolling a focused element into
+ * view stops it above the banner rather than behind it; after the body's last content it
+ * becomes room to scroll into, so the last links on the page can rise clear of the banner too.
+ * Measured in chrome-headless-shell 148.0.7778.96, and the component's note on its ref has the
+ * figures. Both are written under `:has()`, so a site's own scroll padding and its body are
+ * untouched once a choice is made.
+ *
+ * The room is a pseudo-element after the body's content rather than padding on the body, so a
+ * site's own body padding is not overwritten.
+ *
+ * What it costs in layout shift, measured in chrome-headless-shell 148.0.7778.96 at 1024 by
+ * 700 with a layout-shift observer reading buffered entries. Loading the page and the banner
+ * appearing: no entry. Closing it, with the page lengthened by forty links and scrolled to its
+ * foot, by Enter on Accept, by a click, and by a save in another tab: no entry for any of the
+ * three, the browser clamping the scroll from 733 to 589 without one; nor for a save in
+ * another tab on the short page unscrolled. The one entry in any run came from the measuring
+ * script itself: appending the forty links while the banner was open moved the room down the
+ * page, and Chrome counted the room's own visible area, 0.196 with no recent input, which does
+ * count towards Cumulative Layout Shift. So content a page adds below its end while the banner
+ * is open costs that page the room's visible area on top of its own shift. That is the known
+ * cost of this rule. An earlier reading of the same 0.196 attributed it to closing the banner,
+ * which was wrong.
+ */
+:root:has(.salt-consent-banner) {
+  scroll-padding-block-end: var(--salt-consent-banner-size, 0px);
+}
+
+body:has(.salt-consent-banner)::after {
+  content: "";
+  display: block;
+  block-size: var(--salt-consent-banner-size, 0px);
+}
+
+/*
+ * ── The consent preferences panel ───────────────────────────────────────────────
+ *
+ * A native `<dialog>` opened with `showModal()`, so it stacks in the browser's top layer rather
+ * than by `z-index`: above everything on the page, the banner at `--salt-consent-banner-layer`
+ * included, with the page behind it inert. No `z-index` is written here because none would
+ * apply.
+ *
+ * Its centring and its cap are written here rather than left to the browser's stylesheet, which
+ * provides both, because a site's reset takes them away. Measured in chrome-headless-shell
+ * 148.0.7778.96 on the built example app, whose Tailwind preflight zeroes every margin: without
+ * `margin: auto` the panel sat in the top-left corner of the viewport. The cap keeps it inside the
+ * viewport less a margin on each axis, scrolling within beyond that, so at 400% zoom it does not
+ * run off the screen (WCAG 1.4.10).
+ *
+ * It paints the banner's roles, `surface`, `ink` and `border-strong`, and pins the section
+ * variables for the same reason the banner does: its buttons read `--salt-section-ink` first.
+ * The backdrop is left to the browser, because a tint needs a colour this file may not write.
+ */
+.salt-consent-panel {
+  --salt-section-ink: var(--color-ink);
+  --salt-section-ink-contra: var(--color-ink-inverse);
+  --salt-section-ink-muted: var(--color-ink-muted);
+  --salt-section-border: var(--color-border);
+  --salt-section-boundary: var(--color-border-strong);
+
+  box-sizing: border-box;
+  inline-size: var(--container-2xl);
+  max-inline-size: calc(100% - 2rem);
+  max-block-size: calc(100% - 2rem);
+  margin: auto;
+  overflow-y: auto;
+  padding-block: 1.5rem;
+  padding-inline: 1.5rem;
+
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-surface);
+  color: var(--color-ink);
+}
+
+/* A dialog's title, not a section heading, so the contract's minor heading, `heading-4`, as a card's
+   title is (#190 review, LOW 5). As an `h2` the base styles set it at `heading-2`, a section's rank,
+   inside the dialog. */
+.salt-consent-panel__title {
+  margin-block: 0 1rem;
+  font-size: var(--text-heading-4);
+  line-height: var(--text-heading-4--line-height);
+  letter-spacing: var(--text-heading-4--letter-spacing);
+  font-weight: var(--text-heading-4--font-weight);
+  font-family: var(--text-heading-4--font-family);
+}
+
+/*
+ * The checkbox, its label and the description beneath the label. The checkbox is sized to the
+ * WCAG 2.5.8 floor the buttons take, in CSS pixels however the root is set, and its label is a
+ * second way to press it.
+ */
+.salt-consent-panel__category {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  column-gap: 0.75rem;
+  margin-block-end: 1rem;
+}
+
+.salt-consent-panel__checkbox {
+  inline-size: max(1.5rem, 24px);
+  block-size: max(1.5rem, 24px);
+  margin: 0;
+}
+
+.salt-consent-panel__description {
+  grid-column: 2;
+}
+
+.salt-consent-panel__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-block-start: 1.5rem;
+}
+
+/*
+ * ── Heard and not seen ──────────────────────────────────────────────────────────
+ *
+ * Core's one screen-reader-only utility. Text wearing it stays in the accessibility tree and
+ * in reading order, which `display: none` and `visibility: hidden` would both remove it from,
+ * and paints nothing: `clip-path: inset(50%)` on a 1px box, with `white-space: nowrap`
+ * because a 1px box wraps every word onto its own line and some readers then announce a
+ * clipped string a character at a time.
+ *
+ * The consent banner's live region is its first user. It was the second copy of these
+ * declarations, after the pricing recipe's `.salt-pricing__sr-only` in the example app, and
+ * section 7 recorded that a second copy is the point at which they belong in core. The recipe
+ * and `<FallbackHeading>`, the sr-only `<h1>`, now use this and carry no copy (BD-098).
+ */
+.salt-sr-only {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/*
+ * ── Pagination ──────────────────────────────────────────────────────────────────
+ *
+ * `<Pagination>`'s links, one row that wraps. Every link is a target of its own rather than a
+ * word in a sentence, so 2.5.8's inline exception does not reach it: each is floored at 2.75rem
+ * and 24px, the button's floor, on both axes, since a lone digit is far narrower than it is tall.
+ *
+ * The current page is told apart by a border and a missing underline, never by colour alone
+ * (1.4.1), and not by weight: the links are `label`, and the current one keeps its weight
+ * (BD-185). The border is `currentColor`, the band's own ink, so it holds the text
+ * pairing's contrast on every tone rather than a hairline's.
+ */
+.salt-pagination__list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.salt-pagination__link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-block-size: max(2.75rem, 24px);
+  min-inline-size: max(2.75rem, 24px);
+  padding-inline: 0.75rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  color: var(--salt-section-ink, var(--color-ink));
+  text-decoration: underline;
+}
+
+.salt-pagination__link[aria-current='page'] {
+  border-color: currentColor;
+  text-decoration: none;
+}
+
+.salt-pagination__gap {
+  padding-inline: 0.25rem;
+}
+
+/* The contract's `label`, "navigation" (BD-185, Ollie's ruling of 28/09/2026). The gap takes it
+   with the links, so the ellipsis sits in the row at the numbers' size. */
+.salt-pagination__link,
+.salt-pagination__gap {
+  font-size: var(--text-label);
+  line-height: var(--text-label--line-height);
+  letter-spacing: var(--text-label--letter-spacing);
+  font-weight: var(--text-label--font-weight);
+  font-family: var(--text-label--font-family);
+}
+
+/*
+ * ── Share links (WP9 unit 6) ─────────────────────────────────────────────────────
+ *
+ * `<ShareLinks>`: one wrapping row of links, then the copy button, then its status line. Each link
+ * and the button is a target of its own, so each is floored at the pagination link's size on both
+ * axes (WCAG 2.5.8), and a link is told from its neighbours by its underline rather than by colour.
+ *
+ * The copy button before hydration, with no script, or with no clipboard is `visibility: hidden`
+ * (`data-ready='false'`): out of the tab order and the accessibility tree, and still holding its
+ * place, so it arriving on hydration moves nothing. The status line reserves one line whether or
+ * not it says anything, for the same reason: "Link copied" appearing under the row must not push
+ * the article's footer down.
+ */
+.salt-share {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.salt-share__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* The row is the contract's `label`, its links and the copy button alike (BD-185, Ollie's ruling of
+   28/09/2026), so the button is not a size apart from the links beside it. */
+.salt-share__link,
+.salt-copy-link__button {
+  font-size: var(--text-label);
+  line-height: var(--text-label--line-height);
+  letter-spacing: var(--text-label--letter-spacing);
+  font-weight: var(--text-label--font-weight);
+  font-family: var(--text-label--font-family);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-block-size: max(2.75rem, 24px);
+  min-inline-size: max(2.75rem, 24px);
+  padding-inline: 0.75rem;
+  border: 1px solid currentColor;
+  border-radius: var(--radius-md);
+  color: var(--salt-section-ink, var(--color-ink));
+}
+
+.salt-share__link {
+  text-decoration: underline;
+}
+
+.salt-copy-link {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.salt-copy-link__button {
+  background: transparent;
+  cursor: pointer;
+}
+
+.salt-copy-link__button[data-ready='false'] {
+  visibility: hidden;
+}
+
+.salt-copy-link__status {
+  min-block-size: 1lh;
+}
+
+/*
+ * ── The contact form (WP7 unit 7) ───────────────────────────────────────────────
+ *
+ * `ContactForm`'s fields, one under another at a readable measure. Every colour is the band's own
+ * role, so the form holds its pairings on every tone and in both themes without a rule per tone:
+ * the text is the band's ink on the band's background, and a field's edge is
+ * `--salt-section-boundary`, the hairline BD-033 reserves for "the edge of something you use" — the
+ * role a field is, where a card's edge is not.
+ *
+ * An error is told by words beside the field, their weight and a heavier edge, never by a colour
+ * alone (1.4.1). No error red: `--color-error` is a light-mode rung, and on an inverse band it would
+ * be the one colour on the page that failed its pairing.
+ */
+.salt-contact__form {
+  display: grid;
+  gap: 1rem;
+  max-inline-size: var(--container-2xl);
+}
+
+.salt-contact__field {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.salt-contact__label {
+  font-size: var(--text-label);
+  line-height: var(--text-label--line-height);
+  letter-spacing: var(--text-label--letter-spacing);
+  font-weight: var(--text-label--font-weight);
+  font-family: var(--text-label--font-family);
+}
+
+/* The word that marks a field as one a visitor may skip, read as part of the label, set lighter
+   than the label so the field's name is what the eye lands on (BD-155). */
+.salt-contact__optional {
+  font-weight: var(--weight-regular);
+}
+
+.salt-contact__error {
+  margin: 0;
+  font-weight: var(--weight-semibold);
+}
+
+/*
+ * Floored at the button's height, in CSS pixels however the root is set, so a field is never a
+ * smaller target than the button beneath it (2.5.8).
+ */
+.salt-contact__input {
+  box-sizing: border-box;
+  inline-size: 100%;
+  min-block-size: max(2.75rem, 24px);
+  padding-block: 0.5rem;
+  padding-inline: 0.75rem;
+  border: 1px solid var(--salt-section-boundary, var(--color-border-strong));
+  border-radius: var(--radius-md);
+  background-color: var(--salt-section-bg, var(--color-surface));
+  color: var(--salt-section-ink, var(--color-ink));
+  font: inherit;
+}
+
+.salt-contact__input--short {
+  inline-size: 8rem;
+}
+
+textarea.salt-contact__input {
+  resize: vertical;
+}
+
+/*
+ * A second pixel of edge drawn inside the first, so marking a field invalid moves nothing.
+ *
+ * Not while the field is focused. This rule is later than the focus indicator's and just as
+ * specific, so it used to replace the indicator's keyline with its own inset, and a focused
+ * invalid field, the one focus moves to after a failed send, drew the ring alone: 2.775:1 on the
+ * inverted band in light and 2.235:1 in dark, the pairing BD-016 proved no seed can fix. Measured
+ * in chrome-headless-shell 148.0.7778.96 on 26/09/2026 (BD-167). While focused, the indicator is
+ * the edge; the inset returns when focus leaves.
+ */
+.salt-contact__input[aria-invalid='true']:not(:focus-visible) {
+  box-shadow: inset 0 0 0 1px var(--salt-section-boundary, var(--color-border-strong));
+}
+
+/*
+ * The status line keeps two lines of room from the server's first byte, so a message arriving
+ * after a round trip — sent, or refused — moves nothing below it. Two, not one: at 320 CSS pixels
+ * the example's "Thank you. Your message has been sent." wraps to a second line, and once the site
+ * footer sat below the form (WP9 unit 7) that line arriving three seconds after the click was a
+ * 0.0149 shift with no recent input (chrome-headless-shell 148.0.7778.96, 23/09/2026). A longer
+ * message than two lines still moves what is below it. `lh` with an `em` fallback for a browser
+ * that has not met the unit.
+ */
+.salt-contact__status {
+  margin: 0;
+  min-block-size: 3em;
+  min-block-size: 2lh;
+}
+
+.salt-contact__status[data-tone='problem'] {
+  font-weight: var(--weight-semibold);
+}
+
+/*
+ * ── Search ──────────────────────────────────────────────────────────────────────
+ *
+ * `<SearchForm>`: the label above, then the input and its button on one row that wraps. The input is
+ * floored at the button's height, so the two line up and the field is a target of 2.5.8's size.
+ *
+ * Its boundary is `currentColor`, the band's own ink, for the reason the current page's marker in
+ * `<Pagination>` is: the ink already meets the text pairing on every tone, so the edge of the field
+ * clears 1.4.11's 3:1 wherever the form is placed, with no pairing of its own to prove. The fill is
+ * left transparent so the band shows through rather than a light box sitting on a dark one.
+ */
+.salt-search__form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+
+.salt-search__label {
+  flex-basis: 100%;
+}
+
+.salt-search__input {
+  flex: 1 1 12rem;
+  min-inline-size: 0;
+  min-block-size: max(2.75rem, 24px);
+  padding-inline: 0.75rem;
+  border: 1px solid currentColor;
+  border-radius: var(--radius-md);
+  background-color: transparent;
+  color: var(--salt-section-ink, var(--color-ink));
+  font: inherit;
+}
+
+/*
+ * ── The case study view (BD-179) ────────────────────────────────────────────────
+ *
+ * `<CaseStudyView>`'s rhythm, which each site's copy of the view left to base styles that give
+ * headings and paragraphs no margin: the title, the client line and the summary touched, each
+ * section's `h2` sat on its rich text, and each `h2` sat on the paragraph before it. 0px at every
+ * one of those joins, measured on Floorworkz's preview on 28/09/2026 (the mirrored row MR-8).
+ *
+ * **Keyed on `.salt-case-study-view`, a class only core's view renders.** Every site's own copy of the
+ * view draws `.salt-case-study` and its elements, and a site that keeps its copy after upgrading must
+ * not have core's spacing and frames land on it unasked (#201 review).
+ *
+ * Lobotomised owls, as `.salt-block` spaces its parts, so only the gaps BETWEEN parts are set and
+ * nothing collapses against whatever the site draws around the article. Every gap is a token and
+ * none is a length written here:
+ *
+ * - between the article's own parts, which is the gap above every section heading, the layout
+ *   role `section-sm`, so the page's sections breathe as a small band does and retune with it;
+ * - between a heading and what it heads, and between the header's lines, rung 4 of the space
+ *   scale, `--space-4`. Not `calc(var(--spacing) * 4)`: `--spacing` is Tailwind's unit, which a site
+ *   retunes in its own `@theme`, and every other gap here reads a rung that retune leaves alone;
+ * - above the results strip and above the project details (BD-178), rung 8, `--space-8`: each is a
+ *   band of its own under the summary rather than another line of it.
+ *
+ * The headings, paragraphs and lists are zeroed for a consuming repo without a reset, as
+ * `.salt-block`'s heading is, so the user agent's margins cannot stack with the owl and put a
+ * different gap above a line than below it. A detail's `<dd>` is zeroed with them, since the user
+ * agent indents it 40px from its label, which is an eighth of a 320px screen.
+ */
+.salt-case-study-view > * + * {
+  margin-block-start: var(--space-section-sm);
+}
+
+/*
+ * The title off the site header (BD-202). The view is the first thing in `<main>`, and nothing above
+ * the `h1` opened a gap: 0px from the header's foot to the `h1`'s box at 1440 and 390 on the
+ * example, measured on 04/10/2026. The layout role a band is given by default, `section-md`, so the
+ * title sits where a page's first band puts its heading and retunes with it. Padding rather than a
+ * margin, because a margin on the first child of `<main>` collapses through it and moves with
+ * whatever the site puts round `<main>`.
+ */
+.salt-case-study-view {
+  padding-block-start: var(--space-section-md);
+}
+
+/*
+ * A header drawn as a band (BD-206) opens that gap itself, with a band's own padding, so the
+ * article's goes: kept, it would sit above the band on the page ground, a strip of the wrong colour
+ * between the site header and the tone. `--space-0` rather than removing the rule above, so the gap
+ * is still one token a site retunes, and (0,2,0) so the order of the two does not matter.
+ */
+.salt-case-study-view[data-header='band'] {
+  padding-block-start: var(--space-0);
+}
+
+.salt-case-study-view > .salt-case-study-view__header > *,
+.salt-case-study-view > .salt-case-study-view__header > .salt-section__content > *,
+.salt-case-study-view > .salt-case-study-view__section > h2,
+.salt-case-study-view__detail-value {
+  margin: 0;
+}
+
+/*
+ * The band's content keeps the measure `sections.css` centres it on. The reset above reaches it as
+ * the header's one child, at (0,2,0), and `.salt-section > .salt-section__content` is (0,2,0) too, so
+ * on source order the reset would pin it to the band's left edge; (0,3,0) gives it back.
+ */
+.salt-case-study-view > .salt-case-study-view__header > .salt-section__content {
+  margin-inline: auto;
+}
+
+/*
+ * (0,2,0), and it has to be: the gallery, the delivered services and the results are `.salt-grid`
+ * lists, whose `margin: 0` is (0,1,0) in `blocks.css`, which a site imports after this file. At
+ * (0,1,0) the owl lost to it on source order and the heading sat on the grid.
+ */
+.salt-case-study-view > .salt-case-study-view__header > * + *,
+.salt-case-study-view > .salt-case-study-view__header > .salt-section__content > * + *,
+.salt-case-study-view > .salt-case-study-view__section > * + * {
+  margin-block-start: var(--space-4);
+}
+
+.salt-case-study-view > .salt-case-study-view__header > .salt-case-study-view__results,
+.salt-case-study-view > .salt-case-study-view__header > .salt-case-study-view__details,
+.salt-case-study-view > .salt-case-study-view__header > .salt-section__content > .salt-case-study-view__results,
+.salt-case-study-view > .salt-case-study-view__header > .salt-section__content > .salt-case-study-view__details {
+  margin-block-start: var(--space-8);
+}
+
+/*
+ * A section's heading off a heading that opens its rich text (BD-202). At `--space-4` the `h2` sat
+ * 16px above an opening `h3` that sits 18px above its own paragraph at 1440 (the rich text's `1em`
+ * owl), so the two headings read as one block and the `h3` belonged to neither, measured on
+ * 04/10/2026. `--space-8` puts the section heading about twice as far from the subsection as the
+ * subsection is from its text. Matched on the rich text rather than its heading, because the
+ * heading's own margin would collapse through the rich text's top into the owl's 16px. `:has()` is
+ * (0,4,2) here, above the (0,2,0) owl whatever the order; an engine without it keeps 16px, which is
+ * the gap as it was.
+ */
+.salt-case-study-view > .salt-case-study-view__section > h2 + .salt-rich-text:has(> :first-child:is(h3, h4, h5, h6)) {
+  margin-block-start: var(--space-8);
+}
+
+.salt-case-study-view__client {
+  color: var(--salt-section-ink-muted, var(--color-ink-muted));
+}
+
+/*
+ * The link back to the index (BD-206) takes the ink around it, as an editor's link in body copy
+ * does, so on a toned band it is the tone's own ink and clears AA by the pairing the contrast
+ * manifest proves; the underline is what marks it a link rather than its colour.
+ */
+.salt-case-study-view__back-link {
+  text-decoration-line: underline;
+  text-underline-offset: 0.15em;
+}
+
+/*
+ * The project details (BD-178), as many columns of at least 12rem as the header holds, the measure
+ * the footer's columns take, and one below that, so a column never overflows a 320px screen. `auto-fill`
+ * rather than `auto-fit`, so a pair keeps its column's width whatever the count and a list of one
+ * reads as a spec line rather than a banner. The tracks' minimum is fixed, so a long unbroken value
+ * cannot widen its column, and `overflow-wrap` breaks it inside the column instead.
+ */
+.salt-case-study-view__details {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(12rem, 100%), 1fr));
+  gap: var(--space-4) var(--space-8);
+  overflow-wrap: break-word;
+}
+
+/*
+ * A detail's label names its value, as a form's label names its field, so it takes the `label` role
+ * and the muted ink the client line takes; the value keeps the body text it inherits.
+ */
+.salt-case-study-view__detail-label {
+  color: var(--salt-section-ink-muted, var(--color-ink-muted));
+  font-size: var(--text-label);
+  line-height: var(--text-label--line-height);
+  letter-spacing: var(--text-label--letter-spacing);
+  font-weight: var(--text-label--font-weight);
+  font-family: var(--text-label--font-family);
+}
+
+.salt-case-study-view__summary {
+  max-inline-size: var(--container-2xl);
+}
+
+/*
+ * The frames reserve their space before the image arrives, so a photograph landing late pushes
+ * nothing down. The featured frame is 16:9, the showcase card's proportion; the gallery's is 4:3,
+ * the proportion a project photograph is usually shot in, which square would crop.
+ */
+.salt-case-study-view__media,
+.salt-case-study-view__frame {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+}
+
+.salt-case-study-view__frame {
+  aspect-ratio: 4 / 3;
+}
+
+/* Each photograph fills its frame (SC-011). */
+.salt-case-study-view__media > img,
+.salt-case-study-view__frame > img {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}
+
+/*
+ * The featured image in an aside (BD-206), as Floorworkz's setting-out mockup frames its plan
+ * drawing: from 64rem (`--breakpoint-lg`, which a media query cannot read) the article is a grid,
+ * the header and the services across it, the challenge, the solution, the gallery and the live link
+ * in a column of seven parts, and the image in a column of five beside them, held under the site
+ * header as they scroll. Narrower, none of this applies and the image is in the flow where it always
+ * was, after the header and before the challenge, so the order on a phone is the reading order.
+ *
+ * The outer tracks are what a band's content puts before its text: half of what the measure leaves
+ * plus the gutter, or the gutter alone on a page narrower than the measure, as `sections.css` centres
+ * `.salt-section__content` and pads it. So the columns start at a band title's left edge and the image
+ * ends at its right. The measure is `--salt-case-study-view-measure`, which the view writes from its
+ * `measure` prop, a `default` band's `--container-5xl` unless a site that widened its bands passes the
+ * same width (#226 review, 1). The article's parts are placed by the grid, so their inline margins
+ * are zeroed: a site insetting what `<main>` draws outside a band would otherwise inset each column
+ * inside its own track. The rows the image spans are counted by the view, which writes them as
+ * `--salt-case-study-view-aside-rows`; the grid has no way to say "every row up to the services".
+ *
+ * Sticky holds no focus and covers nothing: the image has no control in it, and it sits in its own
+ * column, clear of the text beside it. Its offset is the site header's height plus a gap, and the
+ * height is `--header-height`, which only the header's script publishes; with no fallback, a page
+ * without it has an invalid offset, so `inset-block-start` is `auto` and the image scrolls with the
+ * page rather than sticking under a header it does not know the height of (#226 review, 3).
+ */
+@media (min-width: 64rem) {
+  .salt-case-study-view[data-media='aside'] {
+    display: grid;
+    grid-template-columns:
+      [full-start] max(var(--space-gutter), (100% - var(--salt-case-study-view-measure, var(--container-5xl))) / 2 + var(--space-gutter))
+      [main-start] minmax(0, 7fr)
+      [main-end aside-start] minmax(0, 5fr)
+      [aside-end] max(var(--space-gutter), (100% - var(--salt-case-study-view-measure, var(--container-5xl))) / 2 + var(--space-gutter))
+      [full-end];
+    align-items: start;
+  }
+
+  .salt-case-study-view[data-media='aside'] > * {
+    grid-column: main;
+    margin-inline: 0;
+  }
+
+  .salt-case-study-view[data-media='aside'] > .salt-case-study-view__header {
+    grid-column: full;
+  }
+
+  .salt-case-study-view[data-media='aside'] > .salt-case-study-view__header:not(.salt-section) {
+    grid-column: main-start / aside-end;
+  }
+
+  .salt-case-study-view[data-media='aside'] > .salt-case-study-view__media {
+    grid-column: aside;
+    grid-row: 2 / span var(--salt-case-study-view-aside-rows);
+    position: sticky;
+    inset-block-start: calc(var(--header-height) + var(--space-4));
+    margin-inline-start: var(--space-section-sm);
+  }
+
+  .salt-case-study-view[data-media='aside'] > .salt-case-study-view__services {
+    grid-column: main-start / aside-end;
+  }
+}

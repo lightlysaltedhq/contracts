@@ -1,0 +1,84 @@
+/*
+ * The base layer: the text roles a heading and running text are set in, which the other
+ * stylesheets assume and no longer get from anywhere else.
+ *
+ * Salt for Next.js set these in its generated `theme.css`, inside `@layer base` after Tailwind's
+ * preflight. `theme.css` stays with each implementation, so the shared set carries the mapping
+ * itself: a heading level's text role is a contract rule, not a brand value. Without it a heading
+ * with no rule of its own renders at whatever the host gives it, and under Tailwind's preflight
+ * that is the body's size and weight.
+ *
+ * The mapping is design-foundations' element convention (`textRoles.elementConvention`): h1 to h3
+ * take heading-1 to heading-3, h4 to h6 take heading-4, and `p` takes body. Body is set on `body`
+ * and inherited rather than set on `p`, so a paragraph inside a component that sets its own role on
+ * a container takes the container's; a `p` rule would put it back at body size.
+ *
+ * ── Why a cascade layer, and why `base` ─────────────────────────────────────────
+ *
+ * Where the layer survives (Tailwind v4, no Tailwind), a layered rule loses to every unlayered one,
+ * whatever its specificity, so this is the weakest styling on the page by construction: every
+ * component rule in the shared set, every rule a host theme writes and every utility class outranks
+ * it. Unlayered, these rules beat Tailwind v4's utilities, and `<h2 class="text-sm">` in a section
+ * rendered at heading-2.
+ *
+ * - Tailwind v4 (both Salt implementations): `@import 'tailwindcss'` declares `theme, base,
+ *   components, utilities`, so these rules join its `base` layer, after preflight when this file is
+ *   imported after Tailwind. They beat the preflight that flattens headings on source order, and
+ *   lose to every utility.
+ * - Tailwind v3: import this file into the stylesheet v3 processes. There `@layer base` is v3's own
+ *   directive, which v3 consumes: it emits these rules unlayered, after its preflight and before its
+ *   components and utilities. They then rank by specificity and source order. At (0,0,1) they beat
+ *   preflight's element rules of the same specificity by coming after them, and lose to every rule
+ *   keyed on a class (each component in the shared set, every utility); a host's own element rule
+ *   of the same specificity wins only if it comes later. Served as a file of its own beside v3's
+ *   output, the layer would survive and v3's unlayered preflight would win.
+ * - No Tailwind: `base` is the only layer, and these rules beat only the user agent's, which is
+ *   what a base is for.
+ *
+ * Headings are scoped to the page skeleton's landmarks (`contract/markup/page.json`, the rule
+ * `section#landmarks`), so a heading a plugin draws outside Salt's markup keeps the host's size.
+ * Running text is not: it is inherited, and the skip link and the consent banner sit outside the
+ * landmarks, so its role is on `body`, where any host rule still outranks it.
+ */
+
+@layer base {
+  body {
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+    letter-spacing: var(--text-body--letter-spacing);
+    font-weight: var(--text-body--font-weight);
+    font-family: var(--text-body--font-family);
+  }
+
+  :where(#main, .salt-header, .salt-footer) h1 {
+    font-size: var(--text-heading-1);
+    line-height: var(--text-heading-1--line-height);
+    letter-spacing: var(--text-heading-1--letter-spacing);
+    font-weight: var(--text-heading-1--font-weight);
+    font-family: var(--text-heading-1--font-family);
+  }
+
+  :where(#main, .salt-header, .salt-footer) h2 {
+    font-size: var(--text-heading-2);
+    line-height: var(--text-heading-2--line-height);
+    letter-spacing: var(--text-heading-2--letter-spacing);
+    font-weight: var(--text-heading-2--font-weight);
+    font-family: var(--text-heading-2--font-family);
+  }
+
+  :where(#main, .salt-header, .salt-footer) h3 {
+    font-size: var(--text-heading-3);
+    line-height: var(--text-heading-3--line-height);
+    letter-spacing: var(--text-heading-3--letter-spacing);
+    font-weight: var(--text-heading-3--font-weight);
+    font-family: var(--text-heading-3--font-family);
+  }
+
+  :where(#main, .salt-header, .salt-footer) :is(h4, h5, h6) {
+    font-size: var(--text-heading-4);
+    line-height: var(--text-heading-4--line-height);
+    letter-spacing: var(--text-heading-4--letter-spacing);
+    font-weight: var(--text-heading-4--font-weight);
+    font-family: var(--text-heading-4--font-family);
+  }
+}
