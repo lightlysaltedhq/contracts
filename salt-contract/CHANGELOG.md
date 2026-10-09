@@ -10,8 +10,10 @@ Salted's decision log for Product Salt.
   the markup schema drops the `open-question` note topic.
   - An id an editor set is never changed by a generated one. `section#anchors` settles ids at
     render in three steps: the reserved document ids, then editors' anchors (one that equals a
-    reserved id takes the suffix, SC-008), then generated ids such as `<section id>-heading`, the
-    header's, form and tab ids. A suffix counts up until the id is unique on the page, so `main`
+    reserved id takes the suffix, SC-008), then generated ids in the page body, such as
+    `<section id>-heading`, form and tab ids and the service view's heading ids. The ids the
+    header, footer and consent panel draw are reserved forms, since neither platform draws them
+    with sight of the page's sections. A suffix counts up until the id is unique on the page, so `main`
     beside an explicit `main-2` renders `main-3`; it is applied at render and never stored.
   - The post, service, archive and search view bodies are fixed as Salt for Next.js's example app
     writes them (`salt-post__*`, `salt-service__*`, `salt-related`, `salt-archive__*`,
@@ -27,11 +29,15 @@ Salted's decision log for Product Salt.
   - Salt for WordPress's `owes` records each change, including its `picture_sources` opt-in and the
     glyphs `chevron-right`, `external-link`, `moon` and `sun`.
 - The header fixes every id it draws: `site-navigation` and `salt-header-nav-submenu-<n>` in the
-  bar, with `-drawer` after each prefix in the drawer. A footer social link with no glyph carries
+  bar, with `-drawer` after each prefix in the drawer. The footer's column ids are
+  `salt-footer-column-<n>` and the consent panel's are `salt-consent-*`; all are reserved. A footer social link with no glyph carries
   the profile's name as text.
 - `contract/sections.json` declares component variants (card's `style`), and the gate refuses
-  component markup that describes a variant or option its entry does not declare, an icon name
-  `icons` does not list, and an icon field whose default is not a content name.
+  component markup that describes a variant or option its entry does not declare, a vocabulary
+  variant that offers a value twice or defaults outside its options, an icon name `icons` does not
+  list (in attributes or `dataAttributes`), and an icon field whose default is not a content name.
+- The sections schema drops `openQuestions`.
+- Locations' open-now rule states one order, hours carried past midnight included.
 - The package exists, with its gate (`npm run salt-contract` at the repository root) and its
   release workflow on the `salt-contract-v*` tag prefix. It stays `private` until 1.0.0.
 - `RELEASE-POLICY.md`: one version for the package, what is major, minor and patch for every kind
