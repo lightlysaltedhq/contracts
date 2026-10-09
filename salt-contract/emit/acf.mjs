@@ -30,7 +30,7 @@
 import { readFileSync, writeFileSync } from 'node:fs'
 
 import { allowedFor, clauses, collectionQueryShape, diffSnapshots, isMainModule, LINK_SHAPE, loadContract,
-  normaliseLineEndings, planSections, sourceValues, SOURCES } from './_contract.mjs'
+  normaliseLineEndings, parseEmitterArguments, planSections, sourceValues, SOURCES } from './_contract.mjs'
 
 /**
  * Each source's post type and category taxonomy, as Salt for WordPress registers them by default.
@@ -413,12 +413,14 @@ export function checkAcfSnapshot(snapshot, options = {}) {
 // Every option but `contract` is JSON, so the options file can hold them all.
 
 if (isMainModule(import.meta.url)) {
-  const args = process.argv.slice(2)
-  const flag = (name) => { const i = args.indexOf(name); return i === -1 ? undefined : args[i + 1] }
-  const optionsFile = flag('--options')
+  let args
+  try { args = parseEmitterArguments(process.argv.slice(2)) } catch (e) {
+    console.error(`✗ ${e.message}`)
+    console.error('usage: acf.mjs --check <snapshot.json> | --write <snapshot.json> [--options <options.json>]')
+    process.exit(2)
+  }
+  const { check, write, options: optionsFile } = args
   const options = optionsFile ? JSON.parse(readFileSync(optionsFile, 'utf8')) : {}
-  const check = flag('--check')
-  const write = flag('--write')
   if (write) {
     writeFileSync(write, acfSnapshot(options))
     console.log(`wrote ${write}`)
@@ -430,8 +432,5 @@ if (isMainModule(import.meta.url)) {
       process.exit(1)
     }
     console.log(`PASS: ${check} matches the contract`)
-  } else {
-    console.error('usage: acf.mjs --check <snapshot.json> | --write <snapshot.json> [--options <options.json>]')
-    process.exit(2)
   }
 }

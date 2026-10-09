@@ -518,3 +518,19 @@ test('finding 1: a kept field conditioned on a field left out builds, its rule o
   const keys = new Set(subs.map((f) => f.key))
   for (const f of subs) for (const g of f.conditional_logic ?? []) for (const r of g) assert.ok(keys.has(r.field), `${f.name} reads ${r.field}`)
 })
+
+test('finding 9: the CLI refuses a flag where a value belongs, an unknown argument, and --check with --write', () => {
+  const run = (...args) => {
+    try { execFileSync(process.execPath, [emitter, ...args], { encoding: 'utf8', stdio: 'pipe' }); return { code: 0, err: '' } } catch (e) { return { code: e.status, err: e.stderr } }
+  }
+  for (const [args, message] of [
+    [['--check', '--options', 'o.json'], /--check needs a value, not the flag --options/],
+    [['--check', 'a.json', '--verbose'], /unknown argument --verbose/],
+    [['--check', 'a.json', '--write', 'b.json'], /--check and --write cannot be used together/],
+    [[], /pass --check <snapshot> or --write <snapshot>/],
+  ]) {
+    const r = run(...args)
+    assert.equal(r.code, 2, args.join(' '))
+    assert.match(r.err, message, args.join(' '))
+  }
+})
