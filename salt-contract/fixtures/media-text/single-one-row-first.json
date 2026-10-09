@@ -48,5 +48,8 @@
       "href": "/work/",
       "title": "Our work"
     }
+  },
+  "site": {
+    "arrow": "→"
   }
 }

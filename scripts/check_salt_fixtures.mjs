@@ -390,8 +390,10 @@ const isImage = (c, id) => typeof id === 'string' && isObject(c.input.media?.[id
 const background = (c) => isImage(c, c.input.values?.settings?.backgroundImage?.image)
 const scrimOn = (c) => background(c) && c.input.values.settings.backgroundImage.scrim !== false
 // The stored link a drawn button stands for, found by its label.
+// A button's own words: its text without the site's arrow, which is decoration.
+const labelOf = (el) => el.children.map((x) => (x.type === 'text' ? x.value : classesOf(x).includes('salt-arrow') ? '' : labelOf(x))).join('').replace(/\s+/g, ' ').trim()
 function linkFor(c, el) {
-  const label = textOf(el)
+  const label = labelOf(el)
   const found = []
   const walk = (v) => {
     if (Array.isArray(v)) { v.forEach(walk); return }

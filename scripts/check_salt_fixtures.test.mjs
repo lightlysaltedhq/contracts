@@ -269,7 +269,7 @@ test('when: data-divider follows the divider setting, both ways', () => {
 })
 test('when: target and rel follow the link\'s newTab, both ways', () => {
   expectFail(HERO, (io) => io.html('hero/split-no-image-new-tab.html', ' target="_blank"', ''), /lacks target, which the markup requires when newTab/)
-  expectFail(HERO, (io) => io.html(`${SPLIT}.html`, 'data-track-control="cta">See our work', 'data-track-control="cta" rel="noopener noreferrer">See our work'), /carries rel, which the markup draws only when newTab/)
+  expectFail(HERO, (io) => io.html(`${SPLIT}.html`, 'data-track-control="cta"><span class="salt-button__label">See our work', 'data-track-control="cta" rel="noopener noreferrer"><span class="salt-button__label">See our work'), /carries rel, which the markup draws only when newTab/)
 })
 test('when: aria-current marks the current page and no other', () => {
   expectFail(['listing'], (io) => {
@@ -352,7 +352,8 @@ test('gaps: a background with no focal point writes the fit alone', () => {
 })
 test('gaps: a link-form button without the site\'s arrow fails, and one with it on a site with none', () => {
   expectFail(['process'], (io) => io.html('process/timeline-many.html', '<span class="salt-button__label">Book a visit<span class="salt-arrow" aria-hidden="true">&#x2060;→</span></span>', 'Book a visit'), /"Book a visit" draws no arrow, but the site supplies one/)
-  expectFail(HERO, (io) => io.html(`${SPLIT}.html`, '>See our work</a>', '><span class="salt-button__label">See our work<span class="salt-arrow" aria-hidden="true">&#x2060;→</span></span></a>'), /draws an arrow, which the site does not supply/)
+  expectFail(HERO, (io) => io.html('hero/split-image-right-later.html', '>Aftercare plans</a>', '><span class="salt-button__label">Aftercare plans<span class="salt-arrow" aria-hidden="true">&#x2060;→</span></span></a>'), /draws an arrow, which the site does not supply/)
+  expectFail(HERO, (io) => io.html(`${SPLIT}.html`, '<span class="salt-button__label">See our work<span class="salt-arrow" aria-hidden="true">&#x2060;→</span></span>', 'See our work'), /"See our work" draws no arrow, but the site supplies one/)
 })
 test('gaps: the ungrouped index is one list with no group', () => {
   expectFail(['collection-showcase'], (io) => io.html('collection-showcase/index-posts-ungrouped.html', '<ul class="salt-showcase__index" role="list">', '<div class="salt-showcase__group">\n      <ul class="salt-showcase__index" role="list">'), /index-posts-ungrouped\.html/)

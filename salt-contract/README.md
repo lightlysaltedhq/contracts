@@ -260,7 +260,7 @@ option covered, and the normaliser sound.
 | `documents` | The pages internal links name, by id: `{ href, title }`. |
 | `collections` | The items of each source the section reads (`faqs`, `services`, `team` …), in the collection's usual order, each with a string `id`. |
 | `route` | What the route hands a listing: its cards and pagination. |
-| `site` | Site-wide data the markup reads: `labels` (the strings `labels.<name>` in the markup refers to), `arrow` (the site's arrow glyph), the organisation's contact details, whether it accepts enquiries, its timezone and map settings. |
+| `site` | Site-wide data the markup reads: `labels` (the strings `labels.<name>` in the markup refers to), `arrow` (the site's arrow glyph), the organisation's contact details, whether it accepts enquiries, its timezone and map settings. `logoHeight` (px) is the declared key for the logo's drawn height, for the chrome fixtures to come. |
 
 Conventions, so that every case is deterministic:
 
@@ -275,7 +275,7 @@ Conventions, so that every case is deterministic:
 - **Images.** Each image declares its slot's default `sizes` for its section's band and the
   `srcset` the candidate rule gives for them, both from `contract/image-sizes.json` (SC-016),
   capped at the upload's intrinsic width (the record's `width`, listed itself when it is no
-  candidate), with `src` the widest width listed. The case's media record gives each candidate's URL through its
+  candidate), so `src` is always the URL at the intrinsic width. The case's media record gives each candidate's URL through its
   `{width}` template; the adapter makes its pipeline serve those URLs. Uploads live on
   `https://uploads.example`, and the normaliser drops the host.
 - **Dark tone.** `toneDark: auto` is written as `data-tone-dark` equal to the tone: the shared

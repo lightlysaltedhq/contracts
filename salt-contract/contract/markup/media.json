@@ -8,7 +8,7 @@
     "attributes": {
       "src": {
         "value": "from:image",
-        "note": "The URL of the widest width the srcset lists: the upload's intrinsic width, or the widest candidate below it (contract/image-sizes.json, srcset)."
+        "note": "The URL at the upload's intrinsic width. The srcset always lists the intrinsic width and nothing wider, so src is always that width (contract/image-sizes.json, srcset)."
       },
       "srcset": {
         "value": "from:image",
@@ -78,7 +78,7 @@
     "nextjs": {
       "owes": [
         "Write the inline style object-fit and object-position the parent passes, with focal-point as the image's stored focal point (Payload's upload focalPoint, as <x>% <y>%), left out when none is stored; objectPosition() maps focal-point to nothing today (components/image-sizes.ts).",
-        "Srcset capped at the upload's intrinsic width (SC-016): next/image lists every candidate, 3840w included, whatever the upload; the srcset stops at the widest candidate within the upload's width and adds that width, and src is it.",
+        "Srcset capped at the upload's intrinsic width (SC-016): next/image lists every candidate the sizes leaves, 3840w included, whatever the upload's width. Salt for Next.js owes listing only the candidates at or below the intrinsic width, then the intrinsic width itself, and writing src as the URL at the intrinsic width.",
         "Width and height on every image, fill images included (SC-007): next/image's fill mode writes neither, so the showcase and listing card images, the logo strip and the case study view's images draw none today. They are the upload's intrinsic size and give the aspect ratio before the image loads."
       ]
     },
@@ -96,7 +96,7 @@
         "Drop x-image; take the parent's class; derive sizes from the same contexts.",
         "Its picture_sources opt-in, which wraps the img in picture with source elements, is non-conforming (SC-007): drop it and negotiate formats in the image pipeline behind srcset.",
         "Write the inline style object-fit and object-position when the parent passes a fit or a position: the nine positions as keyword pairs, and focal-point as the attachment's stored focal point as <x>% <y>%, left out when none is stored. It stores no focal point today, so focal-point draws the stylesheet's centre until it does.",
-        "Image sizes (SC-016): each image's sizes from its slot in contract/image-sizes.json for its section's band; an uncropped add_image_size for every candidate width and max_srcset_image_width raised to the widest, so wp_calculate_image_srcset lists the candidates up to the upload's width plus the full-size upload, as the srcset rule says."
+        "Image sizes (SC-016): each image's sizes from its slot in contract/image-sizes.json for its section's band, written exactly: disable WordPress 6.7's auto-sizes, which prepends 'auto, ' to a lazy image's sizes (add_filter('wp_img_tag_add_auto_sizes', '__return_false')). The srcset by exactly the contract's rule: filter wp_calculate_image_srcset to the table's candidate widths at or above the slot's floor (640 x the smallest bare vw share in its sizes / 100, or none), capped at the upload's intrinsic width, plus the intrinsic width (the full-size upload), dropping core's default sizes (300, 768, 1024, 1536) and any other registered size; register an uncropped image size for every candidate width so each exists, and raise max_srcset_image_width to the widest candidate. Worked examples from the fixtures: the carousel's fern-bed slide (card slot unbanded, sizes '(min-width: 64rem) 19rem, (min-width: 40rem) 50vw, 100vw', floor 320, an 800px upload) lists 384w, 640w, 750w, 800w; the full-bleed hero's background (full slot, sizes 100vw, floor 640, a 2400px upload) lists 640w, 750w, 828w, 1080w, 1200w, 1920w, 2048w, 2400w. src is the full-size upload."
       ]
     }
   }

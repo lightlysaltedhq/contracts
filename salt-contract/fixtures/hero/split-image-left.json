@@ -53,5 +53,8 @@
       "href": "/contact/",
       "title": "Contact"
     }
+  },
+  "site": {
+    "arrow": "→"
   }
 }
