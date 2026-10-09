@@ -139,6 +139,10 @@
     {
       "topic": "ruling",
       "text": "The consent banner is drawn only when the site runs an integration that needs consent (SC-006). Salt for WordPress ports Salt for Next.js's banner, gate, preferences panel, categories and cookie format; a client that needs a certified consent tool (Google Ads personalisation in the UK and EEA) uses one as a Grain override."
+    },
+    {
+      "topic": "ruling",
+      "text": "The document head carries <noscript><style>.salt-header{--salt-header-phone-menu:inline-flex;--salt-header-phone-burger:none;--salt-header-phone-wrap:wrap}</style></noscript> whenever the site header is drawn. With no script it keeps the header's menu and call to action on screen below the breakpoint, hides the burger nothing could open, and lets the row wrap. It sits in head because a style element inside noscript is conforming only there; a no-js class removed by script was rejected because it needs a blocking script and leaves a phone whose script fails mid-page with no menu."
     }
   ],
   "platforms": {
@@ -162,7 +166,8 @@
         }
       ],
       "owes": [
-        "Rename skip-link to salt-skip-link (and give it a rule in chrome.css)."
+        "Rename skip-link to salt-skip-link (and give it a rule in chrome.css).",
+        "The header's noscript style in the document head, moved from inside the header."
       ]
     },
     "wordpress": {
@@ -183,7 +188,8 @@
         }
       ],
       "owes": [
-        "salt-skip-link; tabindex -1 on main; the hidden h1 as fallback-heading; the consent banner, gate, preferences panel, categories and cookie format ported from Salt for Next.js, drawn only when an integration needs consent (SC-006)."
+        "salt-skip-link; tabindex -1 on main; the hidden h1 as fallback-heading; the consent banner, gate, preferences panel, categories and cookie format ported from Salt for Next.js, drawn only when an integration needs consent (SC-006).",
+        "The header's noscript style in the document head (wp_head)."
       ]
     }
   }

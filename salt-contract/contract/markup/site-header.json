@@ -18,18 +18,6 @@
   },
   "elements": [
     {
-      "role": "scriptless",
-      "element": "noscript",
-      "children": [
-        {
-          "role": "scriptless-style",
-          "element": "style",
-          "text": ".salt-header{--salt-header-phone-menu:inline-flex;--salt-header-phone-burger:none;--salt-header-phone-wrap:wrap}"
-        }
-      ],
-      "note": "First in the header. With no script, these three custom properties keep the menu and call to action on screen below the breakpoint, hide the burger nothing could open, and let the row wrap; chrome.css reads each through var() with the scripted value as its fallback."
-    },
-    {
       "role": "inner",
       "element": "div",
       "classes": [
@@ -453,6 +441,10 @@
     {
       "topic": "ruling",
       "text": "The call to action follows the nav, then the burger, in both platforms' order."
+    },
+    {
+      "topic": "ruling",
+      "text": "The scriptless phone layout is a noscript style in the document head (page.json), not in the header: a style element inside noscript is conforming HTML only in head. It sets --salt-header-phone-menu, --salt-header-phone-burger and --salt-header-phone-wrap on .salt-header, which chrome.css reads through var() with the scripted values as fallbacks."
     }
   ],
   "platforms": {
@@ -460,7 +452,8 @@
       "owes": [
         "The sticky setting, drawn as data-sticky (SC-006).",
         "The id site-navigation on the main navigation, in place of navigation (SC-006).",
-        "The ids site-header__submenu-<n>, site-header__drawer-navigation and site-header__drawer-submenu-<n>, counting from 1, in place of the salt-header-nav-submenu-<n> ones it builds from idPrefix and counts from 0 (SC-012). The idPrefix prop goes, since an override would write ids outside the contract."
+        "The ids site-header__submenu-<n>, site-header__drawer-navigation and site-header__drawer-submenu-<n>, counting from 1, in place of the salt-header-nav-submenu-<n> ones it builds from idPrefix and counts from 0 (SC-012). The idPrefix prop goes, since an override would write ids outside the contract.",
+        "Move the noscript style SiteHeader draws as its first child into the document head (page.json): inside the header it is non-conforming HTML."
       ]
     },
     "wordpress": {
@@ -528,7 +521,7 @@
       ],
       "owes": [
         "Rename to salt-header and salt-nav*; the burger, drawer, submenu disclosure, phone link and theme toggle; data-site-header. data-sticky in place of is-sticky, and the id site-navigation on the main navigation (SC-006). The bar's and the drawer's ids exactly as the ruling note fixes them (SC-012).",
-        "The noscript style setting --salt-header-phone-menu, --salt-header-phone-burger and --salt-header-phone-wrap, first in the header."
+        "The noscript style setting --salt-header-phone-menu, --salt-header-phone-burger and --salt-header-phone-wrap, printed in the document head (page.json)."
       ]
     }
   }
