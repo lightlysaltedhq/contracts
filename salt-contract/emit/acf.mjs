@@ -28,10 +28,8 @@
 // the clock, the environment or the file system's listing order. Nothing writes ACF's `modified`
 // timestamp, which a consumer loading the groups from code does not need.
 import { readFileSync, writeFileSync } from 'node:fs'
-import path from 'node:path'
-import { pathToFileURL } from 'node:url'
 
-import { allowedFor, clauses, collectionQueryShape, diffSnapshots, LINK_SHAPE, loadContract, resolveSection, SOURCES } from './_contract.mjs'
+import { allowedFor, clauses, collectionQueryShape, diffSnapshots, isMainModule, LINK_SHAPE, loadContract, resolveSection, SOURCES } from './_contract.mjs'
 
 /**
  * Each source's post type and category taxonomy, as Salt for WordPress registers them by default.
@@ -402,7 +400,7 @@ export function checkAcfSnapshot(snapshot, options = {}) {
 // node emit/acf.mjs --write <snapshot.json> [--options <options.json>]
 // Every option but `contract` is JSON, so the options file can hold them all.
 
-if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
+if (isMainModule(import.meta.url)) {
   const args = process.argv.slice(2)
   const flag = (name) => { const i = args.indexOf(name); return i === -1 ? undefined : args[i + 1] }
   const optionsFile = flag('--options')
