@@ -493,3 +493,12 @@ test('Y10: a repeater\'s button keeps an acronym as given', () => {
   assert.equal(faqs.button_label, 'Add FAQ')
   assert.equal(cards.button_label, 'Add card')
 })
+
+test('Y6, Y7: the docs claim no drift check salt-wordpress lacks, and no Local JSON loading', () => {
+  const root = path.join(path.dirname(emitter), '..')
+  const readme = readFileSync(path.join(root, 'README.md'), 'utf8')
+  assert.doesNotMatch(readme, /check-fields-from-contract\.php` runs/)
+  assert.match(readme, /check-fields-from-contract\.php`[^.]*owed[^.]*EP-72/)
+  // ACF Local JSON reads one group object per file, not the list the emitter writes.
+  assert.doesNotMatch(readFileSync(emitter, 'utf8'), /acf-json/)
+})

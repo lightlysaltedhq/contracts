@@ -6,9 +6,9 @@
 // ACF's conditions are data (`conditional_logic`), so unlike Payload's the whole field group is
 // plain JSON. The output is a list of field groups in the shape ACF JSON uses, which is the same
 // array `acf_add_local_field_group()` takes: a PHP consumer reads the committed file with
-// `json_decode( $json, true )` and registers each group, or drops it into `acf-json/`. Generated
-// PHP was the alternative and costs more for nothing: a printer to maintain for PHP's array
-// syntax and `__()` calls, and a second artefact that can be edited by hand and drift silently.
+// `json_decode( $json, true )` and registers each group. Generated PHP was the alternative and
+// costs more for nothing: a printer to maintain for PHP's array syntax and `__()` calls, and a
+// second artefact that can be edited by hand and drift silently.
 // The snapshot the consumer commits is the output itself, so `checkAcfSnapshot` diffs exactly what
 // the site registers.
 //

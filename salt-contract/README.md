@@ -148,7 +148,8 @@ const { ok, problems } = checkAcfSnapshot(readFileSync('acf/sections.json', 'utf
 
 Every option is JSON, so the command line takes them all:
 `node emit/acf.mjs --check <snapshot> [--options <options.json>]` exits 1 on drift, and `--write
-<snapshot>` regenerates it. salt-wordpress's `bin/check-fields-from-contract.php` runs this in CI.
+<snapshot>` regenerates it. salt-wordpress's `bin/check-fields-from-contract.php`, which will run
+this in its CI, does not exist yet: it is owed by Salt for WordPress's conformance work (EP-72).
 As with Payload, a section needing a source the site does not install is left out, or refused when
 `sections` names it; a carousel with no collection sources stays, offering its inline cards alone.
 
