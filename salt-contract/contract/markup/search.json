@@ -35,7 +35,7 @@
       "role": "results",
       "element": "section",
       "attributes": {
-        "aria-labelledby": "search-results"
+        "aria-labelledby": "search__results-heading"
       },
       "optional": true,
       "when": "a query has results",
@@ -44,7 +44,7 @@
           "role": "results-heading",
           "element": "h2",
           "attributes": {
-            "id": "search-results"
+            "id": "search__results-heading"
           },
           "text": "from:labels.results (count, query)"
         },
@@ -127,7 +127,7 @@
   "notes": [
     {
       "topic": "ruling",
-      "text": "The view body is the markup Salt for Next.js's example app writes (apps/example/src/app/(site)/search/page.tsx), in its order: the h1, the form, then either the empty sentence or a named results section with its list and pagination (SC-007). The form's classes are search-form's (salt-search__form, salt-search__label, salt-search__input); the results list is salt-search__results. The id search-results is reserved (section#anchors): it is view chrome, never suffixed."
+      "text": "The view body is the markup Salt for Next.js's example app writes (apps/example/src/app/(site)/search/page.tsx), in its order: the h1, the form, then either the empty sentence or a named results section with its list and pagination (SC-007). The form's classes are search-form's (salt-search__form, salt-search__label, salt-search__input); the results list is salt-search__results. The results heading's id is search__results-heading (SC-012)."
     },
     {
       "topic": "stylesheet-owes",
@@ -157,6 +157,9 @@
           "element": "h1",
           "note": "apps/example search/page.tsx draws the words Search; the count and query are in the results heading"
         }
+      ],
+      "owes": [
+        "The results heading's id search__results-heading in place of search-results (SC-012)."
       ]
     }
   }

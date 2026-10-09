@@ -67,7 +67,7 @@
             "salt-service__benefits"
           ],
           "attributes": {
-            "aria-labelledby": "service-benefits-heading"
+            "aria-labelledby": "service__benefits-heading"
           },
           "optional": true,
           "when": "benefits are set",
@@ -76,7 +76,7 @@
               "role": "benefits-heading",
               "element": "h2",
               "attributes": {
-                "id": "service-benefits-heading"
+                "id": "service__benefits-heading"
               },
               "text": "from:labels.benefits"
             },
@@ -144,7 +144,7 @@
             "salt-related"
           ],
           "attributes": {
-            "aria-labelledby": "service-related-heading"
+            "aria-labelledby": "service__related-heading"
           },
           "optional": true,
           "when": "related services exist",
@@ -153,7 +153,7 @@
               "role": "related-heading",
               "element": "h2",
               "attributes": {
-                "id": "service-related-heading"
+                "id": "service__related-heading"
               },
               "text": "from:labels.relatedServices"
             },
@@ -215,7 +215,7 @@
   "notes": [
     {
       "topic": "ruling",
-      "text": "The view body is the markup Salt for Next.js's example app writes (apps/example/src/site/catalogue-views.tsx, ServiceView), in its order, with its salt-service__* and salt-related classes (SC-007). The related services sit inside the article, as Next draws them. The page draws no icon: the title names the service. The heading ids service-benefits-heading and service-related-heading are reserved (section#anchors): they are view chrome, never suffixed."
+      "text": "The view body is the markup Salt for Next.js's example app writes (apps/example/src/site/catalogue-views.tsx, ServiceView), in its order, with its salt-service__* and salt-related classes (SC-007). The related services sit inside the article, as Next draws them. The page draws no icon: the title names the service. The heading ids are service__benefits-heading and service__related-heading (SC-012)."
     },
     {
       "topic": "stylesheet-owes",
@@ -267,7 +267,7 @@
         }
       ],
       "owes": [
-        "Name the benefits and related sections: the ids service-benefits-heading and service-related-heading on their h2s, and aria-labelledby on each section (section#labelled-by)."
+        "Name the benefits and related sections: the ids service__benefits-heading and service__related-heading on their h2s, and aria-labelledby on each section (section#labelled-by)."
       ]
     }
   }

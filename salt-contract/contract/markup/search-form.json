@@ -31,7 +31,7 @@
             "salt-search__label"
           ],
           "attributes": {
-            "for": "from:id"
+            "for": "search-form__input"
           },
           "text": "from:labels.field"
         },
@@ -42,7 +42,7 @@
             "salt-search__input"
           ],
           "attributes": {
-            "id": "from:id",
+            "id": "search-form__input",
             "type": "search",
             "name": "q",
             "maxlength": "from:query max",
@@ -90,6 +90,11 @@
     }
   ],
   "platforms": {
+    "nextjs": {
+      "owes": [
+        "The input's id search-form__input in place of the id prop's default site-search (SC-012); the prop goes."
+      ]
+    },
     "wordpress": {
       "formerly": [
         {
@@ -102,7 +107,7 @@
         }
       ],
       "owes": [
-        "The contract's markup instead of core searchform."
+        "The contract's markup instead of core searchform. The input's id is search-form__input (SC-012)."
       ]
     }
   }
