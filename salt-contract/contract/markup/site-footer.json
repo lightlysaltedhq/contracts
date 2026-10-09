@@ -189,7 +189,8 @@
                           "optional": true,
                           "when": "a glyph exists for the profile; the name as text otherwise"
                         }
-                      ]
+                      ],
+                      "text": "from:profile name, when no glyph exists for the profile"
                     }
                   ]
                 }
