@@ -8,11 +8,11 @@
     "attributes": {
       "src": {
         "value": "from:image",
-        "note": "The URL of the widest candidate width (contract/image-sizes.json, srcset)."
+        "note": "The URL of the widest width the srcset lists: the upload's intrinsic width, or the widest candidate below it (contract/image-sizes.json, srcset)."
       },
       "srcset": {
         "value": "from:image",
-        "note": "Every candidate width contract/image-sizes.json leaves for the sizes below, ascending, each '<url> <width>w'. The URLs are the platform's image pipeline's; the widths are the contract's (SC-016)."
+        "note": "The candidate widths contract/image-sizes.json leaves for the sizes below, up to and including the upload's intrinsic width, and that width when it is no candidate, ascending, each '<url> <width>w'. The URLs are the platform's image pipeline's; the widths are the contract's (SC-016)."
       },
       "sizes": {
         "value": "from:image slot and band",
@@ -77,7 +77,8 @@
   "platforms": {
     "nextjs": {
       "owes": [
-        "Write the inline style object-fit and object-position the parent passes, with focal-point as the image's stored focal point (Payload's upload focalPoint, as <x>% <y>%), left out when none is stored; objectPosition() maps focal-point to nothing today (components/image-sizes.ts)."
+        "Write the inline style object-fit and object-position the parent passes, with focal-point as the image's stored focal point (Payload's upload focalPoint, as <x>% <y>%), left out when none is stored; objectPosition() maps focal-point to nothing today (components/image-sizes.ts).",
+        "Srcset capped at the upload's intrinsic width (SC-016): next/image lists every candidate, 3840w included, whatever the upload; the srcset stops at the widest candidate within the upload's width and adds that width, and src is it."
       ]
     },
     "wordpress": {
@@ -94,7 +95,7 @@
         "Drop x-image; take the parent's class; derive sizes from the same contexts.",
         "Its picture_sources opt-in, which wraps the img in picture with source elements, is non-conforming (SC-007): drop it and negotiate formats in the image pipeline behind srcset.",
         "Write the inline style object-fit and object-position when the parent passes a fit or a position: the nine positions as keyword pairs, and focal-point as the attachment's stored focal point as <x>% <y>%, left out when none is stored. It stores no focal point today, so focal-point draws the stylesheet's centre until it does.",
-        "Image sizes (SC-016): each image's sizes from its slot in contract/image-sizes.json for its section's band, and registered image sizes at the contract's candidate widths, so srcset carries the same widths."
+        "Image sizes (SC-016): each image's sizes from its slot in contract/image-sizes.json for its section's band; an uncropped add_image_size for every candidate width and max_srcset_image_width raised to the widest, so wp_calculate_image_srcset lists the candidates up to the upload's width plus the full-size upload, as the srcset rule says."
       ]
     }
   }

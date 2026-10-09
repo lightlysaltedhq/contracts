@@ -415,8 +415,12 @@ test('images: sizes other than the slot\'s default for the band fails', () => {
 test('images: a srcset missing a candidate width fails', () => {
   expectFail(HERO, (io) => io.html(`${SPLIT}.html`, 'https://uploads.example/terrace-32.jpg 32w, ', ''), /srcset is not the candidates contract\/image-sizes\.json gives/)
 })
-test('images: a src that is not the widest candidate fails', () => {
-  expectFail(HERO, (io) => io.html(`${SPLIT}.html`, 'src="https://uploads.example/terrace-3840.jpg"', 'src="https://uploads.example/terrace-1600.jpg"'), /is not the widest candidate of any media record/)
+test('images: a src that is not the widest width listed fails', () => {
+  expectFail(HERO, (io) => io.html(`${SPLIT}.html`, 'src="https://uploads.example/terrace-1600.jpg"', 'src="https://uploads.example/terrace-1200.jpg"'), /is not the widest candidate of any media record/)
+})
+test('images: a candidate wider than the upload fails, and so does leaving out its own width', () => {
+  expectFail(HERO, (io) => io.html(`${SPLIT}.html`, 'https://uploads.example/terrace-1600.jpg 1600w"', 'https://uploads.example/terrace-1600.jpg 1600w, https://uploads.example/terrace-1920.jpg 1920w"'), /srcset is not the candidates contract\/image-sizes\.json gives/)
+  expectFail(HERO, (io) => io.json(`${SPLIT}.json`, (d) => { d.media.terrace.width = 1700 }), /src https:\/\/uploads\.example\/terrace-1600\.jpg is not the widest candidate|width is 1600; the media record says 1700/)
 })
 test('images: a media record that carries its own sizes fails', () => {
   expectFail(HERO, (io) => io.json(`${SPLIT}.json`, (d) => { d.media.terrace.sizes = '100vw' }), /media\.terrace\.sizes: a media record holds url, width, height/)

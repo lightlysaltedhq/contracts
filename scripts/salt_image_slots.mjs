@@ -63,9 +63,14 @@ export function widthsFor(table, sizes) {
   return table.candidates.filter((w) => w >= floor)
 }
 
-/** The expected src and srcset of a media record (its url holds {width}) for a sizes value. */
+/**
+ * The expected src and srcset of a media record (its url holds {width}) for a sizes value: the
+ * candidates the rule leaves, up to and including the upload's intrinsic width, and that width
+ * itself when it is no candidate, since no platform can serve an image wider than its upload.
+ */
 export function sourcesOf(table, record, sizes) {
-  const widths = widthsFor(table, sizes)
+  const capped = widthsFor(table, sizes).filter((w) => w <= record.width)
+  const widths = capped.includes(record.width) ? capped : [...capped, record.width]
   const at = (w) => record.url.replaceAll('{width}', String(w))
   return { src: at(widths.at(-1)), srcset: widths.map((w) => `${at(w)} ${w}w`).join(', ') }
 }
