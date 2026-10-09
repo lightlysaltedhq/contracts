@@ -1,7 +1,7 @@
 {
   "section": "pricing",
   "summary": "Three plans; the middle one featured (badge, primary button, data-featured). Feature lists mix included and not-included rows (the latter carry the salt-sr-only text); each plan has a button, the featured one opening a new tab.",
-  "$comment": "Display choices not fixed by the contract: the visually hidden text is 'Not included', the included glyph is 'check' and the not-included glyph is 'close', the period is written as stored ('a month') after the price, and each feature's text follows its icon inside the li. Labels: site.labels.featured and site.labels.notIncluded.",
+  "$comment": "Display choices not fixed by the contract: the visually hidden text is 'Not included', the included glyph is 'check' and the not-included glyph is 'close', the period is written as stored ('a month') after the price, and each feature's text follows its icon after one space, as a browser draws the line. Labels: site.labels.featured and site.labels.notIncluded.",
   "values": {
     "heading": "Simple monthly plans",
     "plans": [
@@ -86,9 +86,10 @@
   },
   "context": {
     "headingLevel": 2,
+    "headingRendered": true,
     "priorityMedia": false,
     "track": "pricing-1",
-    "index": 1
+    "index": 2
   },
   "documents": {
     "contact": {

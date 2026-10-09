@@ -6,12 +6,14 @@
 //
 // 1. Attribute order. Attributes are sorted by name; names and tag names are lower-cased, as an
 //    HTML parser treats them.
-// 2. Insignificant whitespace. White space alone between two tags, across a line break, is a
-//    template's indentation and goes. Every other run collapses by the CSS rule for collapsible
-//    white space: to one space, and a space at the start or end of a block's inline content, or
-//    after another space, goes. A space typed between inline elements on one line stays, so
-//    `<a>x</a> <a>y</a>` and `<a>x</a><a>y</a>` still differ. pre, textarea, script and style keep theirs. Inside style attributes, the spaces
-//    around `:` and `;` go, and srcset candidates are rejoined as `url descriptor, …`.
+// 2. Insignificant whitespace, by the CSS rule for collapsible white space, read from the elements:
+//    a run collapses to one space, and goes only at a block boundary (the start or end of a
+//    block's inline content, or beside a block-level element) or after another space. Between
+//    two inline (phrasing) elements a run is one space and stays, whether it was typed or is a
+//    template's line break, because a browser draws it: `<span>£49</span>\n<span>a month</span>`
+//    shows "£49 a month" and differs from the two spans written together. pre, textarea, script
+//    and style keep theirs. Inside style attributes, the spaces around `:` and `;` go, and srcset
+//    candidates are rejoined as `url descriptor, …`.
 // 3. Boolean attribute forms. `hidden`, `hidden=""` and `hidden="hidden"` are one form, and any
 //    attribute with an empty value (`data-divider=""`) is written bare.
 // 4. Character references. Text and attribute values are decoded and re-escaped one way, so
@@ -164,13 +166,7 @@ function collapse(block) {
   }
   const walk = (el) => {
     for (const c of el.children) {
-      if (c.type === 'text') {
-        // Indentation: a run of white space only, across a line break, is how a template lays out
-        // its elements, not text. React writes none; PHP templates write plenty.
-        if (/^[ \t\n\r\f]*$/.test(c.value) && /[\n\r]/.test(c.value)) { c.value = ''; continue }
-        run.push(c)
-        continue
-      }
+      if (c.type === 'text') { run.push(c); continue }
       if (KEEP_SPACE.has(c.name)) { flush(); continue }
       if (!INLINE.has(c.name)) { flush(); collapse(c); continue }
       if (c.name === 'br') { run.push('break'); continue }
