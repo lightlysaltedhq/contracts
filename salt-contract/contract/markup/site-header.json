@@ -117,7 +117,7 @@
                             "false"
                           ]
                         },
-                        "aria-controls": "from:submenu id",
+                        "aria-controls": "salt-header-nav-submenu-<n>",
                         "aria-label": "from:labels.submenu",
                         "aria-hidden": {
                           "value": "true",
@@ -148,7 +148,7 @@
                         "salt-nav__submenu"
                       ],
                       "attributes": {
-                        "id": "<prefix>-submenu-<n>",
+                        "id": "salt-header-nav-submenu-<n>",
                         "role": {
                           "value": "list",
                           "when": "ul"
@@ -352,7 +352,8 @@
               "classes": [
                 "salt-drawer__panel"
               ],
-              "text": "the nav again (ids prefixed -drawer; the main navigation's id site-navigation becomes site-navigation-drawer), the phone link, the call to action"
+              "text": "the nav again, the phone link, the call to action",
+              "note": "The drawer's copy of the nav carries ids of its own, so no id is on the page twice: -drawer follows the prefix of every id the bar draws. The nav is site-navigation-drawer; each submenu is salt-header-nav-drawer-submenu-<n>, and its toggle's aria-controls names that id. <n> is the same in both copies."
             }
           ]
         }
@@ -435,6 +436,10 @@
     },
     {
       "topic": "ruling",
+      "text": "Every id the header draws is fixed, so both platforms write the same ones. In the bar: the nav is site-navigation, and a submenu is salt-header-nav-submenu-<n>, where <n> is its item's position in the top-level menu counting from 0, items without children included. In the drawer, -drawer follows each prefix: site-navigation-drawer and salt-header-nav-drawer-submenu-<n>. These are generated ids, so an editor's anchor that matches one keeps its id and the generated one takes the suffix, its aria-controls following (section#anchors)."
+    },
+    {
+      "topic": "ruling",
       "text": "The call to action follows the nav, then the burger, in both platforms' order."
     }
   ],
@@ -442,7 +447,7 @@
     "nextjs": {
       "owes": [
         "The sticky setting, drawn as data-sticky (SC-006).",
-        "The id site-navigation on the main navigation, in place of navigation (SC-006)."
+        "The id site-navigation on the main navigation, in place of navigation (SC-006), and site-navigation-drawer on the drawer's copy."
       ]
     },
     "wordpress": {
@@ -509,7 +514,7 @@
         }
       ],
       "owes": [
-        "Rename to salt-header and salt-nav*; the burger, drawer, submenu disclosure, phone link and theme toggle; data-site-header. data-sticky in place of is-sticky, and the id site-navigation on the main navigation (SC-006)."
+        "Rename to salt-header and salt-nav*; the burger, drawer, submenu disclosure, phone link and theme toggle; data-site-header. data-sticky in place of is-sticky, and the id site-navigation on the main navigation (SC-006). The bar's and the drawer's ids exactly as the ruling note fixes them."
       ]
     }
   }
