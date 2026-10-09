@@ -477,3 +477,16 @@ test('U4: a field conditioned on a field left out is left out with it, transitiv
   assert.deepEqual(names({}), ['source'])
   assert.deepEqual(names({ posts: {} }), ['source', 'query', 'showTags', 'tagStyle', 'tagNote'])
 })
+
+test('U1: a source select and its query inside a list are fitted and checked like top-level ones', () => {
+  const rows = [{ name: 'rows', type: 'list', label: 'Rows', fields: [
+    { name: 'source', type: 'select', label: 'Show', options: [{ value: 'posts', label: 'Posts' }, { value: 'team', label: 'Team' }] },
+    { name: 'query', type: 'collection-query', label: 'Query', sourceField: 'source' },
+  ] }]
+  assert.deepEqual(toPayloadBlocks({ contract: probe(rows), sources: {} }), [])
+  assert.throws(() => toPayloadBlocks({ contract: probe(rows), sources: {}, sections: ['probe'] }),
+    /section probe needs one of the sources posts, team \(probe\.rows\.source\)/)
+  const [b] = toPayloadBlocks({ contract: probe(rows), sources: { posts: {} } })
+  assert.deepEqual(field(b.fields, 'rows.source').options.map((o) => o.value), ['posts'])
+  assert.equal(field(field(b.fields, 'rows.query').fields, 'items').relationTo, 'posts')
+})

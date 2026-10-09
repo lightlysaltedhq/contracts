@@ -167,11 +167,12 @@ export const sourceSelectsOf = (fields) =>
  * installed source, and a field whose condition names a source select only by values that select
  * no longer offers (the carousel's showTags with no source that has categories), and any field
  * whose condition names a field left out. A select left with no option is unmetSources' to report.
- * Top level only, where source selects live.
+ * At every depth: a list or group's own fields are fitted the same way.
  */
 export function withinSources(fields, installed) {
   const selects = sourceSelectsOf(fields)
-  const narrowed = fields.map((f) => (selects.has(f.name) ? { ...f, options: offeredSources(f, installed).options } : f))
+  const narrowed = fields.map((f) => (selects.has(f.name) ? { ...f, options: offeredSources(f, installed).options }
+    : f.fields ? { ...f, fields: withinSources(f.fields, installed) } : f))
   const valuesOf = (name) => narrowed.find((s) => s.name === name).options.map((o) => o.value)
   const reachable = (f) => clauses(f.condition).every((c) => {
     // A malformed clause is checkedClauses' to refuse, with its own message.
@@ -208,7 +209,8 @@ export function unmetSources(fields, installed, at, unfitted = fields) {
       const offered = unfitted.find((u) => u.name === f.name).options.map((o) => o.value).filter((v) => SOURCES.includes(v))
       own.push(`one of the sources ${offered.join(', ')} (${where})`)
     }
-    return [...own, ...(f.fields ? unmetSources(f.fields, installed, where) : [])]
+    const below = unfitted.find((u) => u.name === f.name)?.fields ?? f.fields
+    return [...own, ...(f.fields ? unmetSources(f.fields, installed, where, below) : [])]
   })
 }
 
