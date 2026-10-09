@@ -1,0 +1,318 @@
+/*
+ * The section band: tones, rhythm, measure, and the seam between neighbours.
+ *
+ * REQUIRES the token layer — `@lightlysaltedhq/salt-nextjs/theme.css`, processed by Tailwind.
+ * Every value here resolves through a semantic role or a token; the only length written
+ * down is the hairline's `1px`, which is a hairline rather than a measure. That is what
+ * lets a client repo retune the whole site's rhythm, gutter and measures in one place.
+ *
+ * An earlier version claimed no length at all while carrying `80rem`, `64rem` and `68ch`,
+ * and used `--space-section-sm` as the horizontal gutter — so retuning the small band's
+ * vertical rhythm changed the gutter of every section including the large ones, which
+ * inverts the acceptance criterion these tokens exist to satisfy.
+ *
+ * Mode switching is pure CSS. `<Section>` emits both `data-tone` and `data-tone-dark`
+ * server-side, and the `[data-theme='dark']` block below picks the second. One cached
+ * document serves both modes, with no JavaScript and no flash of the wrong band.
+ */
+
+.salt-section {
+  /* The paired foregrounds travel with the tone, so text contrast is AA by construction. */
+  background-color: var(--salt-section-bg);
+  color: var(--salt-section-ink);
+
+  padding-block: var(--salt-section-space, 0);
+
+  /*
+   * The stacking context, and `isolation` is the load-bearing half.
+   *
+   * `position: relative` alone gives the absolutely-positioned layers something to size
+   * against. `isolation: isolate` is what stops a block's own `z-index` escaping its band:
+   * without it a sticky element or a raised card inside one section can paint over the
+   * NEXT section's background image, which looks like a rendering bug and is a stacking
+   * one. Sections are siblings, so nothing else confines them.
+   */
+  position: relative;
+  isolation: isolate;
+}
+
+/*
+ * The two background layers, out of the content flow.
+ *
+ * Both are decorative by contract — the media carries `alt=""` and `aria-hidden`, and the
+ * scrim is an empty presentational element — so neither is content-bearing and losing both
+ * loses nothing but atmosphere.
+ */
+/*
+ * `z-index` only for the media: next/image's `fill` writes `position`, `inset`, `width` and
+ * `height` as inline style, which beats anything here. Declaring them again was dead CSS
+ * describing a frame the class does not provide.
+ */
+.salt-section__media {
+  z-index: 0;
+}
+
+.salt-section__scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+/*
+ * The scrim: the section's OWN resolved tone at a token alpha.
+ *
+ * Tinting with the tone rather than with black is what keeps the composite honest. At
+ * `strong` the band trends back towards the pairing the contrast audit proved, so text over
+ * a photograph converges on a measured result instead of on an arbitrary grey. The alpha
+ * arrives as `--salt-scrim-alpha` from the component, naming a `--scrim-*` token, so there
+ * is no alpha literal at the point of use and a client retuning one token reaches every
+ * scrimmed band at once.
+ */
+.salt-section__scrim {
+  background-color: var(--salt-section-bg);
+  opacity: var(--salt-scrim-alpha);
+}
+
+/* Content sits above both layers. */
+.salt-section > .salt-section__content {
+  position: relative;
+  z-index: 1;
+}
+
+/*
+ * Over a photograph, muted text takes the tone's full ink (BD-163, lightlysaltedhq/salt-core#176).
+ *
+ * Muted ink is proved on every flat tone and cannot be proved over a photograph at any scrim
+ * strength that still shows one: against the worst pixel an image can put under the scrim, it
+ * needs 0.94 of alpha on the inverted band. On the first client site, measured in
+ * chrome-headless-shell 148.0.7778.96, an eyebrow over a photograph read 1.1 to 3.5:1 on the
+ * standard scrim and still failed 22 of 24 cases on the strong one. The tone's own ink holds
+ * 4.5:1 against that worst pixel at the strong scrim, which is what `text-over-image-on-*` in the
+ * contrast manifest proves, so every muted rule in a band with an image paints that ink instead.
+ *
+ * Declared on the content rather than on the section, and that is the load-bearing half. The
+ * tone rules declare `--salt-section-ink-muted` on the wrapper at (0,2,0) and, in dark mode,
+ * (0,3,0), so a rule on the wrapper would have to win a specificity contest with eight of them.
+ * A custom property declared on the child replaces the value it would inherit whatever the
+ * parent's rules score, and `var(--salt-section-ink)` resolves here to the ink the child
+ * inherits, the tone's own in either mode.
+ *
+ * Every consumer reads the variable before its fallback, so this reaches the eyebrow, a stat's
+ * label, a caption, a process step and a showcase's metadata alike. The tabs lose their muted
+ * unselected label over a photograph and keep the 2px rule under the selected one, which was
+ * always the state signal that does not depend on colour. `verify:stylesheet-contracts` holds
+ * this rule and refuses a muted role read around it.
+ */
+.salt-section[data-media] > .salt-section__content {
+  --salt-section-ink-muted: var(--salt-section-ink);
+}
+
+/*
+ * Under forced colours, neither layer is painted.
+ *
+ * This is the one rule here that is a correctness fix rather than a style, and the reason
+ * is worth stating exactly because the obvious wrong version of it invites a harmful fix.
+ *
+ * Forced colours do not STRIP a background — they FORCE it. Measured under emulation, the
+ * scrim keeps `opacity: 0.45` and its background becomes Canvas, so without this rule a
+ * section renders a 45%-Canvas veil over an untouched photograph with forced CanvasText on
+ * top: text on a picture, half-hidden by a wash. Removing both layers gives the forced
+ * palette a plain ground instead.
+ *
+ * The wrong premise matters. A reader who believes the scrim vanishes reaches for
+ * `forced-color-adjust: none` to bring it back — which opts the element OUT of the user's
+ * chosen palette, and is a real accessibility regression rather than a repair.
+ *
+ * Nothing content-bearing is lost: the media is `alt=""` and `aria-hidden`, so it was never
+ * in the accessibility tree, and the scrim is an empty presentational element.
+ *
+ * What this cannot fix: `display: none` stops the paint, not the download. next/image's
+ * preload link is unconditional and offers no `media`, so a high-contrast user still
+ * fetches the full-bleed rendition and never sees it.
+ */
+@media (forced-colors: active) {
+  .salt-section__media,
+  .salt-section__scrim {
+    display: none;
+  }
+}
+
+/*
+ * `--salt-section-border` is the hairline, and it flips with the band.
+ *
+ * `border` alone measures 1.435:1 on `surface` — a hairline — and 10.173:1 on
+ * `surface-inverse`, where the identical declaration becomes a hard light outline. Not a
+ * WCAG failure, since a card edge identifies no component and 1.4.11 does not govern it, but
+ * one declaration reading as two different design decisions depending on the band, which is
+ * the sort of thing that gets noticed as "the dark sections look wrong" and never traced.
+ *
+ * With the pair, every tone sits between 1.199:1 and 1.773:1 across all 766 swept seeds in
+ * both modes. BD-033.
+ */
+
+/*
+ * `--salt-section-ink-contra` is the OTHER pole, and it exists for one composition.
+ *
+ * Every tone pairs with a single body ink, which is the right answer for a flat band and no
+ * answer at all for a photograph (BD-023). An indicator over arbitrary imagery only works if
+ * its parts straddle the lightness range, so an image-backed section draws both — the tone's
+ * own ink and this one. They are `ink` and `ink-inverse` in some order, which is why the
+ * closed form reduces to whether those two clear 9:1 against each other.
+ *
+ * It is declared on every tone, not only where used, so the pair cannot drift apart: a tone
+ * added later that sets one and forgets the other inherits a stale opposite from nothing and
+ * fails visibly rather than silently.
+ */
+
+/*
+ * Tone resolution, light mode. Each tone names its own background and the two foregrounds
+ * BD-023's routing table pairs with it — body and muted — so a caption inside an inverted
+ * band cannot reach for the wrong muted rung.
+ *
+ * The footer takes its tone from these same rules (BD-204), named in each selector list rather
+ * than given a copy in `chrome.css`, so a footer on a tone is on exactly the roles a band of that
+ * tone is and the two cannot drift apart. `verify:stylesheet-contracts` refuses a tone rule that
+ * leaves the footer out.
+ */
+.salt-section[data-tone='surface'],
+.salt-footer[data-tone='surface'] {
+  --salt-section-bg: var(--color-surface);
+  --salt-section-ink: var(--color-ink);
+  --salt-section-ink-contra: var(--color-ink-inverse);
+  --salt-section-border: var(--color-border);
+  --salt-section-ink-muted: var(--color-ink-muted);
+  --salt-section-boundary: var(--color-border-strong);
+}
+
+.salt-section[data-tone='surface-alt'],
+.salt-footer[data-tone='surface-alt'] {
+  --salt-section-bg: var(--color-surface-alt);
+  --salt-section-ink: var(--color-ink);
+  --salt-section-ink-contra: var(--color-ink-inverse);
+  --salt-section-border: var(--color-border);
+  --salt-section-ink-muted: var(--color-ink-muted);
+  --salt-section-boundary: var(--color-border-strong);
+}
+
+.salt-section[data-tone='brand-tint'],
+.salt-footer[data-tone='brand-tint'] {
+  --salt-section-bg: var(--color-brand-tint);
+  --salt-section-ink: var(--color-ink);
+  --salt-section-ink-contra: var(--color-ink-inverse);
+  --salt-section-border: var(--color-border);
+  --salt-section-ink-muted: var(--color-ink-muted);
+  --salt-section-boundary: var(--color-border-strong);
+}
+
+.salt-section[data-tone='surface-inverse'],
+.salt-footer[data-tone='surface-inverse'] {
+  --salt-section-bg: var(--color-surface-inverse);
+  --salt-section-ink: var(--color-ink-inverse);
+  --salt-section-ink-contra: var(--color-ink);
+  --salt-section-border: var(--color-border-inverse);
+  --salt-section-ink-muted: var(--color-ink-muted-inverse);
+  --salt-section-boundary: var(--color-border-strong-inverse);
+}
+
+/*
+ * Dark mode reads `data-tone-dark` instead. The roles themselves also re-point under
+ * `[data-theme='dark']` — that is the Tier 2 inversion — so a section with no override
+ * needs no rule here at all; these exist for the sections that DO carry one, where the
+ * dark tone differs from the light one.
+ */
+[data-theme='dark'] .salt-section[data-tone-dark='surface'],
+[data-theme='dark'] .salt-footer[data-tone-dark='surface'] {
+  --salt-section-bg: var(--color-surface);
+  --salt-section-ink: var(--color-ink);
+  --salt-section-ink-contra: var(--color-ink-inverse);
+  --salt-section-border: var(--color-border);
+  --salt-section-ink-muted: var(--color-ink-muted);
+  --salt-section-boundary: var(--color-border-strong);
+}
+
+[data-theme='dark'] .salt-section[data-tone-dark='surface-alt'],
+[data-theme='dark'] .salt-footer[data-tone-dark='surface-alt'] {
+  --salt-section-bg: var(--color-surface-alt);
+  --salt-section-ink: var(--color-ink);
+  --salt-section-ink-contra: var(--color-ink-inverse);
+  --salt-section-border: var(--color-border);
+  --salt-section-ink-muted: var(--color-ink-muted);
+  --salt-section-boundary: var(--color-border-strong);
+}
+
+[data-theme='dark'] .salt-section[data-tone-dark='brand-tint'],
+[data-theme='dark'] .salt-footer[data-tone-dark='brand-tint'] {
+  --salt-section-bg: var(--color-brand-tint);
+  --salt-section-ink: var(--color-ink);
+  --salt-section-ink-contra: var(--color-ink-inverse);
+  --salt-section-border: var(--color-border);
+  --salt-section-ink-muted: var(--color-ink-muted);
+  --salt-section-boundary: var(--color-border-strong);
+}
+
+[data-theme='dark'] .salt-section[data-tone-dark='surface-inverse'],
+[data-theme='dark'] .salt-footer[data-tone-dark='surface-inverse'] {
+  --salt-section-bg: var(--color-surface-inverse);
+  --salt-section-ink: var(--color-ink-inverse);
+  --salt-section-ink-contra: var(--color-ink);
+  --salt-section-border: var(--color-border-inverse);
+  --salt-section-ink-muted: var(--color-ink-muted-inverse);
+  --salt-section-boundary: var(--color-border-strong-inverse);
+}
+
+/*
+ * The seam. `collapse-top` drops the later section's top padding so two same-tone bands
+ * read as one; the pre-pass decides when, because it depends on the neighbour.
+ */
+.salt-section[data-collapse-top] {
+  padding-block-start: 0;
+}
+
+/*
+ * A rule above the section — and, by the pre-pass's rule, a reason not to collapse.
+ *
+ * It draws in the TONE'S boundary, not `--color-border`. `border` tracks the mode rather
+ * than the band, so on an inverted section in light mode it painted a near-white line at
+ * 10.17:1 while the same tick on a `surface-alt` band gave 1.199:1 — invisible. One
+ * control, opposite outcomes, decided by a tone the editor did not think they were
+ * choosing. `--salt-section-boundary` is the tone-paired line and was already being
+ * computed here and referenced nowhere.
+ *
+ * A divider identifies no component, so WCAG 1.4.11 does not govern it (BD-025) — this is
+ * about the rule inverting with its band, which is a different problem from the 3:1 one.
+ */
+.salt-section[data-divider] {
+  border-block-start: 1px solid var(--salt-section-boundary);
+}
+
+/*
+ * Measure. `full` is the only width that reaches the viewport edge; the rest are reading
+ * measures, centred, with the gutter coming from the section rather than the page so a
+ * full-bleed band can sit flush against one that is not.
+ *
+ * The widths are the contract's `container` rungs (BD-170): `wide` at `7xl` and `default` at
+ * `5xl`, Tailwind's 80rem and 64rem, and `narrow` at `2xl`, which core sets to 68ch where Tailwind
+ * has 42rem, by Ollie's ruling of 26/09/2026. They were `--measure-*`, which the contract's own
+ * `measure` family emits as TEXT measures, so a page width under that name collided with it.
+ */
+.salt-section > .salt-section__content {
+  margin-inline: auto;
+  padding-inline: var(--space-gutter);
+}
+
+.salt-section[data-width='wide'] > .salt-section__content {
+  max-width: var(--container-7xl);
+}
+
+.salt-section[data-width='default'] > .salt-section__content {
+  max-width: var(--container-5xl);
+}
+
+.salt-section[data-width='narrow'] > .salt-section__content {
+  max-width: var(--container-2xl);
+}
+
+.salt-section[data-width='full'] > .salt-section__content {
+  max-width: none;
+  padding-inline: 0;
+}
