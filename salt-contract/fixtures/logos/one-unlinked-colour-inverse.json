@@ -1,0 +1,47 @@
+{
+  "section": "logos",
+  "summary": "One unlinked logo drawn in colour (greyscale off), on the inverse tone and no heading.",
+  "values": {
+    "columns": "4",
+    "greyscale": false,
+    "items": [
+      {
+        "image": "hartley",
+        "name": "Hartley Gardens"
+      }
+    ],
+    "settings": {
+      "anchorId": "logos-one",
+      "tone": "surface-inverse"
+    }
+  },
+  "context": {
+    "headingLevel": 2,
+    "priorityMedia": false,
+    "track": "logos-1",
+    "index": 1
+  },
+  "media": {
+    "hartley": {
+      "src": "https://uploads.example/hartley-logo-480.jpg",
+      "srcset": [
+        {
+          "url": "https://uploads.example/hartley-logo-120.jpg",
+          "width": 120
+        },
+        {
+          "url": "https://uploads.example/hartley-logo-240.jpg",
+          "width": 240
+        },
+        {
+          "url": "https://uploads.example/hartley-logo-480.jpg",
+          "width": 480
+        }
+      ],
+      "sizes": "(min-width: 64rem) 12rem, 40vw",
+      "width": 480,
+      "height": 240,
+      "alt": "Hartley Gardens logo"
+    }
+  }
+}

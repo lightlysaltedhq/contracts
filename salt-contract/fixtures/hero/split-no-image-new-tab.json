@@ -1,0 +1,14 @@
+{
+  "section": "hero",
+  "summary": "Split layout with no image: no media element and no data-media-side. One external button that opens a new tab; small spacing.",
+  "values": {
+    "variant": "split",
+    "heading": "Read our planting guide",
+    "mediaSide": "right",
+    "buttons": [
+      { "link": { "label": "Open the guide", "type": "external", "url": "https://guides.example/planting", "newTab": true }, "style": "primary" }
+    ],
+    "settings": { "anchorId": "guide", "spacing": "sm" }
+  },
+  "context": { "headingLevel": 2, "priorityMedia": false, "track": "hero-1", "index": 2 }
+}

@@ -1,0 +1,51 @@
+{
+  "section": "gallery",
+  "summary": "Exactly one image in the grid layout: the single figure stands in place of the list.",
+  "values": {
+    "heading": "The orchard",
+    "layout": "grid",
+    "columns": "3",
+    "captions": true,
+    "images": [
+      "orchard"
+    ],
+    "settings": {
+      "anchorId": "gallery-one"
+    }
+  },
+  "context": {
+    "headingLevel": 2,
+    "priorityMedia": false,
+    "track": "gallery-1",
+    "index": 2
+  },
+  "media": {
+    "orchard": {
+      "src": "https://uploads.example/orchard-1600.jpg",
+      "srcset": [
+        {
+          "url": "https://uploads.example/orchard-640.jpg",
+          "width": 640
+        },
+        {
+          "url": "https://uploads.example/orchard-1024.jpg",
+          "width": 1024
+        },
+        {
+          "url": "https://uploads.example/orchard-1600.jpg",
+          "width": 1600
+        }
+      ],
+      "sizes": "(min-width: 64rem) 40rem, 80vw",
+      "width": 1600,
+      "height": 1200,
+      "alt": "Young apple trees in a small orchard",
+      "caption": "A new orchard in its first spring"
+    }
+  },
+  "site": {
+    "labels": {
+      "slide": "Slide"
+    }
+  }
+}

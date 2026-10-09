@@ -1,0 +1,12 @@
+{
+  "section": "hero",
+  "summary": "Minimal, centred, on the inverse band with the alternate surface in dark mode (data-tone-dark differs). Spacing none, so no spacing style; collapsed onto the band above.",
+  "values": {
+    "variant": "minimal",
+    "eyebrow": "About us",
+    "heading": "Three gardeners, one van",
+    "alignment": "centre",
+    "settings": { "anchorId": "about", "tone": "surface-inverse", "toneDark": "surface-alt", "spacing": "none" }
+  },
+  "context": { "headingLevel": 1, "priorityMedia": true, "track": "hero-1", "index": 1, "collapseTop": false }
+}

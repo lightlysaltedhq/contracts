@@ -1,0 +1,26 @@
+{
+  "section": "tabs",
+  "summary": "No heading and no label, two tabs: the panels are drawn stacked with no radio group, in a div wrapper.",
+  "values": {
+    "tabs": [
+      {
+        "label": "Hedges",
+        "content": "<p>Hedges are cut twice a year.</p>"
+      },
+      {
+        "label": "Lawns",
+        "content": "<p>Lawns are cut every fortnight in the growing season.</p>"
+      }
+    ],
+    "settings": {
+      "anchorId": "tabs-noname"
+    }
+  },
+  "context": {
+    "headingLevel": 2,
+    "priorityMedia": false,
+    "track": "tabs-1",
+    "index": 2
+  },
+  "$comment": "tabs.json requires aria-label on the tab-set root (from: heading or label) with no condition, and the checker demands the attribute; with no name there is no value, so the stacked set carries an empty aria-label."
+}

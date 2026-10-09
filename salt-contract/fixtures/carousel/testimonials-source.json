@@ -1,0 +1,53 @@
+{
+  "section": "carousel",
+  "$comment": "cardStyle is not stored for a collection source (it applies to inline only); testimonial cards are quotes. Ratings: aria-label reads \"Rated 5 of 5\" (labels.rating, then \"{n} of {N}\"); the fill is rating/5 as a percentage.",
+  "summary": "Testimonials from the collection as quote cards in a carousel named from the heading. Two have ratings, one has none.",
+  "values": {
+    "heading": "Kind words",
+    "source": "testimonials",
+    "query": {
+      "mode": "automatic",
+      "count": 3
+    },
+    "settings": {
+      "anchorId": "kind-words-carousel",
+      "tone": "brand-tint"
+    }
+  },
+  "context": {
+    "headingLevel": 2,
+    "priorityMedia": false,
+    "track": "carousel-5",
+    "index": 5
+  },
+  "collections": {
+    "testimonials": [
+      {
+        "id": "a",
+        "title": "Maya Okafor",
+        "meta": "Homeowner, Redland",
+        "text": "They turned a patch of builders' rubble into a garden we use every evening.",
+        "rating": 5
+      },
+      {
+        "id": "b",
+        "title": "Tom Ashby",
+        "meta": "Manager, Ashby Mill Cafe",
+        "text": "The terrace planting has had more compliments than the menu.",
+        "rating": 4
+      },
+      {
+        "id": "c",
+        "title": "Priya Nair",
+        "meta": "Trustee, Greenway Allotments",
+        "text": "Reliable, tidy and good with volunteers of every age."
+      }
+    ]
+  },
+  "site": {
+    "labels": {
+      "slide": "Slide",
+      "rating": "Rated"
+    }
+  }
+}

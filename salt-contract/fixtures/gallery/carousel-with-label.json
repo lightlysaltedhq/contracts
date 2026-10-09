@@ -1,0 +1,96 @@
+{
+  "section": "gallery",
+  "summary": "Carousel layout with no heading, named by the label field (never shown). The wrapper is a div and the carousel region takes its aria-label from the label.",
+  "values": {
+    "layout": "carousel",
+    "label": "Garden photographs",
+    "captions": true,
+    "images": [
+      "courtyard",
+      "orchard",
+      "pond"
+    ],
+    "settings": {
+      "anchorId": "gallery-label"
+    }
+  },
+  "context": {
+    "headingLevel": 2,
+    "priorityMedia": false,
+    "track": "gallery-3",
+    "index": 4
+  },
+  "media": {
+    "courtyard": {
+      "src": "https://uploads.example/courtyard-1600.jpg",
+      "srcset": [
+        {
+          "url": "https://uploads.example/courtyard-640.jpg",
+          "width": 640
+        },
+        {
+          "url": "https://uploads.example/courtyard-1024.jpg",
+          "width": 1024
+        },
+        {
+          "url": "https://uploads.example/courtyard-1600.jpg",
+          "width": 1600
+        }
+      ],
+      "sizes": "(min-width: 64rem) 40rem, 80vw",
+      "width": 1600,
+      "height": 1200,
+      "alt": "A paved courtyard with olive trees in pots",
+      "caption": "Olive trees in a paved courtyard"
+    },
+    "orchard": {
+      "src": "https://uploads.example/orchard-1600.jpg",
+      "srcset": [
+        {
+          "url": "https://uploads.example/orchard-640.jpg",
+          "width": 640
+        },
+        {
+          "url": "https://uploads.example/orchard-1024.jpg",
+          "width": 1024
+        },
+        {
+          "url": "https://uploads.example/orchard-1600.jpg",
+          "width": 1600
+        }
+      ],
+      "sizes": "(min-width: 64rem) 40rem, 80vw",
+      "width": 1600,
+      "height": 1200,
+      "alt": "Young apple trees in a small orchard",
+      "caption": "A new orchard in its first spring"
+    },
+    "pond": {
+      "src": "https://uploads.example/pond-1600.jpg",
+      "srcset": [
+        {
+          "url": "https://uploads.example/pond-640.jpg",
+          "width": 640
+        },
+        {
+          "url": "https://uploads.example/pond-1024.jpg",
+          "width": 1024
+        },
+        {
+          "url": "https://uploads.example/pond-1600.jpg",
+          "width": 1600
+        }
+      ],
+      "sizes": "(min-width: 64rem) 40rem, 80vw",
+      "width": 1600,
+      "height": 1000,
+      "alt": "A wildlife pond edged with marsh marigolds",
+      "caption": "The finished wildlife pond"
+    }
+  },
+  "site": {
+    "labels": {
+      "slide": "Slide"
+    }
+  }
+}

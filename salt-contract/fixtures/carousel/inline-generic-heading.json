@@ -1,0 +1,95 @@
+{
+  "section": "carousel",
+  "$comment": "The cards have no link, so the track is a tab stop (tabindex 0). Slide labels read \"Slide 1 of 3\": labels.slide followed by \"{n} of {N}\". The inline card's title is a plain heading (no href, no arrow).",
+  "summary": "Three inline generic cards with images under a heading: a carousel region named from the heading, slides wrapping the cards. The previous and next controls are mounted by script and are not in the server HTML.",
+  "values": {
+    "heading": "Recent gardens",
+    "source": "inline",
+    "cardStyle": "generic",
+    "cards": [
+      {
+        "image": "fern",
+        "title": "Shaded courtyard",
+        "text": "Ferns and hostas for a north-facing corner."
+      },
+      {
+        "image": "gravel",
+        "title": "Coastal gravel garden",
+        "text": "Tough planting that shrugs off salt wind."
+      },
+      {
+        "image": "kitchen",
+        "title": "Kitchen plot",
+        "text": "Raised beds sized for a family table."
+      }
+    ],
+    "settings": {
+      "anchorId": "recent-gardens"
+    }
+  },
+  "context": {
+    "headingLevel": 2,
+    "priorityMedia": false,
+    "track": "carousel-1",
+    "index": 3
+  },
+  "media": {
+    "fern": {
+      "src": "https://uploads.example/fern-bed-800.jpg",
+      "srcset": [
+        {
+          "url": "https://uploads.example/fern-bed-400.jpg",
+          "width": 400
+        },
+        {
+          "url": "https://uploads.example/fern-bed-800.jpg",
+          "width": 800
+        }
+      ],
+      "sizes": "(min-width: 64rem) 22rem, (min-width: 40rem) 45vw, 100vw",
+      "width": 800,
+      "height": 600,
+      "alt": "A shaded bed of ferns and hostas"
+    },
+    "gravel": {
+      "src": "https://uploads.example/gravel-garden-800.jpg",
+      "srcset": [
+        {
+          "url": "https://uploads.example/gravel-garden-400.jpg",
+          "width": 400
+        },
+        {
+          "url": "https://uploads.example/gravel-garden-800.jpg",
+          "width": 800
+        }
+      ],
+      "sizes": "(min-width: 64rem) 22rem, (min-width: 40rem) 45vw, 100vw",
+      "width": 800,
+      "height": 600,
+      "alt": "A gravel garden with grasses and sea holly"
+    },
+    "kitchen": {
+      "src": "https://uploads.example/kitchen-plot-800.jpg",
+      "srcset": [
+        {
+          "url": "https://uploads.example/kitchen-plot-400.jpg",
+          "width": 400
+        },
+        {
+          "url": "https://uploads.example/kitchen-plot-800.jpg",
+          "width": 800
+        }
+      ],
+      "sizes": "(min-width: 64rem) 22rem, (min-width: 40rem) 45vw, 100vw",
+      "width": 800,
+      "height": 600,
+      "alt": "Raised vegetable beds beside a kitchen door"
+    }
+  },
+  "site": {
+    "arrow": "→",
+    "labels": {
+      "slide": "Slide"
+    }
+  }
+}

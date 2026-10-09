@@ -1,0 +1,98 @@
+{
+  "section": "gallery",
+  "summary": "Grid of three images, three columns, with heading and intro. Captions come from each media record. First on the page, so the heading is the h1 and the first image is the priority image.",
+  "values": {
+    "heading": "Recent gardens",
+    "intro": "A few of the gardens we have planted and looked after this year.",
+    "layout": "grid",
+    "columns": "3",
+    "captions": true,
+    "images": [
+      "terrace",
+      "courtyard",
+      "meadow"
+    ],
+    "settings": {
+      "anchorId": "gallery-grid"
+    }
+  },
+  "context": {
+    "headingLevel": 1,
+    "priorityMedia": true,
+    "track": "gallery-1",
+    "index": 1
+  },
+  "media": {
+    "terrace": {
+      "src": "https://uploads.example/terrace-1600.jpg",
+      "srcset": [
+        {
+          "url": "https://uploads.example/terrace-640.jpg",
+          "width": 640
+        },
+        {
+          "url": "https://uploads.example/terrace-1024.jpg",
+          "width": 1024
+        },
+        {
+          "url": "https://uploads.example/terrace-1600.jpg",
+          "width": 1600
+        }
+      ],
+      "sizes": "(min-width: 64rem) 20rem, (min-width: 40rem) 33vw, 100vw",
+      "width": 1600,
+      "height": 1067,
+      "alt": "A terrace of raised beds planted with lavender",
+      "caption": "Lavender beds on the Clifton terrace"
+    },
+    "courtyard": {
+      "src": "https://uploads.example/courtyard-1600.jpg",
+      "srcset": [
+        {
+          "url": "https://uploads.example/courtyard-640.jpg",
+          "width": 640
+        },
+        {
+          "url": "https://uploads.example/courtyard-1024.jpg",
+          "width": 1024
+        },
+        {
+          "url": "https://uploads.example/courtyard-1600.jpg",
+          "width": 1600
+        }
+      ],
+      "sizes": "(min-width: 64rem) 20rem, (min-width: 40rem) 33vw, 100vw",
+      "width": 1600,
+      "height": 1200,
+      "alt": "A paved courtyard with olive trees in pots",
+      "caption": "Olive trees in a paved courtyard"
+    },
+    "meadow": {
+      "src": "https://uploads.example/meadow-1600.jpg",
+      "srcset": [
+        {
+          "url": "https://uploads.example/meadow-640.jpg",
+          "width": 640
+        },
+        {
+          "url": "https://uploads.example/meadow-1024.jpg",
+          "width": 1024
+        },
+        {
+          "url": "https://uploads.example/meadow-1600.jpg",
+          "width": 1600
+        }
+      ],
+      "sizes": "(min-width: 64rem) 20rem, (min-width: 40rem) 33vw, 100vw",
+      "width": 1600,
+      "height": 1067,
+      "alt": "A wildflower meadow in early summer",
+      "caption": "A wildflower meadow in June"
+    }
+  },
+  "site": {
+    "labels": {
+      "slide": "Slide"
+    }
+  }
+}

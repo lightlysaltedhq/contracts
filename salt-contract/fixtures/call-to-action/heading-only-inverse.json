@@ -1,0 +1,17 @@
+{
+  "section": "call-to-action",
+  "summary": "Inverse band with a heading only: no body and no buttons, so no actions element.",
+  "values": {
+    "heading": "Spring slots are filling fast",
+    "settings": {
+      "anchorId": "spring",
+      "tone": "surface-inverse"
+    }
+  },
+  "context": {
+    "headingLevel": 2,
+    "priorityMedia": false,
+    "track": "call-to-action-2",
+    "index": 2
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "section": "hero",
+  "summary": "Nothing set: eyebrow, heading, subheading, image and buttons all empty, so nothing renders, not even the wrapper.",
+  "values": { "variant": "split", "settings": { "anchorId": "hero-empty" } },
+  "context": { "headingLevel": 1, "priorityMedia": true, "track": "hero-1", "index": 1 }
+}

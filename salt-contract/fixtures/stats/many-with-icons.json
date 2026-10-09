@@ -1,0 +1,36 @@
+{
+  "section": "stats",
+  "summary": "Heading, intro, three columns; three stats with icons: value, suffix and label; one without a suffix, one without a label.",
+  "values": {
+    "heading": "Lightly Salted in numbers",
+    "intro": "A few figures from the last five years.",
+    "columns": "3",
+    "items": [
+      {
+        "icon": "check",
+        "value": "250",
+        "suffix": "+",
+        "label": "Sites launched"
+      },
+      {
+        "icon": "star",
+        "value": "4.9",
+        "label": "Average review score"
+      },
+      {
+        "icon": "clock",
+        "value": "24",
+        "suffix": "h"
+      }
+    ],
+    "settings": {
+      "anchorId": "stats-many"
+    }
+  },
+  "context": {
+    "headingLevel": 2,
+    "priorityMedia": false,
+    "track": "stats-1",
+    "index": 1
+  }
+}

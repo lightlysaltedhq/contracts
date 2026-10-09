@@ -1,0 +1,121 @@
+{
+  "section": "collection-showcase",
+  "$comment": "The first card has both an image and an icon: the icon is not drawn while an image is (card.json, icon role). The third card has no image, so its icon is. The collection's index page comes from site.collectionIndexes (services: /services/); the contract does not say where the input carries it, so this is a fixture convention. The view-all label is site.labels.viewAll.",
+  "summary": "Services as a three-column grid on the page's first band: the heading is the h1 and the first card's image the priority image. Linked cards with arrows, categories shown as tags, and a view-all link.",
+  "values": {
+    "eyebrow": "What we do",
+    "heading": "Gardening for every season",
+    "intro": "From the first sketch to the fortnightly visit, one team looks after your garden.",
+    "source": "services",
+    "layout": "grid",
+    "columns": "3",
+    "query": {
+      "mode": "automatic",
+      "count": 3
+    },
+    "showIcons": true,
+    "showTags": true,
+    "viewAll": true,
+    "settings": {
+      "anchorId": "services-grid"
+    }
+  },
+  "context": {
+    "headingLevel": 1,
+    "priorityMedia": true,
+    "track": "collection-showcase-1",
+    "index": 1
+  },
+  "media": {
+    "pruning": {
+      "src": "https://uploads.example/pruning-800.jpg",
+      "srcset": [
+        {
+          "url": "https://uploads.example/pruning-400.jpg",
+          "width": 400
+        },
+        {
+          "url": "https://uploads.example/pruning-800.jpg",
+          "width": 800
+        }
+      ],
+      "sizes": "(min-width: 64rem) 22rem, (min-width: 40rem) 45vw, 100vw",
+      "width": 800,
+      "height": 600,
+      "alt": "A gardener pruning an apple tree"
+    },
+    "borders": {
+      "src": "https://uploads.example/borders-800.jpg",
+      "srcset": [
+        {
+          "url": "https://uploads.example/borders-400.jpg",
+          "width": 400
+        },
+        {
+          "url": "https://uploads.example/borders-800.jpg",
+          "width": 800
+        }
+      ],
+      "sizes": "(min-width: 64rem) 22rem, (min-width: 40rem) 45vw, 100vw",
+      "width": 800,
+      "height": 600,
+      "alt": "A mixed herbaceous border in late summer"
+    }
+  },
+  "collections": {
+    "services": [
+      {
+        "id": "garden-design",
+        "title": "Garden design",
+        "href": "/services/garden-design/",
+        "image": "borders",
+        "icon": "star",
+        "text": "Plans drawn to suit the plot, the soil and the way you use the space.",
+        "tags": [
+          {
+            "title": "Design"
+          },
+          {
+            "title": "Planting"
+          }
+        ]
+      },
+      {
+        "id": "tree-care",
+        "title": "Tree care",
+        "href": "/services/tree-care/",
+        "image": "pruning",
+        "text": "Pruning, shaping and safe removal by qualified climbers.",
+        "tags": [
+          {
+            "title": "Trees"
+          }
+        ]
+      },
+      {
+        "id": "maintenance",
+        "title": "Regular maintenance",
+        "href": "/services/maintenance/",
+        "icon": "clock",
+        "text": "A named gardener visits every fortnight through the growing season.",
+        "tags": [
+          {
+            "title": "Maintenance"
+          },
+          {
+            "title": "Lawns"
+          }
+        ]
+      }
+    ]
+  },
+  "site": {
+    "arrow": "→",
+    "labels": {
+      "viewAll": "View all"
+    },
+    "collectionIndexes": {
+      "services": "/services/"
+    }
+  }
+}

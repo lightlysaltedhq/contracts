@@ -1,0 +1,62 @@
+{
+  "section": "collection-showcase",
+  "$comment": "The ungrouped index (groupByCategory false: \"the index list alone\") is a recorded gap: collection-showcase.json draws the list inside a non-optional div.salt-showcase__group with a required group heading, so the checker has no form for a bare list. Likewise the grouped form's unheaded leading list of uncategorised entries cannot be matched, so every post here has a category. Items carry categories as [{ title }], the same shape as tags.",
+  "summary": "Posts in the index layout, grouped under their categories: one group per category, each with a heading (body base + 1) and a list of links.",
+  "values": {
+    "heading": "All our guides",
+    "source": "posts",
+    "layout": "index",
+    "query": {
+      "mode": "automatic",
+      "count": 3
+    },
+    "groupByCategory": true,
+    "viewAll": false,
+    "settings": {
+      "anchorId": "journal-index"
+    }
+  },
+  "context": {
+    "headingLevel": 2,
+    "priorityMedia": false,
+    "track": "collection-showcase-5",
+    "index": 4
+  },
+  "collections": {
+    "posts": [
+      {
+        "id": "frost",
+        "title": "Protecting tender plants from the first frosts",
+        "href": "/journal/protecting-tender-plants/",
+        "categories": [
+          {
+            "title": "Seasonal care"
+          }
+        ]
+      },
+      {
+        "id": "bulbs",
+        "title": "Spring bulbs worth planting in October",
+        "href": "/journal/spring-bulbs/",
+        "categories": [
+          {
+            "title": "Seasonal care"
+          }
+        ]
+      },
+      {
+        "id": "hedges",
+        "title": "When to cut a hedge without disturbing nesting birds",
+        "href": "/journal/cutting-hedges/",
+        "categories": [
+          {
+            "title": "Wildlife"
+          }
+        ]
+      }
+    ]
+  },
+  "site": {
+    "labels": {}
+  }
+}

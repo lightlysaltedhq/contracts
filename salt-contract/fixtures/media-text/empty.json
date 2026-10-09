@@ -1,0 +1,19 @@
+{
+  "section": "media-text",
+  "summary": "A single row with nothing set, so nothing renders.",
+  "values": {
+    "mode": "single",
+    "rows": [
+      {}
+    ],
+    "settings": {
+      "anchorId": "media-text-empty"
+    }
+  },
+  "context": {
+    "headingLevel": 2,
+    "priorityMedia": false,
+    "track": "media-text-1",
+    "index": 1
+  }
+}

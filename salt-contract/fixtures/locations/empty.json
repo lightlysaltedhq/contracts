@@ -1,0 +1,53 @@
+{
+  "section": "locations",
+  "summary": "No office has a title, so nothing renders.",
+  "values": {
+    "heading": "Our offices",
+    "query": {
+      "mode": "automatic",
+      "categories": [],
+      "items": [],
+      "order": "default",
+      "count": 0
+    },
+    "settings": {
+      "anchorId": "offices-empty"
+    }
+  },
+  "context": {
+    "headingLevel": 2,
+    "priorityMedia": false,
+    "track": "locations-1",
+    "index": 3,
+    "now": "2026-10-07T11:00:00+01:00"
+  },
+  "collections": {
+    "locations": [
+      {
+        "id": "loc-untitled",
+        "title": "",
+        "address": [
+          "1 High Street"
+        ]
+      }
+    ]
+  },
+  "site": {
+    "timezone": "Europe/London",
+    "labels": {
+      "open": "Open now",
+      "appointment": "By appointment",
+      "closed": "Closed",
+      "byAppointment": "By appointment",
+      "getDirections": "Get directions",
+      "directions": "Directions to",
+      "load": "Load the map",
+      "loadMap": "Load map",
+      "consent": "Allow map cookies to view this map.",
+      "error": "The map could not be loaded."
+    },
+    "maps": {
+      "enabled": false
+    }
+  }
+}

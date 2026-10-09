@@ -1,0 +1,56 @@
+{
+  "section": "collection-showcase",
+  "$comment": "Display format chosen for card dates: \"12 March 2026\" (day, full month name, year, British English) inside time[datetime=YYYY-MM-DD]. The contract fixes only the datetime value.",
+  "summary": "Posts in the list layout (no data-columns), each with a date in a time element and a line of text. View all is off.",
+  "values": {
+    "heading": "From the journal",
+    "source": "posts",
+    "layout": "list",
+    "query": {
+      "mode": "automatic",
+      "count": 3
+    },
+    "viewAll": false,
+    "settings": {
+      "anchorId": "latest-posts",
+      "tone": "surface-alt",
+      "spacing": "lg",
+      "width": "narrow"
+    }
+  },
+  "context": {
+    "headingLevel": 2,
+    "priorityMedia": false,
+    "track": "collection-showcase-2",
+    "index": 2
+  },
+  "collections": {
+    "posts": [
+      {
+        "id": "frost",
+        "title": "Protecting tender plants from the first frosts",
+        "href": "/journal/protecting-tender-plants/",
+        "date": "2026-03-12",
+        "text": "Which pots to move, what to wrap and when to stop watering."
+      },
+      {
+        "id": "hedges",
+        "title": "When to cut a hedge without disturbing nesting birds",
+        "href": "/journal/cutting-hedges/",
+        "date": "2026-02-26",
+        "text": "The nesting season runs longer than most people think."
+      },
+      {
+        "id": "bulbs",
+        "title": "Spring bulbs worth planting in October",
+        "href": "/journal/spring-bulbs/",
+        "date": "2026-01-15",
+        "text": "Six reliable choices for a small garden."
+      }
+    ]
+  },
+  "site": {
+    "arrow": "→",
+    "labels": {}
+  }
+}

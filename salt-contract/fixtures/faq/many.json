@@ -1,0 +1,46 @@
+{
+  "$comment": "The accordion group name is \"faq-<section index>\" (faq.json), read as faq-<context.index>; here context.index is 2, so every details carries name=\"faq-2\".",
+  "section": "faq",
+  "summary": "Eyebrow, heading and intro above three automatically queried FAQs; answers in div.salt-rich-text (a paragraph, a list, bold text); no item open.",
+  "values": {
+    "eyebrow": "Questions",
+    "heading": "Before you book",
+    "intro": "The things clients ask us most often. If yours is not here, just ask.",
+    "query": {
+      "mode": "automatic",
+      "categories": [],
+      "items": [],
+      "order": "default",
+      "count": 0
+    },
+    "structuredData": true,
+    "settings": {
+      "anchorId": "faq-help"
+    }
+  },
+  "context": {
+    "headingLevel": 2,
+    "priorityMedia": false,
+    "track": "faq-1",
+    "index": 2
+  },
+  "collections": {
+    "faqs": [
+      {
+        "id": "faq-1",
+        "question": "How much does a first visit cost?",
+        "answer": "<p>The first visit is free. We walk the garden with you, take notes and send a written quote within three working days.</p>"
+      },
+      {
+        "id": "faq-2",
+        "question": "Which areas do you cover?",
+        "answer": "<p>We work across:</p>\n<ul>\n<li>Bristol and South Gloucestershire</li>\n<li>Bath and North East Somerset</li>\n<li>North Somerset, as far as Clevedon</li>\n</ul>"
+      },
+      {
+        "id": "faq-3",
+        "question": "Do you use peat or chemical weedkillers?",
+        "answer": "<p>No. We use <strong>peat-free compost</strong> and hand-weed or mulch instead.</p>"
+      }
+    ]
+  }
+}

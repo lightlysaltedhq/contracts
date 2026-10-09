@@ -1,0 +1,15 @@
+{
+  "section": "tabs",
+  "summary": "Eyebrow, heading, intro and tabs all empty: nothing renders, not even the wrapper.",
+  "values": {
+    "settings": {
+      "anchorId": "tabs-empty"
+    }
+  },
+  "context": {
+    "headingLevel": 2,
+    "priorityMedia": false,
+    "track": "tabs-1",
+    "index": 1
+  }
+}

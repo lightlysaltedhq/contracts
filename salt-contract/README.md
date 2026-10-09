@@ -14,8 +14,10 @@ as a WordPress parent theme. This package is the one thing both implementations 
   vocabulary, data attributes and heading rules;
 - the one shared set of **stylesheets** (`styles/`), reaching colour only through custom
   properties;
-- the **extension points** a client site may use, and **fixtures** proving the same content gives
-  the same HTML on both platforms (both to come).
+- **fixtures** (`fixtures/<section>/<case>`): sample content for every section, variant and state,
+  with the default HTML both platforms must render for it, and the **normaliser**
+  (`normalise.mjs`) both run their output through before comparing;
+- the **extension points** a client site may use (to come).
 
 It sits on top of `@lightlysaltedhq/design-foundations` (the colour, type and scale rules every
 Lightly Salted product follows) and holds no brand values of its own.
@@ -38,3 +40,74 @@ version means.
 From the repository root, `npm run salt-contract` runs this package's gate: one version across
 every contract file, every contract file valid against its schema, no colour values anywhere, and
 a tarball that ships only what it declares. `npm run verify` runs every gate in the repository.
+
+## Fixtures
+
+Modelled on GOV.UK Frontend's component fixtures: one directory per section, and in it a pair of
+files per case. `<case>.json` is the input; `<case>.html` is the default HTML for it, or an empty
+file when the case renders nothing (section#zero-state). A case's name describes its state
+(`split-image-left`, `one-item`, `empty`). From the repository root,
+`node scripts/check_salt_fixtures.mjs` proves every input valid against `contract/fields`, every expected HTML valid against
+`contract/markup`, every variant option covered, and the normaliser sound.
+
+### The input
+
+| Key | What it holds |
+| --- | --- |
+| `section` | The section id; the same as the directory. |
+| `summary` | What the case shows, in a sentence or two. |
+| `values` | The section's stored field values, named and shaped as `contract/fields/<section>.json` says, with the shared settings under `settings`. A field left out takes its default. |
+| `context` | What the page plan decides for this band: `headingLevel` (1 to 6, section#heading-level), `priorityMedia` (whether the plan grants this band the priority image, section#priority-media), `track` (its `data-track`, section#data-track), and where they apply `collapseTop` (section#adjacent-collapse), `index` (the section's position on the page from 1, which names an accordion group, `faq-<index>`) and `now` (an ISO 8601 time, for the locations' open-now status). |
+| `media` | The images the values name, by id: `src`, `srcset` (a list of `{ url, width }`), `sizes`, `width`, `height`, `alt`, and where set `caption` and `focalPoint` (`{ x, y }` in per cent). |
+| `documents` | The pages internal links name, by id: `{ href, title }`. |
+| `collections` | The items of each source the section reads (`faqs`, `services`, `team` …), in the collection's usual order, each with a string `id`. |
+| `route` | What the route hands a listing: its cards and pagination. |
+| `site` | Site-wide data the markup reads: `labels` (the strings `labels.<name>` in the markup refers to), `arrow` (the site's arrow glyph), the organisation's contact details, whether it accepts enquiries, its timezone and map settings. |
+
+Conventions, so that every case is deterministic:
+
+- **The anchor is explicit.** Every case sets `values.settings.anchorId` to a slug that is not a
+  landmark id, and renders as the only section with that anchor, so its settled id is the anchor
+  and every id inside it is `<anchor>__<part>` (SC-012).
+- **Stored forms.** An image field stores a media id, a link stores `{ label, type, document | url,
+  newTab }` with `document` a key of `documents`, and a collection query stores `{ mode, categories,
+  items, order, count }`. Rich text is an HTML string using only the field's allowed elements: the
+  fixtures' interchange form, which each platform's adapter turns into its own (Lexical, the
+  WordPress editor's HTML).
+- **Images.** `src`, `srcset` and `sizes` are written exactly as the media record gives them. The
+  contract fixes neither srcset widths nor a sizes table yet, so the record supplies both, and each
+  platform's adapter passes them through. Uploads live on `https://uploads.example`; the
+  normaliser drops the host.
+- **Dark tone.** `toneDark: auto` is written as `data-tone-dark` equal to the tone: the dark palette,
+  not the markup, supplies the counterpart.
+
+### The normaliser
+
+`normalise.mjs` (`@lightlysaltedhq/salt-contract/normalise`) exports `normalise(html)`, which
+returns a canonical string, and `compare(expected, actual)`. Both platforms run their output and the
+expected HTML through it and compare the results. It removes only what a visitor cannot see or the
+contract leaves to each platform: attribute order, class order, insignificant white space,
+boolean-attribute forms, character-reference forms, comments, the upload host in `src` and
+`srcset`, and the artwork inside `svg.salt-icon` (the glyph names are the contract, the artwork is
+each platform's, SC-007). It never touches ids, which SC-012 makes deterministic. The gate proves
+that removing or changing any one attribute of any expected HTML changes its output.
+
+### The adapter protocol
+
+Each implementation provides an adapter that takes a case's input and returns that platform's
+HTML for it, so the conformance runner can call either platform the same way. The adapter is
+written in the implementation's own repository; the contract fixes only its interface.
+
+- **Command.** A command the implementation names. It reads one case input, the whole
+  `<case>.json`, as UTF-8 JSON on stdin, and writes the rendered section to stdout: the section
+  wrapper and everything in it, as the platform renders it for a page whose plan gives that band
+  the case's `context`, and nothing for a case that renders nothing. It exits 0. A non-zero exit
+  fails the case; diagnostics go to stderr, never stdout. One process per case.
+- **Or an endpoint.** A local HTTP endpoint the implementation names, taking the same input as a
+  `POST` with `Content-Type: application/json` and answering `200` with the same HTML as
+  `text/html; charset=utf-8`. Any other status fails the case.
+- The adapter does not normalise; the runner normalises both sides. It loads the case's media,
+  documents, collections and site data into the platform however suits it (fixtures in a test
+  database, mocks), and writes `srcset` and `sizes` from the media record.
+- Form delivery, routing and admin stay native (SC-003): where a case needs a route's data, the
+  case supplies it in `route`.

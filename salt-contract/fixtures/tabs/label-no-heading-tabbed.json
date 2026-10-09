@@ -1,0 +1,27 @@
+{
+  "section": "tabs",
+  "summary": "No heading: the label field names the tab set for screen readers (never shown). Two tabs drawn as a radio group; the wrapper is a div. Inverse tone.",
+  "values": {
+    "label": "Opening times and contact",
+    "tabs": [
+      {
+        "label": "Opening",
+        "content": "<p>We are open Monday to Friday, eight until five.</p>"
+      },
+      {
+        "label": "Contact",
+        "content": "<p>Call <a href=\"tel:+441172345678\">0117 234 5678</a> or email us for a quote.</p>"
+      }
+    ],
+    "settings": {
+      "anchorId": "tabs-label",
+      "tone": "surface-inverse"
+    }
+  },
+  "context": {
+    "headingLevel": 2,
+    "priorityMedia": false,
+    "track": "tabs-1",
+    "index": 2
+  }
+}

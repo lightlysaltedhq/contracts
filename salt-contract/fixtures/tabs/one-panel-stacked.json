@@ -1,0 +1,22 @@
+{
+  "section": "tabs",
+  "summary": "A heading and a single tab: the panel is drawn stacked, with no radio group and no data-tabbed.",
+  "values": {
+    "heading": "What is included",
+    "tabs": [
+      {
+        "label": "The plan",
+        "content": "<p>Every plan includes a written planting schedule.</p>"
+      }
+    ],
+    "settings": {
+      "anchorId": "tabs-one"
+    }
+  },
+  "context": {
+    "headingLevel": 2,
+    "priorityMedia": false,
+    "track": "tabs-1",
+    "index": 2
+  }
+}

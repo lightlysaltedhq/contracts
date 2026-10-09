@@ -1,0 +1,34 @@
+{
+  "$comment": "The accordion group name is \"faq-<section index>\" (faq.json), read as faq-<context.index>; here context.index is 2, so every details carries name=\"faq-2\".",
+  "section": "faq",
+  "summary": "One FAQ, no eyebrow or intro, on the inverse band; the dark tone follows (auto).",
+  "values": {
+    "heading": "One quick question",
+    "query": {
+      "mode": "automatic",
+      "categories": [],
+      "items": [],
+      "order": "default",
+      "count": 0
+    },
+    "settings": {
+      "anchorId": "faq-one",
+      "tone": "surface-inverse"
+    }
+  },
+  "context": {
+    "headingLevel": 2,
+    "priorityMedia": false,
+    "track": "faq-1",
+    "index": 2
+  },
+  "collections": {
+    "faqs": [
+      {
+        "id": "faq-1",
+        "question": "How much does a first visit cost?",
+        "answer": "<p>The first visit is free. We walk the garden with you, take notes and send a written quote within three working days.</p>"
+      }
+    ]
+  }
+}

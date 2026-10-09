@@ -1,0 +1,30 @@
+{
+  "section": "collection-showcase",
+  "summary": "The query finds no items, so the section renders nothing: no wrapper, no heading.",
+  "values": {
+    "heading": "Latest posts",
+    "source": "posts",
+    "layout": "grid",
+    "query": {
+      "mode": "automatic",
+      "count": 3
+    },
+    "settings": {
+      "anchorId": "no-posts"
+    }
+  },
+  "context": {
+    "headingLevel": 2,
+    "priorityMedia": false,
+    "track": "collection-showcase-7",
+    "index": 6
+  },
+  "collections": {
+    "posts": []
+  },
+  "site": {
+    "labels": {
+      "viewAll": "View all"
+    }
+  }
+}

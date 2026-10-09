@@ -1,0 +1,36 @@
+{
+  "$comment": "Gap recorded: no case draws the contact form, whose action URL, hidden token values and challenge question are platform-native or per-request. site.organisation is chosen as { name, phone, email, address[] } because the contract leaves the site-data shape unfixed; the tel: href is the phone number reduced to digits with +44. With showPhone, showEmail and showAddress all false the details block still draws, holding only the organisation name (contact.json: it is shown whenever the site shows any detail, and the organisation name has no switch). No heading, so the wrapper is a div.",
+  "section": "contact",
+  "summary": "Enquiries closed, phone, email and address hidden, so only the organisation name shows; no heading; inverse band.",
+  "values": {
+    "showPhone": false,
+    "showEmail": false,
+    "showAddress": false,
+    "settings": {
+      "anchorId": "contact-closed",
+      "tone": "surface-inverse"
+    }
+  },
+  "context": {
+    "headingLevel": 2,
+    "priorityMedia": false,
+    "track": "contact-1",
+    "index": 4
+  },
+  "site": {
+    "acceptsEnquiries": false,
+    "organisation": {
+      "name": "Hedgerow & Co Gardens",
+      "phone": "0117 496 0123",
+      "email": "hello@hedgerow.example",
+      "address": [
+        "12 Wapping Wharf",
+        "Bristol",
+        "BS1 6UD"
+      ]
+    },
+    "labels": {
+      "unavailable": "We are not taking enquiries through the website at the moment. Please try again later."
+    }
+  }
+}

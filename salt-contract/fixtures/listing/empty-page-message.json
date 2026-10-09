@@ -1,0 +1,37 @@
+{
+  "section": "listing",
+  "$comment": "route shape as in cards-with-pagination; here cards is an empty list and there is one page, so no pagination is drawn.",
+  "summary": "The route has a listing but no cards on this page: the heading and the empty message from site.labels.empty, no list and no pagination. On the inverse band.",
+  "values": {
+    "heading": "Journal",
+    "settings": {
+      "anchorId": "search-results",
+      "tone": "surface-inverse"
+    }
+  },
+  "context": {
+    "headingLevel": 2,
+    "priorityMedia": false,
+    "track": "listing-1",
+    "index": 2
+  },
+  "route": {
+    "cards": [],
+    "pagination": {
+      "current": 1,
+      "total": 1,
+      "hrefs": {
+        "1": "/journal/"
+      }
+    }
+  },
+  "site": {
+    "labels": {
+      "nav": "Pagination",
+      "previous": "Previous",
+      "next": "Next",
+      "page": "Page",
+      "empty": "There are no posts to show yet."
+    }
+  }
+}

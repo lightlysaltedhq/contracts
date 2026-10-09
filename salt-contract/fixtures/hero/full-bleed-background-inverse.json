@@ -1,0 +1,38 @@
+{
+  "section": "hero",
+  "summary": "Full bleed on the inverse band: words over the section's background image (focal point set, scrim on at its default strength), one button. First on the page, so the background is the priority image and the heading the h1.",
+  "values": {
+    "variant": "full-bleed",
+    "eyebrow": "Garden design",
+    "heading": "Outdoor rooms for every season",
+    "subheading": "Planting plans, hard landscaping and aftercare from one small team.",
+    "buttons": [
+      { "link": { "label": "Book a visit", "type": "internal", "document": "contact" } }
+    ],
+    "settings": {
+      "anchorId": "welcome",
+      "tone": "surface-inverse",
+      "toneDark": "auto",
+      "spacing": "lg",
+      "width": "wide",
+      "backgroundImage": { "image": "meadow" }
+    }
+  },
+  "context": { "headingLevel": 1, "priorityMedia": true, "track": "hero-1", "index": 1 },
+  "media": {
+    "meadow": {
+      "src": "https://uploads.example/meadow-2400.jpg",
+      "srcset": [
+        { "url": "https://uploads.example/meadow-1024.jpg", "width": 1024 },
+        { "url": "https://uploads.example/meadow-1600.jpg", "width": 1600 },
+        { "url": "https://uploads.example/meadow-2400.jpg", "width": 2400 }
+      ],
+      "sizes": "100vw",
+      "width": 2400,
+      "height": 1350,
+      "alt": "A wildflower meadow at dusk",
+      "focalPoint": { "x": 30, "y": 60 }
+    }
+  },
+  "documents": { "contact": { "href": "/contact/", "title": "Contact" } }
+}

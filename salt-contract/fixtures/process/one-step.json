@@ -1,0 +1,22 @@
+{
+  "section": "process",
+  "summary": "A single step with a title only: the list still draws, with one item.",
+  "values": {
+    "heading": "Our promise",
+    "layout": "timeline",
+    "steps": [
+      {
+        "title": "We leave the garden tidy"
+      }
+    ],
+    "settings": {
+      "anchorId": "process-one"
+    }
+  },
+  "context": {
+    "headingLevel": 2,
+    "priorityMedia": false,
+    "track": "process-1",
+    "index": 2
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "section": "process",
+  "summary": "Eyebrow, heading, intro and steps all empty: nothing renders, not even the wrapper.",
+  "values": {
+    "layout": "timeline",
+    "settings": {
+      "anchorId": "process-empty"
+    }
+  },
+  "context": {
+    "headingLevel": 2,
+    "priorityMedia": false,
+    "track": "process-1",
+    "index": 1
+  }
+}

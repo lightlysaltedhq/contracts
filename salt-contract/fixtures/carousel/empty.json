@@ -1,0 +1,29 @@
+{
+  "section": "carousel",
+  "summary": "A collection source whose query finds no items: the section renders nothing.",
+  "values": {
+    "heading": "Latest projects",
+    "source": "case-studies",
+    "query": {
+      "mode": "automatic",
+      "count": 4
+    },
+    "settings": {
+      "anchorId": "no-projects"
+    }
+  },
+  "context": {
+    "headingLevel": 2,
+    "priorityMedia": false,
+    "track": "carousel-6",
+    "index": 6
+  },
+  "collections": {
+    "case-studies": []
+  },
+  "site": {
+    "labels": {
+      "slide": "Slide"
+    }
+  }
+}

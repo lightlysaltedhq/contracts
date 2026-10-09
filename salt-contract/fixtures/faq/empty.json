@@ -1,0 +1,27 @@
+{
+  "section": "faq",
+  "summary": "The collection holds no FAQs, so nothing renders, not even the wrapper.",
+  "values": {
+    "eyebrow": "Questions",
+    "heading": "Before you book",
+    "query": {
+      "mode": "automatic",
+      "categories": [],
+      "items": [],
+      "order": "default",
+      "count": 0
+    },
+    "settings": {
+      "anchorId": "faq-empty"
+    }
+  },
+  "context": {
+    "headingLevel": 2,
+    "priorityMedia": false,
+    "track": "faq-1",
+    "index": 2
+  },
+  "collections": {
+    "faqs": []
+  }
+}

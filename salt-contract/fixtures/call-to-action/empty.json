@@ -1,0 +1,15 @@
+{
+  "section": "call-to-action",
+  "summary": "Heading, body and buttons all empty, so nothing renders.",
+  "values": {
+    "settings": {
+      "anchorId": "cta-empty"
+    }
+  },
+  "context": {
+    "headingLevel": 2,
+    "priorityMedia": false,
+    "track": "call-to-action-1",
+    "index": 1
+  }
+}
