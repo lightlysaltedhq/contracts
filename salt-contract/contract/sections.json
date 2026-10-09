@@ -1487,5 +1487,41 @@
         }
       }
     }
-  ]
+  ],
+  "icons": {
+    "note": "Every glyph name both platforms draw (SC-007): the union of their sets. content names are the ones an editor may choose (a select with optionsFrom icons offers these, plus any a site adds); chrome names are drawn only by the system: the caret, the close cross, the theme toggle's marks, and the social marks derived from a profile's address. A name may be in both. The artwork stays each platform's own; the names are the contract.",
+    "content": [
+      "check",
+      "clock",
+      "globe",
+      "link",
+      "mail",
+      "map-pin",
+      "phone",
+      "star",
+      "star-filled"
+    ],
+    "chrome": [
+      "arrow-right",
+      "check",
+      "chevron-down",
+      "chevron-right",
+      "close",
+      "external-link",
+      "menu",
+      "moon",
+      "sun",
+      "bluesky",
+      "facebook",
+      "github",
+      "instagram",
+      "linkedin",
+      "pinterest",
+      "reddit",
+      "tiktok",
+      "whatsapp",
+      "x",
+      "youtube"
+    ]
+  }
 }

@@ -112,7 +112,9 @@ for (const abs of contractFiles) {
 // options, a condition names a sibling other than itself and expects values that sibling offers
 // (or tests whether it is filled, which any type but a group, list, collection-query or link may be),
 // a rowLabel names a child, a list's min is not above its max, and shared.omit and
-// shared.defaults name shared settings. Applies only once contract/sections.json exists.
+// shared.defaults name shared settings. Once sections.json lists icon names (SC-007), every
+// literal data-icon in markup is one of them, and a select whose options come from icons defaults
+// to a content name. Applies only once contract/sections.json exists.
 const read = (p) => { try { return JSON.parse(readFileSync(path.join(dir, p), 'utf8')) } catch { return null } }
 const vocab = read('contract/sections.json')
 // A vocabulary whose entries are objects; a bare list of ids has nothing to cross-check.
@@ -126,6 +128,24 @@ if (vocab && (vocab.sections ?? []).every((x) => x && typeof x === 'object')) {
   }
   for (const e of entries) {
     if (!has(`contract/markup/${e.id}.json`)) fails.push(`${e.id} has no contract/markup/${e.id}.json`)
+  }
+  // Icon names (SC-007): both platforms draw every listed name, so a name outside the list is one
+  // a platform may not draw. Editors choose only content names, so a field default must be one.
+  const iconContent = vocab.icons ? new Set(vocab.icons.content ?? []) : null
+  const iconNames = vocab.icons ? new Set([...(vocab.icons.content ?? []), ...(vocab.icons.chrome ?? [])]) : null
+  const checkIcons = (file, attributes) => {
+    const v = attributes?.['data-icon']
+    if (!iconNames || v === undefined) return
+    const named = typeof v === 'string' ? [v] : [v.value, ...(v.enum ?? [])]
+    for (const n of named) {
+      if (typeof n === 'string' && !n.startsWith('from:') && !iconNames.has(n)) fails.push(`${file} draws icon ${n}, which sections.json icons does not list`)
+    }
+  }
+  const walkNodes = (file, nodes) => {
+    for (const node of nodes ?? []) {
+      checkIcons(file, node.attributes)
+      walkNodes(file, node.children)
+    }
   }
   const settings = read('contract/fields/_section-settings.json')
   const sharedNames = new Set((settings?.fields ?? []).map((f) => f.name))
@@ -167,6 +187,9 @@ if (vocab && (vocab.sections ?? []).every((x) => x && typeof x === 'object')) {
         } else {
           fails.push(`${owner}.${f.name} condition names ${clause.field}, a ${target.type} field; a condition may name only a select or a boolean`)
         }
+      }
+      if (f.optionsFrom === 'icons' && f.default !== undefined && iconContent && !iconContent.has(f.default)) {
+        fails.push(`${owner}.${f.name} defaults to icon ${f.default}, which is not a content icon in sections.json`)
       }
       if (typeof f.min === 'number' && typeof f.max === 'number' && f.min > f.max) fails.push(`${owner}.${f.name} min ${f.min} exceeds max ${f.max}`)
       if (f.rowLabel && !(f.fields ?? []).some((c) => c.name === f.rowLabel)) {
@@ -212,6 +235,15 @@ if (vocab && (vocab.sections ?? []).every((x) => x && typeof x === 'object')) {
     if (!doc) continue
     if (doc.id !== name) fails.push(`${rel(abs)} declares id ${doc.id}; its file name says ${name}`)
     if (!entryIds.has(name)) { fails.push(`${rel(abs)} describes nothing in sections.json`); continue }
+    checkIcons(rel(abs), doc.root?.attributes)
+    walkNodes(rel(abs), doc.elements)
+    for (const mv of doc.variants ?? []) {
+      for (const o of Object.values(mv.options ?? {})) {
+        checkIcons(rel(abs), o.root?.attributes)
+        for (const diff of Object.values(o.elements ?? {})) checkIcons(rel(abs), diff.attributes)
+        walkNodes(rel(abs), [...Object.values(o.replace ?? {}), ...(o.tree ?? [])])
+      }
+    }
     for (const u of doc.uses ?? []) {
       const target = String(u).split('#')[0]
       if (!has(`contract/markup/${target}.json`)) fails.push(`${name} uses ${target}, which has no markup file`)

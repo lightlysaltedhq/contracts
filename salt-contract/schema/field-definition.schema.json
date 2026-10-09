@@ -587,7 +587,7 @@
           }
         },
         "optionsFrom": {
-          "description": "icons: the options are the site's icon set, supplied by the site, not the contract.",
+          "description": "icons: the options are the contract's content icon names (contract/sections.json, icons.content), plus any a site adds. A default must be one of the contract's.",
           "enum": [
             "icons"
           ]

@@ -393,3 +393,53 @@ crossFail('component markup describing a variant option its entry does not offer
 crossFail('component markup describing a variant its entry does not declare', (f) => {
   f['contract/markup/button.json'].variants = [{ field: 'style', options: { solid: {} } }]
 }, /button markup describes a variant of style, which its entry in sections\.json does not declare/)
+
+// ── SC-007: icon names are the union sections.json lists ────────────────────────────────────────
+const withIcons = (f) => {
+  f['contract/sections.json'].icons = { content: ['star', 'check'], chrome: ['check', 'close'] }
+  f['contract/sections.json'].components.push({ id: 'icon', label: 'Icon' })
+  f['contract/markup/icon.json'] = { $schema: '../../schema/markup.schema.json', version: '0.1.0', id: 'icon', kind: 'component' }
+}
+const iconNode = (name) => ({ role: 'glyph', component: 'icon', attributes: { 'data-icon': name } })
+test('cross-file: listed icon names in markup and a content default pass', () => {
+  const r = crossRun((f) => {
+    withIcons(f)
+    f['contract/markup/hero.json'].elements = [{ role: 'box', element: 'div', children: [iconNode('close'), iconNode('from:name')] }]
+    f['contract/fields/hero.json'].fields.push({ name: 'icon', type: 'select', optionsFrom: 'icons', default: 'star' })
+  })
+  assert.equal(r.code, 0, r.out)
+})
+crossFail('a nested icon name sections.json does not list', (f) => {
+  withIcons(f); f['contract/markup/hero.json'].elements = [{ role: 'box', element: 'div', children: [iconNode('rocket')] }]
+}, /contract\/markup\/hero\.json draws icon rocket, which sections\.json icons does not list/)
+crossFail('an unlisted icon name in a variant option', (f) => {
+  withIcons(f)
+  f['contract/markup/hero.json'].elements = [iconNode('check')]
+  f['contract/markup/hero.json'].variants = [{ field: 'variant', options: { b: { elements: { glyph: { attributes: { 'data-icon': 'moon' } } } } } }]
+}, /contract\/markup\/hero\.json draws icon moon, which sections\.json icons does not list/)
+crossFail('an icon field defaulting to a chrome-only name', (f) => {
+  withIcons(f); f['contract/fields/hero.json'].fields.push({ name: 'icon', type: 'select', optionsFrom: 'icons', default: 'close' })
+}, /hero\.icon defaults to icon close, which is not a content icon in sections\.json/)
+
+// The real sections schema requires the icon lists and refuses a repeated name.
+const realSectionsSchema = JSON.parse(readFileSync(path.join(path.dirname(script), '..', 'salt-contract', 'schema', 'sections.schema.json'), 'utf8'))
+const realVocab = (icons) => crossRun((f) => {
+  f['schema/sections.schema.json'] = structuredClone(realSectionsSchema)
+  const both = { nextjs: { status: 'ships' }, wordpress: { status: 'ships' } }
+  f['contract/sections.json'].sections[0].platforms = both
+  f['contract/sections.json'].components[0].platforms = both
+  if (icons === undefined) delete f['contract/sections.json'].icons
+  else f['contract/sections.json'].icons = icons
+})
+test('schema: the sections schema accepts content and chrome icon lists', () => {
+  const r = realVocab({ content: ['star'], chrome: ['close'] })
+  assert.equal(r.code, 0, r.out)
+})
+test('schema: the sections schema requires the icon lists', () => {
+  const r = realVocab(undefined)
+  assert.equal(r.code, 1, r.out); assert.match(r.out, /contract\/sections\.json does not match schema\/sections\.schema\.json: \/ must have required property 'icons'/)
+})
+test('schema: the sections schema refuses a name listed twice in one list', () => {
+  const r = realVocab({ content: ['star', 'star'], chrome: ['close'] })
+  assert.equal(r.code, 1, r.out); assert.match(r.out, /\/icons\/content must NOT have duplicate items/)
+})
