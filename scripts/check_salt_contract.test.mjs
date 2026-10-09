@@ -474,7 +474,7 @@ crossFail('a section variant whose default is not one of its options', (f) => {
 }, /hero variant variant defaults to z, which is not one of its options in sections\.json/)
 crossFail('an unlisted icon name in dataAttributes', (f) => {
   withIcons(f); f['contract/markup/hero.json'].dataAttributes = [{ name: 'data-icon', on: 'glyph', values: ['star', 'rocket'] }]
-}, /contract\/markup\/hero\.json declares data-icon rocket in dataAttributes, which sections\.json icons does not list/)
+}, /contract\/markup\/hero\.json draws icon rocket, which sections\.json icons does not list/)
 test('cross-file: a data-icon in dataAttributes read from content passes', () => {
   const r = crossRun((f) => { withIcons(f); f['contract/markup/hero.json'].dataAttributes = [{ name: 'data-icon', on: 'glyph', values: 'from:name' }] })
   assert.equal(r.code, 0, r.out)
@@ -489,3 +489,11 @@ test('schema: the sections schema refuses openQuestions', () => {
   })
   assert.equal(r.code, 1, r.out); assert.match(r.out, /contract\/sections\.json does not match schema\/sections\.schema\.json: \/ must NOT have additional properties/)
 })
+
+// ── Re-review of #6: one icon rule on both paths ─────────────────────────────────────────────────
+crossFail('an empty data-icon in dataAttributes', (f) => {
+  withIcons(f); f['contract/markup/hero.json'].dataAttributes = [{ name: 'data-icon', on: 'glyph', values: '' }]
+}, /contract\/markup\/hero\.json draws icon "", which sections\.json icons does not list/)
+crossFail('an empty data-icon on a node', (f) => {
+  withIcons(f); f['contract/markup/hero.json'].elements = [iconNode('')]
+}, /contract\/markup\/hero\.json draws icon "", which sections\.json icons does not list/)

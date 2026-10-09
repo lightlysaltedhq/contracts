@@ -137,17 +137,21 @@ if (vocab && (vocab.sections ?? []).every((x) => x && typeof x === 'object')) {
   const { content = [], chrome = [] } = vocab.icons ?? {}
   const iconContent = new Set(content)
   const iconNames = new Set([...content, ...chrome])
-  const checkIcons = (file, attributes) => {
-    const v = attributes?.['data-icon']
+  // One rule for a data-icon wherever it is written, a node's attributes or a file's
+  // dataAttributes: each name is from:<field> or a listed icon. An empty or non-string value names
+  // no icon, so it fails the same way on both paths.
+  const checkIcons = (file, v) => {
     if (v === undefined) return
-    const named = typeof v === 'string' ? [v] : [v.value, ...(v.enum ?? [])]
+    const named = typeof v === 'string' || Array.isArray(v) ? [v].flat()
+      : v && typeof v === 'object' ? ['value' in v ? v.value : [], v.enum ?? []].flat() : [v]
     for (const n of named) {
-      if (typeof n === 'string' && !n.startsWith('from:') && !iconNames.has(n)) fails.push(`${file} draws icon ${n}, which sections.json icons does not list`)
+      if (typeof n === 'string' && (n.startsWith('from:') || iconNames.has(n))) continue
+      fails.push(`${file} draws icon ${n === '' ? '""' : n}, which sections.json icons does not list`)
     }
   }
   const walkNodes = (file, nodes) => {
     for (const node of nodes ?? []) {
-      checkIcons(file, node.attributes)
+      checkIcons(file, node.attributes?.['data-icon'])
       walkNodes(file, node.children)
     }
   }
@@ -252,18 +256,13 @@ if (vocab && (vocab.sections ?? []).every((x) => x && typeof x === 'object')) {
     if (!doc) continue
     if (doc.id !== name) fails.push(`${rel(abs)} declares id ${doc.id}; its file name says ${name}`)
     if (!entryIds.has(name)) { fails.push(`${rel(abs)} describes nothing in sections.json`); continue }
-    checkIcons(rel(abs), doc.root?.attributes)
+    checkIcons(rel(abs), doc.root?.attributes?.['data-icon'])
     walkNodes(rel(abs), doc.elements)
-    // A data-icon declared in dataAttributes names its values there, not on a node.
-    for (const da of (doc.dataAttributes ?? []).filter((x) => x.name === 'data-icon')) {
-      for (const n of [da.values].flat()) {
-        if (typeof n === 'string' && n !== '' && !n.startsWith('from:') && !iconNames.has(n)) fails.push(`${rel(abs)} declares data-icon ${n} in dataAttributes, which sections.json icons does not list`)
-      }
-    }
+    for (const da of (doc.dataAttributes ?? []).filter((x) => x.name === 'data-icon')) checkIcons(rel(abs), da.values)
     for (const mv of doc.variants ?? []) {
       for (const o of Object.values(mv.options ?? {})) {
-        checkIcons(rel(abs), o.root?.attributes)
-        for (const diff of Object.values(o.elements ?? {})) checkIcons(rel(abs), diff.attributes)
+        checkIcons(rel(abs), o.root?.attributes?.['data-icon'])
+        for (const diff of Object.values(o.elements ?? {})) checkIcons(rel(abs), diff.attributes?.['data-icon'])
         walkNodes(rel(abs), [...Object.values(o.replace ?? {}), ...(o.tree ?? [])])
       }
     }
