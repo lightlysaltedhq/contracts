@@ -2,10 +2,13 @@
 // The Payload round trip: what salt-contract/emit/payload.mjs generates for each section, against
 // the field half salt-nextjs ships today. Writes salt-contract/reports/round-trip-payload.md.
 //
-//   node scripts/round_trip_payload.mjs [--check] [<salt-nextjs checkout>]
+//   node scripts/round_trip_payload.mjs [--check | --suggest] [<salt-nextjs checkout>]
 //
-// Needs a salt-nextjs checkout (by default the repository's sibling, salt-nextjs), so it is not part of `npm run verify`; the report it
-// writes is committed, and --check fails when the committed one is stale.
+// Needs a salt-nextjs checkout (by default the repository's sibling, salt-nextjs), so it is not
+// part of `npm run verify`. The report it writes is committed; --check fails when the committed one
+// is stale, when a difference is not on the expected list, or when a listed one no longer occurs.
+// --suggest prints the unlisted differences as list entries, with the contract note that may
+// account for each, for a person to review before adding them.
 //
 // salt-nextjs's field files are TypeScript that import the Lexical editor. esbuild bundles
 // packages/core/src/blocks/index.ts with that editor stubbed (each feature records its key, so
@@ -18,9 +21,10 @@
 // nextjs's are found by watching which keys it touches), with each contract value translated to
 // the one salt-nextjs stores. Labels and descriptions are not compared; see the report's header.
 //
-// Each difference is EXPECTED when the contract field (or its section in sections.json) carries a
-// platforms.nextjs note that accounts for it (formerly, values, owes, or a note on the condition),
-// and UNEXPECTED otherwise.
+// Each difference is EXPECTED only when salt-contract/reports/round-trip-payload.expected.json lists
+// it: its section, field path, kind and exact wording, with the evidence (the owes, formerly or
+// values note, or the SC ruling) that accounts for it. Anything else is UNEXPECTED, so a later
+// rename, retype or required change on a field that already owes something is not hidden by it.
 import { execFileSync } from 'node:child_process'
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
@@ -33,6 +37,7 @@ import { toPayloadBlocks } from '../salt-contract/emit/payload.mjs'
 
 const here = path.dirname(fileURLToPath(import.meta.url))
 const reportPath = path.join(here, '..', 'salt-contract', 'reports', 'round-trip-payload.md')
+const expectedPath = path.join(here, '..', 'salt-contract', 'reports', 'round-trip-payload.expected.json')
 
 /**
  * The command line: flags anywhere, at most one positional argument, the salt-nextjs checkout. By
@@ -40,7 +45,7 @@ const reportPath = path.join(here, '..', 'salt-contract', 'reports', 'round-trip
  * them out.
  */
 export function parseArguments(argv, scriptDir = here) {
-  const flags = new Set(['--check'])
+  const flags = new Set(['--check', '--suggest'])
   const unknown = argv.filter((a) => a.startsWith('--') && !flags.has(a))
   if (unknown.length) throw new Error(`unknown option ${unknown.join(', ')}`)
   const positional = argv.filter((a) => !a.startsWith('--'))
@@ -48,6 +53,7 @@ export function parseArguments(argv, scriptDir = here) {
   return {
     nextjs: path.resolve(positional[0] ?? path.join(scriptDir, '..', '..', 'salt-nextjs')),
     check: argv.includes('--check'),
+    suggest: argv.includes('--suggest'),
   }
 }
 
@@ -161,14 +167,36 @@ function compareConditions(e, n, ctx) {
   return disagree.length ? `condition differs (${disagree.length} of ${combos.length} cases), e.g. ${disagree.slice(0, 2).join('; ')}` : null
 }
 
-function record(section, at, def, kind, text) {
-  const note = def?.platforms?.nextjs
-  let verdict = 'unexpected'
-  let evidence = ''
-  if (note?.owes) { verdict = 'expected'; evidence = `owes: ${note.owes}` }
-  else if (kind === 'name' && note?.formerly) { verdict = 'expected'; evidence = `formerly: ${[note.formerly].flat().join(', ')}` }
-  else if (kind === 'condition' && note?.note) { verdict = 'expected'; evidence = `note: ${note.note}` }
-  rows.push({ section, at, kind, text, verdict, evidence })
+// The contract note that may account for a difference: a suggestion for --suggest, never a verdict.
+function suggestionFor(note, kind) {
+  if (kind === 'values' && note?.values) return `values: ${JSON.stringify(note.values)}`
+  if (kind === 'name' && note?.formerly) return `formerly: ${[note.formerly].flat().join(', ')}`
+  if (kind === 'condition' && note?.note) return `note: ${note.note}`
+  if (note?.owes) return `owes: ${note.owes}`
+  if (note?.note) return `note: ${note.note}`
+  return ''
+}
+
+function record(section, at, def, kind, text, note = def?.platforms?.nextjs) {
+  rows.push({ section, at, kind, text, suggestion: suggestionFor(note, kind) })
+}
+
+const keyOf = (r) => [r.section, r.path ?? r.at, r.kind, r.difference ?? r.text].join('\u0000')
+
+/**
+ * Each row against the reviewed list: listed rows are expected, with the list's evidence; the rest
+ * are unexpected. `unseen` is what the list names and the comparison no longer finds.
+ */
+export function classify(found, list) {
+  const listed = new Map(list.map((e) => [keyOf(e), e]))
+  const seen = new Set()
+  const expected = []
+  const unexpected = []
+  for (const r of found) {
+    const entry = listed.get(keyOf(r))
+    if (entry) { seen.add(keyOf(r)); expected.push({ ...r, evidence: entry.evidence }) } else unexpected.push(r)
+  }
+  return { expected, unexpected, unseen: list.filter((e) => !seen.has(keyOf(e))) }
 }
 
 function compareFields(section, emittedFields, nextFields, defs, prefix) {
@@ -191,7 +219,7 @@ function compareFields(section, emittedFields, nextFields, defs, prefix) {
   }
   for (const n of nextFields) {
     if (!n.name || used.has(n.name)) continue
-    rows.push({ section, at: `${prefix}${n.name}`, kind: 'extra', text: 'in salt-nextjs, not in the contract', verdict: 'unexpected', evidence: '' })
+    rows.push({ section, at: `${prefix}${n.name}`, kind: 'extra', text: 'in salt-nextjs, not in the contract', suggestion: '' })
   }
 }
 
@@ -222,11 +250,7 @@ function compareOne(section, at, e, n, def, ctx) {
   if (e.type === 'upload' && e.relationTo !== n.relationTo) diffs.push(['relation', `relationTo ${show(e.relationTo)}; salt-nextjs ${show(n.relationTo)}`])
   const cond = compareConditions(e, n, ctx)
   if (cond) diffs.push(['condition', cond])
-  for (const [kind, text] of diffs) {
-    // A difference the field's values map explains is expected whatever else the note says.
-    if (kind === 'values') rows.push({ section, at, kind, text, verdict: 'expected', evidence: `values: ${JSON.stringify(def.platforms.nextjs.values)}` })
-    else record(section, at, def, kind, text)
-  }
+  for (const [kind, text] of diffs) record(section, at, def, kind, text, ctx.note ?? def?.platforms?.nextjs)
   if (e.fields && n.fields) {
     if (inQuery) {
       // The query's parts: salt-nextjs's names, by the field's note.
@@ -249,22 +273,21 @@ function compareQuery(section, prefix, mine, theirs, def) {
     return part ? { platforms: { nextjs: { values: note?.values?.[part] ?? {} } } } : undefined
   }
   const defs = new Map(mine.map((m) => [m.name, partDef(m.name)]))
-  const before = rows.length
   const used = new Set()
   for (const e of mine) {
     const n = theirs.find((x) => x.name === e.name)
     if (!n) { record(section, `${prefix}${e.name}`, def, 'inside-query', 'not in salt-nextjs'); continue }
     used.add(n.name)
-    compareOne(section, `${prefix}${e.name}`, e, n, defs.get(e.name), { emittedSiblings: mine, defs })
+    // A part's values come from the query's note, keyed by part; any other difference is the query's.
+    const part = defs.get(e.name)
+    const partNote = part ? { ...note, values: part.platforms.nextjs.values } : note
+    compareOne(section, `${prefix}${e.name}`, e, n, part, { emittedSiblings: mine, defs, note: partNote })
   }
   for (const n of theirs) if (!used.has(n.name)) record(section, `${prefix}${n.name}`, def, 'inside-query', 'in salt-nextjs, not in the contract')
-  for (const r of rows.slice(before)) {
-    if (r.verdict === 'unexpected' && note) { r.verdict = 'expected'; r.evidence = `note: ${note.note ?? note.owes}` }
-  }
 }
 // ── Run ────────────────────────────────────────────────────────────────────────────────────────
 
-async function main({ nextjs, check }) {
+async function main({ nextjs, check, suggest }) {
   const { nx, nextjsCommit, nextjsVersion } = await loadNextjs(nextjs)
   rows = []
   // The options salt-nextjs's own example site passes, as near as the contract's options reach.
@@ -297,7 +320,7 @@ async function main({ nextjs, check }) {
     const formerName = s.platforms?.nextjs?.formerly?.[0]?.name
     if (theirs.slug !== id) {
       rows.push({ section: id, at: '(block slug)', kind: 'name', text: `slug ${id}; salt-nextjs ${theirs.slug}`,
-        verdict: formerName === theirs.slug ? 'expected' : 'unexpected', evidence: formerName ? `sections.json formerly: ${formerName}` : '' })
+        suggestion: formerName === theirs.slug ? `sections.json formerly: ${formerName}` : '' })
     }
     const defs = defsFor([...fields, { name: 'settings', type: 'group', fields: settings }], block.fields)
     compareFields(id, block.fields, theirs.fields, defs, '')
@@ -305,8 +328,12 @@ async function main({ nextjs, check }) {
   }
 
 
-  const expected = rows.filter((r) => r.verdict === 'expected')
-  const unexpected = rows.filter((r) => r.verdict === 'unexpected')
+  const list = JSON.parse(readFileSync(expectedPath, 'utf8'))
+  const { expected, unexpected, unseen } = classify(rows, list)
+  if (suggest) {
+    console.log(JSON.stringify(unexpected.map((r) => ({ section: r.section, path: r.at, kind: r.kind, difference: r.text, evidence: r.suggestion })), null, 2))
+    return
+  }
   const cell = (s) => String(s).replace(/\|/g, '\\|').replace(/\n/g, ' ')
   const lines = [
     '# Payload round trip',
@@ -321,13 +348,14 @@ async function main({ nextjs, check }) {
     'differently and SC-003 says must match, so adopting the emitter changes them throughout; and what',
     'stays native to Payload (enum names, admin components, hooks, validators, row-label components).',
     '',
-    '**Expected** means the contract records the difference in the field\'s `platforms.nextjs` note',
-    '(`formerly`, `values`, `owes`, or a note on the condition), or sections.json records the block\'s',
-    'former slug. **Unexpected** means nothing in the contract accounts for it.',
+    '**Expected** means `round-trip-payload.expected.json` lists the difference exactly (section, field,',
+    'kind and wording), with the contract note or ruling that accounts for it. **Unexpected** means it',
+    'is not on that reviewed list; **listed, not found** means the list names a difference that no',
+    'longer occurs.',
     '',
     `## Summary`,
     '',
-    `${rows.length} differences: ${expected.length} expected, ${unexpected.length} unexpected.`,
+    `${rows.length} differences: ${expected.length} expected, ${unexpected.length} unexpected; ${unseen.length} listed, not found.`,
     '',
     '| Section | Compared |',
     '| --- | --- |',
@@ -335,12 +363,17 @@ async function main({ nextjs, check }) {
     '',
   ]
   if (unexpected.length) {
-    lines.push('## Unexpected', '', '| Section | Field | Difference |', '| --- | --- | --- |')
-    for (const r of unexpected) lines.push(`| ${r.section} | \`${r.at}\` | ${cell(r.text)} |`)
+    lines.push('## Unexpected', '', '| Section | Field | Kind | Difference | Contract note that may account for it |', '| --- | --- | --- | --- | --- |')
+    for (const r of unexpected) lines.push(`| ${r.section} | \`${r.at}\` | ${r.kind} | ${cell(r.text)} | ${cell(r.suggestion || 'none')} |`)
     lines.push('')
   }
-  lines.push('## Expected', '', '| Section | Field | Difference | Recorded as |', '| --- | --- | --- | --- |')
-  for (const r of expected) lines.push(`| ${r.section} | \`${r.at}\` | ${cell(r.text)} | ${cell(r.evidence)} |`)
+  if (unseen.length) {
+    lines.push('## Listed, not found', '', '| Section | Field | Kind | Difference |', '| --- | --- | --- | --- |')
+    for (const e of unseen) lines.push(`| ${e.section} | \`${e.path}\` | ${e.kind} | ${cell(e.difference)} |`)
+    lines.push('')
+  }
+  lines.push('## Expected', '', '| Section | Field | Kind | Difference | Recorded as |', '| --- | --- | --- | --- | --- |')
+  for (const r of expected) lines.push(`| ${r.section} | \`${r.at}\` | ${r.kind} | ${cell(r.text)} | ${cell(r.evidence)} |`)
   lines.push('')
   const text = lines.join('\n')
 
@@ -348,7 +381,11 @@ async function main({ nextjs, check }) {
     let committed = ''
     try { committed = readFileSync(reportPath, 'utf8') } catch { /* missing is stale */ }
     if (committed !== text) { console.log(`✗ ${path.relative(process.cwd(), reportPath)} is stale; regenerate it`); process.exit(1) }
-    console.log('PASS: the round-trip report is current')
+    if (unexpected.length || unseen.length) {
+      console.log(`✗ ${unexpected.length} unexpected difference(s) and ${unseen.length} listed but not found; see the report`)
+      process.exit(1)
+    }
+    console.log(`PASS: the round-trip report is current: ${expected.length} expected, 0 unexpected`)
   } else {
     writeFileSync(reportPath, text)
     console.log(`wrote ${path.relative(process.cwd(), reportPath)}: ${expected.length} expected, ${unexpected.length} unexpected`)

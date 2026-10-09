@@ -78,4 +78,5 @@ diff and migrate. Options that JSON can carry also work from the command line:
 `node emit/payload.mjs --check <snapshot> [--options <options.json>]` exits 1 on drift, and
 `--write <snapshot>` regenerates it. A section needing a source the site does not install is left
 out, or refused when `sections` names it. `reports/round-trip-payload.md`, which is not shipped,
-compares the output with the blocks salt-nextjs ships today.
+compares the output with the blocks salt-nextjs ships today. A difference is expected only when
+`reports/round-trip-payload.expected.json` lists it, with the note that accounts for it.
