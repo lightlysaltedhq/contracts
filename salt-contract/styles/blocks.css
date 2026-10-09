@@ -516,6 +516,16 @@
   block-size: 2.5rem;
 }
 
+/* The logo fills its frame (SC-011), `contain` so each mark stays whole. A rule of the image's own,
+   so nothing here touches the frame's box. */
+.salt-logos__image {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: contain;
+}
+
 /*
  * Greyscale, on by default, in pure CSS.
  *
@@ -1111,6 +1121,15 @@
   aspect-ratio: 16 / 9;
   overflow: hidden;
   border-radius: var(--radius-sm);
+}
+
+/* The photograph fills the frame (SC-011): the card image and the testimonial avatar alike. */
+.salt-showcase__media > img {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
 }
 
 /* A testimonial's photograph is a small round avatar beside who said it, not a card image. */

@@ -45,12 +45,18 @@
  * loses nothing but atmosphere.
  */
 /*
- * `z-index` only for the media: next/image's `fill` writes `position`, `inset`, `width` and
- * `height` as inline style, which beats anything here. Declaring them again was dead CSS
- * describing a frame the class does not provide.
+ * The media fills the band (SC-011). Salt for Next.js's image component writes the same fill as
+ * inline style, which is redundant beside this and harmless; a plain `img`, as Salt for WordPress
+ * draws it, has only this. `object-fit` is the default fit: an inline `object-fit` or
+ * `object-position` the markup writes for the editor's fit and focal point outranks it.
  */
 .salt-section__media {
+  position: absolute;
+  inset: 0;
   z-index: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
 }
 
 .salt-section__scrim {

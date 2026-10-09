@@ -2210,6 +2210,35 @@ describe('each remaining contract fails when the property it holds is taken away
   })
 })
 
+/* SC-011: every framed image fills its frame, and the header logo's contract tells a frame's image
+   from the logo's by its parent. */
+describe('every framed image fills its frame', () => {
+  itEach([
+    ['sections.css', 'the band media loses its cover', replacing('  block-size: 100%;\n  object-fit: cover;\n}', '  block-size: 100%;\n}'), '`.salt-section__media` in sections.css declares no `object-fit`'],
+    ['blocks.css', 'a logo covers its frame', replacing('  block-size: 100%;\n  object-fit: contain;\n}', '  block-size: 100%;\n  object-fit: cover;\n}'), 'sets `object-fit: cover`; the fill is `object-fit: contain`'],
+    ['blocks.css', 'the card photograph is no longer absolutely positioned', replacing('.salt-showcase__media > img {\n  position: absolute;', '.salt-showcase__media > img {\n  position: static;'), '`.salt-showcase__media > img` in blocks.css sets `position: static`'],
+    ['primitives.css', 'the case study gallery loses its fill rule', replacing('.salt-case-study-view__media > img,\n.salt-case-study-view__frame > img {', '.salt-case-study-view__media > img {'), 'no unconditional `.salt-case-study-view__frame > img` rule in primitives.css fills its frame'],
+    ['views.css', 'the post media frame is no longer an anchor', replacing('  margin-block: 2rem;\n  position: relative;', '  margin-block: 2rem;'), '`.salt-post__media` in views.css is not `position: relative`'],
+    ['views.css', 'the fill moves inside a query', (css) => css.replace('.salt-post__media > img,\n', '').concat('\n@media (min-width: 40rem) {\n  .salt-post__media > img {\n    position: absolute;\n    inset: 0;\n    inline-size: 100%;\n    block-size: 100%;\n    object-fit: cover;\n  }\n}\n'), 'no unconditional `.salt-post__media > img` rule in views.css fills its frame'],
+  ])('%s: fails when %s', (file, _case, mutate, message) => {
+    const { code, output } = gate(file, mutate)
+    expect(output).toContain('✗ sections.css: every framed image fills its frame\n')
+    expect(output).toContain(message)
+    expect(code).toBe(1)
+  })
+
+  itEach([
+    ['an image rule keyed on the logo link', '.salt-logo > img {\n  object-fit: cover;\n}'],
+    ['a frame image reached by a descendant combinator', '.salt-showcase__media img {\n  object-fit: cover;\n}'],
+    ['a frame image under an opaque parent', ':is(.salt-showcase__media) > img {\n  object-fit: cover;\n}'],
+  ])('the header logo contract still refuses %s', (_case, addition) => {
+    const { code, output } = gate('blocks.css', appending(addition))
+    expect(output).toContain('the logo is the item that gives way when the header row runs out of room')
+    expect(output).toContain('nothing proves it misses `img.salt-logo__image')
+    expect(code).toBe(1)
+  })
+})
+
 /*
  * ── The checks this gate adds ───────────────────────────────────────────────────────────────
  *

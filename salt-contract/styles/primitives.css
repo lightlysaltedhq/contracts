@@ -1878,6 +1878,16 @@ textarea.salt-contact__input {
   aspect-ratio: 4 / 3;
 }
 
+/* Each photograph fills its frame (SC-011). */
+.salt-case-study-view__media > img,
+.salt-case-study-view__frame > img {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}
+
 /*
  * The featured image in an aside (BD-206), as Floorworkz's setting-out mockup frames its plan
  * drawing: from 64rem (`--breakpoint-lg`, which a media query cannot read) the article is a grid,

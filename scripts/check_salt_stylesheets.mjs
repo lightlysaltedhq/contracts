@@ -18,7 +18,9 @@
 //    width against its theme's breakpoint values (design-foundations names breakpoints, never their
 //    values). A contract that read theme.css only to see that a token exists reads
 //    contract/token-layer.json instead, and the focus ring's geometry is ranked for any values a
-//    runtime gives the two ring tokens.
+//    runtime gives the two ring tokens. The header logo's contract also accepts a classless `img`
+//    reached by `>` from a parent provably not the logo link, which SC-011's fill rules need. One
+//    contract is the contract's own: every framed image fills its frame (SC-011).
 // 3. THE TOKEN LAYER. Every var() the stylesheets read and do not define is named in
 //    contract/token-layer.json, everything named there is read, no name is listed twice, and a name
 //    is `optional` exactly when every read of it carries a fallback.
@@ -4394,8 +4396,10 @@ const CONTRACTS = [
            salt-logo__dark`. Modelled as `img.salt-logo__image` alone, `.salt-logo__dark {
            max-inline-size: none }` was "proved" disjoint and the dark-mode mark drew 240px
            over the toggle. The union is not one real element; for a contention test, which
-           asks whether a rule could share ANY class with it, it is the right question. */
-        { element: 'img.salt-logo__image.salt-logo__light.salt-logo__dark', rule: '.salt-logo__image', canonical: { 'max-inline-size': '100%', 'object-fit': 'contain' } },
+           asks whether a rule could share ANY class with it, it is the right question.
+           Its parent is the logo link (contract/markup/site-logo.json), which is the one other
+           thing a classless `img` rule can be proved disjoint by: see `missesByParent` below. */
+        { element: 'img.salt-logo__image.salt-logo__light.salt-logo__dark', parent: 'a.salt-logo', rule: '.salt-logo__image', canonical: { 'max-inline-size': '100%', 'object-fit': 'contain' } },
         { element: 'span.salt-logo__wordmark', rule: '.salt-logo__wordmark', canonical: { 'overflow-wrap': 'anywhere' } },
         /* The row's own width cap is the one governed property it legitimately declares, and
            it is canonical here rather than exempted, so it is held like the rest. */
@@ -4481,8 +4485,17 @@ const CONTRACTS = [
                required them, so `:not(.salt-nav)` would prove itself disjoint from everything
                that is not the nav — which is the opposite of what it matches. */
             const opaque = /:(?:is|where|has|not)\(/i.test(key)
+            /* A framed image carries no class of its own, so `.salt-showcase__media > img` can only
+               be proved to miss the logo's image by its parent (SC-011's fill rules): a CHILD
+               combinator from a compound that is not in contention with the logo link. A
+               descendant, a sibling or an opaque parent proves nothing. */
+            const chain = chainOf(selector)
+            const parent = chain.combinators.at(-1) === '>' ? chain.compounds.at(-2) : undefined
+            const missesByParent = (part) =>
+              part.parent !== undefined && parent !== undefined && !/:(?:is|where|has|not)\(/i.test(parent) &&
+              !inContention(parent, part.parent)
             for (const part of PARTS) {
-              if (opaque || inContention(key, part.element)) {
+              if (opaque || (inContention(key, part.element) && !missesByParent(part))) {
                 return `\`${selector}\` in ${file} declares \`${declared.join('`, `')}\` and nothing proves it misses \`${part.element}\` — governed properties live only in the element's own rule: ${spell(part.rule, part.canonical)}`
               }
             }
@@ -5600,6 +5613,44 @@ const CONTRACTS = [
       return null
     },
   },
+  {
+    file: 'sections.css',
+    what: 'every framed image fills its frame',
+    why:
+      'SC-011: a frame whose image fills it relied on Salt for Next.js’s image component writing ' +
+      'the fill as inline style, which a plain `img` on Salt for WordPress does not carry. Without the ' +
+      'rule the image draws at its intrinsic size, overflowing or under-filling a frame whose ' +
+      'proportion was fixed so nothing shifts as it loads. Each image is held to one unconditional ' +
+      'rule of its own, and its frame to `position: relative`, the anchor the fill is measured from.',
+    check: (_rules, all) => {
+      /* Every frame whose image fills it, and the fit it fills with. A new one joins this list. */
+      const FRAMES = [
+        { file: 'sections.css', image: '.salt-section__media', frame: '.salt-section', fit: 'cover' },
+        { file: 'blocks.css', image: '.salt-logos__image', frame: '.salt-logos__frame', fit: 'contain' },
+        { file: 'blocks.css', image: '.salt-showcase__media > img', frame: '.salt-showcase__media', fit: 'cover' },
+        { file: 'primitives.css', image: '.salt-case-study-view__media > img', frame: '.salt-case-study-view__media', fit: 'cover' },
+        { file: 'primitives.css', image: '.salt-case-study-view__frame > img', frame: '.salt-case-study-view__frame', fit: 'cover' },
+        { file: 'views.css', image: '.salt-post__media > img', frame: '.salt-post__media', fit: 'cover' },
+        { file: 'views.css', image: '.salt-archive__portrait > img', frame: '.salt-archive__portrait', fit: 'cover' },
+        { file: 'views.css', image: '.salt-author-box__media > img', frame: '.salt-author-box__media', fit: 'cover' },
+      ]
+      const owning = (file, selector) =>
+        (all.get(file) ?? []).filter((rule) => conditional(rule.at).length === 0 && rule.selectors.includes(normalise(selector)))
+      for (const { file, image, frame, fit } of FRAMES) {
+        const FILL = { position: 'absolute', inset: '0', 'inline-size': '100%', 'block-size': '100%', 'object-fit': fit }
+        const rules = owning(file, image)
+        if (rules.length === 0) return `no unconditional \`${image}\` rule in ${file} fills its frame`
+        for (const [property, expected] of Object.entries(FILL)) {
+          const written = rules.map((rule) => rule.declarations[property]).filter((value) => value !== undefined).at(-1)
+          if (written === undefined) return `\`${image}\` in ${file} declares no \`${property}\`; the fill is \`${property}: ${expected}\``
+          if (written.trim().toLowerCase() !== expected) return `\`${image}\` in ${file} sets \`${property}: ${written.trim()}\`; the fill is \`${property}: ${expected}\``
+        }
+        const anchored = owning(file, frame).some((rule) => (rule.declarations['position'] ?? '').trim().toLowerCase() === 'relative')
+        if (!anchored) return `\`${frame}\` in ${file} is not \`position: relative\`, so its image fills the nearest positioned ancestor instead`
+      }
+      return null
+    },
+  },
 ]
 
 // ── 1. The parse is whole ───────────────────────────────────────────────────────────────────
@@ -5792,13 +5843,13 @@ else {
 // them on an element: a root, an element and its children, and a variant's tree. Not a rule's or a
 // note's mention, a platform's former name, a hook (kept with no rule) or an omitted class.
 const UNMARKED = [
-  /* PENDING the view-body classes SC-007 gives the archive, post and service views, which a parallel
-     branch adds to contract/markup/{archive,post,search,service}.json. views.css styles them now.
-     Remove this block once both have merged: the gate fails on an entry the markup already carries. */
+  /* PENDING the view-body classes SC-007 gives the archive, post and service views (less the post's
+     author block, which SC-008 makes the shared author-box), which a parallel branch adds to
+     contract/markup/{archive,post,search,service}.json. views.css styles them now. Remove this block
+     once both have merged: the gate fails on an entry the markup already carries. */
   ...['salt-archive__portrait', 'salt-archive__profile', 'salt-archive__strapline', 'salt-post__adjacent',
-    'salt-post__adjacent-label', 'salt-post__author-name', 'salt-post__author-role', 'salt-post__breadcrumb',
-    'salt-post__byline', 'salt-post__category', 'salt-post__footer', 'salt-post__media', 'salt-post__meta',
-    'salt-post__portrait', 'salt-post__tags', 'salt-service__intro', 'salt-service__price-label',
+    'salt-post__adjacent-label', 'salt-post__breadcrumb', 'salt-post__byline', 'salt-post__category',
+    'salt-post__footer', 'salt-post__media', 'salt-post__meta', 'salt-post__tags', 'salt-service__intro', 'salt-service__price-label',
     'salt-service__summary'].map((name) => ({ class: name, pending: true, reason: 'SC-007 view body, pending its markup' })),
 ]
 const SKIP = new Set(['platforms', 'rules', 'notes', 'hooks', 'omitted'])
