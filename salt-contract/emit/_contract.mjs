@@ -163,7 +163,7 @@ export const sourceValues = (select) => (select?.options ?? []).map((o) => o.val
  */
 export function offeredSources(select, installed) {
   const options = (select?.options ?? []).filter((o) => !SOURCES.includes(o.value) || installed.has(o.value))
-  return { options, sources: sourceValues({ options }) }
+  return { options, sources: sourceValues(select).filter((v) => installed.has(v)) }
 }
 
 /** The names of the selects that a sibling collection-query reads its source from. */
@@ -196,8 +196,7 @@ export function withinSources(fields, installed) {
     if (!isClause(c) || !selects.has(c.field) || 'filled' in c) return true
     return ('equals' in c ? [c.equals] : c.in).some((v) => valuesOf(c.field).includes(v))
   })
-  const queriesNothing = (f) => f.type === 'collection-query' && f.sourceField && selects.has(f.sourceField) &&
-    sourceValues(narrowed.find((s) => s.name === f.sourceField)).length === 0
+  const queriesNothing = (f) => f.sourceField && sourceValues(narrowed.find((s) => s.name === f.sourceField)).length === 0
   // A field conditioned on one left out goes too, and so on down the chain, when that clause cannot
   // hold with the field absent; one that can (filled: false) still shows, reading no value there.
   const gone = new Set(narrowed.filter((f) => queriesNothing(f) || !reachable(f)).map((f) => f.name))
