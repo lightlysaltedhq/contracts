@@ -11,7 +11,7 @@ import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { promisify } from 'node:util'
 import { fileURLToPath } from 'node:url'
-import { firstDifference, parseConformanceArguments } from '../salt-contract/conformance.mjs'
+import { firstDifference, parseConformanceArguments, renderMarkdown } from '../salt-contract/conformance.mjs'
 import { payloadSnapshot } from '../salt-contract/emit/payload.mjs'
 import { acfSnapshot } from '../salt-contract/emit/acf.mjs'
 
@@ -454,4 +454,47 @@ test('firstDifference reads a class change on the first of several like siblings
   // A sibling really removed is still read as missing, when the next one matches exactly.
   const removed = firstDifference('<ul><li class="a">1</li><li class="a">2</li></ul>', '<ul><li class="a">2</li></ul>')
   assert.deepEqual(removed, { path: 'ul > li.a:nth-of-type(1)', kind: 'missing', expected: '<li class="a">', found: null })
+})
+
+// ── Review P2: children are aligned, not compared index by index ─────────────────────────────
+
+test('firstDifference aligns children: a dropped tab panel whose successors renumber is that panel missing (review P2)', () => {
+  const expected = readFileSync(path.join(pkg, 'fixtures', 'tabs', 'many-tabbed.html'), 'utf8')
+  const at = expected.indexOf('<div class="salt-tabs__panels">')
+  const panels = expected.slice(at)
+  const first = panels.indexOf('<div class="salt-tabs__panel" id="tabs-many__panel-1"')
+  const second = panels.indexOf('<div class="salt-tabs__panel" id="tabs-many__panel-2"')
+  const renumbered = (panels.slice(0, first) + panels.slice(second))
+    .replace('__panel-2"', '__panel-1"').replace('__label-2"', '__label-1"')
+    .replace('__panel-3"', '__panel-2"').replace('__label-3"', '__label-2"')
+  const d = firstDifference(expected, expected.slice(0, at) + renumbered)
+  assert.equal(d.kind, 'missing', JSON.stringify(d))
+  assert.match(d.path, / > div\.salt-tabs__panels:nth-of-type\(2\) > div\.salt-tabs__panel:nth-of-type\(1\)$/)
+  assert.match(d.expected, /id="tabs-many__panel-1"/)
+  assert.equal(d.found, null)
+})
+
+test('firstDifference reports two siblings swapped as order, with both positions (review P2)', () => {
+  const expected = readFileSync(path.join(pkg, 'fixtures', 'faq', 'many.html'), 'utf8')
+  const eyebrow = expected.match(/<p class="salt-eyebrow">[^<]*<\/p>/)[0]
+  const heading = expected.match(/<h2 [^>]*>[^<]*<\/h2>/)[0]
+  const swapped = expected.replace(eyebrow, '\u0000').replace(heading, eyebrow).replace('\u0000', heading)
+  const d = firstDifference(expected, swapped)
+  assert.equal(d.kind, 'order', JSON.stringify(d))
+  assert.match(d.path, / > div\.salt-block > p\.salt-eyebrow:nth-of-type\(1\)$/)
+  assert.deepEqual([d.expectedAt, d.foundAt], [1, 2])
+  assert.equal(d.expected, '<p class="salt-eyebrow">')
+  assert.equal(d.found, '<p class="salt-eyebrow">')
+  const failures = [{ case: 'many', kind: 'mismatch', difference: d.kind, ...d, kind: 'mismatch' }]
+  const markdown = renderMarkdown({ platform: 'x', implementation: { version: null }, contract: { package: 'p', version: '0' }, ok: false, partial: false,
+    summary: { pass: 0, fail: 1, incomplete: 0, notShipped: 0 }, adapter: { kind: 'command', target: 'a' }, problems: [], fields: null, stylesheets: null,
+    sections: [{ id: 'faq', status: 'fail', fixtures: { total: 1, passed: 0, failed: 1, failures }, fields: { status: 'not run', problems: [] }, classes: { status: 'pass', unknown: [] }, stylesheets: { status: 'not run' } }] })
+  assert.match(markdown, /- `faq\/many`: order at `[^`]+p\.salt-eyebrow:nth-of-type\(1\)`: `<p class="salt-eyebrow">` expected at position 1, found at 2/)
+})
+
+test('firstDifference descends into an aligned pair for an attribute or text change, past a missing sibling (review P2)', () => {
+  assert.deepEqual(firstDifference('<ul><li>a</li><li>b</li><li>c</li></ul>', '<ul><li>a</li><li>c</li></ul>'),
+    { path: 'ul > li:nth-of-type(2)', kind: 'missing', expected: '<li>', found: null })
+  assert.deepEqual(firstDifference('<ul><li>a</li><li>b</li></ul>', '<ul><li>a</li><li>B</li></ul>'),
+    { path: 'ul > li:nth-of-type(2) > #text', kind: 'text', expected: 'b', found: 'B' })
 })

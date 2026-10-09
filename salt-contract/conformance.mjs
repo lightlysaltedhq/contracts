@@ -152,6 +152,53 @@ const whole = (node) => {
 }
 const same = (x, y) => x !== undefined && y !== undefined && whole(x) === whole(y)
 
+const texts = new WeakMap()
+const textOf = (node) => {
+  if (node.type === 'text') return node.value
+  if (!texts.has(node)) texts.set(node, node.children.map(textOf).join(''))
+  return texts.get(node)
+}
+const shapeOf = (node) => (node.type === 'element' ? `${node.name}.${classesOf(node).join('.')}` : '#text')
+const kindOf = (node) => (node.type === 'element' ? node.name : '#text')
+
+// How alike two nodes of one kind are, to choose among alignments pairing as many: the same
+// classes, then the same text, then the same node whole.
+const likeness = (x, y) => (shapeOf(x) === shapeOf(y) ? 4 : 0) + (textOf(x) === textOf(y) ? 2 : 0) + (same(x, y) ? 1 : 0)
+
+/**
+ * Two lists of siblings aligned: the most pairs of one kind (tag, or text), in order, and among
+ * alignments with as many, the most alike. Returns the steps in document order: ['match', i, j],
+ * ['missing', i] (expected only) and ['unexpected', j] (found only).
+ */
+function align(xs, ys) {
+  const n = xs.length
+  const m = ys.length
+  // best[i][j]: [pairs, likeness] for xs from i against ys from j.
+  const best = Array.from({ length: n + 1 }, () => new Array(m + 1).fill([0, 0]))
+  const better = (p, q) => (p[0] !== q[0] ? p[0] > q[0] : p[1] > q[1])
+  const paired = (i, j) => (kindOf(xs[i]) === kindOf(ys[j]) ? [best[i + 1][j + 1][0] + 1, best[i + 1][j + 1][1] + likeness(xs[i], ys[j])] : null)
+  for (let i = n - 1; i >= 0; i--) {
+    for (let j = m - 1; j >= 0; j--) {
+      let b = best[i + 1][j]
+      if (better(best[i][j + 1], b)) b = best[i][j + 1]
+      const p = paired(i, j)
+      if (p && !better(b, p)) b = p
+      best[i][j] = b
+    }
+  }
+  const steps = []
+  const equal = (p, q) => p[0] === q[0] && p[1] === q[1]
+  let i = 0
+  let j = 0
+  while (i < n || j < m) {
+    const p = i < n && j < m ? paired(i, j) : null
+    if (p && equal(p, best[i][j])) { steps.push(['match', i++, j++]); continue }
+    if (i < n && (j === m || equal(best[i + 1][j], best[i][j]))) { steps.push(['missing', i++]); continue }
+    steps.push(['unexpected', j++])
+  }
+  return steps
+}
+
 /** A step of a path: tag and classes, with :nth-of-type(n) when the parent has more than one of the tag. */
 function step(parent, el) {
   const same = elementsOf(parent).filter((c) => c.name === el.name)
@@ -168,16 +215,19 @@ const show = (node) => (node === undefined ? null : node.type === 'text' ? `text
 
 /**
  * The first node at which two fragments differ once both are normalised, in document order, or
- * null when they are equivalent. `path` is a CSS-like path to it from the fragment's top
+ * null when they are equivalent. Each element's children are aligned (align above) before they are
+ * compared, so a dropped or added sibling is reported as itself, not as every later one changed.
+ * `path` is a CSS-like path to the node from the fragment's top
  * (`section.salt-section > … > a.salt-button:nth-of-type(2)`), and `kind` says what differs:
- * `element` (another element or text in its place), `missing` (expected, absent), `unexpected`
- * (present, not expected), `attribute` (with `name`; null for an absent side) or `text`.
+ * `missing` (expected, absent), `unexpected` (present, not expected), `order` (present elsewhere
+ * among its siblings, with `expectedAt` and `foundAt`, counted from 1), `element` (another element
+ * or text in its place), `attribute` (with `name`; null for an absent side) or `text`.
  */
 export function firstDifference(expectedHtml, actualHtml) {
   const { equal, expected, actual } = compare(expectedHtml, actualHtml)
   if (equal) return null
+  const join = (p, s) => (p ? `${p} > ${s}` : s)
   const walk = (a, b, at) => {
-    const join = (p, s) => (p ? `${p} > ${s}` : s)
     if (a.name !== '#root') {
       const names = [...new Set([...a.attrs, ...b.attrs].map(([n]) => n))].sort()
       for (const name of names) {
@@ -186,27 +236,42 @@ export function firstDifference(expectedHtml, actualHtml) {
         if (x !== y) return { path: at, kind: 'attribute', name, expected: x, found: y }
       }
     }
-    const n = Math.max(a.children.length, b.children.length)
-    for (let i = 0; i < n; i++) {
-      const x = a.children[i]
-      const y = b.children[i]
-      const here = (node, parent) => (node?.type === 'element' ? join(at, step(parent, node)) : join(at, '#text'))
-      if (!y) return { path: here(x, a), kind: 'missing', expected: show(x), found: null }
-      if (!x) return { path: here(y, b), kind: 'unexpected', expected: null, found: show(y) }
-      if (x.type === 'text' && y.type === 'text') {
-        if (x.value !== y.value) return { path: here(x, a), kind: 'text', expected: x.value, found: y.value }
-        continue
+    const xs = a.children
+    const ys = b.children
+    const here = (node, parent) => (node.type === 'element' ? join(at, step(parent, node)) : join(at, '#text'))
+    const steps = align(xs, ys)
+    // A node left out on one side and found unmatched on the other has moved: the same node whole
+    // first, then one of the same tag and classes.
+    const movedTo = new Map()
+    const movedFrom = new Map()
+    const lost = steps.filter(([k]) => k === 'missing').map(([, i]) => i)
+    const extra = steps.filter(([k]) => k === 'unexpected').map(([, j]) => j)
+    for (const alike of [same, (x, y) => shapeOf(x) === shapeOf(y)]) {
+      for (const i of lost) {
+        if (movedTo.has(i)) continue
+        const j = extra.find((k) => !movedFrom.has(k) && alike(xs[i], ys[k]))
+        if (j !== undefined) { movedTo.set(i, j); movedFrom.set(j, i) }
       }
-      if (same(x, y)) continue
-      // One node short or one too many, rather than every later sibling shifted: only when the
-      // next sibling is the node itself, whole, so a change to the first of several like siblings
-      // reads as that change.
-      if (same(y, a.children[i + 1])) return { path: here(x, a), kind: 'missing', expected: show(x), found: null }
-      if (same(x, b.children[i + 1])) return { path: here(y, b), kind: 'unexpected', expected: null, found: show(y) }
-      // The same element with other classes reads as its class attribute differing.
-      if (x.type !== 'element' || y.type !== 'element' || x.name !== y.name) return { path: here(x, a), kind: 'element', expected: show(x), found: show(y) }
-      const found = walk(x, y, here(x, a))
-      if (found) return found
+    }
+    const moved = (i, j) => ({ path: here(xs[i], a), kind: 'order', expected: show(xs[i]), found: show(ys[j]), expectedAt: i + 1, foundAt: j + 1 })
+    for (const [s, [kind, p, q]] of steps.entries()) {
+      const next = steps[s + 1]
+      if (kind === 'match') {
+        const x = xs[p]
+        const y = ys[q]
+        if (same(x, y)) continue
+        if (x.type === 'text') return { path: here(x, a), kind: 'text', expected: x.value, found: y.value }
+        return walk(x, y, here(x, a))
+      }
+      if (kind === 'missing') {
+        if (movedTo.has(p)) return moved(p, movedTo.get(p))
+        // Left out and something else in its place: replaced.
+        if (next?.[0] === 'unexpected' && !movedFrom.has(next[1])) return { path: here(xs[p], a), kind: 'element', expected: show(xs[p]), found: show(ys[next[1]]) }
+        return { path: here(xs[p], a), kind: 'missing', expected: show(xs[p]), found: null }
+      }
+      if (movedFrom.has(p)) return moved(movedFrom.get(p), p)
+      if (next?.[0] === 'missing' && !movedTo.has(next[1])) return { path: here(xs[next[1]], a), kind: 'element', expected: show(xs[next[1]]), found: show(ys[p]) }
+      return { path: here(ys[p], b), kind: 'unexpected', expected: null, found: show(ys[p]) }
     }
     return null
   }
@@ -469,6 +534,7 @@ function describeFailure(f) {
     case 'text': return `text ${where}: expected ${code(f.expected)}, found ${code(f.found)}`
     case 'missing': return `missing ${where}: expected ${code(f.expected)}, found nothing`
     case 'unexpected': return `unexpected ${where}: expected nothing, found ${code(f.found)}${note}`
+    case 'order': return `order ${where}: ${code(f.expected)} expected at position ${f.expectedAt}, found at ${f.foundAt}`
     default: return `element ${where}: expected ${code(f.expected)}, found ${code(f.found)}`
   }
 }
