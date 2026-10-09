@@ -476,7 +476,7 @@
           "$ref": "#/$defs/count"
         },
         "format": {
-          "description": "url: an absolute address (http, https, mailto or tel), ACF url on WordPress. anchor: slugified on save to lower-case letters, digits and single hyphens (any other run of characters, underscores included, becomes one hyphen), so it never contains __; only the slug is stored. At render every anchor that is no landmark id and no repeat keeps its id; then a landmark clash becomes <anchor>-section and a repeat takes -2, -3, each skipping any id an editor set anywhere on the page; ids the system draws are <owner>__<part> and never meet one (markup/section#anchors, SC-012).",
+          "description": "url: an absolute address (http, https, mailto or tel), ACF url on WordPress. anchor: slugified on save to lower-case letters, digits and single hyphens (Latin diacritics folded by NFKD; any other run of characters, underscores and other scripts included, becomes one hyphen), so it never contains __, and an empty slug is no anchor; only the slug is stored. At render every anchor that is no landmark id and no repeat keeps its id; then a landmark clash becomes <anchor>-section and a repeat takes -2, -3, each skipping any id an editor set anywhere on the page; ids the system draws are <owner>__<part> and never meet one (markup/section#anchors, SC-012).",
           "enum": [
             "url",
             "anchor"
