@@ -290,6 +290,11 @@ function unmetSources(fields, sources, at) {
     const where = `${at}.${f.name}`
     const need = f.type === 'collection-query' ? f.source : f.type === 'relationship' ? f.to : undefined
     const own = need && !(need in sources) ? [`the source ${need} (${where})`] : []
+    if (f.type === 'collection-query' && f.sourceField) {
+      // A source select with none of its sources installed has nothing to offer or query.
+      const offered = (fields.find((s) => s.name === f.sourceField)?.options ?? []).map((o) => o.value).filter((v) => SOURCES.includes(v))
+      if (!offered.some((v) => v in sources)) own.push(`one of the sources ${offered.join(', ')} (${where})`)
+    }
     return [...own, ...(f.fields ? unmetSources(f.fields, sources, where) : [])]
   })
 }

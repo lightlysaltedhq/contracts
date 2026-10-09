@@ -356,3 +356,11 @@ test('R2: a section whose fixed source the site lacks is left out, or refused wh
   assert.throws(() => toPayloadBlocks({ contract: probe(fields), sources: { posts: {} }, sections: ['probe'] }),
     /section probe needs the source team \(probe\.people\)/)
 })
+
+test('R3: a section reading its source from a select is left out when the site has none of them', () => {
+  const slugs = blocks({ sources: {} }).map((b) => b.slug)
+  assert.ok(!slugs.includes('collection-showcase') && !slugs.includes('carousel'), slugs.join(', '))
+  assert.throws(() => blocks({ sources: {}, sections: ['collection-showcase'] }),
+    /section collection-showcase needs one of the sources services, case-studies, testimonials, posts, team \(collection-showcase\.query\)/)
+  assert.ok(blocks({ sources: { team: {} } }).some((b) => b.slug === 'collection-showcase'))
+})
