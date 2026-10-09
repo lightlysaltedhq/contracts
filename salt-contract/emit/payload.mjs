@@ -202,7 +202,7 @@ function convertField(f, ctx) {
       out.label = f.label
       // A link's document and a collection-query's parts have no `to`; their callers set it.
       if (f.to) {
-        out.relationTo = (ctx.sources[f.to] ?? SOURCE_DEFAULTS[f.to]).collection
+        out.relationTo = ctx.sources[f.to].collection
         salt.to = f.to
       } else if (ctx.link) {
         out.relationTo = [...(options.linkTo ?? ['pages'])]
@@ -252,7 +252,7 @@ function collectionQuery(f, out, ctx) {
     offered = (select?.options ?? []).map((o) => o.value).filter((v) => SOURCES.includes(v) && v in ctx.sources)
     salt.sourceField = f.sourceField
   }
-  const slugs = offered.map((s) => ctx.sources[s] ?? SOURCE_DEFAULTS[s])
+  const slugs = offered.map((s) => ctx.sources[s])
   const taxonomies = slugs.map((s) => s.taxonomy).filter(Boolean)
   const collections = slugs.map((s) => s.collection)
   if (f.modes) salt.modes = f.modes
@@ -283,10 +283,27 @@ function collectionQuery(f, out, ctx) {
 
 // ── Blocks ─────────────────────────────────────────────────────────────────────────────────────
 
+// What a section needs from the site's sources and the site lacks, one line each. Payload refuses
+// to start with a relationship to a collection it does not have.
+function unmetSources(fields, sources, at) {
+  return fields.flatMap((f) => {
+    const where = `${at}.${f.name}`
+    const need = f.type === 'collection-query' ? f.source : f.type === 'relationship' ? f.to : undefined
+    const own = need && !(need in sources) ? [`the source ${need} (${where})`] : []
+    return [...own, ...(f.fields ? unmetSources(f.fields, sources, where) : [])]
+  })
+}
+
 function build(options, snapshot) {
   const contract = options.contract ?? loadContract()
-  const ids = options.sections ?? contract.sections.map((s) => s.id)
   const sources = sourcesFrom(options)
+  // Asked for by name, a section the site cannot carry is an error; by default it is left out.
+  const named = options.sections !== undefined
+  const ids = (options.sections ?? contract.sections.map((s) => s.id)).filter((id) => {
+    const unmet = unmetSources(resolveSection(contract, id).fields, sources, id)
+    if (unmet.length && named) throw new Error(`section ${id} needs ${unmet.join(', ')}, which options.sources does not install`)
+    return unmet.length === 0
+  })
   return ids.map((id) => {
     const { section, fields, settings } = resolveSection(contract, id)
     const sourceSelects = new Set(fields.filter((f) => f.type === 'collection-query' && f.sourceField).map((f) => f.sourceField))
@@ -321,7 +338,8 @@ function build(options, snapshot) {
  *   sources         { [source id]: { collection?, taxonomy? } } for the sources the site has;
  *                   all of them, with SOURCE_DEFAULTS' slugs, when left out
  *   richTextEditor  (allowed) => the Payload editor for that allowed list; required for rich text
- *   sections        the section ids to emit, in this order (every section in sections.json)
+ *   sections        the section ids to emit, in this order; one the site's sources cannot carry
+ *                   throws. Left out: every section in sections.json the sources can carry
  *   contract        a loaded contract (loadContract()), for tests
  */
 export function toPayloadBlocks(options = {}) {

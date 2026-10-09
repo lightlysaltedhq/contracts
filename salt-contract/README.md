@@ -55,7 +55,7 @@ const blocks = toPayloadBlocks({
   icons: iconOptions(icons.content),  // [{ value, label }]; required by features, stats and process
   sources: { services: {}, posts: {} }, // the sources the site has, with any renamed slugs
   richTextEditor: (allowed) => lexicalEditor({ features: featuresFor(allowed) }),
-  sections: ['hero', 'rich-text'],    // which sections, in order (every section in sections.json)
+  sections: ['hero', 'rich-text'],    // which sections, in order (every one the sources can carry)
 })
 ```
 
@@ -76,5 +76,6 @@ difference by path. So a contract release that renames, retypes or re-limits a f
 consumer's check before anything type-checks, and the fix is to regenerate the snapshot, read its
 diff and migrate. Options that JSON can carry also work from the command line:
 `node emit/payload.mjs --check <snapshot> [--options <options.json>]` exits 1 on drift, and
-`--write <snapshot>` regenerates it. `reports/round-trip-payload.md`, which is not shipped,
+`--write <snapshot>` regenerates it. A section needing a source the site does not install is left
+out, or refused when `sections` names it. `reports/round-trip-payload.md`, which is not shipped,
 compares the output with the blocks salt-nextjs ships today.

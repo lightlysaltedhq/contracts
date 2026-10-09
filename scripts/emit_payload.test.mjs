@@ -344,3 +344,15 @@ test('R6: the query pickers keep their conditions in the snapshot, so a change t
   assert.deepEqual(field(query.fields, 'categories').custom.salt.condition, [{ field: 'mode', equals: 'by-category' }])
   assert.deepEqual(field(query.fields, 'items').custom.salt.condition, [{ field: 'mode', equals: 'manual' }])
 })
+
+test('R2: a section whose fixed source the site lacks is left out, or refused when asked for', () => {
+  const slugs = blocks({ sources: { posts: {} } }).map((b) => b.slug)
+  assert.ok(!slugs.includes('faq') && !slugs.includes('locations'), slugs.join(', '))
+  assert.ok(slugs.includes('hero'))
+  assert.throws(() => blocks({ sources: { posts: {} }, sections: ['faq'] }),
+    /section faq needs the source faqs \(faq\.query\), which options\.sources does not install/)
+  const fields = [{ name: 'people', type: 'relationship', label: 'People', to: 'team' }]
+  assert.deepEqual(toPayloadBlocks({ contract: probe(fields), sources: { posts: {} } }), [])
+  assert.throws(() => toPayloadBlocks({ contract: probe(fields), sources: { posts: {} }, sections: ['probe'] }),
+    /section probe needs the source team \(probe\.people\)/)
+})
