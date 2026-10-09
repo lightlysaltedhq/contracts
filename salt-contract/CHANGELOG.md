@@ -62,22 +62,25 @@ Salted's decision log for Product Salt.
   and framed images fill their frames from CSS alone (SC-011: section media, showcase cards and
   avatars, logos contained, case-study frames). `base.css` sets design-foundations' element
   convention in `@layer base` (headings in their text roles inside the page's landmarks, running
-  text on `body`), so it yields to every utility and host rule. It is supported with Tailwind v4
-  when imported after `tailwindcss`, with Tailwind v3 when imported into the stylesheet v3
-  processes, and with no Tailwind; not imported before `tailwindcss` in v4, nor served as its own
-  file beside v3's output (see the README). `views.css` styles the post, archive and service view
-  bodies in the classes SC-007 adopts (the search view's body is its form and a listing, styled
-  elsewhere), the service's related list, and the shared `author-box` (SC-008). Load order: base,
-  sections, primitives, blocks, chrome, views.
+  text on `body`). With Tailwind v4 (imported after `tailwindcss`) and with no Tailwind it yields to
+  every unlayered rule; with Tailwind v3 (imported into the stylesheet v3 processes) v3 emits it
+  unlayered after preflight, where its (0,0,1) rules beat preflight on source order and lose to
+  every class-keyed rule. Importing it before `tailwindcss` in v4, or serving it beside v3's output,
+  is not supported (see the README). `views.css` styles the post, archive and service view bodies in
+  the classes SC-007 adopts (the search view's body is its form and a listing, styled elsewhere),
+  the service's related list, and the shared `author-box` (SC-008). Load order: base, sections,
+  primitives, blocks, chrome, views.
 - `contract/token-layer.json` (`./token-layer`, schema `./schema/token-layer`): the 126 custom
   properties the stylesheets read, or the markup writes into one they read, and a runtime emits,
   grouped, each with its meaning and source; a property the markup fills from a setting names that
-  setting's values. Names only, never values.
+  setting's values, and a `writes` list gives each property the markup writes with a `<placeholder>`
+  the setting that fills it, by placeholder name. Names only, never values.
 - `npm run salt-stylesheets`: the stylesheets parse whole; 46 decision contracts hold, 45 ported
   from Salt for Next.js (five that read its runtime stay there) and one new (every framed image
-  fills its frame); the token layer names exactly what the stylesheets read and every `var()` the
-  markup's elements write, fallbacks included, through each setting's value map; every token said to
-  come from the markup is written by a markup element; every styled class is on a markup element.
+  fills its frame); the token layer names exactly what the stylesheets read and every `var()` a
+  markup element writes (attribute values, each value of an enum, and a `style` element's CSS),
+  fallbacks included, each placeholder through its named value map; every token said to come from
+  the markup is written by a markup element; every styled class is on a markup element.
 - The package exists, with its gate (`npm run salt-contract` at the repository root) and its
   release workflow on the `salt-contract-v*` tag prefix. It stays `private` until 1.0.0.
 - `RELEASE-POLICY.md`: one version for the package, what is major, minor and patch for every kind
