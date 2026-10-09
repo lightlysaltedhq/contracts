@@ -65,6 +65,10 @@ Salted's decision log for Product Salt.
   Next.js owes a location-area taxonomy with its locations section; its team categories were
   already owed (SC-006). The Payload emitter names team's and locations' taxonomies `departments`
   and `areas` by default; a site names its own through `sources`.
+- The collection-showcase and carousel queries' Salt for WordPress notes owe an
+  `acf/validate_value` check refusing by-category for a source without categories, and an admin
+  check of the categories field's conditional logic (SC-010); the ACF emitter records the rule as
+  `salt.modeRequires`.
 - `emit/acf.mjs` (`./emit/acf`): generates the ACF page-sections field group from
   `contract/fields`, as ACF JSON (what `acf_add_local_field_group()` takes): one Flexible Content
   layout per section, keys following DATA02 from the contract path so reordering never changes
