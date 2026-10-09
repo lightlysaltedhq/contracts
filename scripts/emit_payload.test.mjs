@@ -459,3 +459,10 @@ test('U3: a malformed clause is refused whatever the site installs', () => {
     assert.throws(() => toPayloadBlocks({ contract: probe(sourced([tags])), sources }), /probe\.tags condition: .*a clause is an object/, JSON.stringify(sources))
   }
 })
+
+test('U2: a sourceField naming no sibling select is refused, naming the field', () => {
+  const fields = [{ name: 'query', type: 'collection-query', label: 'Query', sourceField: 'nope' }]
+  assert.throws(() => toPayloadBlocks({ contract: probe(fields) }), /probe\.query: sourceField nope names no sibling select/)
+  const notSelect = [{ name: 'nope', type: 'text', label: 'Nope' }, ...fields]
+  assert.throws(() => toPayloadBlocks({ contract: probe(notSelect) }), /probe\.query: sourceField nope names no sibling select/)
+})

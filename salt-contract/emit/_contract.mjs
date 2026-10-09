@@ -203,13 +203,16 @@ export function unmetSources(fields, installed, at, unfitted = fields) {
   })
 }
 
-// Every condition at every depth, refused by checkedClauses before anything is narrowed, so whether
-// a malformed clause is caught never depends on which sources a site installs.
-function checkConditions(fields, at) {
+// Every condition and every sourceField at every depth, refused before anything is narrowed, so
+// whether a fault is caught never depends on which sources a site installs.
+function checkFields(fields, at) {
   for (const f of fields) {
     const where = `${at}.${f.name}`
     checkedClauses(f.condition, where)
-    if (f.fields) checkConditions(f.fields, where)
+    if (f.sourceField && !fields.some((s) => s.name === f.sourceField && s.type === 'select')) {
+      throw new Error(`${where}: sourceField ${f.sourceField} names no sibling select`)
+    }
+    if (f.fields) checkFields(f.fields, where)
   }
 }
 
@@ -231,8 +234,8 @@ export function planSections(contract, { installed = new Set(SOURCES), sections 
   const leftOut = []
   for (const id of sections ?? contract.sections.map((s) => s.id)) {
     const { section, fields: all, settings } = resolveSection(contract, id)
-    checkConditions(all, id)
-    checkConditions(settings, `${id}.settings`)
+    checkFields(all, id)
+    checkFields(settings, `${id}.settings`)
     const fields = withinSources(all, installed)
     const needs = [
       ...unmetSources(fields, installed, id, all),
