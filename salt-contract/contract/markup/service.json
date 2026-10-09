@@ -16,10 +16,16 @@
     {
       "role": "article",
       "element": "article",
+      "classes": [
+        "salt-service"
+      ],
       "children": [
         {
           "role": "header",
           "element": "header",
+          "classes": [
+            "salt-service__header"
+          ],
           "children": [
             {
               "role": "title",
@@ -29,6 +35,10 @@
             {
               "role": "summary",
               "element": "p",
+              "classes": [
+                "salt-service__summary"
+              ],
+              "text": "from:service.summary",
               "optional": true,
               "when": "summary is set"
             }
@@ -36,13 +46,26 @@
         },
         {
           "role": "intro",
-          "component": "rich-text-body",
+          "element": "div",
+          "classes": [
+            "salt-service__intro"
+          ],
           "optional": true,
-          "when": "intro is set"
+          "when": "the introduction has words",
+          "children": [
+            {
+              "role": "intro-body",
+              "component": "rich-text-body",
+              "note": "Base level 1: an editor's first heading is h2, level with the benefits heading."
+            }
+          ]
         },
         {
           "role": "benefits",
           "element": "section",
+          "classes": [
+            "salt-service__benefits"
+          ],
           "attributes": {
             "aria-labelledby": "from:benefits heading id"
           },
@@ -51,56 +74,117 @@
           "children": [
             {
               "role": "benefits-heading",
-              "element": "h2"
+              "element": "h2",
+              "attributes": {
+                "id": "from:benefits heading id"
+              },
+              "text": "from:labels.benefits"
             },
             {
               "role": "benefits-list",
               "element": "ul",
               "attributes": {
                 "role": "list"
+              },
+              "children": [
+                {
+                  "role": "benefit",
+                  "element": "li",
+                  "repeat": {
+                    "from": "benefits"
+                  },
+                  "text": "from:benefit"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "role": "price",
+          "element": "p",
+          "classes": [
+            "salt-service__price"
+          ],
+          "optional": true,
+          "when": "priceFrom is set",
+          "children": [
+            {
+              "role": "price-label",
+              "element": "span",
+              "classes": [
+                "salt-service__price-label"
+              ],
+              "text": "from:labels.price"
+            }
+          ],
+          "note": "The price follows the label as written, after a space, with no prefix: the field is a display value (£500, from £2,400, POA)."
+        },
+        {
+          "role": "cta",
+          "element": "p",
+          "classes": [
+            "salt-service__cta"
+          ],
+          "optional": true,
+          "when": "a call to action resolves and has a label",
+          "children": [
+            {
+              "role": "cta-button",
+              "component": "button",
+              "attributes": {
+                "data-style": "primary"
               }
             }
           ]
         },
         {
-          "role": "cta",
-          "component": "button",
-          "optional": true,
-          "when": "a call to action resolves"
-        }
-      ]
-    },
-    {
-      "role": "related",
-      "element": "section",
-      "attributes": {
-        "aria-labelledby": "from:related heading id"
-      },
-      "optional": true,
-      "when": "related services exist",
-      "children": [
-        {
-          "role": "related-heading",
-          "element": "h2"
-        },
-        {
-          "role": "related-list",
-          "element": "ul",
+          "role": "related",
+          "element": "section",
           "classes": [
-            "salt-grid",
-            "salt-showcase"
+            "salt-related"
           ],
           "attributes": {
-            "role": "list",
-            "data-layout": "grid"
+            "aria-labelledby": "from:related heading id"
           },
+          "optional": true,
+          "when": "related services exist",
           "children": [
             {
-              "role": "related-card",
-              "component": "card",
-              "repeat": {
-                "from": "related"
-              }
+              "role": "related-heading",
+              "element": "h2",
+              "attributes": {
+                "id": "from:related heading id"
+              },
+              "text": "from:labels.relatedServices"
+            },
+            {
+              "role": "related-list",
+              "element": "ul",
+              "classes": [
+                "salt-grid",
+                "salt-showcase",
+                "salt-related__list"
+              ],
+              "attributes": {
+                "role": "list",
+                "data-layout": "grid"
+              },
+              "children": [
+                {
+                  "role": "related-item",
+                  "element": "li",
+                  "repeat": {
+                    "from": "related"
+                  },
+                  "children": [
+                    {
+                      "role": "related-card",
+                      "component": "card",
+                      "note": "Generic style, title at h3; never the priority image."
+                    }
+                  ]
+                }
+              ]
             }
           ]
         }
@@ -130,8 +214,24 @@
   ],
   "notes": [
     {
-      "topic": "open-question",
-      "text": "Only the landmark structure and the h1 are fixed here. The view body's class vocabulary is work SC-006 leaves open: Next's example app writes salt-post__*, salt-service__* and salt-archive__*, which no shared stylesheet styles."
+      "topic": "ruling",
+      "text": "The view body is the markup Salt for Next.js's example app writes (apps/example/src/site/catalogue-views.tsx, ServiceView), in its order, with its salt-service__* and salt-related classes (SC-007). The related services sit inside the article, as Next draws them. The page draws no icon: the title names the service."
+    },
+    {
+      "topic": "stylesheet-owes",
+      "text": "The view body classes SC-007 adopts; the shared stylesheets style them (today only the example app's site.css does).",
+      "classes": [
+        "salt-service",
+        "salt-service__header",
+        "salt-service__summary",
+        "salt-service__intro",
+        "salt-service__benefits",
+        "salt-service__price",
+        "salt-service__price-label",
+        "salt-service__cta",
+        "salt-related",
+        "salt-related__list"
+      ]
     }
   ],
   "platforms": {
@@ -144,22 +244,30 @@
         }
       ],
       "owes": [
-        "The structure above."
+        "Write the same markup as above, element for element and class for class (SC-007): the article with its header, intro, benefits, price, call to action and related services."
       ]
     },
     "nextjs": {
       "formerly": [
         {
-          "role": "article",
-          "element": "article",
+          "role": "benefits",
+          "element": "section",
           "classes": [
-            "salt-service"
+            "salt-service__benefits"
           ],
-          "note": "apps/example catalogue-views.tsx; its benefits and related sections are unnamed today"
+          "note": "apps/example catalogue-views.tsx; unnamed today"
+        },
+        {
+          "role": "related",
+          "element": "section",
+          "classes": [
+            "salt-related"
+          ],
+          "note": "unnamed today"
         }
       ],
       "owes": [
-        "Name the benefits and related sections (aria-labelledby), or draw them as div (section#labelled-by)."
+        "Name the benefits and related sections: an id on each h2 and aria-labelledby on the section (section#labelled-by)."
       ]
     }
   }
