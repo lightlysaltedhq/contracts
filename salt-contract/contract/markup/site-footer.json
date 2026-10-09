@@ -431,7 +431,8 @@
     "nextjs": {
       "owes": [
         "The copyright line (p.salt-footer__copyright) and the display preferences slot.",
-        "The consent panel's fixed ids (salt-consent-title, salt-consent-<category>, salt-consent-<category>-description) in place of the useId() prefix it builds them from today."
+        "The consent panel's fixed ids (salt-consent-title, salt-consent-<category>, salt-consent-<category>-description) in place of the useId() prefix it builds them from today.",
+        "Drop SiteFooter's overridable idPrefix prop, or fix it to salt-footer: an override moves its ids off the reserved forms (section#anchors)."
       ]
     },
     "wordpress": {

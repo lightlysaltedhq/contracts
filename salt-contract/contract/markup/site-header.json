@@ -447,7 +447,8 @@
     "nextjs": {
       "owes": [
         "The sticky setting, drawn as data-sticky (SC-006).",
-        "The id site-navigation on the main navigation, in place of navigation (SC-006), and site-navigation-drawer on the drawer's copy."
+        "The id site-navigation on the main navigation, in place of navigation (SC-006), and site-navigation-drawer on the drawer's copy.",
+        "Drop SiteHeader's overridable idPrefix prop, or fix it to salt-header-nav: an override moves its ids off the reserved forms (section#anchors)."
       ]
     },
     "wordpress": {
