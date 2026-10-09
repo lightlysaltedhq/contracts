@@ -405,6 +405,19 @@ test('form: a placeholder written for a value the normaliser does not mask fails
 })
 
 // Image sizes (SC-016, item 1).
+test('images: the logo declares its drawn width in px, as Salt for Next.js does', async () => {
+  const { drawnSizes, sourcesOf, slotOf } = await import('./salt_image_slots.mjs')
+  const table = JSON.parse(readFileSync(path.join(pkg, 'contract/image-sizes.json'), 'utf8'))
+  const wordmark = { url: '/u/mark-{width}.png', width: 600, height: 80 }
+  // site-logo.tsx's own example: a 600x80 wordmark at logoHeight 48 draws 360px.
+  assert.equal(drawnSizes(table, 'logo', wordmark, 48), '360px')
+  assert.equal(drawnSizes(table, 'logo', wordmark), '240px')
+  assert.deepEqual(slotOf({ attrs: [['class', 'salt-logo__image salt-logo__light']], children: [] }, [], 'site-header', () => undefined), { slot: 'logo', band: false })
+  const { srcset, src } = sourcesOf(table, wordmark, '240px')
+  assert.equal(src, '/u/mark-600.png')
+  assert.ok(srcset.endsWith('/u/mark-384.png 384w, /u/mark-600.png 600w'), srcset)
+})
+
 test('images: sizes other than the slot\'s default for the band fails', () => {
   expectFail(HERO, (io) => {
     const rel = `fixtures/${SPLIT}.html`
@@ -439,6 +452,16 @@ test('form: a normaliser that masks an empty token fails the mutation proof', ()
     io.write('normalise.mjs', src.replace(" && attrOf(el, 'value') !== ''\n", '\n'))
   }, /emptying value on <input> does not change normalise's output/)
 })
+test('display: a phone written with an extension in brackets draws no link', () => {
+  expectFail(['contact'], (io) => io.html('contact/closed-with-details.html', '<a href="tel:01174960123">0117 496 0123</a>', '<a href="tel:0117496012323">0117 496 0123 (23)</a>'), /section#display-forms gives no link/)
+})
+test('arrows: only a section\'s call to action takes the site\'s arrow', () => {
+  expectFail(['pricing'], (io) => {
+    io.json('pricing/three-plans-featured.json', (d) => { d.site = { ...(d.site ?? {}), arrow: '→' } })
+    io.html('pricing/three-plans-featured.html', '>Choose Starter</a>', '><span class="salt-button__label">Choose Starter<span class="salt-arrow" aria-hidden="true">&#x2060;→</span></span></a>')
+  }, /"Choose Starter[^"]*" draws an arrow, which only a section's call to action takes/)
+})
+
 // ── 4. The normaliser ─────────────────────────────────────────────────────────────────────────
 test('normaliser: one that drops an attribute fails the mutation check', () => {
   expectFail(HERO, (io) => {

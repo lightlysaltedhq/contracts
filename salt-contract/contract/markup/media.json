@@ -16,7 +16,7 @@
       },
       "sizes": {
         "value": "from:image slot and band",
-        "note": "The default sizes of the image's slot (contract/image-sizes.json placements) for the band its section is drawn in, and for a card the grid's column count (SC-016). A client site that swaps the view or changes the layout may declare its own, in salt-overrides.json."
+        "note": "The default sizes of the image's slot (contract/image-sizes.json placements) for the band its section is drawn in, and for a card the grid's column count (SC-016). The site logo's is its drawn width in px (the logo slot's rule). A client site that swaps the view or changes the layout may declare its own, in salt-overrides.json."
       },
       "alt": "from:alt",
       "width": "from:image",
@@ -78,7 +78,8 @@
     "nextjs": {
       "owes": [
         "Write the inline style object-fit and object-position the parent passes, with focal-point as the image's stored focal point (Payload's upload focalPoint, as <x>% <y>%), left out when none is stored; objectPosition() maps focal-point to nothing today (components/image-sizes.ts).",
-        "Srcset capped at the upload's intrinsic width (SC-016): next/image lists every candidate, 3840w included, whatever the upload; the srcset stops at the widest candidate within the upload's width and adds that width, and src is it."
+        "Srcset capped at the upload's intrinsic width (SC-016): next/image lists every candidate, 3840w included, whatever the upload; the srcset stops at the widest candidate within the upload's width and adds that width, and src is it.",
+        "Width and height on every image, fill images included (SC-007): next/image's fill mode writes neither, so the showcase and listing card images, the logo strip and the case study view's images draw none today. They are the upload's intrinsic size and give the aspect ratio before the image loads."
       ]
     },
     "wordpress": {

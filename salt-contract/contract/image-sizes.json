@@ -89,8 +89,12 @@
       "sizes": "(min-width: 80rem) 76rem, 100vw"
     },
     "logo": {
-      "description": "The site logo, in the header and the footer.",
-      "sizes": "24rem"
+      "description": "The site logo, in the header and the footer: drawn at the site's logo height, so its sizes is its drawn width in CSS pixels, exactly, as Salt for Next.js writes it (site-logo.tsx, drawnWidth).",
+      "sizes": "<drawn width>px",
+      "drawn": {
+        "rule": "round(upload width / upload height x logo height) px, the logo height being the site's logo height setting in px, or defaultHeightPx when the site sets none (chrome.css --logo-height: 2rem).",
+        "defaultHeightPx": 32
+      }
     },
     "thumb": {
       "description": "A small fixed image: a logo strip item, a quotation avatar. Never the priority image.",

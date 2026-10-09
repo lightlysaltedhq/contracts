@@ -115,6 +115,25 @@
                 ]
               }
             }
+          },
+          "drawn": {
+            "description": "A slot drawn at a fixed size the site sets: its sizes is the drawn width in px, by this rule, in place of a sizes value of its own.",
+            "type": "object",
+            "required": [
+              "rule",
+              "defaultHeightPx"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "rule": {
+                "type": "string",
+                "minLength": 1
+              },
+              "defaultHeightPx": {
+                "type": "integer",
+                "minimum": 1
+              }
+            }
           }
         }
       }

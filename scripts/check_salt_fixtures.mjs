@@ -38,7 +38,7 @@ const fails = []
 const fail = (msg) => fails.push(msg)
 const readJson = (p) => JSON.parse(readFileSync(path.join(dir, p), 'utf8'))
 const { normalise, parse, CONTAINERS } = await import(pathToFileURL(path.join(dir, 'normalise.mjs')).href)
-const { slotOf, sizesOf, sourcesOf } = await import(pathToFileURL(path.join(here, 'salt_image_slots.mjs')).href)
+const { slotOf, sizesOf, sourcesOf, drawnSizes } = await import(pathToFileURL(path.join(here, 'salt_image_slots.mjs')).href)
 const imageTable = existsSync(path.join(dir, 'contract/image-sizes.json')) ? readJson('contract/image-sizes.json') : null
 const { containersFrom } = await import(pathToFileURL(path.join(here, 'salt_normalise_containers.mjs')).href)
 
@@ -738,13 +738,16 @@ function checkMarkup(c) {
   }
   for (const e of every()) for (const [name, value] of e.attrs) if (value.includes('\\/')) fail(`${at}.html: ${describe(e)} ${name} escapes a slash; JSON in an attribute is written without (section#display-forms)`)
 
-  // A link-form button takes the site's arrow, in its label span, when the site supplies one
-  // (button.json); a button-form control never does.
+  // A section's call to action takes the site's arrow, in its label span, when the site supplies
+  // one; every other button never does (button.json).
+  const ARROWED = ['salt-hero__actions', 'salt-cta__actions', 'salt-media-text__actions', 'salt-process__step', 'salt-showcase__view-all']
   for (const el of [root, ...descendants(root)].filter((e) => classesOf(e).includes('salt-button'))) {
     const arrowed = elementsOf(el).some((k) => classesOf(k).includes('salt-button__label'))
-    const wants = el.name === 'a' && filledText(input.site?.arrow)
+    const parent = c.parents.get(el)
+    const callToAction = el.name === 'a' && parent && ARROWED.some((k) => classesOf(parent).includes(k))
+    const wants = callToAction && filledText(input.site?.arrow)
     if (wants && !arrowed) fail(`${at}.html: ${describe(el)} "${textOf(el)}" draws no arrow, but the site supplies one (button.json)`)
-    if (!wants && arrowed) fail(`${at}.html: ${describe(el)} "${textOf(el)}" draws an arrow, which ${el.name === 'a' ? 'the site does not supply' : 'a button-form control never takes'} (button.json)`)
+    if (!wants && arrowed) fail(`${at}.html: ${describe(el)} "${textOf(el)}" draws an arrow, which ${callToAction ? 'the site does not supply' : 'only a section\'s call to action takes'} (button.json)`)
   }
 
   // Headings (section#labelled-by, section#heading-level, section#body-heading-base).
@@ -798,7 +801,13 @@ function checkMarkup(c) {
     for (let p = c.parents.get(img); p; p = c.parents.get(p)) ancestors.push(p)
     const placed = slotOf(img, ancestors, doc.id, (f) => effective(c, f))
     if (!placed) { fail(`${at}.html: ${describe(img)} takes no slot in contract/image-sizes.json's placements`); continue }
-    const sizes = sizesOf(imageTable, placed, effectiveSetting(c, 'width'))
+    // A drawn slot (the logo) sizes from its own record, matched by the URL template.
+    const drawnRecord = imageTable.slots[placed.slot]?.drawn && Object.values(input.media ?? {}).find((m) => {
+      const [pre, post] = (m.url ?? '').split('{width}')
+      const src = attr(img, 'src') ?? ''
+      return post !== undefined && src.startsWith(pre) && src.endsWith(post)
+    })
+    const sizes = drawnRecord ? drawnSizes(imageTable, placed.slot, drawnRecord, input.site?.logoHeight) : sizesOf(imageTable, placed, effectiveSetting(c, 'width'))
     if (attr(img, 'sizes') !== sizes) { fail(`${at}.html: ${describe(img)} sizes="${attr(img, 'sizes')}"; its slot (${placed.slot}${placed.band ? `, band ${effectiveSetting(c, 'width')}` : ''}${placed.columns ? `, ${placed.columns} columns` : ''}) gives "${sizes}"`); continue }
     const record = Object.values(input.media ?? {}).find((m) => typeof m.url === 'string' && sourcesOf(imageTable, m, sizes).src === attr(img, 'src'))
     if (!record) { fail(`${at}.html: ${describe(img)} src ${attr(img, 'src')} is not the widest candidate of any media record the case holds`); continue }

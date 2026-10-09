@@ -15,6 +15,7 @@ export function slotOf(img, ancestors, section, effective) {
   const within = (c) => ancestors.find((a) => classesOf(a).includes(c))
   const columns = String(effective('columns') ?? '3')
   if (cls.includes('salt-section__media')) return { slot: 'full', band: false }
+  if (cls.includes('salt-logo__image')) return { slot: 'logo', band: false }
   if (cls.includes('salt-hero__image')) return { slot: effective('variant') === 'split' ? 'half' : 'content', band: true }
   if (cls.includes('salt-media-text__image')) {
     const row = within('salt-media-text__row')
@@ -54,6 +55,16 @@ export function sizesOf(table, { slot, band, columns }, width) {
   if (!band || !entry.bands) return entry.sizes
   const value = entry.bands[width]
   return typeof value === 'string' ? value : value?.[columns ?? '3']
+}
+
+/**
+ * A drawn slot's sizes (the logo): its drawn width in px, from the upload's aspect ratio and the
+ * height the site draws it at, or the slot's default height.
+ */
+export function drawnSizes(table, slot, record, heightPx) {
+  const drawn = table.slots[slot]?.drawn
+  if (!drawn) return undefined
+  return `${Math.round((record.width / record.height) * (heightPx ?? drawn.defaultHeightPx))}px`
 }
 
 /** The candidate widths the srcset rule leaves for a sizes value. */
