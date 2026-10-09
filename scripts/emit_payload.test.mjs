@@ -335,7 +335,7 @@ test('R5: a clause with no test, or with two, is refused by the schema and by th
   for (const bad of [{ field: 'on' }, { field: 'on', equals: true, in: [true] }, { field: 'on', filled: true, equals: true }]) {
     assert.equal(validate(doc(bad)), false, JSON.stringify(bad))
     const fields = [{ name: 'on', type: 'boolean', label: 'On' }, { name: 'text', type: 'text', label: 'Text', condition: bad }]
-    assert.throws(() => toPayloadBlocks({ contract: probe(fields) }), /probe\.text condition on on: a clause tests exactly one of equals, in or filled/)
+    assert.throws(() => toPayloadBlocks({ contract: probe(fields) }), /probe\.text condition: .*exactly one of equals, an in list or a true or false filled/)
   }
 })
 
@@ -363,4 +363,12 @@ test('R3: a section reading its source from a select is left out when the site h
   assert.throws(() => blocks({ sources: {}, sections: ['collection-showcase'] }),
     /section collection-showcase needs one of the sources services, case-studies, testimonials, posts, team \(collection-showcase\.query\)/)
   assert.ok(blocks({ sources: { team: {} } }).some((b) => b.slug === 'collection-showcase'))
+})
+
+test('S4: the emitter refuses every clause shape the schema refuses, with its own message', () => {
+  const bad = [{ equals: true }, { field: 'on', in: 'a' }, { field: 'on', filled: 'yes' }, 'on', null, { field: 7, equals: true }]
+  for (const clause of bad) {
+    const fields = [{ name: 'on', type: 'boolean', label: 'On' }, { name: 'text', type: 'text', label: 'Text', condition: clause }]
+    assert.throws(() => toPayloadBlocks({ contract: probe(fields) }), /probe\.text condition: .*a clause is an object with a field name and exactly one of equals, an in list or a true or false filled/, JSON.stringify(clause))
+  }
 })

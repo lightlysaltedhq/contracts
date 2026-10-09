@@ -107,16 +107,30 @@ export const normaliseLineEndings = (text) => text.replace(/\r\n/g, '\n')
 /** A condition as a list of clauses, all of which must hold; [] for none. */
 export const clauses = (condition) => (condition === undefined ? [] : [condition].flat())
 
+const SCALAR = (v) => ['string', 'boolean', 'number'].includes(typeof v)
+
+/** Whether a clause has the shape the field schema's $defs.clause allows. */
+export function isClause(c) {
+  if (!c || typeof c !== 'object' || Array.isArray(c)) return false
+  if (typeof c.field !== 'string' || !/^[a-z][a-zA-Z0-9]*$/.test(c.field)) return false
+  if (Object.keys(c).some((k) => !['field', 'equals', 'in', 'filled'].includes(k))) return false
+  const tests = ['equals', 'in', 'filled'].filter((k) => k in c)
+  if (tests.length !== 1) return false
+  if ('equals' in c) return SCALAR(c.equals)
+  if ('filled' in c) return typeof c.filled === 'boolean'
+  return Array.isArray(c.in) && c.in.length > 0 && new Set(c.in).size === c.in.length &&
+    c.in.every((v) => typeof v === 'string' || typeof v === 'number')
+}
+
 /**
- * clauses(), refusing a clause that tests nothing or two things. The schema refuses both (its
- * oneOf); this holds a contract built in code, which no schema sees, to the same rule. `where`
- * names the field in the message.
+ * clauses(), refusing any clause the schema would refuse (isClause). The schema holds the contract
+ * files to this; a contract built in code reaches the emitter without it. `where` names the field.
  */
 export function checkedClauses(condition, where) {
   const list = clauses(condition)
   for (const c of list) {
-    if (['equals', 'in', 'filled'].filter((k) => k in c).length !== 1) {
-      throw new Error(`${where} condition on ${c.field}: a clause tests exactly one of equals, in or filled`)
+    if (!isClause(c)) {
+      throw new Error(`${where} condition: ${JSON.stringify(c)}: a clause is an object with a field name and exactly one of equals, an in list or a true or false filled`)
     }
   }
   return list
