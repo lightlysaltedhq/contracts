@@ -6,6 +6,31 @@ Salted's decision log for Product Salt.
 
 ## Unreleased (0.1.0, drafting)
 
+- The extension points (ID-3606), with the customisation ladder as normative text in the README:
+  brand settings, dials and tokens, variants, swap a view, replace logic, a client-only section,
+  each saying what still reaches a site on update. No separate slots-and-hooks system.
+  - `contract/dials.json` (`./dials`, schema `./schema/dials`): the four admin-only design dials
+    1.0.0 ships (SC-015). Corners (`--radius-sm`, `-md`, `-lg`: square, soft, round), shadows
+    (`--salt-card-shadow`: none, subtle, raised, on design-foundations' `--shadow-sm` and
+    `--shadow-md`), button style (`--salt-button-radius`: square, soft, pill) and density
+    (`--space-section-sm`, `-md`, `-lg`: compact, comfortable, spacious). Each option points a token
+    at a rung, or 0, and the runtime writes that rung's value. Both platforms owe all four.
+  - Two component tokens the stylesheets read, both optional, so nothing changes until an admin
+    turns a dial: `.salt-card` reads `--salt-card-shadow` (fallback `none`) and `.salt-button`
+    reads `--salt-button-radius` (fallback `--radius-md`). The token layer names 128 properties.
+  - `contract/view-props/` (`./view-props/<section>`, schema `./schema/view-props`): the props each
+    section's view receives, as `data` per section and the page `plan` once in `_shared`, in kinds
+    both a TypeScript type and a PHP array shape can be generated from. A prop drawn from a field
+    takes the field's canonical name (SC-015).
+  - `schema/replaced-logic.schema.json` (`./schema/replaced-logic`): the `salt-overrides.json` a
+    client site writes when it swaps a view or takes a section over, which the update flag reads.
+    On WordPress, `OVERRIDES.md` points at it (SC-015).
+  - `npm run salt-extensions` (in `verify`, CI and the release workflow): every token a dial moves
+    is in the token layer, and every rung it points at is there or in design-foundations' scale
+    shape; every section has view props; every prop drawn from a field names a real one, takes its
+    name and offers its select's options; the replaced-logic examples hold. `npm run
+    salt-stylesheets` names the card's shadow as a focus-rule exception and accepts a dial's radius
+    token in front of a rung, and the release workflow now runs it too.
 - The owner's rulings of 09/10/2026 (SC-007, SC-008, SC-012 to SC-014) are applied, and no open
   question remains; the markup schema drops the `open-question` note topic.
   - Every id the system draws is `<owner>__<part>` (SC-012). The owner is the component, section or

@@ -65,3 +65,5 @@ jobs:
         run: npm run salt-contract
       - name: The shared stylesheets' gate
         run: npm run salt-stylesheets
+      - name: The extension points' gate
+        run: npm run salt-extensions
