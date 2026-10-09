@@ -165,14 +165,17 @@ if (vocab && (vocab.sections ?? []).every((x) => x && typeof x === 'object')) {
   // views, or the header and footer, which are drawn outside every section.
   const OUTSIDE_SECTIONS = new Set(['page', 'site-header', 'site-footer'])
   const landmarks = new Set(read('contract/markup/section.json')?.rules?.anchors?.reserved ?? [])
-  const ID_ATTRIBUTES = ['id', 'for', 'aria-controls', 'aria-labelledby', 'aria-describedby']
+  // Every attribute whose value is an id or a list of ids, and href, whose #fragment names one.
+  const ID_ATTRIBUTES = ['id', 'for', 'aria-controls', 'aria-labelledby', 'aria-describedby', 'aria-errormessage', 'aria-owns',
+    'aria-activedescendant', 'aria-details', 'aria-flowto', 'headers', 'list', 'form', 'popovertarget', 'commandfor', 'href']
   const checkIds = (file, attributes, doc, atRoot) => {
     const outside = doc.kind === 'view' || OUTSIDE_SECTIONS.has(doc.id)
     for (const key of ID_ATTRIBUTES) {
-      for (const x of attributeValues(attributes?.[key]).filter((x) => typeof x !== 'string')) {
+      for (const x of attributeValues(attributes?.[key]).filter((x) => typeof x !== 'string' && key !== 'href')) {
         fails.push(`${file} draws ${key} ${JSON.stringify(x)}, which is not an id`)
       }
       const values = attributeValues(attributes?.[key]).filter((x) => typeof x === 'string')
+        .flatMap((x) => key !== 'href' ? [x] : x.startsWith('#') && x.length > 1 ? [x.slice(1)] : [])
       for (const id of values.flatMap((x) => x.split(/\s+/)).filter(Boolean)) {
         if (landmarks.has(id)) continue
         if (id === '<anchor>') {

@@ -563,3 +563,19 @@ crossFail('a numeric id value', (f) => {
 crossFail('a null id value', (f) => {
   withLandmarks(f); f['contract/markup/hero.json'].elements = [idNode({ 'aria-labelledby': null })]
 }, /draws aria-labelledby null, which is not an id/)
+
+// Every id-referencing attribute is read, href only for its #fragment.
+for (const [key, value] of [['aria-errormessage', 'email-error'], ['popovertarget', 'menu'], ['headers', '<anchor>__a plain-cell'], ['list', 'options']]) {
+  crossFail(`a plain id in ${key}`, (f) => {
+    withLandmarks(f); f['contract/markup/hero.json'].elements = [idNode({ [key]: value })]
+  }, new RegExp(`draws ${key} [a-z-]+, which is neither a landmark id nor <owner>__<part>`))
+}
+crossFail('a plain #fragment in href', (f) => {
+  withLandmarks(f); f['contract/markup/hero.json'].elements = [idNode({ href: '#top' })]
+}, /draws href top, which is neither a landmark id nor <owner>__<part>/)
+test('cross-file: an href to a landmark fragment, a page address or from: passes', () => {
+  const r = crossRun((f) => {
+    withLandmarks(f); f['contract/markup/hero.json'].elements = [idNode({ href: '#main' }), idNode({ href: 'from:url' }), idNode({ href: '/contact' })]
+  })
+  assert.equal(r.code, 0, r.out)
+})
