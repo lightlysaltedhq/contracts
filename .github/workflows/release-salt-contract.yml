@@ -187,6 +187,12 @@ jobs:
       - name: The Salt contract's own gate
         if: steps.registry.outputs.live == 'false'
         run: npm run salt-contract
+      - name: The shared stylesheets' gate
+        if: steps.registry.outputs.live == 'false'
+        run: npm run salt-stylesheets
+      - name: The extension points' gate
+        if: steps.registry.outputs.live == 'false'
+        run: npm run salt-extensions
 
       # Until 1.0.0 the package is `private`, and npm refuses to stage a private package. That is
       # deliberate: a 0.x drafting tag can never reach the registry, even by accident.

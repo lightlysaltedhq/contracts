@@ -1,0 +1,460 @@
+{
+  "$schema": "../../schema/view-props.schema.json",
+  "version": "0.1.0",
+  "$comment": "Types every view-props file may name, and the plan every view receives beside its data. Drafted 09/10/2026 from Salt for Next.js 0.11.0's SectionPlan and block data types, renamed where the contract's field names differ.",
+  "section": "shared",
+  "types": {
+    "plan": {
+      "description": "The page plan's view of one section: what the section cannot know about itself because it depends on the page (section#heading-level, section#anchors, section#priority-media).",
+      "props": [
+        {
+          "name": "index",
+          "kind": "integer",
+          "description": "The section's position among the page's rendered sections, from 0. Names per-section groups, such as an accordion's name.",
+          "from": "plan"
+        },
+        {
+          "name": "anchor",
+          "kind": "text",
+          "description": "The section's settled id, <anchor> (SC-012 to SC-014). Every section has one, so it is never null.",
+          "from": "plan"
+        },
+        {
+          "name": "headingLevel",
+          "kind": "enum",
+          "values": [
+            1,
+            2
+          ],
+          "description": "1 when the section claims the page's h1 (section#single-h1), otherwise 2.",
+          "from": "plan"
+        },
+        {
+          "name": "headingId",
+          "kind": "text",
+          "nullable": true,
+          "description": "<anchor>__heading when the section provides a heading, which the heading carries and the wrapper's aria-labelledby names; otherwise null.",
+          "from": "plan"
+        },
+        {
+          "name": "bodyBaseLevel",
+          "kind": "integer",
+          "description": "The level a body's own headings count from (section#body-heading-base): the section heading's level, or the level it would have had.",
+          "from": "plan"
+        },
+        {
+          "name": "priorityMedia",
+          "kind": "boolean",
+          "description": "True for the one section on the page whose first image is the priority image: eager, fetchpriority high, never lazy (SC-007).",
+          "from": "plan"
+        },
+        {
+          "name": "collapseTop",
+          "kind": "boolean",
+          "description": "True when the section's top space is dropped to butt against the one above (section#adjacent-collapse).",
+          "from": "plan"
+        },
+        {
+          "name": "settings",
+          "kind": "object",
+          "of": "settings",
+          "description": "The wrapper settings, normalised: every value inside its vocabulary.",
+          "from": "plan"
+        }
+      ]
+    },
+    "settings": {
+      "description": "The shared wrapper settings (contract/fields/_section-settings.json) as the wrapper draws them. The wrapper is the logic's, not the view's; a view reads these only to adapt to its band.",
+      "props": [
+        {
+          "name": "spacing",
+          "kind": "enum",
+          "values": [
+            "none",
+            "sm",
+            "md",
+            "lg"
+          ],
+          "from": "field",
+          "field": "settings.spacing"
+        },
+        {
+          "name": "tone",
+          "kind": "enum",
+          "values": [
+            "surface",
+            "surface-alt",
+            "brand-tint",
+            "surface-inverse"
+          ],
+          "from": "field",
+          "field": "settings.tone"
+        },
+        {
+          "name": "toneDark",
+          "kind": "enum",
+          "values": [
+            "surface",
+            "surface-alt",
+            "brand-tint",
+            "surface-inverse"
+          ],
+          "from": "logic",
+          "field": "settings.toneDark",
+          "description": "The dark tone resolved: auto becomes the tone it stands for, so a view never sees auto."
+        },
+        {
+          "name": "width",
+          "kind": "enum",
+          "values": [
+            "full",
+            "wide",
+            "default",
+            "narrow"
+          ],
+          "from": "field",
+          "field": "settings.width"
+        },
+        {
+          "name": "backgroundImage",
+          "kind": "object",
+          "of": "background",
+          "nullable": true,
+          "from": "logic",
+          "field": "settings.backgroundImage",
+          "description": "Null unless an image is set and resolves."
+        },
+        {
+          "name": "divider",
+          "kind": "boolean",
+          "from": "field",
+          "field": "settings.divider"
+        }
+      ]
+    },
+    "background": {
+      "description": "A section's background image, as the wrapper draws it.",
+      "props": [
+        {
+          "name": "image",
+          "kind": "object",
+          "of": "image",
+          "from": "logic",
+          "field": "settings.backgroundImage.image",
+          "description": "Always present: the background object is null unless the image resolves."
+        },
+        {
+          "name": "fit",
+          "kind": "enum",
+          "values": [
+            "cover",
+            "contain"
+          ],
+          "from": "field",
+          "field": "settings.backgroundImage.fit"
+        },
+        {
+          "name": "position",
+          "kind": "enum",
+          "values": [
+            "focal-point",
+            "top-left",
+            "top",
+            "top-right",
+            "left",
+            "centre",
+            "right",
+            "bottom-left",
+            "bottom",
+            "bottom-right"
+          ],
+          "from": "field",
+          "field": "settings.backgroundImage.position"
+        },
+        {
+          "name": "scrim",
+          "kind": "boolean",
+          "from": "field",
+          "field": "settings.backgroundImage.scrim"
+        },
+        {
+          "name": "scrimStrength",
+          "kind": "enum",
+          "values": [
+            "subtle",
+            "standard",
+            "strong"
+          ],
+          "from": "field",
+          "field": "settings.backgroundImage.scrimStrength"
+        }
+      ]
+    },
+    "image": {
+      "description": "A resolved image, ready for one img element (SC-007): the platform's image pipeline has chosen its formats and widths. contract/markup/media.json says how it is drawn.",
+      "props": [
+        {
+          "name": "src",
+          "kind": "text",
+          "from": "logic"
+        },
+        {
+          "name": "srcset",
+          "kind": "text",
+          "nullable": true,
+          "from": "logic"
+        },
+        {
+          "name": "width",
+          "kind": "integer",
+          "from": "logic"
+        },
+        {
+          "name": "height",
+          "kind": "integer",
+          "from": "logic"
+        },
+        {
+          "name": "alt",
+          "kind": "text",
+          "description": "The image's own alt text; empty when it has none, which draws it as decorative.",
+          "from": "logic"
+        },
+        {
+          "name": "caption",
+          "kind": "text",
+          "nullable": true,
+          "from": "logic"
+        },
+        {
+          "name": "focalPoint",
+          "kind": "object",
+          "of": "point",
+          "nullable": true,
+          "from": "logic"
+        }
+      ]
+    },
+    "point": {
+      "description": "A focal point, as percentages of the image's width and height.",
+      "props": [
+        {
+          "name": "x",
+          "kind": "number",
+          "from": "logic"
+        },
+        {
+          "name": "y",
+          "kind": "number",
+          "from": "logic"
+        }
+      ]
+    },
+    "link": {
+      "description": "A resolved link: an internal link already turned into its address. A link that does not resolve is dropped by the logic, so a view never draws a dead one.",
+      "props": [
+        {
+          "name": "href",
+          "kind": "text",
+          "from": "logic"
+        },
+        {
+          "name": "label",
+          "kind": "text",
+          "from": "logic"
+        },
+        {
+          "name": "newTab",
+          "kind": "boolean",
+          "from": "logic"
+        }
+      ]
+    },
+    "button": {
+      "description": "A link drawn as a button, with its style.",
+      "props": [
+        {
+          "name": "href",
+          "kind": "text",
+          "from": "logic"
+        },
+        {
+          "name": "label",
+          "kind": "text",
+          "from": "logic"
+        },
+        {
+          "name": "newTab",
+          "kind": "boolean",
+          "from": "logic"
+        },
+        {
+          "name": "style",
+          "kind": "enum",
+          "values": [
+            "primary",
+            "secondary",
+            "ghost"
+          ],
+          "from": "logic"
+        }
+      ]
+    },
+    "card": {
+      "description": "One item of a collection, as a card draws it (contract/markup/card.json). What a card carries depends on its source; a value the source lacks, or the section switched off, is null.",
+      "props": [
+        {
+          "name": "id",
+          "kind": "text",
+          "from": "logic"
+        },
+        {
+          "name": "title",
+          "kind": "text",
+          "from": "logic"
+        },
+        {
+          "name": "href",
+          "kind": "text",
+          "nullable": true,
+          "description": "The item's own page, for a source whose items have one.",
+          "from": "logic"
+        },
+        {
+          "name": "image",
+          "kind": "object",
+          "of": "image",
+          "nullable": true,
+          "from": "logic"
+        },
+        {
+          "name": "icon",
+          "kind": "icon",
+          "nullable": true,
+          "from": "logic"
+        },
+        {
+          "name": "meta",
+          "kind": "text",
+          "nullable": true,
+          "description": "A role, a client or a byline, by source.",
+          "from": "logic"
+        },
+        {
+          "name": "text",
+          "kind": "text",
+          "nullable": true,
+          "from": "logic"
+        },
+        {
+          "name": "date",
+          "kind": "text",
+          "nullable": true,
+          "description": "An ISO 8601 date, for a source whose items are dated.",
+          "from": "logic"
+        },
+        {
+          "name": "rating",
+          "kind": "number",
+          "nullable": true,
+          "description": "Out of 5, for a testimonial.",
+          "from": "logic"
+        },
+        {
+          "name": "email",
+          "kind": "text",
+          "nullable": true,
+          "description": "A team member's email address; the card draws it as a mailto: link.",
+          "from": "logic"
+        },
+        {
+          "name": "phone",
+          "kind": "text",
+          "nullable": true,
+          "description": "A team member's phone number as entered, drawn as the link text.",
+          "from": "logic"
+        },
+        {
+          "name": "phoneHref",
+          "kind": "text",
+          "nullable": true,
+          "description": "The tel: address, only when the phone normalises to one; with none, the phone is not drawn.",
+          "from": "logic"
+        },
+        {
+          "name": "profiles",
+          "kind": "list",
+          "of": "profile",
+          "description": "A team member's social profiles, in order; empty for every other source.",
+          "from": "logic"
+        },
+        {
+          "name": "tags",
+          "kind": "list",
+          "of": "tag",
+          "from": "logic"
+        }
+      ]
+    },
+    "tag": {
+      "description": "A category term on a card.",
+      "props": [
+        {
+          "name": "id",
+          "kind": "text",
+          "from": "logic"
+        },
+        {
+          "name": "title",
+          "kind": "text",
+          "from": "logic"
+        }
+      ]
+    },
+    "profile": {
+      "description": "A social profile on a team card (contract/markup/card.json, socials).",
+      "props": [
+        {
+          "name": "name",
+          "kind": "text",
+          "description": "The profile's name, which names the link (its accessible name, or its text when no glyph is drawn).",
+          "from": "logic"
+        },
+        {
+          "name": "href",
+          "kind": "text",
+          "from": "logic"
+        },
+        {
+          "name": "network",
+          "kind": "enum",
+          "values": [
+            "bluesky",
+            "facebook",
+            "github",
+            "instagram",
+            "linkedin",
+            "pinterest",
+            "reddit",
+            "tiktok",
+            "whatsapp",
+            "x",
+            "youtube"
+          ],
+          "nullable": true,
+          "description": "The social glyph the address matches, from the chrome icon names; null when none does, which draws the name as text.",
+          "from": "logic"
+        }
+      ]
+    }
+  },
+  "platforms": {
+    "nextjs": {
+      "formerly": "SectionPlan, StoredMedia, ResolvedLink and ShowcaseCard",
+      "owes": "anchor in place of the nullable anchorId; bodyBaseLevel on the plan in place of the bodyBaseLevel() helper; the resolved image shape in place of StoredMedia's media reference; the resolved toneDark and backgroundImage in settings"
+    },
+    "wordpress": {
+      "owes": "the logic and view split itself (the ruling of 06/10/2026 on the Salt page): each section's template takes these props in $args and does no querying, sanitising or schema of its own"
+    }
+  }
+}

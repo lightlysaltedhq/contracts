@@ -3497,7 +3497,12 @@ const CONTRACTS = [
       'one, which is how a subject-based version of this check was passed three times. The named ' +
       'exceptions are listed one declaration each, and the conformance test holds the same list.',
     check: (_rules, all) => {
-      const EXCEPTIONS = ["primitives.css .salt-contact__input[aria-invalid='true']:not(:focus-visible) box-shadow"]
+      /* The card's shadow is the shadows dial's (contract/dials.json): a card is never the focused
+         element, its stretched link is, so the ring is never drawn on the box this shadow paints. */
+      const EXCEPTIONS = [
+        "primitives.css .salt-contact__input[aria-invalid='true']:not(:focus-visible) box-shadow",
+        'primitives.css .salt-card box-shadow',
+      ]
       const found = []
       for (const [file, rules] of all) {
         for (const rule of rules) {
@@ -4915,7 +4920,15 @@ const CONTRACTS = [
               scrims += 1
               continue
             }
-            const token = /^var\(\s*(--[\w-]+)\s*\)$/i.exec(value)
+            /* A dial's component token (contract/dials.json) may stand in front of the rung, as
+               `var(--salt-<component>-radius, var(--radius-<rung>))`: unset, the rung applies, and the
+               component token must be one the token layer names. */
+            const dialled = family === 'radius' ? /^var\(\s*(--salt-[\w-]+-radius)\s*,\s*(var\(\s*--[\w-]+\s*\))\s*\)$/i.exec(value) : null
+            if (dialled !== null) {
+              const component = themeValue(dialled[1] ?? '')
+              if ('missing' in component) return `${where} reads \`${dialled[1] ?? ''}\`, and ${component.missing}`
+            }
+            const token = /^var\(\s*(--[\w-]+)\s*\)$/i.exec(dialled === null ? value : (dialled[2] ?? ''))
             if (token === null || !(token[1] ?? '').startsWith(`--${family}-`)) {
               return `${where} writes \`${property}: ${value}\`; it reads a \`--${family}-*\` token, exactly \`var(--${family}-<rung>)\``
             }
@@ -6032,7 +6045,16 @@ export function checkStylesheets(files) {
           seen.add(name)
           const read = reads.get(name)
           if (declaredHere.has(name)) { fails.push(`contract/token-layer.json names ${name}, which the stylesheets declare themselves; it is not the runtime's to emit`); continue }
-          if (!read) { fails.push(`contract/token-layer.json names ${name}, which neither a stylesheet nor a value the markup writes reads`); continue }
+          if (!read) {
+            /* A property a dial's rungs reference (requiredBy) is emitted for the dial, not for a
+               stylesheet; it passes unread only when every dial it names lists it under requires. */
+            const dials = readJson('contract/dials.json')?.dials ?? []
+            const by = token.requiredBy ?? []
+            const unlisted = by.filter((id) => !(dials.find((d) => d.id === id)?.requires ?? []).includes(name))
+            if (by.length === 0) fails.push(`contract/token-layer.json names ${name}, which neither a stylesheet nor a value the markup writes reads`)
+            else if (unlisted.length > 0) fails.push(`contract/token-layer.json says ${name} is required by ${unlisted.join(', ')}, but contract/dials.json gives no such dial that requires it`)
+            continue
+          }
           const optional = read.withFallback === read.count
           if ((token.optional === true) !== optional) {
             fails.push(optional

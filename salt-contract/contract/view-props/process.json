@@ -1,0 +1,102 @@
+{
+  "$schema": "../../schema/view-props.schema.json",
+  "version": "0.1.0",
+  "section": "process",
+  "data": [
+    {
+      "name": "eyebrow",
+      "kind": "text",
+      "nullable": true,
+      "from": "field",
+      "field": "eyebrow"
+    },
+    {
+      "name": "heading",
+      "kind": "text",
+      "nullable": true,
+      "from": "field",
+      "field": "heading"
+    },
+    {
+      "name": "intro",
+      "kind": "text",
+      "nullable": true,
+      "from": "field",
+      "field": "intro"
+    },
+    {
+      "name": "layout",
+      "kind": "enum",
+      "values": [
+        "timeline",
+        "cards"
+      ],
+      "from": "field",
+      "field": "layout"
+    },
+    {
+      "name": "steps",
+      "kind": "list",
+      "of": "step",
+      "from": "field",
+      "field": "steps"
+    },
+    {
+      "name": "structuredData",
+      "kind": "boolean",
+      "from": "field",
+      "field": "structuredData"
+    }
+  ],
+  "types": {
+    "step": {
+      "props": [
+        {
+          "name": "icon",
+          "kind": "icon",
+          "nullable": true,
+          "from": "field",
+          "field": "steps.icon"
+        },
+        {
+          "name": "image",
+          "kind": "object",
+          "of": "image",
+          "nullable": true,
+          "from": "field",
+          "field": "steps.image"
+        },
+        {
+          "name": "title",
+          "kind": "text",
+          "from": "logic",
+          "field": "steps.title",
+          "description": "Never null: the logic drops a step whose title cleans away (SC-009) or does not resolve, as Salt for Next.js's resolver does."
+        },
+        {
+          "name": "text",
+          "kind": "text",
+          "nullable": true,
+          "from": "field",
+          "field": "steps.text"
+        },
+        {
+          "name": "cta",
+          "kind": "object",
+          "of": "link",
+          "nullable": true,
+          "from": "field",
+          "field": "steps.cta"
+        }
+      ]
+    }
+  },
+  "platforms": {
+    "nextjs": {
+      "formerly": "ProcessBlockData"
+    },
+    "wordpress": {
+      "owes": "a view template that takes these props, split from the section's logic"
+    }
+  }
+}

@@ -1,0 +1,79 @@
+{
+  "$schema": "../../schema/view-props.schema.json",
+  "version": "0.1.0",
+  "section": "gallery",
+  "data": [
+    {
+      "name": "heading",
+      "kind": "text",
+      "nullable": true,
+      "from": "field",
+      "field": "heading"
+    },
+    {
+      "name": "intro",
+      "kind": "text",
+      "nullable": true,
+      "from": "field",
+      "field": "intro"
+    },
+    {
+      "name": "layout",
+      "kind": "enum",
+      "values": [
+        "grid",
+        "masonry",
+        "carousel"
+      ],
+      "from": "field",
+      "field": "layout"
+    },
+    {
+      "name": "columns",
+      "kind": "enum",
+      "values": [
+        "2",
+        "3",
+        "4"
+      ],
+      "from": "field",
+      "field": "columns"
+    },
+    {
+      "name": "label",
+      "kind": "text",
+      "nullable": true,
+      "from": "field",
+      "field": "label",
+      "description": "The field as set; with no heading, it names the set (from:heading or label)."
+    },
+    {
+      "name": "named",
+      "kind": "boolean",
+      "description": "True when the heading or the label is set. Without a name the markup draws a grid in place of the carousel layout, so a swapped view sees the same case core does.",
+      "from": "logic"
+    },
+    {
+      "name": "captions",
+      "kind": "boolean",
+      "from": "field",
+      "field": "captions"
+    },
+    {
+      "name": "images",
+      "kind": "list",
+      "of": "image",
+      "from": "field",
+      "field": "images"
+    }
+  ],
+  "platforms": {
+    "nextjs": {
+      "formerly": "GalleryBlockData",
+      "owes": "label as the field, nullable, and named, in place of a label with the site default filled in"
+    },
+    "wordpress": {
+      "owes": "a view template that takes these props, split from the section's logic"
+    }
+  }
+}

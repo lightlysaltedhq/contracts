@@ -1,0 +1,171 @@
+{
+  "$schema": "../../schema/view-props.schema.json",
+  "version": "0.1.0",
+  "section": "locations",
+  "data": [
+    {
+      "name": "eyebrow",
+      "kind": "text",
+      "nullable": true,
+      "from": "field",
+      "field": "eyebrow"
+    },
+    {
+      "name": "heading",
+      "kind": "text",
+      "nullable": true,
+      "from": "field",
+      "field": "heading"
+    },
+    {
+      "name": "offices",
+      "kind": "list",
+      "of": "office",
+      "from": "collection",
+      "field": "query",
+      "description": "Locations with a title, in the query's order."
+    },
+    {
+      "name": "timezone",
+      "kind": "text",
+      "description": "The site's IANA timezone, for data-timezone.",
+      "from": "site"
+    },
+    {
+      "name": "maps",
+      "kind": "boolean",
+      "description": "True when the site draws maps.",
+      "from": "site"
+    }
+  ],
+  "types": {
+    "office": {
+      "props": [
+        {
+          "name": "id",
+          "kind": "text",
+          "from": "logic"
+        },
+        {
+          "name": "title",
+          "kind": "text",
+          "from": "logic"
+        },
+        {
+          "name": "address",
+          "kind": "list",
+          "of": "text",
+          "from": "logic"
+        },
+        {
+          "name": "phone",
+          "kind": "text",
+          "nullable": true,
+          "from": "logic"
+        },
+        {
+          "name": "phoneHref",
+          "kind": "text",
+          "nullable": true,
+          "from": "logic"
+        },
+        {
+          "name": "email",
+          "kind": "text",
+          "nullable": true,
+          "from": "logic"
+        },
+        {
+          "name": "hours",
+          "kind": "list",
+          "of": "hours-row",
+          "description": "As data-hours carries them (contract/markup/locations.json, the open-now ruling).",
+          "from": "logic"
+        },
+        {
+          "name": "status",
+          "kind": "enum",
+          "values": [
+            "open",
+            "appointment",
+            "closed",
+            "unknown"
+          ],
+          "description": "The status at render; unknown draws none.",
+          "from": "logic"
+        },
+        {
+          "name": "coordinates",
+          "kind": "object",
+          "of": "coordinates",
+          "nullable": true,
+          "from": "logic"
+        },
+        {
+          "name": "directionsHref",
+          "kind": "text",
+          "nullable": true,
+          "from": "logic"
+        }
+      ]
+    },
+    "hours-row": {
+      "props": [
+        {
+          "name": "day",
+          "kind": "enum",
+          "values": [
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday",
+            "sunday"
+          ],
+          "from": "logic"
+        },
+        {
+          "name": "open",
+          "kind": "text",
+          "nullable": true,
+          "description": "HH:MM, 24-hour; null on an appointment row.",
+          "from": "logic"
+        },
+        {
+          "name": "close",
+          "kind": "text",
+          "nullable": true,
+          "from": "logic"
+        },
+        {
+          "name": "appointment",
+          "kind": "boolean",
+          "from": "logic"
+        }
+      ]
+    },
+    "coordinates": {
+      "props": [
+        {
+          "name": "lat",
+          "kind": "number",
+          "from": "logic"
+        },
+        {
+          "name": "lng",
+          "kind": "number",
+          "from": "logic"
+        }
+      ]
+    }
+  },
+  "platforms": {
+    "nextjs": {
+      "owes": "the section (contract/sections.json)"
+    },
+    "wordpress": {
+      "owes": "a view template that takes these props, split from the section's logic"
+    }
+  }
+}
