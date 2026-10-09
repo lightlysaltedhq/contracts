@@ -468,7 +468,7 @@ crossFail('a component variant whose default is not one of its options', (f) => 
 }, /button variant style defaults to outline, which is not one of its options in sections\.json/)
 crossFail('a component variant offering one value twice', (f) => {
   componentVariant(f); f['contract/sections.json'].components[0].variants[0].options.push({ value: 'ghost', label: 'Ghost again' })
-}, /button variant style offers ghost twice in sections\.json/)
+}, /button variant style offers ghost 2 times in sections\.json/)
 crossFail('a section variant whose default is not one of its options', (f) => {
   f['contract/sections.json'].sections[0].variants[0].default = 'z'
 }, /hero variant variant defaults to z, which is not one of its options in sections\.json/)
@@ -504,4 +504,13 @@ test('cross-file: a section variant with a bad default prints one line, not a se
   assert.equal(r.code, 1, r.out)
   const lines = r.out.split('\n').filter((l) => l.startsWith('✗'))
   assert.deepEqual(lines, ['✗ hero variant variant defaults to z, which is not one of its options in sections.json'])
+})
+test('cross-file: a value offered three times is reported once, with its count', () => {
+  const r = crossRun((f) => {
+    componentVariant(f)
+    f['contract/sections.json'].components[0].variants[0].options.push({ value: 'ghost', label: 'G2' }, { value: 'ghost', label: 'G3' })
+  })
+  assert.equal(r.code, 1, r.out)
+  const lines = r.out.split('\n').filter((l) => l.startsWith('✗'))
+  assert.deepEqual(lines, ['✗ button variant style offers ghost 3 times in sections.json'])
 })

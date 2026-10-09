@@ -162,7 +162,9 @@ if (vocab && (vocab.sections ?? []).every((x) => x && typeof x === 'object')) {
   const checkVariantDeclared = (owner, v) => {
     const before = fails.length
     const values = (v.options ?? []).map((o) => o.value)
-    for (const x of values.filter((x, i) => values.indexOf(x) !== i)) fails.push(`${owner} variant ${v.field} offers ${x} twice in sections.json`)
+    for (const x of new Set(values.filter((x, i) => values.indexOf(x) !== i))) {
+      fails.push(`${owner} variant ${v.field} offers ${x} ${values.filter((y) => y === x).length} times in sections.json`)
+    }
     if (!values.includes(v.default)) fails.push(`${owner} variant ${v.field} defaults to ${v.default}, which is not one of its options in sections.json`)
     if (fails.length > before) badVariants.add(`${owner}#${v.field}`)
   }
