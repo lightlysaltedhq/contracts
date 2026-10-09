@@ -76,5 +76,5 @@ difference by path. So a contract release that renames, retypes or re-limits a f
 consumer's check before anything type-checks, and the fix is to regenerate the snapshot, read its
 diff and migrate. Options that JSON can carry also work from the command line:
 `node emit/payload.mjs --check <snapshot> [--options <options.json>]` exits 1 on drift, and
-`--write <snapshot>` regenerates it. `emit/round-trip-payload.md` compares the output with the
-blocks salt-nextjs ships today.
+`--write <snapshot>` regenerates it. `reports/round-trip-payload.md`, which is not shipped,
+compares the output with the blocks salt-nextjs ships today.

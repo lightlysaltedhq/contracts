@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // The Payload round trip: what salt-contract/emit/payload.mjs generates for each section, against
-// the field half salt-nextjs ships today. Writes salt-contract/emit/round-trip-payload.md.
+// the field half salt-nextjs ships today. Writes salt-contract/reports/round-trip-payload.md.
 //
 //   node scripts/round_trip_payload.mjs <salt-nextjs checkout> [--check]
 //
@@ -32,7 +32,7 @@ import { loadContract, resolveSection } from '../salt-contract/emit/_contract.mj
 import { toPayloadBlocks } from '../salt-contract/emit/payload.mjs'
 
 const here = path.dirname(fileURLToPath(import.meta.url))
-const reportPath = path.join(here, '..', 'salt-contract', 'emit', 'round-trip-payload.md')
+const reportPath = path.join(here, '..', 'salt-contract', 'reports', 'round-trip-payload.md')
 const nextjs = path.resolve(process.argv[2] ?? path.join(here, '..', '..', '..', 'Products', 'Salt', 'salt-nextjs'))
 const check = process.argv.includes('--check')
 
