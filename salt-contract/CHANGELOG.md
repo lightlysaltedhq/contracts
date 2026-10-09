@@ -10,24 +10,29 @@ Salted's decision log for Product Salt.
   It is the six shared stylesheets in load order (base, sections, primitives, blocks, chrome,
   views), minified with comments stripped (45 KB), built deterministically by `npm run
   build:salt-bundle` with the lockfile's esbuild. `npm run salt-stylesheets` fails when the
-  committed bundle is not what the sources build; its other checks still read the six sources. It
-  keeps base.css's `@layer base`, so it is served after Tailwind v4 (both platforms' version) or
-  first with none.
+  committed bundle is not what the sources build, or when `styles/` and the build's load order name
+  different sources; its other checks still read the six sources. Both platforms serve it verbatim
+  as a stylesheet of its own (a separate `<link>` or enqueue of a copy, never through Tailwind or a
+  CSS pipeline): after Tailwind v4's stylesheet (both platforms' version), whose `@layer theme,
+  base, components, utilities` declaration its `@layer base` joins, or first with none. Tailwind v3
+  beside it is not supported.
 - The conformance runner (ID-3608), `conformance.mjs` (`./conformance`, bin `salt-conformance`),
   which each implementation points at itself in its own CI. Per section it sends every fixture case
   to the implementation's adapter (a command or a local endpoint), normalises both sides and names
   the case and the first differing node by path; checks the implementation's Payload or ACF field
   snapshot with the emitters' own drift checks, filed per section; checks every `salt-*` class it
   writes against the markup's vocabulary; and checks the stylesheet it serves (a file, or a running
-  site's URL) is byte-identical to `styles/salt.css`, refusing the package's own `styles/`. A
-  fixture mismatch aligns each element's children first, so a dropped sibling is `missing` and a
-  moved one `order`, with both positions. An implementation conforms only when all four checks ran
-  for every section it ships and all pass (SC-017); a run that leaves a section or a check out needs
-  `--partial`, which is reported as partial, not conforming, and exits 1. It writes
-  `conformance.json` (format `salt-conformance/1`, the parity matrix's input) and `conformance.md`,
-  and exits 1 on any mismatch. `--not-shipped` reports a section as not shipped rather than failed.
-  `npm run salt-conformance` (in `verify`, CI and the release workflow) runs it against the
-  reference adapter with both emitters' snapshots, which must conform.
+  site's URL) is byte-identical to `styles/salt.css`, refusing a path inside the package itself (a
+  link elsewhere to the package's file passes). A fixture mismatch aligns each element's children
+  first, identical nodes anchor the alignment, so a moved identical node is `order` (with both
+  positions), a replaced sibling `element`, and a dropped or added one `missing` or `unexpected`. An
+  implementation conforms only when all four checks ran for every section it ships and all pass
+  (SC-017); a run that leaves a section or a check out needs `--partial`, which is reported as
+  partial, not conforming, and exits 1. It writes `conformance.json` (format `salt-conformance/1`,
+  the parity matrix's input) and `conformance.md`, and exits 1 on any mismatch. `--not-shipped`
+  reports a section as not shipped rather than failed. `npm run salt-conformance` (in `verify`, CI
+  and the release workflow) runs it against the reference adapter with both emitters' snapshots,
+  which must conform.
 - Image sizes (SC-016): `contract/image-sizes.json` (`./image-sizes`, schema `./schema/image-sizes`)
   fixes each image slot's default `sizes`, per band and per card column count, the candidate widths
   and the rule that picks them, the srcset capped at the upload's intrinsic width (listed itself
