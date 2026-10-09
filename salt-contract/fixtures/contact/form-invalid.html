@@ -1,0 +1,57 @@
+<section class="salt-section" id="enquire" aria-labelledby="enquire__heading" data-tone="surface" data-tone-dark="surface" data-spacing="md" data-width="default" data-track="contact-1" style="--salt-section-space: var(--space-section-md)">
+  <div class="salt-section__content">
+    <div class="salt-block" data-block="contact">
+      <h2 id="enquire__heading">Start a project</h2>
+      <p class="salt-intro">Tell us about your garden and what you would like from it.</p>
+      <div class="salt-contact__details">
+        <p class="salt-contact__organisation">Hedgerow &amp; Co Gardens</p>
+        <p><a href="tel:01174960123">0117 496 0123</a></p>
+        <p><a href="mailto:hello@hedgerow.example">hello@hedgerow.example</a></p>
+      </div>
+      <p class="salt-intro">We reply within two working days.</p>
+      <form class="salt-contact__form" id="enquire__form" method="post" action="{{salt:form-action}}" novalidate>
+        <div class="salt-contact__field">
+          <label class="salt-contact__label" for="enquire__name">Your name</label>
+          <input class="salt-contact__input" id="enquire__name" name="name" type="text" autocomplete="name" required value="Ruth Ellis">
+        </div>
+        <div class="salt-contact__field">
+          <label class="salt-contact__label" for="enquire__email">Email address</label>
+          <p class="salt-contact__error" id="enquire__email-error">Enter an email address like name@example.com</p>
+          <input class="salt-contact__input" id="enquire__email" name="email" type="email" autocomplete="email" required aria-invalid="true" aria-describedby="enquire__email-error enquire__status" value="ruth@">
+        </div>
+        <div class="salt-contact__field">
+          <label class="salt-contact__label" for="enquire__phone">Phone <span class="salt-contact__optional">(optional)</span></label>
+          <input class="salt-contact__input" id="enquire__phone" name="phone" type="tel" autocomplete="tel">
+        </div>
+        <div class="salt-contact__field">
+          <label class="salt-contact__label" for="enquire__enquiry-type">What is it about?</label>
+          <select class="salt-contact__input" id="enquire__enquiry-type" name="enquiryType">
+            <option value="design">Garden design</option>
+            <option value="maintenance" selected>Maintenance</option>
+          </select>
+        </div>
+        <div class="salt-contact__field">
+          <label class="salt-contact__label" for="enquire__message">Your message</label>
+          <p class="salt-contact__error" id="enquire__message-error">Tell us a little about your garden</p>
+          <textarea class="salt-contact__input" id="enquire__message" name="message" rows="6" required aria-invalid="true" aria-describedby="enquire__message-error enquire__status"></textarea>
+        </div>
+        <div class="salt-contact__field">
+          <label class="salt-contact__label" for="enquire__challenge">{{salt:challenge-question}}</label>
+          <input class="salt-contact__input salt-contact__input--short" id="enquire__challenge" name="challengeAnswer" type="text" inputmode="numeric" autocomplete="off" required aria-describedby="enquire__status">
+        </div>
+        <input type="hidden" name="challengeToken" value="{{salt:challenge-token}}">
+        <input type="hidden" name="formToken" value="{{salt:form-token}}">
+        <div class="salt-sr-only salt-contact__trap" aria-hidden="true">
+          <label for="enquire__website">Leave this field empty</label>
+          <input id="enquire__website" name="website" type="text" tabindex="-1" autocomplete="off">
+        </div>
+        <input type="hidden" name="returnTo" value="/contact/">
+        <p class="salt-contact__privacy">We use your details only to reply. Read our <a href="/privacy/">privacy notice</a>.</p>
+        <div class="salt-contact__actions">
+          <button class="salt-button salt-contact__submit" type="submit" data-style="primary">Send enquiry</button>
+        </div>
+        <p class="salt-contact__status" id="enquire__status" role="status" aria-live="polite" tabindex="-1" data-tone="problem">Please correct the two fields marked.</p>
+      </form>
+    </div>
+  </div>
+</section>

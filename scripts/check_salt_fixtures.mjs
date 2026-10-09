@@ -38,6 +38,8 @@ const fails = []
 const fail = (msg) => fails.push(msg)
 const readJson = (p) => JSON.parse(readFileSync(path.join(dir, p), 'utf8'))
 const { normalise, parse, CONTAINERS } = await import(pathToFileURL(path.join(dir, 'normalise.mjs')).href)
+const { slotOf, sizesOf, sourcesOf, drawnSizes } = await import(pathToFileURL(path.join(here, 'salt_image_slots.mjs')).href)
+const imageTable = existsSync(path.join(dir, 'contract/image-sizes.json')) ? readJson('contract/image-sizes.json') : null
 const { containersFrom } = await import(pathToFileURL(path.join(here, 'salt_normalise_containers.mjs')).href)
 
 const vocab = readJson('contract/sections.json')
@@ -194,7 +196,7 @@ function checkValue(f, v, p, c, siblings) {
   }
 }
 
-const CONTEXT_KEYS = ['headingLevel', 'headingRendered', 'priorityMedia', 'track', 'collapseTop', 'index', 'now']
+const CONTEXT_KEYS = ['headingLevel', 'headingRendered', 'priorityMedia', 'track', 'collapseTop', 'index', 'now', 'locale']
 const INPUT_KEYS = ['$comment', 'section', 'summary', 'values', 'context', 'media', 'documents', 'collections', 'route', 'site']
 
 function settingsFields(fieldsDoc) {
@@ -216,24 +218,26 @@ function checkInput(c) {
   if (typeof ctx.priorityMedia !== 'boolean') fail(`${at}.json: context.priorityMedia must be a boolean`)
   if (typeof ctx.track !== 'string' || !new RegExp(`^${section}-[1-9][0-9]*(@.+)?$`).test(ctx.track)) fail(`${at}.json: context.track must be ${section}-<n> (section#data-track)`)
   if (ctx.collapseTop !== undefined && typeof ctx.collapseTop !== 'boolean') fail(`${at}.json: context.collapseTop must be a boolean`)
-  if (!(Number.isInteger(ctx.index) && ctx.index >= 1)) fail(`${at}.json: context.index, the section's place on the page, counts from 1`)
+  if (!(Number.isInteger(ctx.index) && ctx.index >= 0)) fail(`${at}.json: context.index, the plan's index (view-props/_shared.json), counts the page's sections from 0`)
   if (ctx.headingRendered !== undefined && typeof ctx.headingRendered !== 'boolean') fail(`${at}.json: context.headingRendered must be a boolean`)
   // The context must describe a page that can exist.
   const n = Number(/-([1-9][0-9]*)(@.+)?$/.exec(ctx.track ?? '')?.[1])
-  if (Number.isInteger(ctx.index) && n > ctx.index) fail(`${at}.json: context.track ${ctx.track} counts ${n} ${section} sections, but the section is number ${ctx.index} on the page (section#data-track)`)
+  if (Number.isInteger(ctx.index) && n > ctx.index + 1) fail(`${at}.json: context.track ${ctx.track} counts ${n} ${section} sections, but only ${ctx.index + 1} sections come up to this one (index ${ctx.index}, from 0) (section#data-track)`)
   const level = ctx.headingRendered ? 2 : 1
   if (Number.isInteger(ctx.headingLevel) && ctx.headingLevel !== level) {
     fail(`${at}.json: context.headingLevel ${ctx.headingLevel} cannot be: ${ctx.headingRendered ? 'a heading rendered earlier, so this one is 2' : 'no heading rendered earlier (context.headingRendered), so this section claims the h1'} (section#single-h1)`)
   }
-  if (typeof ctx.priorityMedia === 'boolean' && Number.isInteger(ctx.index) && ctx.priorityMedia !== (ctx.index === 1)) {
-    fail(`${at}.json: context.priorityMedia is ${ctx.priorityMedia} for section ${ctx.index}; the plan grants it to the first section only (section#priority-media)`)
+  if (typeof ctx.priorityMedia === 'boolean' && Number.isInteger(ctx.index) && ctx.priorityMedia !== (ctx.index === 0)) {
+    fail(`${at}.json: context.priorityMedia is ${ctx.priorityMedia} for section ${ctx.index}; the plan grants it to the first section (index 0) only (section#priority-media)`)
   }
-  if (ctx.collapseTop === true && ctx.index === 1) fail(`${at}.json: context.collapseTop needs a section before it (section#adjacent-collapse)`)
+  if (ctx.locale !== undefined && !(typeof ctx.locale === 'string' && Intl.DateTimeFormat.supportedLocalesOf(ctx.locale).length)) fail(`${at}.json: context.locale must be a BCP 47 locale the platform knows, such as en-GB`)
+  if (ctx.collapseTop === true && ctx.index === 0) fail(`${at}.json: context.collapseTop needs a section before it (section#adjacent-collapse)`)
   for (const [id, m] of Object.entries(input.media ?? {})) {
     const p = `${at}.json media.${id}`
-    if (typeof m.src !== 'string' || typeof m.sizes !== 'string' || typeof m.alt !== 'string') fail(`${p} needs src, sizes and alt strings`)
+    // The record names the upload, never its sizes or srcset: those are the slot's (SC-016).
+    for (const k of Object.keys(m)) if (!['url', 'width', 'height', 'alt', 'caption', 'focalPoint'].includes(k)) fail(`${p}.${k}: a media record holds url, width, height, alt, caption and focalPoint only; sizes and srcset come from contract/image-sizes.json`)
+    if (typeof m.url !== 'string' || !m.url.includes('{width}') || typeof m.alt !== 'string') fail(`${p} needs a url holding {width}, the template each candidate width fills, and an alt string`)
     if (!(Number.isInteger(m.width) && m.width > 0 && Number.isInteger(m.height) && m.height > 0)) fail(`${p} needs whole-number width and height`)
-    if (!Array.isArray(m.srcset) || !m.srcset.length || m.srcset.some((s) => typeof s.url !== 'string' || !Number.isInteger(s.width))) fail(`${p}.srcset must list { url, width } candidates`)
   }
   for (const [source, items] of Object.entries(input.collections ?? {})) {
     if (!Array.isArray(items) || items.some((i) => !isObject(i) || typeof i.id !== 'string')) fail(`${at}.json collections.${source} must be a list of items with string ids`)
@@ -386,8 +390,10 @@ const isImage = (c, id) => typeof id === 'string' && isObject(c.input.media?.[id
 const background = (c) => isImage(c, c.input.values?.settings?.backgroundImage?.image)
 const scrimOn = (c) => background(c) && c.input.values.settings.backgroundImage.scrim !== false
 // The stored link a drawn button stands for, found by its label.
+// A button's own words: its text without the site's arrow, which is decoration.
+const labelOf = (el) => el.children.map((x) => (x.type === 'text' ? x.value : classesOf(x).includes('salt-arrow') ? '' : labelOf(x))).join('').replace(/\s+/g, ' ').trim()
 function linkFor(c, el) {
-  const label = textOf(el)
+  const label = labelOf(el)
   const found = []
   const walk = (v) => {
     if (Array.isArray(v)) { v.forEach(walk); return }
@@ -399,6 +405,35 @@ function linkFor(c, el) {
   return found.length === 1 ? found[0] : undefined
 }
 const newTab = (c, el) => { const link = linkFor(c, el); return link ? link.newTab === true : undefined }
+const currentPage = (c, el) => (c.input.route?.pagination ? textOf(el) === String(c.input.route.pagination.current) : undefined)
+// The tabs section: how many panels render, and whether they are tabbed (tab-set.json: more than
+// one panel and a name, the heading or else the label).
+const panelsOf = (c) => (c.input.values?.tabs ?? []).filter((t) => filledText(t.label)).length
+const tabbed = (c) => (c.section === 'tabs' ? panelsOf(c) > 1 && (filledText(c.input.values.heading) || filledText(c.input.values.label)) : undefined)
+// The page window pagination.json fixes: the first, the last, and the current page with one
+// neighbour each side; a run left out is one gap (null), and a one-page gap is drawn as the page.
+function pageWindow(current, total) {
+  const offered = (n) => n === 1 || n === total || Math.abs(n - current) <= 1
+  const shown = []
+  let previous = 0
+  for (let n = 1; n <= total; n++) {
+    if (!offered(n) && !(offered(n - 1) && offered(n + 1))) continue
+    if (n - previous > 1) shown.push(null)
+    shown.push(n)
+    previous = n
+  }
+  return shown
+}
+// section#display-forms: a written phone number as its tel: href, or null when it draws no link.
+function telHref(shown) {
+  if (!/^\+?[0-9 ().-]+$/.test(shown)) return null
+  if (/[()]/.test(shown) && !/^(?:\+[0-9]+)?[ .-]*\([0-9 ]+\)[ .-]*[0-9][^()]*$/.test(shown)) return null
+  const international = shown.startsWith('+')
+  const written = (international ? shown.replace('(0)', '') : shown).replace(/[^0-9]/g, '')
+  const digits = international && written.startsWith('440') ? `44${written.slice(3)}` : written
+  if (digits === '' || digits.length > 15) return null
+  return `tel:${international ? '+' : ''}${digits}`
+}
 const WHEN = {
   'section:root:data-media': (c) => background(c),
   'section:root:data-divider': (c) => effectiveSetting(c, 'divider') === true,
@@ -408,8 +443,16 @@ const WHEN = {
   'hero:root:data-align': (c) => effective(c, 'variant') === 'minimal',
   'button:root:target': newTab,
   'button:root:rel': newTab,
-  'pagination:page-link:aria-current': (c, el) => (c.input.route?.pagination ? textOf(el) === String(c.input.route.pagination.current) : undefined),
-  'tabs:tab-set:aria-label': (c) => filledText(c.input.values.heading) || filledText(c.input.values.label),
+  'pagination:page-link:aria-current': currentPage,
+  'pagination:page-first-link:aria-current': currentPage,
+  'pagination:page-last-link:aria-current': currentPage,
+  'tab-set:root:data-tabbed': tabbed,
+  'contact-form:input:type': (c, el) => el.name === 'input',
+  'contact-form:input:rows': (c, el) => el.name === 'textarea',
+  'contact-form:input:autocomplete': (c, el) => ['name', 'email', 'phone'].includes(attr(el, 'name')),
+  'tab-set:panel:role': tabbed,
+  'tab-set:panel:aria-labelledby': tabbed,
+  'tab-set:panel:tabindex': tabbed,
   'tab-set:input:checked': (c, el) => /__tab-1$/.test(attr(el, 'id') ?? ''),
   // A row draws its side only when it has both an image and words.
   'media-text:row:data-media-side': (c, el) => {
@@ -435,7 +478,19 @@ function rowSide(c, el) {
   const row = shown[k]
   return row ? row.mediaSide ?? byName.get('mediaSide').default : undefined
 }
+// The background's inline style, as media.json writes it: the fit, and the position unless it is
+// the focal point of an image that stores none.
+const KEYWORD = { 'top-left': 'top left', top: 'top', 'top-right': 'top right', left: 'left', centre: 'center', right: 'right',
+  'bottom-left': 'bottom left', bottom: 'bottom', 'bottom-right': 'bottom right' }
+function backgroundStyle(c) {
+  const bg = c.input.values?.settings?.backgroundImage ?? {}
+  const position = bg.position ?? 'focal-point'
+  const focal = c.input.media?.[bg.image]?.focalPoint
+  const at = position === 'focal-point' ? (focal ? `${focal.x}% ${focal.y}%` : null) : KEYWORD[position]
+  return `object-fit: ${bg.fit ?? 'cover'}${at ? `; object-position: ${at}` : ''}`
+}
 const VALUE = {
+  'section:background:style': backgroundStyle,
   'section:root:data-track': (c) => c.input.context.track,
   'section:root:data-tone': (c) => effectiveSetting(c, 'tone'),
   'section:root:data-tone-dark': darkTone,
@@ -443,6 +498,9 @@ const VALUE = {
   'section:root:data-width': (c) => effectiveSetting(c, 'width'),
   'accordion:item:name': (c) => (groupName[c.section] ? `${groupName[c.section]}-${c.input.context.index}` : undefined),
   'media-text:row:data-media-side': rowSide,
+  // A contact field's type and autocomplete follow its name (contact-form.json, SC-016).
+  'contact-form:input:type': (c, el) => ({ name: 'text', email: 'email', phone: 'tel' })[attr(el, 'name')],
+  'contact-form:input:autocomplete': (c, el) => ({ name: 'name', email: 'email', phone: 'tel' })[attr(el, 'name')],
 }
 
 function checkAttrs(alt, el, c) {
@@ -454,13 +512,16 @@ function checkAttrs(alt, el, c) {
     if (name === 'class') continue
     const rule = rules[name]
     if (rule === undefined) { problems.push(`${describe(el)} carries ${name}, which the markup does not declare`); continue }
+    // Where the case fixes the value exactly, that is the test, and the template's shape is not.
+    const want = VALUE[alt.from?.[name]]?.(c, el)
+    if (typeof want === 'string') {
+      const canon = name === 'style' ? canonStyle : (x) => x
+      if (canon(value) !== canon(want)) problems.push(`${describe(el)} ${name}="${value}" disagrees with the case, which gives ${JSON.stringify(want)}`)
+      continue
+    }
     if (typeof rule === 'string') { if (!templateMatch(rule, value, name, c)) problems.push(`${describe(el)} ${name}="${value}" is not ${JSON.stringify(rule)}`); continue }
     if (rule.enum) { if (!rule.enum.includes(value)) problems.push(`${describe(el)} ${name}="${value}" is not one of ${rule.enum.join(', ')}`); continue }
     if (!templateMatch(rule.value, value, name, c)) problems.push(`${describe(el)} ${name}="${value}" is not ${JSON.stringify(rule.value)}`)
-  }
-  for (const [name, value] of el.attrs) {
-    const want = VALUE[alt.from?.[name]]?.(c, el)
-    if (typeof want === 'string' && value !== want) problems.push(`${describe(el)} ${name}="${value}" disagrees with the case, which gives ${JSON.stringify(want)}`)
   }
   for (const [name, rule] of Object.entries(rules)) {
     if (typeof rule === 'string' || rule.when === undefined) {
@@ -604,6 +665,7 @@ function checkMarkup(c) {
   if (top.length !== 1) { fail(`${at}.html must be one section wrapper; it has ${top.length} top-level elements`); return }
   const root = top[0]
   c.root = root
+  const every = () => [root, ...descendants(root)]
   c.parents = new Map()
   for (const el of [root, ...descendants(root)]) for (const child of elementsOf(el)) c.parents.set(child, el)
   const { doc, spec, elements } = wrapperSpec(c)
@@ -631,6 +693,63 @@ function checkMarkup(c) {
   for (const [role, holds, when] of expectations) {
     if (holds && !drawn(role)) fail(`${at}.html: ${role} is not drawn, but ${when} (the markup draws it then)`)
     if (!holds && drawn(role)) fail(`${at}.html: ${role} is drawn, but the markup draws it only when ${when}`)
+  }
+
+  // Counts the case fixes: a tab set's panels and controls, and the pagination's window.
+  if (doc.id === 'tabs') {
+    const n = panelsOf(c)
+    const panels = every().filter((e) => classesOf(e).includes('salt-tabs__panel')).length
+    const controls = every().filter((e) => classesOf(e).includes('salt-tabs__control')).length
+    if (panels !== n) fail(`${at}.html: ${panels} tab panels drawn; the case has ${n} tabs with a label`)
+    if (controls !== (tabbed(c) ? n : 0)) fail(`${at}.html: ${controls} tab controls drawn; the case gives ${tabbed(c) ? n : 0} (tab-set.json: tabbed only with more than one panel and a name)`)
+  }
+  const pages = input.route?.pagination
+  const nav = every().find((e) => classesOf(e).includes('salt-pagination'))
+  if (pages) {
+    const want = pages.total > 1
+      ? [...(pages.current > 1 ? ['previous'] : []), ...pageWindow(pages.current, pages.total).map((n) => (n === null ? 'gap' : String(n))), ...(pages.current < pages.total ? ['next'] : [])]
+      : []
+    const items = nav ? elementsOf(elementsOf(nav)[0] ?? { children: [] }) : []
+    const got = items.map((li) => {
+      if (classesOf(li).includes('salt-pagination__gap')) return 'gap'
+      const a = elementsOf(li)[0]
+      return a && attr(a, 'data-step') ? attr(a, 'data-step') : a ? textOf(a) : '?'
+    })
+    if (want.join(' ') !== got.join(' ')) fail(`${at}.html: the pagination draws [${got.join(', ')}]; page ${pages.current} of ${pages.total} gives [${want.join(', ')}] (pagination.json)`)
+  }
+
+  // Display forms (section#display-forms, SC-016): the machine forms are fixed and the text is
+  // the locale's, so a case that draws a date, a time or a phone names its locale.
+  // A rich-text body is editor content: its links are written as stored, not derived.
+  const inBody = (e) => { for (let p = c.parents.get(e); p; p = c.parents.get(p)) if (classesOf(p).includes('salt-rich-text')) return true; return false }
+  const times = every().filter((e) => e.name === 'time' && !inBody(e))
+  const phones = every().filter((e) => e.name === 'a' && (attr(e, 'href') ?? '').startsWith('tel:') && !inBody(e))
+  if ((times.length || phones.length) && !input.context.locale) fail(`${at}.json: the case draws a date, time or phone, so context.locale must say how they display (section#display-forms)`)
+  const locale = input.context.locale
+  for (const t of times) {
+    const dt = attr(t, 'datetime') ?? ''
+    let text
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dt)) text = locale && new Intl.DateTimeFormat(locale, { dateStyle: 'long', timeZone: 'UTC' }).format(new Date(`${dt}T00:00:00Z`))
+    else if (/^([01]\d|2[0-3]):[0-5]\d$/.test(dt)) text = locale && new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' }).format(new Date(`1970-01-01T${dt}:00Z`))
+    else { fail(`${at}.html: <time datetime="${dt}"> is not ISO 8601 (YYYY-MM-DD or HH:MM) (section#display-forms)`); continue }
+    if (text && textOf(t) !== text) fail(`${at}.html: <time datetime="${dt}"> reads "${textOf(t)}"; ${locale} gives "${text}" (section#display-forms)`)
+  }
+  for (const a of phones) {
+    const want = telHref(textOf(a))
+    if (attr(a, 'href') !== want) fail(`${at}.html: the phone link "${textOf(a)}" has href ${attr(a, 'href')}; section#display-forms gives ${want ?? 'no link'}`)
+  }
+  for (const e of every()) for (const [name, value] of e.attrs) if (value.includes('\\/')) fail(`${at}.html: ${describe(e)} ${name} escapes a slash; JSON in an attribute is written without (section#display-forms)`)
+
+  // A section's call to action takes the site's arrow, in its label span, when the site supplies
+  // one; every other button never does (button.json).
+  const ARROWED = ['salt-hero__actions', 'salt-cta__actions', 'salt-media-text__actions', 'salt-process__step', 'salt-showcase__view-all']
+  for (const el of [root, ...descendants(root)].filter((e) => classesOf(e).includes('salt-button'))) {
+    const arrowed = elementsOf(el).some((k) => classesOf(k).includes('salt-button__label'))
+    const parent = c.parents.get(el)
+    const callToAction = el.name === 'a' && parent && ARROWED.some((k) => classesOf(parent).includes(k))
+    const wants = callToAction && filledText(input.site?.arrow)
+    if (wants && !arrowed) fail(`${at}.html: ${describe(el)} "${textOf(el)}" draws no arrow, but the site supplies one (button.json)`)
+    if (!wants && arrowed) fail(`${at}.html: ${describe(el)} "${textOf(el)}" draws an arrow, which ${callToAction ? 'the site does not supply' : 'only a section\'s call to action takes'} (button.json)`)
   }
 
   // Headings (section#labelled-by, section#heading-level, section#body-heading-base).
@@ -678,6 +797,25 @@ function checkMarkup(c) {
   for (const img of imgs) {
     for (const name of ['src', 'srcset', 'sizes', 'width', 'height', 'alt']) if (!hasAttr(img, name)) fail(`${at}.html: an img lacks ${name} (SC-007)`)
     for (const name of ['width', 'height']) if (hasAttr(img, name) && !/^[1-9][0-9]*$/.test(attr(img, name))) fail(`${at}.html: an img's ${name} is not a whole number of pixels`)
+    // The slot's default sizes, srcset and src (contract/image-sizes.json, SC-016).
+    if (!imageTable) continue
+    const ancestors = []
+    for (let p = c.parents.get(img); p; p = c.parents.get(p)) ancestors.push(p)
+    const placed = slotOf(img, ancestors, doc.id, (f) => effective(c, f))
+    if (!placed) { fail(`${at}.html: ${describe(img)} takes no slot in contract/image-sizes.json's placements`); continue }
+    // A drawn slot (the logo) sizes from its own record, matched by the URL template.
+    const drawnRecord = imageTable.slots[placed.slot]?.drawn && Object.values(input.media ?? {}).find((m) => {
+      const [pre, post] = (m.url ?? '').split('{width}')
+      const src = attr(img, 'src') ?? ''
+      return post !== undefined && src.startsWith(pre) && src.endsWith(post)
+    })
+    const sizes = drawnRecord ? drawnSizes(imageTable, placed.slot, drawnRecord, input.site?.logoHeight) : sizesOf(imageTable, placed, effectiveSetting(c, 'width'))
+    if (attr(img, 'sizes') !== sizes) { fail(`${at}.html: ${describe(img)} sizes="${attr(img, 'sizes')}"; its slot (${placed.slot}${placed.band ? `, band ${effectiveSetting(c, 'width')}` : ''}${placed.columns ? `, ${placed.columns} columns` : ''}) gives "${sizes}"`); continue }
+    const record = Object.values(input.media ?? {}).find((m) => typeof m.url === 'string' && sourcesOf(imageTable, m, sizes).src === attr(img, 'src'))
+    if (!record) { fail(`${at}.html: ${describe(img)} src ${attr(img, 'src')} is not the widest candidate of any media record the case holds`); continue }
+    const want = sourcesOf(imageTable, record, sizes)
+    if (attr(img, 'srcset') !== want.srcset) fail(`${at}.html: ${describe(img)} srcset is not the candidates contract/image-sizes.json gives for its sizes: ${want.srcset}`)
+    for (const name of ['width', 'height']) if (attr(img, name) !== String(record[name])) fail(`${at}.html: ${describe(img)} ${name} is ${attr(img, name)}; the media record says ${record[name]}`)
   }
   const priority = imgs.filter((img) => attr(img, 'fetchpriority') === 'high')
   if (priority.length > 1) fail(`${at}.html: ${priority.length} images claim fetchpriority=high; at most one does (section#priority-media)`)
@@ -687,8 +825,9 @@ function checkMarkup(c) {
     if (!isPriority && attr(img, 'loading') !== 'lazy') fail(`${at}.html: an img that is not the priority image must be loading="lazy" (section#priority-media)`)
   }
   const backgroundImg = bindings.get('background')?.[0]
+  // A role, or the roles the first item may sit in (the carousel's track, list or lone card).
   const role = doc.priorityMedia?.role
-  const within = role ? (bindings.get(role) ?? []).flatMap((el) => (el.name === 'img' ? [el] : descendants(el).filter((d) => d.name === 'img'))) : []
+  const within = arr(role ?? []).flatMap((r) => bindings.get(r) ?? []).flatMap((el) => (el.name === 'img' ? [el] : descendants(el).filter((d) => d.name === 'img')))
   const expected = !ctx.priorityMedia ? null : backgroundImg ?? (within.length ? within : null)
   if (!ctx.priorityMedia && priority.length) fail(`${at}.html: the plan grants no priority media, but an img carries fetchpriority=high`)
   if (expected && !(Array.isArray(expected) ? expected.includes(priority[0]) : priority[0] === expected)) {
@@ -708,25 +847,35 @@ function raw(node) {
   return VOID.has(node.name) ? `<${node.name}${attrs}>` : `<${node.name}${attrs}>${inner}</${node.name}>`
 }
 
+const declaredMask = (el, name, insideForm) =>
+  (name === 'action' && el.name === 'form' && classesOf(el).includes('salt-contact__form')) ||
+  (insideForm && name === 'value' && el.name === 'input' && attr(el, 'type') === 'hidden' && ['formToken', 'challengeToken'].includes(attr(el, 'name')))
+
 function checkNormaliser(c) {
   if (!c.renders) return
   const canonical = normalise(c.html)
   if (normalise(canonical) !== canonical) fail(`${c.at}.html: normalise is not idempotent on it`)
   const tree = parse(c.html)
   if (normalise(raw(tree)) !== canonical) fail(`${c.at}.html: normalise changes its verdict when the same tree is reserialised`)
-  const visit = (el) => {
+  const visit = (el, inForm) => {
+    const inside = inForm || (el.name === 'form' && classesOf(el).includes('salt-contact__form'))
     // Icon artwork is dropped by design (SC-007); everything else must count.
-    if (el.name === 'svg' && classesOf(el).includes('salt-icon')) { mutate(el); return }
-    mutate(el)
-    for (const child of elementsOf(el)) visit(child)
+    if (el.name === 'svg' && classesOf(el).includes('salt-icon')) { mutate(el, inside); return }
+    mutate(el, inside)
+    for (const child of elementsOf(el)) visit(child, inside)
   }
-  const mutate = (el) => {
+  const mutate = (el, inside) => {
     for (let k = 0; k < el.attrs.length; k++) {
       const saved = el.attrs
       const [name, value] = saved[k]
+      // The contact form's declared per-request values are masked by design (SC-016): another
+      // value is no difference, but a missing or empty one is. The list is the contract's, held
+      // here rather than asked of the normaliser, so a normaliser that masks more is caught.
+      const masked = declaredMask(el, name, inside)
       for (const [what, attrs] of [
         ['removing', saved.filter((_, x) => x !== k)],
-        ['changing', saved.map((a, x) => (x === k ? [name, `${value}-mutated`] : a))],
+        ...(masked ? [['emptying', saved.map((a, x) => (x === k ? [name, ''] : a))]] : []),
+        ...(masked ? [] : [['changing', saved.map((a, x) => (x === k ? [name, `${value}-mutated`] : a))]]),
       ]) {
         el.attrs = attrs
         if (normalise(raw(tree)) === canonical) fail(`${c.at}.html: ${what} ${name} on ${describe(el)} does not change normalise's output; the normaliser hides a real difference`)
@@ -734,7 +883,7 @@ function checkNormaliser(c) {
       }
     }
   }
-  for (const el of elementsOf(tree)) visit(el)
+  for (const el of elementsOf(tree)) visit(el, false)
 }
 
 // ── The normaliser's containers agree with the stylesheets ──────────────────────────────────────

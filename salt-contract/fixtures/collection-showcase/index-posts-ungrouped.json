@@ -1,0 +1,67 @@
+{
+  "section": "collection-showcase",
+  "summary": "Posts in the index layout, ungrouped: every post in one unheaded index list, with no group wrapper or heading.",
+  "values": {
+    "heading": "All our guides",
+    "source": "posts",
+    "layout": "index",
+    "query": {
+      "mode": "automatic",
+      "count": 4
+    },
+    "groupByCategory": false,
+    "viewAll": false,
+    "settings": {
+      "anchorId": "journal-all"
+    }
+  },
+  "context": {
+    "headingLevel": 2,
+    "headingRendered": true,
+    "priorityMedia": false,
+    "track": "collection-showcase-1",
+    "index": 1
+  },
+  "collections": {
+    "posts": [
+      {
+        "id": "mulch",
+        "title": "A year of mulching, month by month",
+        "href": "/journal/mulching/"
+      },
+      {
+        "id": "frost",
+        "title": "Protecting tender plants from the first frosts",
+        "href": "/journal/protecting-tender-plants/",
+        "categories": [
+          {
+            "title": "Seasonal care"
+          }
+        ]
+      },
+      {
+        "id": "bulbs",
+        "title": "Spring bulbs worth planting in October",
+        "href": "/journal/spring-bulbs/",
+        "categories": [
+          {
+            "title": "Seasonal care"
+          }
+        ]
+      },
+      {
+        "id": "hedges",
+        "title": "When to cut a hedge without disturbing nesting birds",
+        "href": "/journal/cutting-hedges/",
+        "categories": [
+          {
+            "title": "Wildlife"
+          }
+        ]
+      }
+    ]
+  },
+  "site": {
+    "labels": {}
+  }
+}

@@ -14,7 +14,10 @@
         "note": "Owned by the contact section's settled id, as every id below is (SC-012). <field> is the field's contract name in kebab case, never camelCase: enquiryType's id is <anchor>__enquiry-type."
       },
       "method": "post",
-      "action": "from:platform endpoint",
+      "action": {
+        "value": "from:platform endpoint",
+        "note": "Platform-native (SC-003). The normaliser masks it as {{salt:form-action}} (README, \"Fixtures\"), so the rest of the form compares."
+      },
       "novalidate": ""
     },
     "note": "The action is platform-native (SC-003); the markup is not."
@@ -78,7 +81,36 @@
           ],
           "attributes": {
             "id": "<anchor>__<field>",
-            "name": "from:field name",
+            "name": {
+              "enum": [
+                "name",
+                "email",
+                "phone",
+                "enquiryType",
+                "message"
+              ],
+              "note": "The field's contract name; each platform maps it to its handler (SC-003)."
+            },
+            "type": {
+              "enum": [
+                "text",
+                "email",
+                "tel"
+              ],
+              "when": "an input: text for name, email for email, tel for phone (SC-016)"
+            },
+            "rows": {
+              "value": "6",
+              "when": "the message textarea (SC-016)"
+            },
+            "autocomplete": {
+              "enum": [
+                "name",
+                "email",
+                "tel"
+              ],
+              "when": "name, email or phone"
+            },
             "required": {
               "value": "",
               "when": "the field is required"
@@ -91,15 +123,12 @@
               "value": "<anchor>__<field>-error <anchor>__status",
               "when": "error or challenge"
             },
-            "autocomplete": {
-              "enum": [
-                "name",
-                "email",
-                "tel"
-              ]
+            "value": {
+              "value": "from:the value sent",
+              "when": "an input redrawn after a failed send, holding what was sent; a fresh form draws none (a textarea holds it as text, a select marks its option selected)"
             }
           },
-          "note": "textarea rows=6 for the message."
+          "note": "name, email and message are required; phone per the site setting (optional: the label carries the optional span). The enquiry type select lists the site's types, its first selected by default."
         }
       ]
     },
@@ -121,7 +150,8 @@
           "attributes": {
             "for": "<anchor>__challenge"
           },
-          "text": "from:challenge.question"
+          "text": "from:challenge.question",
+          "note": "Its text is the per-request question, masked by the normaliser as {{salt:challenge-question}}."
         },
         {
           "role": "challenge-error",
@@ -141,6 +171,7 @@
           ],
           "attributes": {
             "id": "<anchor>__challenge",
+            "name": "challengeAnswer",
             "type": "text",
             "inputmode": "numeric",
             "autocomplete": "off",
@@ -151,15 +182,28 @@
       ]
     },
     {
-      "role": "hidden",
+      "role": "token",
       "element": "input",
       "attributes": {
         "type": "hidden",
-        "name": "from:token and return fields"
+        "name": {
+          "enum": [
+            "challengeToken",
+            "formToken"
+          ]
+        },
+        "value": {
+          "value": "from:a per-request token",
+          "note": "Masked by the normaliser as {{salt:challenge-token}} and {{salt:form-token}}."
+        }
       },
       "repeat": {
-        "from": "challenge token, form token, return path"
-      }
+        "from": "challenge token, then form token",
+        "min": 2,
+        "max": 2
+      },
+      "optional": true,
+      "when": "the anti-spam credentials were issued (with the challenge)"
     },
     {
       "role": "trap",
@@ -193,6 +237,16 @@
           }
         }
       ]
+    },
+    {
+      "role": "return",
+      "element": "input",
+      "attributes": {
+        "type": "hidden",
+        "name": "returnTo",
+        "value": "from:the path of the page the form is on"
+      },
+      "note": "After the honeypot, where Salt for Next.js draws it."
     },
     {
       "role": "privacy",
@@ -321,6 +375,10 @@
     {
       "topic": "ruling",
       "text": "Field names in the markup are the contract's; each platform maps them to its handler (SC-003)."
+    },
+    {
+      "topic": "ruling",
+      "text": "The form is in the fixtures (SC-016). The action, the token values and the challenge question differ per platform or per request, so the normaliser replaces exactly those with the placeholders {{salt:form-action}}, {{salt:form-token}}, {{salt:challenge-token}} and {{salt:challenge-question}}; every other attribute and text, field types included, compares."
     }
   ],
   "platforms": {
@@ -329,7 +387,8 @@
         "The privacy line when a privacy page is set, and the arithmetic challenge inside noscript when a captcha provider is configured (SC-006).",
         "The ids <anchor>__form, <anchor>__<field>, <anchor>__<field>-error, <anchor>__challenge and <anchor>__status (SC-012).",
         "Kebab-case field ids (<anchor>__enquiry-type, not <formId>-enquiryType), and the honeypot's id <anchor>__website in place of <formId>-website, which contactFieldId(formId, 'website') builds today (contact-form.tsx, SC-012).",
-        "The honeypot input draws no value attribute: defaultValue=\"\" (contact-form.tsx) prints value=\"\" today."
+        "The honeypot input draws no value attribute: defaultValue=\"\" (contact-form.tsx) prints value=\"\" today.",
+        "No value attribute on a fresh form's fields: defaultValue=\"\" prints value=\"\" today; a value only when the form is redrawn with what was sent."
       ]
     },
     "wordpress": {
@@ -368,7 +427,9 @@
       "owes": [
         "Field, label, error and status markup as above; status after the actions, inside the form; phone field per the site setting; the ids <anchor>__form, <anchor>__<field>, <anchor>__<field>-error, <anchor>__challenge and <anchor>__status (SC-012) instead of a static id.",
         "The privacy line as p.salt-contact__privacy before the actions (SC-006).",
-        "The honeypot as a label and input with the id <anchor>__website (SC-012), in place of salt-contact-hp, and with no value attribute: template-parts/sections/contact.php draws value=\"\" today."
+        "The honeypot as a label and input with the id <anchor>__website (SC-012), in place of salt-contact-hp, and with no value attribute: template-parts/sections/contact.php draws value=\"\" today.",
+        "The contract's field names (name, email, phone, enquiryType, message, challengeAnswer, website, challengeToken, formToken, returnTo), mapped to its handler, in place of salt_contact_*, salt_hp and salt_time (SC-003).",
+        "Input types (text, email, tel), rows=\"6\" on the message, autocomplete on name, email and phone, and the values sent redrawn after a failed send (SC-016)."
       ]
     }
   }

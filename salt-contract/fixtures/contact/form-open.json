@@ -1,0 +1,70 @@
+{
+  "$comment": "Per-request values are the normaliser's declared placeholders (README, \"Fixtures\"): {{salt:form-action}}, {{salt:form-token}}, {{salt:challenge-token}} and {{salt:challenge-question}}. route.form carries the request's state; site.contactForm the site's form settings.",
+  "section": "contact",
+  "summary": "The form as a visitor first meets it: name, email, an optional phone, two enquiry types, the message, the arithmetic challenge, the honeypot, the privacy line and an empty status. The site shows its phone and email above it.",
+  "values": {
+    "heading": "Start a project",
+    "intro": "Tell us about your garden and what you would like from it.",
+    "showAddress": false,
+    "formIntro": "We reply within two working days.",
+    "settings": {
+      "anchorId": "enquire"
+    }
+  },
+  "context": {
+    "headingLevel": 2,
+    "headingRendered": true,
+    "priorityMedia": false,
+    "track": "contact-1",
+    "index": 2,
+    "locale": "en-GB"
+  },
+  "route": {
+    "path": "/contact/",
+    "form": {
+      "challenge": true,
+      "state": "open"
+    }
+  },
+  "site": {
+    "organisation": {
+      "name": "Hedgerow & Co Gardens",
+      "phone": "0117 496 0123",
+      "email": "hello@hedgerow.example",
+      "address": [
+        "12 Wapping Wharf",
+        "Bristol",
+        "BS1 6UD"
+      ]
+    },
+    "acceptsEnquiries": true,
+    "contactForm": {
+      "phone": "optional",
+      "enquiryTypes": [
+        {
+          "value": "design",
+          "label": "Garden design"
+        },
+        {
+          "value": "maintenance",
+          "label": "Maintenance"
+        }
+      ],
+      "privacyPage": "/privacy/",
+      "captcha": false
+    },
+    "labels": {
+      "name": "Your name",
+      "email": "Email address",
+      "phone": "Phone",
+      "enquiryType": "What is it about?",
+      "message": "Your message",
+      "optional": "(optional)",
+      "submit": "Send enquiry",
+      "honeypot": "Leave this field empty",
+      "privacy": "privacy notice",
+      "privacyLine": "We use your details only to reply. Read our {link}.",
+      "unavailable": "We are not taking enquiries through the website at the moment."
+    }
+  }
+}

@@ -420,7 +420,8 @@
     "section#landmarks",
     "section#focus-ring",
     "section#target-size",
-    "section#reduced-motion"
+    "section#reduced-motion",
+    "section#display-forms"
   ],
   "hooks": [
     {

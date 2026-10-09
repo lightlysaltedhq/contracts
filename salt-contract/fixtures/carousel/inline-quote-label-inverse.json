@@ -34,22 +34,11 @@
     "headingRendered": true,
     "priorityMedia": false,
     "track": "carousel-2",
-    "index": 4
+    "index": 3
   },
   "media": {
     "portrait": {
-      "src": "https://uploads.example/portrait-ines-192.jpg",
-      "srcset": [
-        {
-          "url": "https://uploads.example/portrait-ines-96.jpg",
-          "width": 96
-        },
-        {
-          "url": "https://uploads.example/portrait-ines-192.jpg",
-          "width": 192
-        }
-      ],
-      "sizes": "4rem",
+      "url": "https://uploads.example/portrait-ines-{width}.jpg",
       "width": 192,
       "height": 192,
       "alt": "Ines Carvalho"

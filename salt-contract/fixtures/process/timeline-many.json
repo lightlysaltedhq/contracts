@@ -35,26 +35,11 @@
     "headingLevel": 1,
     "priorityMedia": true,
     "track": "process-1",
-    "index": 1
+    "index": 0
   },
   "media": {
     "site-visit": {
-      "src": "https://uploads.example/site-visit-1200.jpg",
-      "srcset": [
-        {
-          "url": "https://uploads.example/site-visit-480.jpg",
-          "width": 480
-        },
-        {
-          "url": "https://uploads.example/site-visit-800.jpg",
-          "width": 800
-        },
-        {
-          "url": "https://uploads.example/site-visit-1200.jpg",
-          "width": 1200
-        }
-      ],
-      "sizes": "(min-width: 64rem) 20rem, 100vw",
+      "url": "https://uploads.example/site-visit-{width}.jpg",
       "width": 1200,
       "height": 800,
       "alt": "Two gardeners measuring a lawn with a tape"

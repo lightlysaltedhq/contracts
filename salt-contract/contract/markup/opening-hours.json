@@ -85,6 +85,9 @@
   "script": {
     "kind": "none"
   },
+  "ruleRefs": [
+    "section#display-forms"
+  ],
   "notes": [
     {
       "topic": "stylesheet-owes",

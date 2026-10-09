@@ -1,5 +1,5 @@
 {
-  "$comment": "The accordion group name is \"faq-<section index>\" (faq.json), read as faq-<context.index>; here context.index is 2, so every details carries name=\"faq-2\".",
+  "$comment": "The accordion group name is \"faq-<section index>\" (faq.json), read as faq-<context.index>; here context.index (plan.index, from 0) is 1, so every details carries name=\"faq-1\".",
   "section": "faq",
   "summary": "Eyebrow, heading and intro above three automatically queried FAQs; answers in div.salt-rich-text (a paragraph, a list, bold text); no item open.",
   "values": {
@@ -23,7 +23,7 @@
     "headingRendered": true,
     "priorityMedia": false,
     "track": "faq-1",
-    "index": 2
+    "index": 1
   },
   "collections": {
     "faqs": [

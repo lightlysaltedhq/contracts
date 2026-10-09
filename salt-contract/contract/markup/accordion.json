@@ -17,7 +17,10 @@
         "salt-accordion__item"
       ],
       "attributes": {
-        "name": "from:name (exclusive open)",
+        "name": {
+          "value": "from:name (exclusive open)",
+          "note": "The group name the section passes (faq-<section index>, showcase-<section index>), on every item. The accordion's own div carries no name: name is not an attribute of div."
+        },
         "open": {
           "value": "",
           "when": "the first item marked open; none by default"

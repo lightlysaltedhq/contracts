@@ -7,7 +7,13 @@
     "heading": "Outdoor rooms for every season",
     "subheading": "Planting plans, hard landscaping and aftercare from one small team.",
     "buttons": [
-      { "link": { "label": "Book a visit", "type": "internal", "document": "contact" } }
+      {
+        "link": {
+          "label": "Book a visit",
+          "type": "internal",
+          "document": "contact"
+        }
+      }
     ],
     "settings": {
       "anchorId": "welcome",
@@ -15,24 +21,33 @@
       "toneDark": "auto",
       "spacing": "lg",
       "width": "wide",
-      "backgroundImage": { "image": "meadow" }
+      "backgroundImage": {
+        "image": "meadow"
+      }
     }
   },
-  "context": { "headingLevel": 1, "priorityMedia": true, "track": "hero-1", "index": 1 },
+  "context": {
+    "headingLevel": 1,
+    "priorityMedia": true,
+    "track": "hero-1",
+    "index": 0
+  },
   "media": {
     "meadow": {
-      "src": "https://uploads.example/meadow-2400.jpg",
-      "srcset": [
-        { "url": "https://uploads.example/meadow-1024.jpg", "width": 1024 },
-        { "url": "https://uploads.example/meadow-1600.jpg", "width": 1600 },
-        { "url": "https://uploads.example/meadow-2400.jpg", "width": 2400 }
-      ],
-      "sizes": "100vw",
+      "url": "https://uploads.example/meadow-{width}.jpg",
       "width": 2400,
       "height": 1350,
       "alt": "A wildflower meadow at dusk",
-      "focalPoint": { "x": 30, "y": 60 }
+      "focalPoint": {
+        "x": 30,
+        "y": 60
+      }
     }
   },
-  "documents": { "contact": { "href": "/contact/", "title": "Contact" } }
+  "documents": {
+    "contact": {
+      "href": "/contact/",
+      "title": "Contact"
+    }
+  }
 }

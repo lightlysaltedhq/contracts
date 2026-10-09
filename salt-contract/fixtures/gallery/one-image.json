@@ -18,26 +18,11 @@
     "headingRendered": true,
     "priorityMedia": false,
     "track": "gallery-1",
-    "index": 2
+    "index": 1
   },
   "media": {
     "orchard": {
-      "src": "https://uploads.example/orchard-1600.jpg",
-      "srcset": [
-        {
-          "url": "https://uploads.example/orchard-640.jpg",
-          "width": 640
-        },
-        {
-          "url": "https://uploads.example/orchard-1024.jpg",
-          "width": 1024
-        },
-        {
-          "url": "https://uploads.example/orchard-1600.jpg",
-          "width": 1600
-        }
-      ],
-      "sizes": "(min-width: 64rem) 40rem, 80vw",
+      "url": "https://uploads.example/orchard-{width}.jpg",
       "width": 1600,
       "height": 1200,
       "alt": "Young apple trees in a small orchard",

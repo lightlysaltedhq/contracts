@@ -138,7 +138,7 @@ test('inputs: a context heading level out of range fails', () => {
   expectFail(HERO, (io) => io.json(`${SPLIT}.json`, (d) => { d.context.headingLevel = 7 }), /context\.headingLevel must be 1 to 6/)
 })
 test('inputs: a track number beyond the section\'s place on the page fails', () => {
-  expectFail(HERO, (io) => io.json('hero/split-image-right-later.json', (d) => { d.context.track = 'hero-4' }), /context\.track hero-4 counts 4 hero sections, but the section is number 3/)
+  expectFail(HERO, (io) => io.json('hero/split-image-right-later.json', (d) => { d.context.track = 'hero-4' }), /context\.track hero-4 counts 4 hero sections, but only 3 sections come up to this one/)
 })
 test('inputs: an h2 with no heading rendered before it fails (section#single-h1)', () => {
   expectFail(HERO, (io) => io.json('hero/split-image-right-later.json', (d) => { delete d.context.headingRendered }), /this section claims the h1/)
@@ -147,10 +147,10 @@ test('inputs: an h1 after a heading has rendered fails', () => {
   expectFail(HERO, (io) => io.json(`${SPLIT}.json`, (d) => { d.context.headingRendered = true }), /a heading rendered earlier, so this one is 2/)
 })
 test('inputs: priority media for a later section fails', () => {
-  expectFail(HERO, (io) => io.json('hero/split-image-right-later.json', (d) => { d.context.priorityMedia = true }), /the plan grants it to the first section only/)
+  expectFail(HERO, (io) => io.json('hero/split-image-right-later.json', (d) => { d.context.priorityMedia = true }), /the plan grants it to the first section \(index 0\) only/)
 })
 test('inputs: a context with no index fails', () => {
-  expectFail(HERO, (io) => io.json(`${SPLIT}.json`, (d) => { delete d.context.index }), /context\.index, the section's place on the page/)
+  expectFail(HERO, (io) => io.json(`${SPLIT}.json`, (d) => { delete d.context.index }), /context\.index, the plan's index/)
 })
 test('inputs: rich text with an element its field does not allow fails', () => {
   expectFail(['rich-text'], (io) => io.json('rich-text/left-eyebrow-heading-body.json', (d) => { d.values.body += '<table><tr><td>x</td></tr></table>' }), /values\.body uses <table>/)
@@ -226,10 +226,13 @@ test('markup: a nested heading at the section heading\'s level fails', () => {
   }, /ranks at or above the section heading's level 2/)
 })
 test('markup: an img without sizes fails', () => {
-  markupFails(' sizes="(min-width: 64rem) 30rem, 100vw"', '', /lacks sizes/)
+  expectFail(HERO, (io) => {
+    const rel = `fixtures/${SPLIT}.html`
+    io.write(rel, readFileSync(path.join(io.dir, rel), 'utf8').replace(/ sizes="[^"]*"/, ''))
+  }, /lacks sizes/)
 })
 test('markup: an img without width fails (SC-007)', () => {
-  markupFails(' width="1600"', '', /an img lacks width/)
+  markupFails(' width="1600"', '', /lacks width/)
 })
 test('markup: a picture element fails (SC-007)', () => {
   markupFails('<img class="salt-hero__image"', '<picture><source srcset="/a.avif"></picture>\n        <img class="salt-hero__image"', /picture|<source>/)
@@ -266,7 +269,7 @@ test('when: data-divider follows the divider setting, both ways', () => {
 })
 test('when: target and rel follow the link\'s newTab, both ways', () => {
   expectFail(HERO, (io) => io.html('hero/split-no-image-new-tab.html', ' target="_blank"', ''), /lacks target, which the markup requires when newTab/)
-  expectFail(HERO, (io) => io.html(`${SPLIT}.html`, 'data-track-control="cta">See our work', 'data-track-control="cta" rel="noopener noreferrer">See our work'), /carries rel, which the markup draws only when newTab/)
+  expectFail(HERO, (io) => io.html(`${SPLIT}.html`, 'data-track-control="cta"><span class="salt-button__label">See our work', 'data-track-control="cta" rel="noopener noreferrer"><span class="salt-button__label">See our work'), /carries rel, which the markup draws only when newTab/)
 })
 test('when: aria-current marks the current page and no other', () => {
   expectFail(['listing'], (io) => {
@@ -283,10 +286,6 @@ test('when: the first tab is checked and no other', () => {
 test('when: a split hero with an image carries data-media-side', () => {
   markupFails(' data-media-side="left"', '', /lacks data-media-side, which the markup requires when/)
 })
-test('when: an unnamed tab set carries no aria-label, a named one does', () => {
-  expectFail(['tabs'], (io) => io.html('tabs/no-name-stacked.html', '<div class="salt-tabs">', '<div class="salt-tabs" aria-label="">'), /carries aria-label, which the markup draws only when the set is named/)
-  expectFail(['tabs'], (io) => io.html('tabs/one-panel-stacked.html', /<div class="salt-tabs" aria-label="[^"]*">/.exec(readFileSync(path.join(pkg, 'fixtures/tabs/one-panel-stacked.html'), 'utf8'))[0], '<div class="salt-tabs">'), /lacks aria-label, which the markup requires when the set is named/)
-})
 test('when: an element whose field is set must be drawn', () => {
   markupFails('<p class="salt-eyebrow">Bristol and Bath</p>\n', '', /eyebrow is not drawn, but eyebrow is set/)
 })
@@ -301,8 +300,8 @@ test('values: data-tone and data-tone-dark must be the settings\' tones', () => 
 test('values: an accordion group named for another section index fails', () => {
   expectFail(['collection-showcase'], (io) => {
     const rel = 'fixtures/collection-showcase/accordion-testimonials.html'
-    io.write(rel, readFileSync(path.join(io.dir, rel), 'utf8').replaceAll('name="showcase-4"', 'name="showcase-2"'))
-  }, /name="showcase-2" (is not "showcase-<section index>"|disagrees with the case, which gives "showcase-4")/)
+    io.write(rel, readFileSync(path.join(io.dir, rel), 'utf8').replaceAll('name="showcase-3"', 'name="showcase-1"'))
+  }, /name="showcase-1" (is not "showcase-<section index>"|disagrees with the case, which gives "showcase-3")/)
 })
 test('values: alternating media-text sides count from 0', () => {
   expectFail(['media-text'], (io) => {
@@ -332,6 +331,136 @@ test('containers: a conditional or contextual flex rule is not a container', asy
     writeFileSync(path.join(dir, 'a.css'), '@layer base { .salt-a { display: grid; } }\n@media (min-width: 40rem) { .salt-b { display: flex; } }\n.salt-grid .salt-c { display: flex; }\n.salt-d[open] { display: flex; }\n.salt-e, .salt-f { display: inline-flex; }\n.salt-g { display: block; }\n')
     assert.deepEqual(containersFrom(dir), ['salt-a', 'salt-e', 'salt-f'])
   } finally { rmSync(dir, { recursive: true, force: true }) }
+})
+
+// The contract gaps the fixtures found, closed (SC-016 unit, item 5) and the counts the case
+// fixes (item 6).
+test('gaps: a name on the accordion\'s own div fails; it belongs on each details', () => {
+  expectFail(['faq'], (io) => io.html('faq/many.html', '<div class="salt-accordion">', '<div class="salt-accordion" name="faq-2">'), /<div\.salt-accordion> carries name, which the markup does not declare/)
+})
+test('gaps: an aria-label on the tab set\'s generic div fails; it belongs on the radiogroup', () => {
+  expectFail(['tabs'], (io) => io.html('tabs/many-tabbed.html', '<div class="salt-tabs" data-tabbed>', '<div class="salt-tabs" data-tabbed aria-label="Services">'), /<div\.salt-tabs> carries aria-label, which the markup does not declare/)
+})
+test('gaps: a body h2 under a level-2 section heading fails, at base 1 it is right', () => {
+  expectFail(['rich-text'], (io) => io.html('rich-text/body-only-no-heading.html', '<h3>Our approach</h3>', '<h2>Our approach</h2>'), /ranks at or above the section heading's level 2/)
+})
+test('gaps: a lone carousel card granted priority must take it', () => {
+  expectFail(['carousel'], (io) => io.html('carousel/inline-one-card.html', ' fetchpriority="high"', ' loading="lazy"'), /the priority image must be in carousel's track,list,single/)
+})
+test('gaps: a background with no focal point writes the fit alone', () => {
+  expectFail(HERO, (io) => io.html('hero/full-bleed-background-no-focal-point.html', 'style="object-fit: cover"', 'style="object-fit: cover; object-position: center"'), /style="object-fit: cover; object-position: center" disagrees with the case, which gives "object-fit: cover"/)
+})
+test('gaps: a link-form button without the site\'s arrow fails, and one with it on a site with none', () => {
+  expectFail(['process'], (io) => io.html('process/timeline-many.html', '<span class="salt-button__label">Book a visit<span class="salt-arrow" aria-hidden="true">&#x2060;→</span></span>', 'Book a visit'), /"Book a visit" draws no arrow, but the site supplies one/)
+  expectFail(HERO, (io) => io.html('hero/split-image-right-later.html', '>Aftercare plans</a>', '><span class="salt-button__label">Aftercare plans<span class="salt-arrow" aria-hidden="true">&#x2060;→</span></span></a>'), /draws an arrow, which the site does not supply/)
+  expectFail(HERO, (io) => io.html(`${SPLIT}.html`, '<span class="salt-button__label">See our work<span class="salt-arrow" aria-hidden="true">&#x2060;→</span></span>', 'See our work'), /"See our work" draws no arrow, but the site supplies one/)
+})
+test('gaps: the ungrouped index is one list with no group', () => {
+  expectFail(['collection-showcase'], (io) => io.html('collection-showcase/index-posts-ungrouped.html', '<ul class="salt-showcase__index" role="list">', '<div class="salt-showcase__group">\n      <ul class="salt-showcase__index" role="list">'), /index-posts-ungrouped\.html/)
+})
+test('counts: the pagination window must be the one the page gives', () => {
+  expectFail(['listing'], (io) => io.html('listing/cards-pagination-gaps.html', '          <li class="salt-pagination__gap" aria-hidden="true">…</li>\n', ''), /the pagination draws \[previous, 1, 4, 5, 6, gap, 9, next\]; page 5 of 9 gives \[previous, 1, gap, 4, 5, 6, gap, 9, next\]/)
+  expectFail(['listing'], (io) => io.html('listing/cards-with-pagination.html', '<li><a class="salt-pagination__link" data-step="next"', '<li><a class="salt-pagination__link" data-step="nextx"'), /cards-with-pagination\.html/)
+})
+test('counts: a tab set must draw a panel per tab and controls only when tabbed', () => {
+  expectFail(['tabs'], (io) => {
+    const rel = 'fixtures/tabs/many-tabbed.html'
+    const text = readFileSync(path.join(io.dir, rel), 'utf8')
+    io.write(rel, text.replace(/\n *<div class="salt-tabs__panel" id="tabs-many__panel-3"[\s\S]*?\n {10}<\/div>(?=\n {8}<\/div>)/, ''))
+  }, /tab panels drawn; the case has 3 tabs|many-tabbed\.html/)
+  expectFail(['tabs'], (io) => io.html('tabs/no-name-stacked.html', '<div class="salt-tabs">', '<div class="salt-tabs" data-tabbed>'), /carries data-tabbed, which the markup draws only when/)
+})
+
+// Display forms (SC-016, section#display-forms).
+const LIST = 'collection-showcase/list-posts-dated'
+test('display: a case that draws a date names its locale', () => {
+  expectFail(['collection-showcase'], (io) => io.json(`${LIST}.json`, (d) => { delete d.context.locale }), /draws a date, time or phone, so context\.locale must say/)
+})
+test('display: a date not in the locale\'s long form fails', () => {
+  expectFail(['collection-showcase'], (io) => io.html(`${LIST}.html`, '>12 March 2026<', '>12/03/2026<'), /reads "12\/03\/2026"; en-GB gives "12 March 2026"/)
+})
+test('display: a datetime that is not ISO 8601 fails', () => {
+  expectFail(['collection-showcase'], (io) => io.html(`${LIST}.html`, 'datetime="2026-03-12"', 'datetime="12/03/2026"'), /is not ISO 8601/)
+})
+test('display: a phone href not built by the rule fails', () => {
+  expectFail(['contact'], (io) => io.html('contact/closed-with-details.html', 'href="tel:01174960123"', 'href="tel:+441174960123"'), /has href tel:\+441174960123; section#display-forms gives tel:01174960123/)
+})
+test('display: JSON with escaped slashes in an attribute fails', () => {
+  expectFail(['locations'], (io) => io.html('locations/one-office-open.html', 'data-timezone="Europe/London"', 'data-timezone="Europe\\/London"'), /escapes a slash/)
+})
+
+// The contact form in the fixtures (SC-016, item 4).
+test('form: a field whose type does not follow its name fails', () => {
+  expectFail(['contact'], (io) => io.html('contact/form-open.html', 'name="email" type="email"', 'name="email" type="text"'), /type="text" disagrees with the case, which gives "email"/)
+})
+test('form: the message without rows fails', () => {
+  expectFail(['contact'], (io) => io.html('contact/form-open.html', ' rows="6"', ''), /<textarea\.salt-contact__input> lacks rows/)
+})
+test('form: a placeholder written for a value the normaliser does not mask fails the mutation proof', () => {
+  expectFail(['contact'], (io) => {
+    const src = readFileSync(path.join(pkg, 'normalise.mjs'), 'utf8')
+    io.write('normalise.mjs', src
+      .replace("['formToken', 'challengeToken'].includes(attrOf(el, 'name'))", "['formToken', 'challengeToken', 'returnTo'].includes(attrOf(el, 'name'))")
+      .replace("PLACEHOLDERS[attrOf(el, 'name')]]", "PLACEHOLDERS[attrOf(el, 'name')] ?? '{{salt:return}}']"))
+  }, /changing value on <input> does not change normalise's output/)
+})
+
+// Image sizes (SC-016, item 1).
+test('images: the logo declares its drawn width in px, as Salt for Next.js does', async () => {
+  const { drawnSizes, sourcesOf, slotOf } = await import('./salt_image_slots.mjs')
+  const table = JSON.parse(readFileSync(path.join(pkg, 'contract/image-sizes.json'), 'utf8'))
+  const wordmark = { url: '/u/mark-{width}.png', width: 600, height: 80 }
+  // site-logo.tsx's own example: a 600x80 wordmark at logoHeight 48 draws 360px.
+  assert.equal(drawnSizes(table, 'logo', wordmark, 48), '360px')
+  assert.equal(drawnSizes(table, 'logo', wordmark), '240px')
+  assert.deepEqual(slotOf({ attrs: [['class', 'salt-logo__image salt-logo__light']], children: [] }, [], 'site-header', () => undefined), { slot: 'logo', band: false })
+  const { srcset, src } = sourcesOf(table, wordmark, '240px')
+  assert.equal(src, '/u/mark-600.png')
+  assert.ok(srcset.endsWith('/u/mark-384.png 384w, /u/mark-600.png 600w'), srcset)
+})
+
+test('images: sizes other than the slot\'s default for the band fails', () => {
+  expectFail(HERO, (io) => {
+    const rel = `fixtures/${SPLIT}.html`
+    const text = readFileSync(path.join(io.dir, rel), 'utf8')
+    io.write(rel, text.replace(/sizes="[^"]*"/, 'sizes="100vw"'))
+  }, /sizes="100vw"; its slot \(half, band default\) gives/)
+})
+test('images: a srcset missing a candidate width fails', () => {
+  expectFail(HERO, (io) => io.html(`${SPLIT}.html`, 'https://uploads.example/terrace-32.jpg 32w, ', ''), /srcset is not the candidates contract\/image-sizes\.json gives/)
+})
+test('images: a src that is not the widest width listed fails', () => {
+  expectFail(HERO, (io) => io.html(`${SPLIT}.html`, 'src="https://uploads.example/terrace-1600.jpg"', 'src="https://uploads.example/terrace-1200.jpg"'), /is not the widest candidate of any media record/)
+})
+test('images: a candidate wider than the upload fails, and so does leaving out its own width', () => {
+  expectFail(HERO, (io) => io.html(`${SPLIT}.html`, 'https://uploads.example/terrace-1600.jpg 1600w"', 'https://uploads.example/terrace-1600.jpg 1600w, https://uploads.example/terrace-1920.jpg 1920w"'), /srcset is not the candidates contract\/image-sizes\.json gives/)
+  expectFail(HERO, (io) => io.json(`${SPLIT}.json`, (d) => { d.media.terrace.width = 1700 }), /src https:\/\/uploads\.example\/terrace-1600\.jpg is not the widest candidate|width is 1600; the media record says 1700/)
+})
+test('images: a media record that carries its own sizes fails', () => {
+  expectFail(HERO, (io) => io.json(`${SPLIT}.json`, (d) => { d.media.terrace.sizes = '100vw' }), /media\.terrace\.sizes: a media record holds url, width, height/)
+})
+test('images: the srcset rule drops candidates below the viewport floor only for a bare vw share', async () => {
+  const { widthsFor } = await import('./salt_image_slots.mjs')
+  const table = JSON.parse(readFileSync(path.join(pkg, 'contract/image-sizes.json'), 'utf8'))
+  assert.deepEqual(widthsFor(table, '100vw'), [640, 750, 828, 1080, 1200, 1920, 2048, 3840])
+  assert.deepEqual(widthsFor(table, '(min-width: 64rem) 19rem, (min-width: 40rem) 50vw, 100vw').at(0), 384)
+  assert.deepEqual(widthsFor(table, 'calc(100vw - 2rem)'), table.candidates)
+})
+
+test('form: a normaliser that masks an empty token fails the mutation proof', () => {
+  expectFail(['contact'], (io) => {
+    const src = readFileSync(path.join(pkg, 'normalise.mjs'), 'utf8')
+    io.write('normalise.mjs', src.replace(" && attrOf(el, 'value') !== ''\n", '\n'))
+  }, /emptying value on <input> does not change normalise's output/)
+})
+test('display: a phone written with an extension in brackets draws no link', () => {
+  expectFail(['contact'], (io) => io.html('contact/closed-with-details.html', '<a href="tel:01174960123">0117 496 0123</a>', '<a href="tel:0117496012323">0117 496 0123 (23)</a>'), /section#display-forms gives no link/)
+})
+test('arrows: only a section\'s call to action takes the site\'s arrow', () => {
+  expectFail(['pricing'], (io) => {
+    io.json('pricing/three-plans-featured.json', (d) => { d.site = { ...(d.site ?? {}), arrow: '→' } })
+    io.html('pricing/three-plans-featured.html', '>Choose Starter</a>', '><span class="salt-button__label">Choose Starter<span class="salt-arrow" aria-hidden="true">&#x2060;→</span></span></a>')
+  }, /"Choose Starter[^"]*" draws an arrow, which only a section's call to action takes/)
 })
 
 // ── 4. The normaliser ─────────────────────────────────────────────────────────────────────────
@@ -409,6 +538,26 @@ test('normalise: white space between the children of a flex or grid container do
   // Outside a container the same line break is a space a browser draws.
   differ('<div class="salt-hero__text">\n  <a href="/a">A</a>\n  <a href="/b">B</a>\n</div>', '<div class="salt-hero__text"><a href="/a">A</a><a href="/b">B</a></div>')
   differ('<p>Read <a class="salt-button" href="/x">Go</a> now</p>', '<p>Read<a class="salt-button" href="/x">Go</a>now</p>')
+})
+test('normalise: the contact form\'s per-request values are masked exactly, nothing else', () => {
+  const form = (action, token, question, type = 'email', ret = '/contact/', other = 'x') => `<form class="salt-contact__form" action="${action}"><label class="salt-contact__label" for="c__challenge">${question}</label><input class="salt-contact__input" name="email" type="${type}"><input type="hidden" name="formToken" value="${token}"><input type="hidden" name="challengeToken" value="${token}"><input type="hidden" name="returnTo" value="${ret}"><input type="hidden" name="other" value="${other}"></form>`
+  same(form('/api/contact', 'abc', 'What is 3 + 4?'), form('/wp-admin/admin-post.php', 'zzz', 'What is 2 + 9?'))
+  // A changed field type, the return path and any other hidden value still differ.
+  differ(form('/a', 't', 'q'), form('/a', 't', 'q', 'text'))
+  differ(form('/a', 't', 'q'), form('/a', 't', 'q', 'email', '/elsewhere/'))
+  differ(form('/a', 't', 'q'), form('/a', 't', 'q', 'email', '/contact/', 'y'))
+  // Outside the contact form nothing is masked.
+  differ('<form action="/a"></form>', '<form action="/b"></form>')
+  differ('<div><input type="hidden" name="formToken" value="a"></div>', '<div><input type="hidden" name="formToken" value="b"></div>')
+})
+test('normalise: the challenge mask takes only the question\'s text, and only non-empty values', () => {
+  const label = (q, marker) => `<form class="salt-contact__form" action="/a"><label class="salt-contact__label" for="c__challenge">${q}<span class="salt-contact__optional">${marker}</span></label></form>`
+  same(label('What is 3 + 4?', '(required)'), label('What is 2 + 9?', '(required)'))
+  differ(label('What is 3 + 4?', '(required)'), label('What is 3 + 4?', '(needed)'))
+  const token = (v) => `<form class="salt-contact__form" action="/a"><input type="hidden" name="formToken" value="${v}"></form>`
+  same(token('abc'), token('xyz'))
+  differ(token(''), token('xyz'))
+  differ('<form class="salt-contact__form" action=""></form>', '<form class="salt-contact__form" action="/a"></form>')
 })
 test('normalise: comments do not count', () => {
   same('<p>One<!-- -->Two</p>', '<p>OneTwo</p>')

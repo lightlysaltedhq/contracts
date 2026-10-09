@@ -164,9 +164,6 @@
             "list": {
               "role": "accordion",
               "component": "accordion",
-              "attributes": {
-                "name": "showcase-<section index>"
-              },
               "children": [
                 {
                   "role": "panel",
@@ -245,14 +242,76 @@
                   ],
                   "note": "Each item's content. Testimonials: figure.salt-showcase__panel.salt-showcase__quote with rating, blockquote and a figcaption meta line."
                 }
-              ]
+              ],
+              "note": "The section passes the group name showcase-<section index> to the accordion, which writes it on each details, never on its own div. <section index> is the plan's index (view-props/_shared.json plan.index): the section's position among the page's rendered sections, counted from 0, as both platforms count it."
             }
           },
           "note": "Summary is the title; no image and no heading in a panel."
         },
         "index": {
-          "replace": {
-            "list": {
+          "tree": [
+            {
+              "role": "eyebrow",
+              "component": "eyebrow",
+              "optional": true,
+              "when": "eyebrow is set"
+            },
+            {
+              "role": "heading",
+              "component": "heading",
+              "attributes": {
+                "id": "<anchor>__heading"
+              },
+              "optional": true,
+              "when": "heading is set",
+              "note": "Level from the plan (section#heading-level)."
+            },
+            {
+              "role": "intro",
+              "element": "p",
+              "classes": [
+                "salt-intro"
+              ],
+              "text": "from:intro",
+              "optional": true,
+              "when": "intro is set"
+            },
+            {
+              "role": "loose-index",
+              "element": "ul",
+              "classes": [
+                "salt-showcase__index"
+              ],
+              "attributes": {
+                "role": "list"
+              },
+              "children": [
+                {
+                  "role": "loose-entry",
+                  "element": "li",
+                  "repeat": {
+                    "from": "entries"
+                  },
+                  "children": [
+                    {
+                      "role": "loose-entry-link",
+                      "element": "a",
+                      "classes": [
+                        "salt-showcase__link"
+                      ],
+                      "attributes": {
+                        "href": "from:href"
+                      },
+                      "text": "from:title"
+                    }
+                  ]
+                }
+              ],
+              "optional": true,
+              "when": "the index is ungrouped, or a grouped index has entries with no term",
+              "note": "Ungrouped: every entry, in this one list. Grouped: the entries with no term, first and unheaded."
+            },
+            {
               "role": "index-groups",
               "element": "div",
               "classes": [
@@ -300,10 +359,31 @@
                   ]
                 }
               ],
-              "note": "Ungrouped: the index list alone. Grouped: uncategorised entries first as an unheaded index list, then one group per term."
+              "note": "One group per term, in term order, each a heading and its index list.",
+              "optional": true,
+              "when": "the index is grouped and an entry has a term"
+            },
+            {
+              "role": "view-all",
+              "element": "p",
+              "classes": [
+                "salt-showcase__view-all"
+              ],
+              "optional": true,
+              "when": "view all is on and the collection has an index",
+              "children": [
+                {
+                  "role": "view-all-link",
+                  "component": "button",
+                  "attributes": {
+                    "data-style": "link"
+                  },
+                  "text": "from:label or labels.viewAll"
+                }
+              ]
             }
-          },
-          "note": "Linked sources only."
+          ],
+          "note": "Linked sources only. The index replaces the card list with an unheaded index list, then the groups: ungrouped draws the list alone, grouped draws its uncategorised entries in it (or no list when every entry has a term) and one group per term."
         }
       },
       "note": "accordion and index draw a different structure at the list's position; grid, list and featured differ by attribute only."
@@ -388,7 +468,8 @@
   ],
   "ruleRefs": [
     "section#list-semantics",
-    "section#focus-ring"
+    "section#focus-ring",
+    "section#display-forms"
   ],
   "notes": [
     {
@@ -505,7 +586,9 @@
         "Write the block root div.salt-block with data-block set to the contract id inside the section wrapper (section.json).",
         "Give the section heading the id <anchor>__heading and point the wrapper's aria-labelledby at it (section#labelled-by, SC-012).",
         "Drop Tailwind utility classes from the markup; the shared stylesheets style the salt-* classes.",
-        "One section in place of services, work, team, testimonials and blog_teaser; ul/li in every layout; a flat featured list; the accordion and index layouts."
+        "One section in place of services, work, team, testimonials and blog_teaser; ul/li in every layout; a flat featured list; the accordion and index layouts.",
+        "Write the accordion layout's group name showcase-<section index> on each details only, never on div.salt-accordion, with the index counted from 0 (plan.index).",
+        "The index layout as the tree gives it: the ungrouped index is one ul.salt-showcase__index with no group wrapper or heading."
       ]
     }
   }

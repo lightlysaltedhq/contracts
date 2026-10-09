@@ -1,5 +1,5 @@
 {
-  "$comment": "context.now is Wednesday 07/10/2026 19:00 in Europe/London (BST, +01:00): the Bristol studio (09:00 to 17:00) is closed, the Bath office (10:00 to 20:00) is open and has Saturday by appointment (no effect today). The map facade has no label (the item carries none, so map.json label is unset); the facade button takes labels.loadMap as text and labels.load as aria-label. The first-item accordion groups share name \"locations-<context.index>\". Status text per labels.open/appointment/closed.",
+  "$comment": "context.now is Wednesday 07/10/2026 19:00 in Europe/London (BST, +01:00): the Bristol studio (09:00 to 17:00) is closed, the Bath office (10:00 to 20:00) is open and has Saturday by appointment (no effect today). The map facade has no label (the item carries none, so map.json label is unset); the facade button takes labels.loadMap as text and labels.load as aria-label. Every office shares the group name \"locations-<context.index>\", the index from 0. Status text per labels.open/appointment/closed.",
   "section": "locations",
   "summary": "Two offices with maps on and coordinates on both; at the time given Bristol is closed and Bath is open, and Bath has Saturday by appointment; on the inverse band.",
   "values": {
@@ -21,8 +21,9 @@
     "headingRendered": true,
     "priorityMedia": false,
     "track": "locations-1",
-    "index": 3,
-    "now": "2026-10-07T19:00:00+01:00"
+    "index": 2,
+    "now": "2026-10-07T19:00:00+01:00",
+    "locale": "en-GB"
   },
   "collections": {
     "locations": [
@@ -35,7 +36,6 @@
           "BS1 6UD"
         ],
         "phone": "0117 496 0123",
-        "tel": "+441174960123",
         "email": "bristol@example.com",
         "hours": [
           {
@@ -78,7 +78,6 @@
           "BA1 1BZ"
         ],
         "phone": "01225 555 0142",
-        "tel": "+441225550142",
         "email": "bath@example.com",
         "hours": [
           {

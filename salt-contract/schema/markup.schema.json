@@ -421,9 +421,17 @@
             },
             {
               "type": "null"
+            },
+            {
+              "type": "array",
+              "minItems": 2,
+              "uniqueItems": true,
+              "items": {
+                "$ref": "#/$defs/role"
+              }
             }
           ],
-          "description": "The one image that may take eager loading and fetchpriority=high, or null for none."
+          "description": "The one image that may take eager loading and fetchpriority=high, or null for none. A list names the roles it may sit in when the section draws its first item in one of several places (the carousel's track, list or lone card); the priority image is the first image in whichever is drawn."
         },
         "when": {
           "$ref": "#/$defs/condition"

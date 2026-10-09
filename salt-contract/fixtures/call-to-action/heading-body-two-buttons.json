@@ -31,7 +31,7 @@
     "headingRendered": true,
     "priorityMedia": false,
     "track": "call-to-action-1",
-    "index": 2
+    "index": 1
   },
   "documents": {
     "contact": {
@@ -42,5 +42,8 @@
       "href": "/work/",
       "title": "Our work"
     }
+  },
+  "site": {
+    "arrow": "→"
   }
 }

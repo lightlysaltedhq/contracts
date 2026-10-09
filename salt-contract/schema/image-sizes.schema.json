@@ -1,0 +1,177 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "image-sizes.schema.json",
+  "title": "The default sizes and srcset of every image slot",
+  "description": "contract/image-sizes.json (SC-016): the candidate widths, the rule that picks them for a sizes value, each slot's sizes (one value, and per band where the slot is a share of the band, per column count for a card), and where each image the markup draws takes its slot.",
+  "type": "object",
+  "required": [
+    "$schema",
+    "version",
+    "candidates",
+    "srcset",
+    "slots",
+    "placements"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "sizes": {
+      "type": "string",
+      "minLength": 1
+    },
+    "band": {
+      "type": "string",
+      "enum": [
+        "full",
+        "wide",
+        "default",
+        "narrow"
+      ]
+    }
+  },
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "$comment": {
+      "type": "string"
+    },
+    "candidates": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "integer",
+        "minimum": 1
+      }
+    },
+    "srcset": {
+      "type": "object",
+      "required": [
+        "statement",
+        "viewportFloor"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "statement": {
+          "type": "string",
+          "minLength": 1
+        },
+        "viewportFloor": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "slots": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {
+        "pattern": "^[a-z][a-z0-9-]*$"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "description",
+          "sizes"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "description": {
+            "type": "string",
+            "minLength": 1
+          },
+          "sizes": {
+            "$ref": "#/$defs/sizes"
+          },
+          "bands": {
+            "type": "object",
+            "required": [
+              "full",
+              "wide",
+              "default",
+              "narrow"
+            ],
+            "additionalProperties": false,
+            "patternProperties": {
+              "^(full|wide|default|narrow)$": {
+                "oneOf": [
+                  {
+                    "$ref": "#/$defs/sizes"
+                  },
+                  {
+                    "type": "object",
+                    "minProperties": 1,
+                    "propertyNames": {
+                      "pattern": "^[1-9]$"
+                    },
+                    "additionalProperties": {
+                      "$ref": "#/$defs/sizes"
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          "drawn": {
+            "description": "A slot drawn at a fixed size the site sets: its sizes is the drawn width in px, by this rule, in place of a sizes value of its own.",
+            "type": "object",
+            "required": [
+              "rule",
+              "defaultHeightPx"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "rule": {
+                "type": "string",
+                "minLength": 1
+              },
+              "defaultHeightPx": {
+                "type": "integer",
+                "minimum": 1
+              }
+            }
+          }
+        }
+      }
+    },
+    "placements": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "markup",
+          "image",
+          "slot",
+          "band",
+          "when"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "markup": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]*$"
+          },
+          "image": {
+            "type": "string",
+            "minLength": 1
+          },
+          "slot": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]*$"
+          },
+          "band": {
+            "type": "boolean"
+          },
+          "when": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  }
+}

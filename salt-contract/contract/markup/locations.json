@@ -47,7 +47,10 @@
             "salt-accordion__item"
           ],
           "attributes": {
-            "name": "locations-<section index>"
+            "name": {
+              "value": "locations-<section index>",
+              "note": "<section index> is the plan's index (view-props/_shared.json plan.index): the section's position among the page's rendered sections, counted from 0, as both platforms count it."
+            }
           },
           "repeat": {
             "from": "offices",
@@ -254,6 +257,9 @@
     "withoutScript": "The status the server rendered, which a cached page may hold past a change of hours.",
     "withScript": "On load, a small script recomputes each office's status from data-hours in data-timezone and rewrites data-status and the status text from data-labels, so a cached page corrects itself."
   },
+  "ruleRefs": [
+    "section#display-forms"
+  ],
   "uses": [
     "section",
     "section-intro",

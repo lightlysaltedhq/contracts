@@ -4,7 +4,13 @@
   "title": "A client site's declaration of the sections it has taken over",
   "description": "What a client site writes when it climbs to tier 4 or 5 of the customisation ladder (README, 'The customisation ladder'), and what the update flag reads when the site moves its Salt pin. It is a JSON file named salt-overrides.json at the root of the client's repository (a Grain for Next.js site) or of its child theme (a Grain for WordPress site), committed beside the code it describes. One entry per section the site has changed above tier 3. `view`: the site swapped the section's view and keeps its logic; the flag raises it when the section's contract/view-props file, or contract/view-props/_shared.json (the plan and the shared types every view reads), changed between the old pin and the new. `logic`: the site took the section over entirely; nothing in a release reaches it, so the flag raises it on every update, with that release's CHANGELOG entries for the section. `verified` is the contract release the entry was last checked against, moved when someone re-verifies it. A client-only section (tier 6) is listed under `clientSections` only so the flag can say when a release adds a contract section of the same id. Platform-native overrides outside the contract (WordPress pluggable functions and filters, a Next.js resolver option) stay in the WordPress override manifest or the site's own notes. Each implementation's update tooling reads this file; the package gate (scripts/check_salt_extensions.mjs) validates the examples below and checks their section ids against contract/sections.json. Salt for Next.js owes the flag in its upgrade check and Grain for Next.js the file; Salt for WordPress owes the flag beside the override manifest's re-verify step, and a pointer to salt-overrides.json in docs/contracts/OVERRIDES.md and in its manifest template (docs/templates/override-manifest.md); Grain for WordPress owes the file, and a pointer to it in its OVERRIDES.md rather than a copy of it (SC-015).",
   "type": "object",
-  "required": ["$schema", "site", "platform", "contract", "sections"],
+  "required": [
+    "$schema",
+    "site",
+    "platform",
+    "contract",
+    "sections"
+  ],
   "additionalProperties": false,
   "$defs": {
     "id": {
@@ -23,13 +29,20 @@
     }
   },
   "properties": {
-    "$schema": { "type": "string" },
+    "$schema": {
+      "type": "string"
+    },
     "site": {
       "description": "The client site's repository name.",
       "type": "string",
       "minLength": 1
     },
-    "platform": { "enum": ["nextjs", "wordpress"] },
+    "platform": {
+      "enum": [
+        "nextjs",
+        "wordpress"
+      ]
+    },
     "contract": {
       "description": "The salt-contract release the site's Salt pin conforms to, moved with the pin.",
       "$ref": "#/$defs/release"
@@ -38,28 +51,85 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["section", "tier", "files", "reason", "since", "verified"],
+        "required": [
+          "section",
+          "tier",
+          "files",
+          "reason",
+          "since",
+          "verified"
+        ],
         "additionalProperties": false,
         "properties": {
           "section": {
             "description": "The contract's section id (contract/sections.json).",
             "$ref": "#/$defs/id"
           },
-          "tier": { "enum": ["view", "logic"] },
+          "tier": {
+            "enum": [
+              "view",
+              "logic"
+            ]
+          },
           "files": {
             "description": "The site's own files that do it, relative to the file's root.",
             "type": "array",
             "minItems": 1,
             "uniqueItems": true,
-            "items": { "type": "string", "minLength": 1 }
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
           },
           "reason": {
             "description": "Why the tiers below would not do. For logic, why swapping the view was not enough.",
             "type": "string",
             "minLength": 1
           },
-          "since": { "$ref": "#/$defs/date" },
-          "verified": { "$ref": "#/$defs/release" }
+          "since": {
+            "$ref": "#/$defs/date"
+          },
+          "verified": {
+            "$ref": "#/$defs/release"
+          }
+        }
+      }
+    },
+    "imageSizes": {
+      "description": "Sizes this site declares for an image slot of a section whose view it swapped or whose layout it changed (SC-016), in place of contract/image-sizes.json's default for that slot. Each names the section, the slot, the band where the slot is banded, and the sizes value; conformance compares the defaults, so a declaration here is the site's own and is raised by the update flag like the section's entry.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "section",
+          "slot",
+          "sizes",
+          "reason"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "section": {
+            "$ref": "#/$defs/id"
+          },
+          "slot": {
+            "$ref": "#/$defs/id"
+          },
+          "band": {
+            "enum": [
+              "full",
+              "wide",
+              "default",
+              "narrow"
+            ]
+          },
+          "sizes": {
+            "type": "string",
+            "minLength": 1
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1
+          }
         }
       }
     },
@@ -67,11 +137,19 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["id", "reason"],
+        "required": [
+          "id",
+          "reason"
+        ],
         "additionalProperties": false,
         "properties": {
-          "id": { "$ref": "#/$defs/id" },
-          "reason": { "type": "string", "minLength": 1 }
+          "id": {
+            "$ref": "#/$defs/id"
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1
+          }
         }
       }
     }
@@ -86,7 +164,9 @@
         {
           "section": "hero",
           "tier": "view",
-          "files": ["src/site/sections/hero.tsx"],
+          "files": [
+            "src/site/sections/hero.tsx"
+          ],
           "reason": "The hero draws the brand's diagonal cut, which no variant offers.",
           "since": "14/11/2026",
           "verified": "1.0.0"
@@ -94,14 +174,29 @@
         {
           "section": "locations",
           "tier": "logic",
-          "files": ["src/site/sections/locations/module.ts", "src/site/sections/locations/section.tsx"],
+          "files": [
+            "src/site/sections/locations/module.ts",
+            "src/site/sections/locations/section.tsx"
+          ],
           "reason": "Opening hours come from the client's booking system, not the locations collection.",
           "since": "14/11/2026",
           "verified": "1.0.0"
         }
       ],
+      "imageSizes": [
+        {
+          "section": "hero",
+          "slot": "half",
+          "band": "default",
+          "sizes": "(min-width: 75rem) 36rem, (min-width: 48.01rem) calc((100vw - 4rem) * 3 / 5), calc(100vw - 2rem)",
+          "reason": "The swapped view gives a split hero's image three fifths of the band, not half."
+        }
+      ],
       "clientSections": [
-        { "id": "showroom-finder", "reason": "Searches the client's showrooms by postcode; no other client has it." }
+        {
+          "id": "showroom-finder",
+          "reason": "Searches the client's showrooms by postcode; no other client has it."
+        }
       ]
     }
   ]

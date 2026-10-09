@@ -19,70 +19,25 @@
     "headingRendered": true,
     "priorityMedia": false,
     "track": "gallery-2",
-    "index": 3
+    "index": 2
   },
   "media": {
     "terrace": {
-      "src": "https://uploads.example/terrace-1600.jpg",
-      "srcset": [
-        {
-          "url": "https://uploads.example/terrace-640.jpg",
-          "width": 640
-        },
-        {
-          "url": "https://uploads.example/terrace-1024.jpg",
-          "width": 1024
-        },
-        {
-          "url": "https://uploads.example/terrace-1600.jpg",
-          "width": 1600
-        }
-      ],
-      "sizes": "(min-width: 64rem) 40rem, 80vw",
+      "url": "https://uploads.example/terrace-{width}.jpg",
       "width": 1600,
       "height": 1067,
       "alt": "A terrace of raised beds planted with lavender",
       "caption": "Lavender beds on the Clifton terrace"
     },
     "meadow": {
-      "src": "https://uploads.example/meadow-1600.jpg",
-      "srcset": [
-        {
-          "url": "https://uploads.example/meadow-640.jpg",
-          "width": 640
-        },
-        {
-          "url": "https://uploads.example/meadow-1024.jpg",
-          "width": 1024
-        },
-        {
-          "url": "https://uploads.example/meadow-1600.jpg",
-          "width": 1600
-        }
-      ],
-      "sizes": "(min-width: 64rem) 40rem, 80vw",
+      "url": "https://uploads.example/meadow-{width}.jpg",
       "width": 1600,
       "height": 1067,
       "alt": "A wildflower meadow in early summer",
       "caption": "A wildflower meadow in June"
     },
     "pond": {
-      "src": "https://uploads.example/pond-1600.jpg",
-      "srcset": [
-        {
-          "url": "https://uploads.example/pond-640.jpg",
-          "width": 640
-        },
-        {
-          "url": "https://uploads.example/pond-1024.jpg",
-          "width": 1024
-        },
-        {
-          "url": "https://uploads.example/pond-1600.jpg",
-          "width": 1600
-        }
-      ],
-      "sizes": "(min-width: 64rem) 40rem, 80vw",
+      "url": "https://uploads.example/pond-{width}.jpg",
       "width": 1600,
       "height": 1000,
       "alt": "A wildlife pond edged with marsh marigolds",

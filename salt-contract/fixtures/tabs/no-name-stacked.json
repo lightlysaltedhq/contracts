@@ -21,7 +21,7 @@
     "headingRendered": true,
     "priorityMedia": false,
     "track": "tabs-1",
-    "index": 2
+    "index": 1
   },
   "$comment": "With no heading and no label the set is unnamed, so the tab-set root carries no aria-label (tabs.json: only when named; ARIA 1.2 prohibits aria-label on a generic element)."
 }

@@ -12,56 +12,24 @@
     "headingLevel": 1,
     "priorityMedia": true,
     "track": "listing-1",
-    "index": 1
+    "index": 0,
+    "locale": "en-GB"
   },
   "media": {
     "soil": {
-      "src": "https://uploads.example/soil-health-800.jpg",
-      "srcset": [
-        {
-          "url": "https://uploads.example/soil-health-400.jpg",
-          "width": 400
-        },
-        {
-          "url": "https://uploads.example/soil-health-800.jpg",
-          "width": 800
-        }
-      ],
-      "sizes": "(min-width: 64rem) 22rem, (min-width: 40rem) 45vw, 100vw",
+      "url": "https://uploads.example/soil-health-{width}.jpg",
       "width": 800,
       "height": 600,
       "alt": "Hands holding a handful of dark compost"
     },
     "hedge": {
-      "src": "https://uploads.example/hedge-laying-800.jpg",
-      "srcset": [
-        {
-          "url": "https://uploads.example/hedge-laying-400.jpg",
-          "width": 400
-        },
-        {
-          "url": "https://uploads.example/hedge-laying-800.jpg",
-          "width": 800
-        }
-      ],
-      "sizes": "(min-width: 64rem) 22rem, (min-width: 40rem) 45vw, 100vw",
+      "url": "https://uploads.example/hedge-laying-{width}.jpg",
       "width": 800,
       "height": 600,
       "alt": "A freshly laid hedge along a field edge"
     },
     "pots": {
-      "src": "https://uploads.example/winter-pots-800.jpg",
-      "srcset": [
-        {
-          "url": "https://uploads.example/winter-pots-400.jpg",
-          "width": 400
-        },
-        {
-          "url": "https://uploads.example/winter-pots-800.jpg",
-          "width": 800
-        }
-      ],
-      "sizes": "(min-width: 64rem) 22rem, (min-width: 40rem) 45vw, 100vw",
+      "url": "https://uploads.example/winter-pots-{width}.jpg",
       "width": 800,
       "height": 600,
       "alt": "Terracotta pots wrapped in fleece"

@@ -45,10 +45,46 @@
           ]
         },
         {
+          "role": "page-first",
+          "element": "li",
+          "children": [
+            {
+              "role": "page-first-link",
+              "element": "a",
+              "classes": [
+                "salt-pagination__link"
+              ],
+              "attributes": {
+                "href": "from:href(n)",
+                "aria-label": "from:labels.page",
+                "aria-current": {
+                  "value": "page",
+                  "when": "n is the current page"
+                }
+              },
+              "text": "from:n"
+            }
+          ],
+          "note": "Page 1, always."
+        },
+        {
+          "role": "gap-start",
+          "element": "li",
+          "classes": [
+            "salt-pagination__gap"
+          ],
+          "attributes": {
+            "aria-hidden": "true"
+          },
+          "text": "an ellipsis",
+          "optional": true,
+          "when": "pages between the first and the window are left out"
+        },
+        {
           "role": "page",
           "element": "li",
           "repeat": {
-            "from": "page window: first, last, current and its neighbours"
+            "from": "the current page and its neighbours, and any page between them and the first or last that a one-page gap would leave out"
           },
           "children": [
             {
@@ -67,10 +103,12 @@
               },
               "text": "from:n"
             }
-          ]
+          ],
+          "optional": true,
+          "when": "the window has pages between the first and the last"
         },
         {
-          "role": "gap",
+          "role": "gap-end",
           "element": "li",
           "classes": [
             "salt-pagination__gap"
@@ -79,12 +117,33 @@
             "aria-hidden": "true"
           },
           "text": "an ellipsis",
-          "repeat": {
-            "from": "gaps",
-            "max": 2
-          },
           "optional": true,
-          "when": "pages are skipped"
+          "when": "pages between the window and the last are left out"
+        },
+        {
+          "role": "page-last",
+          "element": "li",
+          "children": [
+            {
+              "role": "page-last-link",
+              "element": "a",
+              "classes": [
+                "salt-pagination__link"
+              ],
+              "attributes": {
+                "href": "from:href(n)",
+                "aria-label": "from:labels.page",
+                "aria-current": {
+                  "value": "page",
+                  "when": "n is the current page"
+                }
+              },
+              "text": "from:n"
+            }
+          ],
+          "optional": true,
+          "when": "there are two pages or more",
+          "note": "The last page, unless it is the first."
         },
         {
           "role": "next",
@@ -143,7 +202,7 @@
   "notes": [
     {
       "topic": "order",
-      "text": "Gaps sit between page items where the window skips; the previous and next items open and close the list."
+      "text": "The window is the first page, the last, and the current page with one neighbour each side; a run left out is one gap, and a gap of exactly one page is drawn as that page. So 5 of 9 is previous, 1, gap, 4, 5, 6, gap, 9, next, and 2 of 3 is previous, 1, 2, 3, next. Each page link's accessible name is labels.page with {n} replaced by the number (\"Page 2\"). Gaps sit only where the window skips, as the elements say."
     }
   ],
   "platforms": {
@@ -160,7 +219,8 @@
         }
       ],
       "owes": [
-        "Pagination markup to the contract on archive and search templates."
+        "Pagination markup to the contract on archive and search templates.",
+        "The same page window: first, last, current with one neighbour each side, a one-page gap drawn as the page, and an aria-hidden li.salt-pagination__gap for each longer run."
       ]
     }
   }

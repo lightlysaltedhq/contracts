@@ -1,0 +1,267 @@
+{
+  "$schema": "../schema/image-sizes.schema.json",
+  "version": "0.1.0",
+  "$comment": "The default sizes and srcset of every image slot (SC-016), from Salt for Next.js's sizes table (packages/core/src/components/image-sizes.ts, bandSizes, BD-196) and next/image's default widths (next 16). Each image the markup draws declares the sizes its slot gives for the band its section is drawn in (a band is the section's width setting: full, wide, default or narrow; a card slot also takes the grid's column count), and the srcset this file's candidate rule gives for those sizes. The candidate URLs are each platform's image pipeline's, never fixed here; the fixtures name them by a template per image. A client site that swaps a section's view or changes its layout may declare its own sizes for a slot of that section, in salt-overrides.json under imageSizes (schema/replaced-logic.schema.json); conformance compares the defaults, because fixtures render the core views. Salt for WordPress owes these sizes written exactly (auto-sizes disabled, wp_img_tag_add_auto_sizes returning false) and a wp_calculate_image_srcset filter giving exactly the srcset rule below (the candidates at or above the slot's floor, capped at the intrinsic width, plus the intrinsic width, dropping core's default 300, 768, 1024 and 1536 sizes), worked through in markup/media.json's owes. Salt for Next.js owes capping: next/image lists every candidate whatever the upload's width, and must stop at the intrinsic width and add it.",
+  "candidates": [
+    32,
+    48,
+    64,
+    96,
+    128,
+    256,
+    384,
+    640,
+    750,
+    828,
+    1080,
+    1200,
+    1920,
+    2048,
+    3840
+  ],
+  "srcset": {
+    "statement": "An img's srcset lists, ascending, the candidate widths the image's sizes leaves, up to and including the upload's intrinsic width, and the intrinsic width itself when it is not a candidate: no platform can serve an image wider than its upload, and a wider candidate would only spend bytes. A candidate goes when sizes holds a bare viewport share (an <n>vw term at its start or after white space, never inside calc()) and the candidate is narrower than viewportFloor x the smallest such n / 100, as next/image's getWidths drops it; otherwise it stays. Each is '<url> <width>w'. src is the URL at the intrinsic width, which the srcset always lists and nothing wider.",
+    "viewportFloor": 640
+  },
+  "slots": {
+    "full": {
+      "description": "Edge to edge: the section background. The only exact slot.",
+      "sizes": "100vw"
+    },
+    "content": {
+      "description": "The band's content box: a stacked hero, a media-text row with no words, a lone gallery image, a timeline step, a list or lead showcase card, a lone carousel card.",
+      "sizes": "(min-width: 64rem) 60rem, 100vw",
+      "bands": {
+        "full": "calc(100vw)",
+        "wide": "(min-width: 80rem) 76rem, calc(100vw - 2rem)",
+        "default": "(min-width: 75rem) 60rem, (min-width: 64rem) 60.44rem, calc(100vw - 2rem)",
+        "narrow": "(min-width: 75rem) 60rem, (min-width: 64rem) 60.44rem, calc(100vw - 2rem)"
+      }
+    },
+    "half": {
+      "description": "One of two tracks: a split hero, a media-text row with words.",
+      "sizes": "(min-width: 64rem) 30rem, 100vw",
+      "bands": {
+        "full": "(min-width: 48.01rem) calc((100vw - 2rem) / 2), calc(100vw)",
+        "wide": "(min-width: 80rem) 37rem, (min-width: 48.01rem) calc((100vw - 4rem) / 2), calc(100vw - 2rem)",
+        "default": "(min-width: 75rem) 29rem, (min-width: 64rem) 29.22rem, (min-width: 48.01rem) calc((100vw - 4rem) / 2), calc(100vw - 2rem)",
+        "narrow": "(min-width: 75rem) 29rem, (min-width: 64rem) 29.22rem, (min-width: 48.01rem) calc((100vw - 4rem) / 2), calc(100vw - 2rem)"
+      }
+    },
+    "card": {
+      "description": "One column of a grid: a showcase, listing, gallery, unnamed carousel or process card, at the grid's column count. Unbanded, it is a carousel slide, as wide as --salt-carousel-slide whatever the band.",
+      "sizes": "(min-width: 64rem) 19rem, (min-width: 40rem) 50vw, 100vw",
+      "bands": {
+        "full": {
+          "2": "(min-width: 40.01rem) calc((100vw - 1.5rem) / 2), calc(100vw)",
+          "3": "(min-width: 48.01rem) calc((100vw - 3rem) / 3), (min-width: 40.01rem) calc((100vw - 1.5rem) / 2), calc(100vw)",
+          "4": "(min-width: 48.01rem) calc((100vw - 4.5rem) / 4), (min-width: 40.01rem) calc((100vw - 1.5rem) / 2), calc(100vw)"
+        },
+        "wide": {
+          "2": "(min-width: 80rem) 37.25rem, (min-width: 40.01rem) calc((100vw - 3.5rem) / 2), calc(100vw - 2rem)",
+          "3": "(min-width: 80rem) 24.3333rem, (min-width: 48.01rem) calc((100vw - 5rem) / 3), (min-width: 40.01rem) calc((100vw - 3.5rem) / 2), calc(100vw - 2rem)",
+          "4": "(min-width: 80rem) 17.875rem, (min-width: 48.01rem) calc((100vw - 6.5rem) / 4), (min-width: 40.01rem) calc((100vw - 3.5rem) / 2), calc(100vw - 2rem)"
+        },
+        "default": {
+          "2": "(min-width: 75rem) 29.25rem, (min-width: 64rem) 29.47rem, (min-width: 40.01rem) calc((100vw - 3.5rem) / 2), calc(100vw - 2rem)",
+          "3": "(min-width: 75rem) 19rem, (min-width: 64rem) 19.1467rem, (min-width: 48.01rem) calc((100vw - 5rem) / 3), (min-width: 40.01rem) calc((100vw - 3.5rem) / 2), calc(100vw - 2rem)",
+          "4": "(min-width: 75rem) 13.875rem, (min-width: 64rem) 13.985rem, (min-width: 48.01rem) calc((100vw - 6.5rem) / 4), (min-width: 40.01rem) calc((100vw - 3.5rem) / 2), calc(100vw - 2rem)"
+        },
+        "narrow": {
+          "2": "(min-width: 75rem) 29.25rem, (min-width: 64rem) 29.47rem, (min-width: 40.01rem) calc((100vw - 3.5rem) / 2), calc(100vw - 2rem)",
+          "3": "(min-width: 75rem) 19rem, (min-width: 64rem) 19.1467rem, (min-width: 48.01rem) calc((100vw - 5rem) / 3), (min-width: 40.01rem) calc((100vw - 3.5rem) / 2), calc(100vw - 2rem)",
+          "4": "(min-width: 75rem) 13.875rem, (min-width: 64rem) 13.985rem, (min-width: 48.01rem) calc((100vw - 6.5rem) / 4), (min-width: 40.01rem) calc((100vw - 3.5rem) / 2), calc(100vw - 2rem)"
+        }
+      }
+    },
+    "aside": {
+      "description": "The case study view's aside.",
+      "sizes": "(min-width: 64rem) 23.83rem, 100vw",
+      "bands": {
+        "full": "(min-width: 64rem) 23.83rem, 100vw",
+        "wide": "(min-width: 80rem) 30.5rem, (min-width: 64rem) calc((100vw - 2rem) * 5 / 12 - 2rem), 100vw",
+        "default": "(min-width: 64rem) 23.83rem, 100vw",
+        "narrow": "(min-width: 64rem) 23.83rem, 100vw"
+      }
+    },
+    "wide": {
+      "description": "A wide measure, unbanded.",
+      "sizes": "(min-width: 80rem) 76rem, 100vw"
+    },
+    "logo": {
+      "description": "The site logo, in the header and the footer: drawn at the site's logo height, so its sizes is its drawn width in CSS pixels, exactly, as Salt for Next.js writes it (site-logo.tsx, drawnWidth).",
+      "sizes": "<drawn width>px",
+      "drawn": {
+        "rule": "round(upload width / upload height x logo height) px, the logo height being the site's logo height setting in px, or defaultHeightPx when the site sets none (chrome.css --logo-height: 2rem).",
+        "defaultHeightPx": 32
+      }
+    },
+    "thumb": {
+      "description": "A small fixed image: a logo strip item, a quotation avatar. Never the priority image.",
+      "sizes": "8rem"
+    }
+  },
+  "placements": [
+    {
+      "markup": "section",
+      "image": "img.salt-section__media",
+      "slot": "full",
+      "band": false,
+      "when": "always"
+    },
+    {
+      "markup": "hero",
+      "image": "img.salt-hero__image",
+      "slot": "half",
+      "band": true,
+      "when": "variant split"
+    },
+    {
+      "markup": "hero",
+      "image": "img.salt-hero__image",
+      "slot": "content",
+      "band": true,
+      "when": "variant stacked"
+    },
+    {
+      "markup": "media-text",
+      "image": "img.salt-media-text__image",
+      "slot": "half",
+      "band": true,
+      "when": "the row has words beside the image"
+    },
+    {
+      "markup": "media-text",
+      "image": "img.salt-media-text__image",
+      "slot": "content",
+      "band": true,
+      "when": "the row is the image alone"
+    },
+    {
+      "markup": "gallery",
+      "image": "img.salt-gallery__image",
+      "slot": "content",
+      "band": true,
+      "when": "exactly one image"
+    },
+    {
+      "markup": "gallery",
+      "image": "img.salt-gallery__image",
+      "slot": "card",
+      "band": false,
+      "when": "a slide of the carousel layout"
+    },
+    {
+      "markup": "gallery",
+      "image": "img.salt-gallery__image",
+      "slot": "card",
+      "band": true,
+      "when": "grid or masonry, at the gallery's columns"
+    },
+    {
+      "markup": "logos",
+      "image": "img.salt-logos__image",
+      "slot": "thumb",
+      "band": false,
+      "when": "always"
+    },
+    {
+      "markup": "process",
+      "image": "img.salt-process__image",
+      "slot": "card",
+      "band": true,
+      "when": "layout cards, three columns"
+    },
+    {
+      "markup": "process",
+      "image": "img.salt-process__image",
+      "slot": "content",
+      "band": true,
+      "when": "layout timeline"
+    },
+    {
+      "markup": "card",
+      "image": ".salt-showcase__caption .salt-showcase__media img",
+      "slot": "thumb",
+      "band": false,
+      "when": "a quotation's photo or logo"
+    },
+    {
+      "markup": "collection-showcase",
+      "image": ".salt-showcase__media img",
+      "slot": "content",
+      "band": true,
+      "when": "layout list, or the first card of layout featured"
+    },
+    {
+      "markup": "collection-showcase",
+      "image": ".salt-showcase__media img",
+      "slot": "card",
+      "band": true,
+      "when": "grid, or featured after its first card, at the showcase's columns"
+    },
+    {
+      "markup": "carousel",
+      "image": ".salt-showcase__media img",
+      "slot": "card",
+      "band": false,
+      "when": "a slide in the track"
+    },
+    {
+      "markup": "carousel",
+      "image": ".salt-showcase__media img",
+      "slot": "card",
+      "band": true,
+      "when": "the unnamed list, three columns"
+    },
+    {
+      "markup": "carousel",
+      "image": ".salt-showcase__media img",
+      "slot": "content",
+      "band": true,
+      "when": "a lone card"
+    },
+    {
+      "markup": "listing",
+      "image": ".salt-showcase__media img",
+      "slot": "card",
+      "band": true,
+      "when": "three columns"
+    },
+    {
+      "markup": "case-study",
+      "image": "the featured image (role image)",
+      "slot": "aside",
+      "band": true,
+      "when": "the aside layout"
+    },
+    {
+      "markup": "case-study",
+      "image": "the featured image (role image)",
+      "slot": "content",
+      "band": false,
+      "when": "any other layout"
+    },
+    {
+      "markup": "case-study",
+      "image": "a gallery image",
+      "slot": "content",
+      "band": false,
+      "when": "always"
+    },
+    {
+      "markup": "case-study",
+      "image": "a related case study's card image",
+      "slot": "card",
+      "band": false,
+      "when": "always"
+    },
+    {
+      "markup": "site-logo",
+      "image": "img.salt-logo__image",
+      "slot": "logo",
+      "band": false,
+      "when": "always"
+    }
+  ]
+}

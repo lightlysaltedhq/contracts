@@ -1,6 +1,6 @@
 {
   "section": "collection-showcase",
-  "$comment": "Phone links: the number with spaces removed after \"tel:\" (0117 496 0123 gives tel:01174960123); the contract fixes no further normalisation. Social links with a glyph hold the icon alone (role img, aria-label the profile name, data-size sm); one without a glyph (Mastodon) holds a span of its name.",
+  "$comment": "Phone links follow section#display-forms (0117 496 0123 gives tel:01174960123). Social links with a glyph hold the icon alone (role img, aria-label the profile name, data-size sm); one without a glyph (Mastodon) holds a span of its name.",
   "summary": "Team members in a grid, none with a page of their own: titles are plain headings. Each card lists an email and a phone link and social profiles; the last profile has no glyph, so it is drawn as its name.",
   "values": {
     "heading": "Meet the team",
@@ -21,7 +21,8 @@
     "headingRendered": true,
     "priorityMedia": false,
     "track": "collection-showcase-6",
-    "index": 6
+    "index": 5,
+    "locale": "en-GB"
   },
   "collections": {
     "team": [

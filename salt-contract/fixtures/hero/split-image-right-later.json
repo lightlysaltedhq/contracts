@@ -28,22 +28,11 @@
     "headingRendered": true,
     "priorityMedia": false,
     "track": "hero-2",
-    "index": 3
+    "index": 2
   },
   "media": {
     "pruning": {
-      "src": "https://uploads.example/pruning-1600.jpg",
-      "srcset": [
-        {
-          "url": "https://uploads.example/pruning-640.jpg",
-          "width": 640
-        },
-        {
-          "url": "https://uploads.example/pruning-1600.jpg",
-          "width": 1600
-        }
-      ],
-      "sizes": "(min-width: 64rem) 30rem, 100vw",
+      "url": "https://uploads.example/pruning-{width}.jpg",
       "width": 1600,
       "height": 1200,
       "alt": "Secateurs shaping a box hedge"

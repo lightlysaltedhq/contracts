@@ -1,7 +1,7 @@
 {
   "section": "carousel",
-  "$comment": "priorityMedia is false: carousel.json gives priority to the track role only, so a lone card (no track) has no priority image in the checker even when the plan grants one. A recorded gap; see the report.",
-  "summary": "One inline card under a heading: the single card is drawn on its own, with no region, track, slides or controls. Its image is lazy.",
+  "$comment": "A lone card holds the priority image when the plan grants it: carousel.json's priorityMedia names the track, the unnamed list and the lone card (SC-016 unit).",
+  "summary": "One inline card under a heading, first on the page: the single card is drawn on its own, with no region, track, slides or controls, its heading the h1, its title an h2 and its image the priority image.",
   "values": {
     "heading": "Our base",
     "source": "inline",
@@ -18,26 +18,14 @@
     }
   },
   "context": {
-    "headingLevel": 2,
-    "headingRendered": true,
-    "priorityMedia": false,
-    "track": "carousel-4",
-    "index": 4
+    "headingLevel": 1,
+    "priorityMedia": true,
+    "track": "carousel-1",
+    "index": 0
   },
   "media": {
     "shed": {
-      "src": "https://uploads.example/potting-shed-800.jpg",
-      "srcset": [
-        {
-          "url": "https://uploads.example/potting-shed-400.jpg",
-          "width": 400
-        },
-        {
-          "url": "https://uploads.example/potting-shed-800.jpg",
-          "width": 800
-        }
-      ],
-      "sizes": "(min-width: 64rem) 22rem, (min-width: 40rem) 45vw, 100vw",
+      "url": "https://uploads.example/potting-shed-{width}.jpg",
       "width": 800,
       "height": 600,
       "alt": "A potting shed with a green door"

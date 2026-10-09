@@ -1,14 +1,14 @@
 {
   "section": "collection-showcase",
-  "$comment": "The ungrouped index (groupByCategory false: \"the index list alone\") is a recorded gap: collection-showcase.json draws the list inside a non-optional div.salt-showcase__group with a required group heading, so the checker has no form for a bare list. Likewise the grouped form's unheaded leading list of uncategorised entries cannot be matched, so every post here has a category. Items carry categories as [{ title }], the same shape as tags.",
-  "summary": "Posts in the index layout, grouped under their categories: one group per category, each with a heading (body base + 1) and a list of links.",
+  "$comment": "Items carry categories as [{ title }], the same shape as tags. The entry with no category is drawn first, in the unheaded index list, as the index option's tree says.",
+  "summary": "Posts in the index layout, grouped: the one post with no category first in an unheaded list, then one group per category, each a heading (body base + 1) and its list of links.",
   "values": {
     "heading": "All our guides",
     "source": "posts",
     "layout": "index",
     "query": {
       "mode": "automatic",
-      "count": 3
+      "count": 4
     },
     "groupByCategory": true,
     "viewAll": false,
@@ -21,10 +21,15 @@
     "headingRendered": true,
     "priorityMedia": false,
     "track": "collection-showcase-5",
-    "index": 5
+    "index": 4
   },
   "collections": {
     "posts": [
+      {
+        "id": "mulch",
+        "title": "A year of mulching, month by month",
+        "href": "/journal/mulching/"
+      },
       {
         "id": "frost",
         "title": "Protecting tender plants from the first frosts",

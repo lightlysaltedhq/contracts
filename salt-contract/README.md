@@ -55,7 +55,9 @@ the Salt page.
    its logic, which hands the new view exactly the props in `contract/view-props/<section>.json`.
    The swap is declared (`tier: "view"`) in the site's `salt-overrides.json`
    (`schema/replaced-logic.schema.json`); on WordPress, the child theme's `OVERRIDES.md` points at it
-   rather than repeating it. *On update, all of the section's logic, the section wrapper and the
+   rather than repeating it. A view that draws an image at another width declares that slot's
+   sizes there too, under `imageSizes` (SC-016); otherwise its images keep the slot's default from
+   `contract/image-sizes.json`. *On update, all of the section's logic, the section wrapper and the
    shared components still reach the site; core's default view of that section does not. A
    release that changes the section's view props, or the plan and shared types in
    `contract/view-props/_shared.json`, is flagged.*
@@ -253,12 +255,12 @@ option covered, and the normaliser sound.
 | `section` | The section id; the same as the directory. |
 | `summary` | What the case shows, in a sentence or two. |
 | `values` | The section's stored field values, named and shaped as `contract/fields/<section>.json` says, with the shared settings under `settings`. A field left out takes its default. |
-| `context` | What the page plan decides for this band, describing a page that can exist: `index` (the section's place on the page, from 1, which also names an accordion group, `faq-<index>`), `track` (its `data-track`, `<section>-<n>` with n no more than `index`, section#data-track), `headingLevel` (1 when no heading has rendered before the section, otherwise 2, section#single-h1), `headingRendered` (true when a heading rendered earlier on the page), `priorityMedia` (true for the first section only, section#priority-media), and where they apply `collapseTop` (section#adjacent-collapse, never on the first section) and `now` (an ISO 8601 time, for the locations' open-now status). |
-| `media` | The images the values name, by id: `src`, `srcset` (a list of `{ url, width }`), `sizes`, `width`, `height`, `alt`, and where set `caption` and `focalPoint` (`{ x, y }` in per cent). |
+| `context` | What the page plan decides for this band, describing a page that can exist: `index` (the plan's index, the section's position among the page's sections from 0, view-props/_shared.json, which also names an accordion group, `faq-<index>`), `track` (its `data-track`, `<section>-<n>` with n no more than `index` + 1, section#data-track), `headingLevel` (1 when no heading has rendered before the section, otherwise 2, section#single-h1), `headingRendered` (true when a heading rendered earlier on the page), `priorityMedia` (true for the first section, index 0, only, section#priority-media), and where they apply `collapseTop` (section#adjacent-collapse, never on the first section) `now` (an ISO 8601 time, for the locations' open-now status) and `locale` (a BCP 47 locale, `en-GB` in every case that draws a date, a time or a phone, which display as section#display-forms says). |
+| `media` | The images the values name, by id: `url` (the upload's address with `{width}` where each listed width goes), `width` and `height` (the upload's intrinsic size), `alt`, and where set `caption` and `focalPoint` (`{ x, y }` in per cent). Never `sizes` or `srcset`: those are the image slot's. |
 | `documents` | The pages internal links name, by id: `{ href, title }`. |
 | `collections` | The items of each source the section reads (`faqs`, `services`, `team` …), in the collection's usual order, each with a string `id`. |
 | `route` | What the route hands a listing: its cards and pagination. |
-| `site` | Site-wide data the markup reads: `labels` (the strings `labels.<name>` in the markup refers to), `arrow` (the site's arrow glyph), the organisation's contact details, whether it accepts enquiries, its timezone and map settings. |
+| `site` | Site-wide data the markup reads: `labels` (the strings `labels.<name>` in the markup refers to), `arrow` (the site's arrow glyph), the organisation's contact details, whether it accepts enquiries, its timezone and map settings. `logoHeight` (px) is the declared key for the logo's drawn height, for the chrome fixtures to come. |
 
 Conventions, so that every case is deterministic:
 
@@ -270,12 +272,14 @@ Conventions, so that every case is deterministic:
   items, order, count }`. Rich text is an HTML string using only the field's allowed elements: the
   fixtures' interchange form, which each platform's adapter turns into its own (Lexical, the
   WordPress editor's HTML).
-- **Images.** `src`, `srcset` and `sizes` are written exactly as the media record gives them. The
-  contract fixes neither srcset widths nor a sizes table yet, so the record supplies both, and each
-  platform's adapter passes them through. Uploads live on `https://uploads.example`; the
-  normaliser drops the host.
-- **Dark tone.** `toneDark: auto` is written as `data-tone-dark` equal to the tone: the dark palette,
-  not the markup, supplies the counterpart.
+- **Images.** Each image declares its slot's default `sizes` for its section's band and the
+  `srcset` the candidate rule gives for them, both from `contract/image-sizes.json` (SC-016),
+  capped at the upload's intrinsic width (the record's `width`, listed itself when it is no
+  candidate), so `src` is always the URL at the intrinsic width. The case's media record gives each candidate's URL through its
+  `{width}` template; the adapter makes its pipeline serve those URLs. Uploads live on
+  `https://uploads.example`, and the normaliser drops the host.
+- **Dark tone.** `toneDark: auto` is written as `data-tone-dark` equal to the tone: the shared
+  stylesheet, not the markup, draws its dark form (SC-016).
 
 ### The normaliser
 
@@ -288,7 +292,12 @@ and between the children of a flex or grid container, a list `scripts/salt_norma
 derives from `styles/`; between two inline elements in normal flow a run is one space and counts),
 boolean-attribute forms, character-reference forms, comments, the upload host in `src` and
 `srcset`, and the artwork inside `svg.salt-icon` (the glyph names are the contract, the artwork is
-each platform's, SC-007). It never touches ids, which SC-012 makes deterministic. The gate proves
+each platform's, SC-007), and in the contact form, exactly four per-request values, which the
+expected HTML writes as declared placeholders: the form's `action` as `{{salt:form-action}}`, the
+hidden `formToken` and `challengeToken` values as `{{salt:form-token}}` and
+`{{salt:challenge-token}}`, and the challenge question (its label's text) as
+`{{salt:challenge-question}}` (SC-016). Each is matched by element, class and name, so a field's
+type and every other attribute still compares. It never touches ids, which SC-012 makes deterministic. The gate proves
 that removing or changing any one attribute of any expected HTML changes its output.
 
 ### The adapter protocol
@@ -307,6 +316,11 @@ written in the implementation's own repository; the contract fixes only its inte
   `text/html; charset=utf-8`. Any other status fails the case.
 - The adapter does not normalise; the runner normalises both sides. It loads the case's media,
   documents, collections and site data into the platform however suits it (fixtures in a test
-  database, mocks), and writes `srcset` and `sizes` from the media record.
+  database, mocks). It renders as the platform renders: it never writes an image's `sizes`,
+  `srcset`, `src`, width or height itself, so the platform's own image code must produce the
+  values `contract/image-sizes.json` gives, and the comparison fails when it does not. The one
+  thing it may set is where the pipeline's URLs point: each candidate's URL comes from the media
+  record's `{width}` template (a custom loader on Next.js, an upload URL filter on WordPress), so
+  the URLs compare and the widths are the platform's own.
 - Form delivery, routing and admin stay native (SC-003): where a case needs a route's data, the
   case supplies it in `route`.

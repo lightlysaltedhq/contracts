@@ -32,56 +32,23 @@
     "headingRendered": true,
     "priorityMedia": false,
     "track": "carousel-1",
-    "index": 3
+    "index": 2
   },
   "media": {
     "fern": {
-      "src": "https://uploads.example/fern-bed-800.jpg",
-      "srcset": [
-        {
-          "url": "https://uploads.example/fern-bed-400.jpg",
-          "width": 400
-        },
-        {
-          "url": "https://uploads.example/fern-bed-800.jpg",
-          "width": 800
-        }
-      ],
-      "sizes": "(min-width: 64rem) 22rem, (min-width: 40rem) 45vw, 100vw",
+      "url": "https://uploads.example/fern-bed-{width}.jpg",
       "width": 800,
       "height": 600,
       "alt": "A shaded bed of ferns and hostas"
     },
     "gravel": {
-      "src": "https://uploads.example/gravel-garden-800.jpg",
-      "srcset": [
-        {
-          "url": "https://uploads.example/gravel-garden-400.jpg",
-          "width": 400
-        },
-        {
-          "url": "https://uploads.example/gravel-garden-800.jpg",
-          "width": 800
-        }
-      ],
-      "sizes": "(min-width: 64rem) 22rem, (min-width: 40rem) 45vw, 100vw",
+      "url": "https://uploads.example/gravel-garden-{width}.jpg",
       "width": 800,
       "height": 600,
       "alt": "A gravel garden with grasses and sea holly"
     },
     "kitchen": {
-      "src": "https://uploads.example/kitchen-plot-800.jpg",
-      "srcset": [
-        {
-          "url": "https://uploads.example/kitchen-plot-400.jpg",
-          "width": 400
-        },
-        {
-          "url": "https://uploads.example/kitchen-plot-800.jpg",
-          "width": 800
-        }
-      ],
-      "sizes": "(min-width: 64rem) 22rem, (min-width: 40rem) 45vw, 100vw",
+      "url": "https://uploads.example/kitchen-plot-{width}.jpg",
       "width": 800,
       "height": 600,
       "alt": "Raised vegetable beds beside a kitchen door"

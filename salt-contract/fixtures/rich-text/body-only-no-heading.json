@@ -1,5 +1,4 @@
 {
-  "$comment": "At headingLevel 1 the stored h3 would render as h2, which rich-text-body.json's content elements (p, h3 to h6, lists, blockquote) do not allow; that state waits on the contract (a recorded gap), so this case sits at level 2.",
   "section": "rich-text",
   "summary": "Body only, no eyebrow or heading, so the wrapper is a div. Not first on the page (headingLevel 2): the stored h3 and h4 render as h3 and h4 (base + 1 and base + 2).",
   "values": {
@@ -13,6 +12,6 @@
     "headingRendered": true,
     "priorityMedia": false,
     "track": "rich-text-1",
-    "index": 2
+    "index": 1
   }
 }

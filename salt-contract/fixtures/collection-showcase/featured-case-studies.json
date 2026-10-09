@@ -25,56 +25,23 @@
     "headingRendered": true,
     "priorityMedia": false,
     "track": "collection-showcase-3",
-    "index": 3
+    "index": 2
   },
   "media": {
     "orchard": {
-      "src": "https://uploads.example/orchard-960.jpg",
-      "srcset": [
-        {
-          "url": "https://uploads.example/orchard-480.jpg",
-          "width": 480
-        },
-        {
-          "url": "https://uploads.example/orchard-960.jpg",
-          "width": 960
-        }
-      ],
-      "sizes": "(min-width: 64rem) 22rem, (min-width: 40rem) 45vw, 100vw",
+      "url": "https://uploads.example/orchard-{width}.jpg",
       "width": 960,
       "height": 640,
       "alt": "A restored walled orchard in spring blossom"
     },
     "courtyard": {
-      "src": "https://uploads.example/courtyard-960.jpg",
-      "srcset": [
-        {
-          "url": "https://uploads.example/courtyard-480.jpg",
-          "width": 480
-        },
-        {
-          "url": "https://uploads.example/courtyard-960.jpg",
-          "width": 960
-        }
-      ],
-      "sizes": "(min-width: 64rem) 22rem, (min-width: 40rem) 45vw, 100vw",
+      "url": "https://uploads.example/courtyard-{width}.jpg",
       "width": 960,
       "height": 640,
       "alt": "A paved courtyard planted with ferns"
     },
     "meadow": {
-      "src": "https://uploads.example/meadow-960.jpg",
-      "srcset": [
-        {
-          "url": "https://uploads.example/meadow-480.jpg",
-          "width": 480
-        },
-        {
-          "url": "https://uploads.example/meadow-960.jpg",
-          "width": 960
-        }
-      ],
-      "sizes": "(min-width: 64rem) 22rem, (min-width: 40rem) 45vw, 100vw",
+      "url": "https://uploads.example/meadow-{width}.jpg",
       "width": 960,
       "height": 640,
       "alt": "A wildflower meadow beside a farmhouse"

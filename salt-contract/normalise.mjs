@@ -28,6 +28,15 @@
 // 8. Icon artwork. The children of svg.salt-icon are dropped: the glyph names are the contract and
 //    the artwork stays each platform's own (SC-007). The svg's own attributes still compare.
 //
+// 9. Per-request values in the contact form (SC-016), and only these, become declared
+//    placeholders: form.salt-contact__form's action ({{salt:form-action}}, platform-native under
+//    SC-003), the value of its hidden formToken and challengeToken inputs ({{salt:form-token}},
+//    {{salt:challenge-token}}), each only when it holds a value (an empty one still compares), and the
+//    question, the challenge label's own text node ({{salt:challenge-question}}); an element
+//    inside the label still compares.
+//    Each is matched by element, class, name or id, never by pattern, so a field's type, name or
+//    any other attribute still compares.
+//
 // Ids are not normalised: SC-012 makes every drawn id deterministic, so an id that differs is a
 // real difference. Input must close its elements (both platforms' serialisers do); no implied end
 // tags are inferred.
@@ -300,11 +309,45 @@ function serialise(node, parent) {
   return VOID.has(node.name) ? `<${node.name}${attrs}>` : `<${node.name}${attrs}>${inner}</${node.name}>`
 }
 
+export const PLACEHOLDERS = {
+  action: '{{salt:form-action}}',
+  formToken: '{{salt:form-token}}',
+  challengeToken: '{{salt:challenge-token}}',
+  question: '{{salt:challenge-question}}',
+}
+const attrOf = (el, name) => el.attrs.find(([n]) => n === name)?.[1]
+const isContactForm = (el) => el.name === 'form' && hasClass(el, 'salt-contact__form')
+
+/**
+ * Whether the normaliser masks this attribute of this element (inside the contact form or not).
+ * An action or token is masked only when it has a value: an empty one is a real difference.
+ */
+export function masks(el, name, insideForm) {
+  if (name === 'action') return isContactForm(el) && attrOf(el, 'action') !== ''
+  return insideForm && name === 'value' && el.name === 'input' && attrOf(el, 'type') === 'hidden' &&
+    ['formToken', 'challengeToken'].includes(attrOf(el, 'name')) && attrOf(el, 'value') !== ''
+}
+
+function maskPerRequest(el, insideForm = false) {
+  const inside = insideForm || isContactForm(el)
+  el.attrs = el.attrs.map(([n, v]) => {
+    if (!masks(el, n, inside)) return [n, v]
+    return [n, n === 'action' ? PLACEHOLDERS.action : PLACEHOLDERS[attrOf(el, 'name')]]
+  })
+  // The question is the label's own text; any element beside it (a marker) still compares.
+  if (inside && el.name === 'label' && /__challenge$/.test(attrOf(el, 'for') ?? '')) {
+    const question = el.children.find((c) => c.type === 'text' && c.value.trim() !== '')
+    if (question) question.value = PLACEHOLDERS.question
+  }
+  for (const c of el.children) if (c.type === 'element') maskPerRequest(c, inside)
+}
+
 /** The canonical form of an HTML fragment: two fragments are equivalent when these are equal. */
 export function normalise(html) {
   const root = parse(String(html))
   dropComments(root)
   dropIconArtwork(root)
+  maskPerRequest(root)
   collapse(root)
   return serialise(root)
 }
