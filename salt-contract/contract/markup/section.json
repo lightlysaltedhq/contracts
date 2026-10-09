@@ -36,7 +36,7 @@
           "brand-tint",
           "surface-inverse"
         ],
-        "note": "The resolved dark tone, written server-side so one cached document serves both schemes."
+        "note": "The dark tone, written server-side so one cached document serves both schemes. With toneDark auto it is the section's tone itself, and the shared stylesheet draws that tone's dark form (SC-016); an explicit toneDark is written as chosen."
       },
       "data-spacing": {
         "enum": [

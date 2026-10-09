@@ -80,11 +80,11 @@
       "name": "toneDark",
       "type": "select",
       "label": "Dark mode tone",
-      "description": "The tone in dark mode. Automatic uses the counterpart of the tone above.",
+      "description": "The tone in dark mode. Automatic keeps the tone above, and the dark palette draws it in its dark form (SC-016).",
       "options": [
         {
           "value": "auto",
-          "label": "Automatic (the counterpart of the tone above)"
+          "label": "Automatic (the tone above, in its dark form)"
         },
         {
           "value": "surface",

@@ -274,8 +274,8 @@ Conventions, so that every case is deterministic:
   contract fixes neither srcset widths nor a sizes table yet, so the record supplies both, and each
   platform's adapter passes them through. Uploads live on `https://uploads.example`; the
   normaliser drops the host.
-- **Dark tone.** `toneDark: auto` is written as `data-tone-dark` equal to the tone: the dark palette,
-  not the markup, supplies the counterpart.
+- **Dark tone.** `toneDark: auto` is written as `data-tone-dark` equal to the tone: the shared
+  stylesheet, not the markup, draws its dark form (SC-016).
 
 ### The normaliser
 
