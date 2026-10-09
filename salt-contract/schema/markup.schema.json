@@ -595,6 +595,14 @@
         },
         "source": {
           "type": "string"
+        },
+        "reserved": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "description": "Ids the rule reserves (section#anchors: the landmark ids). The gate allows these as plain drawn ids; every other drawn id is <owner>__<part>."
         }
       }
     },

@@ -297,15 +297,15 @@
       "type": "text",
       "format": "anchor",
       "label": "Anchor",
-      "description": "Optional, for links to this section. Made URL-safe on save. The reserved ids main, content, header, footer, nav, site-navigation, site-navigation-drawer, search and skip-link, the header's, footer's and consent panel's own ids, the service and search views' heading ids, and repeats on a page, take a numeric suffix (-2, -3) that counts up until the id is no reserved id, matches none of those ids' forms, and is unique on the page. Two anchors salt-footer-column render salt-footer-column and salt-footer-column-a2, since the footer draws salt-footer-column-2. An id the page generates never changes yours: it takes the suffix instead. Suffixes are applied on the page and never saved, as markup/section#anchors says.",
+      "description": "Optional, for links to this section. Saved as a slug of lower-case letters, digits and single hyphens: any other run of characters, underscores included, becomes one hyphen. On the page, an anchor that is one of the landmark ids main, content, header, footer, nav, site-navigation, search or skip-link becomes <anchor>-section, and a repeat takes -2, -3. Ids the page draws itself contain __, so they never meet yours. Nothing is added on save, as markup/section#anchors says.",
       "platforms": {
         "nextjs": {
           "formerly": "settings.anchorId",
-          "owes": "reserving site-navigation in place of navigation, the id its header's main navigation takes (SC-006); reserving site-navigation-drawer, and matching the reserved forms rather than only the exact ids RESERVED_ANCHOR_IDS lists (fields/section-settings.ts, lib/sections/settings.ts); settling anchors at render in section#anchors' three-step order"
+          "owes": "reserving site-navigation in place of navigation, the id its header's main navigation takes (SC-006); slugging that collapses underscores with other separators; settling a landmark clash at render as <anchor>-section instead of refusing it at save, and repeats as -2, -3 (section#anchors, SC-012)"
         },
         "wordpress": {
           "formerly": "section_anchor",
-          "owes": "storing it in the settings group; reserving site-navigation in place of primary-navigation, the id its header's main navigation takes (SC-006)"
+          "owes": "storing it in the settings group; reserving site-navigation in place of primary-navigation, the id its header's main navigation takes (SC-006); slugging and settling as section#anchors says (SC-012)"
         }
       }
     },

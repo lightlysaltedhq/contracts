@@ -14,9 +14,8 @@
     ],
     "attributes": {
       "id": {
-        "value": "from:anchor",
-        "when": "an anchor is set or minted",
-        "note": "section#anchors"
+        "value": "<anchor>",
+        "note": "The section's settled id: its anchor, or one minted from its section id, settled as section#anchors says. Every section has one."
       },
       "aria-labelledby": {
         "value": "<anchor>__heading",
@@ -346,7 +345,17 @@
       "statement": "A section collapses its top spacing (data-collapse-top) when the previous section shares its tone and dark tone, neither has a background image, it has no divider, and neither section's spacing is none."
     },
     "anchors": {
-      "statement": "A section's id is its anchor, slugged on save; only the slug is stored. Ids are settled at render, in three steps. First, the ids the document reserves are fixed and never change: main, content, header, footer, nav, site-navigation, site-navigation-drawer, search and skip-link; the ids the header and footer draw, which are rendered without sight of the page's sections and so can never take a suffix: salt-header-nav-submenu-<n>, salt-header-nav-drawer-submenu-<n> and salt-footer-column-<n> (<n> any run of digits), the view chrome's fixed heading ids service-benefits-heading, service-related-heading and search-results, drawn beside editor content and never suffixed; and the consent panel's salt-consent-title, salt-consent-<category> and salt-consent-<category>-description (<category> any run of lower-case letters, with no hyphen or digit, so analytics, embeds, marketing and any category added later). Second, editors' anchors in page order: an anchor that is a reserved id or matches a reserved form (the skip link, landmarks and chrome depend on them, SC-008) or repeats an earlier anchor takes a numeric suffix, -2 then -3 and up, counting until the result equals no reserved id, matches no reserved form, and is unique on the page (equal to no anchor set anywhere on the page and no id already settled). So an anchor main beside another section's anchor main-2 renders main-3, and an anchor salt-footer-column-0 renders salt-footer-column-0-2. Every -<n> of the three stems salt-header-nav-submenu, salt-header-nav-drawer-submenu and salt-footer-column matches a reserved form, so an anchor that is one of them and needs a suffix takes -a<n> instead, counted the same way: two anchors salt-footer-column render salt-footer-column and salt-footer-column-a2, never salt-footer-column-2, which the footer draws. Every reserved form is escapable this way: a form's variable part is digits only or letters only, so an id that matches one and gains -<n> (or, for those three stems, -a<n>) matches no form, and the count always ends. Third, generated ids inside the page body (a section heading's '<section id>-heading', a form's and its fields' ids, tab and panel ids): an id an editor set is never changed to make way for one (SC-007; SC-008 reads this as holding against generated ids, not reserved ones), so a generated id that equals any settled id takes the suffix, counted the same way, and every reference to it (aria-labelledby, aria-controls, aria-describedby, for) names the suffixed id. A suffix is applied at render only and is never stored on save, so reordering or removing sections never rewrites an editor's anchor."
+      "statement": "A section's id is its anchor. On save an anchor is slugged: lower-cased, every run of characters other than a to z and 0 to 9 (spaces, underscores and hyphens included) becomes one hyphen, and hyphens are trimmed from both ends, so an anchor is lower-case letters, digits and single hyphens and never contains __. Only the slug is stored; nothing is added to it on save. At render the sections' ids are settled in page order. The landmark ids the skip link and navigation need (main, content, header, footer, nav, site-navigation, search, skip-link) are reserved: an anchor equal to one becomes <anchor>-section, so main renders main-section. An anchor that an earlier section already took then takes -2, -3 and up until it is unique among the page's settled ids and the landmark ids: two anchors faq render faq and faq-2. A section with no anchor mints one from its section id, settled after every editor's anchor in the same way, so it never displaces one: an unanchored pricing beside an editor's anchor pricing renders pricing-2. Every other id the system draws is <owner>__<part> (SC-012): the owner is the component, section or view id as contract/sections.json names it, or <anchor>, the section's settled id, for ids inside a section; the part names the element, numbered from 1 where there are several (site-header__submenu-2, <anchor>__heading, <anchor>__tab-2). A drawn id contains __, which a slug cannot, so it never meets an anchor and is never suffixed.",
+      "reserved": [
+        "main",
+        "content",
+        "header",
+        "footer",
+        "nav",
+        "site-navigation",
+        "search",
+        "skip-link"
+      ]
     },
     "new-tab": {
       "statement": "A link that opens a new tab carries target=_blank and rel=\"noopener noreferrer\"."
@@ -382,8 +391,8 @@
       "owes": [
         "Write data-block and data-track from contract ids: rich-text, call-to-action, media-text, collection-showcase.",
         "Rename the skip link's class skip-link to salt-skip-link (page.json).",
-        "Settle ids at render in section#anchors' three-step order: reserve site-navigation-drawer and the reserved forms (salt-header-nav-submenu-<n> and the rest), not only the exact ids RESERVED_ANCHOR_IDS lists today (fields/section-settings.ts, lib/sections/settings.ts), and let generated ids yield to editors' anchors.",
-        "Section heading ids <anchor>__heading, built from the section's settled id, in place of uniqueAnchor('<slug>-heading') (lib/sections/plan.ts, SC-012)."
+        "Section heading ids <anchor>__heading, built from the section's settled id, in place of uniqueAnchor('<slug>-heading') (lib/sections/plan.ts, SC-012).",
+        "Settle anchors at render per section#anchors: a landmark id becomes <anchor>-section instead of being refused at save, repeats take -2, -3, and an unanchored section mints its id from its section id after every editor's anchor (SC-008, SC-012)."
       ]
     },
     "wordpress": {
@@ -431,7 +440,7 @@
         "Wrap the block in div.salt-section__content > div.salt-block[data-block].",
         "Drop the container div: the content div takes the measure from data-width (SC-007).",
         "Write data-track per section#data-track.",
-        "Settle anchors and generated ids per section#anchors: the generated id takes the suffix when it meets an editor's anchor (SC-007), and suffixes are never saved.",
+        "Settle anchors at render per section#anchors: a landmark id becomes <anchor>-section, repeats take -2, -3, and an unanchored section mints its id from its section id (SC-012); nothing is saved but the slug.",
         "Use salt-sr-only for the fallback h1 and the skip link's hidden state instead of visually-hidden."
       ]
     }
