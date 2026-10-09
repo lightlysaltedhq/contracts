@@ -22,7 +22,8 @@
     "salt-stylesheets": "node scripts/check_salt_stylesheets.mjs",
     "salt-extensions": "node scripts/check_salt_extensions.mjs",
     "salt-fixtures": "node scripts/check_salt_fixtures.mjs",
-    "salt-conformance": "node scripts/salt_conformance_self.mjs"
+    "salt-conformance": "node scripts/salt_conformance_self.mjs",
+    "build:salt-bundle": "node scripts/build_salt_bundle.mjs"
   },
   "devDependencies": {
     "ajv": "8.17.1",
