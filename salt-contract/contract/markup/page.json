@@ -5,103 +5,130 @@
   "kind": "view",
   "summary": "A builder page. Its file also draws the document skeleton every view sits in, once.",
   "root": {
-    "element": "body"
+    "element": "html",
+    "note": "The whole document: head, then body."
   },
   "elements": [
     {
-      "role": "skip-link",
-      "element": "a",
-      "classes": [
-        "salt-skip-link"
-      ],
-      "attributes": {
-        "href": "#main"
-      },
-      "text": "from:labels.skip"
-    },
-    {
-      "role": "consent-banner",
-      "element": "div",
-      "classes": [
-        "salt-consent-banner"
-      ],
-      "attributes": {
-        "role": "region",
-        "aria-label": "from:labels.region"
-      },
-      "optional": true,
-      "when": "consent is pending and the site runs an integration that needs it",
+      "role": "head",
+      "element": "head",
+      "note": "Only what the contract fixes; each platform writes the rest of head natively.",
       "children": [
         {
-          "role": "consent-message",
-          "element": "div",
-          "classes": [
-            "salt-consent-banner__message"
-          ],
-          "text": "from:message"
-        },
-        {
-          "role": "consent-actions",
-          "element": "div",
-          "classes": [
-            "salt-consent-banner__actions"
-          ],
+          "role": "scriptless",
+          "element": "noscript",
+          "optional": true,
+          "when": "the site header is drawn",
           "children": [
             {
-              "role": "consent-choice",
-              "component": "button",
-              "repeat": {
-                "from": "accept, reject, preferences",
-                "max": 3
-              }
+              "role": "scriptless-style",
+              "element": "style",
+              "text": ".salt-header{--salt-header-phone-menu:inline-flex;--salt-header-phone-burger:none;--salt-header-phone-wrap:wrap}"
             }
           ]
         }
       ]
     },
     {
-      "role": "consent-announce",
-      "element": "p",
-      "classes": [
-        "salt-sr-only"
-      ],
-      "attributes": {
-        "role": "status",
-        "aria-live": "polite"
-      },
-      "optional": true,
-      "when": "the consent banner is offered"
-    },
-    {
-      "role": "header",
-      "component": "site-header"
-    },
-    {
-      "role": "main",
-      "element": "main",
-      "attributes": {
-        "id": "main",
-        "tabindex": "-1"
-      },
+      "role": "body",
+      "element": "body",
       "children": [
         {
-          "role": "fallback-heading",
-          "component": "fallback-heading",
-          "optional": true,
-          "when": "no section claimed the h1"
+          "role": "skip-link",
+          "element": "a",
+          "classes": [
+            "salt-skip-link"
+          ],
+          "attributes": {
+            "href": "#main"
+          },
+          "text": "from:labels.skip"
         },
         {
-          "role": "sections",
-          "component": "section",
-          "repeat": {
-            "from": "page sections"
-          }
+          "role": "consent-banner",
+          "element": "div",
+          "classes": [
+            "salt-consent-banner"
+          ],
+          "attributes": {
+            "role": "region",
+            "aria-label": "from:labels.region"
+          },
+          "optional": true,
+          "when": "consent is pending and the site runs an integration that needs it",
+          "children": [
+            {
+              "role": "consent-message",
+              "element": "div",
+              "classes": [
+                "salt-consent-banner__message"
+              ],
+              "text": "from:message"
+            },
+            {
+              "role": "consent-actions",
+              "element": "div",
+              "classes": [
+                "salt-consent-banner__actions"
+              ],
+              "children": [
+                {
+                  "role": "consent-choice",
+                  "component": "button",
+                  "repeat": {
+                    "from": "accept, reject, preferences",
+                    "max": 3
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "role": "consent-announce",
+          "element": "p",
+          "classes": [
+            "salt-sr-only"
+          ],
+          "attributes": {
+            "role": "status",
+            "aria-live": "polite"
+          },
+          "optional": true,
+          "when": "the consent banner is offered"
+        },
+        {
+          "role": "header",
+          "component": "site-header"
+        },
+        {
+          "role": "main",
+          "element": "main",
+          "attributes": {
+            "id": "main",
+            "tabindex": "-1"
+          },
+          "children": [
+            {
+              "role": "fallback-heading",
+              "component": "fallback-heading",
+              "optional": true,
+              "when": "no section claimed the h1"
+            },
+            {
+              "role": "sections",
+              "component": "section",
+              "repeat": {
+                "from": "page sections"
+              }
+            }
+          ]
+        },
+        {
+          "role": "footer",
+          "component": "site-footer"
         }
       ]
-    },
-    {
-      "role": "footer",
-      "component": "site-footer"
     }
   ],
   "headings": {
@@ -142,7 +169,7 @@
     },
     {
       "topic": "ruling",
-      "text": "The document head carries <noscript><style>.salt-header{--salt-header-phone-menu:inline-flex;--salt-header-phone-burger:none;--salt-header-phone-wrap:wrap}</style></noscript> whenever the site header is drawn. With no script it keeps the header's menu and call to action on screen below the breakpoint, hides the burger nothing could open, and lets the row wrap. It sits in head because a style element inside noscript is conforming only there; a no-js class removed by script was rejected because it needs a blocking script and leaves a phone whose script fails mid-page with no menu."
+      "text": "The scriptless phone layout is the noscript style in head: with no script it keeps the header's menu and call to action on screen below the breakpoint, hides the burger nothing could open, and lets the row wrap, through the three custom properties chrome.css reads. It sits in head because a style element inside noscript is conforming only there; a no-js class removed by script was rejected because it needs a blocking script and leaves a phone whose script fails mid-page with no menu."
     }
   ],
   "platforms": {

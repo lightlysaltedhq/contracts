@@ -579,3 +579,15 @@ test('cross-file: an href to a landmark fragment, a page address or from: passes
   })
   assert.equal(r.code, 0, r.out)
 })
+
+// page.json's head draws the header's scriptless style as a style element whose text is CSS.
+test('schema: a noscript > style node with CSS text passes the real markup schema and the gate', () => {
+  const r = crossRun((f) => {
+    f['schema/markup.schema.json'] = structuredClone(realMarkupSchema)
+    f['contract/markup/button.json'].root = { element: 'a' }
+    f['contract/markup/hero.json'].root = { element: 'html' }
+    f['contract/markup/hero.json'].elements = [{ role: 'head', element: 'head', children: [{ role: 'scriptless', element: 'noscript', children: [
+      { role: 'scriptless-style', element: 'style', text: '.salt-header{--salt-header-phone-menu:inline-flex}' }] }] }]
+  })
+  assert.equal(r.code, 0, r.out)
+})
