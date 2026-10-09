@@ -331,7 +331,7 @@
       "statement": "A section with nothing to show renders nothing: no wrapper, no heading, no empty list. Malformed rows are skipped, never drawn blank. One item draws the one-item form, never a carousel track or controls."
     },
     "priority-media": {
-      "statement": "At most one image per page loads eagerly with fetchpriority=high: the principal image of the first section, and only when that section has one. A renderable section background image takes precedence over the block's own image. Every other image is loading=lazy. Images always carry intrinsic width and height, or fill a sized box."
+      "statement": "At most one image per page loads eagerly with fetchpriority=high: the principal image of the first section, and only when that section has one. A renderable section background image takes precedence over the block's own image. The priority image is never loading=lazy; every other image is. Every image, the section background included, is one img with srcset and sizes, never picture or source (SC-007); formats are negotiated by each platform's image pipeline. Images always carry intrinsic width and height, or fill a sized box."
     },
     "data-block": {
       "statement": "The block root carries data-block with the contract's section id (kebab case). Stylesheets and analytics select on it; former platform names are migrated, not kept beside it."
