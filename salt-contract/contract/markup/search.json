@@ -16,16 +16,92 @@
     {
       "role": "title",
       "element": "h1",
-      "text": "from:labels.results (query)"
+      "text": "from:labels.search"
     },
     {
       "role": "search",
-      "component": "search-form"
+      "component": "search-form",
+      "note": "The query is kept in the input."
     },
     {
-      "role": "listing",
-      "component": "section",
-      "note": "The listing section with its empty message."
+      "role": "empty",
+      "element": "p",
+      "text": "from:labels.noResults (query)",
+      "optional": true,
+      "when": "a query matches nothing",
+      "note": "The empty state is the form and a sentence, never an empty list."
+    },
+    {
+      "role": "results",
+      "element": "section",
+      "attributes": {
+        "aria-labelledby": "search__results-heading"
+      },
+      "optional": true,
+      "when": "a query has results",
+      "children": [
+        {
+          "role": "results-heading",
+          "element": "h2",
+          "attributes": {
+            "id": "search__results-heading"
+          },
+          "text": "from:labels.results (count, query)"
+        },
+        {
+          "role": "more",
+          "element": "p",
+          "text": "from:labels.more",
+          "optional": true,
+          "when": "more documents match than are listed"
+        },
+        {
+          "role": "results-list",
+          "element": "ul",
+          "classes": [
+            "salt-search__results"
+          ],
+          "attributes": {
+            "role": "list"
+          },
+          "children": [
+            {
+              "role": "result",
+              "element": "li",
+              "repeat": {
+                "from": "results on this page"
+              },
+              "children": [
+                {
+                  "role": "result-link",
+                  "element": "a",
+                  "attributes": {
+                    "href": "from:result url"
+                  },
+                  "text": "from:result title",
+                  "note": "First, so a screen reader's list of links reads as the titles alone."
+                },
+                {
+                  "role": "result-kind",
+                  "element": "p",
+                  "text": "from:labels.kind (post, page, service, case study)"
+                },
+                {
+                  "role": "result-note",
+                  "element": "p",
+                  "text": "from:result note",
+                  "optional": true,
+                  "when": "the result has a note"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "role": "pagination",
+          "component": "pagination"
+        }
+      ]
     }
   ],
   "headings": {
@@ -42,7 +118,7 @@
   },
   "uses": [
     "search-form",
-    "section"
+    "pagination"
   ],
   "ruleRefs": [
     "section#landmarks",
@@ -50,8 +126,15 @@
   ],
   "notes": [
     {
-      "topic": "open-question",
-      "text": "Only the landmark structure and the h1 are fixed here. The view body's class vocabulary is work SC-006 leaves open: Next's example app writes salt-post__*, salt-service__* and salt-archive__*, which no shared stylesheet styles."
+      "topic": "ruling",
+      "text": "The view body is the markup Salt for Next.js's example app writes (apps/example/src/app/(site)/search/page.tsx), in its order: the h1, the form, then either the empty sentence or a named results section with its list and pagination (SC-007). The form's classes are search-form's (salt-search__form, salt-search__label, salt-search__input); the results list is salt-search__results. The results heading's id is search__results-heading (SC-012)."
+    },
+    {
+      "topic": "stylesheet-owes",
+      "text": "The view body class SC-007 adopts; no shared stylesheet styles it yet.",
+      "classes": [
+        "salt-search__results"
+      ]
     }
   ],
   "platforms": {
@@ -64,7 +147,19 @@
         }
       ],
       "owes": [
-        "The search form and listing section markup."
+        "Write the same markup as above, element for element and class for class (SC-007): the search form, the empty sentence or the named results section with salt-search__results and pagination."
+      ]
+    },
+    "nextjs": {
+      "formerly": [
+        {
+          "role": "title",
+          "element": "h1",
+          "note": "apps/example search/page.tsx draws the words Search; the count and query are in the results heading"
+        }
+      ],
+      "owes": [
+        "The results heading's id search__results-heading in place of search-results (SC-012)."
       ]
     }
   }

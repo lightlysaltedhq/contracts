@@ -9,7 +9,10 @@
       "salt-icon"
     ],
     "attributes": {
-      "data-icon": "from:name",
+      "data-icon": {
+        "value": "from:name",
+        "note": "A name in contract/sections.json icons (content or chrome)."
+      },
       "data-size": {
         "enum": [
           "sm",
@@ -90,8 +93,8 @@
       "text": "The svg is the element; WordPress's span.x-icon wrapper goes. Colour is currentColor only."
     },
     {
-      "topic": "open-question",
-      "text": "The two glyph sets differ (Next ships fifteen, WordPress twenty-five). The contract fixes the markup; which names ship is work SC-006 leaves to the fixtures work item."
+      "topic": "ruling",
+      "text": "The names are the union of both platforms' glyphs, listed in contract/sections.json under icons and split into content names an editor may choose and chrome names only the system draws (SC-007). Both platforms draw every name; the artwork stays each platform's own. For a social name (bluesky, facebook, github, instagram, linkedin, pinterest, reddit, tiktok, whatsapp, x, youtube), a platform that ships no mark of its own may draw the shared globe glyph; the markup is identical either way, data-icon keeps the social name, and the link's accessible name carries the platform (SC-008). The gate refuses an icon name in markup or fields that the list lacks."
     }
   ],
   "platforms": {
@@ -115,7 +118,8 @@
         }
       ],
       "owes": [
-        "Put class, data-icon, data-size and the naming on the svg itself."
+        "Put class, data-icon, data-size and the naming on the svg itself.",
+        "Draw chevron-right, external-link, moon and sun, which it has no glyph for today (SC-007)."
       ]
     }
   }

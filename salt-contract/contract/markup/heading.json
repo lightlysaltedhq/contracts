@@ -14,8 +14,9 @@
     ],
     "attributes": {
       "id": {
-        "value": "from:plan.headingId",
-        "when": "it names a section"
+        "value": "<anchor>__heading",
+        "when": "it names a section",
+        "note": "<anchor>__heading, <anchor> the section's settled id (section#anchors, SC-012)."
       }
     },
     "note": "No class: the stylesheet styles headings by context (.salt-block > h*, card titles). The level is data, never a tag the author picked."

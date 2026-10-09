@@ -117,7 +117,7 @@
                             "false"
                           ]
                         },
-                        "aria-controls": "from:submenu id",
+                        "aria-controls": "site-header__submenu-<n>",
                         "aria-label": "from:labels.submenu",
                         "aria-hidden": {
                           "value": "true",
@@ -148,7 +148,7 @@
                         "salt-nav__submenu"
                       ],
                       "attributes": {
-                        "id": "<prefix>-submenu-<n>",
+                        "id": "site-header__submenu-<n>",
                         "role": {
                           "value": "list",
                           "when": "ul"
@@ -352,7 +352,8 @@
               "classes": [
                 "salt-drawer__panel"
               ],
-              "text": "the nav again (ids prefixed -drawer; the main navigation's id site-navigation becomes site-navigation-drawer), the phone link, the call to action"
+              "text": "the nav again, the phone link, the call to action",
+              "note": "The drawer's copy of the nav carries ids of its own, so no id is on the page twice: the nav is site-header__drawer-navigation, and each submenu is site-header__drawer-submenu-<n>, its toggle's aria-controls naming that id. <n> is the same in both copies (SC-012)."
             }
           ]
         }
@@ -431,18 +432,28 @@
   "notes": [
     {
       "topic": "ruling",
-      "text": "The header's sticky setting is drawn as data-sticky on the header on both platforms (SC-006); WordPress's is-sticky class goes. The main navigation takes the id site-navigation on both, so a section anchor of that id takes a numeric suffix (section#anchors)."
+      "text": "The header's sticky setting is drawn as data-sticky on the header on both platforms (SC-006); WordPress's is-sticky class goes. The main navigation takes the id site-navigation on both, a landmark id, so a section anchor of that id becomes site-navigation-section (section#anchors)."
+    },
+    {
+      "topic": "ruling",
+      "text": "Every id the header draws is fixed, so both platforms write the same ones (SC-012). In the bar: the nav is site-navigation, a landmark id; a submenu is site-header__submenu-<n>, where <n> is its item's position in the top-level menu counting from 1, items without children included. In the drawer: the nav is site-header__drawer-navigation and a submenu is site-header__drawer-submenu-<n>. The drawer's nav takes a drawn id, not a landmark one: the skip link and fragment links target the bar's navigation, and the drawer's copy sits in a dialog nothing links to. A drawn id contains __, which no anchor can, so none of these can meet an editor's anchor."
     },
     {
       "topic": "ruling",
       "text": "The call to action follows the nav, then the burger, in both platforms' order."
+    },
+    {
+      "topic": "ruling",
+      "text": "The scriptless phone layout is a noscript style in the document head (page.json), not in the header: a style element inside noscript is conforming HTML only in head. It sets --salt-header-phone-menu, --salt-header-phone-burger and --salt-header-phone-wrap on .salt-header, which chrome.css reads through var() with the scripted values as fallbacks."
     }
   ],
   "platforms": {
     "nextjs": {
       "owes": [
         "The sticky setting, drawn as data-sticky (SC-006).",
-        "The id site-navigation on the main navigation, in place of navigation (SC-006)."
+        "The id site-navigation on the main navigation, in place of navigation (SC-006).",
+        "The ids site-header__submenu-<n>, site-header__drawer-navigation and site-header__drawer-submenu-<n>, counting from 1, in place of the salt-header-nav-submenu-<n> ones it builds from idPrefix and counts from 0 (SC-012). The idPrefix prop goes, since an override would write ids outside the contract.",
+        "Move the noscript style SiteHeader draws as its first child into the document head (page.json): inside the header it is non-conforming HTML."
       ]
     },
     "wordpress": {
@@ -509,7 +520,8 @@
         }
       ],
       "owes": [
-        "Rename to salt-header and salt-nav*; the burger, drawer, submenu disclosure, phone link and theme toggle; data-site-header. data-sticky in place of is-sticky, and the id site-navigation on the main navigation (SC-006)."
+        "Rename to salt-header and salt-nav*; the burger, drawer, submenu disclosure, phone link and theme toggle; data-site-header. data-sticky in place of is-sticky, and the id site-navigation on the main navigation (SC-006). The bar's and the drawer's ids exactly as the ruling note fixes them (SC-012).",
+        "The noscript style setting --salt-header-phone-menu, --salt-header-phone-burger and --salt-header-phone-wrap, printed in the document head (page.json)."
       ]
     }
   }

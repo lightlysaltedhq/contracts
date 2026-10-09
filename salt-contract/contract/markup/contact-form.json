@@ -9,7 +9,10 @@
       "salt-contact__form"
     ],
     "attributes": {
-      "id": "from:form id (salt-contact-<n>)",
+      "id": {
+        "value": "<anchor>__form",
+        "note": "Owned by the contact section's settled id, as every id below is (SC-012). <field> is the field's contract name in kebab case, never camelCase: enquiryType's id is <anchor>__enquiry-type."
+      },
       "method": "post",
       "action": "from:platform endpoint",
       "novalidate": ""
@@ -34,7 +37,7 @@
             "salt-contact__label"
           ],
           "attributes": {
-            "for": "from:field id"
+            "for": "<anchor>__<field>"
           },
           "text": "from:labels.<field>",
           "children": [
@@ -57,7 +60,7 @@
             "salt-contact__error"
           ],
           "attributes": {
-            "id": "from:field id-error"
+            "id": "<anchor>__<field>-error"
           },
           "text": "from:error",
           "optional": true,
@@ -74,7 +77,7 @@
             "salt-contact__input"
           ],
           "attributes": {
-            "id": "from:field id",
+            "id": "<anchor>__<field>",
             "name": "from:field name",
             "required": {
               "value": "",
@@ -85,7 +88,7 @@
               "when": "error"
             },
             "aria-describedby": {
-              "value": "from:error id and status id",
+              "value": "<anchor>__<field>-error <anchor>__status",
               "when": "error or challenge"
             },
             "autocomplete": {
@@ -116,7 +119,7 @@
             "salt-contact__label"
           ],
           "attributes": {
-            "for": "from:field id"
+            "for": "<anchor>__challenge"
           },
           "text": "from:challenge.question"
         },
@@ -137,11 +140,12 @@
             "salt-contact__input--short"
           ],
           "attributes": {
+            "id": "<anchor>__challenge",
             "type": "text",
             "inputmode": "numeric",
             "autocomplete": "off",
             "required": "",
-            "aria-describedby": "from:status id"
+            "aria-describedby": "<anchor>__status"
           }
         }
       ]
@@ -167,7 +171,28 @@
       "attributes": {
         "aria-hidden": "true"
       },
-      "note": "Honeypot: label + text input with tabindex -1, autocomplete off."
+      "note": "Honeypot: a label and a text input out of the tab order. Its id is <anchor>__website, shaped like every real field's (<anchor>__<field>, after its field name website, the field Next's contactFieldId(formId, 'website') draws as <formId>-website today), so the ids do not tell a scraper which field is the trap. The class salt-contact__trap stays as a hook: a form filler matches field names and ids, not classes. The input carries no value attribute; it starts empty.",
+      "children": [
+        {
+          "role": "trap-label",
+          "element": "label",
+          "attributes": {
+            "for": "<anchor>__website"
+          },
+          "text": "from:labels.honeypot"
+        },
+        {
+          "role": "trap-input",
+          "element": "input",
+          "attributes": {
+            "id": "<anchor>__website",
+            "name": "from:honeypot field name",
+            "type": "text",
+            "tabindex": "-1",
+            "autocomplete": "off"
+          }
+        }
+      ]
     },
     {
       "role": "privacy",
@@ -217,7 +242,7 @@
         "salt-contact__status"
       ],
       "attributes": {
-        "id": "from:status id",
+        "id": "<anchor>__status",
         "role": "status",
         "aria-live": "polite",
         "tabindex": "-1",
@@ -301,7 +326,10 @@
   "platforms": {
     "nextjs": {
       "owes": [
-        "The privacy line when a privacy page is set, and the arithmetic challenge inside noscript when a captcha provider is configured (SC-006)."
+        "The privacy line when a privacy page is set, and the arithmetic challenge inside noscript when a captcha provider is configured (SC-006).",
+        "The ids <anchor>__form, <anchor>__<field>, <anchor>__<field>-error, <anchor>__challenge and <anchor>__status (SC-012).",
+        "Kebab-case field ids (<anchor>__enquiry-type, not <formId>-enquiryType), and the honeypot's id <anchor>__website in place of <formId>-website, which contactFieldId(formId, 'website') builds today (contact-form.tsx, SC-012).",
+        "The honeypot input draws no value attribute: defaultValue=\"\" (contact-form.tsx) prints value=\"\" today."
       ]
     },
     "wordpress": {
@@ -338,8 +366,9 @@
         }
       ],
       "owes": [
-        "Field, label, error and status markup as above; status after the actions, inside the form; phone field per the site setting; one id per form (salt-contact-<n>) instead of a static id.",
-        "The privacy line as p.salt-contact__privacy before the actions (SC-006)."
+        "Field, label, error and status markup as above; status after the actions, inside the form; phone field per the site setting; the ids <anchor>__form, <anchor>__<field>, <anchor>__<field>-error, <anchor>__challenge and <anchor>__status (SC-012) instead of a static id.",
+        "The privacy line as p.salt-contact__privacy before the actions (SC-006).",
+        "The honeypot as a label and input with the id <anchor>__website (SC-012), in place of salt-contact-hp, and with no value attribute: template-parts/sections/contact.php draws value=\"\" today."
       ]
     }
   }

@@ -16,14 +16,23 @@
     {
       "role": "article",
       "element": "article",
+      "classes": [
+        "salt-post"
+      ],
       "children": [
         {
           "role": "header",
           "element": "header",
+          "classes": [
+            "salt-post__header"
+          ],
           "children": [
             {
               "role": "breadcrumb",
               "element": "nav",
+              "classes": [
+                "salt-post__breadcrumb"
+              ],
               "attributes": {
                 "aria-label": "from:labels.breadcrumb"
               },
@@ -35,7 +44,51 @@
                   "element": "ol",
                   "attributes": {
                     "role": "list"
-                  }
+                  },
+                  "children": [
+                    {
+                      "role": "crumb",
+                      "element": "li",
+                      "repeat": {
+                        "from": "home (when a home page is published), the blog index, this post",
+                        "min": 2,
+                        "max": 3
+                      },
+                      "children": [
+                        {
+                          "role": "crumb-link",
+                          "element": "a",
+                          "attributes": {
+                            "href": "from:crumb href",
+                            "aria-current": {
+                              "value": "page",
+                              "when": "the last crumb, this post"
+                            }
+                          },
+                          "text": "from:crumb title"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "role": "category",
+              "element": "p",
+              "classes": [
+                "salt-post__category"
+              ],
+              "optional": true,
+              "when": "the post's first topic heads an archive",
+              "children": [
+                {
+                  "role": "category-link",
+                  "element": "a",
+                  "attributes": {
+                    "href": "from:topic archive url"
+                  },
+                  "text": "from:topic title"
                 }
               ]
             },
@@ -47,17 +100,51 @@
             {
               "role": "meta",
               "element": "p",
+              "classes": [
+                "salt-post__meta"
+              ],
               "optional": true,
-              "when": "byline, date or reading time is set",
+              "when": "byline, date or reading time is shown",
               "children": [
+                {
+                  "role": "byline",
+                  "element": "span",
+                  "classes": [
+                    "salt-post__byline"
+                  ],
+                  "optional": true,
+                  "when": "the post has an author and the byline is on",
+                  "text": "from:labels.byline, a space, then the author's name as text when the author has no archive",
+                  "children": [
+                    {
+                      "role": "byline-link",
+                      "element": "a",
+                      "attributes": {
+                        "href": "from:author archive url"
+                      },
+                      "text": "from:author name",
+                      "optional": true,
+                      "when": "the author has an archive; it takes the name's place, so the name is never also written as text"
+                    }
+                  ],
+                  "note": "The label, then either the name as text or the link, never both, as Salt for Next.js's PostView draws it."
+                },
                 {
                   "role": "date",
                   "element": "time",
                   "attributes": {
-                    "datetime": "from:date"
+                    "datetime": "from:date (YYYY-MM-DD in the site's timezone)"
                   },
+                  "text": "from:date, formatted",
                   "optional": true,
-                  "when": "dated"
+                  "when": "dated and the date is on"
+                },
+                {
+                  "role": "read-time",
+                  "element": "span",
+                  "text": "from:labels.readTime (minutes)",
+                  "optional": true,
+                  "when": "the post has prose and reading time is on"
                 }
               ]
             }
@@ -65,10 +152,19 @@
         },
         {
           "role": "media",
-          "component": "media",
+          "element": "div",
+          "classes": [
+            "salt-post__media"
+          ],
           "optional": true,
-          "when": "the post has a featured image",
-          "note": "The view's priority image."
+          "when": "the post has a featured image and it is on",
+          "children": [
+            {
+              "role": "image",
+              "component": "media",
+              "note": "Context content, filling the frame. The view's priority image (section#priority-media); the body's blocks are planned with the media claimed."
+            }
+          ]
         },
         {
           "role": "body",
@@ -78,18 +174,43 @@
         {
           "role": "footer",
           "element": "footer",
+          "classes": [
+            "salt-post__footer"
+          ],
           "optional": true,
           "when": "tags, sharing or an author are shown",
           "children": [
             {
               "role": "tags",
               "element": "ul",
+              "classes": [
+                "salt-post__tags"
+              ],
               "attributes": {
                 "role": "list",
                 "aria-label": "from:labels.tags"
               },
               "optional": true,
-              "when": "tagged"
+              "when": "filed under a topic that heads an archive",
+              "children": [
+                {
+                  "role": "tag",
+                  "element": "li",
+                  "repeat": {
+                    "from": "topics that head an archive, in the editor's order"
+                  },
+                  "children": [
+                    {
+                      "role": "tag-link",
+                      "element": "a",
+                      "attributes": {
+                        "href": "from:topic archive url"
+                      },
+                      "text": "from:topic title"
+                    }
+                  ]
+                }
+              ]
             },
             {
               "role": "share",
@@ -110,11 +231,68 @@
     {
       "role": "adjacent",
       "element": "nav",
+      "classes": [
+        "salt-post__adjacent"
+      ],
       "attributes": {
         "aria-label": "from:labels.adjacent"
       },
       "optional": true,
-      "when": "a previous or next post exists"
+      "when": "a newer or older post exists",
+      "note": "Outside the article: the way to the next post is not part of this one.",
+      "children": [
+        {
+          "role": "adjacent-list",
+          "element": "ul",
+          "attributes": {
+            "role": "list"
+          },
+          "children": [
+            {
+              "role": "neighbour",
+              "element": "li",
+              "attributes": {
+                "data-direction": {
+                  "enum": [
+                    "newer",
+                    "older"
+                  ]
+                }
+              },
+              "repeat": {
+                "from": "newer, then older",
+                "min": 1,
+                "max": 2
+              },
+              "children": [
+                {
+                  "role": "neighbour-link",
+                  "element": "a",
+                  "attributes": {
+                    "href": "from:neighbour url"
+                  },
+                  "children": [
+                    {
+                      "role": "adjacent-label",
+                      "element": "span",
+                      "classes": [
+                        "salt-post__adjacent-label"
+                      ],
+                      "text": "from:labels.newer or labels.older"
+                    },
+                    {
+                      "role": "neighbour-title",
+                      "element": "span",
+                      "text": "from:neighbour title",
+                      "note": "A space between the two spans."
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
     }
   ],
   "headings": {
@@ -141,8 +319,25 @@
   ],
   "notes": [
     {
-      "topic": "open-question",
-      "text": "Only the landmark structure and the h1 are fixed here. The view body's class vocabulary is work SC-006 leaves open: Next's example app writes salt-post__*, salt-service__* and salt-archive__*, which no shared stylesheet styles."
+      "topic": "ruling",
+      "text": "The view body is the markup Salt for Next.js's example app writes (apps/example/src/site/blog-views.tsx, PostView), in its order, with its salt-post__* classes (SC-007). The author is the shared author-box component (salt-author-box*), not the example app's salt-post__author, salt-post__author-name, salt-post__author-role and salt-post__portrait, which SC-008 excludes from the adoption."
+    },
+    {
+      "topic": "stylesheet-owes",
+      "text": "The view body classes SC-007 adopts; the shared stylesheets style them (today only the example app's site.css does).",
+      "classes": [
+        "salt-post",
+        "salt-post__header",
+        "salt-post__breadcrumb",
+        "salt-post__category",
+        "salt-post__meta",
+        "salt-post__byline",
+        "salt-post__media",
+        "salt-post__footer",
+        "salt-post__tags",
+        "salt-post__adjacent",
+        "salt-post__adjacent-label"
+      ]
     }
   ],
   "platforms": {
@@ -155,20 +350,40 @@
         }
       ],
       "owes": [
-        "The article, header, footer and nav structure above."
+        "Write the same markup as above, element for element and class for class (SC-007): the article, its header with breadcrumb, category, title and meta, the media frame, the footer with tags, share links and author box, and the adjacent nav after the article."
       ]
     },
     "nextjs": {
       "formerly": [
         {
-          "role": "article",
-          "element": "article",
+          "role": "author",
+          "element": "aside",
           "classes": [
-            "salt-post"
+            "salt-post__author"
           ],
-          "note": "apps/example blog-views.tsx, not core"
+          "note": "apps/example blog-views.tsx draws the author inline; author-box.json records its migration"
         }
+      ],
+      "owes": [
+        "Rename salt-post__author, salt-post__author-name, salt-post__author-role and salt-post__portrait to the author-box component's salt-author-box* markup (author-box.json, SC-008)."
       ]
     }
+  },
+  "dataAttributes": [
+    {
+      "name": "data-direction",
+      "on": "neighbour",
+      "values": [
+        "newer",
+        "older"
+      ]
+    }
+  ],
+  "priorityMedia": {
+    "role": "image",
+    "when": "the featured image is drawn",
+    "rules": [
+      "section#priority-media"
+    ]
   }
 }

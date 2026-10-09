@@ -50,8 +50,8 @@
               ],
               "attributes": {
                 "type": "radio",
-                "name": "from:baseId",
-                "id": "<baseId>-tab-<n>",
+                "name": "<anchor>__tabs",
+                "id": "<anchor>__tab-<n>",
                 "checked": {
                   "value": "",
                   "when": "first panel"
@@ -65,8 +65,8 @@
                 "salt-tabs__tab"
               ],
               "attributes": {
-                "for": "<baseId>-tab-<n>",
-                "id": "<baseId>-label-<n>"
+                "for": "<anchor>__tab-<n>",
+                "id": "<anchor>__label-<n>"
               },
               "text": "from:panel.label"
             }
@@ -88,13 +88,13 @@
             "salt-tabs__panel"
           ],
           "attributes": {
-            "id": "<baseId>-panel-<n>",
+            "id": "<anchor>__panel-<n>",
             "role": {
               "value": "group",
               "when": "tabbed"
             },
             "aria-labelledby": {
-              "value": "<baseId>-label-<n>",
+              "value": "<anchor>__label-<n>",
               "when": "tabbed"
             },
             "tabindex": {
@@ -154,10 +154,19 @@
   "notes": [
     {
       "topic": "ruling",
+      "text": "The tab set's ids are owned by its section (SC-012): the radio group is named <anchor>__tabs, and tab <n>, counted from 1, has the input <anchor>__tab-<n>, the label <anchor>__label-<n> and the panel <anchor>__panel-<n>, <anchor> the section's settled id. A drawn id contains __, which no anchor can."
+    },
+    {
+      "topic": "ruling",
       "text": "No script: radio inputs and :has(:checked) show the chosen panel. The group is a radiogroup, not an ARIA tablist, because it behaves as radios."
     }
   ],
   "platforms": {
+    "nextjs": {
+      "owes": [
+        "The ids <anchor>__tab-<n>, <anchor>__label-<n> and <anchor>__panel-<n>, counted from 1, and the group name <anchor>__tabs, in place of baseId-tab-<index> from 0 (SC-012)."
+      ]
+    },
     "wordpress": {
       "owes": [
         "The whole tab set (sections.json: WordPress owes the tabs section)."

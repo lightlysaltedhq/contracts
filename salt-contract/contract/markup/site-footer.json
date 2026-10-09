@@ -79,7 +79,7 @@
                     "salt-footer__title"
                   ],
                   "attributes": {
-                    "id": "<prefix>-column-<n>"
+                    "id": "site-footer__column-<n>"
                   },
                   "text": "from:column.title",
                   "optional": true,
@@ -94,7 +94,7 @@
                   "attributes": {
                     "role": "list",
                     "aria-labelledby": {
-                      "value": "<prefix>-column-<n>",
+                      "value": "site-footer__column-<n>",
                       "when": "the column has a title"
                     }
                   },
@@ -189,7 +189,8 @@
                           "optional": true,
                           "when": "a glyph exists for the profile; the name as text otherwise"
                         }
-                      ]
+                      ],
+                      "text": "from:profile name, when no glyph exists for the profile"
                     }
                   ]
                 }
@@ -266,7 +267,7 @@
                     "salt-consent-panel"
                   ],
                   "attributes": {
-                    "aria-labelledby": "<id>title"
+                    "aria-labelledby": "site-footer__consent-title"
                   },
                   "optional": true,
                   "when": "the visitor opens preferences",
@@ -282,7 +283,7 @@
                             "salt-consent-panel__title"
                           ],
                           "attributes": {
-                            "id": "<id>title"
+                            "id": "site-footer__consent-title"
                           },
                           "text": "from:labels.title"
                         },
@@ -304,12 +305,17 @@
                               ],
                               "attributes": {
                                 "type": "checkbox",
-                                "aria-describedby": "<id><category>-description"
+                                "id": "site-footer__consent-<category>",
+                                "name": "<category>",
+                                "aria-describedby": "site-footer__consent-<category>-description"
                               }
                             },
                             {
                               "role": "consent-label",
                               "element": "label",
+                              "attributes": {
+                                "for": "site-footer__consent-<category>"
+                              },
                               "text": "from:category.label"
                             },
                             {
@@ -319,7 +325,7 @@
                                 "salt-consent-panel__description"
                               ],
                               "attributes": {
-                                "id": "<id><category>-description"
+                                "id": "site-footer__consent-<category>-description"
                               }
                             }
                           ]
@@ -415,12 +421,18 @@
     {
       "topic": "order",
       "text": "Base order: text, social, theme toggle, display preferences, copyright, consent. WordPress today: social, text, copyright, preferences."
+    },
+    {
+      "topic": "ruling",
+      "text": "Every id the footer draws is fixed (SC-012), with the footer's own id as its owner, as sections.json names it: the consent panel is drawn by the footer, and the vocabulary has no consent component of its own. A column title is site-footer__column-<n>, <n> its column's position among the columns with links, counting from 1. The consent panel's title is site-footer__consent-title, and each category's checkbox and description are site-footer__consent-<category> and site-footer__consent-<category>-description, <category> the category's id (analytics, embeds, marketing). A drawn id contains __, which no anchor can, so none can meet an editor's anchor."
     }
   ],
   "platforms": {
     "nextjs": {
       "owes": [
-        "The copyright line (p.salt-footer__copyright) and the display preferences slot."
+        "The copyright line (p.salt-footer__copyright) and the display preferences slot.",
+        "The column ids site-footer__column-<n>, counting from 1, in place of the salt-footer-column-<n> ones it builds from idPrefix and counts from 0; the idPrefix prop goes (SC-012).",
+        "The consent panel's ids site-footer__consent-title, site-footer__consent-<category> and site-footer__consent-<category>-description in place of the useId() prefix it builds them from today (SC-012)."
       ]
     },
     "wordpress": {
@@ -493,7 +505,8 @@
         }
       ],
       "owes": [
-        "Rename to salt-footer*; data-tone on the footer; columns, its single menu as one untitled column; the consent control and panel when an integration needs consent; social icons named by role=img and aria-label."
+        "Rename to salt-footer*; data-tone on the footer; columns, its single menu as one untitled column; the consent control and panel when an integration needs consent; social icons named by role=img and aria-label.",
+        "The column and consent panel ids exactly as the ruling note fixes them (SC-012)."
       ]
     }
   }

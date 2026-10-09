@@ -8,7 +8,8 @@
     "version",
     "sections",
     "components",
-    "views"
+    "views",
+    "icons"
   ],
   "additionalProperties": false,
   "$defs": {
@@ -195,6 +196,7 @@
           "type": "string"
         },
         "variants": {
+          "description": "On a section, the selects in its fields file that change its layout; the gate checks each against that select. On a component, which has no fields file, the styles its parent passes; the gate checks the component's markup describes only these options.",
           "type": "array",
           "items": {
             "$ref": "#/$defs/variant"
@@ -218,6 +220,14 @@
       "type": "string",
       "pattern": "^[a-z][a-zA-Z0-9]*$",
       "description": "A field name, as in contract/fields: camelCase ASCII."
+    },
+    "iconNames": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/id"
+      }
     }
   },
   "properties": {
@@ -258,31 +268,23 @@
         "$ref": "#/$defs/entry"
       }
     },
-    "openQuestions": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "required": [
-          "id",
-          "question"
-        ],
-        "additionalProperties": false,
-        "properties": {
-          "id": {
-            "$ref": "#/$defs/id"
-          },
-          "question": {
-            "type": "string"
-          },
-          "recommendation": {
-            "type": "string"
-          },
-          "affects": {
-            "type": "array",
-            "items": {
-              "$ref": "#/$defs/id"
-            }
-          }
+    "icons": {
+      "description": "The glyph names both platforms draw (SC-007). content: the names an editor may choose; chrome: the names only the system draws. A name may be in both. The gate refuses an icon name in markup or fields that neither list holds.",
+      "type": "object",
+      "required": [
+        "content",
+        "chrome"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "note": {
+          "type": "string"
+        },
+        "content": {
+          "$ref": "#/$defs/iconNames"
+        },
+        "chrome": {
+          "$ref": "#/$defs/iconNames"
         }
       }
     }

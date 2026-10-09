@@ -22,7 +22,8 @@
         "enum": [
           "lazy"
         ],
-        "when": "not priority"
+        "when": "not priority",
+        "note": "Never on the priority image, which is eager by default."
       },
       "fetchpriority": {
         "value": "high",
@@ -32,9 +33,14 @@
       "aria-hidden": {
         "value": "true",
         "when": "decorative background"
+      },
+      "style": {
+        "value": "object-fit: <fit>; object-position: <position>",
+        "when": "the parent passes a fit or a position (a section background does)",
+        "note": "Fit is cover or contain. Position is the keyword pair for the nine positions (top left, top, top right, left, center, right, bottom left, bottom, bottom right), or, for focal-point, the image's stored focal point as <x>% <y>%; with no stored focal point the declaration is left out and the stylesheet's centre applies. The frame fill itself comes from the shared stylesheets (SC-011), so no inline fill is required; one a platform writes is redundant and harmless. No custom property carries the focal point: the stylesheets give way to this inline style."
       }
     },
-    "note": "The image takes the class its parent gives it (salt-hero__image, salt-gallery__image and so on); media has no class of its own. sizes is derived from the image context (full, content, wide, aside, half, card, logo, thumb) and the band's width."
+    "note": "The image takes the class its parent gives it (salt-hero__image, salt-gallery__image and so on); media has no class of its own. sizes is derived from the image context (full, content, wide, aside, half, card, logo, thumb) and the band's width. Always one img, never inside picture and never beside source elements (SC-007)."
   },
   "headings": {
     "provides": "never",
@@ -57,11 +63,16 @@
       "text": "Alt precedence is the parent's: an explicit alt, else the stored alt, else empty (decorative)."
     },
     {
-      "topic": "open-question",
-      "text": "WordPress may emit picture with source elements (opt-in); Next emits img only. The contract allows img only; whether picture is needed is work SC-006 leaves until a fixture needs one."
+      "topic": "ruling",
+      "text": "An image is one img with srcset, sizes, width and height, never picture (SC-007). Formats (WebP, AVIF) are negotiated by each platform's image pipeline behind the srcset URLs, not chosen in the markup. The priority image carries fetchpriority=\"high\" and is never loading=\"lazy\" (section#priority-media)."
     }
   ],
   "platforms": {
+    "nextjs": {
+      "owes": [
+        "Write the inline style object-fit and object-position the parent passes, with focal-point as the image's stored focal point (Payload's upload focalPoint, as <x>% <y>%), left out when none is stored; objectPosition() maps focal-point to nothing today (components/image-sizes.ts)."
+      ]
+    },
     "wordpress": {
       "formerly": [
         {
@@ -73,7 +84,9 @@
         }
       ],
       "owes": [
-        "Drop x-image; take the parent's class; derive sizes from the same contexts."
+        "Drop x-image; take the parent's class; derive sizes from the same contexts.",
+        "Its picture_sources opt-in, which wraps the img in picture with source elements, is non-conforming (SC-007): drop it and negotiate formats in the image pipeline behind srcset.",
+        "Write the inline style object-fit and object-position when the parent passes a fit or a position: the nine positions as keyword pairs, and focal-point as the attachment's stored focal point as <x>% <y>%, left out when none is stored. It stores no focal point today, so focal-point draws the stylesheet's centre until it does."
       ]
     }
   }

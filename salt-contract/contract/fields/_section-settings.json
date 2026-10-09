@@ -297,15 +297,15 @@
       "type": "text",
       "format": "anchor",
       "label": "Anchor",
-      "description": "Optional, for links to this section. Made URL-safe on save. The reserved ids main, content, header, footer, nav, site-navigation, search and skip-link, ids the page itself uses, and repeats on a page take a numeric suffix (-2, -3), as markup/section#anchors says.",
+      "description": "Optional, for links to this section. Saved as a slug of lower-case letters, digits and single hyphens, made as WordPress's sanitize_title makes it under the site's locale, with underscores and encoded characters then turned into hyphens: We're hiring gives were-hiring, Straße gives strase (strasse on a German site), contact__form gives contact-form. An anchor that leaves nothing (日本語) counts as none. On the page, an anchor that is one of the landmark ids main, content, header, footer, nav, site-navigation, search or skip-link becomes <anchor>-section, and one an earlier section has taken takes the next free -2, -3. Ids the page draws itself contain __, so they never meet yours. Nothing is added on save, as markup/section#anchors says. The slug is applied again on the page, to whatever is stored.",
       "platforms": {
         "nextjs": {
           "formerly": "settings.anchorId",
-          "owes": "reserving site-navigation in place of navigation, the id its header's main navigation takes (SC-006)"
+          "owes": "reserving site-navigation in place of navigation, the id its header's main navigation takes (SC-006); settling a landmark clash at render as <anchor>-section instead of refusing it at save (section#anchors, SC-012, SC-013); an anchor slug function of its own that follows section#anchors for the site's locale, leaving slugify for URL slugs unchanged (SC-014)"
         },
         "wordpress": {
           "formerly": "section_anchor",
-          "owes": "storing it in the settings group; reserving site-navigation in place of primary-navigation, the id its header's main navigation takes (SC-006)"
+          "owes": "storing it in the settings group; reserving site-navigation in place of primary-navigation, the id its header's main navigation takes (SC-006); settling a landmark clash as <anchor>-section (section#anchors, SC-012, SC-013); the tidy step after sanitize_title (SC-014); storing the slug on save, where section_anchor stores the raw text today (inc/acf.php)"
         }
       }
     },

@@ -6,6 +6,55 @@ Salted's decision log for Product Salt.
 
 ## Unreleased (0.1.0, drafting)
 
+- The owner's rulings of 09/10/2026 (SC-007, SC-008, SC-012 to SC-014) are applied, and no open
+  question remains; the markup schema drops the `open-question` note topic.
+  - Every id the system draws is `<owner>__<part>` (SC-012). The owner is the component, section or
+    view id as `sections.json` names it, or `<anchor>`, the section's settled id, for ids inside a
+    section. Parts are numbered from 1: `site-header__submenu-2`, `<anchor>__heading`,
+    `<anchor>__tab-2`, `service__benefits-heading`. Only the landmark ids stay plain (`main`,
+    `content`, `header`, `footer`, `nav`, `site-navigation`, `search`, `skip-link`). An anchor is
+    slugged as WordPress's `sanitize_title` slugs it under the site's locale, then every run of
+    underscores or `%xx` octets becomes one hyphen, repeated hyphens collapse and hyphens are
+    trimmed (SC-014), on save and again at render, so it never contains `__` and never meets a drawn
+    id; an empty slug counts as no anchor. "We're hiring" gives `were-hiring`; 'Straße' gives
+    `strase` on en_GB and `strasse` on de_DE; 'contact__form' gives `contact-form`. Anchors settle
+    in one pass in page order, as both platforms do (SC-013): an anchor equal to a landmark id
+    becomes `<anchor>-section`, an id already taken takes the next free `-2`, `-3`, and a section
+    with no anchor mints its id from its section id in the same pass. So `faq, main, faq, faq-2` and
+    an unanchored `pricing` render `faq, main-section, faq-2, faq-2-2, pricing`.
+  - The post, service, archive and search view bodies are fixed as Salt for Next.js's example app
+    writes them (`salt-post__*`, `salt-service__*`, `salt-related`, `salt-archive__*`,
+    `salt-search__results`). The post's author is the shared `author-box` component, and Salt for
+    Next.js owes the rename (SC-008).
+  - Locations' open-now status carries `data-hours`, `data-timezone` and `data-labels` for a script
+    that recomputes it on load.
+  - An image is one `img` with `srcset`, `sizes`, `width` and `height`, never `picture`.
+  - `contract/sections.json` lists the icon names both platforms draw under `icons`, split into
+    content and chrome. A platform may draw the shared `globe` glyph for a social mark it does not
+    ship, with the platform in the link's accessible name (SC-008).
+  - The section has no container element.
+  - Salt for WordPress's `owes` records each change, including its `picture_sources` opt-in and the
+    glyphs `chevron-right`, `external-link`, `moon` and `sun`.
+- The header fixes every id it draws: `site-navigation` (a landmark), and
+  `site-header__submenu-<n>`, `site-header__drawer-navigation` and
+  `site-header__drawer-submenu-<n>`. The footer's column titles are `site-footer__column-<n>`, and
+  the consent panel it draws uses `site-footer__consent-title`, `site-footer__consent-<category>`
+  and `site-footer__consent-<category>-description`. A footer social link with no glyph carries the
+  profile's name as text.
+- `contract/sections.json` declares component variants (card's `style`), and the gate refuses
+  component markup that describes a variant or option its entry does not declare, a vocabulary
+  variant that offers a value more than once or defaults outside its options, an icon name `icons` does not
+  list (in attributes or `dataAttributes`), an icon field whose default is not a content name,
+  and any id the markup draws or points at (every id-referencing attribute, `href` fragments
+  included) that is not a landmark id, `<anchor>` (only inside sections), or `<owner>__<part>`.
+- The markup records the custom properties the shared stylesheets read (the case study's aside rows
+  and measure, and the header's scriptless phone layout, a `noscript` style in the document head,
+  drawn in page.json's head), and that fit and focal point reach the `img` as inline `object-fit`
+  and `object-position` (SC-011).
+- The case study names its four sections by `case-study__<part>-heading`, and the contact form's
+  honeypot is `<anchor>__website`.
+- The sections schema drops `openQuestions`.
+- Locations' open-now rule states one order, hours carried past midnight included.
 - The package exists, with its gate (`npm run salt-contract` at the repository root) and its
   release workflow on the `salt-contract-v*` tag prefix. It stays `private` until 1.0.0.
 - `RELEASE-POLICY.md`: one version for the package, what is major, minor and patch for every kind

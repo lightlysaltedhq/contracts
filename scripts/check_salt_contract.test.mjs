@@ -153,6 +153,7 @@ function crossPackage(edit) {
       $schema: '../schema/sections.schema.json', version: '0.1.0',
       sections: [{ id: 'hero', label: 'Hero', tier: 'core', variants: [{ field: 'variant', options: [{ value: 'a', label: 'A' }, { value: 'b', label: 'B' }], default: 'a' }] }],
       components: [{ id: 'button', label: 'Button' }], views: [],
+      icons: { content: ['star'], chrome: ['close'] },
     }
     f['contract/fields/hero.json'] = {
       $schema: '../../schema/field-definition.schema.json', version: '0.1.0', section: 'hero',
@@ -377,3 +378,216 @@ for (const [type, extra] of [['group', { fields: [{ name: 'a', type: 'text' }] }
     f['contract/fields/hero.json'].fields.push({ name: 'box', type, ...extra }, { name: 'x', type: 'text', condition: { field: 'box', filled: true } })
   }, new RegExp(`hero\\.x condition tests whether box is filled, a ${type} field; filled may not name a group, list, collection-query or link`))
 }
+
+// ── 08/10 review deferral: a component's variants are declared in sections.json ─────────────────
+// A component has no fields file, so its markup's variants are checked against its vocabulary entry.
+const componentVariant = (f) => {
+  f['contract/sections.json'].components[0].variants = [{ field: 'style', options: [{ value: 'solid', label: 'Solid' }, { value: 'ghost', label: 'Ghost' }], default: 'solid' }]
+}
+test('cross-file: component markup describing variant options its entry declares passes', () => {
+  const r = crossRun((f) => { componentVariant(f); f['contract/markup/button.json'].variants = [{ field: 'style', options: { solid: {}, ghost: {} } }] })
+  assert.equal(r.code, 0, r.out)
+})
+crossFail('component markup describing a variant option its entry does not offer', (f) => {
+  componentVariant(f); f['contract/markup/button.json'].variants = [{ field: 'style', options: { solid: {}, outline: {} } }]
+}, /button markup describes variant option outline, which its entry in sections\.json does not offer/)
+crossFail('component markup describing a variant its entry does not declare', (f) => {
+  f['contract/markup/button.json'].variants = [{ field: 'style', options: { solid: {} } }]
+}, /button markup describes a variant of style, which its entry in sections\.json does not declare/)
+
+// ── SC-007: icon names are the union sections.json lists ────────────────────────────────────────
+const withIcons = (f) => {
+  f['contract/sections.json'].icons = { content: ['star', 'check'], chrome: ['check', 'close'] }
+  f['contract/sections.json'].components.push({ id: 'icon', label: 'Icon' })
+  f['contract/markup/icon.json'] = { $schema: '../../schema/markup.schema.json', version: '0.1.0', id: 'icon', kind: 'component' }
+}
+const iconNode = (name) => ({ role: 'glyph', component: 'icon', attributes: { 'data-icon': name } })
+test('cross-file: listed icon names in markup and a content default pass', () => {
+  const r = crossRun((f) => {
+    withIcons(f)
+    f['contract/markup/hero.json'].elements = [{ role: 'box', element: 'div', children: [iconNode('close'), iconNode('from:name')] }]
+    f['contract/fields/hero.json'].fields.push({ name: 'icon', type: 'select', optionsFrom: 'icons', default: 'star' })
+  })
+  assert.equal(r.code, 0, r.out)
+})
+crossFail('a nested icon name sections.json does not list', (f) => {
+  withIcons(f); f['contract/markup/hero.json'].elements = [{ role: 'box', element: 'div', children: [iconNode('rocket')] }]
+}, /contract\/markup\/hero\.json draws icon rocket, which sections\.json icons does not list/)
+crossFail('an unlisted icon name in a variant option', (f) => {
+  withIcons(f)
+  f['contract/markup/hero.json'].elements = [iconNode('check')]
+  f['contract/markup/hero.json'].variants = [{ field: 'variant', options: { b: { elements: { glyph: { attributes: { 'data-icon': 'moon' } } } } } }]
+}, /contract\/markup\/hero\.json draws icon moon, which sections\.json icons does not list/)
+crossFail('an icon field defaulting to a chrome-only name', (f) => {
+  withIcons(f); f['contract/fields/hero.json'].fields.push({ name: 'icon', type: 'select', optionsFrom: 'icons', default: 'close' })
+}, /hero\.icon defaults to icon close, which is not a content icon in sections\.json/)
+
+// The real sections schema requires the icon lists and refuses a repeated name.
+const realSectionsSchema = JSON.parse(readFileSync(path.join(path.dirname(script), '..', 'salt-contract', 'schema', 'sections.schema.json'), 'utf8'))
+const realVocab = (icons) => crossRun((f) => {
+  f['schema/sections.schema.json'] = structuredClone(realSectionsSchema)
+  const both = { nextjs: { status: 'ships' }, wordpress: { status: 'ships' } }
+  f['contract/sections.json'].sections[0].platforms = both
+  f['contract/sections.json'].components[0].platforms = both
+  if (icons === undefined) delete f['contract/sections.json'].icons
+  else f['contract/sections.json'].icons = icons
+})
+test('schema: the sections schema accepts content and chrome icon lists', () => {
+  const r = realVocab({ content: ['star'], chrome: ['close'] })
+  assert.equal(r.code, 0, r.out)
+})
+test('schema: the sections schema requires the icon lists', () => {
+  const r = realVocab(undefined)
+  assert.equal(r.code, 1, r.out); assert.match(r.out, /contract\/sections\.json does not match schema\/sections\.schema\.json: \/ must have required property 'icons'/)
+})
+test('schema: the sections schema refuses a name listed twice in one list', () => {
+  const r = realVocab({ content: ['star', 'star'], chrome: ['close'] })
+  assert.equal(r.code, 1, r.out); assert.match(r.out, /\/icons\/content must NOT have duplicate items/)
+})
+
+// SC-007 closed the last open question; the markup schema no longer offers the topic.
+const realMarkupSchema = JSON.parse(readFileSync(path.join(path.dirname(script), '..', 'salt-contract', 'schema', 'markup.schema.json'), 'utf8'))
+const realMarkupRun = (notes) => crossRun((f) => {
+  f['schema/markup.schema.json'] = structuredClone(realMarkupSchema)
+  f['contract/markup/hero.json'].root = { element: 'div' }
+  f['contract/markup/button.json'].root = { element: 'a' }
+  f['contract/markup/hero.json'].notes = notes
+})
+test('schema: the markup schema accepts a ruling note', () => {
+  const r = realMarkupRun([{ topic: 'ruling', text: 'x' }])
+  assert.equal(r.code, 0, r.out)
+})
+test('schema: the markup schema refuses an open-question note', () => {
+  const r = realMarkupRun([{ topic: 'open-question', text: 'x' }])
+  assert.equal(r.code, 1, r.out); assert.match(r.out, /contract\/markup\/hero\.json does not match schema\/markup\.schema\.json: \/notes\/0\/topic must be equal to one of the allowed values/)
+})
+
+// ── Review of #6: one variant rule for sections and components ──────────────────────────────────
+crossFail('a component variant whose default is not one of its options', (f) => {
+  componentVariant(f); f['contract/sections.json'].components[0].variants[0].default = 'outline'
+}, /button variant style defaults to outline, which is not one of its options in sections\.json/)
+crossFail('a component variant offering one value twice', (f) => {
+  componentVariant(f); f['contract/sections.json'].components[0].variants[0].options.push({ value: 'ghost', label: 'Ghost again' })
+}, /button variant style offers ghost 2 times in sections\.json/)
+crossFail('a section variant whose default is not one of its options', (f) => {
+  f['contract/sections.json'].sections[0].variants[0].default = 'z'
+}, /hero variant variant defaults to z, which is not one of its options in sections\.json/)
+crossFail('an unlisted icon name in dataAttributes', (f) => {
+  withIcons(f); f['contract/markup/hero.json'].dataAttributes = [{ name: 'data-icon', on: 'glyph', values: ['star', 'rocket'] }]
+}, /contract\/markup\/hero\.json draws icon rocket, which sections\.json icons does not list/)
+test('cross-file: a data-icon in dataAttributes read from content passes', () => {
+  const r = crossRun((f) => { withIcons(f); f['contract/markup/hero.json'].dataAttributes = [{ name: 'data-icon', on: 'glyph', values: 'from:name' }] })
+  assert.equal(r.code, 0, r.out)
+})
+test('schema: the sections schema refuses openQuestions', () => {
+  const r = crossRun((f) => {
+    f['schema/sections.schema.json'] = structuredClone(realSectionsSchema)
+    const both = { nextjs: { status: 'ships' }, wordpress: { status: 'ships' } }
+    f['contract/sections.json'].sections[0].platforms = both
+    f['contract/sections.json'].components[0].platforms = both
+    f['contract/sections.json'].openQuestions = [{ id: 'q', question: 'x' }]
+  })
+  assert.equal(r.code, 1, r.out); assert.match(r.out, /contract\/sections\.json does not match schema\/sections\.schema\.json: \/ must NOT have additional properties/)
+})
+
+// ── Re-review of #6: one icon rule on both paths ─────────────────────────────────────────────────
+crossFail('an empty data-icon in dataAttributes', (f) => {
+  withIcons(f); f['contract/markup/hero.json'].dataAttributes = [{ name: 'data-icon', on: 'glyph', values: '' }]
+}, /contract\/markup\/hero\.json draws icon "", which sections\.json icons does not list/)
+crossFail('an empty data-icon on a node', (f) => {
+  withIcons(f); f['contract/markup/hero.json'].elements = [iconNode('')]
+}, /contract\/markup\/hero\.json draws icon "", which sections\.json icons does not list/)
+
+// A section variant that fails its own declaration is not compared with its fields file as well.
+test('cross-file: a section variant with a bad default prints one line, not a second for the fields file', () => {
+  const r = crossRun((f) => { f['contract/sections.json'].sections[0].variants[0].default = 'z' })
+  assert.equal(r.code, 1, r.out)
+  const lines = r.out.split('\n').filter((l) => l.startsWith('✗'))
+  assert.deepEqual(lines, ['✗ hero variant variant defaults to z, which is not one of its options in sections.json'])
+})
+test('cross-file: a value offered three times is reported once, with its count', () => {
+  const r = crossRun((f) => {
+    componentVariant(f)
+    f['contract/sections.json'].components[0].variants[0].options.push({ value: 'ghost', label: 'G2' }, { value: 'ghost', label: 'G3' })
+  })
+  assert.equal(r.code, 1, r.out)
+  const lines = r.out.split('\n').filter((l) => l.startsWith('✗'))
+  assert.deepEqual(lines, ['✗ button variant style offers ghost 3 times in sections.json'])
+})
+
+// ── SC-012: every drawn id is a landmark id, <anchor>, or <owner>__<part> ───────────────────────
+const withLandmarks = (f) => {
+  f['contract/sections.json'].components.push({ id: 'section', label: 'Section' })
+  f['contract/markup/section.json'] = { $schema: '../../schema/markup.schema.json', version: '0.1.0', id: 'section', kind: 'component', rules: { anchors: { statement: 'x', reserved: ['main'] } } }
+}
+const idNode = (attributes) => ({ role: 'box', element: 'div', attributes })
+test('cross-file: landmark, <anchor> and <owner>__<part> ids pass', () => {
+  const r = crossRun((f) => {
+    withLandmarks(f)
+    f['contract/markup/section.json'].root = { element: 'section', attributes: { id: '<anchor>' } }
+    f['contract/markup/hero.json'].elements = [idNode({ id: 'main' }), idNode({ id: '<anchor>__heading' }),
+      idNode({ 'aria-controls': 'button__menu-<n>', 'aria-describedby': { value: '<anchor>__email-error <anchor>__status' } })]
+  })
+  assert.equal(r.code, 0, r.out)
+})
+crossFail('a plain drawn id that is no landmark', (f) => {
+  withLandmarks(f); f['contract/markup/hero.json'].elements = [idNode({ id: 'hero-heading' })]
+}, /contract\/markup\/hero\.json draws id hero-heading, which is neither a landmark id nor <owner>__<part>/)
+crossFail('a drawn id read from content', (f) => {
+  withLandmarks(f); f['contract/markup/hero.json'].elements = [idNode({ 'aria-labelledby': 'from:plan.headingId' })]
+}, /draws aria-labelledby from:plan\.headingId, which is neither a landmark id nor <owner>__<part>/)
+crossFail('a drawn id whose owner sections.json lacks', (f) => {
+  withLandmarks(f); f['contract/markup/hero.json'].elements = [idNode({ for: 'consent-banner__title' })]
+}, /draws for consent-banner__title, whose owner consent-banner is not an id in sections\.json/)
+crossFail('an id in a variant option that is no landmark', (f) => {
+  withLandmarks(f); f['contract/markup/hero.json'].variants = [{ field: 'variant', options: { b: { root: { attributes: { id: 'navigation' } } } } }]
+}, /draws id navigation, which is neither a landmark id nor <owner>__<part>/)
+crossFail('a bare <anchor> anywhere but the section wrapper', (f) => {
+  withLandmarks(f); f['contract/markup/hero.json'].elements = [idNode({ id: '<anchor>' })]
+}, /contract\/markup\/hero\.json draws id <anchor>, which only the section wrapper \(section\.json's root\) may carry/)
+crossFail('an <anchor>__<part> id in a view', (f) => {
+  withLandmarks(f)
+  f['contract/sections.json'].views.push({ id: 'post', label: 'Post' })
+  f['contract/markup/post.json'] = { $schema: '../../schema/markup.schema.json', version: '0.1.0', id: 'post', kind: 'view', elements: [idNode({ id: '<anchor>__heading' })] }
+}, /contract\/markup\/post\.json draws id <anchor>__heading, but <anchor> names a section's id and this is drawn outside every section/)
+crossFail('an <anchor>__<part> id in the site header', (f) => {
+  withLandmarks(f)
+  f['contract/sections.json'].components.push({ id: 'site-header', label: 'Header' })
+  f['contract/markup/site-header.json'] = { $schema: '../../schema/markup.schema.json', version: '0.1.0', id: 'site-header', kind: 'component', elements: [idNode({ 'aria-controls': '<anchor>__menu' })] }
+}, /site-header\.json draws aria-controls <anchor>__menu, but <anchor> names a section's id/)
+
+// A non-string id value fails as a line, never a crash.
+crossFail('a numeric id value', (f) => {
+  withLandmarks(f); f['contract/markup/hero.json'].elements = [idNode({ id: 5 })]
+}, /contract\/markup\/hero\.json draws id 5, which is not an id/)
+crossFail('a null id value', (f) => {
+  withLandmarks(f); f['contract/markup/hero.json'].elements = [idNode({ 'aria-labelledby': null })]
+}, /draws aria-labelledby null, which is not an id/)
+
+// Every id-referencing attribute is read, href only for its #fragment.
+for (const [key, value] of [['aria-errormessage', 'email-error'], ['popovertarget', 'menu'], ['headers', '<anchor>__a plain-cell'], ['list', 'options']]) {
+  crossFail(`a plain id in ${key}`, (f) => {
+    withLandmarks(f); f['contract/markup/hero.json'].elements = [idNode({ [key]: value })]
+  }, new RegExp(`draws ${key} [a-z-]+, which is neither a landmark id nor <owner>__<part>`))
+}
+crossFail('a plain #fragment in href', (f) => {
+  withLandmarks(f); f['contract/markup/hero.json'].elements = [idNode({ href: '#top' })]
+}, /draws href top, which is neither a landmark id nor <owner>__<part>/)
+test('cross-file: an href to a landmark fragment, a page address or from: passes', () => {
+  const r = crossRun((f) => {
+    withLandmarks(f); f['contract/markup/hero.json'].elements = [idNode({ href: '#main' }), idNode({ href: 'from:url' }), idNode({ href: '/contact' })]
+  })
+  assert.equal(r.code, 0, r.out)
+})
+
+// page.json's head draws the header's scriptless style as a style element whose text is CSS.
+test('schema: a noscript > style node with CSS text passes the real markup schema and the gate', () => {
+  const r = crossRun((f) => {
+    f['schema/markup.schema.json'] = structuredClone(realMarkupSchema)
+    f['contract/markup/button.json'].root = { element: 'a' }
+    f['contract/markup/hero.json'].root = { element: 'html' }
+    f['contract/markup/hero.json'].elements = [{ role: 'head', element: 'head', children: [{ role: 'scriptless', element: 'noscript', children: [
+      { role: 'scriptless-style', element: 'style', text: '.salt-header{--salt-header-phone-menu:inline-flex}' }] }] }]
+  })
+  assert.equal(r.code, 0, r.out)
+})

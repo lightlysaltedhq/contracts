@@ -73,7 +73,7 @@
                   "component": "heading",
                   "attributes": {
                     "id": {
-                      "value": "from:plan.headingId",
+                      "value": "<anchor>__heading",
                       "when": "first rendered row"
                     }
                   },
@@ -290,7 +290,7 @@
       ],
       "owes": [
         "Write the block root div.salt-block with data-block set to the contract id inside the section wrapper (section.json).",
-        "Give the section heading the plan's id and point the wrapper's aria-labelledby at it (section#labelled-by).",
+        "Give the section heading the id <anchor>__heading and point the wrapper's aria-labelledby at it (section#labelled-by, SC-012).",
         "Drop Tailwind utility classes from the markup; the shared stylesheets style the salt-* classes.",
         "data-media-side on the row instead of an order class; later row headings at base + 1; up to two buttons per row."
       ]

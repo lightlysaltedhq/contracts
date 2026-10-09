@@ -24,7 +24,7 @@
       "role": "heading",
       "component": "heading",
       "attributes": {
-        "id": "from:plan.headingId"
+        "id": "<anchor>__heading"
       },
       "optional": true,
       "when": "heading is set",
@@ -82,7 +82,20 @@
                         "open",
                         "appointment",
                         "closed"
-                      ]
+                      ],
+                      "note": "The server's status at render; the script replaces it on load."
+                    },
+                    "data-hours": {
+                      "value": "from:office hours, as JSON",
+                      "note": "The format is in the ruling note on open-now."
+                    },
+                    "data-timezone": {
+                      "value": "from:the site's IANA timezone",
+                      "note": "An IANA zone name, such as Europe/London, never an offset, so the script honours daylight saving."
+                    },
+                    "data-labels": {
+                      "value": "from:labels, as JSON",
+                      "note": "A JSON object of the three status labels, keyed open, appointment and closed, so the script writes the site's words."
                     }
                   },
                   "text": "from:labels.status",
@@ -217,10 +230,29 @@
         "appointment",
         "closed"
       ]
+    },
+    {
+      "name": "data-hours",
+      "on": "status",
+      "values": "from:office hours, as JSON",
+      "note": "The open-now ruling note gives the format."
+    },
+    {
+      "name": "data-timezone",
+      "on": "status",
+      "values": "from:the site's IANA timezone"
+    },
+    {
+      "name": "data-labels",
+      "on": "status",
+      "values": "from:labels, as JSON",
+      "note": "{\"open\": \"…\", \"appointment\": \"…\", \"closed\": \"…\"}"
     }
   ],
   "script": {
-    "kind": "none"
+    "kind": "progressive",
+    "withoutScript": "The status the server rendered, which a cached page may hold past a change of hours.",
+    "withScript": "On load, a small script recomputes each office's status from data-hours in data-timezone and rewrites data-status and the status text from data-labels, so a cached page corrects itself."
   },
   "uses": [
     "section",
@@ -247,14 +279,14 @@
       ]
     },
     {
-      "topic": "open-question",
-      "text": "The open-now status is computed at render time in the site's timezone, so cached HTML can go stale. Whether it moves to the client is work SC-006 leaves open; the markup is fixed here."
+      "topic": "ruling",
+      "text": "Open-now (SC-007): the server renders the status, and the status span carries the office's hours (data-hours), the site's IANA timezone (data-timezone) and the status labels (data-labels), so a script recomputes the status on load. data-hours is a JSON array of rows, each {\"day\": \"monday\" to \"sunday\", \"open\": \"HH:MM\", \"close\": \"HH:MM\"} in 24-hour time, or {\"day\": …, \"appointment\": true}. Several rows on one day are split hours. A row whose close is at or before its open runs past midnight: it covers open to midnight on its day and midnight to close on the next. The status at a moment, in data-timezone, is decided in this order, as salt-wordpress's salt_location_status() decides it. 1: today has an appointment row, so the status is appointment, whatever any row says. 2: a row of today's covers now, from open inclusive to close exclusive (for a row past midnight, from open to midnight), so open. 3: a row of yesterday's that runs past midnight covers now, from midnight to its close exclusive, so open, even when today has no rows; an appointment row on yesterday ignores yesterday's times, so carries nothing. 4: otherwise closed, which is what a day with no rows and no carried hours is. Worked example, with [{\"day\": \"friday\", \"open\": \"20:00\", \"close\": \"02:00\"}]: Saturday 01:00 is open (step 3, though Saturday has no rows); Saturday 02:00 is closed; and with {\"day\": \"saturday\", \"appointment\": true} added, Saturday 01:00 is appointment (step 1). Both the server and the script apply these rules, so they agree."
     }
   ],
   "platforms": {
     "nextjs": {
       "owes": [
-        "The section, planned as Epic WP8."
+        "The section, planned as Epic WP8, with the open-now status and its script (SC-007)."
       ]
     },
     "wordpress": {
@@ -369,9 +401,10 @@
       ],
       "owes": [
         "Write the block root div.salt-block with data-block set to the contract id inside the section wrapper (section.json).",
-        "Give the section heading the plan's id and point the wrapper's aria-labelledby at it (section#labelled-by).",
+        "Give the section heading the id <anchor>__heading and point the wrapper's aria-labelledby at it (section#labelled-by, SC-012).",
         "Drop Tailwind utility classes from the markup; the shared stylesheets style the salt-* classes.",
-        "Rename to the salt-locations vocabulary and salt-accordion classes; the outer list gains salt-accordion."
+        "Rename to the salt-locations vocabulary and salt-accordion classes; the outer list gains salt-accordion.",
+        "Write data-hours, data-timezone and data-labels on the status span, and ship the script that recomputes the status on load (SC-007). Its stored appointment_only becomes appointment in data-hours."
       ]
     }
   }

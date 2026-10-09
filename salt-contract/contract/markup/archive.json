@@ -31,6 +31,53 @@
       ]
     },
     {
+      "role": "profile",
+      "element": "div",
+      "classes": [
+        "salt-archive__profile"
+      ],
+      "optional": true,
+      "when": "an author's archive, on its first page, with a photograph, strapline or biography",
+      "children": [
+        {
+          "role": "portrait",
+          "element": "div",
+          "classes": [
+            "salt-archive__portrait"
+          ],
+          "optional": true,
+          "when": "the photograph resolves",
+          "children": [
+            {
+              "role": "portrait-image",
+              "component": "media",
+              "note": "Context thumb, filling the frame; lazy."
+            }
+          ]
+        },
+        {
+          "role": "strapline",
+          "element": "p",
+          "classes": [
+            "salt-archive__strapline"
+          ],
+          "text": "from:author strapline",
+          "optional": true,
+          "when": "strapline is set"
+        },
+        {
+          "role": "bio",
+          "element": "p",
+          "classes": [
+            "salt-archive__bio"
+          ],
+          "text": "from:author biography",
+          "optional": true,
+          "when": "biography is set"
+        }
+      ]
+    },
+    {
       "role": "listing",
       "component": "section",
       "note": "The listing section (listing.json), with its card list and pagination; its heading, if any, is h2."
@@ -51,7 +98,8 @@
   "uses": [
     "section",
     "pagination",
-    "card"
+    "card",
+    "media"
   ],
   "ruleRefs": [
     "section#landmarks",
@@ -59,8 +107,18 @@
   ],
   "notes": [
     {
-      "topic": "open-question",
-      "text": "Only the landmark structure and the h1 are fixed here. The view body's class vocabulary is work SC-006 leaves open: Next's example app writes salt-post__*, salt-service__* and salt-archive__*, which no shared stylesheet styles."
+      "topic": "ruling",
+      "text": "The view body is the markup Salt for Next.js's example app writes (apps/example/src/site/blog-views.tsx, ArchiveView), in its order: the title, then an author's profile with its salt-archive__* classes, then the listing (SC-007). A topic has no profile, and later pages draw none."
+    },
+    {
+      "topic": "stylesheet-owes",
+      "text": "The view body classes SC-007 adopts; the shared stylesheets style them (today only the example app's site.css does).",
+      "classes": [
+        "salt-archive__profile",
+        "salt-archive__portrait",
+        "salt-archive__strapline",
+        "salt-archive__bio"
+      ]
     }
   ],
   "platforms": {
@@ -81,7 +139,8 @@
         }
       ],
       "owes": [
-        "The listing section in place of native loops (listing.json)."
+        "The listing section in place of native loops (listing.json).",
+        "Write the same markup as above, element for element and class for class (SC-007), the author's profile included."
       ]
     },
     "nextjs": {
@@ -91,6 +150,9 @@
           "element": "main",
           "note": "apps/example ArchiveView; salt-blog__list, salt-archive__profile"
         }
+      ],
+      "owes": [
+        "Wrap the title in header, with the term's description when it has one; draw the posts through the listing section (listing.json) in place of ul.salt-blog__list."
       ]
     }
   }

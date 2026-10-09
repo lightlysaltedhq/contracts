@@ -34,7 +34,7 @@
       "role": "heading",
       "component": "heading",
       "attributes": {
-        "id": "from:plan.headingId"
+        "id": "<anchor>__heading"
       },
       "optional": true,
       "when": "heading is set",
@@ -203,7 +203,7 @@
       ],
       "owes": [
         "Write the block root div.salt-block with data-block set to the contract id inside the section wrapper (section.json).",
-        "Give the section heading the plan's id and point the wrapper's aria-labelledby at it (section#labelled-by).",
+        "Give the section heading the id <anchor>__heading and point the wrapper's aria-labelledby at it (section#labelled-by, SC-012).",
         "Drop Tailwind utility classes from the markup; the shared stylesheets style the salt-* classes.",
         "One section for scroll_carousel and the testimonials slider, with collection sources; the label field; the unnamed list fallback."
       ]

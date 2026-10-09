@@ -106,12 +106,17 @@ for (const abs of contractFiles) {
 // checks: every section has a fields file and every entry a markup file, and no file describes
 // something the vocabulary lacks; each file's id is its file name; each variant in sections.json
 // is a select field with the same option values, labels and default; markup describes only
-// variant options the vocabulary offers, and uses only components that have markup; within a
+// variant options the vocabulary offers (a component, having no fields file, only variants its
+// own entry declares), each vocabulary variant offers each value once and defaults to one of them,
+// and markup uses only components that have markup; within a
 // fields file, sibling names and option values are unique, a select's default is one of its
 // options, a condition names a sibling other than itself and expects values that sibling offers
 // (or tests whether it is filled, which any type but a group, list, collection-query or link may be),
 // a rowLabel names a child, a list's min is not above its max, and shared.omit and
-// shared.defaults name shared settings. Applies only once contract/sections.json exists.
+// shared.defaults name shared settings. Every literal data-icon in markup is a name sections.json
+// lists under icons (SC-007), and a select whose options come from icons defaults to a content
+// name. Every id the markup draws or points at is a landmark id, <anchor>, or <owner>__<part>
+// (SC-012). Applies only once contract/sections.json exists.
 const read = (p) => { try { return JSON.parse(readFileSync(path.join(dir, p), 'utf8')) } catch { return null } }
 const vocab = read('contract/sections.json')
 // A vocabulary whose entries are objects; a bare list of ids has nothing to cross-check.
@@ -126,6 +131,93 @@ if (vocab && (vocab.sections ?? []).every((x) => x && typeof x === 'object')) {
   for (const e of entries) {
     if (!has(`contract/markup/${e.id}.json`)) fails.push(`${e.id} has no contract/markup/${e.id}.json`)
   }
+  // Icon names (SC-007): both platforms draw every listed name, so a name outside the list is one
+  // a platform may not draw. Editors choose only content names, so a field default must be one.
+  // The schema requires icons; a vocabulary without them has already failed, and every name it
+  // uses is reported too rather than the gate throwing.
+  const { content = [], chrome = [] } = vocab.icons ?? {}
+  const iconContent = new Set(content)
+  const iconNames = new Set([...content, ...chrome])
+  // One rule for a data-icon wherever it is written, a node's attributes or a file's
+  // dataAttributes: each name is from:<field> or a listed icon. An empty or non-string value names
+  // no icon, so it fails the same way on both paths.
+  // The values an attribute may take, whatever shape it is written in: a string, a list, an object
+  // with value or enum, or something the schema has already refused. Never throws, so a malformed
+  // file prints its schema failure and these checks' lines rather than a stack trace.
+  const attributeValues = (v) => {
+    if (v === undefined) return []
+    if (Array.isArray(v)) return v.flatMap(attributeValues)
+    if (v !== null && typeof v === 'object') return [...('value' in v ? [v.value] : []), ...(Array.isArray(v.enum) ? v.enum : [])]
+    return [v]
+  }
+  const checkIcons = (file, v) => {
+    for (const n of attributeValues(v)) {
+      if (typeof n === 'string' && (n.startsWith('from:') || iconNames.has(n))) continue
+      fails.push(`${file} draws icon ${n === '' ? '""' : n}, which sections.json icons does not list`)
+    }
+  }
+  // Drawn ids (SC-012): every id the markup draws, and every id an attribute points at, is a
+  // landmark id section#anchors reserves, the section's own <anchor>, or <owner>__<part>, the owner
+  // an id in sections.json or <anchor>. A slugged anchor cannot contain __, so such an id never
+  // meets one; a plain or from: id could. <anchor> is the section's settled id, so it means
+  // something only in a section: the bare <anchor> only on the section wrapper (section.json's
+  // root), and <anchor>__<part> only in section and component markup, never in the page, the
+  // views, or the header and footer, which are drawn outside every section.
+  const OUTSIDE_SECTIONS = new Set(['page', 'site-header', 'site-footer'])
+  const landmarks = new Set(read('contract/markup/section.json')?.rules?.anchors?.reserved ?? [])
+  // Every attribute whose value is an id or a list of ids, and href, whose #fragment names one.
+  const ID_ATTRIBUTES = ['id', 'for', 'aria-controls', 'aria-labelledby', 'aria-describedby', 'aria-errormessage', 'aria-owns',
+    'aria-activedescendant', 'aria-details', 'aria-flowto', 'headers', 'list', 'form', 'popovertarget', 'commandfor', 'href']
+  const checkIds = (file, attributes, doc, atRoot) => {
+    const outside = doc.kind === 'view' || OUTSIDE_SECTIONS.has(doc.id)
+    for (const key of ID_ATTRIBUTES) {
+      for (const x of attributeValues(attributes?.[key]).filter((x) => typeof x !== 'string' && key !== 'href')) {
+        fails.push(`${file} draws ${key} ${JSON.stringify(x)}, which is not an id`)
+      }
+      const values = attributeValues(attributes?.[key]).filter((x) => typeof x === 'string')
+        .flatMap((x) => key !== 'href' ? [x] : x.startsWith('#') && x.length > 1 ? [x.slice(1)] : [])
+      for (const id of values.flatMap((x) => x.split(/\s+/)).filter(Boolean)) {
+        if (landmarks.has(id)) continue
+        if (id === '<anchor>') {
+          if (!(doc.id === 'section' && atRoot && key === 'id')) fails.push(`${file} draws ${key} <anchor>, which only the section wrapper (section.json's root) may carry`)
+          continue
+        }
+        const owner = /^(<anchor>|[a-z][a-z0-9-]*)__[a-z0-9<>-]+$/.exec(id)?.[1]
+        if (!owner) { fails.push(`${file} draws ${key} ${id}, which is neither a landmark id nor <owner>__<part>`); continue }
+        if (owner === '<anchor>' && outside) fails.push(`${file} draws ${key} ${id}, but <anchor> names a section's id and this is drawn outside every section`)
+        if (owner !== '<anchor>' && !entryIds.has(owner)) fails.push(`${file} draws ${key} ${id}, whose owner ${owner} is not an id in sections.json`)
+      }
+    }
+  }
+  const checkAttributes = (file, attributes, doc, atRoot = false) => {
+    checkIcons(file, attributes?.['data-icon'])
+    checkIds(file, attributes, doc, atRoot)
+  }
+  const walkNodes = (file, nodes, doc) => {
+    for (const node of nodes ?? []) {
+      checkAttributes(file, node.attributes, doc)
+      walkNodes(file, node.children, doc)
+    }
+  }
+  // One rule for every variant in sections.json, section or component, so the two paths cannot
+  // drift: each value offered once, the default one of them, and markup describing only those.
+  // A variant that fails here is not compared with its fields file too, so one defect prints one line.
+  const badVariants = new Set()
+  const checkVariantDeclared = (owner, v) => {
+    const before = fails.length
+    const values = (v.options ?? []).map((o) => o.value)
+    for (const x of new Set(values.filter((x, i) => values.indexOf(x) !== i))) {
+      fails.push(`${owner} variant ${v.field} offers ${x} ${values.filter((y) => y === x).length} times in sections.json`)
+    }
+    if (!values.includes(v.default)) fails.push(`${owner} variant ${v.field} defaults to ${v.default}, which is not one of its options in sections.json`)
+    if (fails.length > before) badVariants.add(`${owner}#${v.field}`)
+  }
+  const checkVariantOptions = (owner, mv, offered, source) => {
+    for (const key of Object.keys(mv.options ?? {})) {
+      if (!offered.includes(key)) fails.push(`${owner} markup describes variant option ${key}, which ${source} does not offer`)
+    }
+  }
+  for (const e of entries) for (const v of e.variants ?? []) checkVariantDeclared(e.id, v)
   const settings = read('contract/fields/_section-settings.json')
   const sharedNames = new Set((settings?.fields ?? []).map((f) => f.name))
   const checkFields = (owner, fields) => {
@@ -167,6 +259,9 @@ if (vocab && (vocab.sections ?? []).every((x) => x && typeof x === 'object')) {
           fails.push(`${owner}.${f.name} condition names ${clause.field}, a ${target.type} field; a condition may name only a select or a boolean`)
         }
       }
+      if (f.optionsFrom === 'icons' && f.default !== undefined && !iconContent.has(f.default)) {
+        fails.push(`${owner}.${f.name} defaults to icon ${f.default}, which is not a content icon in sections.json`)
+      }
       if (typeof f.min === 'number' && typeof f.max === 'number' && f.min > f.max) fails.push(`${owner}.${f.name} min ${f.min} exceeds max ${f.max}`)
       if (f.rowLabel && !(f.fields ?? []).some((c) => c.name === f.rowLabel)) {
         fails.push(`${owner}.${f.name} rowLabel names ${f.rowLabel}, which is not one of its fields`)
@@ -193,6 +288,7 @@ if (vocab && (vocab.sections ?? []).every((x) => x && typeof x === 'object')) {
       if (settings) for (const n of named) if (!sharedNames.has(n)) fails.push(`${s.id} shared.${key} names ${n}, which is not a shared setting`)
     }
     for (const v of s.variants ?? []) {
+      if (badVariants.has(`${s.id}#${v.field}`)) continue
       const f = (doc.fields ?? []).find((x) => x.name === v.field)
       const want = v.options.map((o) => o.value).join(', ')
       if (!f || f.type !== 'select') { fails.push(`${s.id} variant ${v.field} has no select field of that name in its fields file`); continue }
@@ -211,6 +307,16 @@ if (vocab && (vocab.sections ?? []).every((x) => x && typeof x === 'object')) {
     if (!doc) continue
     if (doc.id !== name) fails.push(`${rel(abs)} declares id ${doc.id}; its file name says ${name}`)
     if (!entryIds.has(name)) { fails.push(`${rel(abs)} describes nothing in sections.json`); continue }
+    checkAttributes(rel(abs), doc.root?.attributes, doc, true)
+    walkNodes(rel(abs), doc.elements, doc)
+    for (const da of (doc.dataAttributes ?? []).filter((x) => x.name === 'data-icon')) checkIcons(rel(abs), da.values)
+    for (const mv of doc.variants ?? []) {
+      for (const o of Object.values(mv.options ?? {})) {
+        checkAttributes(rel(abs), o.root?.attributes, doc, true)
+        for (const diff of Object.values(o.elements ?? {})) checkAttributes(rel(abs), diff.attributes, doc)
+        walkNodes(rel(abs), [...Object.values(o.replace ?? {}), ...(o.tree ?? [])], doc)
+      }
+    }
     for (const u of doc.uses ?? []) {
       const target = String(u).split('#')[0]
       if (!has(`contract/markup/${target}.json`)) fails.push(`${name} uses ${target}, which has no markup file`)
@@ -226,9 +332,16 @@ if (vocab && (vocab.sections ?? []).every((x) => x && typeof x === 'object')) {
         const sv = (section.variants ?? []).find((v) => v.field === mv.field)
         const offered = sv ? sv.options.map((o) => o.value) : sel.optionsFrom ? null : (sel.options ?? []).map((o) => o.value)
         if (!offered) continue
-        for (const key of Object.keys(mv.options ?? {})) {
-          if (!offered.includes(key)) fails.push(`${name} markup describes variant option ${key}, which ${sv ? 'sections.json' : 'its fields file'} does not offer`)
-        }
+        checkVariantOptions(name, mv, offered, sv ? 'sections.json' : 'its fields file')
+      }
+    } else {
+      // A component or view has no fields file, so its entry in sections.json is the only place
+      // its variants are declared; without this, card's quote style could grow options unchecked.
+      const entry = entries.find((e) => e.id === name)
+      for (const mv of doc.variants ?? []) {
+        const ev = (entry.variants ?? []).find((v) => v.field === mv.field)
+        if (!ev) { fails.push(`${name} markup describes a variant of ${mv.field}, which its entry in sections.json does not declare`); continue }
+        checkVariantOptions(name, mv, (ev.options ?? []).map((o) => o.value), 'its entry in sections.json')
       }
     }
   }

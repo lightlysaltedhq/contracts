@@ -476,7 +476,7 @@
           "$ref": "#/$defs/count"
         },
         "format": {
-          "description": "url: an absolute address (http, https, mailto or tel), ACF url on WordPress. anchor: slugified on save; the reserved ids, ids the page itself uses and repeats take a numeric suffix (markup/section#anchors).",
+          "description": "url: an absolute address (http, https, mailto or tel), ACF url on WordPress. anchor: slugified on save by WordPress's sanitize_title under the site's locale, then every run of underscores or %xx octets turned into one hyphen, repeated hyphens collapsed and hyphens trimmed (SC-014), so it is lower-case letters, digits and single hyphens and never contains __; an empty slug is no anchor; only the slug is stored. At render ids settle in one pass in page order: a landmark clash becomes <anchor>-section, and an id already taken takes the next free -2, -3 (SC-013); ids the system draws are <owner>__<part> and never meet one (markup/section#anchors, SC-012).",
           "enum": [
             "url",
             "anchor"
@@ -587,7 +587,7 @@
           }
         },
         "optionsFrom": {
-          "description": "icons: the options are the site's icon set, supplied by the site, not the contract.",
+          "description": "icons: the options are the contract's content icon names (contract/sections.json, icons.content), plus any a site adds. A default must be one of the contract's.",
           "enum": [
             "icons"
           ]
