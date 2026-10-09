@@ -319,7 +319,7 @@
   "notes": [
     {
       "topic": "ruling",
-      "text": "The view body is the markup Salt for Next.js's example app writes (apps/example/src/site/blog-views.tsx, PostView), in its order, with its salt-post__* classes (SC-007). The author keeps the author-box component this contract already fixes."
+      "text": "The view body is the markup Salt for Next.js's example app writes (apps/example/src/site/blog-views.tsx, PostView), in its order, with its salt-post__* classes (SC-007). The author is the shared author-box component (salt-author-box*), not the example app's salt-post__author, salt-post__author-name, salt-post__author-role and salt-post__portrait, which SC-008 excludes from the adoption."
     },
     {
       "topic": "stylesheet-owes",
@@ -364,7 +364,7 @@
         }
       ],
       "owes": [
-        "Draw the author as the author-box component in place of aside.salt-post__author (author-box.json)."
+        "Rename salt-post__author, salt-post__author-name, salt-post__author-role and salt-post__portrait to the author-box component's salt-author-box* markup (author-box.json, SC-008)."
       ]
     }
   },

@@ -139,7 +139,7 @@
         }
       ],
       "owes": [
-        "The author box as a core component with this markup (sections.json)."
+        "The author box as a core component with this markup (sections.json), renaming the post view's salt-post__author* and salt-post__portrait (SC-008)."
       ]
     },
     "wordpress": {
