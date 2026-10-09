@@ -141,11 +141,17 @@ if (vocab && (vocab.sections ?? []).every((x) => x && typeof x === 'object')) {
   // One rule for a data-icon wherever it is written, a node's attributes or a file's
   // dataAttributes: each name is from:<field> or a listed icon. An empty or non-string value names
   // no icon, so it fails the same way on both paths.
+  // The values an attribute may take, whatever shape it is written in: a string, a list, an object
+  // with value or enum, or something the schema has already refused. Never throws, so a malformed
+  // file prints its schema failure and these checks' lines rather than a stack trace.
+  const attributeValues = (v) => {
+    if (v === undefined) return []
+    if (Array.isArray(v)) return v.flatMap(attributeValues)
+    if (v !== null && typeof v === 'object') return [...('value' in v ? [v.value] : []), ...(Array.isArray(v.enum) ? v.enum : [])]
+    return [v]
+  }
   const checkIcons = (file, v) => {
-    if (v === undefined) return
-    const named = typeof v === 'string' || Array.isArray(v) ? [v].flat()
-      : v && typeof v === 'object' ? ['value' in v ? v.value : [], v.enum ?? []].flat() : [v]
-    for (const n of named) {
+    for (const n of attributeValues(v)) {
       if (typeof n === 'string' && (n.startsWith('from:') || iconNames.has(n))) continue
       fails.push(`${file} draws icon ${n === '' ? '""' : n}, which sections.json icons does not list`)
     }
@@ -163,10 +169,11 @@ if (vocab && (vocab.sections ?? []).every((x) => x && typeof x === 'object')) {
   const checkIds = (file, attributes, doc, atRoot) => {
     const outside = doc.kind === 'view' || OUTSIDE_SECTIONS.has(doc.id)
     for (const key of ID_ATTRIBUTES) {
-      const v = attributes?.[key]
-      if (v === undefined) continue
-      const values = typeof v === 'string' ? [v] : ['value' in v ? v.value : [], v.enum ?? []].flat()
-      for (const id of values.flatMap((x) => String(x).split(/\s+/)).filter(Boolean)) {
+      for (const x of attributeValues(attributes?.[key]).filter((x) => typeof x !== 'string')) {
+        fails.push(`${file} draws ${key} ${JSON.stringify(x)}, which is not an id`)
+      }
+      const values = attributeValues(attributes?.[key]).filter((x) => typeof x === 'string')
+      for (const id of values.flatMap((x) => x.split(/\s+/)).filter(Boolean)) {
         if (landmarks.has(id)) continue
         if (id === '<anchor>') {
           if (!(doc.id === 'section' && atRoot && key === 'id')) fails.push(`${file} draws ${key} <anchor>, which only the section wrapper (section.json's root) may carry`)

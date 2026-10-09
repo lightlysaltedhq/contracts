@@ -555,3 +555,11 @@ crossFail('an <anchor>__<part> id in the site header', (f) => {
   f['contract/sections.json'].components.push({ id: 'site-header', label: 'Header' })
   f['contract/markup/site-header.json'] = { $schema: '../../schema/markup.schema.json', version: '0.1.0', id: 'site-header', kind: 'component', elements: [idNode({ 'aria-controls': '<anchor>__menu' })] }
 }, /site-header\.json draws aria-controls <anchor>__menu, but <anchor> names a section's id/)
+
+// A non-string id value fails as a line, never a crash.
+crossFail('a numeric id value', (f) => {
+  withLandmarks(f); f['contract/markup/hero.json'].elements = [idNode({ id: 5 })]
+}, /contract\/markup\/hero\.json draws id 5, which is not an id/)
+crossFail('a null id value', (f) => {
+  withLandmarks(f); f['contract/markup/hero.json'].elements = [idNode({ 'aria-labelledby': null })]
+}, /draws aria-labelledby null, which is not an id/)
