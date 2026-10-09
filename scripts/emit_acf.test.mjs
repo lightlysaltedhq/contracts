@@ -433,8 +433,8 @@ test('Payload and ACF leave out and keep the same sections, and offer the same s
       assert.equal(acfError, payloadError, `${at} sections: [${id}]`)
     }
   }
-  // A query choosing among several installed sources below the top level is refused by both, the
-  // same way; with one source installed both carry it.
+  // A query reading its source from a select below the top level is a contract shape both refuse,
+  // the same way, whatever the site installs.
   const pair = [
     { name: 'source', type: 'select', label: 'Show', options: [{ value: 'posts', label: 'Posts' }, { value: 'team', label: 'Team' }] },
     { name: 'query', type: 'collection-query', label: 'Query', sourceField: 'source' },
@@ -446,8 +446,7 @@ test('Payload and ACF leave out and keep the same sections, and offer the same s
     try { toPayloadBlocks({ contract: nested, sources }) } catch (e) { payloadError = e.message }
     try { toAcfFieldGroups({ contract: nested, sources }) } catch (e) { acfError = e.message }
     assert.equal(acfError, payloadError, JSON.stringify(sources))
-    if (sources?.team && !sources.posts) assert.equal(acfError, null)
-    else assert.match(acfError, /probe\.rows\.query: a collection-query choosing among several sources must sit at the block's top level/)
+    assert.match(acfError, /probe\.rows\.query: a collection-query reading its source from a select must sit, with that select, at the section's top level/)
   }
   // The carousel keeps its inline cards with no sources, on both.
   assert.ok(toPayloadBlocks({ icons, richTextEditor: (allowed) => ({ allowed }), sources: {} }).some((b) => b.slug === 'carousel'))
@@ -501,4 +500,21 @@ test('Y6, Y7: the docs claim no drift check salt-wordpress lacks, and no Local J
   assert.match(readme, /check-fields-from-contract\.php`[^.]*owed[^.]*EP-72/)
   // ACF Local JSON reads one group object per file, not the list the emitter writes.
   assert.doesNotMatch(readFileSync(emitter, 'utf8'), /acf-json/)
+})
+
+test('finding 1: a kept field conditioned on a field left out builds, its rule on that field gone', () => {
+  const fields = [
+    { name: 'source', type: 'select', label: 'Show', options: [{ value: 'inline', label: 'Inline' }, { value: 'posts', label: 'Posts' }], default: 'inline' },
+    { name: 'query', type: 'collection-query', label: 'Query', sourceField: 'source', condition: { field: 'source', equals: 'posts' } },
+    { name: 'flag', type: 'boolean', label: 'Flag' },
+    { name: 'showTags', type: 'boolean', label: 'Tags', condition: { field: 'source', equals: 'posts' } },
+    { name: 'note', type: 'text', label: 'Note', condition: { field: 'showTags', filled: false } },
+    { name: 'aside', type: 'text', label: 'Aside', condition: [{ field: 'showTags', filled: false }, { field: 'flag', equals: true }] },
+  ]
+  const subs = probed(fields, { sources: {} })
+  assert.ok(!subs.some((f) => f.name === 'showTags' || f.name === 'query'))
+  assert.equal(field(subs, 'note').conditional_logic, undefined)
+  assert.deepEqual(field(subs, 'aside').conditional_logic, [[{ field: 'field_salt_probe_flag', operator: '==', value: '1' }]])
+  const keys = new Set(subs.map((f) => f.key))
+  for (const f of subs) for (const g of f.conditional_logic ?? []) for (const r of g) assert.ok(keys.has(r.field), `${f.name} reads ${r.field}`)
 })
