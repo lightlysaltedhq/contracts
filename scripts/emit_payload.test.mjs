@@ -478,32 +478,6 @@ test('U4: a field conditioned on a field left out is left out with it, transitiv
   assert.deepEqual(names({ posts: {} }), ['source', 'query', 'showTags', 'tagStyle', 'tagNote'])
 })
 
-test('U1: a source select and its query inside a list are fitted and checked like top-level ones', () => {
-  const rows = [{ name: 'rows', type: 'list', label: 'Rows', fields: [
-    { name: 'source', type: 'select', label: 'Show', options: [{ value: 'posts', label: 'Posts' }, { value: 'team', label: 'Team' }] },
-    { name: 'query', type: 'collection-query', label: 'Query', sourceField: 'source' },
-  ] }]
-  assert.deepEqual(toPayloadBlocks({ contract: probe(rows), sources: {} }), [])
-  assert.throws(() => toPayloadBlocks({ contract: probe(rows), sources: {}, sections: ['probe'] }),
-    /section probe needs one of the sources posts, team \(probe\.rows\.source\)/)
-  const [b] = toPayloadBlocks({ contract: probe(rows), sources: { posts: {} } })
-  assert.deepEqual(field(b.fields, 'rows.source').options.map((o) => o.value), ['posts'])
-  assert.equal(field(field(b.fields, 'rows.query').fields, 'items').relationTo, 'posts')
-})
-
-test('U5: a source select in the shared settings is fitted and checked like a section field', () => {
-  const contract = probe([{ name: 'heading', type: 'text', label: 'Heading' }])
-  contract.settings = [
-    { name: 'source', type: 'select', label: 'Show', options: [{ value: 'posts', label: 'Posts' }, { value: 'team', label: 'Team' }] },
-    { name: 'query', type: 'collection-query', label: 'Query', sourceField: 'source' },
-  ]
-  contract.fields.probe.shared = { id: 'section-settings' }
-  const [b] = toPayloadBlocks({ contract, sources: { posts: {} } })
-  assert.deepEqual(field(b.fields, 'settings.source').options.map((o) => o.value), ['posts'])
-  assert.deepEqual(toPayloadBlocks({ contract, sources: {} }), [])
-  assert.throws(() => toPayloadBlocks({ contract, sources: {}, sections: ['probe'] }), /\(probe\.settings\.source\)/)
-})
-
 test('V7: sourceValues is the one reading of the source values among a select\'s options', async () => {
   const { sourceValues } = await import('../salt-contract/emit/_contract.mjs')
   const select = { name: 'pick', type: 'select', label: 'Pick', options: ['team', 'inline', 'posts', 'other'].map((value) => ({ value, label: value })) }
@@ -562,28 +536,6 @@ test('V4: a query whose source select is left out goes with it', () => {
   assert.deepEqual(b.fields.map((f) => f.name), ['source'])
 })
 
-test('V1, V6: a query choosing among several sources must sit at the block\'s top level', () => {
-  const pair = [
-    { name: 'source', type: 'select', label: 'Show', options: [{ value: 'posts', label: 'Posts' }, { value: 'team', label: 'Team' }] },
-    { name: 'query', type: 'collection-query', label: 'Query', sourceField: 'source' },
-  ]
-  const nested = probe([{ name: 'rows', type: 'list', label: 'Rows', fields: pair }])
-  assert.throws(() => toPayloadBlocks({ contract: nested }), /probe\.rows\.query: a collection-query choosing among several sources must sit at the block's top level/)
-  // One installed source needs no picker filter, so it may sit anywhere.
-  assert.equal(field(field(toPayloadBlocks({ contract: nested, sources: { team: {} } })[0].fields, 'rows.query').fields, 'items').relationTo, 'users')
-
-  const settings = probe([{ name: 'heading', type: 'text', label: 'Heading' }])
-  settings.settings = pair
-  settings.fields.probe.shared = { id: 'section-settings' }
-  assert.throws(() => toPayloadBlocks({ contract: settings }), /probe\.settings\.query: a collection-query choosing among several sources/)
-
-  // At the top level the pickers filter by the block's own source select.
-  const items = field(field(toPayloadBlocks({ contract: probe(pair) })[0].fields, 'query').fields, 'items')
-  assert.deepEqual(items.relationTo, ['posts', 'users'])
-  assert.equal(items.filterOptions({ relationTo: 'users', blockData: { source: 'team' } }), true)
-  assert.equal(items.filterOptions({ relationTo: 'posts', blockData: { source: 'team' } }), false)
-})
-
 test('X1: a kept dependant loses its clauses on a field left out, so no condition names a missing sibling', async () => {
   const { planSections } = await import('../salt-contract/emit/_contract.mjs')
   const extra = [
@@ -605,4 +557,35 @@ test('X1: a kept dependant loses its clauses on a field left out, so no conditio
   assert.deepEqual(field(b.fields, 'aside').custom.salt.condition, [{ field: 'flag', equals: true }])
   const names = new Set(b.fields.map((f) => f.name))
   for (const f of b.fields) for (const c of f.custom?.salt?.condition ?? []) assert.ok(names.has(c.field), `${f.name} names ${c.field}`)
+})
+
+test('X2-X5: a source select and its query belong at the section\'s top level, for every site', async () => {
+  const { planSections } = await import('../salt-contract/emit/_contract.mjs')
+  const pair = (options) => [
+    { name: 'source', type: 'select', label: 'Show', options: options.map((value) => ({ value, label: value })) },
+    { name: 'query', type: 'collection-query', label: 'Query', sourceField: 'source' },
+  ]
+  const shape = /a collection-query reading its source from a select must sit, with that select, at the section's top level/
+  for (const options of [['posts', 'team'], ['posts']]) {
+    const nested = probe([{ name: 'rows', type: 'list', label: 'Rows', fields: pair(options) }])
+    const grouped = probe([{ name: 'box', type: 'group', label: 'Box', fields: pair(options) }])
+    const settings = probe([{ name: 'heading', type: 'text', label: 'Heading' }])
+    settings.settings = pair(options)
+    settings.fields.probe.shared = { id: 'section-settings' }
+    for (const [contract, at] of [[nested, 'probe.rows.query'], [grouped, 'probe.box.query'], [settings, 'probe.settings.query']]) {
+      // Whatever the site installs, including nothing that would let the section be left out.
+      for (const sources of [undefined, {}, { posts: {} }]) {
+        assert.throws(() => toPayloadBlocks({ contract, sources }), (e) => shape.test(e.message) && e.message.startsWith(`${at}:`), `${at} ${JSON.stringify(sources)}`)
+      }
+    }
+  }
+  // At the top level the pickers filter by the block's own source select.
+  const items = field(field(toPayloadBlocks({ contract: probe(pair(['posts', 'team'])) })[0].fields, 'query').fields, 'items')
+  assert.deepEqual(items.relationTo, ['posts', 'users'])
+  assert.equal(items.filterOptions({ relationTo: 'users', blockData: { source: 'team' } }), true)
+  assert.equal(items.filterOptions({ relationTo: 'posts', blockData: { source: 'team' } }), false)
+  // The shipped contract has no such shape: it plans cleanly with every source installed.
+  const plan = planSections(loadContract())
+  assert.deepEqual(plan.leftOut, [])
+  assert.equal(plan.sections.length, loadContract().sections.length)
 })

@@ -81,17 +81,19 @@ diff and migrate. Options that JSON can carry also work from the command line:
 **Fitting the site's sources.** `planSections` in `emit/_contract.mjs` decides, for every emitter,
 which sections a site gets. A section that needs a source the site does not install (a fixed
 collection-query source, a relationship's source, or a source select with no option the site can
-satisfy, in its own fields or its shared settings, at any depth) is left out, or refused with the
+satisfy, in its own fields or its shared settings) is left out, or refused with the
 missing source and field named when `sections` lists it (`null` counts as not listing). Where a
 source select still has an option to offer, as the carousel's inline cards do, the section stays.
 The select offers only what the site can satisfy, with no default when its default is no longer
 offered. The query, any field reached only by a missing source, and any field whose condition
-cannot hold once such a field is gone are left out.
+cannot hold once such a field is gone are left out; a kept field loses any clause on a field left
+out.
 
-Some faults are refused whatever the site installs: a malformed condition, and a `sourceField`
-naming no sibling select or one offering no source. A query choosing among several installed
-sources is refused anywhere but the block's top level, where its pickers can find the select.
-Conditions read a stored `null` as no value; only a sibling never set takes its default.
+Faults in the contract's own shape are refused whatever the site installs: a malformed condition;
+a `sourceField` naming no sibling select, or one offering no source; and a collection-query that
+reads its source from a select anywhere but the section's top level (in a list, a group or the
+settings), where its pickers could not find the select. Conditions read a stored `null` as no
+value; only a sibling never set takes its default.
 
 `reports/round-trip-payload.md`, which is not shipped, compares the output with the blocks
 salt-nextjs ships today. A difference is expected only when `reports/round-trip-payload.expected.json`

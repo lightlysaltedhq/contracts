@@ -181,7 +181,7 @@ export const sourceSelectsOf = (fields) =>
  * left out. A kept field's clauses on a field left out (which hold with it absent) are removed.
  * A select left with no option is unmetSources' to report. Expects fields whose
  * conditions checkedClauses has passed, as planSections ensures; it does not check them again.
- * At every depth: a list or group's own fields are fitted the same way.
+ * Top level only: checkFields keeps source selects and their queries there.
  */
 export function withinSources(fields, installed) {
   const selects = sourceSelectsOf(fields)
@@ -191,7 +191,7 @@ export function withinSources(fields, installed) {
     // A default the select no longer offers is dropped, never emitted as a value it cannot hold.
     return options.some((o) => o.value === was) ? { ...rest, options, default: was } : { ...rest, options }
   }
-  const narrowed = fields.map((f) => (selects.has(f.name) ? narrow(f) : f.fields ? { ...f, fields: withinSources(f.fields, installed) } : f))
+  const narrowed = fields.map((f) => (selects.has(f.name) ? narrow(f) : f))
   const valuesOf = (name) => narrowed.find((s) => s.name === name).options.map((o) => o.value)
   const reachable = (f) => clauses(f.condition).every((c) => {
     if (!selects.has(c.field) || 'filled' in c) return true
@@ -242,30 +242,25 @@ export function unmetSources(fields, installed, at, unfitted = fields) {
 }
 
 // Every condition and every sourceField at every depth, refused before anything is narrowed, so
-// whether a fault is caught never depends on which sources a site installs.
-function checkFields(fields, at) {
+// whether a fault is caught never depends on which sources a site installs. `depth` is 0 for a
+// section's own fields; its settings start at 1, as they sit in a group.
+//
+// A query reading its source from a select sits with that select at the section's top level: the
+// Payload pickers find the select on the block (blockData), and no section needs it deeper. The
+// shape is refused in the contract, for every site, rather than supported with per-site edge cases.
+function checkFields(fields, at, depth = 0) {
   for (const f of fields) {
     const where = `${at}.${f.name}`
     checkedClauses(f.condition, where)
+    if (f.sourceField && depth > 0) {
+      throw new Error(`${where}: a collection-query reading its source from a select must sit, with that select, at the section's top level, not in a list, a group or the settings`)
+    }
     if (f.sourceField) {
       const select = fields.find((s) => s.name === f.sourceField && s.type === 'select')
       if (!select) throw new Error(`${where}: sourceField ${f.sourceField} names no sibling select`)
       if (sourceValues(select).length === 0) throw new Error(`${where}: sourceField ${f.sourceField} names no sibling select offering a source`)
     }
-    if (f.fields) checkFields(f.fields, where)
-  }
-}
-
-// A query choosing among several sources filters its pickers by its select's value, which a picker
-// can find only on the block itself (Payload's blockData). Below the top level, in a list row or the
-// settings group, it would read the wrong select or none, so it is refused until it can find its own.
-function refuseDeepMultiSource(fields, at, depth) {
-  for (const f of fields) {
-    const where = `${at}.${f.name}`
-    if (depth > 0 && f.sourceField && sourceValues(fields.find((s) => s.name === f.sourceField)).length > 1) {
-      throw new Error(`${where}: a collection-query choosing among several sources must sit at the block's top level, where its pickers can find the select`)
-    }
-    if (f.fields) refuseDeepMultiSource(f.fields, where, depth + 1)
+    if (f.fields) checkFields(f.fields, where, depth + 1)
   }
 }
 
@@ -279,8 +274,8 @@ function refuseDeepMultiSource(fields, at, depth) {
  *
  * Returns { sections: [{ id, section, fields, settings }], leftOut: [{ id, needs }] }: fields and
  * settings fitted by withinSources. A section asked for by name that the site cannot carry throws,
- * naming what it needs, and so does a query choosing among several installed sources anywhere but
- * the block's top level. Each section is resolved once.
+ * naming what it needs. A fault in the contract's own shape (checkFields) throws for every site.
+ * Each section is resolved once.
  */
 export function planSections(contract, { installed = new Set(SOURCES), sections } = {}) {
   const named = sections != null
@@ -290,7 +285,7 @@ export function planSections(contract, { installed = new Set(SOURCES), sections 
     // The section's own fields and its shared settings, treated alike.
     const { section, fields: all, settings: allSettings } = resolveSection(contract, id)
     checkFields(all, id)
-    checkFields(allSettings, `${id}.settings`)
+    checkFields(allSettings, `${id}.settings`, 1)
     const fields = withinSources(all, installed)
     const settings = withinSources(allSettings, installed)
     const needs = [
@@ -298,10 +293,8 @@ export function planSections(contract, { installed = new Set(SOURCES), sections 
       ...unmetSources(settings, installed, `${id}.settings`, allSettings),
     ]
     if (needs.length && named) throw new Error(`section ${id} needs ${needs.join(', ')}, which options.sources does not install`)
-    if (needs.length) { leftOut.push({ id, needs }); continue }
-    refuseDeepMultiSource(fields, id, 0)
-    refuseDeepMultiSource(settings, `${id}.settings`, 1)
-    kept.push({ id, section, fields, settings })
+    if (needs.length) leftOut.push({ id, needs })
+    else kept.push({ id, section, fields, settings })
   }
   return { sections: kept, leftOut }
 }
