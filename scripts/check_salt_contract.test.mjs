@@ -153,6 +153,7 @@ function crossPackage(edit) {
       $schema: '../schema/sections.schema.json', version: '0.1.0',
       sections: [{ id: 'hero', label: 'Hero', tier: 'core', variants: [{ field: 'variant', options: [{ value: 'a', label: 'A' }, { value: 'b', label: 'B' }], default: 'a' }] }],
       components: [{ id: 'button', label: 'Button' }], views: [],
+      icons: { content: ['star'], chrome: ['close'] },
     }
     f['contract/fields/hero.json'] = {
       $schema: '../../schema/field-definition.schema.json', version: '0.1.0', section: 'hero',
@@ -460,3 +461,14 @@ test('schema: the markup schema refuses an open-question note', () => {
   const r = realMarkupRun([{ topic: 'open-question', text: 'x' }])
   assert.equal(r.code, 1, r.out); assert.match(r.out, /contract\/markup\/hero\.json does not match schema\/markup\.schema\.json: \/notes\/0\/topic must be equal to one of the allowed values/)
 })
+
+// ── Review of #6: one variant rule for sections and components ──────────────────────────────────
+crossFail('a component variant whose default is not one of its options', (f) => {
+  componentVariant(f); f['contract/sections.json'].components[0].variants[0].default = 'outline'
+}, /button variant style defaults to outline, which is not one of its options in sections\.json/)
+crossFail('a component variant offering one value twice', (f) => {
+  componentVariant(f); f['contract/sections.json'].components[0].variants[0].options.push({ value: 'ghost', label: 'Ghost again' })
+}, /button variant style offers ghost twice in sections\.json/)
+crossFail('a section variant whose default is not one of its options', (f) => {
+  f['contract/sections.json'].sections[0].variants[0].default = 'z'
+}, /hero variant variant defaults to z, which is not one of its options in sections\.json/)

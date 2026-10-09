@@ -107,14 +107,15 @@ for (const abs of contractFiles) {
 // something the vocabulary lacks; each file's id is its file name; each variant in sections.json
 // is a select field with the same option values, labels and default; markup describes only
 // variant options the vocabulary offers (a component, having no fields file, only variants its
-// own entry declares), and uses only components that have markup; within a
+// own entry declares), each vocabulary variant offers each value once and defaults to one of them,
+// and markup uses only components that have markup; within a
 // fields file, sibling names and option values are unique, a select's default is one of its
 // options, a condition names a sibling other than itself and expects values that sibling offers
 // (or tests whether it is filled, which any type but a group, list, collection-query or link may be),
 // a rowLabel names a child, a list's min is not above its max, and shared.omit and
-// shared.defaults name shared settings. Once sections.json lists icon names (SC-007), every
-// literal data-icon in markup is one of them, and a select whose options come from icons defaults
-// to a content name. Applies only once contract/sections.json exists.
+// shared.defaults name shared settings. Every literal data-icon in markup is a name sections.json
+// lists under icons (SC-007), and a select whose options come from icons defaults to a content
+// name. Applies only once contract/sections.json exists.
 const read = (p) => { try { return JSON.parse(readFileSync(path.join(dir, p), 'utf8')) } catch { return null } }
 const vocab = read('contract/sections.json')
 // A vocabulary whose entries are objects; a bare list of ids has nothing to cross-check.
@@ -131,11 +132,14 @@ if (vocab && (vocab.sections ?? []).every((x) => x && typeof x === 'object')) {
   }
   // Icon names (SC-007): both platforms draw every listed name, so a name outside the list is one
   // a platform may not draw. Editors choose only content names, so a field default must be one.
-  const iconContent = vocab.icons ? new Set(vocab.icons.content ?? []) : null
-  const iconNames = vocab.icons ? new Set([...(vocab.icons.content ?? []), ...(vocab.icons.chrome ?? [])]) : null
+  // The schema requires icons; a vocabulary without them has already failed, and every name it
+  // uses is reported too rather than the gate throwing.
+  const { content = [], chrome = [] } = vocab.icons ?? {}
+  const iconContent = new Set(content)
+  const iconNames = new Set([...content, ...chrome])
   const checkIcons = (file, attributes) => {
     const v = attributes?.['data-icon']
-    if (!iconNames || v === undefined) return
+    if (v === undefined) return
     const named = typeof v === 'string' ? [v] : [v.value, ...(v.enum ?? [])]
     for (const n of named) {
       if (typeof n === 'string' && !n.startsWith('from:') && !iconNames.has(n)) fails.push(`${file} draws icon ${n}, which sections.json icons does not list`)
@@ -147,6 +151,19 @@ if (vocab && (vocab.sections ?? []).every((x) => x && typeof x === 'object')) {
       walkNodes(file, node.children)
     }
   }
+  // One rule for every variant in sections.json, section or component, so the two paths cannot
+  // drift: each value offered once, the default one of them, and markup describing only those.
+  const checkVariantDeclared = (owner, v) => {
+    const values = (v.options ?? []).map((o) => o.value)
+    for (const x of values.filter((x, i) => values.indexOf(x) !== i)) fails.push(`${owner} variant ${v.field} offers ${x} twice in sections.json`)
+    if (!values.includes(v.default)) fails.push(`${owner} variant ${v.field} defaults to ${v.default}, which is not one of its options in sections.json`)
+  }
+  const checkVariantOptions = (owner, mv, offered, source) => {
+    for (const key of Object.keys(mv.options ?? {})) {
+      if (!offered.includes(key)) fails.push(`${owner} markup describes variant option ${key}, which ${source} does not offer`)
+    }
+  }
+  for (const e of entries) for (const v of e.variants ?? []) checkVariantDeclared(e.id, v)
   const settings = read('contract/fields/_section-settings.json')
   const sharedNames = new Set((settings?.fields ?? []).map((f) => f.name))
   const checkFields = (owner, fields) => {
@@ -188,7 +205,7 @@ if (vocab && (vocab.sections ?? []).every((x) => x && typeof x === 'object')) {
           fails.push(`${owner}.${f.name} condition names ${clause.field}, a ${target.type} field; a condition may name only a select or a boolean`)
         }
       }
-      if (f.optionsFrom === 'icons' && f.default !== undefined && iconContent && !iconContent.has(f.default)) {
+      if (f.optionsFrom === 'icons' && f.default !== undefined && !iconContent.has(f.default)) {
         fails.push(`${owner}.${f.name} defaults to icon ${f.default}, which is not a content icon in sections.json`)
       }
       if (typeof f.min === 'number' && typeof f.max === 'number' && f.min > f.max) fails.push(`${owner}.${f.name} min ${f.min} exceeds max ${f.max}`)
@@ -259,9 +276,7 @@ if (vocab && (vocab.sections ?? []).every((x) => x && typeof x === 'object')) {
         const sv = (section.variants ?? []).find((v) => v.field === mv.field)
         const offered = sv ? sv.options.map((o) => o.value) : sel.optionsFrom ? null : (sel.options ?? []).map((o) => o.value)
         if (!offered) continue
-        for (const key of Object.keys(mv.options ?? {})) {
-          if (!offered.includes(key)) fails.push(`${name} markup describes variant option ${key}, which ${sv ? 'sections.json' : 'its fields file'} does not offer`)
-        }
+        checkVariantOptions(name, mv, offered, sv ? 'sections.json' : 'its fields file')
       }
     } else {
       // A component or view has no fields file, so its entry in sections.json is the only place
@@ -270,10 +285,7 @@ if (vocab && (vocab.sections ?? []).every((x) => x && typeof x === 'object')) {
       for (const mv of doc.variants ?? []) {
         const ev = (entry.variants ?? []).find((v) => v.field === mv.field)
         if (!ev) { fails.push(`${name} markup describes a variant of ${mv.field}, which its entry in sections.json does not declare`); continue }
-        const offered = (ev.options ?? []).map((o) => o.value)
-        for (const key of Object.keys(mv.options ?? {})) {
-          if (!offered.includes(key)) fails.push(`${name} markup describes variant option ${key}, which its entry in sections.json does not offer`)
-        }
+        checkVariantOptions(name, mv, (ev.options ?? []).map((o) => o.value), 'its entry in sections.json')
       }
     }
   }
