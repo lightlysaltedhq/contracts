@@ -583,3 +583,26 @@ test('V1, V6: a query choosing among several sources must sit at the block\'s to
   assert.equal(items.filterOptions({ relationTo: 'users', blockData: { source: 'team' } }), true)
   assert.equal(items.filterOptions({ relationTo: 'posts', blockData: { source: 'team' } }), false)
 })
+
+test('X1: a kept dependant loses its clauses on a field left out, so no condition names a missing sibling', async () => {
+  const { planSections } = await import('../salt-contract/emit/_contract.mjs')
+  const extra = [
+    { name: 'flag', type: 'boolean', label: 'Flag' },
+    { name: 'showTags', type: 'boolean', label: 'Tags', condition: { field: 'source', equals: 'posts' } },
+    { name: 'note', type: 'text', label: 'Note', condition: { field: 'showTags', filled: false } },
+    { name: 'aside', type: 'text', label: 'Aside', condition: [{ field: 'showTags', filled: false }, { field: 'flag', equals: true }] },
+  ]
+  const contract = probe(sourced(extra))
+  // The plan both emitters build from.
+  const [planned] = planSections(contract, { installed: new Set() }).sections
+  const byName = Object.fromEntries(planned.fields.map((f) => [f.name, f]))
+  assert.ok(!('showTags' in byName))
+  assert.ok(!('condition' in byName.note), JSON.stringify(byName.note))
+  assert.deepEqual(byName.aside.condition, { field: 'flag', equals: true })
+  // And the Payload build from it.
+  const [b] = toPayloadBlocks({ contract, sources: {} })
+  assert.ok(!field(b.fields, 'note').custom?.salt?.condition)
+  assert.deepEqual(field(b.fields, 'aside').custom.salt.condition, [{ field: 'flag', equals: true }])
+  const names = new Set(b.fields.map((f) => f.name))
+  for (const f of b.fields) for (const c of f.custom?.salt?.condition ?? []) assert.ok(names.has(c.field), `${f.name} names ${c.field}`)
+})

@@ -178,7 +178,8 @@ export const sourceSelectsOf = (fields) =>
  * installed source, and a field whose condition names a source select only by values that select
  * no longer offers (the carousel's showTags with no source that has categories), and any field
  * whose condition on a field left out cannot hold with that field absent, or whose source select is
- * left out. A select left with no option is unmetSources' to report. Expects fields whose
+ * left out. A kept field's clauses on a field left out (which hold with it absent) are removed.
+ * A select left with no option is unmetSources' to report. Expects fields whose
  * conditions checkedClauses has passed, as planSections ensures; it does not check them again.
  * At every depth: a list or group's own fields are fitted the same way.
  */
@@ -208,7 +209,15 @@ export function withinSources(fields, installed) {
       if (!gone.has(f.name) && (hidden(f) || (f.sourceField && gone.has(f.sourceField)))) { gone.add(f.name); grew = true }
     }
   }
-  return narrowed.filter((f) => !gone.has(f.name))
+  // A kept field's clauses on a field left out hold with it absent; they are removed, so no
+  // condition names a sibling that is not there. One clause left stands alone, none drops it.
+  return narrowed.filter((f) => !gone.has(f.name)).map((f) => {
+    const list = clauses(f.condition)
+    const kept = list.filter((c) => !gone.has(c.field))
+    if (kept.length === list.length) return f
+    const { condition, ...rest } = f
+    return kept.length === 0 ? rest : { ...rest, condition: kept.length === 1 ? kept[0] : kept }
+  })
 }
 
 /**
