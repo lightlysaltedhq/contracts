@@ -10,7 +10,7 @@ import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import { isFilled, loadContract } from '../salt-contract/emit/_contract.mjs'
+import { isFilled, loadContract, siblingValue } from '../salt-contract/emit/_contract.mjs'
 import { acfSlugRegistry, acfSnapshot, checkAcfSnapshot, conditionalLogic, toAcfFieldGroups } from '../salt-contract/emit/acf.mjs'
 
 const emitter = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'salt-contract', 'emit', 'acf.mjs')
@@ -33,10 +33,12 @@ const rule = (r, v) => ({
   '==empty': () => empty(v),
   '!=empty': () => !empty(v),
 })[r.operator]()
+// A sibling never set reads as its default, as ACF fills a new row; a stored null stays no value.
 const shows = (f, siblings, all) => {
   if (!f.conditional_logic) return true
   const byKey = Object.fromEntries(all.map((s) => [s.key, s.name]))
-  return f.conditional_logic.some((g) => g.every((r) => rule(r, siblings[byKey[r.field]])))
+  const defaults = Object.fromEntries(all.filter((s) => s.default_value !== undefined).map((s) => [s.name, s.default_value]))
+  return f.conditional_logic.some((g) => g.every((r) => rule(r, siblingValue(siblings, byKey[r.field], defaults))))
 }
 
 // A contract of one section, for field types and options the real contract does not use yet.
@@ -327,4 +329,18 @@ test('R5: a clause with no test, or with two, is refused by the emitter', () => 
     const fields = [{ name: 'on', type: 'boolean', label: 'On' }, { name: 'text', type: 'text', label: 'Text', condition: bad }]
     assert.throws(() => probed(fields), /probe\.text condition on on: a clause tests exactly one of equals, in or filled/, JSON.stringify(bad))
   }
+})
+
+test('R8: a stored null is no value, and only a never-set sibling takes its default', () => {
+  const bg = field(layout(layoutsOf(), 'hero').sub_fields, 'settings.backgroundImage').sub_fields
+  const strength = field(bg, 'scrimStrength') // image filled, scrim equals true; scrim defaults to 1
+  assert.equal(shows(strength, { image: 12 }, bg), true)
+  assert.equal(shows(strength, { image: 12, scrim: null }, bg), false)
+  const hero = layout(layoutsOf(), 'hero').sub_fields
+  assert.equal(shows(field(hero, 'image'), { variant: null }, hero), false)
+  assert.equal(shows(field(hero, 'image'), {}, hero), false) // default full-bleed
+  const showcase = layout(layoutsOf(), 'collection-showcase').sub_fields
+  const label = field(showcase, 'viewAllLabel') // viewAll equals true; viewAll defaults to 1
+  assert.equal(shows(label, {}, showcase), true)
+  assert.equal(shows(label, { viewAll: null }, showcase), false)
 })

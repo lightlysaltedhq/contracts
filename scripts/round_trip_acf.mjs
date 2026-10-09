@@ -28,7 +28,7 @@ import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import { clauses, loadContract, resolveSection } from '../salt-contract/emit/_contract.mjs'
+import { clauses, loadContract, resolveSection, siblingValue } from '../salt-contract/emit/_contract.mjs'
 import { toAcfFieldGroups } from '../salt-contract/emit/acf.mjs'
 
 const here = path.dirname(fileURLToPath(import.meta.url))
@@ -157,13 +157,15 @@ function compareConditions(e, n, ctx) {
     const samples = name in ctx.fixed ? [ctx.fixed[name]] : samplesFor(f)
     combos = combos.flatMap((c) => samples.map((v) => ({ ...c, [name]: v })))
   }
+  // Read as the emitter's tests read them: only a sibling never set takes its default.
+  const defaults = Object.fromEntries(ctx.mine.filter((s) => s.default_value !== undefined).map((s) => [s.name, s.default_value]))
   const disagree = []
   for (const combo of combos) {
-    const a = shown(mineLogic, (key) => combo[byKey.get(key).name])
+    const a = shown(mineLogic, (key) => siblingValue(combo, byKey.get(key).name, defaults))
     const b = shown(theirLogic, (key) => {
       const wp = wpByKey.get(key)
       const name = pairedName.get(wp.key)
-      return name ? toWordpress(ctx.defs.get(name)?.platforms?.wordpress?.values, combo[name]) : combo[`wp:${wp.name}`]
+      return name ? toWordpress(ctx.defs.get(name)?.platforms?.wordpress?.values, siblingValue(combo, name, defaults)) : combo[`wp:${wp.name}`]
     })
     if (a !== b) disagree.push(`${JSON.stringify(combo)}: contract ${a ? 'shows' : 'hides'}, salt-wordpress ${b ? 'shows' : 'hides'}`)
   }
