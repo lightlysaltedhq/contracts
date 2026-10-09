@@ -68,6 +68,11 @@
     }
   ],
   "platforms": {
+    "nextjs": {
+      "owes": [
+        "Write the inline style object-fit and object-position the parent passes, with focal-point as the image's stored focal point (Payload's upload focalPoint, as <x>% <y>%), left out when none is stored; objectPosition() maps focal-point to nothing today (components/image-sizes.ts)."
+      ]
+    },
     "wordpress": {
       "formerly": [
         {
@@ -80,7 +85,8 @@
       ],
       "owes": [
         "Drop x-image; take the parent's class; derive sizes from the same contexts.",
-        "Its picture_sources opt-in, which wraps the img in picture with source elements, is non-conforming (SC-007): drop it and negotiate formats in the image pipeline behind srcset."
+        "Its picture_sources opt-in, which wraps the img in picture with source elements, is non-conforming (SC-007): drop it and negotiate formats in the image pipeline behind srcset.",
+        "Write the inline style object-fit and object-position when the parent passes a fit or a position: the nine positions as keyword pairs, and focal-point as the attachment's stored focal point as <x>% <y>%, left out when none is stored. It stores no focal point today, so focal-point draws the stylesheet's centre until it does."
       ]
     }
   }
