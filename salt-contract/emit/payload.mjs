@@ -23,7 +23,7 @@
 // the clock, the environment or the file system's listing order.
 import { readFileSync, writeFileSync } from 'node:fs'
 
-import { checkedClauses, collectionQueryShape, hasVisibleText, isFilled, isMainModule, LINK_SHAPE, loadContract,
+import { clauses, collectionQueryShape, hasVisibleText, isFilled, isMainModule, LINK_SHAPE, loadContract,
   normaliseLineEndings, planSections, siblingValue, sourceValues, SOURCES } from './_contract.mjs'
 
 /**
@@ -101,7 +101,8 @@ function convertField(f, ctx) {
   const admin = {}
   const out = { name: f.name }
   if (f.description) admin.description = f.description
-  const list = checkedClauses(f.condition, `${ctx.scope}.${[...ctx.path, f.name].join('.')}`)
+  // planSections has validated every condition; this only reads them.
+  const list = clauses(f.condition)
   if (list.length) {
     salt.condition = list
     admin.condition = conditionFor(list, ctx.defaults)

@@ -511,3 +511,9 @@ test('V7: sourceValues is the one reading of the source values among a select\'s
   assert.deepEqual(sourceValues({ options: [{ value: 'inline', label: 'Inline' }] }), [])
   assert.deepEqual(sourceValues(undefined), [])
 })
+
+test('V8: conditions are validated once, by planSections, and the Payload emitter only reads them', () => {
+  assert.doesNotMatch(readFileSync(emitter, 'utf8'), /checkedClauses/)
+  const bad = [{ name: 'on', type: 'boolean', label: 'On' }, { name: 'text', type: 'text', label: 'Text', condition: { field: 'on' } }]
+  assert.throws(() => toPayloadBlocks({ contract: probe(bad) }), /probe\.text condition:/)
+})
