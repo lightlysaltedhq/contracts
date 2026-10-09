@@ -324,3 +324,102 @@ written in the implementation's own repository; the contract fixes only its inte
   the URLs compare and the widths are the platform's own.
 - Form delivery, routing and admin stay native (SC-003): where a case needs a route's data, the
   case supplies it in `route`.
+
+## Conformance
+
+`conformance.mjs` (`@lightlysaltedhq/salt-contract/conformance`, and the `salt-conformance` bin) is
+the runner each implementation points at itself, in its own CI, against the contract version it
+pins. For every section it ships it checks four things:
+
+- **Fixtures.** Every case goes to the implementation's adapter (above), one process or request per case,
+  and the adapter's HTML and the case's expected HTML both go through `normalise`. A mismatch names
+  the section, the case and the first node that differs, by a CSS-like path
+  (`… > div.salt-hero__actions > a.salt-button:nth-of-type(2)`), with what was expected and what
+  was found: another element, a missing or unexpected one, an attribute or text. A case that
+  renders nothing expects empty output. An adapter that exits non-zero, times out or answers other
+  than 200 fails that case, with its stderr (or the response body) in the report.
+- **Field parity.** The implementation's committed field snapshot is checked with the emitter's own
+  `checkPayloadSnapshot` or `checkAcfSnapshot` (the drift checks above), using the implementation's
+  real options, and each problem is filed under its section.
+- **Classes.** Every `salt-*` class in the adapter's output is one an element in `contract/markup`
+  carries.
+- **Stylesheet pin.** The stylesheets the implementation serves are byte-identical to `styles/`, or
+  the package version it re-exports them from is this one.
+
+A section passes only when all four hold for it; field parity and the stylesheet pin are reported
+"not checked" when their flags are left out, and do not fail a run. In CI:
+
+```sh
+npx salt-conformance --platform nextjs --implementation-version "$VERSION" \
+  --adapter "node scripts/salt-adapter.mjs" \
+  --payload-snapshot src/blocks.snapshot.json --fields-options src/blocks.options.json \
+  --styles-version "$(node -p 'require("@lightlysaltedhq/salt-contract/package.json").version')" \
+  --out conformance
+```
+
+or `node node_modules/@lightlysaltedhq/salt-contract/conformance.mjs` with the same flags. Salt for
+WordPress passes `--acf-snapshot acf/sections.json` and `--styles <dir>` for its enqueued copy.
+
+| Flag | What it takes |
+| --- | --- |
+| `--platform <name>` | Required. The implementation's name in the report (`nextjs`, `wordpress`). |
+| `--adapter <command>` | The adapter command, run through the shell once per case. |
+| `--endpoint <url>` | Or the adapter endpoint, POSTed each case. One of the two is required. |
+| `--payload-snapshot <file>` | The committed `payloadSnapshot(options)`. |
+| `--acf-snapshot <file>` | Or the committed `acfSnapshot(options)`. |
+| `--fields-options <file>` | The JSON options the snapshot was generated with (`{}` when left out). |
+| `--styles <dir>` | The directory holding the stylesheets served, compared file by file with `styles/`. |
+| `--styles-version <version>` | Or the version of this package the stylesheets are re-exported from. |
+| `--sections <id,…>` | Run only these sections. |
+| `--not-shipped <id,…>` | Sections the implementation does not ship: reported "not shipped", not failed. |
+| `--implementation-version <v>` | The implementation's own version, for the report. |
+| `--out <dir>` | Write `conformance.json` and `conformance.md` there. The Markdown also goes to stdout. |
+| `--jobs <n>` | Cases run at once (the machine's parallelism by default; 1 for an adapter that cannot share). |
+| `--timeout <ms>` | How long one case may take (60000). |
+
+Every flag takes one value; an unknown, empty or repeated flag is refused. Exit 0 is every section
+run green, 1 any mismatch, 2 a usage error (and no report).
+
+**The report.** `conformance.json` is the parity matrix's input:
+
+```json
+{
+  "format": "salt-conformance/1",
+  "contract": { "package": "@lightlysaltedhq/salt-contract", "version": "0.1.0" },
+  "platform": "nextjs",
+  "implementation": { "version": "0.4.0" },
+  "adapter": { "kind": "command", "target": "node scripts/salt-adapter.mjs" },
+  "ok": false,
+  "summary": { "pass": 15, "fail": 1, "notShipped": 1 },
+  "fields": { "platform": "payload", "snapshot": "…", "options": "…", "problems": [] },
+  "stylesheets": { "mode": "version", "pin": "0.1.0", "contract": "0.1.0", "ok": true, "files": [] },
+  "sections": [
+    {
+      "id": "hero",
+      "status": "fail",
+      "fixtures": { "total": 9, "passed": 8, "failed": 1, "failures": [
+        { "case": "split-image-left", "kind": "mismatch", "difference": "attribute",
+          "path": "section.salt-section > … > a.salt-button:nth-of-type(2)",
+          "name": "href", "expected": "/contact/", "found": "/contacts/" }
+      ] },
+      "fields": { "status": "pass", "problems": [] },
+      "classes": { "status": "pass", "unknown": [] },
+      "stylesheets": { "status": "pass" }
+    },
+    { "id": "pricing", "status": "not shipped" }
+  ]
+}
+```
+
+A section's `status` is `pass`, `fail` or `not shipped`. A failure's `kind` is `mismatch` (with
+`difference`: `element`, `missing`, `unexpected`, `attribute` with its `name`, or `text`; an absent
+side is `null`) or `adapter` (with `error` and `stderr`). `fields.problems` at the top holds what is
+about the whole snapshot (not JSON, sections out of order, formatting); a section's own are under
+it. With `--styles`, `stylesheets.files` lists each file as `identical`, `differs` (with
+`firstDifferingByte`) or `missing`. `conformance.md` is the same report for a person: a table of
+sections, then each failure on a line.
+
+The runner is also importable: `runConformance(options)` returns the report, `renderMarkdown(report)`
+its Markdown, and `firstDifference(expected, actual)` the first differing node of two fragments, for
+an implementation's own tests. `npm run salt-conformance` runs it here against
+`scripts/salt_fixture_reference_adapter.mjs`, which must pass every case.
