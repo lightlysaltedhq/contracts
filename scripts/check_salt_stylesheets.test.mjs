@@ -7,10 +7,10 @@
 // stayed in Salt for Next.js are gone; cases that mutated its theme.css now mutate the token layer.
 // The last block holds the checks this gate added, and proves every contract has failed at least
 // once in this file.
-import { after, describe, it } from 'node:test'
+import { describe, it } from 'node:test'
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { cpSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
@@ -2273,6 +2273,9 @@ describe('the parse is whole, across every stylesheet in styles/', () => {
     ['base.css names another layer', [['base.css', (css) => css.replace('@layer base {', '@layer salt-base {')]], 'base.css holds `@layer salt-base`'],
     ['base.css declares a layer order as well', [['base.css', (css) => `@layer reset, base;\n${css}`]], 'base.css holds `@layer reset, base`, `@layer base`'],
     ['another stylesheet uses a layer', [['views.css', (css) => `@layer base {\n${css}\n}`]], 'views.css:1 uses `@layer`, an at-rule this gate does not read'],
+    /* The base's classless text rules are excused only inside base.css's layer (W2). */
+    ['body text set in another stylesheet', [['views.css', appending('body {\n  font-size: var(--text-body);\n}')]], '`body` in views.css sets `font-size` on an element it names by no class'],
+    ['body text set unlayered in base.css, refused before any contract runs', [['base.css', appending('body {\n  font-size: var(--text-body);\n}')]], 'base.css writes `body` outside its `@layer base` block'],
   ])('fails when %s', (_case, edits, message) => {
     const { code, output } = run(...edits)
     expect(output).toContain(message)
@@ -2298,6 +2301,13 @@ describe('the token layer names exactly what the stylesheets read', () => {
     ['a placeholder the token layer gives no values for', [tokenLayer((layer) => { delete tokenNamed(layer, '--salt-scrim-alpha').values })], 'writes --salt-scrim-alpha as var(--scrim-<strength>), and contract/token-layer.json gives no values for <strength>'],
     ['a value map naming no field', [tokenLayer((layer) => { tokenNamed(layer, '--salt-scrim-alpha').values.field = '_section-settings#strength' })], "takes --salt-scrim-alpha's values from _section-settings#strength, which is not a field with options"],
     ['a value map on a token the markup does not write', [tokenLayer((layer) => { tokenNamed(layer, '--color-ink').values = { field: '_section-settings#spacing' } })], 'gives --color-ink values, but only a property the markup writes has them'],
+    /* Every write the markup makes is read, into any property, fallbacks and nested var()s included. */
+    ['a markup write reads a token only in its fallback', [addFile('contract/markup/zz-write.json', JSON.stringify({ root: { attributes: { style: '--salt-rating-fill: var(--rating-unnamed, 0%)' } } }))], 'contract/markup/zz-write.json read(s) --rating-unnamed, which contract/token-layer.json does not name'],
+    ['a markup write reads a token nested in a fallback', [addFile('contract/markup/zz-write.json', JSON.stringify({ root: { attributes: { style: '--salt-rating-fill: var(--salt-x, var(--rating-nested))' } } }))], 'read(s) --rating-nested, which contract/token-layer.json does not name'],
+    ['a markup write into a property the stylesheets declare', [addFile('contract/markup/zz-write.json', JSON.stringify({ root: { attributes: { style: { value: '--logo-height: var(--logo-unnamed)' } } } }))], 'contract/markup/zz-write.json read(s) --logo-unnamed, which contract/token-layer.json does not name'],
+    ['a placeholder written into a property with no value map', [addFile('contract/markup/zz-write.json', JSON.stringify({ root: { attributes: { style: '--logo-height: var(--logo-<size>)' } } }))], 'writes --logo-height as var(--logo-<size>), and contract/token-layer.json gives no values for <size>'],
+    /* Prose never counts as a write: a note, a rule, a platform's former markup. */
+    ['a token whose only "write" is a note', [addFile('contract/markup/zz-write.json', JSON.stringify({ notes: [{ text: '--header-height: 4rem' }], rules: { r: { statement: '--header-height: 4rem' } }, platforms: { nextjs: { formerly: [{ attributes: { style: '--header-height: 4rem' } }] } } })), tokenLayer((layer) => { tokenNamed(layer, '--header-height').source = 'markup' })], 'says the markup writes --header-height, but no file in contract/markup/ does'],
     /* A token said to come from the markup is written by some markup file (T5). */
     ['a token the markup is said to write and none does', [tokenLayer((layer) => { tokenNamed(layer, '--header-height').source = 'markup' })], 'says the markup writes --header-height, but no file in contract/markup/ does'],
   ])('fails when %s', (_case, edits, message) => {
@@ -2343,11 +2353,38 @@ describe('every class the stylesheets style is on an element in the markup contr
 /* The command line, end to end: the cases above call the checks in memory, so two run the script as
    CI does, on the committed package and on a copy on disk with one defect. */
 describe('the script, run as CI runs it', () => {
-  it('passes the committed package, or fails it only on the writes #6 records', () => {
-    const result = spawnSync(process.execPath, [GATE], { encoding: 'utf8' })
+  /* Exactly the five writes #6 records, or none once it has merged: never some of them. */
+  const committedLines = (args) => {
+    const result = spawnSync(process.execPath, args, { encoding: 'utf8' })
     const lines = result.stdout.split('\n').filter((line) => line.startsWith('✗'))
-    assert.deepEqual(lines.filter((line) => !PENDING_FAILS.includes(line)), [])
+    return { result, lines }
+  }
+  const holdsPending = ({ result, lines }) => {
+    assert.ok(lines.length === 0 || JSON.stringify([...lines].sort()) === JSON.stringify([...PENDING_FAILS].sort()), `expected no failures or exactly the five #6 records, got:\n${lines.join('\n')}`)
     expect(result.status).toBe(lines.length === 0 ? 0 : 1)
+    if (lines.length === 0) expect(result.stdout).toContain('PASS: ')
+  }
+
+  it('passes the committed package, or fails it on exactly the five writes #6 records', () => {
+    holdsPending(committedLines([GATE]))
+  })
+
+  it('runs when invoked through a symlink, as an installed bin would be', () => {
+    const dir = mkdtempSync(path.join(tmpdir(), 'salt-stylesheet-gate-link-'))
+    try {
+      const link = path.join(dir, 'gate.mjs')
+      symlinkSync(GATE, link)
+      holdsPending(committedLines([link, PACKAGE]))
+    } finally {
+      rmSync(dir, { recursive: true, force: true })
+    }
+  })
+
+  /* The tripwire for the stand-in: once the real markup writes any of the five, delete it. */
+  it('still needs the PENDING stand-in for #6', () => {
+    const { output } = report(readPackage(PACKAGE))
+    const carried = PENDING_FAILS.filter((line) => !output.includes(line)).map((line) => line.match(/writes (--[\w-]+)/)[1])
+    assert.deepEqual(carried, [], `the markup now writes ${carried.join(', ')}: delete the stand-in, PENDING_WRITES and PENDING_FAILS (and UNMARKED's pending block)`)
   })
 
   it('fails a copy on disk with one defect, naming it', () => {

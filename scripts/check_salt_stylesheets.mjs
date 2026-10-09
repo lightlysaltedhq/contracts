@@ -30,9 +30,9 @@
 // The checks are `checkStylesheets(files)`, over a map of the package's files by path (`styles/x.css`,
 // `contract/…json`), so the test runs its cases in memory; run as a script, it reads the package from
 // disk and prints the result.
-import { existsSync, readdirSync, readFileSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync, realpathSync } from 'node:fs'
 import path from 'node:path'
-import { fileURLToPath, pathToFileURL } from 'node:url'
+import { fileURLToPath } from 'node:url'
 
 /* The package being checked, set at the start of each `checkStylesheets` run. */
 let FILES = new Map()
@@ -58,30 +58,23 @@ const textRoleDeclarations = (role) => [
   { property: 'font-family', value: `var(--text-${role}--font-family)` },
 ]
 
-/* The selector helpers below are pure functions of their text, and the same selectors are read by
-   many contracts and, in the test, by hundreds of runs over one package. Each is memoised; none of
-   their results is ever modified by a caller. */
+/* The selector helpers below, and the per-file scans further down, are pure functions of their
+   arguments, and the same selectors and files are read by many contracts and, in the test, by
+   hundreds of runs over one package. Each is memoised. The caches live as long as the process: one
+   gate run, or one test file's run, and no longer. Keys are the argument values themselves in
+   nested maps, so a cached stylesheet costs a reference to text already held, never a copy. No
+   caller modifies a cached result. */
 const memo = (fn) => {
-  const cache = new Map()
-  return (text) => {
-    if (!cache.has(text)) cache.set(text, fn(text))
-    return cache.get(text)
-  }
-}
-const memoKey = (fn) => {
-  const cache = new Map()
-  return (name, text) => {
-    const key = `${name}\u0000${text}`
-    if (!cache.has(key)) cache.set(key, fn(name, text))
-    return cache.get(key)
-  }
-}
-const memo2 = (fn) => {
-  const cache = new Map()
-  return (text, separator) => {
-    const key = `${separator}\u0000${text}`
-    if (!cache.has(key)) cache.set(key, fn(text, separator))
-    return cache.get(key)
+  const root = new Map()
+  const done = Symbol('result')
+  return (...args) => {
+    let node = root
+    for (const arg of args) {
+      if (!node.has(arg)) node.set(arg, new Map())
+      node = node.get(arg)
+    }
+    if (!node.has(done)) node.set(done, fn(...args))
+    return node.get(done)
   }
 }
 
@@ -124,7 +117,7 @@ const splitTopUnmemoised = (input, separator) => {
   parts.push(current)
   return parts.map((part) => part.trim()).filter((part) => part.length > 0)
 }
-const splitTop = memo2(splitTopUnmemoised)
+const splitTop = memo(splitTopUnmemoised)
 
 /**
  * Selectors are compared after normalising whitespace and quotes.
@@ -1446,16 +1439,19 @@ const ROLE_OWNER = new Map(
  * which an editor's document draws with no class; and inline code's proportion, excused by the contract
  * above. Any other such rule is refused (#198 review, F4): `.salt-nav a { … }` reaches a menu link
  * without naming its class, so the component contract could not see it take the link back to `body`.
- * And base.css, the element convention Salt for Next.js's `theme.css` applied in `@layer base`, in
- * that layer here too, so every unlayered rule outranks it.
+ *
+ * And base.css's element convention, which Salt for Next.js's `theme.css` applied in `@layer base`:
+ * excused only in base.css and only inside its `@layer base` block, where every unlayered rule
+ * outranks it. The same selector anywhere else, or unlayered, would set text past every component.
  */
-const BASE = ':where(#main, .salt-header, .salt-footer)'
 const CLASSLESS_SUBJECTS = new Set(
-  ['.salt-card :is(h1, h2, h3, h4, h5, h6)', '.salt-hero__text > :is(h1, h2, h3, h4, h5, h6)', '.salt-rich-text blockquote', '.salt-rich-text code',
-    'body', `${BASE} h1`, `${BASE} h2`, `${BASE} h3`, `${BASE} :is(h4, h5, h6)`].map(
+  ['.salt-card :is(h1, h2, h3, h4, h5, h6)', '.salt-hero__text > :is(h1, h2, h3, h4, h5, h6)', '.salt-rich-text blockquote', '.salt-rich-text code'].map(
     (selector) => normalise(selector),
   ),
 )
+const BASE = ':where(#main, .salt-header, .salt-footer)'
+const BASE_SUBJECTS = new Set(['body', `${BASE} h1`, `${BASE} h2`, `${BASE} h3`, `${BASE} :is(h4, h5, h6)`].map((selector) => normalise(selector)))
+const inBaseLayer = (file, rule) => file === 'base.css' && rule.at.length === 1 && /^@layer\s+base$/i.test(rule.at[0].trim())
 
 /* The controls whose `font: inherit` is excused, each by its selector. */
 const INHERITING_CONTROLS = ['.salt-contact__input', '.salt-search__input']
@@ -5542,7 +5538,8 @@ const CONTRACTS = [
         for (const rule of rules) {
           const property = rule.order.find((name) => ROLE_PROPERTIES.has(name.toLowerCase()) || name.toLowerCase() === 'font')
           if (property === undefined) continue
-          const classless = rule.selectors.find((candidate) => requiredClasses(keyCompound(candidate)).size === 0 && !CLASSLESS_SUBJECTS.has(candidate))
+          const classless = rule.selectors.find((candidate) => requiredClasses(keyCompound(candidate)).size === 0 &&
+            !CLASSLESS_SUBJECTS.has(candidate) && !(BASE_SUBJECTS.has(candidate) && inBaseLayer(file, rule)))
           if (classless !== undefined) {
             return `\`${classless}\` in ${file} sets \`${property}\` on an element it names by no class, so no contract here can tell which component it reaches; set text through the component's class, or list the selector beside the card title's and the hero headline's`
           }
@@ -5702,9 +5699,26 @@ const varReads = memo((text) =>
   [...text.replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/"(?:[^"\\\n]|\\.)*"|'(?:[^'\\\n]|\\.)*'/g, '""')
     .matchAll(/var\(\s*(--[\w-]+)\s*(,?)/gi)].map((m) => [m[1], m[2] === ',']))
 
-/* Every string in a JSON document. */
-const stringsIn = (node) =>
-  typeof node === 'string' ? [node] : node && typeof node === 'object' ? Object.values(node).flatMap(stringsIn) : []
+/* The keys of a markup file that describe rather than draw: a platform's former markup, a rule's
+   statement, a note, a hook kept with no rule, an omitted class. The class check and the markup
+   writes both skip them, so prose never counts as markup. */
+const NOT_ELEMENTS = new Set(['platforms', 'rules', 'notes', 'hooks', 'omitted'])
+
+/* Every attribute value an element in a markup file writes: a plain string, or an entry's `value`. */
+const attributeValuesIn = (node) => {
+  if (Array.isArray(node)) return node.flatMap(attributeValuesIn)
+  if (!node || typeof node !== 'object') return []
+  const own = node.attributes && typeof node.attributes === 'object'
+    ? Object.values(node.attributes).flatMap((value) => (typeof value === 'string' ? [value] : typeof value?.value === 'string' ? [value.value] : []))
+    : []
+  return [...own, ...Object.entries(node).filter(([key]) => !NOT_ELEMENTS.has(key) && key !== 'attributes').flatMap(([, value]) => attributeValuesIn(value))]
+}
+
+/* Every `var()` in a written value, nested ones and fallbacks included: its name, split at a
+   `<placeholder>` if it has one, and whether it carries a fallback. */
+const varsWritten = (value) =>
+  [...value.matchAll(/var\(\s*(--[\w-]*?)(?:<([\w-]+)>([\w-]*))?\s*(,|\))/g)]
+    .map((m) => ({ name: m[1], placeholder: m[2], rest: m[3] ?? '', fallback: m[4] === ',' }))
 
 /* A field of that name anywhere in a fields file. */
 const fieldNamed = (node, name) => {
@@ -5719,7 +5733,7 @@ const fieldNamed = (node, name) => {
 
 const parseOnce = memo(parse)
 
-const sourceFindings = memoKey((file, text) => {
+const sourceFindings = memo((file, text) => {
   const out = []
   const source = text
     /* Comments blanked line for line, so the line reported is the file's own. */
@@ -5772,7 +5786,7 @@ const sourceFindings = memoKey((file, text) => {
      outrank Tailwind's utilities and a host's own rules, which is what the layer exists to stop. */
   if (file === 'base.css') {
     const preludes = [...source.matchAll(/@layer\b([^{;]*)([{;])/gi)].map((m) => `${m[1].trim()}${m[2]}`)
-    const outside = parse(source).rules.filter((rule) => !rule.at.some((prelude) => /^@layer\b/i.test(prelude)))
+    const outside = parseOnce(text).rules.filter((rule) => !rule.at.some((prelude) => /^@layer\b/i.test(prelude)))
     if (preludes.length !== 1 || preludes[0] !== 'base{') {
       out.push(`base.css holds ${preludes.length === 0 ? 'no `@layer base` block' : preludes.map((p) => `\`@layer ${p.slice(0, -1)}\``).join(', ')}; it is one \`@layer base { … }\` block`)
     } else if (outside.length > 0) {
@@ -5902,13 +5916,16 @@ export function checkStylesheets(files) {
     for (const [name, fallback] of varReads(text)) addRead(name, file, fallback)
     for (const rule of parsed.get(file).rules) for (const property of rule.order) if (property.startsWith('--')) declaredHere.add(property)
   }
-  /* What the markup writes on an element's style (`--salt-scrim-alpha: var(--scrim-<strength>)`)
-     reaches the stylesheets too, so each `var()` it writes is a read. A `<placeholder>` stands for
-     a setting's options, which the token entry's `values` names (`_section-settings#scrimStrength`):
-     each option is a token the runtime must emit. */
+  /* What the markup writes on an element (`--salt-scrim-alpha: var(--scrim-<strength>)` on the
+     scrim's style) reaches the stylesheets too, so every `var()` in a written value is a read,
+     fallbacks and nested `var()`s included. Only what elements write counts: attribute values on
+     the nodes the class check reads, never a note, a rule's statement, an omitted class or a
+     platform's former markup, whose prose could otherwise satisfy it. A `<placeholder>` stands for
+     a setting's options, which the written property's token entry names in `values`
+     (`_section-settings#scrimStrength`): each option is a token the runtime must emit. */
   const markupWrites = new Map()
   for (const file of markupFiles) {
-    for (const text of stringsIn(readJson(file))) {
+    for (const text of attributeValuesIn(readJson(file))) {
       for (const m of text.matchAll(/(--[a-z][\w-]*)\s*:\s*([^;]+)/g)) {
         if (!markupWrites.has(m[1])) markupWrites.set(m[1], [])
         markupWrites.get(m[1]).push({ file, value: m[2].trim() })
@@ -5919,23 +5936,27 @@ export function checkStylesheets(files) {
   else {
     for (const group of TOKEN_LAYER.groups ?? []) {
       for (const token of group.tokens ?? []) {
-        if (token.source !== 'markup') {
-          if (token.values) fails.push(`contract/token-layer.json gives ${token.name} values, but only a property the markup writes has them`)
-          continue
+        if (token.values && !markupWrites.has(token.name)) {
+          fails.push(`contract/token-layer.json gives ${token.name} values, but only a property the markup writes has them`)
         }
-        const writes = markupWrites.get(token.name) ?? []
-        if (writes.length === 0) { fails.push(`contract/token-layer.json says the markup writes ${token.name}, but no file in contract/markup/ does`); continue }
-        for (const { file, value } of writes) {
-          for (const m of value.matchAll(/var\(\s*(--[\w-]*?)(?:<([\w-]+)>([\w-]*))?\s*\)/g)) {
-            if (m[2] === undefined) { addRead(m[1], file, false); continue }
-            if (!token.values) { fails.push(`${file} writes ${token.name} as ${m[0]}, and contract/token-layer.json gives no values for <${m[2]}>`); continue }
-            const [fieldFile, fieldName] = String(token.values.field).split('#')
-            const field = fieldNamed(readJson(`contract/fields/${fieldFile}.json`), fieldName)
-            if (!field || !Array.isArray(field.options)) { fails.push(`contract/token-layer.json takes ${token.name}'s values from ${token.values.field}, which is not a field with options`); continue }
-            for (const option of field.options) {
-              if ((token.values.except ?? []).includes(option.value)) continue
-              addRead(`${m[1]}${option.value}${m[3]}`, file, false)
-            }
+        if (token.source === 'markup' && !markupWrites.has(token.name)) {
+          fails.push(`contract/token-layer.json says the markup writes ${token.name}, but no file in contract/markup/ does`)
+        }
+      }
+    }
+    for (const [property, writes] of markupWrites) {
+      const token = TOKEN_NAMES.get(property)
+      for (const { file, value } of writes) {
+        for (const { name, placeholder, rest, fallback } of varsWritten(value)) {
+          if (placeholder === undefined) { addRead(name, file, fallback); continue }
+          const spelt = `var(${name}<${placeholder}>${rest})`
+          if (!token?.values) { fails.push(`${file} writes ${property} as ${spelt}, and contract/token-layer.json gives no values for <${placeholder}>`); continue }
+          const [fieldFile, fieldName] = String(token.values.field).split('#')
+          const field = fieldNamed(readJson(`contract/fields/${fieldFile}.json`), fieldName)
+          if (!field || !Array.isArray(field.options)) { fails.push(`contract/token-layer.json takes ${property}'s values from ${token.values.field}, which is not a field with options`); continue }
+          for (const option of field.options) {
+            if ((token.values.except ?? []).includes(option.value)) continue
+            addRead(`${name}${option.value}${rest}`, file, fallback)
           }
         }
       }
@@ -5979,13 +6000,12 @@ export function checkStylesheets(files) {
       'salt-post__footer', 'salt-post__media', 'salt-post__meta', 'salt-post__tags', 'salt-service__intro', 'salt-service__price-label',
       'salt-service__summary', 'salt-related__list'].map((name) => ({ class: name, pending: true, reason: 'SC-007 view body, pending its markup' })),
   ]
-  const SKIP = new Set(['platforms', 'rules', 'notes', 'hooks', 'omitted'])
   const onElements = new Set()
   const collect = (node) => {
     if (Array.isArray(node)) { node.forEach(collect); return }
     if (!node || typeof node !== 'object') return
     for (const [key, value] of Object.entries(node)) {
-      if (SKIP.has(key)) continue
+      if (NOT_ELEMENTS.has(key)) continue
       if (key === 'classes' && Array.isArray(value)) value.forEach((name) => onElements.add(name))
       else collect(value)
     }
@@ -6046,7 +6066,17 @@ export function readPackage(dir) {
   return files
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+/*
+ * Whether this module is the script being run. Real paths, because a symlinked invocation names the
+ * link, and comparing URLs then read as "imported", printed nothing and exited 0. The same check as
+ * `isMainModule` in #5's `emit/_contract.mjs`; one copy once both have merged.
+ */
+const isMainModule = (moduleUrl) => {
+  if (!process.argv[1]) return false
+  try { return realpathSync(process.argv[1]) === realpathSync(fileURLToPath(moduleUrl)) } catch { return false }
+}
+
+if (isMainModule(import.meta.url)) {
   const here = path.dirname(fileURLToPath(import.meta.url))
   const { code, output } = report(readPackage(path.resolve(process.argv[2] ?? path.join(here, '..', 'salt-contract'))))
   process.stdout.write(output)
