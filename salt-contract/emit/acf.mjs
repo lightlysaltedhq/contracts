@@ -125,7 +125,9 @@ function convertField(f, ctx) {
 
   switch (f.type) {
     case 'text':
-      typed(f.format === 'url' ? 'url' : 'text')
+      // Always ACF text: its url field accepts only addresses with a scheme://, so it refuses the
+      // mailto: and tel: the schema allows. salt.format tells the site's sanitiser to check it.
+      typed('text')
       if (f.default !== undefined) out.default_value = f.default
       if (f.maxLength !== undefined) out.maxlength = f.maxLength
       if (f.format) salt.format = f.format

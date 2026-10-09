@@ -514,7 +514,7 @@
     "section": "features",
     "path": "items.url",
     "kind": "type",
-    "difference": "type url; salt-wordpress link",
+    "difference": "type text; salt-wordpress link",
     "evidence": "owes: a plain address in place of a link field, whose title and target were already ignored"
   },
   {

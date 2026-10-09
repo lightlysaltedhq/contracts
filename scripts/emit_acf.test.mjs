@@ -161,7 +161,7 @@ test('text, textarea, select, boolean, number and group map to their ACF types',
     { name: 'box', type: 'group', label: 'Box', fields: [{ name: 'inner', type: 'text', label: 'Inner' }] },
   ])
   assert.deepEqual(title, { key: 'field_salt_probe_title', label: 'Title', name: 'title', type: 'text', instructions: 'Help.', required: 1, default_value: 'Hi', maxlength: 80 })
-  assert.deepEqual([address.type, address.salt], ['url', { format: 'url' }])
+  assert.deepEqual([address.type, address.salt], ['text', { format: 'url' }])
   assert.deepEqual([intro.type, intro.maxlength], ['textarea', 300])
   assert.deepEqual([style.type, style.choices, style.default_value, style.allow_null], ['select', { a: 'A', b: 'B' }, 'b', undefined])
   assert.equal(pick.allow_null, 1)
@@ -195,7 +195,7 @@ test('a link is the fixed group, its document a post object of linkTo, required 
   const link = field(hero.sub_fields, 'buttons.link')
   assert.deepEqual([link.type, link.required, link.salt], ['group', undefined, { link: true }])
   assert.deepEqual(link.sub_fields.map((f) => [f.name, f.type, f.required ?? 0]), [
-    ['label', 'text', 1], ['type', 'select', 0], ['document', 'post_object', 1], ['url', 'url', 1], ['newTab', 'true_false', 0],
+    ['label', 'text', 1], ['type', 'select', 0], ['document', 'post_object', 1], ['url', 'text', 1], ['newTab', 'true_false', 0],
   ])
   const document = field(link.sub_fields, 'document')
   assert.deepEqual(document.post_type, ['page', 'post'])
@@ -457,4 +457,9 @@ test('Y2: rich text keeps the visual editor\'s full toolbar, as salt-wordpress h
   const body = field(layout(layoutsOf(), 'rich-text').sub_fields, 'body')
   assert.deepEqual([body.tabs, body.toolbar, body.media_upload], ['visual', 'full', 0])
   assert.ok(body.salt.allowed.length)
+})
+
+test('Y3: a url-format text is an ACF text, since ACF\'s url field refuses mailto: and tel:', () => {
+  const url = field(field(layout(layoutsOf(), 'hero').sub_fields, 'buttons.link').sub_fields, 'url')
+  assert.deepEqual([url.type, url.salt], ['text', { format: 'url' }])
 })

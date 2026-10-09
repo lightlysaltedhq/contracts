@@ -249,7 +249,8 @@ function compareLevel(section, entries, theirs, prefix, parentDef, fixed = {}) {
 function compareOne(section, at, e, n, def, ctx) {
   const values = wpNote(def)?.values
   const diffs = []
-  const sameType = family(e.type) === family(n.type)
+  // A url-format text stores the same string ACF's url field does; only ACF's validation differs.
+  const sameType = family(e.type) === family(n.type) || (e.salt?.format === 'url' && e.type === 'text' && n.type === 'url')
   if (!sameType) diffs.push(['type', `type ${e.type}; salt-wordpress ${n.type}`])
   if (e.choices && n.choices) {
     const mine = Object.keys(e.choices)
@@ -388,8 +389,9 @@ async function main({ wordpress, check, suggest }) {
     'loaded with `php` under its own test shims, as its bin/extract-slugs.php loads them, not parsed.',
     '',
     'Compared: field names, types (select, radio and button_group count as one: the widget stays',
-    'native), choices, defaults, required, limits, the post types and taxonomy a relation reads, and',
-    'conditional logic (by behaviour, over every combination of the siblings either side reads).',
+    'native; a url-format text matches ACF url, which stores the same string), choices, defaults,',
+    'required, limits, the post types and taxonomy a relation reads, and conditional logic (by',
+    'behaviour, over every combination of the siblings either side reads).',
     'Not compared: labels and instructions, which salt-wordpress words differently and SC-003 says',
     'must match, so adopting the emitter changes them throughout; and what stays native to ACF',
     '(return formats, wrapper widths, tabs, toolbars, row layouts).',
