@@ -301,7 +301,7 @@
       "platforms": {
         "nextjs": {
           "formerly": "settings.anchorId",
-          "owes": "reserving site-navigation in place of navigation, the id its header's main navigation takes (SC-006)"
+          "owes": "reserving site-navigation in place of navigation, the id its header's main navigation takes (SC-006); reserving site-navigation-drawer, and matching the reserved forms rather than only the exact ids RESERVED_ANCHOR_IDS lists (fields/section-settings.ts, lib/sections/settings.ts); settling anchors at render in section#anchors' three-step order"
         },
         "wordpress": {
           "formerly": "section_anchor",

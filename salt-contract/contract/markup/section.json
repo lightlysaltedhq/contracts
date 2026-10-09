@@ -381,7 +381,8 @@
       ],
       "owes": [
         "Write data-block and data-track from contract ids: rich-text, call-to-action, media-text, collection-showcase.",
-        "Rename the skip link's class skip-link to salt-skip-link (page.json)."
+        "Rename the skip link's class skip-link to salt-skip-link (page.json).",
+        "Settle ids at render in section#anchors' three-step order: reserve site-navigation-drawer and the reserved forms (salt-header-nav-submenu-<n> and the rest), not only the exact ids RESERVED_ANCHOR_IDS lists today (fields/section-settings.ts, lib/sections/settings.ts), and let generated ids yield to editors' anchors."
       ]
     },
     "wordpress": {
