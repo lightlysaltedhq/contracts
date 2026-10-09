@@ -51,6 +51,8 @@ export function parseArguments(argv, env = process.env) {
   if (unknown.length) throw new Error(`unknown option ${unknown.join(', ')}`)
   const positional = argv.filter((a) => !a.startsWith('--'))
   if (positional.length > 1) throw new Error(`one salt-nextjs checkout, not ${positional.length}`)
+  // --suggest prints and returns before any check, so together they would pass without checking.
+  if (argv.includes('--check') && argv.includes('--suggest')) throw new Error('--check and --suggest cannot be used together')
   const given = positional[0] ?? env.SALT_NEXTJS_DIR
   if (!given) throw new Error('pass the salt-nextjs checkout, or set SALT_NEXTJS_DIR')
   const nextjs = path.resolve(given)

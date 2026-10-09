@@ -51,3 +51,10 @@ test('R9: every entry on the committed list cites the note or ruling that accoun
     assert.doesNotMatch(e.evidence, /undefined/, JSON.stringify(e))
   }
 })
+
+test('S3: --check and --suggest together are refused, as --suggest would skip the check and pass', () => {
+  const dir = fakeCheckout()
+  try {
+    assert.throws(() => parseArguments(['--check', '--suggest', dir], {}), /--check and --suggest cannot be used together/)
+  } finally { rmSync(dir, { recursive: true, force: true }) }
+})
