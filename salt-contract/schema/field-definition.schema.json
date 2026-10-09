@@ -476,7 +476,7 @@
           "$ref": "#/$defs/count"
         },
         "format": {
-          "description": "url: an absolute address (http, https, mailto or tel), ACF url on WordPress. anchor: slugified on save, and only the slug is stored. At render, a reserved id or a repeat takes a numeric suffix that counts up until the id is unique on the page; a generated id that meets an editor's anchor takes the suffix instead, so the anchor keeps its id (SC-007). The suffix is never stored (markup/section#anchors).",
+          "description": "url: an absolute address (http, https, mailto or tel), ACF url on WordPress. anchor: slugified on save, and only the slug is stored. At render, a reserved id or a repeat takes a numeric suffix that counts up until the id equals no reserved id, matches no reserved form, and is unique on the page (a stem whose every -<n> is reserved takes -a<n>); a generated id that meets an editor's anchor takes the suffix instead, so the anchor keeps its id (SC-007). The suffix is never stored (markup/section#anchors).",
           "enum": [
             "url",
             "anchor"
