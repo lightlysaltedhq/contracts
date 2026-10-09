@@ -203,6 +203,16 @@ export function unmetSources(fields, installed, at, unfitted = fields) {
   })
 }
 
+// Every condition at every depth, refused by checkedClauses before anything is narrowed, so whether
+// a malformed clause is caught never depends on which sources a site installs.
+function checkConditions(fields, at) {
+  for (const f of fields) {
+    const where = `${at}.${f.name}`
+    checkedClauses(f.condition, where)
+    if (f.fields) checkConditions(f.fields, where)
+  }
+}
+
 /**
  * The one entry point every emitter plans its sections with, so the emitters cannot disagree about
  * which sections a site gets or what their source selects offer.
@@ -221,6 +231,8 @@ export function planSections(contract, { installed = new Set(SOURCES), sections 
   const leftOut = []
   for (const id of sections ?? contract.sections.map((s) => s.id)) {
     const { section, fields: all, settings } = resolveSection(contract, id)
+    checkConditions(all, id)
+    checkConditions(settings, `${id}.settings`)
     const fields = withinSources(all, installed)
     const needs = [
       ...unmetSources(fields, installed, id, all),

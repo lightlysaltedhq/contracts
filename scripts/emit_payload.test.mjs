@@ -445,3 +445,17 @@ test('U6: a condition is one clause or a list of at least two, as the schema say
   const two = [on, { name: 'n', type: 'boolean', label: 'N' }, { name: 'text', type: 'text', label: 'Text', condition: [{ field: 'on', equals: true }, { field: 'n', equals: true }] }]
   assert.doesNotThrow(() => toPayloadBlocks({ contract: probe(two) }))
 })
+
+// A section choosing between inline content and a source, as the carousel does.
+const sourced = (extra = []) => [
+  { name: 'source', type: 'select', label: 'Show', options: [{ value: 'inline', label: 'Inline' }, { value: 'posts', label: 'Posts' }], default: 'inline' },
+  { name: 'query', type: 'collection-query', label: 'Query', sourceField: 'source', condition: { field: 'source', equals: 'posts' } },
+  ...extra,
+]
+
+test('U3: a malformed clause is refused whatever the site installs', () => {
+  const tags = { name: 'tags', type: 'boolean', label: 'Tags', condition: [{ field: 'source', in: ['posts'] }, { field: 'source' }] }
+  for (const sources of [{}, { posts: {} }]) {
+    assert.throws(() => toPayloadBlocks({ contract: probe(sourced([tags])), sources }), /probe\.tags condition: .*a clause is an object/, JSON.stringify(sources))
+  }
+})
