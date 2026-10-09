@@ -79,11 +79,12 @@ diff and migrate. Options that JSON can carry also work from the command line:
 `--write <snapshot>` regenerates it. CRLF line endings are read as LF.
 
 **Fitting the site's sources.** `planSections` in `emit/_contract.mjs` decides, for every emitter,
-which sections a site gets. A section that needs a source the site does not install (a fixed
-collection-query source, a relationship's source, or a source select with no option the site can
-satisfy, in its own fields or its shared settings) is left out, or refused with the
-missing source and field named when `sections` lists it (`null` counts as not listing). Where a
-source select still has an option to offer, as the carousel's inline cards do, the section stays.
+which sections a site gets. A section that needs a source the site does not install is left out,
+or refused with the missing source and field named when `sections` lists it (`null` counts as not
+listing). It needs one through a fixed collection-query source or a relationship's source, in its
+own fields or its shared settings, or through a source select with no option the site can satisfy;
+a source select and its query sit only at the section's top level. Where a source select still has
+an option to offer, as the carousel's inline cards do, the section stays.
 The select offers only what the site can satisfy, with no default when its default is no longer
 offered. The query, any field reached only by a missing source, and any field whose condition
 cannot hold once such a field is gone are left out; a kept field loses any clause on a field left
