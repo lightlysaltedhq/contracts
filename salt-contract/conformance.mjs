@@ -11,9 +11,9 @@
 //    contract generates with the implementation's options. Each problem is filed under its section.
 // 3. CLASSES. Every salt-* class in the adapter's output is one an element in contract/markup
 //    carries.
-// 4. STYLESHEET PIN. The stylesheets the implementation serves, from the directory it serves them
-//    from, are byte-identical to styles/. A version string the caller states is no pin: it says
-//    nothing of the bytes served.
+// 4. STYLESHEET PIN. The CSS the implementation serves (a file it builds, or a URL on a running
+//    site) is byte-identical to styles/salt.css, the one bundle both platforms serve. The package's
+//    own copy is refused: comparing it with itself would prove nothing.
 //
 // An implementation conforms only when all four ran for every section it ships and all pass
 // (SC-017): a run without a field snapshot or a stylesheet pin fails. A run that leaves a check or
@@ -21,7 +21,7 @@
 // It writes a JSON report (the parity matrix's input) and a Markdown one, and exits 1 on any
 // mismatch or partial run, 2 on a usage error. Plain Node, no dependencies.
 import { spawn } from 'node:child_process'
-import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readdirSync, readFileSync, realpathSync, writeFileSync } from 'node:fs'
 import { availableParallelism } from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -38,7 +38,7 @@ export const REPORT_FORMAT = 'salt-conformance/1'
 // ── Arguments ─────────────────────────────────────────────────────────────────────────────────
 
 const FLAGS = ['--platform', '--adapter', '--endpoint', '--payload-snapshot', '--acf-snapshot', '--fields-options',
-  '--styles', '--sections', '--not-shipped', '--implementation-version', '--out', '--jobs', '--timeout']
+  '--styles', '--styles-url', '--sections', '--not-shipped', '--implementation-version', '--out', '--jobs', '--timeout']
 // Flags that take no value.
 const SWITCHES = ['--partial']
 
@@ -65,6 +65,7 @@ export function parseConformanceArguments(argv) {
   const either = (a, b) => { if (values[a] && values[b]) throw new Error(`${a} and ${b} cannot be used together`) }
   either('--adapter', '--endpoint')
   either('--payload-snapshot', '--acf-snapshot')
+  either('--styles', '--styles-url')
   if (!values['--platform']) throw new Error('--platform <name> is required (nextjs, wordpress …), to name the implementation in the report')
   if (!values['--adapter'] && !values['--endpoint']) throw new Error('pass --adapter <command> or --endpoint <url>')
   // A run of some sections says nothing of the rest, so it is partial by construction.
@@ -85,7 +86,7 @@ export function parseConformanceArguments(argv) {
     fields: values['--payload-snapshot'] ? { platform: 'payload', snapshot: values['--payload-snapshot'], options: values['--fields-options'] }
       : values['--acf-snapshot'] ? { platform: 'acf', snapshot: values['--acf-snapshot'], options: values['--fields-options'] }
         : undefined,
-    styles: values['--styles'] ? { dir: values['--styles'] } : undefined,
+    styles: values['--styles'] ? { file: values['--styles'] } : values['--styles-url'] ? { url: values['--styles-url'] } : undefined,
     sections: list(values['--sections']),
     notShipped: list(values['--not-shipped']),
     implementationVersion: values['--implementation-version'],
@@ -298,19 +299,39 @@ function checkFields(fields) {
   return { platform: fields.platform, snapshot: fields.snapshot, options: fields.options ?? null, problems: whole, bySection, present }
 }
 
-function checkStyles(styles, version, dir) {
-  const styleDir = path.join(dir, 'styles')
-  const files = readdirSync(styleDir).filter((f) => f.endsWith('.css')).sort().map((file) => {
-    const theirs = path.join(styles.dir, file)
-    if (!existsSync(theirs)) return { file, status: 'missing' }
-    const a = readFileSync(path.join(styleDir, file))
-    const b = readFileSync(theirs)
-    if (a.equals(b)) return { file, status: 'identical' }
-    let at = 0
-    while (at < a.length && at < b.length && a[at] === b[at]) at++
-    return { file, status: 'differs', firstDifferingByte: at }
-  })
-  return { dir: styles.dir, contract: version, ok: files.every((f) => f.status === 'identical'), files }
+export const BUNDLE = 'styles/salt.css'
+
+/** Refuse a served file that is the package's own bundle or stylesheets: the pin would be vacuous. */
+function refuseOwnStyles(styles, dir) {
+  if (!styles.file) return
+  let served
+  try { served = realpathSync(styles.file) } catch { return } // a missing file is reported, not refused
+  const own = realpathSync(path.join(dir, 'styles'))
+  if (served === own || path.dirname(served) === own) {
+    throw new Error(`--styles ${styles.file} is this package's own styles/; name the CSS file the implementation serves (or --styles-url), which is compared with ${BUNDLE}`)
+  }
+}
+
+async function checkStyles(styles, version, dir, timeout) {
+  const bundle = readFileSync(path.join(dir, BUNDLE))
+  const out = { served: styles.file ?? styles.url, bundle: BUNDLE, contract: version }
+  let theirs
+  if (styles.file) {
+    if (!existsSync(styles.file)) return { ...out, ok: false, status: 'missing' }
+    theirs = readFileSync(styles.file)
+  } else {
+    try {
+      const res = await fetch(styles.url, { signal: AbortSignal.timeout(timeout) })
+      if (res.status !== 200) return { ...out, ok: false, status: 'unreachable', error: `answered ${res.status}` }
+      theirs = Buffer.from(await res.arrayBuffer())
+    } catch (e) {
+      return { ...out, ok: false, status: 'unreachable', error: e.cause?.message ?? e.message }
+    }
+  }
+  if (bundle.equals(theirs)) return { ...out, ok: true, status: 'identical' }
+  let at = 0
+  while (at < bundle.length && at < theirs.length && bundle[at] === theirs[at]) at++
+  return { ...out, ok: false, status: 'differs', firstDifferingByte: at }
 }
 
 async function pool(items, jobs, work) {
@@ -361,7 +382,8 @@ export async function runConformance(options) {
       if (!notShipped.has(id) && fields.present && !fields.present.includes(id)) fields.bySection.set(id, [`${id} is not in the field snapshot`, ...(fields.bySection.get(id) ?? [])])
     }
   }
-  const styles = options.styles ? checkStyles(options.styles, pkg.version, dir) : null
+  if (options.styles) refuseOwnStyles(options.styles, dir)
+  const styles = options.styles ? await checkStyles(options.styles, pkg.version, dir, timeout) : null
   const render = options.adapter.command
     ? (input) => runCommand(options.adapter.command, input, timeout)
     : (input) => runEndpoint(options.adapter.endpoint, input, timeout)
@@ -470,10 +492,10 @@ export function renderMarkdown(report) {
   lines.push('')
   const st = report.stylesheets
   lines.push('## Stylesheet pin', '')
-  if (!st) lines.push('Not run, so no section conforms (SC-017): pass `--styles <dir>`.')
+  if (!st) lines.push('Not run, so no section conforms (SC-017): pass `--styles <file>` or `--styles-url <url>`.')
   else {
-    lines.push(`${st.ok ? 'Pass' : 'Fail'}: ${code(st.dir)} against this contract's \`styles/\` (${st.contract}).`, '')
-    for (const f of st.files) lines.push(`- ${f.file}: ${f.status}${f.status === 'differs' ? ` from byte ${f.firstDifferingByte}` : ''}`)
+    const how = st.status === 'differs' ? `differs from byte ${st.firstDifferingByte}` : st.status === 'unreachable' ? `could not be read (${st.error})` : st.status
+    lines.push(`${st.ok ? 'Pass' : 'Fail'}: ${code(st.served)} against this contract's \`${st.bundle}\` (${st.contract}): ${how}.`)
   }
   lines.push('', '## Field parity', '')
   if (!report.fields) lines.push('Not run, so no section conforms (SC-017): pass `--payload-snapshot <file>` or `--acf-snapshot <file>`.')
@@ -501,7 +523,7 @@ export function renderMarkdown(report) {
 
 const USAGE = `usage: conformance.mjs --platform <name> (--adapter <command> | --endpoint <url>)
   [--payload-snapshot <file> | --acf-snapshot <file>] [--fields-options <options.json>]
-  [--styles <dir>] [--sections <id,…>] [--not-shipped <id,…>]
+  [--styles <file> | --styles-url <url>] [--sections <id,…>] [--not-shipped <id,…>]
   [--implementation-version <version>] [--out <dir>] [--jobs <n>] [--timeout <ms>] [--partial]`
 
 if (isMainModule(import.meta.url)) {

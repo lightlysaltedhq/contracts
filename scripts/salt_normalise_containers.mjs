@@ -17,7 +17,8 @@ import { fileURLToPath } from 'node:url'
 
 export function containersFrom(stylesDir) {
   const found = new Set()
-  for (const file of readdirSync(stylesDir).filter((f) => f.endsWith('.css')).sort()) {
+  // salt.css is the others minified, so it adds nothing and is read in their form instead.
+  for (const file of readdirSync(stylesDir).filter((f) => f.endsWith('.css') && f !== 'salt.css').sort()) {
     const css = readFileSync(path.join(stylesDir, file), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '')
     const stack = []
     let start = 0

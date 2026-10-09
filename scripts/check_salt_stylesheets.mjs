@@ -26,6 +26,9 @@
 //    is `optional` exactly when every read of it carries a fallback.
 // 4. THE CLASS VOCABULARY. Every salt-* class a selector names is on an element in
 //    contract/markup/*.json.
+// 5. THE BUNDLE (the command line only). styles/salt.css, the one file both platforms serve, is
+//    exactly what scripts/build_salt_bundle.mjs builds from the sources. Checks 1 to 4 read the
+//    sources, never the bundle, which is their minified copy.
 //
 // The checks are `checkStylesheets(files)`, over a map of the package's files by path (`styles/x.css`,
 // `contract/…json`), so the test runs its cases in memory; run as a script, it reads the package from
@@ -5876,7 +5879,7 @@ export function checkStylesheets(files) {
 
   // ── 1. The parse is whole ───────────────────────────────────────────────────────────────────
   const fails = []
-  const listed = [...files.keys()].filter((file) => /^styles\/[^/]+\.css$/.test(file)).map((file) => file.slice('styles/'.length)).sort()
+  const listed = [...files.keys()].filter((file) => /^styles\/[^/]+\.css$/.test(file) && file !== 'styles/salt.css').map((file) => file.slice('styles/'.length)).sort()
   /* The four the contracts are written against must be there; every other stylesheet is read too, so
      a rule added in a new file is seen by every contract that sweeps all of them. */
   for (const file of ['sections.css', 'primitives.css', 'blocks.css', 'chrome.css']) {
@@ -6156,7 +6159,10 @@ export const isMainModule = (moduleUrl, entry = process.argv[1], real = realpath
 
 if (isMainModule(import.meta.url)) {
   const here = path.dirname(fileURLToPath(import.meta.url))
-  const { code, output } = report(readPackage(path.resolve(process.argv[2] ?? path.join(here, '..', 'salt-contract'))))
-  process.stdout.write(output)
-  process.exit(code)
+  const dir = path.resolve(process.argv[2] ?? path.join(here, '..', 'salt-contract'))
+  const { code, output } = report(readPackage(dir))
+  const { bundleProblem } = await import('./build_salt_bundle.mjs')
+  const problem = bundleProblem(dir)
+  process.stdout.write(problem ? `${output}✗ ${problem}\n` : output)
+  process.exit(problem ? 1 : code)
 }

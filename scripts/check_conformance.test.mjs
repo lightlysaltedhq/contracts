@@ -53,7 +53,9 @@ writeFileSync(path.join(fieldsDir, 'options.json'), JSON.stringify(ICONS))
 writeFileSync(path.join(fieldsDir, 'payload.json'), payloadSnapshot(ICONS))
 after(() => rmSync(fieldsDir, { recursive: true, force: true }))
 const withFields = ['--payload-snapshot', path.join(fieldsDir, 'payload.json'), '--fields-options', path.join(fieldsDir, 'options.json')]
-const withStyles = ['--styles', path.join(pkg, 'styles')]
+// The CSS an implementation serves: a copy of the bundle, since the package's own is refused.
+cpSync(path.join(pkg, 'styles', 'salt.css'), path.join(fieldsDir, 'served.css'))
+const withStyles = ['--styles', path.join(fieldsDir, 'served.css')]
 
 test('the reference adapter conforms: all four checks run and pass for every section', async () => {
   const r = await run(['--platform', 'reference', '--adapter', reference, ...withFields, ...withStyles, '--implementation-version', '9.9.9'])
@@ -249,34 +251,55 @@ test('field parity: a matching snapshot passes, and a renamed field fails its ow
   }
 })
 
-test('stylesheet pin: one changed byte fails, a missing file fails, and a version string is no pin (review C4)', async () => {
+test('stylesheet pin: the served CSS must be styles/salt.css byte for byte, from a file or a URL (review P1)', async () => {
   const dir = scratch()
+  const bundle = readFileSync(path.join(pkg, 'styles', 'salt.css'))
+  const server = createServer((req, res) => {
+    if (req.url === '/salt.css') { res.writeHead(200, { 'content-type': 'text/css' }); res.end(bundle); return }
+    res.writeHead(404); res.end()
+  })
+  await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve))
+  const origin = `http://127.0.0.1:${server.address().port}`
   try {
-    cpSync(path.join(pkg, 'styles'), dir, { recursive: true })
-    const file = path.join(dir, 'sections.css')
-    const bytes = readFileSync(file)
-    bytes[100] = bytes[100] === 0x20 ? 0x09 : 0x20
-    writeFileSync(file, bytes)
     const base = ['--platform', 'reference', '--adapter', reference, '--sections', 'faq', '--partial', ...withFields]
-    const r = await run([...base, '--styles', dir])
+    const served = path.join(dir, 'app.css')
+    const changed = Buffer.from(bundle)
+    changed[100] = changed[100] === 0x20 ? 0x09 : 0x20
+    writeFileSync(served, changed)
+    const r = await run([...base, '--styles', served])
     assert.equal(r.code, 1, r.out)
-    assert.equal(r.report.stylesheets.ok, false)
-    assert.deepEqual(r.report.stylesheets.files.find((f) => f.file === 'sections.css'), { file: 'sections.css', status: 'differs', firstDifferingByte: 100 })
-    assert.ok(r.report.stylesheets.files.filter((f) => f.file !== 'sections.css').every((f) => f.status === 'identical'))
+    assert.deepEqual(r.report.stylesheets, { served, bundle: 'styles/salt.css', contract: version, ok: false, status: 'differs', firstDifferingByte: 100 })
     assert.equal(section(r.report, 'faq').stylesheets.status, 'fail')
-    assert.match(r.out, /- sections\.css: differs from byte 100/)
+    assert.match(r.out, /against this contract's `styles\/salt\.css` \(.+\): differs from byte 100\./)
 
-    rmSync(path.join(dir, 'views.css'))
-    const gone = await run([...base, '--styles', dir])
-    assert.equal(gone.report.stylesheets.files.find((f) => f.file === 'views.css').status, 'missing')
+    writeFileSync(served, bundle)
+    const same = await run([...base, '--styles', served])
+    assert.equal(same.report.stylesheets.status, 'identical')
+    assert.equal(section(same.report, 'faq').stylesheets.status, 'pass')
 
+    const gone = await run([...base, '--styles', path.join(dir, 'nothing.css')])
+    assert.equal(gone.report.stylesheets.status, 'missing')
     assert.equal(gone.report.stylesheets.ok, false)
+
+    // The package's own bundle or styles/, however named, is no pin: refused.
+    for (const own of [path.join(pkg, 'styles', 'salt.css'), path.join(pkg, 'styles'), path.join(pkg, 'styles', 'sections.css'), path.join(pkg, 'styles', '..', 'styles', 'salt.css')]) {
+      const refused = await run([...base, '--styles', own])
+      assert.equal(refused.code, 2, `${own}: ${refused.out}`)
+      assert.match(refused.out, /is this package's own styles\//)
+    }
+
+    const fetched = await run([...base, '--styles-url', `${origin}/salt.css`])
+    assert.equal(fetched.report.stylesheets.status, 'identical', fetched.out)
+    assert.equal(section(fetched.report, 'faq').stylesheets.status, 'pass')
+    const notFound = await run([...base, '--styles-url', `${origin}/other.css`])
+    assert.deepEqual([notFound.report.stylesheets.status, notFound.report.stylesheets.error], ['unreachable', 'answered 404'])
 
     // A version the caller states proves nothing about the bytes served, so it is no pin.
     const stated = await run([...base, '--styles-version', version])
     assert.equal(stated.code, 2, stated.out)
     assert.match(stated.out, /unknown argument --styles-version/)
   } finally {
+    server.close()
     rmSync(dir, { recursive: true, force: true })
   }
 })
@@ -321,6 +344,7 @@ test('arguments: unknown, empty, duplicated or contradictory flags are refused w
   assert.throws(() => parseConformanceArguments([...ok, '--partial', '--sections', '--jobs']), /not the flag --jobs/)
   assert.throws(() => parseConformanceArguments([...ok, '--endpoint', 'http://x']), /cannot be used together/)
   assert.throws(() => parseConformanceArguments([...ok, '--styles-version', '1']), /unknown argument --styles-version/)
+  assert.throws(() => parseConformanceArguments([...ok, '--styles', 'a.css', '--styles-url', 'http://x/a.css']), /cannot be used together/)
   assert.throws(() => parseConformanceArguments(['--adapter', 'true']), /--platform/)
   assert.throws(() => parseConformanceArguments(['--platform', 'x']), /--adapter <command> or --endpoint <url>/)
   assert.throws(() => parseConformanceArguments([...ok, '--jobs', '0']), /at least 1/)

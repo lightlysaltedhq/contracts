@@ -237,6 +237,15 @@ The set reads only the custom properties `contract/token-layer.json` names, whic
 implementation's runtime emits (its generated `theme.css`). The files carry long comments: serve
 them as one minified bundle, never as six render-blocking requests.
 
+**The bundle.** `styles/salt.css` (`@lightlysaltedhq/salt-contract/styles/salt.css`) is that bundle:
+the six files in the load order above, minified with every comment stripped, built by
+`scripts/build_salt_bundle.mjs` with the lockfile's esbuild, so the same sources always give the
+same bytes. Both platforms serve this file byte for byte, and the conformance runner's stylesheet
+pin checks that they do. `npm run salt-stylesheets` fails when the committed bundle is not what the
+sources build; rebuild it with `node scripts/build_salt_bundle.mjs` after any change to `styles/`.
+The bundle keeps `base.css`'s `@layer base`, so it is served as the set-ups above serve `base.css`:
+after Tailwind v4, or first with no Tailwind.
+
 ## Fixtures
 
 Modelled on GOV.UK Frontend's component fixtures: one directory per section, and in it a pair of
@@ -347,9 +356,10 @@ pins. For every section it ships it checks four things:
   since shipped fields make it shipped.
 - **Classes.** Every `salt-*` class in the adapter's output is one an element in `contract/markup`
   carries.
-- **Stylesheet pin.** The stylesheets in the directory the implementation serves them from are
-  byte-identical to `styles/`. There is no version form: a version the caller states says nothing
-  of the bytes served.
+- **Stylesheet pin.** The CSS file the implementation serves (or fetches from a running site) is
+  byte-identical to `styles/salt.css`. The package's own `styles/` is refused, since comparing it
+  with itself proves nothing, and there is no version form: a version the caller states says
+  nothing of the bytes served.
 
 An implementation conforms only when all four checks ran for every section it ships and all pass
 (SC-017). A section passes only when all four hold for it; one whose checks that ran all passed,
@@ -359,25 +369,25 @@ its report says "partial, not conforming": `ok` is false, `partial` is true and 
 must ship at least one section, and a section declared not shipped (`--not-shipped`) must stay
 out of the output: a class only its markup draws, written by another section, fails the run.
 
-Salt for Next.js re-exports the stylesheets, so it passes the directory its build resolves them
-from:
+Salt for Next.js passes the CSS file its build emits for the Salt layer, whose hashed name its
+build reports (or `--styles-url` with that file's URL on a preview of the site):
 
 ```sh
 npx salt-conformance --platform nextjs --implementation-version "$VERSION" \
   --adapter "node scripts/salt-adapter.mjs" \
   --payload-snapshot src/blocks.snapshot.json --fields-options src/blocks.options.json \
-  --styles "$(dirname "$(node -p 'require.resolve("@lightlysaltedhq/salt-contract/styles/base.css")')")" \
+  --styles "$SALT_CSS" \
   --out conformance
 ```
 
 or `node node_modules/@lightlysaltedhq/salt-contract/conformance.mjs` with the same flags. Salt for
-WordPress passes its snapshot and the stylesheets in its built theme, the files it enqueues:
+WordPress passes its snapshot and the file its theme enqueues:
 
 ```sh
 npx salt-conformance --platform wordpress --implementation-version "$VERSION" \
   --adapter "php bin/salt-adapter.php" \
   --acf-snapshot acf/sections.json --fields-options acf/sections.options.json \
-  --styles build/theme/assets/salt \
+  --styles build/theme/assets/salt.css \
   --out conformance
 ```
 
@@ -389,7 +399,8 @@ npx salt-conformance --platform wordpress --implementation-version "$VERSION" \
 | `--payload-snapshot <file>` | The committed `payloadSnapshot(options)`. |
 | `--acf-snapshot <file>` | Or the committed `acfSnapshot(options)`. |
 | `--fields-options <file>` | The JSON options the snapshot was generated with (`{}` when left out). |
-| `--styles <dir>` | The directory holding the stylesheets served, compared file by file with `styles/`. |
+| `--styles <file>` | The CSS file the implementation serves, compared byte for byte with `styles/salt.css`. |
+| `--styles-url <url>` | Or that file's URL on a running site, fetched and compared the same way. |
 | `--sections <id,…>` | Run only these sections. Needs `--partial`. |
 | `--not-shipped <id,…>` | Sections the implementation does not ship: reported "not shipped", not failed. |
 | `--implementation-version <v>` | The implementation's own version, for the report. |
@@ -416,7 +427,7 @@ report).
   "summary": { "pass": 15, "fail": 1, "incomplete": 0, "notShipped": 1 },
   "fields": { "platform": "payload", "snapshot": "…", "options": "…", "problems": [] },
   "problems": [],
-  "stylesheets": { "dir": "…", "contract": "0.1.0", "ok": true, "files": [{ "file": "base.css", "status": "identical" }] },
+  "stylesheets": { "served": "…", "bundle": "styles/salt.css", "contract": "0.1.0", "ok": true, "status": "identical" },
   "sections": [
     {
       "id": "hero",
@@ -441,8 +452,8 @@ is `pass`, `fail` or `not run`. A failure's `kind` is `mismatch` (with
 side is `null`) or `adapter` (with `error` and `stderr`). `fields.problems` at the top holds what is
 about the whole snapshot (not JSON, sections out of order, formatting); a section's own are under
 it. `problems` holds what fails the run as a whole (a section declared not shipped whose classes
-the output uses). `stylesheets.files` lists each file as `identical`, `differs` (with
-`firstDifferingByte`) or `missing`. `conformance.md` is the same report for a person: a table of
+the output uses). `stylesheets.status` is `identical`, `differs` (with `firstDifferingByte`),
+`missing` (no such file) or `unreachable` (the URL failed, with `error`). `conformance.md` is the same report for a person: a table of
 sections, then each failure on a line.
 
 The runner is also importable: `runConformance(options)` returns the report, `renderMarkdown(report)`

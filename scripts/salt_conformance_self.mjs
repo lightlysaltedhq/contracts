@@ -3,9 +3,10 @@
 // reference adapter over every fixture, with all four checks run as SC-017 requires. Field parity
 // needs a committed snapshot, which the contract has none of, so this writes the Payload and the
 // ACF snapshot the emitters give for one set of options to a temporary directory and runs the
-// runner once for each platform. Both runs must conform.
+// runner once for each platform. The stylesheet it pins is a copy of styles/salt.css, standing for
+// the file an implementation serves: the runner refuses the package's own. Both runs must conform.
 import { execFileSync } from 'node:child_process'
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { copyFileSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -26,9 +27,10 @@ try {
   writeFileSync(path.join(dir, 'options.json'), JSON.stringify(options))
   writeFileSync(path.join(dir, 'payload.json'), payloadSnapshot(options))
   writeFileSync(path.join(dir, 'acf.json'), acfSnapshot(options))
+  copyFileSync(path.join(pkg, 'styles', 'salt.css'), path.join(dir, 'served.css'))
   for (const platform of ['payload', 'acf']) {
     const args = [runner, '--platform', `reference-${platform}`, '--adapter', adapter, `--${platform}-snapshot`, path.join(dir, `${platform}.json`),
-      '--fields-options', path.join(dir, 'options.json'), '--styles', path.join(pkg, 'styles'), '--out', path.join(dir, platform)]
+      '--fields-options', path.join(dir, 'options.json'), '--styles', path.join(dir, 'served.css'), '--out', path.join(dir, platform)]
     try {
       execFileSync(process.execPath, args, { stdio: ['ignore', 'pipe', 'inherit'] })
       const { summary } = JSON.parse(readFileSync(path.join(dir, platform, 'conformance.json'), 'utf8'))
