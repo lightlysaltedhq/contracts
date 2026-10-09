@@ -484,3 +484,12 @@ test('Y5: sources sharing a post type or taxonomy are offered once, so one taxon
   assert.deepEqual([categories.type, categories.taxonomy], ['taxonomy', 'service_category'])
   assert.deepEqual(field(query.sub_fields, 'items').post_type, ['service'])
 })
+
+test('Y10: a repeater\'s button keeps an acronym as given', () => {
+  const [faqs, cards] = probed([
+    { name: 'faqs', type: 'list', label: 'FAQs', itemLabel: 'FAQ', fields: [{ name: 'q', type: 'text', label: 'Q' }] },
+    { name: 'cards', type: 'list', label: 'Cards', itemLabel: 'Card', fields: [{ name: 'title', type: 'text', label: 'Title' }] },
+  ])
+  assert.equal(faqs.button_label, 'Add FAQ')
+  assert.equal(cards.button_label, 'Add card')
+})

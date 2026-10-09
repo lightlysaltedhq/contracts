@@ -190,7 +190,11 @@ function convertField(f, ctx) {
       out.layout = 'block'
       if (f.min !== undefined) out.min = f.min
       if (f.max !== undefined) out.max = f.max
-      if (f.itemLabel) out.button_label = `Add ${f.itemLabel.charAt(0).toLowerCase()}${f.itemLabel.slice(1)}`
+      if (f.itemLabel) {
+        // Lower-cased into the sentence, unless it is an acronym (FAQ), which stays as given.
+        const word = /^.[A-Z]/.test(f.itemLabel) ? f.itemLabel : f.itemLabel.charAt(0).toLowerCase() + f.itemLabel.slice(1)
+        out.button_label = `Add ${word}`
+      }
       if (f.rowLabel) {
         // A link names its row by its label (schema: rowLabel), so the row collapses to that.
         const child = f.fields.find((c) => c.name === f.rowLabel)
