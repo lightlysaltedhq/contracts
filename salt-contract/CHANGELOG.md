@@ -6,9 +6,9 @@ Salted's decision log for Product Salt.
 
 ## Unreleased (0.1.0, drafting)
 
-- The owner's rulings of 09/10/2026 (SC-007, SC-008) are applied, and no open question remains;
+- The owner's rulings of 09/10/2026 (SC-007, SC-008, SC-012) are applied, and no open question remains;
   the markup schema drops the `open-question` note topic.
-  - - Every id the system draws is `<owner>__<part>` (SC-012). The owner is the component, section
+  - Every id the system draws is `<owner>__<part>` (SC-012). The owner is the component, section
     or view id as `sections.json` names it, or `<anchor>`, the section's settled id, for ids inside
     a section. Parts are numbered from 1: `site-header__submenu-2`, `<anchor>__heading`,
     `<anchor>__tab-2`, `service__benefits-heading`. An anchor is slugged to lower-case letters,
@@ -41,8 +41,8 @@ Salted's decision log for Product Salt.
   profile's name as text.
 - `contract/sections.json` declares component variants (card's `style`), and the gate refuses
   component markup that describes a variant or option its entry does not declare, a vocabulary
-  variant that offers a value twice or defaults outside its options, an icon name `icons` does not
-  list (in attributes or `dataAttributes`), and an icon field whose default is not a content name,
+  variant that offers a value more than once or defaults outside its options, an icon name `icons` does not
+  list (in attributes or `dataAttributes`), an icon field whose default is not a content name,
   and any id the markup draws or points at (every id-referencing attribute, `href` fragments
   included) that is not a landmark id, `<anchor>` (only inside sections), or `<owner>__<part>`.
 - The markup records the custom properties the shared stylesheets read (the case study's aside rows
