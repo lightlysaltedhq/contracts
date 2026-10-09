@@ -65,3 +65,5 @@ jobs:
         run: npm run salt-contract
       - name: The shared stylesheets' gate
         run: npm run salt-stylesheets
+      - name: Every Salt section's fixtures, against its fields and markup, and the normaliser
+        run: npm run salt-fixtures

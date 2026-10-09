@@ -6,6 +6,25 @@ Salted's decision log for Product Salt.
 
 ## Unreleased (0.1.0, drafting)
 
+- Fixtures (`fixtures/<section>/<case>.json` and `.html`, `./fixtures/*`, ID-3604): 73 cases over
+  the 17 sections. Each pairs a section's stored field values and its page context with the
+  default HTML both platforms must render. Together they cover every variant option, the zero
+  state, the inverse band and every value of the shared tone, dark tone, spacing and width
+  settings. Every case sets its anchor, so every drawn id is known (SC-012), and its context is a
+  page that could exist (track numbers, the single h1, priority media, collapse).
+- `normalise.mjs` (`./normalise`): the one normaliser both platforms compare through. It folds
+  attribute and class order, white space at block boundaries (between inline elements any run is
+  one space and counts), boolean-attribute and character-reference forms, comments, the upload host
+  in `src` and `srcset`, and icon artwork (SC-007). It never touches ids.
+- The README defines the fixture input and the adapter protocol the conformance runner calls: a
+  case's JSON on stdin and the section's HTML on stdout, or a local endpoint.
+- `npm run salt-fixtures` (in `verify`, CI and the release workflow) proves coverage, every input
+  against `contract/fields`, every expected HTML against `contract/markup` (element order, classes,
+  required and undeclared attributes, conditional attributes and elements the case switches on or
+  off, data attributes, headings and `aria-labelledby`, ids, and SC-007's image rules), every case
+  context, and that the normaliser is idempotent and no one-attribute change survives it.
+- `markup/media-text.json` counts alternating rows from 0; `markup/tabs.json` draws the tab set's
+  `aria-label` only when it is named.
 - The owner's rulings of 09/10/2026 (SC-007, SC-008, SC-012 to SC-014) are applied, and no open
   question remains; the markup schema drops the `open-question` note topic.
   - Every id the system draws is `<owner>__<part>` (SC-012). The owner is the component, section or

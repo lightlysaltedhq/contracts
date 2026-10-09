@@ -16,10 +16,11 @@
     "verify:foundations-pack": "bash scripts/check_foundations_pack.sh",
     "verify:type-tokens-bundle": "esbuild foundations/scripts/type_tokens.mjs --bundle --platform=neutral --format=esm --log-level=warning --outfile=/dev/null && esbuild foundations/scripts/layout_roles.mjs --bundle --platform=neutral --format=esm --log-level=warning --outfile=/dev/null",
     "verify:actions-pinned": "bash scripts/check_actions_pinned.sh",
-    "verify": "npm run test:scripts && npm run verify:actions-pinned && npm run foundations && npm run verify:foundations-pack && npm run verify:type-tokens-bundle && npm run salt-contract && npm run salt-stylesheets",
+    "verify": "npm run test:scripts && npm run verify:actions-pinned && npm run foundations && npm run verify:foundations-pack && npm run verify:type-tokens-bundle && npm run salt-contract && npm run salt-stylesheets && npm run salt-fixtures",
     "test:scripts": "node --test scripts/*.test.mjs",
     "salt-contract": "node scripts/check_salt_contract.mjs",
-    "salt-stylesheets": "node scripts/check_salt_stylesheets.mjs"
+    "salt-stylesheets": "node scripts/check_salt_stylesheets.mjs",
+    "salt-fixtures": "node scripts/check_salt_fixtures.mjs"
   },
   "devDependencies": {
     "ajv": "8.17.1",

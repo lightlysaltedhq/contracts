@@ -21,6 +21,7 @@
     "schema",
     "styles",
     "fixtures",
+    "normalise.mjs",
     "emit",
     "README.md",
     "CHANGELOG.md",
@@ -39,6 +40,8 @@
     "./styles/*": "./styles/*",
     "./token-layer": "./contract/token-layer.json",
     "./schema/token-layer": "./schema/token-layer.schema.json",
+    "./normalise": "./normalise.mjs",
+    "./fixtures/*": "./fixtures/*",
     "./package.json": "./package.json"
   },
   "keywords": [
