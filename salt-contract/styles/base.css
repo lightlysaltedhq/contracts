@@ -8,61 +8,72 @@
  * with no rule of its own renders at whatever the host gives it, and under Tailwind's preflight
  * that is the body's size and weight.
  *
- * Scoped to the three landmarks the page skeleton draws (`contract/markup/page.json`, the rule
- * `section#landmarks`): `main#main`, `header.salt-header` and `footer.salt-footer`. A heading a host
- * theme or plugin draws outside them is left alone. Inside them the subject is the bare element
- * with the scope in `:where()`, so each rule is (0,0,1):
- *
- * - it beats Tailwind's preflight, which is (0,0,1) too and either layered (v4, so it loses to any
- *   unlayered rule) or earlier in the source (v3, imported before this file);
- * - every component rule in the shared set names a class and so outranks it, which is what lets a
- *   card title stay `heading-4` whatever its level;
- * - a host's own `h2 { … }` after this file still wins on source order.
- *
  * The mapping is design-foundations' element convention (`textRoles.elementConvention`): h1 to h3
- * take heading-1 to heading-3, h4 to h6 take heading-4, and `p` takes body. Body is set on the
- * landmarks and inherited rather than set on `p`, so a paragraph inside a component that sets its
- * own role on a container takes the container's; a `p` rule would put it back at body size. The
- * landmarks rather than `<body>`, so a host's body type is untouched outside them. Unlayered, like
- * every stylesheet here, because the shared set's gate reads `@media` and `@keyframes` only.
+ * take heading-1 to heading-3, h4 to h6 take heading-4, and `p` takes body. Body is set on `body`
+ * and inherited rather than set on `p`, so a paragraph inside a component that sets its own role on
+ * a container takes the container's; a `p` rule would put it back at body size.
+ *
+ * ── Why a cascade layer, and why `base` ─────────────────────────────────────────
+ *
+ * A layered rule loses to every unlayered one, whatever its specificity, so this is the weakest
+ * styling on the page by construction: every component rule in the shared set, every rule a host
+ * theme writes and every utility class outranks it. Unlayered, these rules beat Tailwind v4's
+ * utilities, and `<h2 class="text-sm">` in a section rendered at heading-2.
+ *
+ * - Tailwind v4 (both Salt implementations): `@import 'tailwindcss'` declares `theme, base,
+ *   components, utilities`, so these rules join its `base` layer, after preflight when this file is
+ *   imported after Tailwind. They beat the preflight that flattens headings on source order, and
+ *   lose to every utility.
+ * - Tailwind v3: its output is unlayered, so a host serving this file beside v3's would have its
+ *   preflight win. Import this file into the stylesheet v3 processes, where `@layer base` is v3's
+ *   own directive and places these rules after its preflight.
+ * - No Tailwind: `base` is the only layer, and these rules beat only the user agent's, which is
+ *   what a base is for.
+ *
+ * Headings are scoped to the page skeleton's landmarks (`contract/markup/page.json`, the rule
+ * `section#landmarks`), so a heading a plugin draws outside Salt's markup keeps the host's size.
+ * Running text is not: it is inherited, and the skip link and the consent banner sit outside the
+ * landmarks, so its role is on `body`, where any host rule still outranks it.
  */
 
-:where(#main, .salt-header, .salt-footer) {
-  font-size: var(--text-body);
-  line-height: var(--text-body--line-height);
-  letter-spacing: var(--text-body--letter-spacing);
-  font-weight: var(--text-body--font-weight);
-  font-family: var(--text-body--font-family);
-}
+@layer base {
+  body {
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+    letter-spacing: var(--text-body--letter-spacing);
+    font-weight: var(--text-body--font-weight);
+    font-family: var(--text-body--font-family);
+  }
 
-:where(#main, .salt-header, .salt-footer) h1 {
-  font-size: var(--text-heading-1);
-  line-height: var(--text-heading-1--line-height);
-  letter-spacing: var(--text-heading-1--letter-spacing);
-  font-weight: var(--text-heading-1--font-weight);
-  font-family: var(--text-heading-1--font-family);
-}
+  :where(#main, .salt-header, .salt-footer) h1 {
+    font-size: var(--text-heading-1);
+    line-height: var(--text-heading-1--line-height);
+    letter-spacing: var(--text-heading-1--letter-spacing);
+    font-weight: var(--text-heading-1--font-weight);
+    font-family: var(--text-heading-1--font-family);
+  }
 
-:where(#main, .salt-header, .salt-footer) h2 {
-  font-size: var(--text-heading-2);
-  line-height: var(--text-heading-2--line-height);
-  letter-spacing: var(--text-heading-2--letter-spacing);
-  font-weight: var(--text-heading-2--font-weight);
-  font-family: var(--text-heading-2--font-family);
-}
+  :where(#main, .salt-header, .salt-footer) h2 {
+    font-size: var(--text-heading-2);
+    line-height: var(--text-heading-2--line-height);
+    letter-spacing: var(--text-heading-2--letter-spacing);
+    font-weight: var(--text-heading-2--font-weight);
+    font-family: var(--text-heading-2--font-family);
+  }
 
-:where(#main, .salt-header, .salt-footer) h3 {
-  font-size: var(--text-heading-3);
-  line-height: var(--text-heading-3--line-height);
-  letter-spacing: var(--text-heading-3--letter-spacing);
-  font-weight: var(--text-heading-3--font-weight);
-  font-family: var(--text-heading-3--font-family);
-}
+  :where(#main, .salt-header, .salt-footer) h3 {
+    font-size: var(--text-heading-3);
+    line-height: var(--text-heading-3--line-height);
+    letter-spacing: var(--text-heading-3--letter-spacing);
+    font-weight: var(--text-heading-3--font-weight);
+    font-family: var(--text-heading-3--font-family);
+  }
 
-:where(#main, .salt-header, .salt-footer) :is(h4, h5, h6) {
-  font-size: var(--text-heading-4);
-  line-height: var(--text-heading-4--line-height);
-  letter-spacing: var(--text-heading-4--letter-spacing);
-  font-weight: var(--text-heading-4--font-weight);
-  font-family: var(--text-heading-4--font-family);
+  :where(#main, .salt-header, .salt-footer) :is(h4, h5, h6) {
+    font-size: var(--text-heading-4);
+    line-height: var(--text-heading-4--line-height);
+    letter-spacing: var(--text-heading-4--letter-spacing);
+    font-weight: var(--text-heading-4--font-weight);
+    font-family: var(--text-heading-4--font-family);
+  }
 }

@@ -1446,13 +1446,13 @@ const ROLE_OWNER = new Map(
  * which an editor's document draws with no class; and inline code's proportion, excused by the contract
  * above. Any other such rule is refused (#198 review, F4): `.salt-nav a { … }` reaches a menu link
  * without naming its class, so the component contract could not see it take the link back to `body`.
- * And base.css, the element convention Salt for Next.js's `theme.css` applied in `@layer base`: each
- * at (0,0,1), so every component rule that names a class outranks it.
+ * And base.css, the element convention Salt for Next.js's `theme.css` applied in `@layer base`, in
+ * that layer here too, so every unlayered rule outranks it.
  */
 const BASE = ':where(#main, .salt-header, .salt-footer)'
 const CLASSLESS_SUBJECTS = new Set(
   ['.salt-card :is(h1, h2, h3, h4, h5, h6)', '.salt-hero__text > :is(h1, h2, h3, h4, h5, h6)', '.salt-rich-text blockquote', '.salt-rich-text code',
-    BASE, `${BASE} h1`, `${BASE} h2`, `${BASE} h3`, `${BASE} :is(h4, h5, h6)`].map(
+    'body', `${BASE} h1`, `${BASE} h2`, `${BASE} h3`, `${BASE} :is(h4, h5, h6)`].map(
     (selector) => normalise(selector),
   ),
 )
@@ -5743,8 +5743,10 @@ const sourceFindings = memoKey((file, text) => {
      `@keyframes` joined it on 06/10/2026 for the burger's morph (BD-207), and only because what a
      keyframe may declare is narrowed below to motion: a keyframe is a rule this parse reads, so its
      declarations are not hidden, but no contract expects to find a colour or a size in a `from`. */
-  /* `property` only so the refusal above is not reported twice. */
-  const AT_RULES = new Set(['media', 'keyframes', 'property'])
+  /* `property` only so the refusal above is not reported twice. `layer` only as base.css's one
+     `@layer base { … }` block, which is the base layer's whole point (checked below), and which every
+     contract reads like any other rule: `conditional()` does not count a layer. */
+  const AT_RULES = new Set(['media', 'keyframes', 'property', ...(file === 'base.css' ? ['layer'] : [])])
   for (const [index, text] of source.split('\n').entries()) {
     for (const match of text.matchAll(/@([\w-]+)/g)) {
       const name = (match[1] ?? '').toLowerCase()
@@ -5765,6 +5767,17 @@ const sourceFindings = memoKey((file, text) => {
       `${file}:${String(line + 1)} carries a backslash outside a string. A CSS escape spells a selector or a ` +
         'property in a way no contract here reads, so it could satisfy or dodge one unseen. Write the name plainly.',
     )
+  }
+  /* base.css is one `@layer base` block and nothing else: a rule outside it would be unlayered and
+     outrank Tailwind's utilities and a host's own rules, which is what the layer exists to stop. */
+  if (file === 'base.css') {
+    const preludes = [...source.matchAll(/@layer\b([^{;]*)([{;])/gi)].map((m) => `${m[1].trim()}${m[2]}`)
+    const outside = parse(source).rules.filter((rule) => !rule.at.some((prelude) => /^@layer\b/i.test(prelude)))
+    if (preludes.length !== 1 || preludes[0] !== 'base{') {
+      out.push(`base.css holds ${preludes.length === 0 ? 'no `@layer base` block' : preludes.map((p) => `\`@layer ${p.slice(0, -1)}\``).join(', ')}; it is one \`@layer base { … }\` block`)
+    } else if (outside.length > 0) {
+      out.push(`base.css writes \`${outside[0].selectors.join(', ')}\` outside its \`@layer base\` block, where it outranks every utility and host rule`)
+    }
   }
   return out
 })

@@ -2267,6 +2267,12 @@ describe('the parse is whole, across every stylesheet in styles/', () => {
     ['a rule nested inside another, which the parse cannot read', [['blocks.css', appending('.salt-note {\n  .salt-x {\n    margin: 0;\n  }\n}')]], 'The parse is dropping rules'],
     ['a declaration written straight into a media block', [['blocks.css', appending('@media (min-width: 48rem) {\n  margin: 0;\n}')]], "directly in an at-rule's block"],
     ['a new stylesheet that drops a focus outline, which a contract sweeping every file reads', [addFile('extra.css', '.salt-button {\n  outline: none;\n}\n')], 'extra.css .salt-button outline: declared outside the focus rules'],
+    /* base.css is one `@layer base` block (T1): unlayered, its headings beat Tailwind v4's utilities. */
+    ['base.css loses its layer, so its rules outrank every utility', [['base.css', (css) => css.replace('@layer base {', '@media all {')]], 'base.css holds no `@layer base` block'],
+    ['base.css writes a rule outside its layer', [['base.css', appending(':where(#main) h2 {\n  font-size: var(--text-heading-2);\n}')]], 'base.css writes `:where(#main) h2` outside its `@layer base` block'],
+    ['base.css names another layer', [['base.css', (css) => css.replace('@layer base {', '@layer salt-base {')]], 'base.css holds `@layer salt-base`'],
+    ['base.css declares a layer order as well', [['base.css', (css) => `@layer reset, base;\n${css}`]], 'base.css holds `@layer reset, base`, `@layer base`'],
+    ['another stylesheet uses a layer', [['views.css', (css) => `@layer base {\n${css}\n}`]], 'views.css:1 uses `@layer`, an at-rule this gate does not read'],
   ])('fails when %s', (_case, edits, message) => {
     const { code, output } = run(...edits)
     expect(output).toContain(message)
