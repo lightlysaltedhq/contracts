@@ -3,12 +3,20 @@
  *
  * SC-007 (09/10/2026) fixed these views' class vocabulary as the one Salt for Next.js's example
  * app writes (`salt-post__*`, `salt-archive__*`, `salt-service__*`, `salt-search__*`), styled by the
- * shared stylesheets. These rules are that app's, moved here unchanged from its `site.css` on
- * 09/10/2026. The search view's body has no rule of its own: its form is `primitives.css`'s and its
- * results are a listing section's.
+ * shared stylesheets. These rules are that app's `site.css` of 09/10/2026, with what was left out
+ * or changed, and why:
  *
- * A file of its own rather than more of `sections.css`, which is the section band and nothing
- * else, and which stays byte-identical to the copy Salt for Next.js re-exports.
+ * - `.salt-blog__list`'s margin: the index's own class, which SC-007 does not adopt.
+ * - The post's `salt-post__author*` and `__portrait` rules: SC-008 makes that block the shared
+ *   author-box, so the same declarations are on `salt-author-box__*` below.
+ * - The current breadcrumb's bold weight: no rule sets a state's weight (the owner's ruling of
+ *   28/09/2026, which the stylesheet gate holds).
+ * - The fill rule for each framed image, which Salt for Next.js wrote inline (SC-011), is added.
+ *
+ * The search view's body has no rule of its own: its form is `primitives.css`'s and its results are
+ * a listing section's.
+ *
+ * A file of its own rather than more of `sections.css`, which is the section band and nothing else.
  *
  * Each value is a token or a stated floor, and no colour is written down.
  */
@@ -20,6 +28,9 @@
  * reserves its space before it loads and the page does not shift under the reader.
  */
 .salt-post__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
   margin-block-start: 0;
   color: var(--color-ink-muted);
 }
@@ -68,12 +79,6 @@
 
 .salt-post__category {
   margin-block: 1rem 0;
-}
-
-.salt-post__meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.25rem 1rem;
 }
 
 .salt-post__footer {
@@ -160,6 +165,11 @@
 
 .salt-service__price-label::after {
   content: ':';
+}
+
+/* The service's related cards, which draw themselves with the showcase's classes. */
+.salt-related__list {
+  margin-block: 2rem;
 }
 
 /*

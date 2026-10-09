@@ -5977,7 +5977,7 @@ export function checkStylesheets(files) {
     ...['salt-archive__portrait', 'salt-archive__profile', 'salt-archive__strapline', 'salt-post__adjacent',
       'salt-post__adjacent-label', 'salt-post__breadcrumb', 'salt-post__byline', 'salt-post__category',
       'salt-post__footer', 'salt-post__media', 'salt-post__meta', 'salt-post__tags', 'salt-service__intro', 'salt-service__price-label',
-      'salt-service__summary'].map((name) => ({ class: name, pending: true, reason: 'SC-007 view body, pending its markup' })),
+      'salt-service__summary', 'salt-related__list'].map((name) => ({ class: name, pending: true, reason: 'SC-007 view body, pending its markup' })),
   ]
   const SKIP = new Set(['platforms', 'rules', 'notes', 'hooks', 'omitted'])
   const onElements = new Set()
