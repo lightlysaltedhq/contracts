@@ -546,3 +546,13 @@ test('V2: a dependant stays when its clause on a field left out still holds with
   assert.deepEqual(b.fields.map((f) => f.name), ['source', 'note'])
   assert.equal(shows(field(b.fields, 'note'), { source: 'inline' }), true)
 })
+
+test('V4: a query whose source select is left out goes with it', () => {
+  const extra = [
+    { name: 'audience', type: 'select', label: 'Audience', options: [{ value: 'posts', label: 'Posts' }, { value: 'team', label: 'Team' }], condition: { field: 'source', equals: 'posts' } },
+    { name: 'people', type: 'collection-query', label: 'People', sourceField: 'audience' },
+  ]
+  // team installed, posts not: source offers inline only, so audience is unreachable and goes.
+  const [b] = toPayloadBlocks({ contract: probe(sourced(extra)), sources: { team: {} } })
+  assert.deepEqual(b.fields.map((f) => f.name), ['source'])
+})

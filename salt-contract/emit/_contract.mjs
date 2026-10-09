@@ -177,7 +177,8 @@ export const sourceSelectsOf = (fields) =>
  * have none. Left out: a collection-query read from a select that offers no
  * installed source, and a field whose condition names a source select only by values that select
  * no longer offers (the carousel's showTags with no source that has categories), and any field
- * whose condition on a field left out cannot hold with that field absent. A select left with no option is unmetSources' to report.
+ * whose condition on a field left out cannot hold with that field absent, or whose source select is
+ * left out. A select left with no option is unmetSources' to report.
  * At every depth: a list or group's own fields are fitted the same way.
  */
 export function withinSources(fields, installed) {
@@ -204,7 +205,8 @@ export function withinSources(fields, installed) {
   for (let grew = true; grew;) {
     grew = false
     for (const f of narrowed) {
-      if (!gone.has(f.name) && hidden(f)) { gone.add(f.name); grew = true }
+      // A query whose source select is gone has nothing to read its source from.
+      if (!gone.has(f.name) && (hidden(f) || (f.sourceField && gone.has(f.sourceField)))) { gone.add(f.name); grew = true }
     }
   }
   return narrowed.filter((f) => !gone.has(f.name))
