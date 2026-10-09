@@ -6,6 +6,19 @@ Salted's decision log for Product Salt.
 
 ## Unreleased (0.1.0, drafting)
 
+- The conformance runner (ID-3608), `conformance.mjs` (`./conformance`, bin `salt-conformance`),
+  which each implementation points at itself in its own CI. Per section it sends every fixture case
+  to the implementation's adapter (a command or a local endpoint), normalises both sides and names
+  the case and the first differing node by path; checks the implementation's Payload or ACF field
+  snapshot with the emitters' own drift checks, filed per section; checks every `salt-*` class it
+  writes against the markup's vocabulary; and checks its stylesheets are byte-identical to
+  `styles/`, in the directory the implementation serves them from. An implementation conforms only
+  when all four checks ran for every section it ships and all pass (SC-017); a run that leaves a
+  section or a check out needs `--partial`, which is reported as partial, not conforming, and exits
+  1. It writes `conformance.json` (format `salt-conformance/1`, the parity matrix's input) and
+  `conformance.md`, and exits 1 on any mismatch. `--not-shipped` reports a section as not shipped
+  rather than failed. `npm run salt-conformance` (in `verify`, CI and the release workflow) runs it
+  against the reference adapter with both emitters' snapshots, which must conform.
 - Image sizes (SC-016): `contract/image-sizes.json` (`./image-sizes`, schema `./schema/image-sizes`)
   fixes each image slot's default `sizes`, per band and per card column count, the candidate widths
   and the rule that picks them, the srcset capped at the upload's intrinsic width (listed itself

@@ -69,3 +69,5 @@ jobs:
         run: npm run salt-extensions
       - name: Every Salt section's fixtures, against its fields and markup, and the normaliser
         run: npm run salt-fixtures
+      - name: The conformance runner, against the reference adapter over every fixture
+        run: npm run salt-conformance
