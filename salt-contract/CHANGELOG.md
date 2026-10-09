@@ -6,6 +6,32 @@ Salted's decision log for Product Salt.
 
 ## Unreleased (0.1.0, drafting)
 
+- The owner's rulings of 09/10/2026 (SC-007, SC-008) are applied, and no open question remains;
+  the markup schema drops the `open-question` note topic.
+  - An id an editor set is never changed by a generated one. `section#anchors` settles ids at
+    render in three steps: the reserved document ids, then editors' anchors (one that equals a
+    reserved id takes the suffix, SC-008), then generated ids such as `<section id>-heading`, the
+    header's, form and tab ids. A suffix counts up until the id is unique on the page, so `main`
+    beside an explicit `main-2` renders `main-3`; it is applied at render and never stored.
+  - The post, service, archive and search view bodies are fixed as Salt for Next.js's example app
+    writes them (`salt-post__*`, `salt-service__*`, `salt-related`, `salt-archive__*`,
+    `salt-search__results`). The post's author is the shared `author-box` component, and Salt for
+    Next.js owes the rename (SC-008).
+  - Locations' open-now status carries `data-hours`, `data-timezone` and `data-labels` for a script
+    that recomputes it on load.
+  - An image is one `img` with `srcset`, `sizes`, `width` and `height`, never `picture`.
+  - `contract/sections.json` lists the icon names both platforms draw under `icons`, split into
+    content and chrome. A platform may draw the shared `globe` glyph for a social mark it does not
+    ship, with the platform in the link's accessible name (SC-008).
+  - The section has no container element.
+  - Salt for WordPress's `owes` records each change, including its `picture_sources` opt-in and the
+    glyphs `chevron-right`, `external-link`, `moon` and `sun`.
+- The header fixes every id it draws: `site-navigation` and `salt-header-nav-submenu-<n>` in the
+  bar, with `-drawer` after each prefix in the drawer. A footer social link with no glyph carries
+  the profile's name as text.
+- `contract/sections.json` declares component variants (card's `style`), and the gate refuses
+  component markup that describes a variant or option its entry does not declare, an icon name
+  `icons` does not list, and an icon field whose default is not a content name.
 - The package exists, with its gate (`npm run salt-contract` at the repository root) and its
   release workflow on the `salt-contract-v*` tag prefix. It stays `private` until 1.0.0.
 - `RELEASE-POLICY.md`: one version for the package, what is major, minor and patch for every kind
