@@ -335,3 +335,16 @@ test('firstDifference reads past what the normaliser removes, and finds an extra
   assert.deepEqual(firstDifference('<div><p>a</p></div>', '<div><span>a</span></div>'),
     { path: 'div > p', kind: 'element', expected: '<p>', found: '<span>' })
 })
+
+test('firstDifference reads a class change on the first of several like siblings as that attribute (review C7)', () => {
+  const expected = readFileSync(path.join(pkg, 'fixtures', 'tabs', 'many-tabbed.html'), 'utf8')
+  const actual = expected.replace('<div class="salt-tabs__control">', '<div class="salt-tabs__choice">')
+  const d = firstDifference(expected, actual)
+  assert.equal(d.kind, 'attribute', JSON.stringify(d))
+  assert.equal(d.name, 'class')
+  assert.deepEqual([d.expected, d.found], ['salt-tabs__control', 'salt-tabs__choice'])
+  assert.match(d.path, / > div\.salt-tabs__list:nth-of-type\(1\) > div\.salt-tabs__control:nth-of-type\(1\)$/)
+  // A sibling really removed is still read as missing, when the next one matches exactly.
+  const removed = firstDifference('<ul><li class="a">1</li><li class="a">2</li></ul>', '<ul><li class="a">2</li></ul>')
+  assert.deepEqual(removed, { path: 'ul > li.a:nth-of-type(1)', kind: 'missing', expected: '<li class="a">', found: null })
+})

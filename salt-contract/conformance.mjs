@@ -142,7 +142,14 @@ async function runEndpoint(url, input, timeout) {
 
 const elementsOf = (el) => el.children.filter((c) => c.type === 'element')
 const classesOf = (el) => (el.attrs.find(([n]) => n === 'class')?.[1] ?? '').split(/[ \t\n\r\f]+/).filter(Boolean)
-const shapeOf = (node) => (node?.type === 'element' ? `${node.name}.${classesOf(node).join('.')}` : node?.type === 'text' ? '#text' : '')
+// A node, whole, as one string; memoised, since a sibling is compared with its neighbours too.
+const wholes = new WeakMap()
+const whole = (node) => {
+  if (node.type === 'text') return JSON.stringify(node.value)
+  if (!wholes.has(node)) wholes.set(node, `<${node.name}${JSON.stringify(node.attrs)}>${node.children.map(whole).join('')}</>`)
+  return wholes.get(node)
+}
+const same = (x, y) => x !== undefined && y !== undefined && whole(x) === whole(y)
 
 /** A step of a path: tag and classes, with :nth-of-type(n) when the parent has more than one of the tag. */
 function step(parent, el) {
@@ -189,13 +196,14 @@ export function firstDifference(expectedHtml, actualHtml) {
         if (x.value !== y.value) return { path: here(x, a), kind: 'text', expected: x.value, found: y.value }
         continue
       }
-      if (shapeOf(x) !== shapeOf(y)) {
-        // One node short or one too many, rather than every later sibling shifted.
-        if (shapeOf(y) === shapeOf(a.children[i + 1])) return { path: here(x, a), kind: 'missing', expected: show(x), found: null }
-        if (shapeOf(x) === shapeOf(b.children[i + 1])) return { path: here(y, b), kind: 'unexpected', expected: null, found: show(y) }
-        // The same element with other classes reads as its class attribute differing.
-        if (x.type !== 'element' || y.type !== 'element' || x.name !== y.name) return { path: here(x, a), kind: 'element', expected: show(x), found: show(y) }
-      }
+      if (same(x, y)) continue
+      // One node short or one too many, rather than every later sibling shifted: only when the
+      // next sibling is the node itself, whole, so a change to the first of several like siblings
+      // reads as that change.
+      if (same(y, a.children[i + 1])) return { path: here(x, a), kind: 'missing', expected: show(x), found: null }
+      if (same(x, b.children[i + 1])) return { path: here(y, b), kind: 'unexpected', expected: null, found: show(y) }
+      // The same element with other classes reads as its class attribute differing.
+      if (x.type !== 'element' || y.type !== 'element' || x.name !== y.name) return { path: here(x, a), kind: 'element', expected: show(x), found: show(y) }
       const found = walk(x, y, here(x, a))
       if (found) return found
     }
