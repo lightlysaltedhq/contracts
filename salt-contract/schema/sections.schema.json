@@ -195,6 +195,7 @@
           "type": "string"
         },
         "variants": {
+          "description": "On a section, the selects in its fields file that change its layout; the gate checks each against that select. On a component, which has no fields file, the styles its parent passes; the gate checks the component's markup describes only these options.",
           "type": "array",
           "items": {
             "$ref": "#/$defs/variant"

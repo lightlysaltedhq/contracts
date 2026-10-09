@@ -377,3 +377,19 @@ for (const [type, extra] of [['group', { fields: [{ name: 'a', type: 'text' }] }
     f['contract/fields/hero.json'].fields.push({ name: 'box', type, ...extra }, { name: 'x', type: 'text', condition: { field: 'box', filled: true } })
   }, new RegExp(`hero\\.x condition tests whether box is filled, a ${type} field; filled may not name a group, list, collection-query or link`))
 }
+
+// ── 08/10 review deferral: a component's variants are declared in sections.json ─────────────────
+// A component has no fields file, so its markup's variants are checked against its vocabulary entry.
+const componentVariant = (f) => {
+  f['contract/sections.json'].components[0].variants = [{ field: 'style', options: [{ value: 'solid', label: 'Solid' }, { value: 'ghost', label: 'Ghost' }], default: 'solid' }]
+}
+test('cross-file: component markup describing variant options its entry declares passes', () => {
+  const r = crossRun((f) => { componentVariant(f); f['contract/markup/button.json'].variants = [{ field: 'style', options: { solid: {}, ghost: {} } }] })
+  assert.equal(r.code, 0, r.out)
+})
+crossFail('component markup describing a variant option its entry does not offer', (f) => {
+  componentVariant(f); f['contract/markup/button.json'].variants = [{ field: 'style', options: { solid: {}, outline: {} } }]
+}, /button markup describes variant option outline, which its entry in sections\.json does not offer/)
+crossFail('component markup describing a variant its entry does not declare', (f) => {
+  f['contract/markup/button.json'].variants = [{ field: 'style', options: { solid: {} } }]
+}, /button markup describes a variant of style, which its entry in sections\.json does not declare/)

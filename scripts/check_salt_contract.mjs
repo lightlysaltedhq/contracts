@@ -106,7 +106,8 @@ for (const abs of contractFiles) {
 // checks: every section has a fields file and every entry a markup file, and no file describes
 // something the vocabulary lacks; each file's id is its file name; each variant in sections.json
 // is a select field with the same option values, labels and default; markup describes only
-// variant options the vocabulary offers, and uses only components that have markup; within a
+// variant options the vocabulary offers (a component, having no fields file, only variants its
+// own entry declares), and uses only components that have markup; within a
 // fields file, sibling names and option values are unique, a select's default is one of its
 // options, a condition names a sibling other than itself and expects values that sibling offers
 // (or tests whether it is filled, which any type but a group, list, collection-query or link may be),
@@ -228,6 +229,18 @@ if (vocab && (vocab.sections ?? []).every((x) => x && typeof x === 'object')) {
         if (!offered) continue
         for (const key of Object.keys(mv.options ?? {})) {
           if (!offered.includes(key)) fails.push(`${name} markup describes variant option ${key}, which ${sv ? 'sections.json' : 'its fields file'} does not offer`)
+        }
+      }
+    } else {
+      // A component or view has no fields file, so its entry in sections.json is the only place
+      // its variants are declared; without this, card's quote style could grow options unchecked.
+      const entry = entries.find((e) => e.id === name)
+      for (const mv of doc.variants ?? []) {
+        const ev = (entry.variants ?? []).find((v) => v.field === mv.field)
+        if (!ev) { fails.push(`${name} markup describes a variant of ${mv.field}, which its entry in sections.json does not declare`); continue }
+        const offered = (ev.options ?? []).map((o) => o.value)
+        for (const key of Object.keys(mv.options ?? {})) {
+          if (!offered.includes(key)) fails.push(`${name} markup describes variant option ${key}, which its entry in sections.json does not offer`)
         }
       }
     }
