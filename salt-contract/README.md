@@ -331,9 +331,9 @@ written in the implementation's own repository; the contract fixes only its inte
 the runner each implementation points at itself, in its own CI, against the contract version it
 pins. For every section it ships it checks four things:
 
-- **Fixtures.** Every case goes to the implementation's adapter (above), one process or request per case,
-  and the adapter's HTML and the case's expected HTML both go through `normalise`. A mismatch names
-  the section, the case and the first node that differs, by a CSS-like path
+- **Fixtures.** Every case goes to the implementation's adapter (above), one process or request
+  per case, and the adapter's HTML and the case's expected HTML both go through `normalise`. A
+  mismatch names the section, the case and the first node that differs, by a CSS-like path
   (`… > div.salt-hero__actions > a.salt-button:nth-of-type(2)`), with what was expected and what
   was found: another element, a missing or unexpected one, an attribute or text. A case that
   renders nothing expects empty output. An adapter that exits non-zero, times out or answers other
