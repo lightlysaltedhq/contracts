@@ -301,11 +301,11 @@
       "platforms": {
         "nextjs": {
           "formerly": "settings.anchorId",
-          "owes": "reserving site-navigation in place of navigation, the id its header's main navigation takes (SC-006); settling a landmark clash at render as <anchor>-section instead of refusing it at save (section#anchors, SC-012, SC-013); slugging as section#anchors says for the site's locale, in place of its NFKD slugify (SC-014)"
+          "owes": "reserving site-navigation in place of navigation, the id its header's main navigation takes (SC-006); settling a landmark clash at render as <anchor>-section instead of refusing it at save (section#anchors, SC-012, SC-013); an anchor slug function of its own that follows section#anchors for the site's locale, leaving slugify for URL slugs unchanged (SC-014)"
         },
         "wordpress": {
           "formerly": "section_anchor",
-          "owes": "storing it in the settings group; reserving site-navigation in place of primary-navigation, the id its header's main navigation takes (SC-006); settling a landmark clash as <anchor>-section (section#anchors, SC-012, SC-013); the tidy step after sanitize_title (SC-014)"
+          "owes": "storing it in the settings group; reserving site-navigation in place of primary-navigation, the id its header's main navigation takes (SC-006); settling a landmark clash as <anchor>-section (section#anchors, SC-012, SC-013); the tidy step after sanitize_title (SC-014); storing the slug on save, where section_anchor stores the raw text today (inc/acf.php)"
         }
       }
     },

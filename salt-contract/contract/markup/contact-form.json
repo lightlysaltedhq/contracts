@@ -171,7 +171,7 @@
       "attributes": {
         "aria-hidden": "true"
       },
-      "note": "Honeypot: a label and a text input out of the tab order. Its id is <anchor>__website, shaped like every real field's (<anchor>__<field>, after its field name website, as Next's contactFieldId(formId, 'website') drew it), so the ids do not tell a scraper which field is the trap. The class salt-contact__trap stays as a hook: a form filler matches field names and ids, not classes. The input carries no value attribute; it starts empty.",
+      "note": "Honeypot: a label and a text input out of the tab order. Its id is <anchor>__website, shaped like every real field's (<anchor>__<field>, after its field name website, the field Next's contactFieldId(formId, 'website') draws as <formId>-website today), so the ids do not tell a scraper which field is the trap. The class salt-contact__trap stays as a hook: a form filler matches field names and ids, not classes. The input carries no value attribute; it starts empty.",
       "children": [
         {
           "role": "trap-label",
@@ -328,7 +328,8 @@
       "owes": [
         "The privacy line when a privacy page is set, and the arithmetic challenge inside noscript when a captcha provider is configured (SC-006).",
         "The ids <anchor>__form, <anchor>__<field>, <anchor>__<field>-error, <anchor>__challenge and <anchor>__status (SC-012).",
-        "Kebab-case field ids (<anchor>__enquiry-type, not <formId>-enquiryType), and the honeypot's id <anchor>__website, as contactFieldId(formId, 'website') builds it today (contact-form.tsx, SC-012)."
+        "Kebab-case field ids (<anchor>__enquiry-type, not <formId>-enquiryType), and the honeypot's id <anchor>__website in place of <formId>-website, which contactFieldId(formId, 'website') builds today (contact-form.tsx, SC-012).",
+        "The honeypot input draws no value attribute: defaultValue=\"\" (contact-form.tsx) prints value=\"\" today."
       ]
     },
     "wordpress": {
@@ -367,7 +368,7 @@
       "owes": [
         "Field, label, error and status markup as above; status after the actions, inside the form; phone field per the site setting; the ids <anchor>__form, <anchor>__<field>, <anchor>__<field>-error, <anchor>__challenge and <anchor>__status (SC-012) instead of a static id.",
         "The privacy line as p.salt-contact__privacy before the actions (SC-006).",
-        "The honeypot as a label and input with the id <anchor>__website (SC-012)."
+        "The honeypot as a label and input with the id <anchor>__website (SC-012), in place of salt-contact-hp, and with no value attribute: template-parts/sections/contact.php draws value=\"\" today."
       ]
     }
   }

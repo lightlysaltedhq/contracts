@@ -398,7 +398,7 @@
         "Rename the skip link's class skip-link to salt-skip-link (page.json).",
         "Section heading ids <anchor>__heading, built from the section's settled id, in place of uniqueAnchor('<slug>-heading') (lib/sections/plan.ts, SC-012).",
         "An anchor equal to a landmark id becomes <anchor>-section, where uniqueAnchor gives <anchor>-2 today; and a section with no anchor mints its id from its section id in the same pass, where anchorId is null today (lib/sections/plan.ts, SC-012, SC-013).",
-        "slugify (fields/slug.ts) must give the contract's slug for the site's locale: sanitize_title's result under that locale, tidied. Today it folds by NFKD, so Straße gives stra-e (strase on en_GB, strasse on de_DE), Über uns gives uber-uns even on de_DE (ueber-uns), and a,b gives a-b where WordPress gives ab (SC-014)."
+        "Anchors get a slug function of their own that follows SC-014 for the site's locale: sanitize_title's result under that locale, tidied. Today anchors go through slugify (fields/slug.ts), which folds by NFKD, so Straße gives stra-e (strase on en_GB, strasse on de_DE), Über uns gives uber-uns even on de_DE (ueber-uns), and a,b gives a-b where WordPress gives ab. slugify itself, which also derives URL slugs and site settings, is unchanged."
       ]
     },
     "wordpress": {
@@ -448,7 +448,8 @@
         "Write data-track per section#data-track.",
         "Use salt-sr-only for the fallback h1 and the skip link's hidden state instead of visually-hidden.",
         "An anchor equal to a landmark id becomes <anchor>-section, where salt_anchor_id gives <anchor>-2 today; and a section with no anchor mints its id from its section id in the same pass, where salt_anchor_id returns '' today (inc/render.php, SC-012, SC-013).",
-        "The tidy step after sanitize_title in salt_anchor_id: every run of underscores or %xx octets becomes one hyphen, repeated hyphens collapse and hyphens are trimmed, so contact__form renders contact-form and 日本語 gives no anchor (SC-014)."
+        "The tidy step after sanitize_title in salt_anchor_id: every run of underscores or %xx octets becomes one hyphen, repeated hyphens collapse and hyphens are trimmed, so contact__form renders contact-form and 日本語 gives no anchor (SC-014).",
+        "Store the anchor's slug on save, as section#anchors says: the ACF text field section_anchor stores the raw text today, with no save filter (inc/acf.php)."
       ]
     }
   }
