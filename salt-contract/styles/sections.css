@@ -1,7 +1,8 @@
 /*
  * The section band: tones, rhythm, measure, and the seam between neighbours.
  *
- * REQUIRES the token layer — `@lightlysaltedhq/salt-nextjs/theme.css`, processed by Tailwind.
+ * REQUIRES the token layer: a runtime that emits every custom property `contract/token-layer.json`
+ * names.
  * Every value here resolves through a semantic role or a token; the only length written
  * down is the hairline's `1px`, which is a hairline rather than a measure. That is what
  * lets a client repo retune the whole site's rhythm, gutter and measures in one place.
