@@ -20,6 +20,7 @@ function copy(sections, edit = () => {}) {
   const dir = mkdtempSync(path.join(tmpdir(), 'salt-fixtures-gate-'))
   cpSync(path.join(pkg, 'contract'), path.join(dir, 'contract'), { recursive: true })
   cpSync(path.join(pkg, 'normalise.mjs'), path.join(dir, 'normalise.mjs'))
+  cpSync(path.join(pkg, 'styles'), path.join(dir, 'styles'), { recursive: true })
   for (const s of sections) cpSync(path.join(pkg, 'fixtures', s), path.join(dir, 'fixtures', s), { recursive: true })
   const file = (rel) => path.join(dir, 'fixtures', rel)
   const io = {
@@ -290,6 +291,49 @@ test('when: an element whose field is set must be drawn', () => {
   markupFails('<p class="salt-eyebrow">Bristol and Bath</p>\n', '', /eyebrow is not drawn, but eyebrow is set/)
 })
 
+// Values the case fixes exactly (review G1, G2, G4).
+test('values: data-track must be the context\'s track', () => {
+  expectFail(HERO, (io) => io.html('hero/split-image-right-later.html', 'data-track="hero-2"', 'data-track="hero-3"'), /data-track="hero-3" disagrees with the case, which gives "hero-2"/)
+})
+test('values: data-tone and data-tone-dark must be the settings\' tones', () => {
+  expectFail(HERO, (io) => io.html('hero/split-image-right-later.html', 'data-tone-dark="surface"', 'data-tone-dark="brand-tint"'), /data-tone-dark="brand-tint" disagrees with the case, which gives "surface"/)
+})
+test('values: an accordion group named for another section index fails', () => {
+  expectFail(['collection-showcase'], (io) => {
+    const rel = 'fixtures/collection-showcase/accordion-testimonials.html'
+    io.write(rel, readFileSync(path.join(io.dir, rel), 'utf8').replaceAll('name="showcase-4"', 'name="showcase-2"'))
+  }, /name="showcase-2" (is not "showcase-<section index>"|disagrees with the case, which gives "showcase-4")/)
+})
+test('values: alternating media-text sides count from 0', () => {
+  expectFail(['media-text'], (io) => {
+    const rel = 'fixtures/media-text/alternating-inverse.html'
+    const text = readFileSync(path.join(io.dir, rel), 'utf8')
+    io.write(rel, text.replaceAll('data-media-side="left"', 'X').replaceAll('data-media-side="right"', 'data-media-side="left"').replaceAll('X', 'data-media-side="right"'))
+  }, /data-media-side="right" disagrees with the case, which gives "left"/)
+})
+test('values: a single-mode row takes its stored side', () => {
+  expectFail(['media-text'], (io) => io.html('media-text/single-many-rows.html', 'data-media-side="right"', 'data-media-side="left"'), /data-media-side="left" disagrees with the case, which gives "right"/)
+})
+
+// The normaliser's containers follow the stylesheets (review G3).
+test('containers: a flex container the normaliser does not list fails', () => {
+  expectFail(HERO, (io) => io.write('styles/zz.css', '.salt-new-row {\n  display: flex;\n}\n'), /the stylesheets make \.salt-new-row a flex or grid container, but CONTAINERS lacks it/)
+})
+test('containers: a listed container the stylesheets do not make one fails', () => {
+  expectFail(HERO, (io) => {
+    const src = readFileSync(path.join(pkg, 'normalise.mjs'), 'utf8')
+    io.write('normalise.mjs', src.replace("export const CONTAINERS = new Set([\n", "export const CONTAINERS = new Set([\n  'salt-hero__text',\n"))
+  }, /CONTAINERS lists salt-hero__text, which the stylesheets do not make/)
+})
+test('containers: a conditional or contextual flex rule is not a container', async () => {
+  const { containersFrom } = await import('./salt_normalise_containers.mjs')
+  const dir = mkdtempSync(path.join(tmpdir(), 'salt-styles-'))
+  try {
+    writeFileSync(path.join(dir, 'a.css'), '@layer base { .salt-a { display: grid; } }\n@media (min-width: 40rem) { .salt-b { display: flex; } }\n.salt-grid .salt-c { display: flex; }\n.salt-d[open] { display: flex; }\n.salt-e, .salt-f { display: inline-flex; }\n.salt-g { display: block; }\n')
+    assert.deepEqual(containersFrom(dir), ['salt-a', 'salt-e', 'salt-f'])
+  } finally { rmSync(dir, { recursive: true, force: true }) }
+})
+
 // ── 4. The normaliser ─────────────────────────────────────────────────────────────────────────
 test('normaliser: one that drops an attribute fails the mutation check', () => {
   expectFail(HERO, (io) => {
@@ -352,6 +396,19 @@ test('normalise: class order and spacing do not count, a class does', () => {
 test('normalise: style spacing does not count, a declaration does', () => {
   same('<div style="--salt-section-space: var(--space-section-md);"></div>', '<div style="--salt-section-space:var(--space-section-md)"></div>')
   differ('<div style="object-fit: cover"></div>', '<div style="object-fit: contain"></div>')
+})
+test('normalise: white space between the children of a flex or grid container does not count', () => {
+  // The three cases the review of #10's fixes raised: a flex actions row, an inline-flex tab
+  // control and a grid process step, each written by a template one element to a line.
+  same('<div class="salt-hero__actions">\n  <a class="salt-button" href="/a">A</a>\n  <a class="salt-button" href="/b">B</a>\n</div>',
+    '<div class="salt-hero__actions"><a class="salt-button" href="/a">A</a><a class="salt-button" href="/b">B</a></div>')
+  same('<div class="salt-tabs__control">\n  <input class="salt-tabs__input" type="radio">\n  <label class="salt-tabs__tab">One</label>\n</div>',
+    '<div class="salt-tabs__control"><input class="salt-tabs__input" type="radio"><label class="salt-tabs__tab">One</label></div>')
+  same('<li class="salt-process__step">\n  <span class="salt-process__number">1</span>\n  <img src="/a.jpg">\n</li>',
+    '<li class="salt-process__step"><span class="salt-process__number">1</span><img src="/a.jpg"></li>')
+  // Outside a container the same line break is a space a browser draws.
+  differ('<div class="salt-hero__text">\n  <a href="/a">A</a>\n  <a href="/b">B</a>\n</div>', '<div class="salt-hero__text"><a href="/a">A</a><a href="/b">B</a></div>')
+  differ('<p>Read <a class="salt-button" href="/x">Go</a> now</p>', '<p>Read<a class="salt-button" href="/x">Go</a>now</p>')
 })
 test('normalise: comments do not count', () => {
   same('<p>One<!-- -->Two</p>', '<p>OneTwo</p>')

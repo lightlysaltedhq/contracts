@@ -241,8 +241,9 @@ Conventions, so that every case is deterministic:
 export), exports `normalise(html)`, which returns a canonical string, and
 `compare(expected, actual)`. Both platforms run their output and the expected HTML through it and
 compare the results. It removes only what a visitor cannot see or the contract leaves to each
-platform: attribute order, class order, white space a browser does not draw (at block boundaries;
-between two inline elements a run is one space and counts),
+platform: attribute order, class order, white space a browser does not draw (at block boundaries,
+and between the children of a flex or grid container, a list `scripts/salt_normalise_containers.mjs`
+derives from `styles/`; between two inline elements in normal flow a run is one space and counts),
 boolean-attribute forms, character-reference forms, comments, the upload host in `src` and
 `srcset`, and the artwork inside `svg.salt-icon` (the glyph names are the contract, the artwork is
 each platform's, SC-007). It never touches ids, which SC-012 makes deterministic. The gate proves

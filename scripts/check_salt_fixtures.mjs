@@ -37,7 +37,8 @@ const dir = path.resolve(process.argv[2] ?? path.join(here, '..', 'salt-contract
 const fails = []
 const fail = (msg) => fails.push(msg)
 const readJson = (p) => JSON.parse(readFileSync(path.join(dir, p), 'utf8'))
-const { normalise, parse } = await import(pathToFileURL(path.join(dir, 'normalise.mjs')).href)
+const { normalise, parse, CONTAINERS } = await import(pathToFileURL(path.join(dir, 'normalise.mjs')).href)
+const { containersFrom } = await import(pathToFileURL(path.join(here, 'salt_normalise_containers.mjs')).href)
 
 const vocab = readJson('contract/sections.json')
 const markup = new Map()
@@ -356,11 +357,20 @@ const canonStyle = (v) => v.split(';').map((d) => d.trim()).filter(Boolean).map(
   return i === -1 ? d : `${d.slice(0, i).trim()}:${d.slice(i + 1).trim().replace(/\s+/g, ' ')}`
 }).join(';')
 
-function templateMatch(tpl, value, name, anchor) {
+// Placeholders the case fixes; any other <placeholder> matches any text.
+const placeholders = (c) => ({
+  '<anchor>': c.anchor,
+  '<section index>': String(c.input.context.index),
+  '<spacing>': effectiveSetting(c, 'spacing'),
+  '<strength>': c.input.values?.settings?.backgroundImage?.scrimStrength ?? 'strong',
+})
+
+function templateMatch(tpl, value, name, c) {
   if (tpl.startsWith('from:')) return true
   const canon = name === 'style' ? canonStyle : (x) => x
+  const known = placeholders(c)
   const re = canon(tpl).split(/(<[^<>]+>)/).map((part) => {
-    if (part === '<anchor>') return escapeRe(anchor)
+    if (known[part] !== undefined) return escapeRe(known[part])
     if (/^<[^<>]+>$/.test(part)) return '.+?'
     return escapeRe(part)
   }).join('')
@@ -408,6 +418,33 @@ const WHEN = {
   },
 }
 
+// Values the case fixes exactly, where the markup's rule allows a range (from:, an enum), by
+// <file>:<role>:<attribute>: the plan's values from the context, the wrapper's from the settings,
+// and the media-text sides.
+const darkTone = (c) => { const v = effectiveSetting(c, 'toneDark'); return v === 'auto' ? effectiveSetting(c, 'tone') : v }
+const groupName = { faq: 'faq', 'collection-showcase': 'showcase' }
+const parentOf = (c, el) => c.parents?.get(el)
+function rowSide(c, el) {
+  const rows = elementsOf(parentOf(c, el) ?? { children: [] })
+  const k = rows.indexOf(el)
+  if (effective(c, 'mode') === 'alternating') return k % 2 === 0 ? 'left' : 'right'
+  // Single: the stored side of the k-th row that renders.
+  const fields = c.fieldsDoc.fields.find((f) => f.name === 'rows').fields
+  const byName = new Map(fields.map((f) => [f.name, f]))
+  const shown = (c.input.values.rows ?? []).filter((r) => ['image', 'heading', 'content', 'buttons'].some((n) => n === 'image' ? isImage(c, r.image) : filled(byName.get(n), r[n])))
+  const row = shown[k]
+  return row ? row.mediaSide ?? byName.get('mediaSide').default : undefined
+}
+const VALUE = {
+  'section:root:data-track': (c) => c.input.context.track,
+  'section:root:data-tone': (c) => effectiveSetting(c, 'tone'),
+  'section:root:data-tone-dark': darkTone,
+  'section:root:data-spacing': (c) => effectiveSetting(c, 'spacing'),
+  'section:root:data-width': (c) => effectiveSetting(c, 'width'),
+  'accordion:item:name': (c) => (groupName[c.section] ? `${groupName[c.section]}-${c.input.context.index}` : undefined),
+  'media-text:row:data-media-side': rowSide,
+}
+
 function checkAttrs(alt, el, c) {
   const { anchor } = c
   const problems = []
@@ -417,9 +454,13 @@ function checkAttrs(alt, el, c) {
     if (name === 'class') continue
     const rule = rules[name]
     if (rule === undefined) { problems.push(`${describe(el)} carries ${name}, which the markup does not declare`); continue }
-    if (typeof rule === 'string') { if (!templateMatch(rule, value, name, anchor)) problems.push(`${describe(el)} ${name}="${value}" is not ${JSON.stringify(rule)}`); continue }
+    if (typeof rule === 'string') { if (!templateMatch(rule, value, name, c)) problems.push(`${describe(el)} ${name}="${value}" is not ${JSON.stringify(rule)}`); continue }
     if (rule.enum) { if (!rule.enum.includes(value)) problems.push(`${describe(el)} ${name}="${value}" is not one of ${rule.enum.join(', ')}`); continue }
-    if (!templateMatch(rule.value, value, name, anchor)) problems.push(`${describe(el)} ${name}="${value}" is not ${JSON.stringify(rule.value)}`)
+    if (!templateMatch(rule.value, value, name, c)) problems.push(`${describe(el)} ${name}="${value}" is not ${JSON.stringify(rule.value)}`)
+  }
+  for (const [name, value] of el.attrs) {
+    const want = VALUE[alt.from?.[name]]?.(c, el)
+    if (typeof want === 'string' && value !== want) problems.push(`${describe(el)} ${name}="${value}" disagrees with the case, which gives ${JSON.stringify(want)}`)
   }
   for (const [name, rule] of Object.entries(rules)) {
     if (typeof rule === 'string' || rule.when === undefined) {
@@ -563,6 +604,8 @@ function checkMarkup(c) {
   if (top.length !== 1) { fail(`${at}.html must be one section wrapper; it has ${top.length} top-level elements`); return }
   const root = top[0]
   c.root = root
+  c.parents = new Map()
+  for (const el of [root, ...descendants(root)]) for (const child of elementsOf(el)) c.parents.set(child, el)
   const { doc, spec, elements } = wrapperSpec(c)
   const m = matcher(c)
   const bindings = m.one(spec, root, 0, 0, '')
@@ -692,6 +735,14 @@ function checkNormaliser(c) {
     }
   }
   for (const el of elementsOf(tree)) visit(el)
+}
+
+// ── The normaliser's containers agree with the stylesheets ──────────────────────────────────────
+{
+  const derived = existsSync(path.join(dir, 'styles')) ? containersFrom(path.join(dir, 'styles')) : []
+  const listed = [...(CONTAINERS ?? [])].sort()
+  for (const c of derived.filter((x) => !listed.includes(x))) fail(`normalise.mjs: the stylesheets make .${c} a flex or grid container, but CONTAINERS lacks it (run node scripts/salt_normalise_containers.mjs --write)`)
+  for (const c of listed.filter((x) => !derived.includes(x))) fail(`normalise.mjs: CONTAINERS lists ${c}, which the stylesheets do not make a flex or grid container (run node scripts/salt_normalise_containers.mjs --write)`)
 }
 
 // ── Run ───────────────────────────────────────────────────────────────────────────────────────

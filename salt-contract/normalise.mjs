@@ -11,7 +11,9 @@
 //    block's inline content, or beside a block-level element) or after another space. Between
 //    two inline (phrasing) elements a run is one space and stays, whether it was typed or is a
 //    template's line break, because a browser draws it: `<span>£49</span>\n<span>a month</span>`
-//    shows "£49 a month" and differs from the two spans written together. pre, textarea, script
+//    shows "£49 a month" and differs from the two spans written together. Inside a flex or grid
+//    container (CONTAINERS, derived from the shared stylesheets) white space between children is
+//    never drawn, so it goes, and each child's own text is trimmed as a block's is. pre, textarea, script
 //    and style keep theirs. Inside style attributes, the spaces around `:` and `;` go, and srcset
 //    candidates are rejoined as `url descriptor, …`.
 // 3. Boolean attribute forms. `hidden`, `hidden=""` and `hidden="hidden"` are one form, and any
@@ -45,6 +47,76 @@ const ENTITIES = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ',
   trade: '™', pound: '£', euro: '€', times: '×', middot: '·', rarr: '→', larr: '←' }
 // HTML's white space; \s would also take U+00A0, which is not collapsible.
 const WS = /[ \t\n\r\f]+/g
+
+// The classes the shared stylesheets make flex or grid containers, unconditionally. Generated from
+// styles/ by scripts/salt_normalise_containers.mjs; the fixtures gate fails if they disagree.
+// BEGIN containers (scripts/salt_normalise_containers.mjs --write)
+export const CONTAINERS = new Set([
+  'salt-button',
+  'salt-carousel',
+  'salt-carousel__controls',
+  'salt-carousel__track',
+  'salt-case-study-view__details',
+  'salt-consent-banner',
+  'salt-consent-banner__actions',
+  'salt-consent-panel__actions',
+  'salt-consent-panel__category',
+  'salt-contact__field',
+  'salt-contact__form',
+  'salt-copy-link',
+  'salt-copy-link__button',
+  'salt-cta__actions',
+  'salt-drawer__close',
+  'salt-drawer__panel',
+  'salt-footer__base',
+  'salt-footer__inner',
+  'salt-footer__link',
+  'salt-footer__nav',
+  'salt-footer__social',
+  'salt-footer__social-link',
+  'salt-grid',
+  'salt-header__inner',
+  'salt-header__phone',
+  'salt-hero',
+  'salt-hero__actions',
+  'salt-logo',
+  'salt-logos__item',
+  'salt-media-text',
+  'salt-media-text__actions',
+  'salt-media-text__row',
+  'salt-nav__item',
+  'salt-nav__link',
+  'salt-nav__list',
+  'salt-nav__subitem',
+  'salt-nav__sublink',
+  'salt-nav__submenu',
+  'salt-nav__toggle',
+  'salt-pagination__link',
+  'salt-pagination__list',
+  'salt-post__footer',
+  'salt-post__meta',
+  'salt-post__tags',
+  'salt-process__number',
+  'salt-process__step',
+  'salt-search__form',
+  'salt-share',
+  'salt-share__link',
+  'salt-share__list',
+  'salt-showcase__caption',
+  'salt-showcase__group',
+  'salt-showcase__index',
+  'salt-showcase__panel',
+  'salt-showcase__tags',
+  'salt-stat',
+  'salt-tabs',
+  'salt-tabs__control',
+  'salt-tabs__list',
+  'salt-tabs__panels',
+  'salt-tabs__tab',
+  'salt-theme-toggle',
+])
+// END containers
+const isContainer = (el) => el.attrs.some(([n, v]) => n === 'class' && v.split(WS).some((c) => CONTAINERS.has(c)))
 
 export function decode(text) {
   return text.replace(/&(#x[0-9a-f]+|#[0-9]+|[a-z][a-z0-9]*);/gi, (m, ref) => {
@@ -140,6 +212,16 @@ function dropIconArtwork(el) {
 // The CSS rule for collapsible white space over one block's inline content. A run is the inline
 // content between block boundaries; a space at either end of a run, or after a space, goes.
 function collapse(block) {
+  // A flex or grid container draws no white space between its children, and each child, text
+  // included, is laid out as a block of its own.
+  if (isContainer(block)) {
+    for (const c of block.children) {
+      if (c.type === 'text') c.value = c.value.replace(WS, ' ').trim()
+      else if (!KEEP_SPACE.has(c.name)) collapse(c)
+    }
+    prune(block)
+    return
+  }
   let run = []
   const flush = () => {
     let prevSpace = true
@@ -168,6 +250,7 @@ function collapse(block) {
     for (const c of el.children) {
       if (c.type === 'text') { run.push(c); continue }
       if (KEEP_SPACE.has(c.name)) { flush(); continue }
+      if (isContainer(c)) { if (INLINE.has(c.name)) run.push('atom'); else flush(); collapse(c); continue }
       if (!INLINE.has(c.name)) { flush(); collapse(c); continue }
       if (c.name === 'br') { run.push('break'); continue }
       if (VOID.has(c.name) || c.name === 'svg' || c.name === 'select' || c.name === 'textarea') { run.push('atom'); continue }

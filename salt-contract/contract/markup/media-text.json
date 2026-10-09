@@ -124,7 +124,7 @@
             "row": {
               "attributes": {
                 "data-media-side": {
-                  "value": "from:row.side",
+                  "value": "from:row.mediaSide",
                   "when": "image and words"
                 }
               }
