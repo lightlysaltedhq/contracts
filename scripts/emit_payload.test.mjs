@@ -642,3 +642,20 @@ test('SC-010: with a source select, the categories picker shows only for a sourc
   assert.equal(on('testimonials'), false) // PR #7: testimonials were offered service categories
   assert.equal(categories.admin.condition({}, { mode: 'manual' }, { blockData: { source: 'services' } }), false)
 })
+
+test('SC-010: with a source select, by-category is offered and valid only for a source with categories', () => {
+  const carousel = block(blocks({ sources: { services: {}, testimonials: {} } }), 'carousel')
+  const mode = field(field(carousel.fields, 'query').fields, 'mode')
+  assert.deepEqual(mode.custom.salt.categoriesFor, ['services'])
+  const offered = (source) => mode.filterOptions({ options: mode.options, blockData: { source } }).map((o) => o.value)
+  assert.deepEqual(offered('services'), ['automatic', 'by-category', 'manual'])
+  assert.deepEqual(offered('testimonials'), ['automatic', 'manual'])
+  // A value left from a source that had categories cannot be saved after the source changes.
+  assert.equal(mode.validate('by-category', { blockData: { source: 'services' } }), true)
+  assert.match(mode.validate('by-category', { blockData: { source: 'testimonials' } }), /By category needs a source with categories/)
+  assert.equal(mode.validate('automatic', { blockData: { source: 'testimonials' } }), true)
+  assert.match(mode.validate('bogus', { blockData: { source: 'services' } }), /not one of its options/)
+  // A fixed source has no select to follow, so its mode needs neither.
+  const faq = field(field(block(blocks(), 'faq').fields, 'query').fields, 'mode')
+  assert.ok(!faq.filterOptions && !faq.validate)
+})

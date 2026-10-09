@@ -24,7 +24,7 @@
 import { readFileSync, writeFileSync } from 'node:fs'
 
 import { clauseHolds, clauses, collectionQueryShape, hasVisibleText, isFilled, isMainModule, LINK_SHAPE, loadContract,
-  categorisedSources, categorySources, normaliseLineEndings, parseEmitterArguments, planSections, siblingValue, sourceValues, SOURCES } from './_contract.mjs'
+  categorisedSources, categorySources, modeAllowed, normaliseLineEndings, parseEmitterArguments, planSections, siblingValue, sourceValues, SOURCES } from './_contract.mjs'
 
 /**
  * Each source's Payload collection and category taxonomy, as Salt for Next.js names them by
@@ -263,7 +263,28 @@ function collectionQuery(f, out, ctx) {
   // narrowed set is named by its values.
   const modeEnum = modeValues.length === 3 ? 'enum_query_mode' : `enum_query_mode_${modeValues.map(snake).join('_')}`
   out.fields = convertFields(shape.map(({ part, ...p }) => p), { ...ctx, enumPrefix: 'enum_query' }).map((field) => {
-    if (field.name === 'mode') return { ...field, enumName: modeEnum }
+    if (field.name === 'mode') {
+      const mode = { ...field, enumName: modeEnum }
+      if (!f.sourceField || withCategories.length === 0) return mode
+      // By-category follows the block's source select (SC-010): hidden, and refused on save, while
+      // it holds a source without categories. Payload passes the block as blockData; without it,
+      // nothing is narrowed. A validate replaces Payload's own, so option membership is checked here.
+      const select = ctx.siblings.find((s) => s.name === f.sourceField)
+      const chosen = (blockData) => siblingValue(blockData, f.sourceField, { [f.sourceField]: select.default })
+      const values = mode.options.map((o) => o.value)
+      return {
+        ...mode,
+        filterOptions: ({ options, blockData }) =>
+          (blockData ? options.filter((o) => modeAllowed(typeof o === 'string' ? o : o.value, chosen(blockData), withCategories)) : options),
+        validate: (value, { blockData } = {}) => {
+          if (value === undefined || value === null) return true
+          if (!values.includes(value)) return `${value} is not one of its options`
+          if (blockData && !modeAllowed(value, chosen(blockData), withCategories)) return 'By category needs a source with categories; choose another mode'
+          return true
+        },
+        custom: { salt: { ...mode.custom?.salt, categoriesFor: withCategories } },
+      }
+    }
     if (field.name !== 'categories' && field.name !== 'items') return field
     const targets = field.name === 'categories' ? taxonomies : collections
     const relation = { ...field, relationTo: targets.length === 1 ? targets[0] : targets }

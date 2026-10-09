@@ -207,6 +207,13 @@ export function categorySources(query, siblings, categorised) {
   return sources.filter((s) => categorised.has(s))
 }
 
+/**
+ * Whether a query mode suits the source its select holds (SC-010): by-category only while that
+ * source is one of `withCategories` (categorySources). An emitter hides the option and refuses the
+ * value otherwise, so a mode left from an earlier source cannot be saved.
+ */
+export const modeAllowed = (mode, source, withCategories) => mode !== 'by-category' || withCategories.includes(source)
+
 /** The names of the selects that a sibling collection-query reads its source from. */
 export const sourceSelectsOf = (fields) =>
   new Set(fields.filter((f) => f.type === 'collection-query' && f.sourceField).map((f) => f.sourceField))
