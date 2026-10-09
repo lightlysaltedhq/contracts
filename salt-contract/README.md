@@ -37,7 +37,8 @@ version means.
 
 From the repository root, `npm run salt-contract` runs this package's gate: one version across
 every contract file, every contract file valid against its schema, no colour values anywhere, and
-a tarball that ships only what it declares. `npm run verify` runs every gate in the repository.
+a tarball that ships only what it declares. `npm run salt-stylesheets` runs the shared stylesheets'
+gate. `npm run verify` runs every gate in the repository.
 
 ## Generating Payload blocks
 
@@ -105,3 +106,26 @@ value; only a sibling never set takes its default.
 `reports/round-trip-payload.md`, which is not shipped, compares the output with the blocks
 salt-nextjs ships today. A difference is expected only when `reports/round-trip-payload.expected.json`
 lists it, with the note that accounts for it.
+
+## Stylesheets
+
+`styles/` is the one shared stylesheet set both implementations serve (SC-002). Load it in this
+order: `base.css`, `sections.css`, `primitives.css`, `blocks.css`, `chrome.css`, `views.css`.
+
+`base.css` is one `@layer base` block. Three set-ups are supported:
+
+- Tailwind v4: import it after `@import 'tailwindcss'`. Its rules join Tailwind's `base` layer
+  after preflight, beat preflight on source order, and yield to every unlayered rule.
+- Tailwind v3: import it into the stylesheet v3 processes. v3 consumes `@layer base` and emits the
+  rules unlayered, after its preflight and before its components and utilities. They rank by
+  specificity and source order: at (0,0,1) they beat preflight's element rules by coming after
+  them and lose to every rule keyed on a class; a host's element rule wins only if it comes later.
+- No Tailwind: load it first, as above. The layer yields to every unlayered rule.
+
+Two are not supported: importing it before `tailwindcss` in v4, where preflight comes later in the
+same layer and puts every heading back at body size; and serving it as a file of its own beside
+v3's output, where the layer survives and v3's unlayered preflight outranks it.
+
+The set reads only the custom properties `contract/token-layer.json` names, which each
+implementation's runtime emits (its generated `theme.css`). The files carry long comments: serve
+them as one minified bundle, never as six render-blocking requests.

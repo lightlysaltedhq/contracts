@@ -35,6 +35,9 @@
     "./schema/field-definition": "./schema/field-definition.schema.json",
     "./schema/markup": "./schema/markup.schema.json",
     "./emit/payload": "./emit/payload.mjs",
+    "./styles/*": "./styles/*",
+    "./token-layer": "./contract/token-layer.json",
+    "./schema/token-layer": "./schema/token-layer.schema.json",
     "./package.json": "./package.json"
   },
   "keywords": [
