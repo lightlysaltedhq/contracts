@@ -81,7 +81,9 @@
                   "attributes": {
                     "id": "<prefix>-column-<n>"
                   },
-                  "text": "from:column.title"
+                  "text": "from:column.title",
+                  "optional": true,
+                  "when": "the column has a title"
                 },
                 {
                   "role": "links",
@@ -91,7 +93,10 @@
                   ],
                   "attributes": {
                     "role": "list",
-                    "aria-labelledby": "<prefix>-column-<n>"
+                    "aria-labelledby": {
+                      "value": "<prefix>-column-<n>",
+                      "when": "the column has a title"
+                    }
                   },
                   "children": [
                     {
@@ -404,8 +409,8 @@
       ]
     },
     {
-      "topic": "open-question",
-      "text": "WordPress has one footer menu (a flat list); Next has titled columns. Ruled: columns. Open: how WordPress's single menu maps (one untitled column, or top-level items as titles)."
+      "topic": "ruling",
+      "text": "Footer links are drawn in columns. A single flat menu, as WordPress has, maps to one untitled column (SC-006): no title paragraph, and its list takes the nav's name."
     },
     {
       "topic": "order",
@@ -488,7 +493,7 @@
         }
       ],
       "owes": [
-        "Rename to salt-footer*; data-tone on the footer; columns; the consent control and panel when an integration needs consent; social icons named by role=img and aria-label."
+        "Rename to salt-footer*; data-tone on the footer; columns, its single menu as one untitled column; the consent control and panel when an integration needs consent; social icons named by role=img and aria-label."
       ]
     }
   }

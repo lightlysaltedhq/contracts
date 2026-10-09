@@ -88,8 +88,8 @@
       ]
     },
     {
-      "topic": "open-question",
-      "text": "WordPress also writes data-maplibre (the library's url); whether the contract fixes the library is for the owner."
+      "topic": "ruling",
+      "text": "The contract does not fix the map library (SC-006): data-maplibre leaves the visitor markup, and each platform's script knows its own library."
     }
   ],
   "platforms": {
@@ -130,7 +130,8 @@
         }
       ],
       "owes": [
-        "Rename to salt-map*; the load control through the button component."
+        "Rename to salt-map*; the load control through the button component.",
+        "Drop data-maplibre (SC-006)."
       ]
     }
   }

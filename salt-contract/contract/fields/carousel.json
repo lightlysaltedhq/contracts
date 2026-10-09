@@ -34,10 +34,11 @@
       "type": "text",
       "label": "Carousel name",
       "description": "Names the carousel for screen readers when there is no heading. Never shown. Without either, two or more cards are drawn as a grid.",
+      "condition": {
+        "field": "heading",
+        "filled": false
+      },
       "platforms": {
-        "nextjs": {
-          "note": "Shown only while the heading is empty, a condition the contract cannot express (open question 3)."
-        },
         "wordpress": {
           "owes": "the field; the track is named Carousel when there is no heading today"
         }
@@ -204,7 +205,7 @@
               "title": "title"
             }
           },
-          "owes": "one query group read against the chosen source in place of one group per source",
+          "owes": "one query group read against the chosen source in place of one group per source; a team category taxonomy, so by-category is offered for team as on WordPress (SC-006)",
           "note": "Stored as {mode, terms, items, sortBy, limit}; terms becomes categories, sortBy becomes order, limit becomes count."
         },
         "wordpress": {
@@ -229,7 +230,7 @@
             }
           },
           "owes": "the query on scroll_carousel; only the testimonials layout has one today",
-          "note": "Stored as the layout's own source, taxonomy_terms, manual, orderby, order and count; taxonomy_terms becomes categories, manual becomes items, orderby and order fold into order, count stays count. Order ascending/descending has no contract equivalent (open question 2)."
+          "note": "Stored as the layout's own source, taxonomy_terms, manual, orderby, order and count; taxonomy_terms becomes categories, manual becomes items, orderby and order fold into order, count stays count. SC-006 offers neither oldest-first nor Z to A, so a stored order direction is dropped on migration."
         }
       }
     },

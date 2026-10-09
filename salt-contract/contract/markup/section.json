@@ -346,7 +346,7 @@
       "statement": "A section collapses its top spacing (data-collapse-top) when the previous section shares its tone and dark tone, neither has a background image, it has no divider, and neither section's spacing is none."
     },
     "anchors": {
-      "statement": "A section's id is its anchor, slugged. Ids reserved by the document (main, content, header, footer, nav, primary-navigation, search, skip-link) and repeats take a numeric suffix (-2, -3)."
+      "statement": "A section's id is its anchor, slugged. Ids reserved by the document (main, content, header, footer, nav, site-navigation, search, skip-link), ids the page itself uses and repeats take a numeric suffix (-2, -3)."
     },
     "new-tab": {
       "statement": "A link that opens a new tab carries target=_blank and rel=\"noopener noreferrer\"."
@@ -367,7 +367,7 @@
     },
     {
       "topic": "open-question",
-      "text": "WordPress spacing and width are utility classes on a container div inside the section; the contract has no container element, the content div takes the measure from data-width. Confirm no WordPress site styles the container div directly."
+      "text": "WordPress spacing and width are utility classes on a container div inside the section; the contract has no container element, the content div takes the measure from data-width. Checking that no WordPress client site styles the container div directly is work SC-006 leaves open."
     }
   ],
   "platforms": {

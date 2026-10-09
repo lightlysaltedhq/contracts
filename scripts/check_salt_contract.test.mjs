@@ -3,7 +3,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { execFileSync } from 'node:child_process'
-import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs'
+import { mkdtempSync, mkdirSync, readFileSync, writeFileSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -303,3 +303,77 @@ test('colour: words that are not colours on non-colour properties, data attribut
   })
   try { const r = run(dir); assert.equal(r.code, 0, r.out) } finally { rmSync(dir, { recursive: true, force: true }) }
 })
+
+// ── SC-006: the `filled` condition clause ────────────────────────────────────────────────────────
+// A clause may test that a sibling has a value (filled: true) or has none (filled: false), of any
+// field type, instead of comparing it.
+test('cross-file: a filled condition on an image sibling passes', () => {
+  const r = crossRun((f) => {
+    f['contract/fields/hero.json'].fields.push({ name: 'background', type: 'image' }, { name: 'fit', type: 'text', condition: { field: 'background', filled: true } })
+  })
+  assert.equal(r.code, 0, r.out)
+})
+test('cross-file: a filled clause inside a list condition passes beside an equals clause', () => {
+  const r = crossRun((f) => {
+    f['contract/fields/hero.json'].fields.push({ name: 'title', type: 'text' }, { name: 'x', type: 'text', condition: [{ field: 'variant', equals: 'b' }, { field: 'title', filled: true }] })
+  })
+  assert.equal(r.code, 0, r.out)
+})
+crossFail('a filled condition naming a field that is not a sibling', (f) => {
+  f['contract/fields/hero.json'].fields[1].condition = { field: 'background', filled: true }
+}, /hero\.image condition names background, which is not a sibling field/)
+crossFail('a filled condition on itself', (f) => {
+  f['contract/fields/hero.json'].fields[1].condition = { field: 'image', filled: true }
+}, /hero\.image is conditioned on itself/)
+test('cross-file: a filled: false condition on a text sibling passes', () => {
+  const r = crossRun((f) => {
+    f['contract/fields/hero.json'].fields.push({ name: 'heading', type: 'text' }, { name: 'label', type: 'text', condition: { field: 'heading', filled: false } })
+  })
+  assert.equal(r.code, 0, r.out)
+})
+crossFail('a filled clause that is not a boolean', (f) => {
+  f['contract/fields/hero.json'].fields[1].condition = { field: 'variant', filled: 'yes' }
+}, /hero\.image condition on variant: filled is true or false/)
+crossFail('a filled clause that also compares a value', (f) => {
+  f['contract/fields/hero.json'].fields[1].condition = { field: 'variant', filled: true, equals: 'b' }
+}, /hero\.image condition on variant tests filled and compares a value; a clause does one/)
+
+// The real field-definition schema accepts the clause and refuses the malformed ones.
+const realFieldSchema = JSON.parse(readFileSync(path.join(path.dirname(script), '..', 'salt-contract', 'schema', 'field-definition.schema.json'), 'utf8'))
+function realSchemaRun(condition) {
+  return crossRun((f) => {
+    f['schema/field-definition.schema.json'] = structuredClone(realFieldSchema)
+    f['contract/fields/_section-settings.json'] = { $schema: '../../schema/field-definition.schema.json', version: '0.1.0', section: 'section-settings', fields: [{ name: 'tone', type: 'text', label: 'Tone' }] }
+    f['contract/fields/hero.json'] = {
+      $schema: '../../schema/field-definition.schema.json', version: '0.1.0', section: 'hero', shared: { id: 'section-settings' },
+      fields: [
+        { name: 'variant', type: 'select', label: 'Variant', options: [{ value: 'a', label: 'A' }, { value: 'b', label: 'B' }], default: 'a' },
+        { name: 'background', type: 'image', label: 'Background' },
+        { name: 'fit', type: 'text', label: 'Fit', condition },
+      ],
+    }
+  })
+}
+test('schema: the field-definition schema accepts a filled clause', () => {
+  const r = realSchemaRun({ field: 'background', filled: true })
+  assert.equal(r.code, 0, r.out)
+})
+test('schema: the field-definition schema accepts filled: false', () => {
+  const r = realSchemaRun({ field: 'background', filled: false })
+  assert.equal(r.code, 0, r.out)
+})
+test('schema: the field-definition schema refuses a filled that is not a boolean', () => {
+  const r = realSchemaRun({ field: 'background', filled: 'yes' })
+  assert.equal(r.code, 1, r.out); assert.match(r.out, /contract\/fields\/hero\.json does not match schema\/field-definition\.schema\.json/)
+})
+test('schema: the field-definition schema refuses a clause that tests filled and compares', () => {
+  const r = realSchemaRun({ field: 'variant', filled: true, equals: 'b' })
+  assert.equal(r.code, 1, r.out); assert.match(r.out, /contract\/fields\/hero\.json does not match schema\/field-definition\.schema\.json/)
+})
+
+// ── Review of #4: ACF cannot condition on a group, a list, a collection-query or a link ─────────
+for (const [type, extra] of [['group', { fields: [{ name: 'a', type: 'text' }] }], ['list', { fields: [{ name: 'a', type: 'text' }] }], ['collection-query', { source: 'posts' }], ['link', {}]]) {
+  crossFail(`a filled condition on a ${type} sibling`, (f) => {
+    f['contract/fields/hero.json'].fields.push({ name: 'box', type, ...extra }, { name: 'x', type: 'text', condition: { field: 'box', filled: true } })
+  }, new RegExp(`hero\\.x condition tests whether box is filled, a ${type} field; filled may not name a group, list, collection-query or link`))
+}

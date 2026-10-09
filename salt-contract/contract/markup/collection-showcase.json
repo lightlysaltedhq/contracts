@@ -400,7 +400,7 @@
       "text": "Platforms differ on featured: WordPress draws the lead card then a nested grid of the rest; Next one flat list with data-featured on the first item. Ruled: the flat list."
     },
     {
-      "topic": "open-question",
+      "topic": "ruling",
       "text": "WordPress's testimonials slider becomes the carousel section with source testimonials, not a showcase layout."
     }
   ],

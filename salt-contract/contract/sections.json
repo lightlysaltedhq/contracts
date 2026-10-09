@@ -643,7 +643,7 @@
       "label": "Pricing",
       "tier": "edge",
       "summary": "Plans with a price, a period, features and a call to action.",
-      "note": "Kept at the edge in Salt for Next.js on purpose (docs/recipes/pricing.md): the version every site needs does not exist. Whether it stays edge on both platforms is open-question pricing-tier.",
+      "note": "An edge recipe on both platforms (SC-006): the version every site needs does not exist (Salt for Next.js docs/recipes/pricing.md).",
       "platforms": {
         "nextjs": {
           "status": "edge",
@@ -662,7 +662,7 @@
               "note": "ships in the parent theme today"
             }
           ],
-          "owes": "moving it out of the parent theme into a recipe, unless the owner rules it core"
+          "owes": "moving its pricing layout out of the parent theme into a Grain for WordPress recipe (SC-006)"
         }
       }
     }
@@ -1468,33 +1468,6 @@
           ]
         }
       }
-    }
-  ],
-  "openQuestions": [
-    {
-      "id": "pricing-tier",
-      "question": "Does pricing stay an edge recipe on both platforms, or become a core section?",
-      "recommendation": "Edge on both: Salt for Next.js ruled it out of core because no single version serves every site; salt-wordpress moves its pricing layout into a grain-wordpress recipe.",
-      "affects": [
-        "pricing"
-      ]
-    },
-    {
-      "id": "call-to-action-id",
-      "question": "Is the section id call-to-action, or cta as both platforms call it today?",
-      "recommendation": "call-to-action: ids are read by people writing overrides and content migrations, and cta is the only abbreviated id. Both platforms already have to map stored slugs, so the rename costs one more entry each.",
-      "affects": [
-        "call-to-action"
-      ]
-    },
-    {
-      "id": "alignment-centre",
-      "question": "Is the centred option value centre (British) or center (CSS)?",
-      "recommendation": "centre in stored values and labels, mapped to text-align: center in the stylesheet; salt-wordpress stores center today and maps.",
-      "affects": [
-        "rich-text",
-        "hero"
-      ]
     }
   ]
 }

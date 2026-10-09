@@ -110,6 +110,105 @@
       "note": "Features cards draw a rich-text body where collection cards draw the text paragraph."
     },
     {
+      "role": "contact",
+      "element": "ul",
+      "classes": [
+        "salt-showcase__contact"
+      ],
+      "attributes": {
+        "role": "list"
+      },
+      "optional": true,
+      "when": "a team member has an email, or a phone that normalises to a tel: link",
+      "children": [
+        {
+          "role": "contact-email",
+          "element": "li",
+          "optional": true,
+          "when": "email is set",
+          "children": [
+            {
+              "role": "email-link",
+              "element": "a",
+              "attributes": {
+                "href": "from:mailto"
+              },
+              "text": "from:email"
+            }
+          ]
+        },
+        {
+          "role": "contact-phone",
+          "element": "li",
+          "optional": true,
+          "when": "phone normalises to a tel: link",
+          "children": [
+            {
+              "role": "phone-link",
+              "element": "a",
+              "attributes": {
+                "href": "from:tel"
+              },
+              "text": "from:phone"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "role": "socials",
+      "element": "ul",
+      "classes": [
+        "salt-showcase__socials"
+      ],
+      "attributes": {
+        "role": "list",
+        "aria-label": "from:labels.social"
+      },
+      "optional": true,
+      "when": "a team member has social profiles",
+      "children": [
+        {
+          "role": "social-item",
+          "element": "li",
+          "repeat": {
+            "from": "profiles"
+          },
+          "children": [
+            {
+              "role": "social-link",
+              "element": "a",
+              "classes": [
+                "salt-showcase__social-link"
+              ],
+              "attributes": {
+                "href": "from:profile url"
+              },
+              "children": [
+                {
+                  "role": "social-icon",
+                  "component": "icon",
+                  "attributes": {
+                    "role": "img",
+                    "aria-label": "from:profile name"
+                  },
+                  "optional": true,
+                  "when": "a glyph exists for the profile"
+                },
+                {
+                  "role": "social-name",
+                  "element": "span",
+                  "text": "from:profile name",
+                  "optional": true,
+                  "when": "no glyph exists for the profile"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
       "role": "results",
       "element": "ul",
       "classes": [
@@ -319,12 +418,21 @@
       "text": "The quote style changes the root element (figure) and its children's order; the generic style is the base."
     },
     {
-      "topic": "open-question",
-      "text": "Next names the person in a quote card with a heading; WordPress's testimonial card has no heading (a span). The contract follows Next so a carousel of quotes has an outline; confirm before WordPress migrates."
+      "topic": "stylesheet-owes",
+      "text": "Team contact and social links (SC-006); no rules in the shared stylesheets yet. On a linked card they sit under its stretched a.salt-card__link, so the rules must lift them above it (position relative and a higher z-index) or they open the card's page instead.",
+      "classes": [
+        "salt-showcase__contact",
+        "salt-showcase__socials",
+        "salt-showcase__social-link"
+      ]
     },
     {
-      "topic": "open-question",
-      "text": "WordPress team cards also list email, phone and social links (x-card-team-contact, x-card-team-socials); Next's do not. Not in the contract until the owner rules whether team cards carry contact details."
+      "topic": "ruling",
+      "text": "The person in a quote card is named by a heading (SC-006), so a carousel of quotes has an outline. WordPress's testimonial card draws a span today."
+    },
+    {
+      "topic": "ruling",
+      "text": "Team cards carry optional email, phone and social links, each drawn only when filled (SC-006). They sit inside the card beside its stretched link, so the stylesheet lifts them above it."
     },
     {
       "topic": "ruling",
@@ -342,6 +450,9 @@
           ],
           "note": "Card plus the ShowcaseCard children from collection-showcase/section.tsx"
         }
+      ],
+      "owes": [
+        "Team members' optional email, phone and social links, drawn on the card only when filled (SC-006)."
       ]
     },
     "wordpress": {
@@ -469,12 +580,21 @@
             "x-scroll-carousel-text"
           ],
           "note": "The scroll carousel's own generic card; becomes this card."
+        },
+        {
+          "element": "ul",
+          "classes": [
+            "x-card-team-contact",
+            "x-card-team-socials"
+          ],
+          "note": "Team contact and social lists; become the contact and socials lists."
         }
       ],
       "owes": [
         "One div.salt-card (figure for quotes) with the order above; drop x-card-media and x-card-content wrappers.",
         "Rating as p.salt-showcase__rating with the two star spans, not five icons.",
-        "Name the person in a quote card with a heading (see open question)."
+        "Name the person in a quote card with a heading (SC-006).",
+        "Team contact and social links as ul.salt-showcase__contact and ul.salt-showcase__socials, drawn only when filled."
       ]
     }
   }

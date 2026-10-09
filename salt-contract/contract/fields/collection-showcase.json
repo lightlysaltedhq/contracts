@@ -59,7 +59,7 @@
       "description": "Only the collections the site has installed are offered.",
       "platforms": {
         "nextjs": {
-          "note": "Defaults to the first installed source (open question 8)."
+          "owes": "no default source: the editor picks one, where today the first installed source is chosen (SC-006)"
         },
         "wordpress": {
           "formerly": [
@@ -171,7 +171,7 @@
               "title": "title"
             }
           },
-          "owes": "one query group read against the chosen source in place of one group per source",
+          "owes": "one query group read against the chosen source in place of one group per source; a team category taxonomy, so by-category is offered for team as on WordPress (SC-006)",
           "note": "Stored as {mode, terms, items, sortBy, limit}; terms becomes categories, sortBy becomes order, limit becomes count."
         },
         "wordpress": {
@@ -197,7 +197,7 @@
             }
           },
           "owes": "one query group in place of six layout fields",
-          "note": "Stored as the layout's own source, taxonomy_terms, manual, orderby, order and count; taxonomy_terms becomes categories, manual becomes items, orderby and order fold into order, count stays count. Order ascending/descending has no contract equivalent (open question 2)."
+          "note": "Stored as the layout's own source, taxonomy_terms, manual, orderby, order and count; taxonomy_terms becomes categories, manual becomes items, orderby and order fold into order, count stays count. SC-006 offers neither oldest-first nor Z to A, so a stored order direction is dropped on migration."
         }
       }
     },

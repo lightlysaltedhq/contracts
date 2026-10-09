@@ -38,8 +38,8 @@
           "owes": "the stored value full-bleed in place of fullBleed"
         },
         "wordpress": {
-          "owes": "the stacked option",
-          "note": "Its full-bleed draws the hero image edge to edge above the text (open question 5)."
+          "owes": "the stacked option, and a full-bleed hero that sets its words over the section's background image (SC-006)",
+          "note": "Its full-bleed draws the hero image edge to edge above the text today."
         }
       }
     },
@@ -75,7 +75,7 @@
       "description": "Used by the split and stacked layouts. A full-bleed hero uses the section's background image.",
       "platforms": {
         "wordpress": {
-          "owes": "hiding it for full-bleed and minimal, and moving a full-bleed hero's image to the background image setting (open question 5)"
+          "owes": "hiding it for full-bleed and minimal, and moving a full-bleed hero's image to the background image setting (SC-006)"
         }
       }
     },

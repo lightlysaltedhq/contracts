@@ -58,7 +58,7 @@
     },
     {
       "topic": "open-question",
-      "text": "WordPress may emit picture with source elements (opt-in); Next emits img only. The contract allows img only until a fixture needs picture."
+      "text": "WordPress may emit picture with source elements (opt-in); Next emits img only. The contract allows img only; whether picture is needed is work SC-006 leaves until a fixture needs one."
     }
   ],
   "platforms": {
