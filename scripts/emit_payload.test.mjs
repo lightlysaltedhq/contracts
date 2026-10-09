@@ -435,3 +435,13 @@ test('U7, U8, U9: planSections is the one plan, its source selects already narro
   assert.deepEqual(plan.sections.map((s) => s.id), blocks({ sources: { posts: {} } }).map((b) => b.slug))
   assert.throws(() => planSections(loadContract(), { installed: new Set(), sections: ['faq'] }), /section faq needs the source faqs/)
 })
+
+test('U6: a condition is one clause or a list of at least two, as the schema says', () => {
+  const on = { name: 'on', type: 'boolean', label: 'On' }
+  for (const condition of [[], [{ field: 'on', equals: true }]]) {
+    const fields = [on, { name: 'text', type: 'text', label: 'Text', condition }]
+    assert.throws(() => toPayloadBlocks({ contract: probe(fields) }), /probe\.text condition: a condition is one clause or a list of at least two/, JSON.stringify(condition))
+  }
+  const two = [on, { name: 'n', type: 'boolean', label: 'N' }, { name: 'text', type: 'text', label: 'Text', condition: [{ field: 'on', equals: true }, { field: 'n', equals: true }] }]
+  assert.doesNotThrow(() => toPayloadBlocks({ contract: probe(two) }))
+})

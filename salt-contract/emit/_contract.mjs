@@ -127,6 +127,9 @@ export function isClause(c) {
  * files to this; a contract built in code reaches the emitter without it. `where` names the field.
  */
 export function checkedClauses(condition, where) {
+  if (Array.isArray(condition) && condition.length < 2) {
+    throw new Error(`${where} condition: a condition is one clause or a list of at least two`)
+  }
   const list = clauses(condition)
   for (const c of list) {
     if (!isClause(c)) {
