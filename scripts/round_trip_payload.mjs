@@ -84,7 +84,9 @@ const BUILDERS = {
 }
 
 const contract = loadContract()
-const emitted = toPayloadBlocks({ icons, sources, richTextEditor: (allowed) => ({ allowed }) })
+// faq's own source, and locations so the report still lists it: the emitter leaves out a section
+// whose source the site lacks.
+const emitted = toPayloadBlocks({ icons, sources: { ...sources, faqs: {}, locations: {} }, richTextEditor: (allowed) => ({ allowed }) })
 
 // ── Compare ────────────────────────────────────────────────────────────────────────────────────
 
