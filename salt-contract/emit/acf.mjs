@@ -29,7 +29,7 @@
 // timestamp, which a consumer loading the groups from code does not need.
 import { readFileSync, writeFileSync } from 'node:fs'
 
-import { allowedFor, clauses, collectionQueryShape, diffSnapshots, isMainModule, LINK_SHAPE, loadContract, resolveSection, SOURCES } from './_contract.mjs'
+import { allowedFor, clauses, collectionQueryShape, diffSnapshots, isMainModule, LINK_SHAPE, loadContract, normaliseLineEndings, resolveSection, SOURCES } from './_contract.mjs'
 
 /**
  * Each source's post type and category taxonomy, as Salt for WordPress registers them by default.
@@ -384,7 +384,8 @@ const keyOf = (item) => (item && typeof item === 'object' && !Array.isArray(item
  * snapshot and no longer generated`.
  */
 export function checkAcfSnapshot(snapshot, options = {}) {
-  const now = acfSnapshot(options)
+  const now = normaliseLineEndings(acfSnapshot(options))
+  snapshot = normaliseLineEndings(snapshot)
   if (now === snapshot) return { ok: true, problems: [] }
   let was
   try { was = JSON.parse(snapshot) } catch (e) { return { ok: false, problems: [`the snapshot is not JSON: ${e.message}`] } }

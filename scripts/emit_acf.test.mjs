@@ -316,3 +316,8 @@ test('R1: the CLI runs, and fails on drift, when invoked through a symlink as pn
     assert.match(out, /strapline/)
   } finally { rmSync(dir, { recursive: true, force: true }) }
 })
+
+test('R4: a snapshot checked out with CRLF line endings still matches', () => {
+  const snapshot = acfSnapshot({ icons })
+  assert.deepEqual(checkAcfSnapshot(snapshot.replace(/\n/g, '\r\n'), { icons }), { ok: true, problems: [] })
+})
