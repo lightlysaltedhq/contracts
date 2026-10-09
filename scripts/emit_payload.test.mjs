@@ -9,6 +9,8 @@ import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
+import Ajv2020 from 'ajv/dist/2020.js'
+
 import { hasVisibleText, loadContract } from '../salt-contract/emit/_contract.mjs'
 import { checkPayloadSnapshot, isFilled, payloadSnapshot, toPayloadBlocks } from '../salt-contract/emit/payload.mjs'
 
@@ -320,4 +322,19 @@ test('R1: the CLI runs, and fails on drift, when invoked through a symlink as pn
     assert.equal(code, 1)
     assert.match(out, /strapline/)
   } finally { rmSync(dir, { recursive: true, force: true }) }
+})
+
+test('R5: a clause with no test, or with two, is refused by the schema and by the emitter', () => {
+  const schemaFile = path.join(path.dirname(emitter), '..', 'schema', 'field-definition.schema.json')
+  const validate = new Ajv2020({ strict: false }).compile(JSON.parse(readFileSync(schemaFile, 'utf8')))
+  const doc = (condition) => ({
+    $schema: '../../schema/field-definition.schema.json', version: '0.1.0', section: 'probe', shared: { id: 'section-settings' },
+    fields: [{ name: 'on', type: 'boolean', label: 'On' }, { name: 'text', type: 'text', label: 'Text', condition }],
+  })
+  assert.equal(validate(doc({ field: 'on', equals: true })), true)
+  for (const bad of [{ field: 'on' }, { field: 'on', equals: true, in: [true] }, { field: 'on', filled: true, equals: true }]) {
+    assert.equal(validate(doc(bad)), false, JSON.stringify(bad))
+    const fields = [{ name: 'on', type: 'boolean', label: 'On' }, { name: 'text', type: 'text', label: 'Text', condition: bad }]
+    assert.throws(() => toPayloadBlocks({ contract: probe(fields) }), /probe\.text condition on on: a clause tests exactly one of equals, in or filled/)
+  }
 })

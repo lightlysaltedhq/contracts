@@ -23,7 +23,7 @@
 // the clock, the environment or the file system's listing order.
 import { readFileSync, writeFileSync } from 'node:fs'
 
-import { clauses, collectionQueryShape, hasVisibleText, isFilled, isMainModule, LINK_SHAPE, loadContract, normaliseLineEndings, resolveSection, siblingValue, SOURCES } from './_contract.mjs'
+import { checkedClauses, collectionQueryShape, hasVisibleText, isFilled, isMainModule, LINK_SHAPE, loadContract, normaliseLineEndings, resolveSection, siblingValue, SOURCES } from './_contract.mjs'
 
 /**
  * Each source's Payload collection and category taxonomy, as Salt for Next.js names them by
@@ -100,7 +100,7 @@ function convertField(f, ctx) {
   const admin = {}
   const out = { name: f.name }
   if (f.description) admin.description = f.description
-  const list = clauses(f.condition)
+  const list = checkedClauses(f.condition, `${ctx.scope}.${[...ctx.path, f.name].join('.')}`)
   if (list.length) {
     salt.condition = list
     admin.condition = conditionFor(list, ctx.defaults)

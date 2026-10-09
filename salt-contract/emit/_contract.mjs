@@ -107,6 +107,21 @@ export const normaliseLineEndings = (text) => text.replace(/\r\n/g, '\n')
 /** A condition as a list of clauses, all of which must hold; [] for none. */
 export const clauses = (condition) => (condition === undefined ? [] : [condition].flat())
 
+/**
+ * clauses(), refusing a clause that tests nothing or two things. The schema refuses both (its
+ * oneOf); this holds a contract built in code, which no schema sees, to the same rule. `where`
+ * names the field in the message.
+ */
+export function checkedClauses(condition, where) {
+  const list = clauses(condition)
+  for (const c of list) {
+    if (['equals', 'in', 'filled'].filter((k) => k in c).length !== 1) {
+      throw new Error(`${where} condition on ${c.field}: a clause tests exactly one of equals, in or filled`)
+    }
+  }
+  return list
+}
+
 /** Source ids that hold items (field-definition schema, $defs.source). */
 export const SOURCES = ['services', 'case-studies', 'testimonials', 'posts', 'team', 'faqs', 'locations']
 
