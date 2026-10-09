@@ -10,7 +10,7 @@ import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import { loadContract } from '../salt-contract/emit/_contract.mjs'
+import { isFilled, loadContract } from '../salt-contract/emit/_contract.mjs'
 import { acfSlugRegistry, acfSnapshot, checkAcfSnapshot, conditionalLogic, toAcfFieldGroups } from '../salt-contract/emit/acf.mjs'
 
 const emitter = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'salt-contract', 'emit', 'acf.mjs')
@@ -112,6 +112,10 @@ test('filled: true is ACF "has any value" and filled: false "has no value"', () 
   assert.deepEqual(fit.conditional_logic, [[{ field: 'field_salt_tabs_settings_background_image_image', operator: '!=empty' }]])
   assert.equal(shows(fit, { image: '' }, bg), false)
   assert.equal(shows(fit, { image: 12 }, bg), true)
+  // ACF's reading agrees with the contract's isFilled wherever it can; text of only spaces or
+  // zero-width characters is the one place it cannot (SC-009, the schema's WordPress note).
+  for (const v of ['', null, 12, 'Our services']) assert.equal(shows(label, { heading: v }, tabs.sub_fields), !isFilled(v), String(v))
+  for (const v of ['   ', '\u200B']) assert.equal(shows(label, { heading: v }, tabs.sub_fields), isFilled(v), JSON.stringify(v))
   // Every clause must hold: one group of two rules, the boolean compared as ACF stores it.
   const strength = field(bg, 'scrimStrength')
   assert.deepEqual(strength.conditional_logic, [[

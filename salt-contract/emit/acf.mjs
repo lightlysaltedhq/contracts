@@ -31,7 +31,7 @@ import { readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 
-import { clauses, collectionQueryShape, LINK_SHAPE, loadContract, resolveSection, SOURCES } from './_contract.mjs'
+import { allowedFor, clauses, collectionQueryShape, diffSnapshots, LINK_SHAPE, loadContract, resolveSection, SOURCES } from './_contract.mjs'
 
 /**
  * Each source's post type and category taxonomy, as Salt for WordPress registers them by default.
@@ -51,8 +51,6 @@ export const SECTIONS_GROUP_KEY = 'group_salt_sections'
 // The container's key predates the contract; changing it would orphan every stored page's sections.
 const CONTAINER_KEY = 'field_salt_sections_container'
 
-const HEADING_KINDS = { h2: 'heading-2', h3: 'heading-3', h4: 'heading-4' }
-
 const snake = (s) => s.replace(/([a-z0-9])([A-Z])/g, '$1_$2').replace(/-/g, '_').toLowerCase()
 
 // ── Conditions ─────────────────────────────────────────────────────────────────────────────────
@@ -60,7 +58,8 @@ const snake = (s) => s.replace(/([a-z0-9])([A-Z])/g, '$1_$2').replace(/-/g, '_')
 /**
  * Contract clauses as ACF `conditional_logic`: a list of OR groups, each a list of rules that must
  * all hold. ACF has no "one of", so each `in` multiplies the groups out. `filled: true` is ACF's
- * "has any value" (`!=empty`), `filled: false` its "has no value" (`==empty`). A true_false stores
+ * "has any value" (`!=empty`), `filled: false` its "has no value" (`==empty`); ACF counts text of
+ * only spaces as a value, which SC-009's isFilled does not, as the schema's WordPress note records. A true_false stores
  * 1 or 0 and ACF compares it with '1', so `equals: false` is "not checked".
  */
 export function conditionalLogic(list, keyOf) {
@@ -85,19 +84,6 @@ function sourcesFrom(options) {
   const given = options.sources
   const installed = given ? SOURCES.filter((s) => s in given) : SOURCES
   return Object.fromEntries(installed.map((s) => [s, { ...SOURCE_DEFAULTS[s], ...(given?.[s] ?? {}) }]))
-}
-
-function allowedFor(field, headings) {
-  if (!headings) return field.allowed
-  const contractHeadings = field.allowed.filter((k) => k.startsWith('heading-'))
-  if (contractHeadings.length === 0) return field.allowed
-  const wanted = headings.map((h) => HEADING_KINDS[h] ?? h)
-  for (const k of wanted) {
-    if (!contractHeadings.includes(k)) {
-      throw new Error(`headings: ${k} is not allowed by the contract, which allows ${contractHeadings.join(', ')}`)
-    }
-  }
-  return field.allowed.filter((k) => !k.startsWith('heading-') || wanted.includes(k))
 }
 
 const keyFor = (ctx, name) => `field_salt_${[ctx.scope, ...ctx.path, name].map(snake).join('_')}`
@@ -393,29 +379,6 @@ export function acfSlugRegistry(groups) {
 
 const keyOf = (item) => (item && typeof item === 'object' && !Array.isArray(item) ? item.name ?? item.key : undefined)
 
-function diff(was, now, at, out) {
-  if (Array.isArray(was) && Array.isArray(now) && [...was, ...now].every((x) => keyOf(x) !== undefined)) {
-    const a = new Map(was.map((x) => [keyOf(x), x]))
-    const b = new Map(now.map((x) => [keyOf(x), x]))
-    for (const k of a.keys()) if (!b.has(k)) out.push(`${at}[${k}] is in the snapshot and no longer generated`)
-    for (const k of b.keys()) if (!a.has(k)) out.push(`${at}[${k}] is generated and not in the snapshot`)
-    const common = [...a.keys()].filter((k) => b.has(k))
-    if (common.join('\0') !== [...b.keys()].filter((k) => a.has(k)).join('\0')) out.push(`${at} is in a different order`)
-    for (const k of common) diff(a.get(k), b.get(k), `${at}[${k}]`, out)
-    return
-  }
-  const isObj = (x) => x && typeof x === 'object' && !Array.isArray(x)
-  if (isObj(was) && isObj(now)) {
-    for (const k of new Set([...Object.keys(was), ...Object.keys(now)])) {
-      if (!(k in now)) out.push(`${at}.${k} is in the snapshot and no longer generated`)
-      else if (!(k in was)) out.push(`${at}.${k} is generated and not in the snapshot`)
-      else diff(was[k], now[k], `${at}.${k}`, out)
-    }
-    return
-  }
-  if (JSON.stringify(was) !== JSON.stringify(now)) out.push(`${at} was ${JSON.stringify(was)}, is now ${JSON.stringify(now)}`)
-}
-
 /**
  * Regenerate with `options` and compare with a committed snapshot (its text). `ok` is true only
  * when the two are byte-identical; `problems` names each difference by path, as
@@ -428,7 +391,7 @@ export function checkAcfSnapshot(snapshot, options = {}) {
   let was
   try { was = JSON.parse(snapshot) } catch (e) { return { ok: false, problems: [`the snapshot is not JSON: ${e.message}`] } }
   const problems = []
-  diff(was, JSON.parse(now), 'groups', problems)
+  diffSnapshots(was, JSON.parse(now), 'groups', keyOf, problems)
   // Same structure, different bytes: formatting, which a regenerated snapshot fixes.
   if (!problems.length) problems.push('the snapshot differs from the generated text only in formatting; regenerate it')
   return { ok: false, problems }

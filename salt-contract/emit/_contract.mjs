@@ -1,6 +1,7 @@
 // What every emitter reads from the contract, and nothing platform-specific: loading the contract
-// files, resolving a section's shared settings, normalising a condition to a list of clauses, and
-// the two fixed shapes (link and collection-query) the schema describes in prose. The Payload
+// files, resolving a section's shared settings, normalising a condition to a list of clauses, the
+// two fixed shapes (link and collection-query) the schema describes in prose, a rich text field's
+// allowed list for a site's headings, and the drift diff both snapshots are checked with. The Payload
 // emitter (payload.mjs) and the ACF emitter use this one copy, so the two cannot drift apart on
 // what a link or a collection-query holds.
 //
@@ -421,4 +422,52 @@ export function collectionQueryShape({ modes, max = COLLECTION_QUERY_MAX, hasCat
       ]
       : []),
   ]
+}
+
+const HEADING_KINDS = { h2: 'heading-2', h3: 'heading-3', h4: 'heading-4' }
+
+/**
+ * A rich text field's allowed list narrowed to the heading levels a site offers (['h3', 'h4']).
+ * A field allowing no headings is not given any; a level the contract refuses is an error.
+ */
+export function allowedFor(field, headings) {
+  if (!headings) return field.allowed
+  const contractHeadings = field.allowed.filter((k) => k.startsWith('heading-'))
+  if (contractHeadings.length === 0) return field.allowed
+  const wanted = headings.map((h) => HEADING_KINDS[h] ?? h)
+  for (const k of wanted) {
+    if (!contractHeadings.includes(k)) {
+      throw new Error(`headings: ${k} is not allowed by the contract, which allows ${contractHeadings.join(', ')}`)
+    }
+  }
+  return field.allowed.filter((k) => !k.startsWith('heading-') || wanted.includes(k))
+}
+
+/**
+ * Push onto `out` each difference between a committed snapshot (`was`) and a regenerated one
+ * (`now`), by path from `at`. Lists whose items all have a `keyOf` are compared by that key, so a
+ * renamed item reads as one gone and one new, not as every later item shifted.
+ */
+export function diffSnapshots(was, now, at, keyOf, out) {
+  if (Array.isArray(was) && Array.isArray(now) && [...was, ...now].every((x) => keyOf(x) !== undefined)) {
+    const a = new Map(was.map((x) => [keyOf(x), x]))
+    const b = new Map(now.map((x) => [keyOf(x), x]))
+    for (const k of a.keys()) if (!b.has(k)) out.push(`${at}[${k}] is in the snapshot and no longer generated`)
+    for (const k of b.keys()) if (!a.has(k)) out.push(`${at}[${k}] is generated and not in the snapshot`)
+    const common = [...a.keys()].filter((k) => b.has(k))
+    if (common.join('\0') !== [...b.keys()].filter((k) => a.has(k)).join('\0')) out.push(`${at} is in a different order`)
+    for (const k of common) diffSnapshots(a.get(k), b.get(k), `${at}[${k}]`, keyOf, out)
+    return out
+  }
+  const isObj = (x) => x && typeof x === 'object' && !Array.isArray(x)
+  if (isObj(was) && isObj(now)) {
+    for (const k of new Set([...Object.keys(was), ...Object.keys(now)])) {
+      if (!(k in now)) out.push(`${at}.${k} is in the snapshot and no longer generated`)
+      else if (!(k in was)) out.push(`${at}.${k} is generated and not in the snapshot`)
+      else diffSnapshots(was[k], now[k], `${at}.${k}`, keyOf, out)
+    }
+    return out
+  }
+  if (JSON.stringify(was) !== JSON.stringify(now)) out.push(`${at} was ${JSON.stringify(was)}, is now ${JSON.stringify(now)}`)
+  return out
 }

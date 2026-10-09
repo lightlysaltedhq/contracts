@@ -102,7 +102,8 @@ function record(section, at, def, kind, text, parent) {
   rows.push({ section, at, kind, text, verdict, evidence })
 }
 
-// ACF's reading of a rule. A true_false holds 1 or 0; empty is '', null, 0 or an empty list.
+// ACF's reading of a rule, not the contract's isFilled: both sides here are ACF rules, so they are
+// judged as ACF judges them. A true_false holds 1 or 0; empty is '', null, 0 or an empty list.
 const isEmpty = (v) => v === undefined || v === null || v === '' || v === 0 || (Array.isArray(v) && v.length === 0)
 function holds(r, v) {
   switch (r.operator) {
