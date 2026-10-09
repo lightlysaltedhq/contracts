@@ -556,3 +556,25 @@ test('V4: a query whose source select is left out goes with it', () => {
   const [b] = toPayloadBlocks({ contract: probe(sourced(extra)), sources: { team: {} } })
   assert.deepEqual(b.fields.map((f) => f.name), ['source'])
 })
+
+test('V1, V6: a query choosing among several sources must sit at the block\'s top level', () => {
+  const pair = [
+    { name: 'source', type: 'select', label: 'Show', options: [{ value: 'posts', label: 'Posts' }, { value: 'team', label: 'Team' }] },
+    { name: 'query', type: 'collection-query', label: 'Query', sourceField: 'source' },
+  ]
+  const nested = probe([{ name: 'rows', type: 'list', label: 'Rows', fields: pair }])
+  assert.throws(() => toPayloadBlocks({ contract: nested }), /probe\.rows\.query: a collection-query choosing among several sources must sit at the block's top level/)
+  // One installed source needs no picker filter, so it may sit anywhere.
+  assert.equal(field(field(toPayloadBlocks({ contract: nested, sources: { team: {} } })[0].fields, 'rows.query').fields, 'items').relationTo, 'users')
+
+  const settings = probe([{ name: 'heading', type: 'text', label: 'Heading' }])
+  settings.settings = pair
+  settings.fields.probe.shared = { id: 'section-settings' }
+  assert.throws(() => toPayloadBlocks({ contract: settings }), /probe\.settings\.query: a collection-query choosing among several sources/)
+
+  // At the top level the pickers filter by the block's own source select.
+  const items = field(field(toPayloadBlocks({ contract: probe(pair) })[0].fields, 'query').fields, 'items')
+  assert.deepEqual(items.relationTo, ['posts', 'users'])
+  assert.equal(items.filterOptions({ relationTo: 'users', blockData: { source: 'team' } }), true)
+  assert.equal(items.filterOptions({ relationTo: 'posts', blockData: { source: 'team' } }), false)
+})

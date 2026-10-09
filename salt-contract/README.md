@@ -87,7 +87,9 @@ source select still has an option to offer, as the carousel's inline cards do, t
 the select offers only what the site can satisfy (and has no default when its default is no
 longer offered), and the query, any field reached only by a
 missing source, and anything conditioned on a field left out are left out. A malformed condition,
-or a `sourceField` naming no sibling select, is refused whatever the site installs. Conditions
+or a `sourceField` naming no sibling select or one offering no source, is refused whatever the site
+installs. A query choosing among several installed sources is refused anywhere but the block's top
+level, where its pickers can find the select. Conditions
 read a stored `null` as no value; only a sibling never set takes its default.
 
 `reports/round-trip-payload.md`, which is not shipped, compares the output with the blocks

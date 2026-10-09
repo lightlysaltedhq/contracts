@@ -248,6 +248,19 @@ function checkFields(fields, at) {
   }
 }
 
+// A query choosing among several sources filters its pickers by its select's value, which a picker
+// can find only on the block itself (Payload's blockData). Below the top level, in a list row or the
+// settings group, it would read the wrong select or none, so it is refused until it can find its own.
+function refuseDeepMultiSource(fields, at, depth) {
+  for (const f of fields) {
+    const where = `${at}.${f.name}`
+    if (depth > 0 && f.sourceField && sourceValues(fields.find((s) => s.name === f.sourceField)).length > 1) {
+      throw new Error(`${where}: a collection-query choosing among several sources must sit at the block's top level, where its pickers can find the select`)
+    }
+    if (f.fields) refuseDeepMultiSource(f.fields, where, depth + 1)
+  }
+}
+
 /**
  * The one entry point every emitter plans its sections with, so the emitters cannot disagree about
  * which sections a site gets or what their source selects offer.
@@ -258,7 +271,8 @@ function checkFields(fields, at) {
  *
  * Returns { sections: [{ id, section, fields, settings }], leftOut: [{ id, needs }] }: fields and
  * settings fitted by withinSources. A section asked for by name that the site cannot carry throws,
- * naming what it needs. Each section is resolved once.
+ * naming what it needs, and so does a query choosing among several installed sources anywhere but
+ * the block's top level. Each section is resolved once.
  */
 export function planSections(contract, { installed = new Set(SOURCES), sections } = {}) {
   const named = sections != null
@@ -276,8 +290,10 @@ export function planSections(contract, { installed = new Set(SOURCES), sections 
       ...unmetSources(settings, installed, `${id}.settings`, allSettings),
     ]
     if (needs.length && named) throw new Error(`section ${id} needs ${needs.join(', ')}, which options.sources does not install`)
-    if (needs.length) leftOut.push({ id, needs })
-    else kept.push({ id, section, fields, settings })
+    if (needs.length) { leftOut.push({ id, needs }); continue }
+    refuseDeepMultiSource(fields, id, 0)
+    refuseDeepMultiSource(settings, `${id}.settings`, 1)
+    kept.push({ id, section, fields, settings })
   }
   return { sections: kept, leftOut }
 }
