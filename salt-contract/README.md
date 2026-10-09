@@ -107,6 +107,58 @@ value; only a sibling never set takes its default.
 salt-nextjs ships today. A difference is expected only when `reports/round-trip-payload.expected.json`
 lists it, with the note that accounts for it.
 
+## Generating ACF field groups
+
+`emit/acf.mjs` (`@lightlysaltedhq/salt-contract/emit/acf`) turns each section's field definitions
+into the Flexible Content layout Salt for WordPress registers in its page sections field group
+(`group_salt_sections`). The contract defines no other groups yet, so that is the only one; the
+custom post types' groups stay in salt-wordpress until the contract defines their fields. Like the
+Payload emitter it is a pure data transform, reading only this package's files.
+
+```js
+import { toAcfFieldGroups, checkAcfSnapshot, acfSnapshot } from '@lightlysaltedhq/salt-contract/emit/acf'
+
+const groups = toAcfFieldGroups({
+  linkTo: ['page'],                   // post types an internal link may point at (['page'])
+  headings: ['h3', 'h4'],             // narrows rich text's headings; cannot add one the contract refuses
+  icons: iconOptions(),               // [{ value, label }]; required by features, stats and process
+  sources: { services: {}, posts: {} }, // the sources the site has, with any renamed post types or taxonomies
+  postTypes: ['page'],                // where the sections group shows (['page'])
+  sections: ['hero', 'rich-text'],    // which sections, in order (every section in sections.json)
+})
+```
+
+ACF's conditions are data, so the output is plain JSON in the shape ACF JSON uses, which is also
+the array `acf_add_local_field_group()` takes: the site commits `acfSnapshot(options)` and
+registers each group from it with `json_decode( $json, true )`. Names are the contract's (a
+layout is named by its section id, a field by its canonical name); keys follow salt-wordpress's
+DATA02 convention, derived from the contract path, so `rows.mediaSide` on media-text is
+`field_salt_media_text_rows_media_side` whatever order the fields are in. Conditions become
+`conditional_logic`, with `filled: true` as ACF's "has any value" and `filled: false` as "has no
+value". Each field records what it was generated from under `salt` (rich text's allowed list, a
+text format, a list's row label, a link's or query's shape), for the site's renderer and
+sanitiser.
+
+**The drift check.** As with Payload, the site commits the snapshot and checks it on every run:
+
+```js
+const { ok, problems } = checkAcfSnapshot(readFileSync('acf/sections.json', 'utf8'), options)
+// problems: ['groups[group_salt_sections].fields[sections].layouts[hero].sub_fields[heading] is in the snapshot and no longer generated', …]
+```
+
+Every option is JSON, so the command line takes them all:
+`node emit/acf.mjs --check <snapshot> [--options <options.json>]` exits 1 on drift, and `--write
+<snapshot>` regenerates it. salt-wordpress's `bin/check-fields-from-contract.php` runs this in CI.
+
+**The slug gate still holds.** salt-wordpress's FLEET07 gate (`bin/extract-slugs.php`,
+`bin/check-slug-stability.php`) reads the groups the theme registers, not the code that built
+them. The emitted groups have the shape it walks (`fields`, `sub_fields`, `layouts[].name`), so
+registering them leaves `docs/contracts/slug-registry.json` regenerable as before, and a field or
+layout the contract drops disappears from the registry. Without a `slug-migrations.json` entry
+that removal still fails the gate on a non-major release. `acfSlugRegistry(groups)` gives the same
+layouts and names, for a test that wants to see the effect before the theme does.
+`reports/round-trip-acf.md`, which is not shipped either, compares the output with the layouts salt-wordpress ships today.
+
 ## Stylesheets
 
 `styles/` is the one shared stylesheet set both implementations serve (SC-002). Load it in this
