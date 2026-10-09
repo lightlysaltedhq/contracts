@@ -6,28 +6,33 @@ Salted's decision log for Product Salt.
 
 ## Unreleased (0.1.0, drafting)
 
-- Image sizes (SC-016): `contract/image-sizes.json` (`./image-sizes`, schema
-  `./schema/image-sizes`) fixes each image slot's default `sizes`, per band and per card column
-  count, the candidate widths and the rule that picks them, and `src` as the widest candidate, from
-  Salt for Next.js's table. `markup/media.json` and the section background read it. A site that
-  swaps a view or changes a layout declares its own sizes per slot in `salt-overrides.json` under
-  `imageSizes`. Salt for WordPress owes matching sizes and registered widths. Fixture media records
-  give a URL template per width; every image asserts its slot's default.
+- Image sizes (SC-016): `contract/image-sizes.json` (`./image-sizes`, schema `./schema/image-sizes`)
+  fixes each image slot's default `sizes`, per band and per card column count, the candidate widths
+  and the rule that picks them, the srcset capped at the upload's intrinsic width (listed itself
+  when it is no candidate), `src` the widest width listed, and the site logo's sizes as its drawn
+  width in px, from Salt for Next.js's table. `markup/media.json` and the section background read
+  it. A site that swaps a view or changes a layout declares its own sizes per slot in
+  `salt-overrides.json` under `imageSizes`. Salt for WordPress owes matching sizes and registered
+  widths; Salt for Next.js owes the cap, and width and height on fill images (SC-007). Fixture media
+  records give a URL template per width; every image asserts its slot's default.
 - `toneDark: auto` writes the section's tone, and the shared stylesheet draws its dark form; the
   label and the markup note say so (SC-016).
-- `section#display-forms` (SC-016): dates and times display in the site's locale, `<time
-  datetime>` is ISO 8601, a phone link's href follows one rule, and JSON in data attributes has no
-  escaped slashes. Fixtures pin `en-GB`.
+- `section#display-forms` (SC-016): dates and times display in the site's locale, `<time datetime>`
+  is ISO 8601, a phone link's href follows Salt for Next.js's rule, and a number with an extension
+  or a stray bracket draws no link, and JSON in data attributes has no escaped slashes. Fixtures pin
+  `en-GB`.
 - The contact form is fixtured (SC-016): field names, types, the message's rows, autocomplete and
   redrawn values are in the markup. The normaliser masks only the form's action, its two token
-  values and the challenge question, as declared placeholders. New cases: open, invalid and sent.
-- Markup corrections: images always carry width and height (SC-007); a rich-text body may draw h2
-  at base level 1; the accordion's group name is only on each `details`, and the tab set's name
-  only on its radiogroup; pagination draws its window with gaps; the showcase index has an
-  ungrouped form; a lone carousel card may take the priority image (`priorityMedia.role` may list
-  roles, a MINOR schema loosening); and the button arrow, section index counted from 1 and a
-  background with no focal point are stated. The fixtures gate also checks tab counts and the
-  pagination window against the case. 80 fixture cases.
+  values and the challenge question (the question's own text only, and only values that are
+  present), as declared placeholders. New cases: open, invalid and sent.
+- Markup corrections: images always carry width and height (SC-007); a rich-text body may draw h2 at
+  base level 1; the accordion's group name is only on each `details`, and the tab set's name only on
+  its radiogroup; pagination draws its window with gaps; the showcase index has an ungrouped form; a
+  lone carousel card may take the priority image (`priorityMedia.role` may list roles, a MINOR
+  schema loosening); which buttons take the site's arrow (a section's calls to action only), the
+  section index counted from 0 (the plan's index, as both platforms count it) and a background with
+  no focal point are stated. The fixtures gate also checks tab counts and the pagination window
+  against the case. 80 fixture cases.
 - The extension points (ID-3606), with the customisation ladder as normative text in the README:
   brand settings, dials and tokens, variants, swap a view, replace logic, a client-only section,
   each saying what still reaches a site on update. No separate slots-and-hooks system.
