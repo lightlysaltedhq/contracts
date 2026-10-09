@@ -340,7 +340,11 @@ pins. For every section it ships it checks four things:
   than 200 fails that case, with its stderr (or the response body) in the report.
 - **Field parity.** The implementation's committed field snapshot is checked with the emitter's own
   `checkPayloadSnapshot` or `checkAcfSnapshot` (the drift checks above), using the implementation's
-  real options, and each problem is filed under its section.
+  real options, and each problem is filed under its section. Every shipped section must be in the
+  snapshot ("not in the field snapshot" otherwise). A problem under a block or layout that is no
+  contract section, or under a section declared not shipped, is about the whole snapshot and fails
+  every shipped section; so does a section declared not shipped whose fields are in the snapshot,
+  since shipped fields make it shipped.
 - **Classes.** Every `salt-*` class in the adapter's output is one an element in `contract/markup`
   carries.
 - **Stylesheet pin.** The stylesheets in the directory the implementation serves them from are
@@ -351,7 +355,9 @@ An implementation conforms only when all four checks ran for every section it sh
 (SC-017). A section passes only when all four hold for it; one whose checks that ran all passed,
 but with a check left out, is `incomplete`. So a run without a field snapshot or a stylesheet pin
 fails. A run of some sections (`--sections`) or some checks is allowed only with `--partial`, and
-its report says "partial, not conforming": `ok` is false, `partial` is true and it exits 1.
+its report says "partial, not conforming": `ok` is false, `partial` is true and it exits 1. A run
+must ship at least one section, and a section declared not shipped (`--not-shipped`) must stay
+out of the output: a class only its markup draws, written by another section, fails the run.
 
 Salt for Next.js re-exports the stylesheets, so it passes the directory its build resolves them
 from:
@@ -409,6 +415,7 @@ report).
   "partial": false,
   "summary": { "pass": 15, "fail": 1, "incomplete": 0, "notShipped": 1 },
   "fields": { "platform": "payload", "snapshot": "…", "options": "…", "problems": [] },
+  "problems": [],
   "stylesheets": { "dir": "…", "contract": "0.1.0", "ok": true, "files": [{ "file": "base.css", "status": "identical" }] },
   "sections": [
     {
@@ -433,7 +440,8 @@ is `pass`, `fail` or `not run`. A failure's `kind` is `mismatch` (with
 `difference`: `element`, `missing`, `unexpected`, `attribute` with its `name`, or `text`; an absent
 side is `null`) or `adapter` (with `error` and `stderr`). `fields.problems` at the top holds what is
 about the whole snapshot (not JSON, sections out of order, formatting); a section's own are under
-it. `stylesheets.files` lists each file as `identical`, `differs` (with
+it. `problems` holds what fails the run as a whole (a section declared not shipped whose classes
+the output uses). `stylesheets.files` lists each file as `identical`, `differs` (with
 `firstDifferingByte`) or `missing`. `conformance.md` is the same report for a person: a table of
 sections, then each failure on a line.
 

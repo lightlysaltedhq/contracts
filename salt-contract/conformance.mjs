@@ -238,6 +238,28 @@ export function markupClasses(dir = packageDir) {
   return classes
 }
 
+/** For each class only one section's markup file draws, that section's id. */
+function ownClasses(dir) {
+  const markupDir = path.join(dir, 'contract', 'markup')
+  const drawnBy = new Map()
+  for (const f of readdirSync(markupDir).filter((f) => f.endsWith('.json'))) {
+    const doc = readJson(path.join(markupDir, f))
+    const classes = new Set()
+    const collect = (node) => {
+      if (Array.isArray(node)) { node.forEach(collect); return }
+      if (!node || typeof node !== 'object') return
+      for (const [key, value] of Object.entries(node)) {
+        if (NOT_ELEMENTS.has(key)) continue
+        if (key === 'classes' && Array.isArray(value)) value.forEach((name) => classes.add(name))
+        else collect(value)
+      }
+    }
+    collect(doc)
+    for (const c of classes) drawnBy.set(c, [...(drawnBy.get(c) ?? []), doc.id])
+  }
+  return new Map([...drawnBy].filter(([, owners]) => owners.length === 1).map(([c, [owner]]) => [c, owner]))
+}
+
 function casesOf(dir, section) {
   const sdir = path.join(dir, 'fixtures', section)
   if (!existsSync(sdir)) return []
@@ -258,6 +280,14 @@ function checkFields(fields) {
   const options = fields.options ? readJson(fields.options) : {}
   const check = fields.platform === 'payload' ? checkPayloadSnapshot : checkAcfSnapshot
   const { problems } = check(text, options)
+  // The sections the snapshot holds, so a shipped section missing from it can be named.
+  let present = null
+  try {
+    const doc = JSON.parse(text)
+    present = fields.platform === 'payload'
+      ? doc.map((b) => b.slug)
+      : doc.find((g) => g.key === 'group_salt_sections').fields.find((f) => f.name === 'sections').layouts.map((l) => l.name)
+  } catch { /* not the snapshot's shape: check() has said so */ }
   const bySection = new Map()
   const whole = []
   for (const p of problems) {
@@ -265,7 +295,7 @@ function checkFields(fields) {
     if (id) bySection.set(id, [...(bySection.get(id) ?? []), p])
     else whole.push(p)
   }
-  return { platform: fields.platform, snapshot: fields.snapshot, options: fields.options ?? null, problems: whole, bySection }
+  return { platform: fields.platform, snapshot: fields.snapshot, options: fields.options ?? null, problems: whole, bySection, present }
 }
 
 function checkStyles(styles, version, dir) {
@@ -312,10 +342,25 @@ export async function runConformance(options) {
     if (notShipped.has(id)) throw new Error(`${id} is in --sections and --not-shipped; a section is run or not shipped, not both`)
   }
   const run = ids.filter((id) => (options.sections ? options.sections.includes(id) || notShipped.has(id) : true))
+  if (run.every((id) => notShipped.has(id))) throw new Error('the run ships no section, so there is nothing to show conforming')
   const timeout = options.timeout ?? 60000
   const jobs = options.jobs ?? availableParallelism()
   const vocabulary = markupClasses(dir)
   const fields = options.fields ? checkFields(options.fields) : null
+  if (fields) {
+    // Every problem lands where it fails the run. One under a block that is no contract section, or
+    // under a section declared not shipped, is about the snapshot as a whole; and a section declared
+    // not shipped whose fields are in the snapshot is shipped after all.
+    for (const [id, problems] of fields.bySection) {
+      if (!ids.includes(id) || notShipped.has(id)) { fields.problems.push(...problems); fields.bySection.delete(id) }
+    }
+    for (const id of notShipped) {
+      if (fields.present?.includes(id)) fields.problems.push(`${id} is declared not shipped, and its fields are in the snapshot: fields shipped make the section shipped`)
+    }
+    for (const id of run) {
+      if (!notShipped.has(id) && fields.present && !fields.present.includes(id)) fields.bySection.set(id, [`${id} is not in the field snapshot`, ...(fields.bySection.get(id) ?? [])])
+    }
+  }
   const styles = options.styles ? checkStyles(options.styles, pkg.version, dir) : null
   const render = options.adapter.command
     ? (input) => runCommand(options.adapter.command, input, timeout)
@@ -323,6 +368,24 @@ export async function runConformance(options) {
 
   const tasks = run.filter((id) => !notShipped.has(id)).flatMap((section) => casesOf(dir, section).map((c) => ({ section, ...c })))
   const outcomes = await pool(tasks, jobs, async (t) => ({ ...t, result: await render(t.input) }))
+
+  // A section declared not shipped whose own classes the output draws is shipped after all.
+  const owners = ownClasses(dir)
+  const drawnUnshipped = new Map()
+  for (const o of outcomes) {
+    if (o.result.error) continue
+    for (const m of compare('', o.result.html).actual.matchAll(/ class="([^"]*)"/g)) {
+      for (const c of m[1].split(' ')) {
+        if (!notShipped.has(owners.get(c))) continue
+        const key = `${owners.get(c)}\0${c}`
+        drawnUnshipped.set(key, [...new Set([...(drawnUnshipped.get(key) ?? []), `${o.section}/${o.name}`])])
+      }
+    }
+  }
+  const problems = [...drawnUnshipped].sort().map(([key, cases]) => {
+    const [owner, c] = key.split('\0')
+    return `${owner} is declared not shipped, and the output uses its class ${c} (${cases.join(', ')})`
+  })
 
   const sections = run.map((id) => {
     if (notShipped.has(id)) return { id, status: 'not shipped' }
@@ -360,8 +423,9 @@ export async function runConformance(options) {
     platform: options.platform,
     implementation: { version: options.implementationVersion ?? null },
     adapter: options.adapter.command ? { kind: 'command', target: options.adapter.command } : { kind: 'endpoint', target: options.adapter.endpoint },
-    ok: !options.partial && count('fail') === 0 && count('incomplete') === 0 && !(fields?.problems.length) && styles?.ok !== false,
+    ok: !options.partial && count('fail') === 0 && count('incomplete') === 0 && !(fields?.problems.length) && styles?.ok !== false && problems.length === 0,
     partial: Boolean(options.partial),
+    problems,
     summary: { pass: count('pass'), fail: count('fail'), incomplete: count('incomplete'), notShipped: count('not shipped') },
     fields: fields ? { platform: fields.platform, snapshot: fields.snapshot, options: fields.options, problems: fields.problems } : null,
     stylesheets: styles,
@@ -416,6 +480,10 @@ export function renderMarkdown(report) {
   else {
     lines.push(`${report.fields.platform} snapshot ${code(report.fields.snapshot)}${report.fields.options ? ` with options ${code(report.fields.options)}` : ''}.`)
     for (const p of report.fields.problems) lines.push(`- ${cell(p)}`)
+  }
+  if (report.problems.length) {
+    lines.push('', '## Run problems', '')
+    for (const p of report.problems) lines.push(`- ${cell(p)}`)
   }
   const failing = report.sections.filter((s) => s.status === 'fail')
   if (failing.length) lines.push('', '## Failures')

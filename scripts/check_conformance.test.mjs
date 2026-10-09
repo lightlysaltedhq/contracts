@@ -60,6 +60,7 @@ test('the reference adapter conforms: all four checks run and pass for every sec
   assert.equal(r.code, 0, r.out)
   assert.equal(r.report.ok, true)
   assert.equal(r.report.partial, false)
+  assert.deepEqual(r.report.problems, [])
   assert.deepEqual(r.report.summary, { pass: r.report.sections.length, fail: 0, incomplete: 0, notShipped: 0 })
   assert.equal(r.report.format, 'salt-conformance/1')
   assert.deepEqual(r.report.contract, { package: '@lightlysaltedhq/salt-contract', version })
@@ -198,7 +199,10 @@ test('a broken adapter fails each case it breaks, naming the section, the case a
 })
 
 test('a section the implementation does not ship is reported as not shipped, not failed', async () => {
-  const r = await run(['--platform', 'reference', '--adapter', reference, ...withFields, ...withStyles, '--not-shipped', 'pricing,tabs'])
+  const shipped = JSON.parse(readFileSync(path.join(pkg, 'contract', 'sections.json'), 'utf8')).sections.map((s) => s.id).filter((id) => !['pricing', 'tabs'].includes(id))
+  const f = snapshotFiles({ ...ICONS, sections: shipped })
+  after(() => rmSync(f.dir, { recursive: true, force: true }))
+  const r = await run(['--platform', 'reference', '--adapter', reference, ...f.payload, ...withStyles, '--not-shipped', 'pricing,tabs'])
   assert.equal(r.code, 0, r.out)
   assert.equal(r.report.ok, true)
   assert.deepEqual(r.report.sections.filter((s) => s.status !== 'pass').map((s) => s.id), ['tabs', 'pricing'])
@@ -334,6 +338,85 @@ test('firstDifference reads past what the normaliser removes, and finds an extra
     { path: 'ul > li:nth-of-type(2)', kind: 'unexpected', expected: null, found: '<li>' })
   assert.deepEqual(firstDifference('<div><p>a</p></div>', '<div><span>a</span></div>'),
     { path: 'div > p', kind: 'element', expected: '<p>', found: '<span>' })
+})
+
+// ── Review C1, C2, C6, C7 ─────────────────────────────────────────────────────────────────────
+
+const ids = JSON.parse(readFileSync(path.join(pkg, 'contract', 'sections.json'), 'utf8')).sections.map((s) => s.id)
+
+/** Snapshots and options in a scratch directory, from `options`, optionally edited. */
+function snapshotFiles(options, edit = (x) => x) {
+  const dir = scratch()
+  writeFileSync(path.join(dir, 'options.json'), JSON.stringify(options))
+  writeFileSync(path.join(dir, 'payload.json'), JSON.stringify(edit(JSON.parse(payloadSnapshot(options))), null, 2) + '\n')
+  writeFileSync(path.join(dir, 'acf.json'), acfSnapshot(options))
+  return { dir, payload: ['--payload-snapshot', path.join(dir, 'payload.json'), '--fields-options', path.join(dir, 'options.json')],
+    acf: ['--acf-snapshot', path.join(dir, 'acf.json'), '--fields-options', path.join(dir, 'options.json')] }
+}
+
+test('field parity: a block that is no contract section fails every shipped section (review C1)', async () => {
+  const f = snapshotFiles(ICONS, (blocks) => [...blocks, { ...blocks[0], slug: 'legacy-banner' }])
+  try {
+    const r = await run(['--platform', 'reference', '--adapter', reference, ...f.payload, ...withStyles])
+    assert.equal(r.code, 1, r.out)
+    assert.equal(r.report.ok, false)
+    assert.ok(r.report.fields.problems.includes('blocks[legacy-banner] is in the snapshot and no longer generated'), r.report.fields.problems.join('\n'))
+    assert.ok(r.report.sections.every((s) => s.status === 'fail' && s.fields.status === 'fail'))
+  } finally {
+    rmSync(f.dir, { recursive: true, force: true })
+  }
+})
+
+test('field parity: a section declared not shipped but in the snapshot fails the run (review C1, C6)', async () => {
+  const f = snapshotFiles(ICONS, (blocks) => { blocks.find((b) => b.slug === 'pricing').fields[0].name = 'drifted'; return blocks })
+  try {
+    for (const platform of ['payload', 'acf']) {
+      const r = await run(['--platform', 'reference', '--adapter', reference, ...f[platform], ...withStyles, '--not-shipped', 'pricing'])
+      assert.equal(r.code, 1, r.out)
+      assert.equal(r.report.ok, false)
+      assert.ok(r.report.fields.problems.some((p) => p.startsWith('pricing is declared not shipped, and its fields are in the snapshot')), r.report.fields.problems.join('\n'))
+      assert.ok(r.report.sections.filter((s) => s.status !== 'not shipped').every((s) => s.fields.status === 'fail'))
+    }
+  } finally {
+    rmSync(f.dir, { recursive: true, force: true })
+  }
+})
+
+test('field parity: a shipped section missing from the snapshot fails (review C2)', async () => {
+  const f = snapshotFiles({ ...ICONS, sections: ids.filter((id) => id !== 'faq') })
+  try {
+    for (const platform of ['payload', 'acf']) {
+      const r = await run(['--platform', 'reference', '--adapter', reference, ...f[platform], ...withStyles])
+      assert.equal(r.code, 1, r.out)
+      assert.deepEqual(section(r.report, 'faq').fields, { status: 'fail', problems: ['faq is not in the field snapshot'] })
+      assert.equal(section(r.report, 'hero').status, 'pass')
+    }
+    // Declared not shipped, its absence is right.
+    const r = await run(['--platform', 'reference', '--adapter', reference, ...f.payload, ...withStyles, '--not-shipped', 'faq'])
+    assert.equal(r.code, 0, r.out)
+  } finally {
+    rmSync(f.dir, { recursive: true, force: true })
+  }
+})
+
+test('a run that ships no section is refused (review C6)', async () => {
+  const r = await run(['--platform', 'reference', '--adapter', reference, ...withFields, ...withStyles, '--not-shipped', ids.join(',')])
+  assert.equal(r.code, 2, r.out)
+  assert.match(r.out, /ships no section/)
+})
+
+test('a shipped section drawing a class only a not-shipped section draws fails the run (review C6)', async () => {
+  const f = snapshotFiles({ ...ICONS, sections: ids.filter((id) => id !== 'pricing') })
+  const adapter = brokenAdapter({ 'faq/many': { from: 'class="salt-intro"', to: 'class="salt-intro salt-pricing__badge"' } })
+  try {
+    const r = await run(['--platform', 'reference', '--adapter', adapter.command, ...f.payload, ...withStyles, '--not-shipped', 'pricing'])
+    assert.equal(r.code, 1, r.out)
+    assert.deepEqual(r.report.problems, ['pricing is declared not shipped, and the output uses its class salt-pricing__badge (faq/many)'])
+    assert.match(r.out, /pricing is declared not shipped, and the output uses its class salt-pricing__badge \(faq\/many\)/)
+  } finally {
+    rmSync(f.dir, { recursive: true, force: true })
+    rmSync(adapter.dir, { recursive: true, force: true })
+  }
 })
 
 test('firstDifference reads a class change on the first of several like siblings as that attribute (review C7)', () => {
