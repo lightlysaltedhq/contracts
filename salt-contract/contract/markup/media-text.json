@@ -141,7 +141,7 @@
                     "right"
                   ],
                   "when": "image and words",
-                  "note": "left on even rendered rows, right on odd"
+                  "note": "left on even rendered rows, right on odd, counted from 0 (the first rendered row is left)"
                 }
               }
             }
