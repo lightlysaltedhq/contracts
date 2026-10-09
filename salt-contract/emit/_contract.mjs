@@ -140,6 +140,20 @@ export function checkedClauses(condition, where) {
 export const SOURCES = ['services', 'case-studies', 'testimonials', 'posts', 'team', 'faqs', 'locations']
 
 /**
+ * What a select that picks a collection-query's source (its sourceField) can offer a site.
+ *
+ * `select` is the contract's select field; `installed` a Set of the source ids the site has.
+ * Returns `options`, the select's options the site can satisfy, in contract order: an installed
+ * source, or a value that is not a source at all (the carousel's inline cards); and `sources`, the
+ * installed source ids among them, in the same order. An emitter offers `options`, queries
+ * `sources`, and cannot carry the section when `options` is empty.
+ */
+export function offeredSources(select, installed) {
+  const options = (select?.options ?? []).filter((o) => !SOURCES.includes(o.value) || installed.has(o.value))
+  return { options, sources: options.map((o) => o.value).filter((v) => SOURCES.includes(v)) }
+}
+
+/**
  * The link's fixed shape (field-definition schema, "link"). `withLabel: false` drops `label`.
  * `requiredWithLink` marks the parts a required link must have.
  */

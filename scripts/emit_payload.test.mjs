@@ -386,3 +386,17 @@ test('S6: a source the shared settings need counts like one the section\'s own f
   assert.throws(() => toPayloadBlocks({ contract, sources: { posts: {} }, sections: ['probe'] }), /section probe needs the source team \(probe\.settings\.people\)/)
   assert.equal(field(toPayloadBlocks({ contract, sources: { team: {} } })[0].fields, 'settings.people').relationTo, 'users')
 })
+
+test('S9: offeredSources is the one rule for what a source select can offer', async () => {
+  const { offeredSources } = await import('../salt-contract/emit/_contract.mjs')
+  const carousel = loadContract().fields.carousel.fields.find((f) => f.name === 'source')
+  assert.deepEqual(offeredSources(carousel, new Set(['posts', 'team'])), {
+    options: carousel.options.filter((o) => ['inline', 'posts', 'team'].includes(o.value)),
+    sources: ['posts', 'team'],
+  })
+  assert.deepEqual(offeredSources(carousel, new Set()).sources, [])
+  assert.deepEqual(offeredSources(carousel, new Set()).options.map((o) => o.value), ['inline'])
+  // The emitted options are that rule's options.
+  const emitted = field(block(blocks({ sources: { team: {} } }), 'carousel').fields, 'source')
+  assert.deepEqual(emitted.options.map((o) => o.value), ['inline', 'team'])
+})
