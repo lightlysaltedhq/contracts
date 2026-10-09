@@ -37,4 +37,13 @@ version means.
 
 From the repository root, `npm run salt-contract` runs this package's gate: one version across
 every contract file, every contract file valid against its schema, no colour values anywhere, and
-a tarball that ships only what it declares. `npm run verify` runs every gate in the repository.
+a tarball that ships only what it declares. `npm run salt-stylesheets` runs the shared stylesheets'
+gate. `npm run verify` runs every gate in the repository.
+
+## Stylesheets
+
+`styles/` is the one shared stylesheet set both implementations serve (SC-002). Load it in this
+order: `base.css`, `sections.css`, `primitives.css`, `blocks.css`, `chrome.css`, `views.css`. It
+reads only the custom properties `contract/token-layer.json` names, which each implementation's
+runtime emits (its generated `theme.css`). The files carry long comments: serve them as one
+minified bundle, never as six render-blocking requests.

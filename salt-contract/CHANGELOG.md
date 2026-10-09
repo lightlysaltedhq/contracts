@@ -55,6 +55,23 @@ Salted's decision log for Product Salt.
   honeypot is `<anchor>__website`.
 - The sections schema drops `openQuestions`.
 - Locations' open-now rule states one order, hours carried past midnight included.
+- `styles/` (`./styles/<file>`): the one shared stylesheet set (SC-002). `sections.css`,
+  `primitives.css`, `blocks.css` and `chrome.css` come from Salt for Next.js's
+  `packages/core/styles` at 1472afdd, which it will re-export; `theme.css` stays with each
+  implementation. Changed from that source: `sections.css` names the token layer as what it needs,
+  and framed images fill their frames from CSS alone (SC-011: section media, showcase cards and
+  avatars, logos contained, case-study frames). `base.css` sets design-foundations' element
+  convention (headings in their text roles, running text in `body`) inside the page's landmarks, so
+  the set stands with or without Tailwind's preflight. `views.css` styles the post, archive, search
+  and service view bodies in the classes SC-007 adopts, and the shared `author-box` (SC-008). Load
+  order: base, sections, primitives, blocks, chrome, views.
+- `contract/token-layer.json` (`./token-layer`, schema `./schema/token-layer`): the 122 custom
+  properties the stylesheets read and a runtime emits, grouped, each with its meaning and source.
+  Names only, never values.
+- `npm run salt-stylesheets`: the stylesheets parse whole; 46 decision contracts hold, 45 ported
+  from Salt for Next.js (five that read its runtime stay there) and one new (every framed image
+  fills its frame); the token layer names exactly what the stylesheets read; every styled class is
+  on a markup element.
 - The package exists, with its gate (`npm run salt-contract` at the repository root) and its
   release workflow on the `salt-contract-v*` tag prefix. It stays `private` until 1.0.0.
 - `RELEASE-POLICY.md`: one version for the package, what is major, minor and patch for every kind
