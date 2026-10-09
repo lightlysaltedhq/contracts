@@ -42,6 +42,16 @@
         "optional": {
           "description": "True when every read in the stylesheets carries a fallback, so a runtime may leave the property unset.",
           "type": "boolean"
+        },
+        "values": {
+          "description": "For a property the markup writes as var(--x-<placeholder>): the setting whose options fill the placeholder, as '<fields file>#<field name>', less any option in except (which writes nothing). Each resulting --x-<option> is a token the runtime emits.",
+          "type": "object",
+          "required": ["field"],
+          "additionalProperties": false,
+          "properties": {
+            "field": { "type": "string", "pattern": "^[\\w-]+#[\\w]+$" },
+            "except": { "type": "array", "items": { "type": "string" } }
+          }
         }
       }
     },

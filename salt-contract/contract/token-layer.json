@@ -43,7 +43,7 @@
         { "textRole": "stat", "meaning": "A stat's figure.", "source": "design-foundations", "ref": "vocabulary.json textRoles stat" },
         { "name": "--weight-regular", "meaning": "The weight an emphasis steps back down to.", "source": "design-foundations", "ref": "scale-shape.json weight regular" },
         { "name": "--weight-semibold", "meaning": "A semibold emphasis inside a role.", "source": "design-foundations", "ref": "scale-shape.json weight semibold" },
-        { "name": "--weight-bold", "meaning": "A bold emphasis inside a role: the current breadcrumb, an author's name.", "source": "design-foundations", "ref": "scale-shape.json weight bold" }
+        { "name": "--weight-bold", "meaning": "A bold emphasis inside a role: an author's name.", "source": "design-foundations", "ref": "scale-shape.json weight bold" }
       ]
     },
     {
@@ -57,6 +57,7 @@
         { "name": "--space-gutter", "meaning": "The page's inline gutter, on every band and on the header and footer.", "source": "design-foundations", "ref": "vocabulary.json layoutRoles gutter" },
         { "name": "--space-section-sm", "meaning": "A compact band's block space.", "source": "design-foundations", "ref": "vocabulary.json layoutRoles section-sm" },
         { "name": "--space-section-md", "meaning": "The default band's block space.", "source": "design-foundations", "ref": "vocabulary.json layoutRoles section-md" },
+        { "name": "--space-section-lg", "meaning": "A spacious band's block space, which the markup writes into --salt-section-space.", "source": "design-foundations", "ref": "vocabulary.json layoutRoles section-lg" },
         { "name": "--space-card-media", "meaning": "A card's join between its media and its title.", "source": "salt" },
         { "name": "--space-card-title", "meaning": "A card's join after its title, and between two meta lines.", "source": "salt" },
         { "name": "--space-card-body", "meaning": "A card's join between its parts, where no closer join applies.", "source": "salt" },
@@ -82,6 +83,9 @@
         { "name": "--radius-full", "meaning": "A pill or a circle: chips and portraits.", "source": "design-foundations", "ref": "scale-shape.json radius full" },
         { "name": "--opacity-medium", "meaning": "A carousel control at the end of its track.", "source": "design-foundations", "ref": "scale-shape.json opacity medium" },
         { "name": "--opacity-heavy", "meaning": "A disabled button.", "source": "design-foundations", "ref": "scale-shape.json opacity heavy" },
+        { "name": "--scrim-subtle", "meaning": "The subtle scrim's alpha, which the markup writes into --salt-scrim-alpha.", "source": "salt" },
+        { "name": "--scrim-standard", "meaning": "The standard scrim's alpha, which the markup writes into --salt-scrim-alpha.", "source": "salt" },
+        { "name": "--scrim-strong", "meaning": "The strong scrim's alpha, which the markup writes into --salt-scrim-alpha.", "source": "salt" },
         { "name": "--focus-ring-width", "meaning": "The focus ring's width; the keyline's spread is computed from it.", "source": "design-foundations", "ref": "scale-shape.json focusRing width" },
         { "name": "--focus-ring-offset", "meaning": "The gap between a control and its focus ring.", "source": "design-foundations", "ref": "scale-shape.json focusRing offset" }
       ]
@@ -98,8 +102,8 @@
       "id": "set-by-markup",
       "what": "Written on an element by the markup itself, from editor content or a section setting.",
       "tokens": [
-        { "name": "--salt-section-space", "meaning": "A band's block space: var(--space-section-<spacing>), absent when spacing is none.", "source": "markup", "ref": "contract/markup/section.json", "optional": true },
-        { "name": "--salt-scrim-alpha", "meaning": "The scrim's strength over a background image: var(--scrim-<strength>).", "source": "markup", "ref": "contract/markup/section.json" },
+        { "name": "--salt-section-space", "meaning": "A band's block space: var(--space-section-<spacing>), absent when spacing is none.", "source": "markup", "ref": "contract/markup/section.json", "values": { "field": "_section-settings#spacing", "except": ["none"] }, "optional": true },
+        { "name": "--salt-scrim-alpha", "meaning": "The scrim's strength over a background image: var(--scrim-<strength>).", "source": "markup", "ref": "contract/markup/section.json", "values": { "field": "_section-settings#scrimStrength" } },
         { "name": "--salt-rating-fill", "meaning": "How much of a rating's five stars is filled, as a percentage.", "source": "markup", "ref": "contract/markup/card.json", "optional": true },
         { "name": "--salt-case-study-view-aside-rows", "meaning": "How many of a case study band's rows its aside spans.", "source": "markup", "ref": "contract/markup/case-study.json (not yet recorded there)" },
         { "name": "--salt-case-study-view-measure", "meaning": "A case study band's measure, when it sets one.", "source": "markup", "ref": "contract/markup/case-study.json (not yet recorded there)", "optional": true },

@@ -26,22 +26,25 @@
 //    is `optional` exactly when every read of it carries a fallback.
 // 4. THE CLASS VOCABULARY. Every salt-* class a selector names is on an element in
 //    contract/markup/*.json, or is listed in UNMARKED with its reason.
+//
+// The checks are `checkStylesheets(files)`, over a map of the package's files by path (`styles/x.css`,
+// `contract/…json`), so the test runs its cases in memory; run as a script, it reads the package from
+// disk and prints the result.
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 
-const here = path.dirname(fileURLToPath(import.meta.url))
-const dir = path.resolve(process.argv[2] ?? path.join(here, '..', 'salt-contract'))
-const stylesheetRoot = path.join(dir, 'styles')
+/* The package being checked, set at the start of each `checkStylesheets` run. */
+let FILES = new Map()
 const readJson = (file) => {
-  try { return JSON.parse(readFileSync(path.join(dir, file), 'utf8')) } catch { return null }
+  try { return JSON.parse(FILES.get(file)) } catch { return null }
 }
 
 /* design-foundations' dark-mode selector is `[data-theme="dark"]` (vocabulary.json `darkMode`). */
 const THEME_ATTRIBUTE = 'data-theme'
 
 /* The section tones, from the markup contract's `data-tone` vocabulary. */
-const TONES = readJson('contract/markup/section.json')?.root?.attributes?.['data-tone']?.enum ?? []
+let TONES = []
 
 /* design-foundations' text roles (vocabulary.json `textRoles`, required and optional), and the five
    declarations that set text in one: each CSS property reading the role's own custom property, in
@@ -55,9 +58,36 @@ const textRoleDeclarations = (role) => [
   { property: 'font-family', value: `var(--text-${role}--font-family)` },
 ]
 
+/* The selector helpers below are pure functions of their text, and the same selectors are read by
+   many contracts and, in the test, by hundreds of runs over one package. Each is memoised; none of
+   their results is ever modified by a caller. */
+const memo = (fn) => {
+  const cache = new Map()
+  return (text) => {
+    if (!cache.has(text)) cache.set(text, fn(text))
+    return cache.get(text)
+  }
+}
+const memoKey = (fn) => {
+  const cache = new Map()
+  return (name, text) => {
+    const key = `${name}\u0000${text}`
+    if (!cache.has(key)) cache.set(key, fn(name, text))
+    return cache.get(key)
+  }
+}
+const memo2 = (fn) => {
+  const cache = new Map()
+  return (text, separator) => {
+    const key = `${separator}\u0000${text}`
+    if (!cache.has(key)) cache.set(key, fn(text, separator))
+    return cache.get(key)
+  }
+}
+
 /* A selector with every `:not(…)` taken out, nested parentheses included: `:focus-visible` inside a
    negation is the unfocused state. An unbalanced `:not(` is left as it is rather than guessed at. */
-const withoutNegations = (selector) => {
+const withoutNegationsUnmemoised = (selector) => {
   let text = selector
   for (let at = text.search(/:not\(/i); at !== -1; at = text.search(/:not\(/i)) {
     let depth = 0
@@ -74,9 +104,10 @@ const withoutNegations = (selector) => {
   }
   return text
 }
+const withoutNegations = memo(withoutNegationsUnmemoised)
 
 /** Split on a separator that is not inside brackets — selector lists and `var()` both need it. */
-const splitTop = (input, separator) => {
+const splitTopUnmemoised = (input, separator) => {
   const parts = []
   let depth = 0
   let current = ''
@@ -93,6 +124,7 @@ const splitTop = (input, separator) => {
   parts.push(current)
   return parts.map((part) => part.trim()).filter((part) => part.length > 0)
 }
+const splitTop = memo2(splitTopUnmemoised)
 
 /**
  * Selectors are compared after normalising whitespace and quotes.
@@ -107,7 +139,7 @@ const splitTop = (input, separator) => {
  * that does not exist, which is also where the quote churn in `sections.css` came from. The
  * normalisation is still right; the reason given for it was not.)
  */
-const normalise = (selector) =>
+const normaliseUnmemoised = (selector) =>
   selector
     .replace(/\s+/g, ' ')
     .replace(/"/g, "'")
@@ -129,6 +161,7 @@ const normalise = (selector) =>
     )
     .text.replace(/\s+/g, ' ')
     .trim()
+const normalise = memo(normaliseUnmemoised)
 
 const parseDeclarations = (body) => {
   const declarations = {}
@@ -252,9 +285,10 @@ const px = (value) => {
  * `theme.css`; the contract has no values, so a token exists when the token layer names it, and the
  * token layer check below holds that list to what the stylesheets read.
  */
-const TOKEN_LAYER = readJson('contract/token-layer.json')
-const TOKEN_NAMES = new Map(
-  (TOKEN_LAYER?.groups ?? []).flatMap((group) =>
+let TOKEN_LAYER = null
+let TOKEN_NAMES = new Map()
+const tokenNames = (layer) => new Map(
+  (layer?.groups ?? []).flatMap((group) =>
     (group.tokens ?? []).flatMap((token) =>
       token.textRole === undefined
         ? [[token.name, token]]
@@ -649,7 +683,7 @@ const negatedParts = (selector) => {
  * ancestor but is not itself current", passes for looking right, and excludes nothing,
  * because a list item never carries `aria-current` in the first place.
  */
-const keyCompound = (selector) => {
+const keyCompoundUnmemoised = (selector) => {
   let depth = 0
   let start = 0
   for (let i = 0; i < selector.length; i += 1) {
@@ -662,6 +696,7 @@ const keyCompound = (selector) => {
   }
   return selector.slice(start)
 }
+const keyCompound = memo(keyCompoundUnmemoised)
 
 /**
  * A compound with every attribute selector cut out, brackets and all.
@@ -671,7 +706,7 @@ const keyCompound = (selector) => {
  * `a[href^='#fn']` as naming the id `fn`. Quotes are tracked so a bracket inside a quoted value
  * (`[title=']']`) does not end the selector early.
  */
-const withoutAttributes = (compound) => {
+const withoutAttributesUnmemoised = (compound) => {
   let kept = ''
   let depth = 0
   let quote = null
@@ -689,14 +724,16 @@ const withoutAttributes = (compound) => {
   }
   return kept
 }
+const withoutAttributes = memo(withoutAttributesUnmemoised)
 
 /**
  * The classes a key compound names — read with its attribute selectors cut out, because
  * `a[href$='.pdf']` names no class, and reading `pdf` as one proves a rule misses any element
  * that does not carry it.
  */
-const compoundClasses = (compound) =>
+const compoundClassesUnmemoised = (compound) =>
   new Set([...withoutAttributes(compound).matchAll(/\.([\w-]+)/g)].map((match) => match[1] ?? ''))
+const compoundClasses = memo(compoundClassesUnmemoised)
 
 /**
  * The classes a key compound REQUIRES of its element (#198 re-review, F4). `compoundClasses` counts every
@@ -704,7 +741,7 @@ const compoundClasses = (compound) =>
  * as naming it too, though each matches every menu link. A class inside `:not()` or `:where()` is not
  * required, and one inside `:is()` or `:matches()` only when every branch requires it.
  */
-const requiredClasses = (compound) => {
+const requiredClassesUnmemoised = (compound) => {
   const plain = withoutAttributes(compound)
   const required = new Set()
   let rest = ''
@@ -736,6 +773,7 @@ const requiredClasses = (compound) => {
   for (const found of rest.matchAll(/\.([\w-]+)/g)) required.add(found[1] ?? '')
   return required
 }
+const requiredClasses = memo(requiredClassesUnmemoised)
 
 /** The element type a key compound names, or `null` for one that names none. */
 const compoundType = (compound) =>
@@ -871,7 +909,7 @@ const welcomesMotion = (at) =>
     return /\(\s*prefers-reduced-motion\s*:\s*no-preference\s*\)/i.test(prelude)
   })
 
-const stripNegations = (selector) => {
+const stripNegationsUnmemoised = (selector) => {
   let out = ''
   let i = 0
   while (i < selector.length) {
@@ -895,6 +933,7 @@ const stripNegations = (selector) => {
   }
   return out
 }
+const stripNegations = memo(stripNegationsUnmemoised)
 
 /**
  * A selector with every `:is()` and `:where()` group removed, brackets and all.
@@ -975,7 +1014,7 @@ const stripMatchesAny = (selector) => {
  * whitespace or a nested group inside is left alone too, because `:is(.a, .b)` and
  * `:where(.a .b)` change what matches.
  */
-const unwrapMatchesAny = (compound) => {
+const unwrapMatchesAnyUnmemoised = (compound) => {
   /* Anchored at both ends: the group is the entire compound or nothing happens. `[^()]*`
      refuses a nested group, which also stops the greedy read of `:where(.a):is(.b)` — two
      compounds' worth of text that would otherwise look like one group's argument.
@@ -988,6 +1027,7 @@ const unwrapMatchesAny = (compound) => {
   if (inner === undefined || inner === '' || /[,>+~\s]/.test(inner)) return compound
   return inner
 }
+const unwrapMatchesAny = memo(unwrapMatchesAnyUnmemoised)
 
 /**
  * A selector's specificity, as `[id, class, type]`.
@@ -1239,7 +1279,7 @@ const declarationsOf = (rule, names) =>
  * A selector as its compounds, outermost first, and the combinator before each after the first: `' '`,
  * `'>'`, `'+'` or `'~'`. Read from the normalised spelling, which spaces every combinator.
  */
-const chainOf = (selector) => {
+const chainOfUnmemoised = (selector) => {
   const compounds = []
   const combinators = []
   let pending = ' '
@@ -1254,6 +1294,7 @@ const chainOf = (selector) => {
   }
   return { compounds, combinators }
 }
+const chainOf = memo(chainOfUnmemoised)
 
 /**
  * Can this selector reach an element whose parent is `parent`'s compound, when the element's own
@@ -5653,39 +5694,33 @@ const CONTRACTS = [
   },
 ]
 
-// ── 1. The parse is whole ───────────────────────────────────────────────────────────────────
-const fails = []
-const listed = existsSync(stylesheetRoot) ? readdirSync(stylesheetRoot).filter((file) => file.endsWith('.css')).sort() : []
-/* The four the contracts are written against must be there; every other stylesheet is read too, so
-   a rule added in a new file is seen by every contract that sweeps all of them. */
-for (const file of ['sections.css', 'primitives.css', 'blocks.css', 'chrome.css']) {
-  if (!listed.includes(file)) fails.push(`styles/${file} is missing, and the contracts below are written against it`)
-}
-const sources = new Map(listed.map((file) => [file, readFileSync(path.join(stylesheetRoot, file), 'utf8')]))
-const parsed = new Map([...sources].map(([file, css]) => [file, parse(css)]))
+/* What a stylesheet's text alone can be refused for, found once per text: the test reads the same
+   files hundreds of times. */
+/* Every `var()` a stylesheet's text reads, and whether that read carries a fallback. Comments and
+   strings are blanked first, so neither a paragraph quoting a `var()` nor `content` counts. */
+const varReads = memo((text) =>
+  [...text.replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/"(?:[^"\\\n]|\\.)*"|'(?:[^'\\\n]|\\.)*'/g, '""')
+    .matchAll(/var\(\s*(--[\w-]+)\s*(,?)/gi)].map((m) => [m[1], m[2] === ',']))
 
-/*
- * The parse checks itself, because a contract that passes by finding no offender is
- * satisfied by a parser that finds nothing at all.
- *
- * The first version compared the rule count against a floor of 5 and justified it as
- * covering "two of the seven" contracts. Both halves were wrong: exactly one of the nine is
- * vacuity-shaped, and a floor cannot see a parse that loses ONE rule of fourteen — which is
- * what a statement at-rule did, and the rule it lost was the base focus indicator.
- *
- * So the count is derived rather than guessed. Every `{` in the source opens either an
- * at-rule block or a declaration block, so the declaration blocks are the difference, and
- * anything the walk drops shows up as a mismatch.
- */
-/*
- * A backslash outside a string is refused before any contract runs. CSS escapes let one selector
- * or property be spelled many ways: `b\\6f dy` is `body` to a browser and an unknown element to
- * every contract here, so it painted the page ground past the one-owner check (#181 review). The
- * contracts compare spellings, so the spellings they cannot read are forbidden rather than decoded,
- * the same rule the salt theme's gate uses. Inside a string, `content: "\\201C"` for one, an escape
- * names a character and selects nothing, so strings are skipped.
- */
-for (const [file, text] of sources) {
+/* Every string in a JSON document. */
+const stringsIn = (node) =>
+  typeof node === 'string' ? [node] : node && typeof node === 'object' ? Object.values(node).flatMap(stringsIn) : []
+
+/* A field of that name anywhere in a fields file. */
+const fieldNamed = (node, name) => {
+  if (!node || typeof node !== 'object') return null
+  if (!Array.isArray(node) && node.name === name && node.type !== undefined) return node
+  for (const value of Object.values(node)) {
+    const found = fieldNamed(value, name)
+    if (found) return found
+  }
+  return null
+}
+
+const parseOnce = memo(parse)
+
+const sourceFindings = memoKey((file, text) => {
+  const out = []
   const source = text
     /* Comments blanked line for line, so the line reported is the file's own. */
     .replace(/\/\*[\s\S]*?\*\//g, (comment) => comment.replace(/[^\n]/g, ' '))
@@ -5695,7 +5730,7 @@ for (const [file, text] of sources) {
      its descriptors would pass unread; it is refused instead. */
   const registration = source.split('\n').findIndex((text) => /@property\b/i.test(text))
   if (registration !== -1) {
-    fails.push(`${file}:${String(registration + 1)} registers a custom property. \`@property\` belongs to a runtime's token ` +
+    out.push(`${file}:${String(registration + 1)} registers a custom property. \`@property\` belongs to a runtime's token ` +
       'layer, beside the values it registers; this gate cannot read one here.')
   }
   /* An allowlist of at-rules, because each one this gate has not been taught hides declarations from
@@ -5714,7 +5749,7 @@ for (const [file, text] of sources) {
     for (const match of text.matchAll(/@([\w-]+)/g)) {
       const name = (match[1] ?? '').toLowerCase()
       if (AT_RULES.has(name)) continue
-      fails.push(
+      out.push(
         name === 'apply'
           ? `${file}:${String(index + 1)} uses \`@apply\`, whose declarations this gate cannot read. Write the ` +
               'declarations out, a text role for text, so the contracts below rank them.'
@@ -5726,174 +5761,281 @@ for (const [file, text] of sources) {
   }
   const line = source.split('\n').findIndex((text) => text.includes('\\'))
   if (line !== -1) {
-    fails.push(
+    out.push(
       `${file}:${String(line + 1)} carries a backslash outside a string. A CSS escape spells a selector or a ` +
         'property in a way no contract here reads, so it could satisfy or dodge one unseen. Write the name plainly.',
     )
   }
-}
+  return out
+})
 
-for (const [file, { rules, bare, expected }] of parsed) {
-  if (bare.length > 0) {
-    fails.push(
-      `${file} writes \`${bare[0] ?? ''}\` directly in an at-rule's block, outside any rule. No contract reads a ` +
-        'declaration there, so it could set text or anything else unseen. Put it inside a rule.',
-    )
+/**
+ * Every check, over the package's files: a map from each path in the package (`styles/blocks.css`,
+ * `contract/token-layer.json`, `contract/markup/hero.json`) to its text. Returns the failures, one
+ * line each, and the summary a passing run prints.
+ */
+export function checkStylesheets(files) {
+  FILES = files
+  TONES = readJson('contract/markup/section.json')?.root?.attributes?.['data-tone']?.enum ?? []
+  TOKEN_LAYER = readJson('contract/token-layer.json')
+  TOKEN_NAMES = tokenNames(TOKEN_LAYER)
+
+  // ── 1. The parse is whole ───────────────────────────────────────────────────────────────────
+  const fails = []
+  const listed = [...files.keys()].filter((file) => /^styles\/[^/]+\.css$/.test(file)).map((file) => file.slice('styles/'.length)).sort()
+  /* The four the contracts are written against must be there; every other stylesheet is read too, so
+     a rule added in a new file is seen by every contract that sweeps all of them. */
+  for (const file of ['sections.css', 'primitives.css', 'blocks.css', 'chrome.css']) {
+    if (!listed.includes(file)) fails.push(`styles/${file} is missing, and the contracts below are written against it`)
   }
-  if (rules.length !== expected) {
-    fails.push(
-      `Parsed ${String(rules.length)} rules from ${file} but the source contains ` +
-        `${String(expected)} declaration blocks. The parse is dropping rules, so every ` +
-        `contract below is reading an incomplete stylesheet.`,
-    )
-  }
-  /* A keyframe moves things and does nothing else. Each one is read as a rule under its
-     `@keyframes`, and may declare `transform` or `opacity` only: a colour there would animate the
-     page off its paired roles where the colour contracts never look, and a size or a margin would
-     move layout every contract here assumes is still. `!important` is refused by name, because a
-     browser ignores it in a keyframe and a reader would not; a selector that is not `from`, `to` or
-     a percentage is not a keyframe at all, and is refused rather than guessed at. */
-  for (const rule of rules) {
-    if (!rule.at.some((prelude) => /^@keyframes\b/i.test(prelude))) continue
-    const selector = rule.selectors.find((text) => !/^(?:from|to|\d+(?:\.\d+)?%)$/i.test(text))
-    if (selector !== undefined) {
-      fails.push(`${file} holds \`${selector}\` inside \`@keyframes\`, which is not a keyframe selector this gate reads.`)
+  const sources = new Map(listed.map((file) => [file, files.get(`styles/${file}`)]))
+  const parsed = new Map([...sources].map(([file, css]) => [file, parseOnce(css)]))
+
+  /*
+   * The parse checks itself, because a contract that passes by finding no offender is
+   * satisfied by a parser that finds nothing at all.
+   *
+   * The first version compared the rule count against a floor of 5 and justified it as
+   * covering "two of the seven" contracts. Both halves were wrong: exactly one of the nine is
+   * vacuity-shaped, and a floor cannot see a parse that loses ONE rule of fourteen — which is
+   * what a statement at-rule did, and the rule it lost was the base focus indicator.
+   *
+   * So the count is derived rather than guessed. Every `{` in the source opens either an
+   * at-rule block or a declaration block, so the declaration blocks are the difference, and
+   * anything the walk drops shows up as a mismatch.
+   */
+  /*
+   * A backslash outside a string is refused before any contract runs. CSS escapes let one selector
+   * or property be spelled many ways: `b\\6f dy` is `body` to a browser and an unknown element to
+   * every contract here, so it painted the page ground past the one-owner check (#181 review). The
+   * contracts compare spellings, so the spellings they cannot read are forbidden rather than decoded,
+   * the same rule the salt theme's gate uses. Inside a string, `content: "\\201C"` for one, an escape
+   * names a character and selects nothing, so strings are skipped.
+   */
+  for (const [file, text] of sources) fails.push(...sourceFindings(file, text))
+
+  for (const [file, { rules, bare, expected }] of parsed) {
+    if (bare.length > 0) {
+      fails.push(
+        `${file} writes \`${bare[0] ?? ''}\` directly in an at-rule's block, outside any rule. No contract reads a ` +
+          'declaration there, so it could set text or anything else unseen. Put it inside a rule.',
+      )
     }
-    for (const [index, property] of rule.order.entries()) {
-      const value = rule.values[index] ?? ''
-      if (/!\s*important/i.test(value)) {
-        fails.push(`${file} writes \`${property}: ${value}\` in a keyframe. A browser ignores \`!important\` there; write it plainly.`)
-        continue
-      }
-      const name = property.toLowerCase()
-      /* Not animated properties but how the next stretch is animated, legal in a keyframe and
-         moving nothing on their own, so they pass rather than being called a defect (#230
-         re-review). */
-      if (name === 'animation-timing-function' || name === 'animation-composition') continue
-      if (!['transform', 'opacity'].includes(name)) {
-        fails.push(
-          `${file} animates \`${property}\` in \`@keyframes\`. The shared keyframes animate \`transform\` or \`opacity\` only, ` +
-            'so a colour, a size or a margin cannot change where the contracts below do not look; this gate reads ' +
-            'no other animated property there.',
-        )
-      }
+    if (rules.length !== expected) {
+      fails.push(
+        `Parsed ${String(rules.length)} rules from ${file} but the source contains ` +
+          `${String(expected)} declaration blocks. The parse is dropping rules, so every ` +
+          `contract below is reading an incomplete stylesheet.`,
+      )
     }
-  }
-}
-
-/* Every contract below reads the parse, so a parse that is not whole stops here. */
-if (fails.length > 0) {
-  for (const f of fails) console.log(`✗ ${f}`)
-  process.exit(1)
-}
-
-// ── 2. The decision contracts ───────────────────────────────────────────────────────────────
-const all = new Map([...parsed].map(([file, { rules }]) => [file, rules]))
-for (const contract of CONTRACTS) {
-  const reason = contract.check(parsed.get(contract.file)?.rules ?? [], all)
-  if (reason !== null) fails.push(`${contract.file}: ${contract.what}\n    found: ${reason}\n    why it matters: ${contract.why}`)
-}
-
-// ── 3. The token layer ──────────────────────────────────────────────────────────────────────
-// Every var() read, with whether that read has a fallback, and every custom property declared.
-// Comments and strings are blanked first, so neither a paragraph quoting a var() nor `content`
-// counts as a read. A declared name is the runtime's no longer: sections.css sets the band's own.
-const reads = new Map()
-const declaredHere = new Set()
-for (const [file, text] of sources) {
-  const css = text.replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/"(?:[^"\\\n]|\\.)*"|'(?:[^'\\\n]|\\.)*'/g, '""')
-  for (const m of css.matchAll(/var\(\s*(--[\w-]+)\s*(,?)/gi)) {
-    const entry = reads.get(m[1]) ?? { files: new Set(), withFallback: 0, count: 0 }
-    entry.files.add(file)
-    entry.count += 1
-    if (m[2] === ',') entry.withFallback += 1
-    reads.set(m[1], entry)
-  }
-  for (const rule of parsed.get(file).rules) for (const property of rule.order) if (property.startsWith('--')) declaredHere.add(property)
-}
-if (!TOKEN_LAYER) fails.push('contract/token-layer.json is missing or not JSON; it names what a runtime emits for these stylesheets')
-else {
-  const seen = new Set()
-  for (const group of TOKEN_LAYER.groups ?? []) {
-    for (const token of group.tokens ?? []) {
-      const names = token.textRole === undefined ? [token.name] : textRoleDeclarations(token.textRole).map(({ value }) => value.slice('var('.length, -1))
-      for (const name of names) {
-        if (seen.has(name)) { fails.push(`contract/token-layer.json names ${name} twice`); continue }
-        seen.add(name)
-        const read = reads.get(name)
-        if (declaredHere.has(name)) { fails.push(`contract/token-layer.json names ${name}, which the stylesheets declare themselves; it is not the runtime's to emit`); continue }
-        if (!read) { fails.push(`contract/token-layer.json names ${name}, which no stylesheet reads`); continue }
-        const optional = read.withFallback === read.count
-        if ((token.optional === true) !== optional) {
-          fails.push(optional
-            ? `${name} has a fallback at every read (${[...read.files].join(', ')}), so contract/token-layer.json marks it optional`
-            : `contract/token-layer.json marks ${name} optional, but ${read.count - read.withFallback} of its ${read.count} read(s) have no fallback`)
+    /* A keyframe moves things and does nothing else. Each one is read as a rule under its
+       `@keyframes`, and may declare `transform` or `opacity` only: a colour there would animate the
+       page off its paired roles where the colour contracts never look, and a size or a margin would
+       move layout every contract here assumes is still. `!important` is refused by name, because a
+       browser ignores it in a keyframe and a reader would not; a selector that is not `from`, `to` or
+       a percentage is not a keyframe at all, and is refused rather than guessed at. */
+    for (const rule of rules) {
+      if (!rule.at.some((prelude) => /^@keyframes\b/i.test(prelude))) continue
+      const selector = rule.selectors.find((text) => !/^(?:from|to|\d+(?:\.\d+)?%)$/i.test(text))
+      if (selector !== undefined) {
+        fails.push(`${file} holds \`${selector}\` inside \`@keyframes\`, which is not a keyframe selector this gate reads.`)
+      }
+      for (const [index, property] of rule.order.entries()) {
+        const value = rule.values[index] ?? ''
+        if (/!\s*important/i.test(value)) {
+          fails.push(`${file} writes \`${property}: ${value}\` in a keyframe. A browser ignores \`!important\` there; write it plainly.`)
+          continue
+        }
+        const name = property.toLowerCase()
+        /* Not animated properties but how the next stretch is animated, legal in a keyframe and
+           moving nothing on their own, so they pass rather than being called a defect (#230
+           re-review). */
+        if (name === 'animation-timing-function' || name === 'animation-composition') continue
+        if (!['transform', 'opacity'].includes(name)) {
+          fails.push(
+            `${file} animates \`${property}\` in \`@keyframes\`. The shared keyframes animate \`transform\` or \`opacity\` only, ` +
+              'so a colour, a size or a margin cannot change where the contracts below do not look; this gate reads ' +
+              'no other animated property there.',
+          )
         }
       }
     }
   }
-  for (const [name, read] of [...reads].sort()) {
-    if (!declaredHere.has(name) && !seen.has(name)) fails.push(`${[...read.files].join(', ')} read(s) ${name}, which contract/token-layer.json does not name`)
-  }
-}
 
-// ── 4. The class vocabulary ─────────────────────────────────────────────────────────────────
-// A class the stylesheets style that no markup draws is a rule for nothing on one platform at
-// least, or a class the markup contract has yet to record. Classes are read where the markup puts
-// them on an element: a root, an element and its children, and a variant's tree. Not a rule's or a
-// note's mention, a platform's former name, a hook (kept with no rule) or an omitted class.
-const UNMARKED = [
-  /* PENDING the view-body classes SC-007 gives the archive, post and service views (less the post's
-     author block, which SC-008 makes the shared author-box), which a parallel branch adds to
-     contract/markup/{archive,post,search,service}.json. views.css styles them now. Remove this block
-     once both have merged: the gate fails on an entry the markup already carries. */
-  ...['salt-archive__portrait', 'salt-archive__profile', 'salt-archive__strapline', 'salt-post__adjacent',
-    'salt-post__adjacent-label', 'salt-post__breadcrumb', 'salt-post__byline', 'salt-post__category',
-    'salt-post__footer', 'salt-post__media', 'salt-post__meta', 'salt-post__tags', 'salt-service__intro', 'salt-service__price-label',
-    'salt-service__summary'].map((name) => ({ class: name, pending: true, reason: 'SC-007 view body, pending its markup' })),
-]
-const SKIP = new Set(['platforms', 'rules', 'notes', 'hooks', 'omitted'])
-const onElements = new Set()
-const collect = (node) => {
-  if (Array.isArray(node)) { node.forEach(collect); return }
-  if (!node || typeof node !== 'object') return
-  for (const [key, value] of Object.entries(node)) {
-    if (SKIP.has(key)) continue
-    if (key === 'classes' && Array.isArray(value)) value.forEach((name) => onElements.add(name))
-    else collect(value)
+  /* Every contract below reads the parse, so a parse that is not whole stops here. */
+  if (fails.length > 0) return { fails, summary: '' }
+
+  // ── 2. The decision contracts ───────────────────────────────────────────────────────────────
+  const all = new Map([...parsed].map(([file, { rules }]) => [file, rules]))
+  for (const contract of CONTRACTS) {
+    const reason = contract.check(parsed.get(contract.file)?.rules ?? [], all)
+    if (reason !== null) fails.push(`${contract.file}: ${contract.what}\n    found: ${reason}\n    why it matters: ${contract.why}`)
   }
-}
-const markupDir = path.join(dir, 'contract', 'markup')
-const markupFiles = existsSync(markupDir) ? readdirSync(markupDir).filter((file) => file.endsWith('.json')) : []
-for (const file of markupFiles) collect(readJson(`contract/markup/${file}`))
-const styled = new Map()
-for (const [file, { rules }] of parsed) {
-  for (const rule of rules) {
-    for (const selector of rule.selectors) {
-      // Attribute selectors are blanked: `[class*='salt-button']` names no class.
-      for (const m of selector.replace(/\[[^\]]*\]/g, '').matchAll(/\.(salt-[\w-]+)/g)) {
-        if (!styled.has(m[1])) styled.set(m[1], new Set())
-        styled.get(m[1]).add(file)
+
+  // ── 3. The token layer ──────────────────────────────────────────────────────────────────────
+  // Every var() read, with whether that read has a fallback, and every custom property declared.
+  // A declared name is the runtime's no longer: sections.css sets the band's own.
+  const markupFiles = [...files.keys()].filter((file) => /^contract\/markup\/[^/]+\.json$/.test(file))
+  const reads = new Map()
+  const declaredHere = new Set()
+  const addRead = (name, file, fallback) => {
+    const entry = reads.get(name) ?? { files: new Set(), withFallback: 0, count: 0 }
+    entry.files.add(file)
+    entry.count += 1
+    if (fallback) entry.withFallback += 1
+    reads.set(name, entry)
+  }
+  for (const [file, text] of sources) {
+    for (const [name, fallback] of varReads(text)) addRead(name, file, fallback)
+    for (const rule of parsed.get(file).rules) for (const property of rule.order) if (property.startsWith('--')) declaredHere.add(property)
+  }
+  /* What the markup writes on an element's style (`--salt-scrim-alpha: var(--scrim-<strength>)`)
+     reaches the stylesheets too, so each `var()` it writes is a read. A `<placeholder>` stands for
+     a setting's options, which the token entry's `values` names (`_section-settings#scrimStrength`):
+     each option is a token the runtime must emit. */
+  const markupWrites = new Map()
+  for (const file of markupFiles) {
+    for (const text of stringsIn(readJson(file))) {
+      for (const m of text.matchAll(/(--[a-z][\w-]*)\s*:\s*([^;]+)/g)) {
+        if (!markupWrites.has(m[1])) markupWrites.set(m[1], [])
+        markupWrites.get(m[1]).push({ file, value: m[2].trim() })
       }
     }
   }
-}
-if (markupFiles.length === 0) fails.push('contract/markup/ holds no markup files, so no styled class can be found on an element')
-const unmarked = new Map(UNMARKED.map((entry) => [entry.class, entry]))
-for (const [name, files] of [...styled].sort()) {
-  if (onElements.has(name) || unmarked.has(name)) continue
-  fails.push(`${[...files].join(', ')} style(s) .${name}, which no element in contract/markup/ carries; add it to the markup or to UNMARKED with its reason`)
-}
-for (const entry of UNMARKED) {
-  if (!styled.has(entry.class)) fails.push(`UNMARKED lists .${entry.class}, which no stylesheet styles; take it out`)
-  else if (onElements.has(entry.class)) fails.push(`UNMARKED lists .${entry.class}, which contract/markup/ now carries; take it out${entry.pending ? ' (the pending view classes have landed)' : ''}`)
+  if (!TOKEN_LAYER) fails.push('contract/token-layer.json is missing or not JSON; it names what a runtime emits for these stylesheets')
+  else {
+    for (const group of TOKEN_LAYER.groups ?? []) {
+      for (const token of group.tokens ?? []) {
+        if (token.source !== 'markup') {
+          if (token.values) fails.push(`contract/token-layer.json gives ${token.name} values, but only a property the markup writes has them`)
+          continue
+        }
+        const writes = markupWrites.get(token.name) ?? []
+        if (writes.length === 0) { fails.push(`contract/token-layer.json says the markup writes ${token.name}, but no file in contract/markup/ does`); continue }
+        for (const { file, value } of writes) {
+          for (const m of value.matchAll(/var\(\s*(--[\w-]*?)(?:<([\w-]+)>([\w-]*))?\s*\)/g)) {
+            if (m[2] === undefined) { addRead(m[1], file, false); continue }
+            if (!token.values) { fails.push(`${file} writes ${token.name} as ${m[0]}, and contract/token-layer.json gives no values for <${m[2]}>`); continue }
+            const [fieldFile, fieldName] = String(token.values.field).split('#')
+            const field = fieldNamed(readJson(`contract/fields/${fieldFile}.json`), fieldName)
+            if (!field || !Array.isArray(field.options)) { fails.push(`contract/token-layer.json takes ${token.name}'s values from ${token.values.field}, which is not a field with options`); continue }
+            for (const option of field.options) {
+              if ((token.values.except ?? []).includes(option.value)) continue
+              addRead(`${m[1]}${option.value}${m[3]}`, file, false)
+            }
+          }
+        }
+      }
+    }
+    const seen = new Set()
+    for (const group of TOKEN_LAYER.groups ?? []) {
+      for (const token of group.tokens ?? []) {
+        const names = token.textRole === undefined ? [token.name] : textRoleDeclarations(token.textRole).map(({ value }) => value.slice('var('.length, -1))
+        for (const name of names) {
+          if (seen.has(name)) { fails.push(`contract/token-layer.json names ${name} twice`); continue }
+          seen.add(name)
+          const read = reads.get(name)
+          if (declaredHere.has(name)) { fails.push(`contract/token-layer.json names ${name}, which the stylesheets declare themselves; it is not the runtime's to emit`); continue }
+          if (!read) { fails.push(`contract/token-layer.json names ${name}, which neither a stylesheet nor a value the markup writes reads`); continue }
+          const optional = read.withFallback === read.count
+          if ((token.optional === true) !== optional) {
+            fails.push(optional
+              ? `${name} has a fallback at every read (${[...read.files].join(', ')}), so contract/token-layer.json marks it optional`
+              : `contract/token-layer.json marks ${name} optional, but ${read.count - read.withFallback} of its ${read.count} read(s) have no fallback`)
+          }
+        }
+      }
+    }
+    for (const [name, read] of [...reads].sort()) {
+      if (!declaredHere.has(name) && !seen.has(name)) fails.push(`${[...read.files].join(', ')} read(s) ${name}, which contract/token-layer.json does not name`)
+    }
+  }
+
+  // ── 4. The class vocabulary ─────────────────────────────────────────────────────────────────
+  // A class the stylesheets style that no markup draws is a rule for nothing on one platform at
+  // least, or a class the markup contract has yet to record. Classes are read where the markup puts
+  // them on an element: a root, an element and its children, and a variant's tree. Not a rule's or a
+  // note's mention, a platform's former name, a hook (kept with no rule) or an omitted class.
+  const UNMARKED = [
+    /* PENDING the view-body classes SC-007 gives the archive, post and service views (less the post's
+       author block, which SC-008 makes the shared author-box), which a parallel branch adds to
+       contract/markup/{archive,post,search,service}.json. views.css styles them now. Remove this block
+       once both have merged: the gate fails on an entry the markup already carries. */
+    ...['salt-archive__portrait', 'salt-archive__profile', 'salt-archive__strapline', 'salt-post__adjacent',
+      'salt-post__adjacent-label', 'salt-post__breadcrumb', 'salt-post__byline', 'salt-post__category',
+      'salt-post__footer', 'salt-post__media', 'salt-post__meta', 'salt-post__tags', 'salt-service__intro', 'salt-service__price-label',
+      'salt-service__summary'].map((name) => ({ class: name, pending: true, reason: 'SC-007 view body, pending its markup' })),
+  ]
+  const SKIP = new Set(['platforms', 'rules', 'notes', 'hooks', 'omitted'])
+  const onElements = new Set()
+  const collect = (node) => {
+    if (Array.isArray(node)) { node.forEach(collect); return }
+    if (!node || typeof node !== 'object') return
+    for (const [key, value] of Object.entries(node)) {
+      if (SKIP.has(key)) continue
+      if (key === 'classes' && Array.isArray(value)) value.forEach((name) => onElements.add(name))
+      else collect(value)
+    }
+  }
+  for (const file of markupFiles) collect(readJson(file))
+  const styled = new Map()
+  for (const [file, { rules }] of parsed) {
+    for (const rule of rules) {
+      for (const selector of rule.selectors) {
+        // Attribute selectors are blanked: `[class*='salt-button']` names no class.
+        for (const m of selector.replace(/\[[^\]]*\]/g, '').matchAll(/\.(salt-[\w-]+)/g)) {
+          if (!styled.has(m[1])) styled.set(m[1], new Set())
+          styled.get(m[1]).add(file)
+        }
+      }
+    }
+  }
+  if (markupFiles.length === 0) fails.push('contract/markup/ holds no markup files, so no styled class can be found on an element')
+  const unmarked = new Map(UNMARKED.map((entry) => [entry.class, entry]))
+  for (const [name, files] of [...styled].sort()) {
+    if (onElements.has(name) || unmarked.has(name)) continue
+    fails.push(`${[...files].join(', ')} style(s) .${name}, which no element in contract/markup/ carries; add it to the markup or to UNMARKED with its reason`)
+  }
+  for (const entry of UNMARKED) {
+    if (!styled.has(entry.class)) fails.push(`UNMARKED lists .${entry.class}, which no stylesheet styles; take it out`)
+    else if (onElements.has(entry.class)) fails.push(`UNMARKED lists .${entry.class}, which contract/markup/ now carries; take it out${entry.pending ? ' (the pending view classes have landed)' : ''}`)
+  }
+
+  const named = [...reads.keys()].filter((name) => !declaredHere.has(name))
+  return {
+    fails,
+    summary: `PASS: ${String(parsed.size)} stylesheet(s) parse whole; ${String(CONTRACTS.length)} decision contract(s) hold; ` +
+      `the token layer names the ${String(named.length)} custom properties they and the markup read (${String(named.filter((n) => reads.get(n).withFallback === reads.get(n).count).length)} optional); ` +
+      `${String(styled.size)} salt-* classes styled, ${String(UNMARKED.length)} of them listed in UNMARKED.`,
+  }
 }
 
-if (fails.length) {
-  for (const f of fails) console.log(`✗ ${f}`)
-  process.exit(1)
+/** The run as the command line reports it: each failure on a line of its own, or the summary. */
+export function report(files) {
+  const { fails, summary } = checkStylesheets(files)
+  return fails.length > 0 ? { code: 1, output: fails.map((f) => `✗ ${f}`).join('\n') + '\n' } : { code: 0, output: `${summary}\n` }
 }
-const named = [...reads.keys()].filter((name) => !declaredHere.has(name))
-console.log(`PASS: ${String(parsed.size)} stylesheet(s) parse whole; ${String(CONTRACTS.length)} decision contract(s) hold; ` +
-  `the token layer names the ${String(named.length)} custom properties they read (${String(named.filter((n) => reads.get(n).withFallback === reads.get(n).count).length)} optional); ` +
-  `${String(styled.size)} salt-* classes styled, ${String(UNMARKED.length)} of them listed in UNMARKED.`)
+
+/** The package's files from disk: its stylesheets and every contract file. */
+export function readPackage(dir) {
+  const files = new Map()
+  const walk = (sub) => {
+    const abs = path.join(dir, sub)
+    if (!existsSync(abs)) return
+    for (const entry of readdirSync(abs, { withFileTypes: true })) {
+      const rel = `${sub}/${entry.name}`
+      if (entry.isDirectory()) walk(rel)
+      else files.set(rel, readFileSync(path.join(dir, rel), 'utf8'))
+    }
+  }
+  walk('styles')
+  walk('contract')
+  return files
+}
+
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  const here = path.dirname(fileURLToPath(import.meta.url))
+  const { code, output } = report(readPackage(path.resolve(process.argv[2] ?? path.join(here, '..', 'salt-contract'))))
+  process.stdout.write(output)
+  process.exit(code)
+}

@@ -10,10 +10,10 @@
 import { after, describe, it } from 'node:test'
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { cpSync, mkdtempSync, readdirSync, readFileSync, rmSync, unlinkSync, writeFileSync } from 'node:fs'
+import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 
 /**
  * The stylesheet contracts, run against stylesheets that are WRONG.
@@ -44,6 +44,7 @@ import { fileURLToPath } from 'node:url'
 const HERE = path.dirname(fileURLToPath(import.meta.url))
 const GATE = path.join(HERE, 'check_salt_stylesheets.mjs')
 const PACKAGE = path.resolve(HERE, '../salt-contract')
+const { readPackage, report } = await import(pathToFileURL(GATE).href)
 
 /* vitest's spelling over node:assert, for the cases ported as they were written. */
 const expect = (actual) => ({
@@ -64,24 +65,34 @@ const itEach = (rows) => (title, fn) => {
   }
 }
 
-const workspace = mkdtempSync(path.join(tmpdir(), 'salt-stylesheet-gate-'))
-after(() => {
-  rmSync(workspace, { recursive: true, force: true })
-})
-
 let next = 0
 /* Every contract's failure seen by any case, for the coverage case at the end. */
 const failed = new Set()
 
-/* A stylesheet is named by its file, `blocks.css`; anything else by its path in the package. */
-const target = (root, file) => path.join(root, file.includes('/') ? file : path.join('styles', file))
+/*
+ * PENDING lightlysaltedhq/contracts#6, which records in the markup the five custom properties the
+ * token layer says the markup writes and no markup file does yet. Until it merges the gate fails on
+ * exactly those five (the end-to-end case below holds that), so the in-memory cases run on the
+ * package plus this stand-in record, and each sees only its own subject. Delete it, and the five
+ * names below, with UNMARKED once #6 has merged and this branch is rebased.
+ */
+const PENDING_WRITES = ['--salt-case-study-view-aside-rows', '--salt-case-study-view-measure', '--salt-header-phone-menu', '--salt-header-phone-burger', '--salt-header-phone-wrap']
+const PENDING_FAILS = PENDING_WRITES.map((name) => `✗ contract/token-layer.json says the markup writes ${name}, but no file in contract/markup/ does`)
 
-/* The salt-* names in a set of stylesheets, read loosely: over-reading only registers more. */
-const saltNames = (dir) => new Set(readdirSync(dir).flatMap((file) => [...readFileSync(path.join(dir, file), 'utf8').matchAll(/\.(salt-[\w-]+)/g)].map((m) => m[1])))
-const COMMITTED = saltNames(path.join(PACKAGE, 'styles'))
+/* The committed package, read once; each case edits a copy of this map in memory. */
+const COMMITTED_FILES = readPackage(PACKAGE)
+COMMITTED_FILES.set('contract/markup/zz-pending-6.json', JSON.stringify({ root: { attributes: { style: PENDING_WRITES.map((name) => `${name}: x`).join('; ') } } }))
+
+/* A stylesheet is named by its file, `blocks.css`; anything else by its path in the package. */
+const target = (file) => (file.includes('/') ? file : `styles/${file}`)
+
+/* The salt-* names in a package's stylesheets, read loosely: over-reading only registers more. */
+const saltNames = (files) => new Set([...files].filter(([file]) => file.startsWith('styles/')).flatMap(([, text]) => [...text.matchAll(/\.(salt-[\w-]+)/g)].map((m) => m[1])))
+const COMMITTED = saltNames(COMMITTED_FILES)
 
 /**
- * The gate's outcome against a copy of the package with each `[file, mutate]` applied.
+ * The gate's outcome against a copy of the package with each edit applied: `[file, mutate]`, or a
+ * function of the copy's file map, for a case that adds or removes a file.
  *
  * The ported cases write rules for classes no markup draws (`.salt-note`), to test a contract, not
  * the class vocabulary. So unless `raw`, every class a case invents (one the committed stylesheets
@@ -90,21 +101,17 @@ const COMMITTED = saltNames(path.join(PACKAGE, 'styles'))
  */
 const runWith = (raw, edits) => {
   next += 1
-  const root = path.join(workspace, String(next))
-  for (const part of ['styles', 'contract']) cpSync(path.join(PACKAGE, part), path.join(root, part), { recursive: true })
+  const files = new Map(COMMITTED_FILES)
   for (const edit of edits) {
-    if (typeof edit === 'function') { edit(root); continue }
+    if (typeof edit === 'function') { edit(files); continue }
     const [file, mutate] = edit
-    writeFileSync(target(root, file), mutate(readFileSync(target(root, file), 'utf8')))
+    files.set(target(file), mutate(files.get(target(file))))
   }
-  const invented = [...saltNames(path.join(root, 'styles'))].filter((name) => !COMMITTED.has(name))
-  if (!raw && invented.length > 0) {
-    writeFileSync(path.join(root, 'contract/markup/zz-invented.json'), JSON.stringify({ elements: [{ classes: invented }] }))
-  }
-  const result = spawnSync(process.execPath, [GATE, root], { encoding: 'utf8' })
-  const output = `${result.stdout}${result.stderr}`
+  const invented = [...saltNames(files)].filter((name) => !COMMITTED.has(name))
+  if (!raw && invented.length > 0) files.set('contract/markup/zz-invented.json', JSON.stringify({ elements: [{ classes: invented }] }))
+  const { code, output } = report(files)
   for (const m of output.matchAll(/^✗ [\w.-]+\.css: (.+)$/gm)) failed.add(m[1])
-  return { code: result.status ?? 1, output }
+  return { code, output }
 }
 
 const run = (...edits) => runWith(false, edits)
@@ -2245,8 +2252,8 @@ describe('every framed image fills its frame', () => {
  * Each runs raw where the class vocabulary is the subject, so a class a case invents is not
  * registered for it.
  */
-const addFile = (file, text) => (root) => writeFileSync(target(root, file), text)
-const removeFile = (file) => (root) => unlinkSync(target(root, file))
+const addFile = (file, text) => (files) => files.set(target(file), text)
+const removeFile = (file) => (files) => files.delete(target(file))
 const tokenLayer = (edit) => ['contract/token-layer.json', (text) => {
   const layer = JSON.parse(text)
   edit(layer)
@@ -2271,13 +2278,22 @@ describe('the token layer names exactly what the stylesheets read', () => {
   itEach([
     ['a stylesheet reads a property the token layer does not name', [['views.css', appending('.salt-service__summary {\n  padding-block: var(--space-12);\n}')]], 'views.css read(s) --space-12, which contract/token-layer.json does not name'],
     ['a role is dropped, and its five properties go with it', [tokenLayer((layer) => { for (const g of layer.groups) g.tokens = g.tokens.filter((t) => t.textRole !== 'stat') })], 'blocks.css read(s) --text-stat--font-family, which contract/token-layer.json does not name'],
-    ['the token layer names a property nothing reads', [tokenLayer((layer) => layer.groups[0].tokens.push({ name: '--color-accent', meaning: 'Unread.', source: 'design-foundations' }))], 'names --color-accent, which no stylesheet reads'],
+    ['the token layer names a property nothing reads', [tokenLayer((layer) => layer.groups[0].tokens.push({ name: '--color-accent', meaning: 'Unread.', source: 'design-foundations' }))], 'names --color-accent, which neither a stylesheet nor a value the markup writes reads'],
     ['the token layer names a property twice', [tokenLayer((layer) => layer.groups[0].tokens.push({ ...tokenNamed(layer, '--color-ink') }))], 'names --color-ink twice'],
     ['the token layer names a property the stylesheets declare', [tokenLayer((layer) => layer.groups[0].tokens.push({ name: '--salt-section-bg', meaning: 'The band.', source: 'salt' }))], 'names --salt-section-bg, which the stylesheets declare themselves'],
     ['a property read without a fallback is marked optional', [tokenLayer((layer) => { tokenNamed(layer, '--header-height').optional = true })], 'marks --header-height optional, but 1 of its 1 read(s) have no fallback'],
     ['a property with a fallback at every read is not marked optional', [tokenLayer((layer) => { delete tokenNamed(layer, '--salt-rating-fill').optional })], '--salt-rating-fill has a fallback at every read (blocks.css), so contract/token-layer.json marks it optional'],
     ['a read loses its fallback', [['chrome.css', replacing('var(--duration-moderate, 200ms)', 'var(--duration-moderate)')]], 'marks --duration-moderate optional, but 1 of its 1 read(s) have no fallback'],
     ['the token layer is not JSON', [['contract/token-layer.json', (text) => text.slice(1)]], 'contract/token-layer.json is missing or not JSON'],
+    /* What the markup writes is read too (T2), through each placeholder's value map. */
+    ['a token the markup writes into a band is dropped', [tokenLayer((layer) => { for (const g of layer.groups) g.tokens = g.tokens.filter((t) => t.name !== '--scrim-strong') })], 'contract/markup/section.json read(s) --scrim-strong, which contract/token-layer.json does not name'],
+    ['a spacing the markup writes is dropped', [tokenLayer((layer) => { for (const g of layer.groups) g.tokens = g.tokens.filter((t) => t.name !== '--space-section-lg') })], 'contract/markup/section.json read(s) --space-section-lg, which contract/token-layer.json does not name'],
+    ['the value map loses its exception, so `none` would be a token', [tokenLayer((layer) => { delete tokenNamed(layer, '--salt-section-space').values.except })], 'read(s) --space-section-none, which contract/token-layer.json does not name'],
+    ['a placeholder the token layer gives no values for', [tokenLayer((layer) => { delete tokenNamed(layer, '--salt-scrim-alpha').values })], 'writes --salt-scrim-alpha as var(--scrim-<strength>), and contract/token-layer.json gives no values for <strength>'],
+    ['a value map naming no field', [tokenLayer((layer) => { tokenNamed(layer, '--salt-scrim-alpha').values.field = '_section-settings#strength' })], "takes --salt-scrim-alpha's values from _section-settings#strength, which is not a field with options"],
+    ['a value map on a token the markup does not write', [tokenLayer((layer) => { tokenNamed(layer, '--color-ink').values = { field: '_section-settings#spacing' } })], 'gives --color-ink values, but only a property the markup writes has them'],
+    /* A token said to come from the markup is written by some markup file (T5). */
+    ['a token the markup is said to write and none does', [tokenLayer((layer) => { tokenNamed(layer, '--header-height').source = 'markup' })], 'says the markup writes --header-height, but no file in contract/markup/ does'],
   ])('fails when %s', (_case, edits, message) => {
     const { code, output } = run(...edits)
     expect(output).toContain(message)
@@ -2315,6 +2331,31 @@ describe('every class the stylesheets style is on an element in the markup contr
     const { code, output } = runRaw(...edits)
     expect(output).toContain('PASS: ')
     expect(code).toBe(0)
+  })
+})
+
+/* The command line, end to end: the cases above call the checks in memory, so two run the script as
+   CI does, on the committed package and on a copy on disk with one defect. */
+describe('the script, run as CI runs it', () => {
+  it('passes the committed package, or fails it only on the writes #6 records', () => {
+    const result = spawnSync(process.execPath, [GATE], { encoding: 'utf8' })
+    const lines = result.stdout.split('\n').filter((line) => line.startsWith('✗'))
+    assert.deepEqual(lines.filter((line) => !PENDING_FAILS.includes(line)), [])
+    expect(result.status).toBe(lines.length === 0 ? 0 : 1)
+  })
+
+  it('fails a copy on disk with one defect, naming it', () => {
+    const root = mkdtempSync(path.join(tmpdir(), 'salt-stylesheet-gate-'))
+    try {
+      for (const part of ['styles', 'contract']) cpSync(path.join(PACKAGE, part), path.join(root, part), { recursive: true })
+      const file = path.join(root, 'styles', 'sections.css')
+      writeFileSync(file, readFileSync(file, 'utf8').replace('  isolation: isolate;\n', ''))
+      const result = spawnSync(process.execPath, [GATE, root], { encoding: 'utf8' })
+      expect(result.stdout).toContain('✗ sections.css: the wrapper establishes a stacking context')
+      expect(result.status).toBe(1)
+    } finally {
+      rmSync(root, { recursive: true, force: true })
+    }
   })
 })
 
