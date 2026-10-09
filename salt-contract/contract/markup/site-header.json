@@ -352,7 +352,7 @@
               "classes": [
                 "salt-drawer__panel"
               ],
-              "text": "the nav again (ids prefixed -drawer), the phone link, the call to action"
+              "text": "the nav again (ids prefixed -drawer; the main navigation's id site-navigation becomes site-navigation-drawer), the phone link, the call to action"
             }
           ]
         }

@@ -346,7 +346,7 @@
       "statement": "A section collapses its top spacing (data-collapse-top) when the previous section shares its tone and dark tone, neither has a background image, it has no divider, and neither section's spacing is none."
     },
     "anchors": {
-      "statement": "A section's id is its anchor, slugged. Ids reserved by the document (main, content, header, footer, nav, primary-navigation, search, skip-link) and repeats take a numeric suffix (-2, -3)."
+      "statement": "A section's id is its anchor, slugged. Ids reserved by the document (main, content, header, footer, nav, site-navigation, search, skip-link) and repeats take a numeric suffix (-2, -3)."
     },
     "new-tab": {
       "statement": "A link that opens a new tab carries target=_blank and rel=\"noopener noreferrer\"."

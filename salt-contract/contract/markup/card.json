@@ -119,7 +119,7 @@
         "role": "list"
       },
       "optional": true,
-      "when": "a team member has an email or a phone",
+      "when": "a team member has an email, or a phone that normalises to a tel: link",
       "children": [
         {
           "role": "contact-email",
@@ -195,7 +195,8 @@
                   "optional": true,
                   "when": "a glyph exists for the profile; the name as text otherwise"
                 }
-              ]
+              ],
+              "text": "from:profile name, when no glyph exists for the profile"
             }
           ]
         }
@@ -412,7 +413,7 @@
     },
     {
       "topic": "stylesheet-owes",
-      "text": "Team contact and social links (SC-006); no rules in the shared stylesheets yet.",
+      "text": "Team contact and social links (SC-006); no rules in the shared stylesheets yet. On a linked card they sit under its stretched a.salt-card__link, so the rules must lift them above it (position relative and a higher z-index) or they open the card's page instead.",
       "classes": [
         "salt-showcase__contact",
         "salt-showcase__socials",
