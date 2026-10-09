@@ -1,0 +1,136 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "token-layer.schema.json",
+  "title": "The custom properties a runtime emits for the Salt contract's shared stylesheets",
+  "description": "Names only, never values: a value is the implementation's, generated from design-foundations and its brand engine. The package gate (scripts/check_salt_stylesheets.mjs) holds the list to the stylesheets: every var() they read and do not define is named here, nothing here goes unread, and `optional` is true exactly when every read carries a fallback.",
+  "type": "object",
+  "required": [
+    "$schema",
+    "version",
+    "groups"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*$"
+    },
+    "source": {
+      "description": "Who gives the property its value. design-foundations: a role or scale rung that package names, emitted by the implementation's theme. salt: a token of Salt's own, emitted by the implementation's theme. markup: written by the markup contract on an element's style attribute. script: written by the implementation's script at run time.",
+      "enum": [
+        "design-foundations",
+        "salt",
+        "markup",
+        "script"
+      ]
+    },
+    "common": {
+      "type": "object",
+      "properties": {
+        "meaning": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source": {
+          "$ref": "#/$defs/source"
+        },
+        "ref": {
+          "description": "Where the name is defined: a design-foundations vocabulary or scale-shape entry, or a markup contract file.",
+          "type": "string",
+          "minLength": 1
+        },
+        "optional": {
+          "description": "True when every read in the stylesheets carries a fallback, so a runtime may leave the property unset.",
+          "type": "boolean"
+        }
+      }
+    },
+    "token": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/common"
+        }
+      ],
+      "type": "object",
+      "required": [
+        "name",
+        "meaning",
+        "source"
+      ],
+      "unevaluatedProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^--[a-z][a-z0-9]*(-[a-z0-9]+)*$"
+        }
+      }
+    },
+    "textRole": {
+      "description": "A design-foundations text role, which a runtime emits as five properties: --text-<id> (size), and --text-<id>--line-height, --letter-spacing, --font-weight and --font-family.",
+      "allOf": [
+        {
+          "$ref": "#/$defs/common"
+        }
+      ],
+      "type": "object",
+      "required": [
+        "textRole",
+        "meaning",
+        "source"
+      ],
+      "unevaluatedProperties": false,
+      "properties": {
+        "textRole": {
+          "$ref": "#/$defs/id"
+        }
+      }
+    }
+  },
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string"
+    },
+    "$comment": {
+      "type": "string"
+    },
+    "groups": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "what",
+          "tokens"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "$ref": "#/$defs/id"
+          },
+          "what": {
+            "type": "string",
+            "minLength": 1
+          },
+          "tokens": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/$defs/token"
+                },
+                {
+                  "$ref": "#/$defs/textRole"
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,125 @@
+{
+  "$schema": "../schema/token-layer.schema.json",
+  "version": "0.1.0",
+  "$comment": "Every custom property the shared stylesheets (styles/*.css) read and do not define, which a runtime must therefore emit for them to work (SC-002). Names only: each value is the implementation's, generated from design-foundations and its brand engine, and the stylesheets reach colour through these alone. A property marked optional has a fallback at every read. Drafted 09/10/2026 from the stylesheets Salt for Next.js shipped at 1472afdd.",
+  "groups": [
+    {
+      "id": "colour",
+      "what": "Colour roles. Each re-points under [data-theme='dark'], so no stylesheet carries a dark variant; a section's tone routes them into its own --salt-section-* properties (sections.css).",
+      "tokens": [
+        { "name": "--color-surface", "meaning": "The page ground, and the surface tone's band.", "source": "design-foundations", "ref": "vocabulary.json colorRoles surface" },
+        { "name": "--color-surface-alt", "meaning": "The companion band, the surface-alt tone.", "source": "design-foundations", "ref": "vocabulary.json colorRoles surface.alt" },
+        { "name": "--color-surface-inverse", "meaning": "The inverted band, the surface-inverse tone.", "source": "design-foundations", "ref": "vocabulary.json colorRoles surface.inverse" },
+        { "name": "--color-brand", "meaning": "The brand fill: the primary button, and the icon in a grid or carousel card.", "source": "design-foundations", "ref": "vocabulary.json colorRoles brand" },
+        { "name": "--color-brand-tint", "meaning": "The brand-tint tone's band.", "source": "design-foundations", "ref": "vocabulary.json colorRoles brand.tint" },
+        { "name": "--color-on-brand", "meaning": "Text on the brand fill.", "source": "design-foundations", "ref": "vocabulary.json colorRoles on-brand" },
+        { "name": "--color-ink", "meaning": "Body text on the light tones and the page ground.", "source": "design-foundations", "ref": "vocabulary.json colorRoles ink" },
+        { "name": "--color-ink-muted", "meaning": "De-emphasised text on the light tones and in the view bodies.", "source": "design-foundations", "ref": "vocabulary.json colorRoles ink.muted" },
+        { "name": "--color-ink-inverse", "meaning": "Body text on the inverted band, and the contra pole of the focus indicator.", "source": "design-foundations", "ref": "vocabulary.json colorRoles ink.inverse" },
+        { "name": "--color-ink-muted-inverse", "meaning": "De-emphasised text on the inverted band.", "source": "design-foundations", "ref": "vocabulary.json colorRoles extended ink.muted.inverse" },
+        { "name": "--color-border", "meaning": "The hairline on the light tones and in the page chrome.", "source": "design-foundations", "ref": "vocabulary.json colorRoles border" },
+        { "name": "--color-border-inverse", "meaning": "The hairline on the inverted band.", "source": "design-foundations", "ref": "vocabulary.json colorRoles extended border.inverse" },
+        { "name": "--color-border-strong", "meaning": "A boundary that identifies a control (held to 3:1) on the light tones.", "source": "design-foundations", "ref": "vocabulary.json colorRoles extended border.strong" },
+        { "name": "--color-border-strong-inverse", "meaning": "A control's boundary on the inverted band.", "source": "design-foundations", "ref": "vocabulary.json colorRoles extended border.strong.inverse" },
+        { "name": "--color-focus", "meaning": "The focus ring.", "source": "design-foundations", "ref": "vocabulary.json colorRoles focus" }
+      ]
+    },
+    {
+      "id": "type",
+      "what": "Text roles and weight rungs. A text role is a visual rank, not an element: a card title is heading-4 whatever its level.",
+      "tokens": [
+        { "textRole": "display", "meaning": "The hero headline.", "source": "design-foundations", "ref": "vocabulary.json textRoles display" },
+        { "textRole": "heading-1", "meaning": "An h1 with no rule of its own (base.css).", "source": "design-foundations", "ref": "vocabulary.json textRoles heading-1" },
+        { "textRole": "heading-2", "meaning": "An h2 with no rule of its own: a section heading (base.css).", "source": "design-foundations", "ref": "vocabulary.json textRoles heading-2" },
+        { "textRole": "heading-3", "meaning": "An h3 with no rule of its own (base.css).", "source": "design-foundations", "ref": "vocabulary.json textRoles heading-3" },
+        { "textRole": "heading-4", "meaning": "A minor heading: card, FAQ question, dialog and footer column titles, the wordmark, and h4 to h6.", "source": "design-foundations", "ref": "vocabulary.json textRoles heading-4" },
+        { "textRole": "lead", "meaning": "The standfirst: a section intro and the hero's subheading.", "source": "design-foundations", "ref": "vocabulary.json textRoles lead" },
+        { "textRole": "body", "meaning": "Running text inside the page's landmarks (base.css).", "source": "design-foundations", "ref": "vocabulary.json textRoles body" },
+        { "textRole": "small", "meaning": "Supporting text: showcase meta and footer links.", "source": "design-foundations", "ref": "vocabulary.json textRoles small" },
+        { "textRole": "label", "meaning": "Controls and their labels: buttons, menu links, tabs, pagination, form labels.", "source": "design-foundations", "ref": "vocabulary.json textRoles label" },
+        { "textRole": "caption", "meaning": "A gallery caption.", "source": "design-foundations", "ref": "vocabulary.json textRoles caption" },
+        { "textRole": "eyebrow", "meaning": "The eyebrow over a heading.", "source": "design-foundations", "ref": "vocabulary.json textRoles eyebrow" },
+        { "textRole": "quote", "meaning": "A quotation: a testimonial and a rich-text blockquote.", "source": "design-foundations", "ref": "vocabulary.json textRoles quote" },
+        { "textRole": "stat", "meaning": "A stat's figure.", "source": "design-foundations", "ref": "vocabulary.json textRoles stat" },
+        { "name": "--weight-regular", "meaning": "The weight an emphasis steps back down to.", "source": "design-foundations", "ref": "scale-shape.json weight regular" },
+        { "name": "--weight-semibold", "meaning": "A semibold emphasis inside a role.", "source": "design-foundations", "ref": "scale-shape.json weight semibold" },
+        { "name": "--weight-bold", "meaning": "A bold emphasis inside a role: the current breadcrumb, an author's name.", "source": "design-foundations", "ref": "scale-shape.json weight bold" }
+      ]
+    },
+    {
+      "id": "space",
+      "what": "Space rungs and the layout roles built on them.",
+      "tokens": [
+        { "name": "--space-0", "meaning": "No space, as a rung.", "source": "design-foundations", "ref": "scale-shape.json space 0" },
+        { "name": "--space-3", "meaning": "Space rung 3: under a footer column title.", "source": "design-foundations", "ref": "scale-shape.json space 3" },
+        { "name": "--space-4", "meaning": "Space rung 4: gaps inside the case study view.", "source": "design-foundations", "ref": "scale-shape.json space 4" },
+        { "name": "--space-8", "meaning": "Space rung 8: gaps between the case study view's parts.", "source": "design-foundations", "ref": "scale-shape.json space 8" },
+        { "name": "--space-gutter", "meaning": "The page's inline gutter, on every band and on the header and footer.", "source": "design-foundations", "ref": "vocabulary.json layoutRoles gutter" },
+        { "name": "--space-section-sm", "meaning": "A compact band's block space.", "source": "design-foundations", "ref": "vocabulary.json layoutRoles section-sm" },
+        { "name": "--space-section-md", "meaning": "The default band's block space.", "source": "design-foundations", "ref": "vocabulary.json layoutRoles section-md" },
+        { "name": "--space-card-media", "meaning": "A card's join between its media and its title.", "source": "salt" },
+        { "name": "--space-card-title", "meaning": "A card's join after its title, and between two meta lines.", "source": "salt" },
+        { "name": "--space-card-body", "meaning": "A card's join between its parts, where no closer join applies.", "source": "salt" },
+        { "name": "--space-card-row", "meaning": "The gap between rows in a grid of cards.", "source": "salt" }
+      ]
+    },
+    {
+      "id": "measure",
+      "what": "Content widths: the band's measures, by data-width.",
+      "tokens": [
+        { "name": "--container-2xl", "meaning": "The narrow measure: running text, a service's opening text.", "source": "design-foundations", "ref": "scale-shape.json container 2xl" },
+        { "name": "--container-5xl", "meaning": "The default measure.", "source": "design-foundations", "ref": "scale-shape.json container 5xl" },
+        { "name": "--container-7xl", "meaning": "The wide measure, and the header's and footer's.", "source": "design-foundations", "ref": "scale-shape.json container 7xl" }
+      ]
+    },
+    {
+      "id": "shape",
+      "what": "Corners, transparency and the focus ring's geometry.",
+      "tokens": [
+        { "name": "--radius-sm", "meaning": "A small corner: tags, a post's image frame.", "source": "design-foundations", "ref": "scale-shape.json radius sm" },
+        { "name": "--radius-md", "meaning": "A control's corner: buttons, inputs.", "source": "design-foundations", "ref": "scale-shape.json radius md" },
+        { "name": "--radius-lg", "meaning": "A card's and a dialog's corner.", "source": "design-foundations", "ref": "scale-shape.json radius lg" },
+        { "name": "--radius-full", "meaning": "A pill or a circle: chips and portraits.", "source": "design-foundations", "ref": "scale-shape.json radius full" },
+        { "name": "--opacity-medium", "meaning": "A carousel control at the end of its track.", "source": "design-foundations", "ref": "scale-shape.json opacity medium" },
+        { "name": "--opacity-heavy", "meaning": "A disabled button.", "source": "design-foundations", "ref": "scale-shape.json opacity heavy" },
+        { "name": "--focus-ring-width", "meaning": "The focus ring's width; the keyline's spread is computed from it.", "source": "design-foundations", "ref": "scale-shape.json focusRing width" },
+        { "name": "--focus-ring-offset", "meaning": "The gap between a control and its focus ring.", "source": "design-foundations", "ref": "scale-shape.json focusRing offset" }
+      ]
+    },
+    {
+      "id": "motion",
+      "what": "Timing for the little motion there is, all of it behind prefers-reduced-motion: no-preference.",
+      "tokens": [
+        { "name": "--duration-moderate", "meaning": "The menu icon's morph.", "source": "design-foundations", "ref": "scale-shape.json duration moderate", "optional": true },
+        { "name": "--ease-in-out", "meaning": "The menu icon's morph curve.", "source": "design-foundations", "ref": "scale-shape.json easing in-out", "optional": true }
+      ]
+    },
+    {
+      "id": "set-by-markup",
+      "what": "Written on an element by the markup itself, from editor content or a section setting.",
+      "tokens": [
+        { "name": "--salt-section-space", "meaning": "A band's block space: var(--space-section-<spacing>), absent when spacing is none.", "source": "markup", "ref": "contract/markup/section.json", "optional": true },
+        { "name": "--salt-scrim-alpha", "meaning": "The scrim's strength over a background image: var(--scrim-<strength>).", "source": "markup", "ref": "contract/markup/section.json" },
+        { "name": "--salt-rating-fill", "meaning": "How much of a rating's five stars is filled, as a percentage.", "source": "markup", "ref": "contract/markup/card.json", "optional": true },
+        { "name": "--salt-case-study-view-aside-rows", "meaning": "How many of a case study band's rows its aside spans.", "source": "markup", "ref": "contract/markup/case-study.json (not yet recorded there)" },
+        { "name": "--salt-case-study-view-measure", "meaning": "A case study band's measure, when it sets one.", "source": "markup", "ref": "contract/markup/case-study.json (not yet recorded there)", "optional": true },
+        { "name": "--salt-header-phone-menu", "meaning": "Without script, shows the phone menu: the header's noscript style sets it.", "source": "markup", "ref": "contract/markup/site-header.json", "optional": true },
+        { "name": "--salt-header-phone-burger", "meaning": "Without script, hides the burger: the header's noscript style sets it.", "source": "markup", "ref": "contract/markup/site-header.json", "optional": true },
+        { "name": "--salt-header-phone-wrap", "meaning": "Without script, lets the header row wrap: the header's noscript style sets it.", "source": "markup", "ref": "contract/markup/site-header.json", "optional": true }
+      ]
+    },
+    {
+      "id": "set-by-script",
+      "what": "Measured and written at run time by the implementation's script. Each read either has a fallback or sits where a missing value draws nothing wrong.",
+      "tokens": [
+        { "name": "--header-height", "meaning": "The sticky header's height, on the root, so a sticky aside clears it.", "source": "script" },
+        { "name": "--salt-consent-banner-size", "meaning": "The consent banner's height, on the root, so content can scroll clear of it.", "source": "script", "optional": true },
+        { "name": "--salt-drawer-toggle-block-start", "meaning": "Where the menu button sits, so the drawer's close button lands on it.", "source": "script", "optional": true },
+        { "name": "--salt-drawer-toggle-block-size", "meaning": "The menu button's height, for the drawer's close button.", "source": "script", "optional": true },
+        { "name": "--salt-drawer-toggle-inline-start", "meaning": "The menu button's inline start, for the drawer's close button.", "source": "script", "optional": true },
+        { "name": "--salt-drawer-toggle-inline-end", "meaning": "The menu button's inline end, for the drawer's close button.", "source": "script", "optional": true },
+        { "name": "--salt-drawer-toggle-inline-size", "meaning": "The menu button's width, for the drawer's close button.", "source": "script", "optional": true }
+      ]
+    }
+  ]
+}
