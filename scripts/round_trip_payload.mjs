@@ -23,9 +23,10 @@
 // the one salt-nextjs stores. Labels and descriptions are not compared; see the report's header.
 //
 // Each difference is EXPECTED only when salt-contract/reports/round-trip-payload.expected.json lists
-// it: its section, field path, kind and exact wording, with the evidence (the owes, formerly or
-// values note, or the SC ruling) that accounts for it, which --check holds to a note of that field,
-// a field above it or its section (scripts/_round_trip.mjs). Anything else is UNEXPECTED, so a later
+// it: its section, field path, kind and exact wording, with the evidence that accounts for it. That
+// evidence is an owes, note, formerly or values entry from the platform note of that field or a
+// field above it, or its section's owes, note or sections.json formerly; --check refuses anything
+// else (scripts/_round_trip.mjs). Anything else is UNEXPECTED, so a later
 // rename, retype or required change on a field that already owes something is not hidden by it.
 import { execFileSync } from 'node:child_process'
 import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
