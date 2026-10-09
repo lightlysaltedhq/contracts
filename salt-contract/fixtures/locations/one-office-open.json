@@ -1,0 +1,89 @@
+{
+  "$comment": "context.now is Wednesday 07/10/2026 11:00 in Europe/London (BST, +01:00); the status is open under locations.json open-now step 2. \"labels.status\" is read as the label for the computed status (labels.open, labels.appointment or labels.closed); \"Directions to\" + office name forms the aria-label of the directions link; the opening hours list only days with rows; contact links use the item phone as text with a digits-only tel: href.",
+  "section": "locations",
+  "summary": "One office with address, phone, email and weekday hours; the time given falls inside its hours, so the status is open; maps are off, so no map.",
+  "values": {
+    "eyebrow": "Find us",
+    "heading": "Visit the studio",
+    "query": {
+      "mode": "automatic",
+      "categories": [],
+      "items": [],
+      "order": "default",
+      "count": 0
+    },
+    "settings": {
+      "anchorId": "find-us"
+    }
+  },
+  "context": {
+    "headingLevel": 2,
+    "headingRendered": true,
+    "priorityMedia": false,
+    "track": "locations-1",
+    "index": 3,
+    "now": "2026-10-07T11:00:00+01:00"
+  },
+  "collections": {
+    "locations": [
+      {
+        "id": "loc-bristol",
+        "title": "Bristol studio",
+        "address": [
+          "12 Wapping Wharf",
+          "Bristol",
+          "BS1 6UD"
+        ],
+        "phone": "0117 496 0123",
+        "email": "bristol@example.com",
+        "hours": [
+          {
+            "day": "monday",
+            "open": "09:00",
+            "close": "17:00"
+          },
+          {
+            "day": "tuesday",
+            "open": "09:00",
+            "close": "17:00"
+          },
+          {
+            "day": "wednesday",
+            "open": "09:00",
+            "close": "17:00"
+          },
+          {
+            "day": "thursday",
+            "open": "09:00",
+            "close": "17:00"
+          },
+          {
+            "day": "friday",
+            "open": "09:00",
+            "close": "17:00"
+          }
+        ],
+        "directionsUrl": "https://maps.example/dir/?q=12+Wapping+Wharf+Bristol+BS1+6UD",
+        "tel": "+441174960123"
+      }
+    ]
+  },
+  "site": {
+    "timezone": "Europe/London",
+    "labels": {
+      "open": "Open now",
+      "appointment": "By appointment",
+      "closed": "Closed",
+      "byAppointment": "By appointment",
+      "getDirections": "Get directions",
+      "directions": "Directions to",
+      "load": "Load the map",
+      "loadMap": "Load map",
+      "consent": "Allow map cookies to view this map.",
+      "error": "The map could not be loaded."
+    },
+    "maps": {
+      "enabled": false
+    }
+  }
+}

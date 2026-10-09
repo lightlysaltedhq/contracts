@@ -1,0 +1,40 @@
+{
+  "section": "features",
+  "summary": "No eyebrow or intro; four columns, four unlinked cards with a body, on the inverse tone.",
+  "values": {
+    "heading": "How a project runs",
+    "columns": "4",
+    "items": [
+      {
+        "title": "Discover",
+        "text": "<p>We learn how your business works.</p>"
+      },
+      {
+        "title": "Design",
+        "text": "<p>Layouts built from your brand.</p>"
+      },
+      {
+        "title": "Build",
+        "text": "<p>Code that stays fast.</p>"
+      },
+      {
+        "title": "Support",
+        "text": "<p>Help after launch.</p>"
+      }
+    ],
+    "settings": {
+      "anchorId": "features-four",
+      "tone": "surface-inverse"
+    }
+  },
+  "context": {
+    "headingLevel": 2,
+    "headingRendered": true,
+    "priorityMedia": false,
+    "track": "features-1",
+    "index": 2
+  },
+  "site": {
+    "arrow": "→"
+  }
+}

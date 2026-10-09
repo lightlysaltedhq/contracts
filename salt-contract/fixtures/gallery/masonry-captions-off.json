@@ -1,0 +1,121 @@
+{
+  "section": "gallery",
+  "summary": "Masonry layout, two columns, four images with captions off: the media records carry captions but none are drawn. Inverse tone, no heading, so the wrapper is a div.",
+  "values": {
+    "layout": "masonry",
+    "columns": "2",
+    "captions": false,
+    "images": [
+      "terrace",
+      "courtyard",
+      "meadow",
+      "pond"
+    ],
+    "settings": {
+      "anchorId": "gallery-masonry",
+      "tone": "surface-inverse"
+    }
+  },
+  "context": {
+    "headingLevel": 2,
+    "headingRendered": true,
+    "priorityMedia": false,
+    "track": "gallery-1",
+    "index": 2
+  },
+  "media": {
+    "terrace": {
+      "src": "https://uploads.example/terrace-1600.jpg",
+      "srcset": [
+        {
+          "url": "https://uploads.example/terrace-640.jpg",
+          "width": 640
+        },
+        {
+          "url": "https://uploads.example/terrace-1024.jpg",
+          "width": 1024
+        },
+        {
+          "url": "https://uploads.example/terrace-1600.jpg",
+          "width": 1600
+        }
+      ],
+      "sizes": "(min-width: 64rem) 30rem, 50vw",
+      "width": 1600,
+      "height": 1067,
+      "alt": "A terrace of raised beds planted with lavender",
+      "caption": "Lavender beds on the Clifton terrace"
+    },
+    "courtyard": {
+      "src": "https://uploads.example/courtyard-1600.jpg",
+      "srcset": [
+        {
+          "url": "https://uploads.example/courtyard-640.jpg",
+          "width": 640
+        },
+        {
+          "url": "https://uploads.example/courtyard-1024.jpg",
+          "width": 1024
+        },
+        {
+          "url": "https://uploads.example/courtyard-1600.jpg",
+          "width": 1600
+        }
+      ],
+      "sizes": "(min-width: 64rem) 30rem, 50vw",
+      "width": 1600,
+      "height": 1200,
+      "alt": "A paved courtyard with olive trees in pots",
+      "caption": "Olive trees in a paved courtyard"
+    },
+    "meadow": {
+      "src": "https://uploads.example/meadow-1600.jpg",
+      "srcset": [
+        {
+          "url": "https://uploads.example/meadow-640.jpg",
+          "width": 640
+        },
+        {
+          "url": "https://uploads.example/meadow-1024.jpg",
+          "width": 1024
+        },
+        {
+          "url": "https://uploads.example/meadow-1600.jpg",
+          "width": 1600
+        }
+      ],
+      "sizes": "(min-width: 64rem) 30rem, 50vw",
+      "width": 1600,
+      "height": 1067,
+      "alt": "A wildflower meadow in early summer",
+      "caption": "A wildflower meadow in June"
+    },
+    "pond": {
+      "src": "https://uploads.example/pond-1600.jpg",
+      "srcset": [
+        {
+          "url": "https://uploads.example/pond-640.jpg",
+          "width": 640
+        },
+        {
+          "url": "https://uploads.example/pond-1024.jpg",
+          "width": 1024
+        },
+        {
+          "url": "https://uploads.example/pond-1600.jpg",
+          "width": 1600
+        }
+      ],
+      "sizes": "(min-width: 64rem) 30rem, 50vw",
+      "width": 1600,
+      "height": 1000,
+      "alt": "A wildlife pond edged with marsh marigolds",
+      "caption": "The finished wildlife pond"
+    }
+  },
+  "site": {
+    "labels": {
+      "slide": "Slide"
+    }
+  }
+}

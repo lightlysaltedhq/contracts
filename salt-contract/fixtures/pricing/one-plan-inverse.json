@@ -1,0 +1,31 @@
+{
+  "section": "pricing",
+  "summary": "One plan with price and period only (no features, no button), on the inverse tone and no heading.",
+  "$comment": "Display choices not fixed by the contract: the visually hidden text is 'Not included', the included glyph is 'check' and the not-included glyph is 'close', the period is written as stored ('a month') after the price, and each feature's text follows its icon after one space, as a browser draws the line. Labels: site.labels.featured and site.labels.notIncluded.",
+  "values": {
+    "plans": [
+      {
+        "name": "Essentials",
+        "price": "£49",
+        "period": "a month"
+      }
+    ],
+    "settings": {
+      "anchorId": "pricing-one",
+      "tone": "surface-inverse"
+    }
+  },
+  "context": {
+    "headingLevel": 2,
+    "headingRendered": true,
+    "priorityMedia": false,
+    "track": "pricing-1",
+    "index": 2
+  },
+  "site": {
+    "labels": {
+      "featured": "Most popular",
+      "notIncluded": "Not included"
+    }
+  }
+}

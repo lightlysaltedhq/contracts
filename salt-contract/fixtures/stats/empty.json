@@ -1,0 +1,16 @@
+{
+  "section": "stats",
+  "summary": "Nothing set: no heading, intro or stats, so nothing renders.",
+  "values": {
+    "settings": {
+      "anchorId": "stats-empty"
+    }
+  },
+  "context": {
+    "headingLevel": 2,
+    "headingRendered": true,
+    "priorityMedia": false,
+    "track": "stats-1",
+    "index": 2
+  }
+}

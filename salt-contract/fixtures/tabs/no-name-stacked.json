@@ -1,0 +1,27 @@
+{
+  "section": "tabs",
+  "summary": "No heading and no label, two tabs: the panels are drawn stacked with no radio group, in a div wrapper.",
+  "values": {
+    "tabs": [
+      {
+        "label": "Hedges",
+        "content": "<p>Hedges are cut twice a year.</p>"
+      },
+      {
+        "label": "Lawns",
+        "content": "<p>Lawns are cut every fortnight in the growing season.</p>"
+      }
+    ],
+    "settings": {
+      "anchorId": "tabs-noname"
+    }
+  },
+  "context": {
+    "headingLevel": 2,
+    "headingRendered": true,
+    "priorityMedia": false,
+    "track": "tabs-1",
+    "index": 2
+  },
+  "$comment": "With no heading and no label the set is unnamed, so the tab-set root carries no aria-label (tabs.json: only when named; ARIA 1.2 prohibits aria-label on a generic element)."
+}

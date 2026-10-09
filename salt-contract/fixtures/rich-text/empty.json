@@ -1,0 +1,16 @@
+{
+  "section": "rich-text",
+  "summary": "Nothing set: eyebrow, heading and body all empty, so nothing renders, not even the wrapper.",
+  "values": {
+    "settings": {
+      "anchorId": "rich-text-empty"
+    }
+  },
+  "context": {
+    "headingLevel": 2,
+    "headingRendered": true,
+    "priorityMedia": false,
+    "track": "rich-text-1",
+    "index": 2
+  }
+}

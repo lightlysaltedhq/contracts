@@ -1,0 +1,28 @@
+{
+  "section": "listing",
+  "$comment": "Expressed as \"route\": null (the route supplies no listing). A route that lists but has no cards on this page is empty-page-message instead.",
+  "summary": "The route has nothing to list at all: the section renders nothing, not even the empty message.",
+  "values": {
+    "heading": "Journal",
+    "settings": {
+      "anchorId": "no-listing"
+    }
+  },
+  "context": {
+    "headingLevel": 2,
+    "headingRendered": true,
+    "priorityMedia": false,
+    "track": "listing-1",
+    "index": 2
+  },
+  "route": null,
+  "site": {
+    "labels": {
+      "nav": "Pagination",
+      "previous": "Previous",
+      "next": "Next",
+      "page": "Page",
+      "empty": "There are no posts to show yet."
+    }
+  }
+}

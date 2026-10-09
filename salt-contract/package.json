@@ -21,6 +21,7 @@
     "schema",
     "styles",
     "fixtures",
+    "normalise.mjs",
     "emit",
     "README.md",
     "CHANGELOG.md",
@@ -44,6 +45,8 @@
     "./view-props/*": "./contract/view-props/*.json",
     "./schema/view-props": "./schema/view-props.schema.json",
     "./schema/replaced-logic": "./schema/replaced-logic.schema.json",
+    "./normalise": "./normalise.mjs",
+    "./fixtures/*": "./fixtures/*",
     "./package.json": "./package.json"
   },
   "keywords": [

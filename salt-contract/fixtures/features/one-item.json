@@ -1,0 +1,26 @@
+{
+  "section": "features",
+  "summary": "Heading and one feature without icon or link: a single card with title and no body.",
+  "values": {
+    "heading": "Why choose us",
+    "columns": "3",
+    "items": [
+      {
+        "title": "Fixed prices"
+      }
+    ],
+    "settings": {
+      "anchorId": "features-one"
+    }
+  },
+  "context": {
+    "headingLevel": 2,
+    "headingRendered": true,
+    "priorityMedia": false,
+    "track": "features-1",
+    "index": 2
+  },
+  "site": {
+    "arrow": "→"
+  }
+}

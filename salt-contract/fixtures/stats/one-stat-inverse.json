@@ -1,0 +1,25 @@
+{
+  "section": "stats",
+  "summary": "One stat on the inverse tone and no heading, so the wrapper is a div with no aria-labelledby.",
+  "values": {
+    "columns": "3",
+    "items": [
+      {
+        "value": "12",
+        "suffix": "years",
+        "label": "In business"
+      }
+    ],
+    "settings": {
+      "anchorId": "stats-one",
+      "tone": "surface-inverse"
+    }
+  },
+  "context": {
+    "headingLevel": 2,
+    "headingRendered": true,
+    "priorityMedia": false,
+    "track": "stats-1",
+    "index": 2
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "section": "call-to-action",
+  "summary": "Default brand-tint tone (the section's own default) with heading, one paragraph and two internal buttons, primary then secondary.",
+  "values": {
+    "heading": "Ready to plan your garden?",
+    "body": "<p>Tell us about your plot and we will visit within a week.</p>",
+    "buttons": [
+      {
+        "link": {
+          "label": "Book a visit",
+          "type": "internal",
+          "document": "contact"
+        },
+        "style": "primary"
+      },
+      {
+        "link": {
+          "label": "See our work",
+          "type": "internal",
+          "document": "work"
+        },
+        "style": "secondary"
+      }
+    ],
+    "settings": {
+      "anchorId": "book"
+    }
+  },
+  "context": {
+    "headingLevel": 2,
+    "headingRendered": true,
+    "priorityMedia": false,
+    "track": "call-to-action-1",
+    "index": 2
+  },
+  "documents": {
+    "contact": {
+      "href": "/contact/",
+      "title": "Contact"
+    },
+    "work": {
+      "href": "/work/",
+      "title": "Our work"
+    }
+  }
+}

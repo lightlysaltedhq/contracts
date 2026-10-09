@@ -1,0 +1,140 @@
+{
+  "$comment": "context.now is Wednesday 07/10/2026 19:00 in Europe/London (BST, +01:00): the Bristol studio (09:00 to 17:00) is closed, the Bath office (10:00 to 20:00) is open and has Saturday by appointment (no effect today). The map facade has no label (the item carries none, so map.json label is unset); the facade button takes labels.loadMap as text and labels.load as aria-label. The first-item accordion groups share name \"locations-<context.index>\". Status text per labels.open/appointment/closed.",
+  "section": "locations",
+  "summary": "Two offices with maps on and coordinates on both; at the time given Bristol is closed and Bath is open, and Bath has Saturday by appointment; on the inverse band.",
+  "values": {
+    "heading": "Our offices",
+    "query": {
+      "mode": "automatic",
+      "categories": [],
+      "items": [],
+      "order": "default",
+      "count": 0
+    },
+    "settings": {
+      "anchorId": "offices",
+      "tone": "surface-inverse"
+    }
+  },
+  "context": {
+    "headingLevel": 2,
+    "headingRendered": true,
+    "priorityMedia": false,
+    "track": "locations-1",
+    "index": 3,
+    "now": "2026-10-07T19:00:00+01:00"
+  },
+  "collections": {
+    "locations": [
+      {
+        "id": "loc-bristol",
+        "title": "Bristol studio",
+        "address": [
+          "12 Wapping Wharf",
+          "Bristol",
+          "BS1 6UD"
+        ],
+        "phone": "0117 496 0123",
+        "tel": "+441174960123",
+        "email": "bristol@example.com",
+        "hours": [
+          {
+            "day": "monday",
+            "open": "09:00",
+            "close": "17:00"
+          },
+          {
+            "day": "tuesday",
+            "open": "09:00",
+            "close": "17:00"
+          },
+          {
+            "day": "wednesday",
+            "open": "09:00",
+            "close": "17:00"
+          },
+          {
+            "day": "thursday",
+            "open": "09:00",
+            "close": "17:00"
+          },
+          {
+            "day": "friday",
+            "open": "09:00",
+            "close": "17:00"
+          }
+        ],
+        "directionsUrl": "https://maps.example/dir/?q=12+Wapping+Wharf+Bristol+BS1+6UD",
+        "lat": 51.4503,
+        "lng": -2.5977,
+        "zoom": 15
+      },
+      {
+        "id": "loc-bath",
+        "title": "Bath office",
+        "address": [
+          "4 Milsom Place",
+          "Bath",
+          "BA1 1BZ"
+        ],
+        "phone": "01225 555 0142",
+        "tel": "+441225550142",
+        "email": "bath@example.com",
+        "hours": [
+          {
+            "day": "monday",
+            "open": "10:00",
+            "close": "20:00"
+          },
+          {
+            "day": "tuesday",
+            "open": "10:00",
+            "close": "20:00"
+          },
+          {
+            "day": "wednesday",
+            "open": "10:00",
+            "close": "20:00"
+          },
+          {
+            "day": "thursday",
+            "open": "10:00",
+            "close": "20:00"
+          },
+          {
+            "day": "friday",
+            "open": "10:00",
+            "close": "20:00"
+          },
+          {
+            "day": "saturday",
+            "appointment": true
+          }
+        ],
+        "lat": 51.3822,
+        "lng": -2.359,
+        "zoom": 16,
+        "directionsUrl": "https://maps.example/dir/?q=4+Milsom+Place+Bath+BA1+1BZ"
+      }
+    ]
+  },
+  "site": {
+    "timezone": "Europe/London",
+    "labels": {
+      "open": "Open now",
+      "appointment": "By appointment",
+      "closed": "Closed",
+      "byAppointment": "By appointment",
+      "getDirections": "Get directions",
+      "directions": "Directions to",
+      "load": "Load the map",
+      "loadMap": "Load map",
+      "consent": "Allow map cookies to view this map.",
+      "error": "The map could not be loaded."
+    },
+    "maps": {
+      "enabled": true,
+      "tile": "https://tiles.example/{z}/{x}/{y}.png"
+    }
+  }
+}

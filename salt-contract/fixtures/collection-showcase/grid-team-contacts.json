@@ -1,0 +1,82 @@
+{
+  "section": "collection-showcase",
+  "$comment": "Phone links: the number with spaces removed after \"tel:\" (0117 496 0123 gives tel:01174960123); the contract fixes no further normalisation. Social links with a glyph hold the icon alone (role img, aria-label the profile name, data-size sm); one without a glyph (Mastodon) holds a span of its name.",
+  "summary": "Team members in a grid, none with a page of their own: titles are plain headings. Each card lists an email and a phone link and social profiles; the last profile has no glyph, so it is drawn as its name.",
+  "values": {
+    "heading": "Meet the team",
+    "source": "team",
+    "layout": "grid",
+    "columns": "3",
+    "query": {
+      "mode": "automatic",
+      "count": 3
+    },
+    "viewAll": false,
+    "settings": {
+      "anchorId": "the-team"
+    }
+  },
+  "context": {
+    "headingLevel": 2,
+    "headingRendered": true,
+    "priorityMedia": false,
+    "track": "collection-showcase-6",
+    "index": 6
+  },
+  "collections": {
+    "team": [
+      {
+        "id": "rosa",
+        "title": "Rosa Whitfield",
+        "meta": "Head gardener",
+        "email": "rosa@example.com",
+        "phone": "0117 496 0123",
+        "socials": [
+          {
+            "name": "LinkedIn",
+            "url": "https://www.linkedin.com/in/rosa-whitfield",
+            "icon": "linkedin"
+          }
+        ]
+      },
+      {
+        "id": "dev",
+        "title": "Dev Patel",
+        "meta": "Garden designer",
+        "email": "dev@example.com",
+        "phone": "0117 496 0124",
+        "socials": [
+          {
+            "name": "Instagram",
+            "url": "https://www.instagram.com/devpatel.gardens",
+            "icon": "instagram"
+          },
+          {
+            "name": "X",
+            "url": "https://x.com/devpatel",
+            "icon": "x"
+          }
+        ]
+      },
+      {
+        "id": "jo",
+        "title": "Jo Marsh",
+        "meta": "Tree surgeon",
+        "email": "jo@example.com",
+        "phone": "0117 496 0125",
+        "socials": [
+          {
+            "name": "Mastodon",
+            "url": "https://mastodon.example/@jomarsh"
+          }
+        ]
+      }
+    ]
+  },
+  "site": {
+    "arrow": "→",
+    "labels": {
+      "social": "Social profiles"
+    }
+  }
+}

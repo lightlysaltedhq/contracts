@@ -1,0 +1,17 @@
+{
+  "section": "gallery",
+  "summary": "Heading, intro and images all empty: nothing renders, not even the wrapper.",
+  "values": {
+    "layout": "grid",
+    "settings": {
+      "anchorId": "gallery-empty"
+    }
+  },
+  "context": {
+    "headingLevel": 2,
+    "headingRendered": true,
+    "priorityMedia": false,
+    "track": "gallery-1",
+    "index": 2
+  }
+}

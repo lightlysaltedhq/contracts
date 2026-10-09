@@ -1,0 +1,16 @@
+{
+  "section": "logos",
+  "summary": "Nothing set: no heading, intro or logos, so nothing renders.",
+  "values": {
+    "settings": {
+      "anchorId": "logos-empty"
+    }
+  },
+  "context": {
+    "headingLevel": 2,
+    "headingRendered": true,
+    "priorityMedia": false,
+    "track": "logos-1",
+    "index": 2
+  }
+}

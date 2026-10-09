@@ -1,0 +1,33 @@
+{
+  "section": "tabs",
+  "summary": "Eyebrow, heading, intro and three tabs with rich-text content, drawn as a radio group with the first input checked. Stored h3 in the first tab renders as h3, one below the h2 section heading.",
+  "values": {
+    "eyebrow": "Good to know",
+    "heading": "Questions about planting",
+    "intro": "Pick a topic to read the short answer.",
+    "tabs": [
+      {
+        "label": "Planting",
+        "content": "<p>Most gardens are planted between October and March, while the soil is workable and the plants are dormant.</p><h3>Bare-root stock</h3><p>Hedging and fruit trees go in as bare roots, which costs less and establishes faster.</p>"
+      },
+      {
+        "label": "Maintenance",
+        "content": "<p>We cut lawns, clip hedges and feed beds every <strong>fortnight</strong> from April to October.</p><ul><li>Mowing and edging</li><li>Weeding of beds</li></ul>"
+      },
+      {
+        "label": "Reviews",
+        "content": "<blockquote>The garden has never looked better, and we have not had to think about it once.</blockquote><p>Read more on <a href=\"https://example.com/reviews\">our reviews page</a>.</p>"
+      }
+    ],
+    "settings": {
+      "anchorId": "tabs-many"
+    }
+  },
+  "context": {
+    "headingLevel": 2,
+    "headingRendered": true,
+    "priorityMedia": false,
+    "track": "tabs-1",
+    "index": 2
+  }
+}

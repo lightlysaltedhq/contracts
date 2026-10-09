@@ -1,0 +1,16 @@
+{
+  "section": "features",
+  "summary": "Nothing set: no eyebrow, heading, intro or items, so nothing renders.",
+  "values": {
+    "settings": {
+      "anchorId": "features-empty"
+    }
+  },
+  "context": {
+    "headingLevel": 2,
+    "headingRendered": true,
+    "priorityMedia": false,
+    "track": "features-1",
+    "index": 2
+  }
+}

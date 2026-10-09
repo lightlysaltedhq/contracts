@@ -1,0 +1,58 @@
+{
+  "section": "hero",
+  "summary": "Split layout, image on the right, no eyebrow, on the alternate surface with an explicit dark tone. Not the first section: its heading is an h2 and its image lazy.",
+  "values": {
+    "variant": "split",
+    "heading": "Aftercare that keeps a garden young",
+    "subheading": "Seasonal visits to prune, feed and replant.",
+    "image": "pruning",
+    "mediaSide": "right",
+    "buttons": [
+      {
+        "link": {
+          "label": "Aftercare plans",
+          "type": "internal",
+          "document": "aftercare"
+        },
+        "style": "secondary"
+      }
+    ],
+    "settings": {
+      "anchorId": "aftercare",
+      "tone": "surface-alt",
+      "toneDark": "surface"
+    }
+  },
+  "context": {
+    "headingLevel": 2,
+    "headingRendered": true,
+    "priorityMedia": false,
+    "track": "hero-2",
+    "index": 3
+  },
+  "media": {
+    "pruning": {
+      "src": "https://uploads.example/pruning-1600.jpg",
+      "srcset": [
+        {
+          "url": "https://uploads.example/pruning-640.jpg",
+          "width": 640
+        },
+        {
+          "url": "https://uploads.example/pruning-1600.jpg",
+          "width": 1600
+        }
+      ],
+      "sizes": "(min-width: 64rem) 30rem, 100vw",
+      "width": 1600,
+      "height": 1200,
+      "alt": "Secateurs shaping a box hedge"
+    }
+  },
+  "documents": {
+    "aftercare": {
+      "href": "/services/aftercare/",
+      "title": "Aftercare"
+    }
+  }
+}

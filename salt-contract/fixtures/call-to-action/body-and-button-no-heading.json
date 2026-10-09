@@ -1,0 +1,30 @@
+{
+  "section": "call-to-action",
+  "summary": "No heading, so the wrapper is a div. A body and one external new-tab button. Width full and an explicit dark tone of surface-inverse.",
+  "values": {
+    "body": "<p>Download our seasonal planting calendar.</p>",
+    "buttons": [
+      {
+        "link": {
+          "label": "Get the calendar",
+          "type": "external",
+          "url": "https://guides.example/calendar",
+          "newTab": true
+        },
+        "style": "ghost"
+      }
+    ],
+    "settings": {
+      "anchorId": "calendar",
+      "width": "full",
+      "toneDark": "surface-inverse"
+    }
+  },
+  "context": {
+    "headingLevel": 2,
+    "headingRendered": true,
+    "priorityMedia": false,
+    "track": "call-to-action-3",
+    "index": 3
+  }
+}

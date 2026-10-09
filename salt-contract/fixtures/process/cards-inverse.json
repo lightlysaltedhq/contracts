@@ -1,0 +1,33 @@
+{
+  "section": "process",
+  "summary": "Cards layout, three text-only steps, inverse tone. Not the first section, so no priority media; step titles are h3 under the h2.",
+  "values": {
+    "heading": "What happens next",
+    "layout": "cards",
+    "steps": [
+      {
+        "title": "Tell us about the garden",
+        "text": "Send a few photos and a short note."
+      },
+      {
+        "title": "We visit",
+        "text": "A free half-hour walk round the garden."
+      },
+      {
+        "title": "You decide",
+        "text": "A written plan arrives within the fortnight."
+      }
+    ],
+    "settings": {
+      "anchorId": "process-cards",
+      "tone": "surface-inverse"
+    }
+  },
+  "context": {
+    "headingLevel": 2,
+    "headingRendered": true,
+    "priorityMedia": false,
+    "track": "process-1",
+    "index": 2
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "section": "process",
+  "summary": "Timeline of three steps with eyebrow, heading and intro. Step 1 has an image (the priority image, as the section is first on the page), step 2 an icon, step 3 a call to action drawn as a secondary button. Step titles are h2 under the h1.",
+  "values": {
+    "eyebrow": "How we work",
+    "heading": "From first visit to first bloom",
+    "intro": "Every garden follows the same four-stage path, so you always know what comes next.",
+    "layout": "timeline",
+    "steps": [
+      {
+        "image": "site-visit",
+        "title": "Site visit",
+        "text": "We walk the garden with you and take measurements."
+      },
+      {
+        "icon": "star",
+        "title": "Design",
+        "text": "A planting plan and a fixed quote, within two weeks."
+      },
+      {
+        "title": "Planting",
+        "text": "Our team plants and builds, usually in a single week.",
+        "cta": {
+          "label": "Book a visit",
+          "type": "internal",
+          "document": "contact"
+        }
+      }
+    ],
+    "settings": {
+      "anchorId": "process-timeline"
+    }
+  },
+  "context": {
+    "headingLevel": 1,
+    "priorityMedia": true,
+    "track": "process-1",
+    "index": 1
+  },
+  "media": {
+    "site-visit": {
+      "src": "https://uploads.example/site-visit-1200.jpg",
+      "srcset": [
+        {
+          "url": "https://uploads.example/site-visit-480.jpg",
+          "width": 480
+        },
+        {
+          "url": "https://uploads.example/site-visit-800.jpg",
+          "width": 800
+        },
+        {
+          "url": "https://uploads.example/site-visit-1200.jpg",
+          "width": 1200
+        }
+      ],
+      "sizes": "(min-width: 64rem) 20rem, 100vw",
+      "width": 1200,
+      "height": 800,
+      "alt": "Two gardeners measuring a lawn with a tape"
+    }
+  },
+  "documents": {
+    "contact": {
+      "href": "/contact/",
+      "title": "Contact"
+    }
+  },
+  "site": {
+    "arrow": "→"
+  }
+}

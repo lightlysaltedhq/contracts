@@ -1,0 +1,34 @@
+{
+  "section": "carousel",
+  "summary": "Two inline cards with neither a heading nor a label: nothing names a carousel, so they are drawn as the plain grid list. The wrapper is a div. Spacing none.",
+  "values": {
+    "source": "inline",
+    "cardStyle": "generic",
+    "cards": [
+      {
+        "title": "Design",
+        "text": "A plan drawn for your plot."
+      },
+      {
+        "title": "Planting",
+        "text": "Plants chosen for your soil and light."
+      }
+    ],
+    "settings": {
+      "anchorId": "two-steps",
+      "spacing": "none",
+      "width": "narrow"
+    }
+  },
+  "context": {
+    "headingLevel": 2,
+    "headingRendered": true,
+    "priorityMedia": false,
+    "track": "carousel-3",
+    "index": 3
+  },
+  "site": {
+    "arrow": "→",
+    "labels": {}
+  }
+}

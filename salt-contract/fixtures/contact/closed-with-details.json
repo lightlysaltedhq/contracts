@@ -1,0 +1,35 @@
+{
+  "$comment": "Gap recorded: no case draws the contact form, whose action URL, hidden token values and challenge question are platform-native or per-request. site.organisation is chosen as { name, phone, email, address[] } because the contract leaves the site-data shape unfixed; the tel: href is the phone number reduced to digits with +44.",
+  "section": "contact",
+  "summary": "The site does not accept enquiries: heading, intro, the organisation name, phone, email and address, then the closed message in place of the form.",
+  "values": {
+    "heading": "Get in touch",
+    "intro": "Call or email us, or call in at the studio.",
+    "settings": {
+      "anchorId": "contact"
+    }
+  },
+  "context": {
+    "headingLevel": 2,
+    "headingRendered": true,
+    "priorityMedia": false,
+    "track": "contact-1",
+    "index": 4
+  },
+  "site": {
+    "acceptsEnquiries": false,
+    "organisation": {
+      "name": "Hedgerow & Co Gardens",
+      "phone": "0117 496 0123",
+      "email": "hello@hedgerow.example",
+      "address": [
+        "12 Wapping Wharf",
+        "Bristol",
+        "BS1 6UD"
+      ]
+    },
+    "labels": {
+      "unavailable": "We are not taking enquiries through the website at the moment. Please try again later."
+    }
+  }
+}

@@ -1,0 +1,110 @@
+{
+  "section": "pricing",
+  "summary": "Three plans; the middle one featured (badge, primary button, data-featured). Feature lists mix included and not-included rows (the latter carry the salt-sr-only text); each plan has a button, the featured one opening a new tab.",
+  "$comment": "Display choices not fixed by the contract: the visually hidden text is 'Not included', the included glyph is 'check' and the not-included glyph is 'close', the period is written as stored ('a month') after the price, and each feature's text follows its icon after one space, as a browser draws the line. Labels: site.labels.featured and site.labels.notIncluded.",
+  "values": {
+    "heading": "Simple monthly plans",
+    "plans": [
+      {
+        "name": "Starter",
+        "price": "£29",
+        "period": "a month",
+        "features": [
+          {
+            "text": "One page of content",
+            "included": true
+          },
+          {
+            "text": "Monthly report",
+            "included": true
+          },
+          {
+            "text": "Priority support",
+            "included": false
+          }
+        ],
+        "cta": {
+          "label": "Choose Starter",
+          "type": "internal",
+          "document": "contact"
+        }
+      },
+      {
+        "name": "Growth",
+        "price": "£79",
+        "period": "a month",
+        "featured": true,
+        "features": [
+          {
+            "text": "Ten pages of content",
+            "included": true
+          },
+          {
+            "text": "Monthly report",
+            "included": true
+          },
+          {
+            "text": "Priority support",
+            "included": true
+          }
+        ],
+        "cta": {
+          "label": "Choose Growth",
+          "type": "external",
+          "url": "https://billing.example/growth",
+          "newTab": true
+        }
+      },
+      {
+        "name": "Scale",
+        "price": "£199",
+        "period": "a month",
+        "features": [
+          {
+            "text": "Unlimited pages",
+            "included": true
+          },
+          {
+            "text": "Weekly report",
+            "included": true
+          },
+          {
+            "text": "Dedicated manager",
+            "included": false
+          }
+        ],
+        "cta": {
+          "label": "Talk to us",
+          "type": "internal",
+          "document": "book"
+        }
+      }
+    ],
+    "settings": {
+      "anchorId": "pricing-three"
+    }
+  },
+  "context": {
+    "headingLevel": 2,
+    "headingRendered": true,
+    "priorityMedia": false,
+    "track": "pricing-1",
+    "index": 2
+  },
+  "documents": {
+    "contact": {
+      "href": "/contact/",
+      "title": "Contact"
+    },
+    "book": {
+      "href": "/book-a-call/",
+      "title": "Book a call"
+    }
+  },
+  "site": {
+    "labels": {
+      "featured": "Most popular",
+      "notIncluded": "Not included"
+    }
+  }
+}

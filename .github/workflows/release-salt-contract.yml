@@ -193,6 +193,9 @@ jobs:
       - name: The extension points' gate
         if: steps.registry.outputs.live == 'false'
         run: npm run salt-extensions
+      - name: Every Salt section's fixtures, against its fields and markup, and the normaliser
+        if: steps.registry.outputs.live == 'false'
+        run: npm run salt-fixtures
 
       # Until 1.0.0 the package is `private`, and npm refuses to stage a private package. That is
       # deliberate: a 0.x drafting tag can never reach the registry, even by accident.

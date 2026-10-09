@@ -1,0 +1,21 @@
+{
+  "section": "hero",
+  "summary": "Minimal, left-aligned (the default), on the brand tint, its top spacing collapsed because the band above shares its tones. Subheading with no heading, so the wrapper is a div.",
+  "values": {
+    "variant": "minimal",
+    "subheading": "Planting, paving and aftercare across Bristol and Bath.",
+    "settings": {
+      "anchorId": "intro",
+      "tone": "brand-tint",
+      "toneDark": "brand-tint"
+    }
+  },
+  "context": {
+    "headingLevel": 2,
+    "headingRendered": true,
+    "priorityMedia": false,
+    "track": "hero-2",
+    "index": 2,
+    "collapseTop": true
+  }
+}

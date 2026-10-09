@@ -1,0 +1,63 @@
+{
+  "section": "carousel",
+  "$comment": "Quote cards: the card's title is the person (a heading, one level below the section's), the role field is the meta line, text is the quote. The portrait is decorative (alt empty), as card.json says. The section draws no heading, so its context.headingLevel (2) is the level the heading would have had, and the person headings are 3.",
+  "summary": "Three inline quote cards with no heading: the carousel is named from the label field, and the wrapper is a div. On the inverse band. The first quote has a portrait.",
+  "values": {
+    "label": "Client quotes",
+    "source": "inline",
+    "cardStyle": "quote",
+    "cards": [
+      {
+        "image": "portrait",
+        "title": "Ines Carvalho",
+        "role": "Owner, The Walled Garden Cafe",
+        "text": "Our customers now ask to sit in the garden before the dining room."
+      },
+      {
+        "title": "Callum Reed",
+        "role": "Homeowner, Totterdown",
+        "text": "Three visits in and the borders have never looked better."
+      },
+      {
+        "title": "Hannah Moyo",
+        "role": "Head, Oakfield Primary",
+        "text": "The children helped plant the beds and now tend them every week."
+      }
+    ],
+    "settings": {
+      "anchorId": "client-quotes",
+      "tone": "surface-inverse"
+    }
+  },
+  "context": {
+    "headingLevel": 2,
+    "headingRendered": true,
+    "priorityMedia": false,
+    "track": "carousel-2",
+    "index": 4
+  },
+  "media": {
+    "portrait": {
+      "src": "https://uploads.example/portrait-ines-192.jpg",
+      "srcset": [
+        {
+          "url": "https://uploads.example/portrait-ines-96.jpg",
+          "width": 96
+        },
+        {
+          "url": "https://uploads.example/portrait-ines-192.jpg",
+          "width": 192
+        }
+      ],
+      "sizes": "4rem",
+      "width": 192,
+      "height": 192,
+      "alt": "Ines Carvalho"
+    }
+  },
+  "site": {
+    "labels": {
+      "slide": "Slide"
+    }
+  }
+}

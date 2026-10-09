@@ -1,0 +1,42 @@
+{
+  "section": "features",
+  "summary": "Eyebrow, heading, intro and three columns; three feature cards with icon, title and rich-text body, the first two linked (title wraps the card link with the arrow), the third plain.",
+  "values": {
+    "eyebrow": "What we do",
+    "heading": "Services for small businesses",
+    "intro": "Three things we do well, and do for a fixed price.",
+    "columns": "3",
+    "items": [
+      {
+        "icon": "globe",
+        "title": "Websites that load fast",
+        "text": "<p>Built on <strong>Next.js</strong> or WordPress, tuned for Core Web Vitals.</p>",
+        "url": "https://example.com/websites"
+      },
+      {
+        "icon": "star",
+        "title": "Search that works",
+        "text": "<p>Technical SEO and content that earns its place in results.</p><ul><li>Audits</li><li>Content plans</li></ul>",
+        "url": "https://example.com/seo"
+      },
+      {
+        "icon": "mail",
+        "title": "Email that gets read",
+        "text": "<p>Plain, well-timed campaigns for existing customers.</p>"
+      }
+    ],
+    "settings": {
+      "anchorId": "features-many"
+    }
+  },
+  "context": {
+    "headingLevel": 2,
+    "headingRendered": true,
+    "priorityMedia": false,
+    "track": "features-1",
+    "index": 2
+  },
+  "site": {
+    "arrow": "→"
+  }
+}

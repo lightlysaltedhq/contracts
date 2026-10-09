@@ -1,0 +1,72 @@
+{
+  "section": "media-text",
+  "summary": "Single mode, three rows: image and words with the image on the right; words only (no media element, no data-media-side); image only (no body element, no data-media-side). Later row headings rank at base + 1.",
+  "values": {
+    "mode": "single",
+    "rows": [
+      {
+        "image": "path",
+        "heading": "Hard landscaping",
+        "content": "<p>Paths, patios and walls built to last.</p>",
+        "mediaSide": "right"
+      },
+      {
+        "heading": "Aftercare",
+        "content": "<p>Seasonal visits to prune, feed and replant.</p>"
+      },
+      {
+        "image": "pond"
+      }
+    ],
+    "settings": {
+      "anchorId": "services-rows"
+    }
+  },
+  "context": {
+    "headingLevel": 2,
+    "headingRendered": true,
+    "priorityMedia": false,
+    "track": "media-text-2",
+    "index": 2
+  },
+  "media": {
+    "path": {
+      "src": "https://uploads.example/path-1600.jpg",
+      "srcset": [
+        {
+          "url": "https://uploads.example/path-640.jpg",
+          "width": 640
+        },
+        {
+          "url": "https://uploads.example/path-1600.jpg",
+          "width": 1600
+        }
+      ],
+      "sizes": "(min-width: 64rem) 32rem, 100vw",
+      "width": 1600,
+      "height": 1200,
+      "alt": "A gravel path between box hedges"
+    },
+    "pond": {
+      "src": "https://uploads.example/pond-1600.jpg",
+      "srcset": [
+        {
+          "url": "https://uploads.example/pond-640.jpg",
+          "width": 640
+        },
+        {
+          "url": "https://uploads.example/pond-1024.jpg",
+          "width": 1024
+        },
+        {
+          "url": "https://uploads.example/pond-1600.jpg",
+          "width": 1600
+        }
+      ],
+      "sizes": "(min-width: 64rem) 32rem, 100vw",
+      "width": 1600,
+      "height": 1067,
+      "alt": "A wildlife pond edged with reeds"
+    }
+  }
+}

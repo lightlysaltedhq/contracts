@@ -124,7 +124,7 @@
             "row": {
               "attributes": {
                 "data-media-side": {
-                  "value": "from:row.side",
+                  "value": "from:row.mediaSide",
                   "when": "image and words"
                 }
               }
@@ -141,7 +141,7 @@
                     "right"
                   ],
                   "when": "image and words",
-                  "note": "left on even rendered rows, right on odd"
+                  "note": "left on even rendered rows, right on odd, counted from 0 (the first rendered row is left)"
                 }
               }
             }

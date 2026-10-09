@@ -1,0 +1,20 @@
+{
+  "section": "rich-text",
+  "summary": "Centred on the inverse band with a heading and a short body, no eyebrow.",
+  "values": {
+    "heading": "Small team, careful work",
+    "body": "<p>Three gardeners and one van, covering Bristol and Bath.</p>",
+    "alignment": "centre",
+    "settings": {
+      "anchorId": "small-team",
+      "tone": "surface-inverse"
+    }
+  },
+  "context": {
+    "headingLevel": 2,
+    "headingRendered": true,
+    "priorityMedia": false,
+    "track": "rich-text-2",
+    "index": 2
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "section": "pricing",
+  "summary": "No plans, so nothing renders.",
+  "values": {
+    "settings": {
+      "anchorId": "pricing-empty"
+    }
+  },
+  "context": {
+    "headingLevel": 2,
+    "headingRendered": true,
+    "priorityMedia": false,
+    "track": "pricing-1",
+    "index": 2
+  }
+}

@@ -1,0 +1,136 @@
+{
+  "section": "collection-showcase",
+  "$comment": "Three results, so the results list has no data-columns (it is \"2\" only for two or fewer). Stat values are written as plain text; a suffix is its own span; the contract draws no icon unless the stat has one. The view-all href comes from site.collectionIndexes (case-studies: /work/), a fixture convention.",
+  "summary": "Case studies in the featured layout, two columns: the first item carries data-featured and its card lists three results as stats. A custom view-all label is used.",
+  "values": {
+    "heading": "Recent projects",
+    "source": "case-studies",
+    "layout": "featured",
+    "columns": "2",
+    "query": {
+      "mode": "automatic",
+      "count": 3
+    },
+    "viewAll": true,
+    "viewAllLabel": "See every project",
+    "settings": {
+      "anchorId": "recent-work",
+      "tone": "brand-tint",
+      "spacing": "sm",
+      "width": "wide"
+    }
+  },
+  "context": {
+    "headingLevel": 2,
+    "headingRendered": true,
+    "priorityMedia": false,
+    "track": "collection-showcase-3",
+    "index": 3
+  },
+  "media": {
+    "orchard": {
+      "src": "https://uploads.example/orchard-960.jpg",
+      "srcset": [
+        {
+          "url": "https://uploads.example/orchard-480.jpg",
+          "width": 480
+        },
+        {
+          "url": "https://uploads.example/orchard-960.jpg",
+          "width": 960
+        }
+      ],
+      "sizes": "(min-width: 64rem) 22rem, (min-width: 40rem) 45vw, 100vw",
+      "width": 960,
+      "height": 640,
+      "alt": "A restored walled orchard in spring blossom"
+    },
+    "courtyard": {
+      "src": "https://uploads.example/courtyard-960.jpg",
+      "srcset": [
+        {
+          "url": "https://uploads.example/courtyard-480.jpg",
+          "width": 480
+        },
+        {
+          "url": "https://uploads.example/courtyard-960.jpg",
+          "width": 960
+        }
+      ],
+      "sizes": "(min-width: 64rem) 22rem, (min-width: 40rem) 45vw, 100vw",
+      "width": 960,
+      "height": 640,
+      "alt": "A paved courtyard planted with ferns"
+    },
+    "meadow": {
+      "src": "https://uploads.example/meadow-960.jpg",
+      "srcset": [
+        {
+          "url": "https://uploads.example/meadow-480.jpg",
+          "width": 480
+        },
+        {
+          "url": "https://uploads.example/meadow-960.jpg",
+          "width": 960
+        }
+      ],
+      "sizes": "(min-width: 64rem) 22rem, (min-width: 40rem) 45vw, 100vw",
+      "width": 960,
+      "height": 640,
+      "alt": "A wildflower meadow beside a farmhouse"
+    }
+  },
+  "collections": {
+    "case-studies": [
+      {
+        "id": "orchard",
+        "title": "The walled orchard at Combe Farm",
+        "href": "/work/combe-farm-orchard/",
+        "image": "orchard",
+        "meta": "Combe Farm",
+        "text": "Forty fruit trees brought back into production over three seasons.",
+        "results": [
+          {
+            "value": "40",
+            "label": "Trees restored"
+          },
+          {
+            "value": "3",
+            "suffix": " years",
+            "label": "To first full harvest"
+          },
+          {
+            "value": "85",
+            "suffix": "%",
+            "label": "More pollinators recorded"
+          }
+        ]
+      },
+      {
+        "id": "courtyard",
+        "title": "A shaded courtyard in Clifton",
+        "href": "/work/clifton-courtyard/",
+        "image": "courtyard",
+        "meta": "Private client",
+        "text": "Ferns and hostas turn a dark corner into somewhere to sit."
+      },
+      {
+        "id": "meadow",
+        "title": "A meadow for the Hartley Estate",
+        "href": "/work/hartley-meadow/",
+        "image": "meadow",
+        "meta": "Hartley Estate",
+        "text": "Native seed mixes sown across two acres."
+      }
+    ]
+  },
+  "site": {
+    "arrow": "→",
+    "labels": {
+      "results": "Results"
+    },
+    "collectionIndexes": {
+      "case-studies": "/work/"
+    }
+  }
+}

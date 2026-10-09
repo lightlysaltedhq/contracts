@@ -1,0 +1,20 @@
+{
+  "section": "rich-text",
+  "summary": "Left-aligned (the default) with eyebrow, heading and a body of paragraphs, a list, a link and a stored h3. Not first on the page: heading h2, the stored h3 renders as h3.",
+  "values": {
+    "alignment": "left",
+    "eyebrow": "How we work",
+    "heading": "A garden is a long conversation",
+    "body": "<p>We start by walking the plot with you, <strong>listening</strong> before we draw anything.</p><p>Every plan covers three things:</p><ul><li>Planting and soil</li><li>Paving and boundaries</li><li>Aftercare through the first year</li></ul><h3>What happens next</h3><p>Read more about our <a href=\"/services/\">services</a> or get in touch.</p>",
+    "settings": {
+      "anchorId": "how-we-work"
+    }
+  },
+  "context": {
+    "headingLevel": 2,
+    "headingRendered": true,
+    "priorityMedia": false,
+    "track": "rich-text-1",
+    "index": 2
+  }
+}
