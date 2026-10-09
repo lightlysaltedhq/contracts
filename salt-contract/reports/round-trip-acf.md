@@ -12,12 +12,10 @@ Not compared: labels and instructions, which salt-wordpress words differently an
 must match, so adopting the emitter changes them throughout; and what stays native to ACF
 (return formats, wrapper widths, tabs, toolbars, row layouts).
 
-**Expected** means the contract records the difference in the field's `platforms.wordpress`
-note (`formerly`, `values`, `owes`, or a note on the condition), or sections.json records the
-layout's former name. **Unexpected** means nothing in the contract accounts for it. As in the
-Payload round trip, a field whose note owes something counts every difference on it as expected,
-so read the evidence column: it says which record covers each row. A part added or dropped inside
-a list, group or query is covered by its parent's note.
+**Expected** means `round-trip-acf.expected.json` lists the difference exactly (section, field,
+kind and wording), with the contract record that accounts for it. **Unexpected** means it is not
+on that reviewed list; **listed, not found** means the list names a difference that no longer
+occurs.
 
 Matching: the shared settings are stored on the layout itself today (section_spacing and the
 rest), so the contract's `settings.*` fields are matched there. Where several salt-wordpress
@@ -27,7 +25,7 @@ with that source chosen, so fields the contract hides for it are left out.
 
 ## Summary
 
-390 differences: 390 expected, 0 unexpected.
+390 differences: 390 expected, 0 unexpected; 0 listed, not found.
 
 | Section | Compared |
 | --- | --- |
@@ -61,398 +59,398 @@ Field groups not compared, because the contract defines no fields for them: grou
 
 ## Expected
 
-| Section | Field | Difference | Recorded as |
-| --- | --- | --- | --- |
-| hero | `variant` | choices full-bleed, split, stacked, minimal; salt-wordpress full-bleed, split, minimal | owes: the stacked option, and a full-bleed hero that sets its words over the section's background image (SC-006) |
-| hero | `image` | condition differs (2 of 4 cases), e.g. {"variant":"full-bleed"}: contract hides, salt-wordpress shows; {"variant":"minimal"}: contract hides, salt-wordpress shows | owes: hiding it for full-bleed and minimal, and moving a full-bleed hero's image to the background image setting (SC-006) |
-| hero | `mediaSide` | not in salt-wordpress | owes: the field |
-| hero | `alignment` | not in salt-wordpress | owes: the field |
-| hero | `buttons` | stored as cta_primary, cta_secondary | formerly: cta_primary, cta_secondary |
-| hero | `buttons` | type repeater; salt-wordpress link | owes: a list of up to two buttons in place of two link fields: cta_primary becomes buttons[0] with style primary, cta_secondary buttons[1] with style secondary; internal links store the document, not its address |
-| hero | `settings.spacing` | stored as section_spacing | formerly: section_spacing |
-| hero | `settings.tone` | stored as section_background | formerly: section_background |
-| hero | `settings.tone` | choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse | values: {"inverse":"surface-inverse"} |
-| hero | `settings.toneDark` | not in salt-wordpress | owes: the field; dark mode is a token inversion today, with no per-section choice |
-| hero | `settings.width` | stored as section_container | formerly: section_container |
-| hero | `settings.backgroundImage` | not in salt-wordpress | owes: the background image and its four settings |
-| hero | `settings.anchorId` | stored as section_anchor | formerly: section_anchor |
-| hero | `settings.firstPageOnly` | not in salt-wordpress | owes: the field, with the listing section that paginates |
-| hero | `settings.divider` | stored as section_divider | formerly: section_divider |
-| rich-text (rich_text) | `(layout name)` | name rich-text; salt-wordpress rich_text | sections.json formerly: rich_text |
-| rich-text (rich_text) | `eyebrow` | not in salt-wordpress | owes: the field on rich_text; intro already has it |
-| rich-text (rich_text) | `body` | stored as content | formerly: content |
-| rich-text (rich_text) | `alignment` | not in salt-wordpress | owes: the field on rich_text, and the value centre in place of center on intro |
-| rich-text (rich_text) | `settings.spacing` | stored as section_spacing | formerly: section_spacing |
-| rich-text (rich_text) | `settings.tone` | stored as section_background | formerly: section_background |
-| rich-text (rich_text) | `settings.tone` | choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse | values: {"inverse":"surface-inverse"} |
-| rich-text (rich_text) | `settings.toneDark` | not in salt-wordpress | owes: the field; dark mode is a token inversion today, with no per-section choice |
-| rich-text (rich_text) | `settings.width` | stored as section_container | formerly: section_container |
-| rich-text (rich_text) | `settings.backgroundImage` | not in salt-wordpress | owes: the background image and its four settings |
-| rich-text (rich_text) | `settings.anchorId` | stored as section_anchor | formerly: section_anchor |
-| rich-text (rich_text) | `settings.firstPageOnly` | not in salt-wordpress | owes: the field, with the listing section that paginates |
-| rich-text (rich_text) | `settings.divider` | stored as section_divider | formerly: section_divider |
-| rich-text (intro) | `(layout name)` | name rich-text; salt-wordpress intro | sections.json formerly: intro |
-| rich-text (intro) | `body` | stored as content | formerly: content |
-| rich-text (intro) | `alignment` | stored as align | formerly: align |
-| rich-text (intro) | `alignment` | choices left, centre; salt-wordpress left, center | values: {"center":"centre"} |
-| rich-text (intro) | `settings.spacing` | stored as section_spacing | formerly: section_spacing |
-| rich-text (intro) | `settings.tone` | stored as section_background | formerly: section_background |
-| rich-text (intro) | `settings.tone` | choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse | values: {"inverse":"surface-inverse"} |
-| rich-text (intro) | `settings.toneDark` | not in salt-wordpress | owes: the field; dark mode is a token inversion today, with no per-section choice |
-| rich-text (intro) | `settings.width` | stored as section_container | formerly: section_container |
-| rich-text (intro) | `settings.backgroundImage` | not in salt-wordpress | owes: the background image and its four settings |
-| rich-text (intro) | `settings.anchorId` | stored as section_anchor | formerly: section_anchor |
-| rich-text (intro) | `settings.firstPageOnly` | not in salt-wordpress | owes: the field, with the listing section that paginates |
-| rich-text (intro) | `settings.divider` | stored as section_divider | formerly: section_divider |
-| call-to-action | `(layout name)` | name call-to-action; salt-wordpress cta | sections.json formerly: cta |
-| call-to-action | `body` | stored as text | formerly: text |
-| call-to-action | `body` | type wysiwyg; salt-wordpress textarea | owes: rich text in place of a textarea; a stored plain text migrates as one paragraph |
-| call-to-action | `buttons.link` | not in salt-wordpress | parent owes: the link shape: label, url and style become link (label, type, document or url, newTab) and style; internal links and opening in a new tab are new |
-| call-to-action | `buttons.label` | in salt-wordpress, not in the contract | parent owes: the link shape: label, url and style become link (label, type, document or url, newTab) and style; internal links and opening in a new tab are new |
-| call-to-action | `buttons.url` | in salt-wordpress, not in the contract | parent owes: the link shape: label, url and style become link (label, type, document or url, newTab) and style; internal links and opening in a new tab are new |
-| call-to-action | `settings.spacing` | stored as section_spacing | formerly: section_spacing |
-| call-to-action | `settings.tone` | stored as section_background | formerly: section_background |
-| call-to-action | `settings.tone` | choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse | values: {"inverse":"surface-inverse"} |
-| call-to-action | `settings.toneDark` | not in salt-wordpress | owes: the field; dark mode is a token inversion today, with no per-section choice |
-| call-to-action | `settings.width` | stored as section_container | formerly: section_container |
-| call-to-action | `settings.backgroundImage` | not in salt-wordpress | owes: the background image and its four settings |
-| call-to-action | `settings.anchorId` | stored as section_anchor | formerly: section_anchor |
-| call-to-action | `settings.firstPageOnly` | not in salt-wordpress | owes: the field, with the listing section that paginates |
-| call-to-action | `settings.divider` | stored as section_divider | formerly: section_divider |
-| media-text | `(layout name)` | name media-text; salt-wordpress media_text | sections.json formerly: media_text |
-| media-text | `rows.mediaSide` | stored as media_side | formerly: media_side |
-| media-text | `rows.buttons` | stored as cta | formerly: cta |
-| media-text | `rows.buttons` | type repeater; salt-wordpress link | owes: a list of up to two buttons in place of one link field: cta becomes buttons[0] with style secondary. Visible change: WordPress draws this link today with the link-arrow style (template-parts/sections/media-text.php), so migrated rows change appearance unless the contract adds a link style; and a row with only a second link must move it to buttons[0], closing the gap |
-| media-text | `settings.spacing` | stored as section_spacing | formerly: section_spacing |
-| media-text | `settings.tone` | stored as section_background | formerly: section_background |
-| media-text | `settings.tone` | choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse | values: {"inverse":"surface-inverse"} |
-| media-text | `settings.toneDark` | not in salt-wordpress | owes: the field; dark mode is a token inversion today, with no per-section choice |
-| media-text | `settings.width` | stored as section_container | formerly: section_container |
-| media-text | `settings.backgroundImage` | not in salt-wordpress | owes: the background image and its four settings |
-| media-text | `settings.anchorId` | stored as section_anchor | formerly: section_anchor |
-| media-text | `settings.firstPageOnly` | not in salt-wordpress | owes: the field, with the listing section that paginates |
-| media-text | `settings.divider` | stored as section_divider | formerly: section_divider |
-| features | `intro` | not in salt-wordpress | owes: the field |
-| features | `items.icon` | type select; salt-wordpress text | owes: a select of the site's icons in place of a text field holding an icon name |
-| features | `items.text` | type wysiwyg; salt-wordpress textarea | owes: rich text in place of a textarea; a stored plain text migrates as one paragraph |
-| features | `items.url` | stored as link | formerly: link |
-| features | `items.url` | type url; salt-wordpress link | owes: a plain address in place of a link field, whose title and target were already ignored |
-| features | `settings.spacing` | stored as section_spacing | formerly: section_spacing |
-| features | `settings.tone` | stored as section_background | formerly: section_background |
-| features | `settings.tone` | choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse | values: {"inverse":"surface-inverse"} |
-| features | `settings.toneDark` | not in salt-wordpress | owes: the field; dark mode is a token inversion today, with no per-section choice |
-| features | `settings.width` | stored as section_container | formerly: section_container |
-| features | `settings.backgroundImage` | not in salt-wordpress | owes: the background image and its four settings |
-| features | `settings.anchorId` | stored as section_anchor | formerly: section_anchor |
-| features | `settings.firstPageOnly` | not in salt-wordpress | owes: the field, with the listing section that paginates |
-| features | `settings.divider` | stored as section_divider | formerly: section_divider |
-| stats | `intro` | not in salt-wordpress | owes: the field |
-| stats | `items.icon` | not in salt-wordpress | owes: the field |
-| stats | `items.value` | stored as number | formerly: number |
-| stats | `settings.spacing` | stored as section_spacing | formerly: section_spacing |
-| stats | `settings.tone` | stored as section_background | formerly: section_background |
-| stats | `settings.tone` | choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse | values: {"inverse":"surface-inverse"} |
-| stats | `settings.toneDark` | not in salt-wordpress | owes: the field; dark mode is a token inversion today, with no per-section choice |
-| stats | `settings.width` | stored as section_container | formerly: section_container |
-| stats | `settings.backgroundImage` | not in salt-wordpress | owes: the background image and its four settings |
-| stats | `settings.anchorId` | stored as section_anchor | formerly: section_anchor |
-| stats | `settings.firstPageOnly` | not in salt-wordpress | owes: the field, with the listing section that paginates |
-| stats | `settings.divider` | stored as section_divider | formerly: section_divider |
-| logos | `intro` | not in salt-wordpress | owes: the field |
-| logos | `columns` | not in salt-wordpress | owes: the field; the strip lays itself out today |
-| logos | `items` | stored as logos | formerly: logos |
-| logos | `settings.spacing` | stored as section_spacing | formerly: section_spacing |
-| logos | `settings.tone` | stored as section_background | formerly: section_background |
-| logos | `settings.tone` | choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse | values: {"inverse":"surface-inverse"} |
-| logos | `settings.toneDark` | not in salt-wordpress | owes: the field; dark mode is a token inversion today, with no per-section choice |
-| logos | `settings.width` | stored as section_container | formerly: section_container |
-| logos | `settings.backgroundImage` | not in salt-wordpress | owes: the background image and its four settings |
-| logos | `settings.anchorId` | stored as section_anchor | formerly: section_anchor |
-| logos | `settings.firstPageOnly` | not in salt-wordpress | owes: the field, with the listing section that paginates |
-| logos | `settings.divider` | stored as section_divider | formerly: section_divider |
-| gallery | `heading` | not in salt-wordpress | owes: the field; the gallery has no heading today |
-| gallery | `intro` | not in salt-wordpress | owes: the field |
-| gallery | `columns` | default "3"; salt-wordpress 3 | owes: storing the strings 2, 3 and 4; the default is stored as the integer 3 today |
-| gallery | `columns` | condition differs (1 of 3 cases), e.g. {"layout":"carousel"}: contract hides, salt-wordpress shows | note: Shown for every layout, with the instruction that only grid and masonry use it. |
-| gallery | `label` | not in salt-wordpress | owes: the field |
-| gallery | `captions` | default 1; salt-wordpress 0 | owes: the default true; it is false today |
-| gallery | `settings.spacing` | stored as section_spacing | formerly: section_spacing |
-| gallery | `settings.tone` | stored as section_background | formerly: section_background |
-| gallery | `settings.tone` | choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse | values: {"inverse":"surface-inverse"} |
-| gallery | `settings.toneDark` | not in salt-wordpress | owes: the field; dark mode is a token inversion today, with no per-section choice |
-| gallery | `settings.width` | stored as section_container | formerly: section_container |
-| gallery | `settings.backgroundImage` | not in salt-wordpress | owes: the background image and its four settings |
-| gallery | `settings.anchorId` | stored as section_anchor | formerly: section_anchor |
-| gallery | `settings.firstPageOnly` | not in salt-wordpress | owes: the field, with the listing section that paginates |
-| gallery | `settings.divider` | stored as section_divider | formerly: section_divider |
-| process | `intro` | not in salt-wordpress | owes: the field |
-| process | `steps.icon` | type select; salt-wordpress text | owes: a select of the site's icons in place of a text field holding an icon name |
-| process | `steps.image` | not in salt-wordpress | owes: the field |
-| process | `steps.cta` | not in salt-wordpress | owes: the field |
-| process | `structuredData` | stored as schema_toggle | formerly: schema_toggle |
-| process | `settings.spacing` | stored as section_spacing | formerly: section_spacing |
-| process | `settings.tone` | stored as section_background | formerly: section_background |
-| process | `settings.tone` | choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse | values: {"inverse":"surface-inverse"} |
-| process | `settings.toneDark` | not in salt-wordpress | owes: the field; dark mode is a token inversion today, with no per-section choice |
-| process | `settings.width` | stored as section_container | formerly: section_container |
-| process | `settings.backgroundImage` | not in salt-wordpress | owes: the background image and its four settings |
-| process | `settings.anchorId` | stored as section_anchor | formerly: section_anchor |
-| process | `settings.firstPageOnly` | not in salt-wordpress | owes: the field, with the listing section that paginates |
-| process | `settings.divider` | stored as section_divider | formerly: section_divider |
-| faq | `intro` | not in salt-wordpress | owes: the field |
-| faq | `query` | stored as source, manual, taxonomy_terms, orderby, order, count | formerly: source, manual, taxonomy_terms, orderby, order, count |
-| faq | `query.mode` | choices automatic, by-category, manual; salt-wordpress default, taxonomy, manual | values: {"default":"automatic","taxonomy":"by-category","manual":"manual"} |
-| faq | `query.mode` | default "automatic"; salt-wordpress "default" | values: {"default":"automatic","taxonomy":"by-category","manual":"manual"} |
-| faq | `query.order` | choices default, newest, title; salt-wordpress (empty), menu_order, date, title | note: Stored as the layout's own source, taxonomy_terms, manual, orderby, order and count; taxonomy_terms becomes categories, manual becomes items, orderby and order fold into order, count stays count. SC-006 offers neither oldest-first nor Z to A, so a stored order direction is dropped on migration. |
-| faq | `query.order` | default "default"; salt-wordpress none | values: {"":"default","menu_order":"default","date":"newest","title":"title"} |
-| faq | `query.order` | condition differs (1 of 3 cases), e.g. {"mode":"manual"}: contract hides, salt-wordpress shows | note: Stored as the layout's own source, taxonomy_terms, manual, orderby, order and count; taxonomy_terms becomes categories, manual becomes items, orderby and order fold into order, count stays count. SC-006 offers neither oldest-first nor Z to A, so a stored order direction is dropped on migration. |
-| faq | `query.count` | step 1; salt-wordpress none | note: Stored as the layout's own source, taxonomy_terms, manual, orderby, order and count; taxonomy_terms becomes categories, manual becomes items, orderby and order fold into order, count stays count. SC-006 offers neither oldest-first nor Z to A, so a stored order direction is dropped on migration. |
-| faq | `query.count` | condition differs (1 of 3 cases), e.g. {"mode":"manual"}: contract hides, salt-wordpress shows | note: Stored as the layout's own source, taxonomy_terms, manual, orderby, order and count; taxonomy_terms becomes categories, manual becomes items, orderby and order fold into order, count stays count. SC-006 offers neither oldest-first nor Z to A, so a stored order direction is dropped on migration. |
-| faq | `query.direction` | in salt-wordpress, not in the contract | parent owes: one query group in place of six layout fields |
-| faq | `structuredData` | stored as schema_toggle | formerly: schema_toggle |
-| faq | `settings.spacing` | stored as section_spacing | formerly: section_spacing |
-| faq | `settings.tone` | stored as section_background | formerly: section_background |
-| faq | `settings.tone` | choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse | values: {"inverse":"surface-inverse"} |
-| faq | `settings.toneDark` | not in salt-wordpress | owes: the field; dark mode is a token inversion today, with no per-section choice |
-| faq | `settings.width` | stored as section_container | formerly: section_container |
-| faq | `settings.backgroundImage` | not in salt-wordpress | owes: the background image and its four settings |
-| faq | `settings.anchorId` | stored as section_anchor | formerly: section_anchor |
-| faq | `settings.firstPageOnly` | not in salt-wordpress | owes: the field, with the listing section that paginates |
-| faq | `settings.divider` | stored as section_divider | formerly: section_divider |
-| collection-showcase (services) | `(layout name)` | name collection-showcase; salt-wordpress services | sections.json formerly: services |
-| collection-showcase (services) | `intro` | not in salt-wordpress | owes: the field |
-| collection-showcase (services) | `source` | not in salt-wordpress | owes: one section with a source select in place of five layouts; the former layout slug gives the source |
-| collection-showcase (services) | `layout` | choices grid, list, featured, accordion, index; salt-wordpress grid, list, featured | owes: the accordion and index layouts, and the field on work, team and blog_teaser; services has grid, list and featured; testimonials grid becomes source testimonials with layout grid |
-| collection-showcase (services) | `columns` | condition differs (3 of 5 cases), e.g. {"layout":"list"}: contract hides, salt-wordpress shows; {"layout":"accordion"}: contract hides, salt-wordpress shows | owes: one select with the strings 2, 3 and 4 on every source; work and blog_teaser offer 2 and 3 with an integer default 3, team uses bare-numeral labels, testimonials has none |
-| collection-showcase (services) | `query` | stored as source, manual, taxonomy_terms, orderby, order, count | formerly: source, manual, taxonomy_terms, orderby, order, count |
-| collection-showcase (services) | `query.mode` | choices automatic, by-category, manual; salt-wordpress default, taxonomy, manual | values: {"default":"automatic","taxonomy":"by-category","manual":"manual"} |
-| collection-showcase (services) | `query.mode` | default "automatic"; salt-wordpress "default" | values: {"default":"automatic","taxonomy":"by-category","manual":"manual"} |
-| collection-showcase (services) | `query.categories` | type select; salt-wordpress taxonomy | note: Stored as the layout's own source, taxonomy_terms, manual, orderby, order and count; taxonomy_terms becomes categories, manual becomes items, orderby and order fold into order, count stays count. SC-006 offers neither oldest-first nor Z to A, so a stored order direction is dropped on migration. |
-| collection-showcase (services) | `query.items` | post_type ["service","work","testimonial","post","team_member"]; salt-wordpress ["service"] | note: Stored as the layout's own source, taxonomy_terms, manual, orderby, order and count; taxonomy_terms becomes categories, manual becomes items, orderby and order fold into order, count stays count. SC-006 offers neither oldest-first nor Z to A, so a stored order direction is dropped on migration. |
-| collection-showcase (services) | `query.order` | choices default, newest, title; salt-wordpress (empty), menu_order, date, title | note: Stored as the layout's own source, taxonomy_terms, manual, orderby, order and count; taxonomy_terms becomes categories, manual becomes items, orderby and order fold into order, count stays count. SC-006 offers neither oldest-first nor Z to A, so a stored order direction is dropped on migration. |
-| collection-showcase (services) | `query.order` | default "default"; salt-wordpress none | values: {"":"default","menu_order":"default","date":"newest","title":"title"} |
-| collection-showcase (services) | `query.order` | condition differs (1 of 3 cases), e.g. {"mode":"manual"}: contract hides, salt-wordpress shows | note: Stored as the layout's own source, taxonomy_terms, manual, orderby, order and count; taxonomy_terms becomes categories, manual becomes items, orderby and order fold into order, count stays count. SC-006 offers neither oldest-first nor Z to A, so a stored order direction is dropped on migration. |
-| collection-showcase (services) | `query.count` | step 1; salt-wordpress none | note: Stored as the layout's own source, taxonomy_terms, manual, orderby, order and count; taxonomy_terms becomes categories, manual becomes items, orderby and order fold into order, count stays count. SC-006 offers neither oldest-first nor Z to A, so a stored order direction is dropped on migration. |
-| collection-showcase (services) | `query.count` | condition differs (1 of 3 cases), e.g. {"mode":"manual"}: contract hides, salt-wordpress shows | note: Stored as the layout's own source, taxonomy_terms, manual, orderby, order and count; taxonomy_terms becomes categories, manual becomes items, orderby and order fold into order, count stays count. SC-006 offers neither oldest-first nor Z to A, so a stored order direction is dropped on migration. |
-| collection-showcase (services) | `query.direction` | in salt-wordpress, not in the contract | parent owes: one query group in place of six layout fields |
-| collection-showcase (services) | `showIcons` | not in salt-wordpress | owes: the field; services always draws its icon today |
-| collection-showcase (services) | `showTags` | not in salt-wordpress | owes: the field |
-| collection-showcase (services) | `groupByCategory` | not in salt-wordpress | owes: the field, with the index layout |
-| collection-showcase (services) | `viewAll` | stored as view_all | formerly: view_all |
-| collection-showcase (services) | `viewAll` | default 1; salt-wordpress 0 | owes: the default true on services, where it is false today; team has none |
-| collection-showcase (services) | `viewAllLabel` | not in salt-wordpress | owes: the field; the wording is fixed per collection today |
-| collection-showcase (services) | `settings.spacing` | stored as section_spacing | formerly: section_spacing |
-| collection-showcase (services) | `settings.tone` | stored as section_background | formerly: section_background |
-| collection-showcase (services) | `settings.tone` | choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse | values: {"inverse":"surface-inverse"} |
-| collection-showcase (services) | `settings.toneDark` | not in salt-wordpress | owes: the field; dark mode is a token inversion today, with no per-section choice |
-| collection-showcase (services) | `settings.width` | stored as section_container | formerly: section_container |
-| collection-showcase (services) | `settings.backgroundImage` | not in salt-wordpress | owes: the background image and its four settings |
-| collection-showcase (services) | `settings.anchorId` | stored as section_anchor | formerly: section_anchor |
-| collection-showcase (services) | `settings.firstPageOnly` | not in salt-wordpress | owes: the field, with the listing section that paginates |
-| collection-showcase (services) | `settings.divider` | stored as section_divider | formerly: section_divider |
-| collection-showcase (work) | `(layout name)` | name collection-showcase; salt-wordpress work | sections.json formerly: work |
-| collection-showcase (work) | `intro` | not in salt-wordpress | owes: the field |
-| collection-showcase (work) | `source` | not in salt-wordpress | owes: one section with a source select in place of five layouts; the former layout slug gives the source |
-| collection-showcase (work) | `layout` | not in salt-wordpress | owes: the accordion and index layouts, and the field on work, team and blog_teaser; services has grid, list and featured; testimonials grid becomes source testimonials with layout grid |
-| collection-showcase (work) | `columns` | condition differs (3 of 5 cases), e.g. {"layout":"list"}: contract hides, salt-wordpress shows; {"layout":"accordion"}: contract hides, salt-wordpress shows | layout owes: the accordion and index layouts, and the field on work, team and blog_teaser; services has grid, list and featured; testimonials grid becomes source testimonials with layout grid |
-| collection-showcase (work) | `columns` | choices 2, 3, 4; salt-wordpress 2, 3 | owes: one select with the strings 2, 3 and 4 on every source; work and blog_teaser offer 2 and 3 with an integer default 3, team uses bare-numeral labels, testimonials has none |
-| collection-showcase (work) | `columns` | default "3"; salt-wordpress 3 | owes: one select with the strings 2, 3 and 4 on every source; work and blog_teaser offer 2 and 3 with an integer default 3, team uses bare-numeral labels, testimonials has none |
-| collection-showcase (work) | `query` | stored as source, manual, taxonomy_terms, orderby, order, count | formerly: source, manual, taxonomy_terms, orderby, order, count |
-| collection-showcase (work) | `query.mode` | choices automatic, by-category, manual; salt-wordpress default, taxonomy, manual | values: {"default":"automatic","taxonomy":"by-category","manual":"manual"} |
-| collection-showcase (work) | `query.mode` | default "automatic"; salt-wordpress "default" | values: {"default":"automatic","taxonomy":"by-category","manual":"manual"} |
-| collection-showcase (work) | `query.categories` | type select; salt-wordpress taxonomy | note: Stored as the layout's own source, taxonomy_terms, manual, orderby, order and count; taxonomy_terms becomes categories, manual becomes items, orderby and order fold into order, count stays count. SC-006 offers neither oldest-first nor Z to A, so a stored order direction is dropped on migration. |
-| collection-showcase (work) | `query.items` | post_type ["service","work","testimonial","post","team_member"]; salt-wordpress ["work"] | note: Stored as the layout's own source, taxonomy_terms, manual, orderby, order and count; taxonomy_terms becomes categories, manual becomes items, orderby and order fold into order, count stays count. SC-006 offers neither oldest-first nor Z to A, so a stored order direction is dropped on migration. |
-| collection-showcase (work) | `query.order` | choices default, newest, title; salt-wordpress (empty), menu_order, date, title | note: Stored as the layout's own source, taxonomy_terms, manual, orderby, order and count; taxonomy_terms becomes categories, manual becomes items, orderby and order fold into order, count stays count. SC-006 offers neither oldest-first nor Z to A, so a stored order direction is dropped on migration. |
-| collection-showcase (work) | `query.order` | default "default"; salt-wordpress none | values: {"":"default","menu_order":"default","date":"newest","title":"title"} |
-| collection-showcase (work) | `query.order` | condition differs (1 of 3 cases), e.g. {"mode":"manual"}: contract hides, salt-wordpress shows | note: Stored as the layout's own source, taxonomy_terms, manual, orderby, order and count; taxonomy_terms becomes categories, manual becomes items, orderby and order fold into order, count stays count. SC-006 offers neither oldest-first nor Z to A, so a stored order direction is dropped on migration. |
-| collection-showcase (work) | `query.count` | step 1; salt-wordpress none | note: Stored as the layout's own source, taxonomy_terms, manual, orderby, order and count; taxonomy_terms becomes categories, manual becomes items, orderby and order fold into order, count stays count. SC-006 offers neither oldest-first nor Z to A, so a stored order direction is dropped on migration. |
-| collection-showcase (work) | `query.count` | condition differs (1 of 3 cases), e.g. {"mode":"manual"}: contract hides, salt-wordpress shows | note: Stored as the layout's own source, taxonomy_terms, manual, orderby, order and count; taxonomy_terms becomes categories, manual becomes items, orderby and order fold into order, count stays count. SC-006 offers neither oldest-first nor Z to A, so a stored order direction is dropped on migration. |
-| collection-showcase (work) | `query.direction` | in salt-wordpress, not in the contract | parent owes: one query group in place of six layout fields |
-| collection-showcase (work) | `showTags` | not in salt-wordpress | owes: the field |
-| collection-showcase (work) | `groupByCategory` | not in salt-wordpress | owes: the field, with the index layout |
-| collection-showcase (work) | `viewAll` | stored as view_all | formerly: view_all |
-| collection-showcase (work) | `viewAllLabel` | not in salt-wordpress | owes: the field; the wording is fixed per collection today |
-| collection-showcase (work) | `settings.spacing` | stored as section_spacing | formerly: section_spacing |
-| collection-showcase (work) | `settings.tone` | stored as section_background | formerly: section_background |
-| collection-showcase (work) | `settings.tone` | choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse | values: {"inverse":"surface-inverse"} |
-| collection-showcase (work) | `settings.toneDark` | not in salt-wordpress | owes: the field; dark mode is a token inversion today, with no per-section choice |
-| collection-showcase (work) | `settings.width` | stored as section_container | formerly: section_container |
-| collection-showcase (work) | `settings.backgroundImage` | not in salt-wordpress | owes: the background image and its four settings |
-| collection-showcase (work) | `settings.anchorId` | stored as section_anchor | formerly: section_anchor |
-| collection-showcase (work) | `settings.firstPageOnly` | not in salt-wordpress | owes: the field, with the listing section that paginates |
-| collection-showcase (work) | `settings.divider` | stored as section_divider | formerly: section_divider |
-| collection-showcase (team) | `(layout name)` | name collection-showcase; salt-wordpress team | sections.json formerly: team |
-| collection-showcase (team) | `intro` | not in salt-wordpress | owes: the field |
-| collection-showcase (team) | `source` | not in salt-wordpress | owes: one section with a source select in place of five layouts; the former layout slug gives the source |
-| collection-showcase (team) | `layout` | not in salt-wordpress | owes: the accordion and index layouts, and the field on work, team and blog_teaser; services has grid, list and featured; testimonials grid becomes source testimonials with layout grid |
-| collection-showcase (team) | `columns` | condition differs (3 of 5 cases), e.g. {"layout":"list"}: contract hides, salt-wordpress shows; {"layout":"accordion"}: contract hides, salt-wordpress shows | layout owes: the accordion and index layouts, and the field on work, team and blog_teaser; services has grid, list and featured; testimonials grid becomes source testimonials with layout grid |
-| collection-showcase (team) | `query` | stored as source, manual, taxonomy_terms, orderby, order, count | formerly: source, manual, taxonomy_terms, orderby, order, count |
-| collection-showcase (team) | `query.mode` | choices automatic, by-category, manual; salt-wordpress default, taxonomy, manual | values: {"default":"automatic","taxonomy":"by-category","manual":"manual"} |
-| collection-showcase (team) | `query.mode` | default "automatic"; salt-wordpress "default" | values: {"default":"automatic","taxonomy":"by-category","manual":"manual"} |
-| collection-showcase (team) | `query.categories` | type select; salt-wordpress taxonomy | note: Stored as the layout's own source, taxonomy_terms, manual, orderby, order and count; taxonomy_terms becomes categories, manual becomes items, orderby and order fold into order, count stays count. SC-006 offers neither oldest-first nor Z to A, so a stored order direction is dropped on migration. |
-| collection-showcase (team) | `query.items` | post_type ["service","work","testimonial","post","team_member"]; salt-wordpress ["team_member"] | note: Stored as the layout's own source, taxonomy_terms, manual, orderby, order and count; taxonomy_terms becomes categories, manual becomes items, orderby and order fold into order, count stays count. SC-006 offers neither oldest-first nor Z to A, so a stored order direction is dropped on migration. |
-| collection-showcase (team) | `query.order` | choices default, newest, title; salt-wordpress (empty), menu_order, date, title | note: Stored as the layout's own source, taxonomy_terms, manual, orderby, order and count; taxonomy_terms becomes categories, manual becomes items, orderby and order fold into order, count stays count. SC-006 offers neither oldest-first nor Z to A, so a stored order direction is dropped on migration. |
-| collection-showcase (team) | `query.order` | default "default"; salt-wordpress none | values: {"":"default","menu_order":"default","date":"newest","title":"title"} |
-| collection-showcase (team) | `query.order` | condition differs (1 of 3 cases), e.g. {"mode":"manual"}: contract hides, salt-wordpress shows | note: Stored as the layout's own source, taxonomy_terms, manual, orderby, order and count; taxonomy_terms becomes categories, manual becomes items, orderby and order fold into order, count stays count. SC-006 offers neither oldest-first nor Z to A, so a stored order direction is dropped on migration. |
-| collection-showcase (team) | `query.count` | step 1; salt-wordpress none | note: Stored as the layout's own source, taxonomy_terms, manual, orderby, order and count; taxonomy_terms becomes categories, manual becomes items, orderby and order fold into order, count stays count. SC-006 offers neither oldest-first nor Z to A, so a stored order direction is dropped on migration. |
-| collection-showcase (team) | `query.count` | condition differs (1 of 3 cases), e.g. {"mode":"manual"}: contract hides, salt-wordpress shows | note: Stored as the layout's own source, taxonomy_terms, manual, orderby, order and count; taxonomy_terms becomes categories, manual becomes items, orderby and order fold into order, count stays count. SC-006 offers neither oldest-first nor Z to A, so a stored order direction is dropped on migration. |
-| collection-showcase (team) | `query.direction` | in salt-wordpress, not in the contract | parent owes: one query group in place of six layout fields |
-| collection-showcase (team) | `viewAll` | not in salt-wordpress | owes: the default true on services, where it is false today; team has none |
-| collection-showcase (team) | `viewAllLabel` | not in salt-wordpress | owes: the field; the wording is fixed per collection today |
-| collection-showcase (team) | `settings.spacing` | stored as section_spacing | formerly: section_spacing |
-| collection-showcase (team) | `settings.tone` | stored as section_background | formerly: section_background |
-| collection-showcase (team) | `settings.tone` | choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse | values: {"inverse":"surface-inverse"} |
-| collection-showcase (team) | `settings.toneDark` | not in salt-wordpress | owes: the field; dark mode is a token inversion today, with no per-section choice |
-| collection-showcase (team) | `settings.width` | stored as section_container | formerly: section_container |
-| collection-showcase (team) | `settings.backgroundImage` | not in salt-wordpress | owes: the background image and its four settings |
-| collection-showcase (team) | `settings.anchorId` | stored as section_anchor | formerly: section_anchor |
-| collection-showcase (team) | `settings.firstPageOnly` | not in salt-wordpress | owes: the field, with the listing section that paginates |
-| collection-showcase (team) | `settings.divider` | stored as section_divider | formerly: section_divider |
-| collection-showcase (testimonials) | `(layout name)` | name collection-showcase; salt-wordpress testimonials | sections.json formerly: testimonials |
-| collection-showcase (testimonials) | `intro` | not in salt-wordpress | owes: the field |
-| collection-showcase (testimonials) | `source` | not in salt-wordpress | owes: one section with a source select in place of five layouts; the former layout slug gives the source |
-| collection-showcase (testimonials) | `layout` | choices grid, list, featured, accordion, index; salt-wordpress grid, slider | owes: the accordion and index layouts, and the field on work, team and blog_teaser; services has grid, list and featured; testimonials grid becomes source testimonials with layout grid |
-| collection-showcase (testimonials) | `columns` | not in salt-wordpress | owes: one select with the strings 2, 3 and 4 on every source; work and blog_teaser offer 2 and 3 with an integer default 3, team uses bare-numeral labels, testimonials has none |
-| collection-showcase (testimonials) | `query` | stored as source, manual, orderby, order, count | formerly: source, manual, taxonomy_terms, orderby, order, count |
-| collection-showcase (testimonials) | `query.mode` | choices automatic, by-category, manual; salt-wordpress default, taxonomy, manual | values: {"default":"automatic","taxonomy":"by-category","manual":"manual"} |
-| collection-showcase (testimonials) | `query.mode` | default "automatic"; salt-wordpress "default" | values: {"default":"automatic","taxonomy":"by-category","manual":"manual"} |
-| collection-showcase (testimonials) | `query.categories` | not in salt-wordpress | parent owes: one query group in place of six layout fields |
-| collection-showcase (testimonials) | `query.items` | post_type ["service","work","testimonial","post","team_member"]; salt-wordpress ["testimonial"] | note: Stored as the layout's own source, taxonomy_terms, manual, orderby, order and count; taxonomy_terms becomes categories, manual becomes items, orderby and order fold into order, count stays count. SC-006 offers neither oldest-first nor Z to A, so a stored order direction is dropped on migration. |
-| collection-showcase (testimonials) | `query.order` | choices default, newest, title; salt-wordpress (empty), menu_order, date, title | note: Stored as the layout's own source, taxonomy_terms, manual, orderby, order and count; taxonomy_terms becomes categories, manual becomes items, orderby and order fold into order, count stays count. SC-006 offers neither oldest-first nor Z to A, so a stored order direction is dropped on migration. |
-| collection-showcase (testimonials) | `query.order` | default "default"; salt-wordpress none | values: {"":"default","menu_order":"default","date":"newest","title":"title"} |
-| collection-showcase (testimonials) | `query.order` | condition differs (1 of 3 cases), e.g. {"mode":"manual"}: contract hides, salt-wordpress shows | note: Stored as the layout's own source, taxonomy_terms, manual, orderby, order and count; taxonomy_terms becomes categories, manual becomes items, orderby and order fold into order, count stays count. SC-006 offers neither oldest-first nor Z to A, so a stored order direction is dropped on migration. |
-| collection-showcase (testimonials) | `query.count` | step 1; salt-wordpress none | note: Stored as the layout's own source, taxonomy_terms, manual, orderby, order and count; taxonomy_terms becomes categories, manual becomes items, orderby and order fold into order, count stays count. SC-006 offers neither oldest-first nor Z to A, so a stored order direction is dropped on migration. |
-| collection-showcase (testimonials) | `query.count` | condition differs (1 of 3 cases), e.g. {"mode":"manual"}: contract hides, salt-wordpress shows | note: Stored as the layout's own source, taxonomy_terms, manual, orderby, order and count; taxonomy_terms becomes categories, manual becomes items, orderby and order fold into order, count stays count. SC-006 offers neither oldest-first nor Z to A, so a stored order direction is dropped on migration. |
-| collection-showcase (testimonials) | `query.direction` | in salt-wordpress, not in the contract | parent owes: one query group in place of six layout fields |
-| collection-showcase (testimonials) | `showRatings` | not in salt-wordpress | owes: the field; testimonials always draws a stored rating today |
-| collection-showcase (testimonials) | `viewAll` | not in salt-wordpress | owes: the default true on services, where it is false today; team has none |
-| collection-showcase (testimonials) | `viewAllLabel` | not in salt-wordpress | owes: the field; the wording is fixed per collection today |
-| collection-showcase (testimonials) | `settings.spacing` | stored as section_spacing | formerly: section_spacing |
-| collection-showcase (testimonials) | `settings.tone` | stored as section_background | formerly: section_background |
-| collection-showcase (testimonials) | `settings.tone` | choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse | values: {"inverse":"surface-inverse"} |
-| collection-showcase (testimonials) | `settings.toneDark` | not in salt-wordpress | owes: the field; dark mode is a token inversion today, with no per-section choice |
-| collection-showcase (testimonials) | `settings.width` | stored as section_container | formerly: section_container |
-| collection-showcase (testimonials) | `settings.backgroundImage` | not in salt-wordpress | owes: the background image and its four settings |
-| collection-showcase (testimonials) | `settings.anchorId` | stored as section_anchor | formerly: section_anchor |
-| collection-showcase (testimonials) | `settings.firstPageOnly` | not in salt-wordpress | owes: the field, with the listing section that paginates |
-| collection-showcase (testimonials) | `settings.divider` | stored as section_divider | formerly: section_divider |
-| collection-showcase (blog_teaser) | `(layout name)` | name collection-showcase; salt-wordpress blog_teaser | sections.json formerly: blog_teaser |
-| collection-showcase (blog_teaser) | `intro` | not in salt-wordpress | owes: the field |
-| collection-showcase (blog_teaser) | `source` | not in salt-wordpress | owes: one section with a source select in place of five layouts; the former layout slug gives the source |
-| collection-showcase (blog_teaser) | `layout` | not in salt-wordpress | owes: the accordion and index layouts, and the field on work, team and blog_teaser; services has grid, list and featured; testimonials grid becomes source testimonials with layout grid |
-| collection-showcase (blog_teaser) | `columns` | condition differs (3 of 5 cases), e.g. {"layout":"list"}: contract hides, salt-wordpress shows; {"layout":"accordion"}: contract hides, salt-wordpress shows | layout owes: the accordion and index layouts, and the field on work, team and blog_teaser; services has grid, list and featured; testimonials grid becomes source testimonials with layout grid |
-| collection-showcase (blog_teaser) | `columns` | choices 2, 3, 4; salt-wordpress 2, 3 | owes: one select with the strings 2, 3 and 4 on every source; work and blog_teaser offer 2 and 3 with an integer default 3, team uses bare-numeral labels, testimonials has none |
-| collection-showcase (blog_teaser) | `columns` | default "3"; salt-wordpress 3 | owes: one select with the strings 2, 3 and 4 on every source; work and blog_teaser offer 2 and 3 with an integer default 3, team uses bare-numeral labels, testimonials has none |
-| collection-showcase (blog_teaser) | `query` | stored as source, manual, taxonomy_terms, orderby, order, count | formerly: source, manual, taxonomy_terms, orderby, order, count |
-| collection-showcase (blog_teaser) | `query.mode` | choices automatic, by-category, manual; salt-wordpress default, taxonomy, manual | values: {"default":"automatic","taxonomy":"by-category","manual":"manual"} |
-| collection-showcase (blog_teaser) | `query.mode` | default "automatic"; salt-wordpress "default" | values: {"default":"automatic","taxonomy":"by-category","manual":"manual"} |
-| collection-showcase (blog_teaser) | `query.categories` | type select; salt-wordpress taxonomy | note: Stored as the layout's own source, taxonomy_terms, manual, orderby, order and count; taxonomy_terms becomes categories, manual becomes items, orderby and order fold into order, count stays count. SC-006 offers neither oldest-first nor Z to A, so a stored order direction is dropped on migration. |
-| collection-showcase (blog_teaser) | `query.items` | post_type ["service","work","testimonial","post","team_member"]; salt-wordpress ["post"] | note: Stored as the layout's own source, taxonomy_terms, manual, orderby, order and count; taxonomy_terms becomes categories, manual becomes items, orderby and order fold into order, count stays count. SC-006 offers neither oldest-first nor Z to A, so a stored order direction is dropped on migration. |
-| collection-showcase (blog_teaser) | `query.order` | choices default, newest, title; salt-wordpress (empty), menu_order, date, title | note: Stored as the layout's own source, taxonomy_terms, manual, orderby, order and count; taxonomy_terms becomes categories, manual becomes items, orderby and order fold into order, count stays count. SC-006 offers neither oldest-first nor Z to A, so a stored order direction is dropped on migration. |
-| collection-showcase (blog_teaser) | `query.order` | default "default"; salt-wordpress none | values: {"":"default","menu_order":"default","date":"newest","title":"title"} |
-| collection-showcase (blog_teaser) | `query.order` | condition differs (1 of 3 cases), e.g. {"mode":"manual"}: contract hides, salt-wordpress shows | note: Stored as the layout's own source, taxonomy_terms, manual, orderby, order and count; taxonomy_terms becomes categories, manual becomes items, orderby and order fold into order, count stays count. SC-006 offers neither oldest-first nor Z to A, so a stored order direction is dropped on migration. |
-| collection-showcase (blog_teaser) | `query.count` | step 1; salt-wordpress none | note: Stored as the layout's own source, taxonomy_terms, manual, orderby, order and count; taxonomy_terms becomes categories, manual becomes items, orderby and order fold into order, count stays count. SC-006 offers neither oldest-first nor Z to A, so a stored order direction is dropped on migration. |
-| collection-showcase (blog_teaser) | `query.count` | condition differs (1 of 3 cases), e.g. {"mode":"manual"}: contract hides, salt-wordpress shows | note: Stored as the layout's own source, taxonomy_terms, manual, orderby, order and count; taxonomy_terms becomes categories, manual becomes items, orderby and order fold into order, count stays count. SC-006 offers neither oldest-first nor Z to A, so a stored order direction is dropped on migration. |
-| collection-showcase (blog_teaser) | `query.direction` | in salt-wordpress, not in the contract | parent owes: one query group in place of six layout fields |
-| collection-showcase (blog_teaser) | `showTags` | not in salt-wordpress | owes: the field |
-| collection-showcase (blog_teaser) | `groupByCategory` | not in salt-wordpress | owes: the field, with the index layout |
-| collection-showcase (blog_teaser) | `viewAll` | stored as view_all | formerly: view_all |
-| collection-showcase (blog_teaser) | `viewAllLabel` | not in salt-wordpress | owes: the field; the wording is fixed per collection today |
-| collection-showcase (blog_teaser) | `settings.spacing` | stored as section_spacing | formerly: section_spacing |
-| collection-showcase (blog_teaser) | `settings.tone` | stored as section_background | formerly: section_background |
-| collection-showcase (blog_teaser) | `settings.tone` | choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse | values: {"inverse":"surface-inverse"} |
-| collection-showcase (blog_teaser) | `settings.toneDark` | not in salt-wordpress | owes: the field; dark mode is a token inversion today, with no per-section choice |
-| collection-showcase (blog_teaser) | `settings.width` | stored as section_container | formerly: section_container |
-| collection-showcase (blog_teaser) | `settings.backgroundImage` | not in salt-wordpress | owes: the background image and its four settings |
-| collection-showcase (blog_teaser) | `settings.anchorId` | stored as section_anchor | formerly: section_anchor |
-| collection-showcase (blog_teaser) | `settings.firstPageOnly` | not in salt-wordpress | owes: the field, with the listing section that paginates |
-| collection-showcase (blog_teaser) | `settings.divider` | stored as section_divider | formerly: section_divider |
-| carousel (scroll_carousel) | `(layout name)` | name carousel; salt-wordpress scroll_carousel | sections.json formerly: scroll_carousel |
-| carousel (scroll_carousel) | `intro` | not in salt-wordpress | owes: the field |
-| carousel (scroll_carousel) | `label` | not in salt-wordpress | owes: the field; the track is named Carousel when there is no heading today |
-| carousel (scroll_carousel) | `source` | not in salt-wordpress | owes: the source select: scroll_carousel becomes source inline, a testimonials layout set to slider becomes source testimonials; the other collections are new |
-| carousel (scroll_carousel) | `cardStyle` | stored as card_type | formerly: card_type |
-| carousel (scroll_carousel) | `cardStyle` | choices generic, quote; salt-wordpress generic, testimonial | values: {"testimonial":"quote"} |
-| carousel (scroll_carousel) | `cards.title` | required true; salt-wordpress false | owes: requiring it; a card with text alone is kept today |
-| carousel (scroll_carousel) | `settings.spacing` | stored as section_spacing | formerly: section_spacing |
-| carousel (scroll_carousel) | `settings.tone` | stored as section_background | formerly: section_background |
-| carousel (scroll_carousel) | `settings.tone` | choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse | values: {"inverse":"surface-inverse"} |
-| carousel (scroll_carousel) | `settings.toneDark` | not in salt-wordpress | owes: the field; dark mode is a token inversion today, with no per-section choice |
-| carousel (scroll_carousel) | `settings.width` | stored as section_container | formerly: section_container |
-| carousel (scroll_carousel) | `settings.backgroundImage` | not in salt-wordpress | owes: the background image and its four settings |
-| carousel (scroll_carousel) | `settings.anchorId` | stored as section_anchor | formerly: section_anchor |
-| carousel (scroll_carousel) | `settings.firstPageOnly` | not in salt-wordpress | owes: the field, with the listing section that paginates |
-| carousel (scroll_carousel) | `settings.divider` | stored as section_divider | formerly: section_divider |
-| carousel (testimonials) | `(layout name)` | name carousel; salt-wordpress testimonials | sections.json formerly: testimonials |
-| carousel (testimonials) | `intro` | not in salt-wordpress | owes: the field |
-| carousel (testimonials) | `label` | not in salt-wordpress | owes: the field; the track is named Carousel when there is no heading today |
-| carousel (testimonials) | `source` | not in salt-wordpress | owes: the source select: scroll_carousel becomes source inline, a testimonials layout set to slider becomes source testimonials; the other collections are new |
-| carousel (testimonials) | `query` | stored as source, manual, orderby, order, count | formerly: source, manual, orderby, order, count |
-| carousel (testimonials) | `query.mode` | choices automatic, by-category, manual; salt-wordpress default, taxonomy, manual | values: {"default":"automatic","taxonomy":"by-category","manual":"manual"} |
-| carousel (testimonials) | `query.mode` | default "automatic"; salt-wordpress "default" | values: {"default":"automatic","taxonomy":"by-category","manual":"manual"} |
-| carousel (testimonials) | `query.categories` | not in salt-wordpress | parent owes: the query on scroll_carousel; only the testimonials layout has one today |
-| carousel (testimonials) | `query.items` | post_type ["service","work","testimonial","post","team_member"]; salt-wordpress ["testimonial"] | note: Stored as the layout's own source, taxonomy_terms, manual, orderby, order and count; taxonomy_terms becomes categories, manual becomes items, orderby and order fold into order, count stays count. SC-006 offers neither oldest-first nor Z to A, so a stored order direction is dropped on migration. |
-| carousel (testimonials) | `query.order` | choices default, newest, title; salt-wordpress (empty), menu_order, date, title | note: Stored as the layout's own source, taxonomy_terms, manual, orderby, order and count; taxonomy_terms becomes categories, manual becomes items, orderby and order fold into order, count stays count. SC-006 offers neither oldest-first nor Z to A, so a stored order direction is dropped on migration. |
-| carousel (testimonials) | `query.order` | default "default"; salt-wordpress none | values: {"":"default","menu_order":"default","date":"newest","title":"title"} |
-| carousel (testimonials) | `query.order` | condition differs (1 of 3 cases), e.g. {"mode":"manual"}: contract hides, salt-wordpress shows | note: Stored as the layout's own source, taxonomy_terms, manual, orderby, order and count; taxonomy_terms becomes categories, manual becomes items, orderby and order fold into order, count stays count. SC-006 offers neither oldest-first nor Z to A, so a stored order direction is dropped on migration. |
-| carousel (testimonials) | `query.count` | step 1; salt-wordpress none | note: Stored as the layout's own source, taxonomy_terms, manual, orderby, order and count; taxonomy_terms becomes categories, manual becomes items, orderby and order fold into order, count stays count. SC-006 offers neither oldest-first nor Z to A, so a stored order direction is dropped on migration. |
-| carousel (testimonials) | `query.count` | condition differs (1 of 3 cases), e.g. {"mode":"manual"}: contract hides, salt-wordpress shows | note: Stored as the layout's own source, taxonomy_terms, manual, orderby, order and count; taxonomy_terms becomes categories, manual becomes items, orderby and order fold into order, count stays count. SC-006 offers neither oldest-first nor Z to A, so a stored order direction is dropped on migration. |
-| carousel (testimonials) | `query.direction` | in salt-wordpress, not in the contract | parent owes: the query on scroll_carousel; only the testimonials layout has one today |
-| carousel (testimonials) | `settings.spacing` | stored as section_spacing | formerly: section_spacing |
-| carousel (testimonials) | `settings.tone` | stored as section_background | formerly: section_background |
-| carousel (testimonials) | `settings.tone` | choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse | values: {"inverse":"surface-inverse"} |
-| carousel (testimonials) | `settings.toneDark` | not in salt-wordpress | owes: the field; dark mode is a token inversion today, with no per-section choice |
-| carousel (testimonials) | `settings.width` | stored as section_container | formerly: section_container |
-| carousel (testimonials) | `settings.backgroundImage` | not in salt-wordpress | owes: the background image and its four settings |
-| carousel (testimonials) | `settings.anchorId` | stored as section_anchor | formerly: section_anchor |
-| carousel (testimonials) | `settings.firstPageOnly` | not in salt-wordpress | owes: the field, with the listing section that paginates |
-| carousel (testimonials) | `settings.divider` | stored as section_divider | formerly: section_divider |
-| carousel (testimonials) | `layout` | in salt-wordpress, not in the contract | sections.json formerly: testimonials when layout slider |
-| contact | `intro` | stored as text | formerly: text |
-| contact | `intro` | maxlength 300; salt-wordpress none | owes: the 300-character limit |
-| contact | `showPhone` | stored as show_phone | formerly: show_phone |
-| contact | `showEmail` | stored as show_email | formerly: show_email |
-| contact | `showAddress` | stored as show_address | formerly: show_address |
-| contact | `formIntro` | stored as form_intro | formerly: form_intro |
-| contact | `settings.spacing` | stored as section_spacing | formerly: section_spacing |
-| contact | `settings.tone` | stored as section_background | formerly: section_background |
-| contact | `settings.tone` | choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse | values: {"inverse":"surface-inverse"} |
-| contact | `settings.toneDark` | not in salt-wordpress | owes: the field; dark mode is a token inversion today, with no per-section choice |
-| contact | `settings.width` | stored as section_container | formerly: section_container |
-| contact | `settings.backgroundImage` | not in salt-wordpress | owes: the background image and its four settings |
-| contact | `settings.anchorId` | stored as section_anchor | formerly: section_anchor |
-| contact | `settings.firstPageOnly` | not in salt-wordpress | owes: the field, with the listing section that paginates |
-| contact | `settings.divider` | stored as section_divider | formerly: section_divider |
-| locations | `query` | stored as source, manual, taxonomy_terms, orderby, order, count | formerly: source, manual, taxonomy_terms, orderby, order, count |
-| locations | `query.mode` | choices automatic, by-category, manual; salt-wordpress default, taxonomy, manual | values: {"default":"automatic","taxonomy":"by-category","manual":"manual"} |
-| locations | `query.mode` | default "automatic"; salt-wordpress "default" | values: {"default":"automatic","taxonomy":"by-category","manual":"manual"} |
-| locations | `query.order` | choices default, newest, title; salt-wordpress (empty), menu_order, date, title | note: Stored as the layout's own source, taxonomy_terms, manual, orderby, order and count; taxonomy_terms becomes categories, manual becomes items, orderby and order fold into order, count stays count. SC-006 offers neither oldest-first nor Z to A, so a stored order direction is dropped on migration. |
-| locations | `query.order` | default "default"; salt-wordpress none | values: {"":"default","menu_order":"default","date":"newest","title":"title"} |
-| locations | `query.order` | condition differs (1 of 3 cases), e.g. {"mode":"manual"}: contract hides, salt-wordpress shows | note: Stored as the layout's own source, taxonomy_terms, manual, orderby, order and count; taxonomy_terms becomes categories, manual becomes items, orderby and order fold into order, count stays count. SC-006 offers neither oldest-first nor Z to A, so a stored order direction is dropped on migration. |
-| locations | `query.count` | step 1; salt-wordpress none | note: Stored as the layout's own source, taxonomy_terms, manual, orderby, order and count; taxonomy_terms becomes categories, manual becomes items, orderby and order fold into order, count stays count. SC-006 offers neither oldest-first nor Z to A, so a stored order direction is dropped on migration. |
-| locations | `query.count` | condition differs (1 of 3 cases), e.g. {"mode":"manual"}: contract hides, salt-wordpress shows | note: Stored as the layout's own source, taxonomy_terms, manual, orderby, order and count; taxonomy_terms becomes categories, manual becomes items, orderby and order fold into order, count stays count. SC-006 offers neither oldest-first nor Z to A, so a stored order direction is dropped on migration. |
-| locations | `query.direction` | in salt-wordpress, not in the contract | parent owes: one query group in place of six layout fields |
-| locations | `settings.spacing` | stored as section_spacing | formerly: section_spacing |
-| locations | `settings.tone` | stored as section_background | formerly: section_background |
-| locations | `settings.tone` | choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse | values: {"inverse":"surface-inverse"} |
-| locations | `settings.toneDark` | not in salt-wordpress | owes: the field; dark mode is a token inversion today, with no per-section choice |
-| locations | `settings.width` | stored as section_container | formerly: section_container |
-| locations | `settings.backgroundImage` | not in salt-wordpress | owes: the background image and its four settings |
-| locations | `settings.anchorId` | stored as section_anchor | formerly: section_anchor |
-| locations | `settings.firstPageOnly` | not in salt-wordpress | owes: the field, with the listing section that paginates |
-| locations | `settings.divider` | stored as section_divider | formerly: section_divider |
-| pricing | `plans.features.text` | required true; salt-wordpress false | owes: requiring it |
-| pricing | `plans.features.included` | not in salt-wordpress | owes: the field |
-| pricing | `plans.cta` | type group; salt-wordpress link | owes: the link shape (label, type, document or url, newTab) in place of an ACF link |
-| pricing | `settings.spacing` | stored as section_spacing | formerly: section_spacing |
-| pricing | `settings.tone` | stored as section_background | formerly: section_background |
-| pricing | `settings.tone` | choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse | values: {"inverse":"surface-inverse"} |
-| pricing | `settings.toneDark` | not in salt-wordpress | owes: the field; dark mode is a token inversion today, with no per-section choice |
-| pricing | `settings.width` | stored as section_container | formerly: section_container |
-| pricing | `settings.backgroundImage` | not in salt-wordpress | owes: the background image and its four settings |
-| pricing | `settings.anchorId` | stored as section_anchor | formerly: section_anchor |
-| pricing | `settings.firstPageOnly` | not in salt-wordpress | owes: the field, with the listing section that paginates |
-| pricing | `settings.divider` | stored as section_divider | formerly: section_divider |
+| Section | Field | Kind | Difference | Recorded as |
+| --- | --- | --- | --- | --- |
+| hero | `variant` | options | choices full-bleed, split, stacked, minimal; salt-wordpress full-bleed, split, minimal | owes: the stacked option, and a full-bleed hero that sets its words over the section's background image (SC-006) |
+| hero | `image` | condition | condition differs (2 of 4 cases), e.g. {"variant":"full-bleed"}: contract hides, salt-wordpress shows; {"variant":"minimal"}: contract hides, salt-wordpress shows | owes: hiding it for full-bleed and minimal, and moving a full-bleed hero's image to the background image setting (SC-006) |
+| hero | `mediaSide` | missing | not in salt-wordpress | owes: the field |
+| hero | `alignment` | missing | not in salt-wordpress | owes: the field |
+| hero | `buttons` | name | stored as cta_primary, cta_secondary | formerly: cta_primary, cta_secondary |
+| hero | `buttons` | type | type repeater; salt-wordpress link | owes: a list of up to two buttons in place of two link fields: cta_primary becomes buttons[0] with style primary, cta_secondary buttons[1] with style secondary; internal links store the document, not its address |
+| hero | `settings.spacing` | name | stored as section_spacing | formerly: section_spacing |
+| hero | `settings.tone` | name | stored as section_background | formerly: section_background |
+| hero | `settings.tone` | values | choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse | values: {"inverse":"surface-inverse"} |
+| hero | `settings.toneDark` | missing | not in salt-wordpress | owes: the field; dark mode is a token inversion today, with no per-section choice |
+| hero | `settings.width` | name | stored as section_container | formerly: section_container |
+| hero | `settings.backgroundImage` | missing | not in salt-wordpress | owes: the background image and its four settings |
+| hero | `settings.anchorId` | name | stored as section_anchor | formerly: section_anchor |
+| hero | `settings.firstPageOnly` | missing | not in salt-wordpress | owes: the field, with the listing section that paginates |
+| hero | `settings.divider` | name | stored as section_divider | formerly: section_divider |
+| rich-text (rich_text) | `(layout name)` | name | name rich-text; salt-wordpress rich_text | sections.json formerly: rich_text |
+| rich-text (rich_text) | `eyebrow` | missing | not in salt-wordpress | owes: the field on rich_text; intro already has it |
+| rich-text (rich_text) | `body` | name | stored as content | formerly: content |
+| rich-text (rich_text) | `alignment` | missing | not in salt-wordpress | owes: the field on rich_text, and the value centre in place of center on intro |
+| rich-text (rich_text) | `settings.spacing` | name | stored as section_spacing | formerly: section_spacing |
+| rich-text (rich_text) | `settings.tone` | name | stored as section_background | formerly: section_background |
+| rich-text (rich_text) | `settings.tone` | values | choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse | values: {"inverse":"surface-inverse"} |
+| rich-text (rich_text) | `settings.toneDark` | missing | not in salt-wordpress | owes: the field; dark mode is a token inversion today, with no per-section choice |
+| rich-text (rich_text) | `settings.width` | name | stored as section_container | formerly: section_container |
+| rich-text (rich_text) | `settings.backgroundImage` | missing | not in salt-wordpress | owes: the background image and its four settings |
+| rich-text (rich_text) | `settings.anchorId` | name | stored as section_anchor | formerly: section_anchor |
+| rich-text (rich_text) | `settings.firstPageOnly` | missing | not in salt-wordpress | owes: the field, with the listing section that paginates |
+| rich-text (rich_text) | `settings.divider` | name | stored as section_divider | formerly: section_divider |
+| rich-text (intro) | `(layout name)` | name | name rich-text; salt-wordpress intro | sections.json formerly: intro |
+| rich-text (intro) | `body` | name | stored as content | formerly: content |
+| rich-text (intro) | `alignment` | name | stored as align | formerly: align |
+| rich-text (intro) | `alignment` | values | choices left, centre; salt-wordpress left, center | values: {"center":"centre"} |
+| rich-text (intro) | `settings.spacing` | name | stored as section_spacing | formerly: section_spacing |
+| rich-text (intro) | `settings.tone` | name | stored as section_background | formerly: section_background |
+| rich-text (intro) | `settings.tone` | values | choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse | values: {"inverse":"surface-inverse"} |
+| rich-text (intro) | `settings.toneDark` | missing | not in salt-wordpress | owes: the field; dark mode is a token inversion today, with no per-section choice |
+| rich-text (intro) | `settings.width` | name | stored as section_container | formerly: section_container |
+| rich-text (intro) | `settings.backgroundImage` | missing | not in salt-wordpress | owes: the background image and its four settings |
+| rich-text (intro) | `settings.anchorId` | name | stored as section_anchor | formerly: section_anchor |
+| rich-text (intro) | `settings.firstPageOnly` | missing | not in salt-wordpress | owes: the field, with the listing section that paginates |
+| rich-text (intro) | `settings.divider` | name | stored as section_divider | formerly: section_divider |
+| call-to-action | `(layout name)` | name | name call-to-action; salt-wordpress cta | sections.json formerly: cta |
+| call-to-action | `body` | name | stored as text | formerly: text |
+| call-to-action | `body` | type | type wysiwyg; salt-wordpress textarea | owes: rich text in place of a textarea; a stored plain text migrates as one paragraph |
+| call-to-action | `buttons.link` | missing | not in salt-wordpress | parent owes: the link shape: label, url and style become link (label, type, document or url, newTab) and style; internal links and opening in a new tab are new |
+| call-to-action | `buttons.label` | extra | in salt-wordpress, not in the contract | parent owes: the link shape: label, url and style become link (label, type, document or url, newTab) and style; internal links and opening in a new tab are new |
+| call-to-action | `buttons.url` | extra | in salt-wordpress, not in the contract | parent owes: the link shape: label, url and style become link (label, type, document or url, newTab) and style; internal links and opening in a new tab are new |
+| call-to-action | `settings.spacing` | name | stored as section_spacing | formerly: section_spacing |
+| call-to-action | `settings.tone` | name | stored as section_background | formerly: section_background |
+| call-to-action | `settings.tone` | values | choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse | values: {"inverse":"surface-inverse"} |
+| call-to-action | `settings.toneDark` | missing | not in salt-wordpress | owes: the field; dark mode is a token inversion today, with no per-section choice |
+| call-to-action | `settings.width` | name | stored as section_container | formerly: section_container |
+| call-to-action | `settings.backgroundImage` | missing | not in salt-wordpress | owes: the background image and its four settings |
+| call-to-action | `settings.anchorId` | name | stored as section_anchor | formerly: section_anchor |
+| call-to-action | `settings.firstPageOnly` | missing | not in salt-wordpress | owes: the field, with the listing section that paginates |
+| call-to-action | `settings.divider` | name | stored as section_divider | formerly: section_divider |
+| media-text | `(layout name)` | name | name media-text; salt-wordpress media_text | sections.json formerly: media_text |
+| media-text | `rows.mediaSide` | name | stored as media_side | formerly: media_side |
+| media-text | `rows.buttons` | name | stored as cta | formerly: cta |
+| media-text | `rows.buttons` | type | type repeater; salt-wordpress link | owes: a list of up to two buttons in place of one link field: cta becomes buttons[0] with style secondary. Visible change: WordPress draws this link today with the link-arrow style (template-parts/sections/media-text.php), so migrated rows change appearance unless the contract adds a link style; and a row with only a second link must move it to buttons[0], closing the gap |
+| media-text | `settings.spacing` | name | stored as section_spacing | formerly: section_spacing |
+| media-text | `settings.tone` | name | stored as section_background | formerly: section_background |
+| media-text | `settings.tone` | values | choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse | values: {"inverse":"surface-inverse"} |
+| media-text | `settings.toneDark` | missing | not in salt-wordpress | owes: the field; dark mode is a token inversion today, with no per-section choice |
+| media-text | `settings.width` | name | stored as section_container | formerly: section_container |
+| media-text | `settings.backgroundImage` | missing | not in salt-wordpress | owes: the background image and its four settings |
+| media-text | `settings.anchorId` | name | stored as section_anchor | formerly: section_anchor |
+| media-text | `settings.firstPageOnly` | missing | not in salt-wordpress | owes: the field, with the listing section that paginates |
+| media-text | `settings.divider` | name | stored as section_divider | formerly: section_divider |
+| features | `intro` | missing | not in salt-wordpress | owes: the field |
+| features | `items.icon` | type | type select; salt-wordpress text | owes: a select of the site's icons in place of a text field holding an icon name |
+| features | `items.text` | type | type wysiwyg; salt-wordpress textarea | owes: rich text in place of a textarea; a stored plain text migrates as one paragraph |
+| features | `items.url` | name | stored as link | formerly: link |
+| features | `items.url` | type | type url; salt-wordpress link | owes: a plain address in place of a link field, whose title and target were already ignored |
+| features | `settings.spacing` | name | stored as section_spacing | formerly: section_spacing |
+| features | `settings.tone` | name | stored as section_background | formerly: section_background |
+| features | `settings.tone` | values | choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse | values: {"inverse":"surface-inverse"} |
+| features | `settings.toneDark` | missing | not in salt-wordpress | owes: the field; dark mode is a token inversion today, with no per-section choice |
+| features | `settings.width` | name | stored as section_container | formerly: section_container |
+| features | `settings.backgroundImage` | missing | not in salt-wordpress | owes: the background image and its four settings |
+| features | `settings.anchorId` | name | stored as section_anchor | formerly: section_anchor |
+| features | `settings.firstPageOnly` | missing | not in salt-wordpress | owes: the field, with the listing section that paginates |
+| features | `settings.divider` | name | stored as section_divider | formerly: section_divider |
+| stats | `intro` | missing | not in salt-wordpress | owes: the field |
+| stats | `items.icon` | missing | not in salt-wordpress | owes: the field |
+| stats | `items.value` | name | stored as number | formerly: number |
+| stats | `settings.spacing` | name | stored as section_spacing | formerly: section_spacing |
+| stats | `settings.tone` | name | stored as section_background | formerly: section_background |
+| stats | `settings.tone` | values | choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse | values: {"inverse":"surface-inverse"} |
+| stats | `settings.toneDark` | missing | not in salt-wordpress | owes: the field; dark mode is a token inversion today, with no per-section choice |
+| stats | `settings.width` | name | stored as section_container | formerly: section_container |
+| stats | `settings.backgroundImage` | missing | not in salt-wordpress | owes: the background image and its four settings |
+| stats | `settings.anchorId` | name | stored as section_anchor | formerly: section_anchor |
+| stats | `settings.firstPageOnly` | missing | not in salt-wordpress | owes: the field, with the listing section that paginates |
+| stats | `settings.divider` | name | stored as section_divider | formerly: section_divider |
+| logos | `intro` | missing | not in salt-wordpress | owes: the field |
+| logos | `columns` | missing | not in salt-wordpress | owes: the field; the strip lays itself out today |
+| logos | `items` | name | stored as logos | formerly: logos |
+| logos | `settings.spacing` | name | stored as section_spacing | formerly: section_spacing |
+| logos | `settings.tone` | name | stored as section_background | formerly: section_background |
+| logos | `settings.tone` | values | choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse | values: {"inverse":"surface-inverse"} |
+| logos | `settings.toneDark` | missing | not in salt-wordpress | owes: the field; dark mode is a token inversion today, with no per-section choice |
+| logos | `settings.width` | name | stored as section_container | formerly: section_container |
+| logos | `settings.backgroundImage` | missing | not in salt-wordpress | owes: the background image and its four settings |
+| logos | `settings.anchorId` | name | stored as section_anchor | formerly: section_anchor |
+| logos | `settings.firstPageOnly` | missing | not in salt-wordpress | owes: the field, with the listing section that paginates |
+| logos | `settings.divider` | name | stored as section_divider | formerly: section_divider |
+| gallery | `heading` | missing | not in salt-wordpress | owes: the field; the gallery has no heading today |
+| gallery | `intro` | missing | not in salt-wordpress | owes: the field |
+| gallery | `columns` | default | default "3"; salt-wordpress 3 | owes: storing the strings 2, 3 and 4; the default is stored as the integer 3 today |
+| gallery | `columns` | condition | condition differs (1 of 3 cases), e.g. {"layout":"carousel"}: contract hides, salt-wordpress shows | note: Shown for every layout, with the instruction that only grid and masonry use it. |
+| gallery | `label` | missing | not in salt-wordpress | owes: the field |
+| gallery | `captions` | default | default 1; salt-wordpress 0 | owes: the default true; it is false today |
+| gallery | `settings.spacing` | name | stored as section_spacing | formerly: section_spacing |
+| gallery | `settings.tone` | name | stored as section_background | formerly: section_background |
+| gallery | `settings.tone` | values | choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse | values: {"inverse":"surface-inverse"} |
+| gallery | `settings.toneDark` | missing | not in salt-wordpress | owes: the field; dark mode is a token inversion today, with no per-section choice |
+| gallery | `settings.width` | name | stored as section_container | formerly: section_container |
+| gallery | `settings.backgroundImage` | missing | not in salt-wordpress | owes: the background image and its four settings |
+| gallery | `settings.anchorId` | name | stored as section_anchor | formerly: section_anchor |
+| gallery | `settings.firstPageOnly` | missing | not in salt-wordpress | owes: the field, with the listing section that paginates |
+| gallery | `settings.divider` | name | stored as section_divider | formerly: section_divider |
+| process | `intro` | missing | not in salt-wordpress | owes: the field |
+| process | `steps.icon` | type | type select; salt-wordpress text | owes: a select of the site's icons in place of a text field holding an icon name |
+| process | `steps.image` | missing | not in salt-wordpress | owes: the field |
+| process | `steps.cta` | missing | not in salt-wordpress | owes: the field |
+| process | `structuredData` | name | stored as schema_toggle | formerly: schema_toggle |
+| process | `settings.spacing` | name | stored as section_spacing | formerly: section_spacing |
+| process | `settings.tone` | name | stored as section_background | formerly: section_background |
+| process | `settings.tone` | values | choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse | values: {"inverse":"surface-inverse"} |
+| process | `settings.toneDark` | missing | not in salt-wordpress | owes: the field; dark mode is a token inversion today, with no per-section choice |
+| process | `settings.width` | name | stored as section_container | formerly: section_container |
+| process | `settings.backgroundImage` | missing | not in salt-wordpress | owes: the background image and its four settings |
+| process | `settings.anchorId` | name | stored as section_anchor | formerly: section_anchor |
+| process | `settings.firstPageOnly` | missing | not in salt-wordpress | owes: the field, with the listing section that paginates |
+| process | `settings.divider` | name | stored as section_divider | formerly: section_divider |
+| faq | `intro` | missing | not in salt-wordpress | owes: the field |
+| faq | `query` | name | stored as source, manual, taxonomy_terms, orderby, order, count | formerly: source, manual, taxonomy_terms, orderby, order, count |
+| faq | `query.mode` | values | choices automatic, by-category, manual; salt-wordpress default, taxonomy, manual | values: {"default":"automatic","taxonomy":"by-category","manual":"manual"} |
+| faq | `query.mode` | values | default "automatic"; salt-wordpress "default" | values: {"default":"automatic","taxonomy":"by-category","manual":"manual"} |
+| faq | `query.order` | options | choices default, newest, title; salt-wordpress (empty), menu_order, date, title | note: Stored as the layout's own source, taxonomy_terms, manual, orderby, order and count; taxonomy_terms becomes categories, manual becomes items, orderby and order fold into order, count stays count. SC-006 offers neither oldest-first nor Z to A, so a stored order direction is dropped on migration. |
+| faq | `query.order` | values | default "default"; salt-wordpress none | values: {"":"default","menu_order":"default","date":"newest","title":"title"} |
+| faq | `query.order` | condition | condition differs (1 of 3 cases), e.g. {"mode":"manual"}: contract hides, salt-wordpress shows | owes: one query group in place of six layout fields |
+| faq | `query.count` | limit | step 1; salt-wordpress none | owes: one query group in place of six layout fields |
+| faq | `query.count` | condition | condition differs (1 of 3 cases), e.g. {"mode":"manual"}: contract hides, salt-wordpress shows | owes: one query group in place of six layout fields |
+| faq | `query.direction` | extra | in salt-wordpress, not in the contract | parent owes: one query group in place of six layout fields |
+| faq | `structuredData` | name | stored as schema_toggle | formerly: schema_toggle |
+| faq | `settings.spacing` | name | stored as section_spacing | formerly: section_spacing |
+| faq | `settings.tone` | name | stored as section_background | formerly: section_background |
+| faq | `settings.tone` | values | choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse | values: {"inverse":"surface-inverse"} |
+| faq | `settings.toneDark` | missing | not in salt-wordpress | owes: the field; dark mode is a token inversion today, with no per-section choice |
+| faq | `settings.width` | name | stored as section_container | formerly: section_container |
+| faq | `settings.backgroundImage` | missing | not in salt-wordpress | owes: the background image and its four settings |
+| faq | `settings.anchorId` | name | stored as section_anchor | formerly: section_anchor |
+| faq | `settings.firstPageOnly` | missing | not in salt-wordpress | owes: the field, with the listing section that paginates |
+| faq | `settings.divider` | name | stored as section_divider | formerly: section_divider |
+| collection-showcase (services) | `(layout name)` | name | name collection-showcase; salt-wordpress services | sections.json formerly: services |
+| collection-showcase (services) | `intro` | missing | not in salt-wordpress | owes: the field |
+| collection-showcase (services) | `source` | missing | not in salt-wordpress | owes: one section with a source select in place of five layouts; the former layout slug gives the source |
+| collection-showcase (services) | `layout` | options | choices grid, list, featured, accordion, index; salt-wordpress grid, list, featured | owes: the accordion and index layouts, and the field on work, team and blog_teaser; services has grid, list and featured; testimonials grid becomes source testimonials with layout grid |
+| collection-showcase (services) | `columns` | condition | condition differs (3 of 5 cases), e.g. {"layout":"list"}: contract hides, salt-wordpress shows; {"layout":"accordion"}: contract hides, salt-wordpress shows | owes: one select with the strings 2, 3 and 4 on every source; work and blog_teaser offer 2 and 3 with an integer default 3, team uses bare-numeral labels, testimonials has none |
+| collection-showcase (services) | `query` | name | stored as source, manual, taxonomy_terms, orderby, order, count | formerly: source, manual, taxonomy_terms, orderby, order, count |
+| collection-showcase (services) | `query.mode` | values | choices automatic, by-category, manual; salt-wordpress default, taxonomy, manual | values: {"default":"automatic","taxonomy":"by-category","manual":"manual"} |
+| collection-showcase (services) | `query.mode` | values | default "automatic"; salt-wordpress "default" | values: {"default":"automatic","taxonomy":"by-category","manual":"manual"} |
+| collection-showcase (services) | `query.categories` | type | type select; salt-wordpress taxonomy | owes: one query group in place of six layout fields |
+| collection-showcase (services) | `query.items` | relation | post_type ["service","work","testimonial","post","team_member"]; salt-wordpress ["service"] | owes: one query group in place of six layout fields |
+| collection-showcase (services) | `query.order` | options | choices default, newest, title; salt-wordpress (empty), menu_order, date, title | note: Stored as the layout's own source, taxonomy_terms, manual, orderby, order and count; taxonomy_terms becomes categories, manual becomes items, orderby and order fold into order, count stays count. SC-006 offers neither oldest-first nor Z to A, so a stored order direction is dropped on migration. |
+| collection-showcase (services) | `query.order` | values | default "default"; salt-wordpress none | values: {"":"default","menu_order":"default","date":"newest","title":"title"} |
+| collection-showcase (services) | `query.order` | condition | condition differs (1 of 3 cases), e.g. {"mode":"manual"}: contract hides, salt-wordpress shows | owes: one query group in place of six layout fields |
+| collection-showcase (services) | `query.count` | limit | step 1; salt-wordpress none | owes: one query group in place of six layout fields |
+| collection-showcase (services) | `query.count` | condition | condition differs (1 of 3 cases), e.g. {"mode":"manual"}: contract hides, salt-wordpress shows | owes: one query group in place of six layout fields |
+| collection-showcase (services) | `query.direction` | extra | in salt-wordpress, not in the contract | parent owes: one query group in place of six layout fields |
+| collection-showcase (services) | `showIcons` | missing | not in salt-wordpress | owes: the field; services always draws its icon today |
+| collection-showcase (services) | `showTags` | missing | not in salt-wordpress | owes: the field |
+| collection-showcase (services) | `groupByCategory` | missing | not in salt-wordpress | owes: the field, with the index layout |
+| collection-showcase (services) | `viewAll` | name | stored as view_all | formerly: view_all |
+| collection-showcase (services) | `viewAll` | default | default 1; salt-wordpress 0 | owes: the default true on services, where it is false today; team has none |
+| collection-showcase (services) | `viewAllLabel` | missing | not in salt-wordpress | owes: the field; the wording is fixed per collection today |
+| collection-showcase (services) | `settings.spacing` | name | stored as section_spacing | formerly: section_spacing |
+| collection-showcase (services) | `settings.tone` | name | stored as section_background | formerly: section_background |
+| collection-showcase (services) | `settings.tone` | values | choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse | values: {"inverse":"surface-inverse"} |
+| collection-showcase (services) | `settings.toneDark` | missing | not in salt-wordpress | owes: the field; dark mode is a token inversion today, with no per-section choice |
+| collection-showcase (services) | `settings.width` | name | stored as section_container | formerly: section_container |
+| collection-showcase (services) | `settings.backgroundImage` | missing | not in salt-wordpress | owes: the background image and its four settings |
+| collection-showcase (services) | `settings.anchorId` | name | stored as section_anchor | formerly: section_anchor |
+| collection-showcase (services) | `settings.firstPageOnly` | missing | not in salt-wordpress | owes: the field, with the listing section that paginates |
+| collection-showcase (services) | `settings.divider` | name | stored as section_divider | formerly: section_divider |
+| collection-showcase (work) | `(layout name)` | name | name collection-showcase; salt-wordpress work | sections.json formerly: work |
+| collection-showcase (work) | `intro` | missing | not in salt-wordpress | owes: the field |
+| collection-showcase (work) | `source` | missing | not in salt-wordpress | owes: one section with a source select in place of five layouts; the former layout slug gives the source |
+| collection-showcase (work) | `layout` | missing | not in salt-wordpress | owes: the accordion and index layouts, and the field on work, team and blog_teaser; services has grid, list and featured; testimonials grid becomes source testimonials with layout grid |
+| collection-showcase (work) | `columns` | condition | condition differs (3 of 5 cases), e.g. {"layout":"list"}: contract hides, salt-wordpress shows; {"layout":"accordion"}: contract hides, salt-wordpress shows | layout owes: the accordion and index layouts, and the field on work, team and blog_teaser; services has grid, list and featured; testimonials grid becomes source testimonials with layout grid |
+| collection-showcase (work) | `columns` | options | choices 2, 3, 4; salt-wordpress 2, 3 | owes: one select with the strings 2, 3 and 4 on every source; work and blog_teaser offer 2 and 3 with an integer default 3, team uses bare-numeral labels, testimonials has none |
+| collection-showcase (work) | `columns` | default | default "3"; salt-wordpress 3 | owes: one select with the strings 2, 3 and 4 on every source; work and blog_teaser offer 2 and 3 with an integer default 3, team uses bare-numeral labels, testimonials has none |
+| collection-showcase (work) | `query` | name | stored as source, manual, taxonomy_terms, orderby, order, count | formerly: source, manual, taxonomy_terms, orderby, order, count |
+| collection-showcase (work) | `query.mode` | values | choices automatic, by-category, manual; salt-wordpress default, taxonomy, manual | values: {"default":"automatic","taxonomy":"by-category","manual":"manual"} |
+| collection-showcase (work) | `query.mode` | values | default "automatic"; salt-wordpress "default" | values: {"default":"automatic","taxonomy":"by-category","manual":"manual"} |
+| collection-showcase (work) | `query.categories` | type | type select; salt-wordpress taxonomy | owes: one query group in place of six layout fields |
+| collection-showcase (work) | `query.items` | relation | post_type ["service","work","testimonial","post","team_member"]; salt-wordpress ["work"] | owes: one query group in place of six layout fields |
+| collection-showcase (work) | `query.order` | options | choices default, newest, title; salt-wordpress (empty), menu_order, date, title | note: Stored as the layout's own source, taxonomy_terms, manual, orderby, order and count; taxonomy_terms becomes categories, manual becomes items, orderby and order fold into order, count stays count. SC-006 offers neither oldest-first nor Z to A, so a stored order direction is dropped on migration. |
+| collection-showcase (work) | `query.order` | values | default "default"; salt-wordpress none | values: {"":"default","menu_order":"default","date":"newest","title":"title"} |
+| collection-showcase (work) | `query.order` | condition | condition differs (1 of 3 cases), e.g. {"mode":"manual"}: contract hides, salt-wordpress shows | owes: one query group in place of six layout fields |
+| collection-showcase (work) | `query.count` | limit | step 1; salt-wordpress none | owes: one query group in place of six layout fields |
+| collection-showcase (work) | `query.count` | condition | condition differs (1 of 3 cases), e.g. {"mode":"manual"}: contract hides, salt-wordpress shows | owes: one query group in place of six layout fields |
+| collection-showcase (work) | `query.direction` | extra | in salt-wordpress, not in the contract | parent owes: one query group in place of six layout fields |
+| collection-showcase (work) | `showTags` | missing | not in salt-wordpress | owes: the field |
+| collection-showcase (work) | `groupByCategory` | missing | not in salt-wordpress | owes: the field, with the index layout |
+| collection-showcase (work) | `viewAll` | name | stored as view_all | formerly: view_all |
+| collection-showcase (work) | `viewAllLabel` | missing | not in salt-wordpress | owes: the field; the wording is fixed per collection today |
+| collection-showcase (work) | `settings.spacing` | name | stored as section_spacing | formerly: section_spacing |
+| collection-showcase (work) | `settings.tone` | name | stored as section_background | formerly: section_background |
+| collection-showcase (work) | `settings.tone` | values | choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse | values: {"inverse":"surface-inverse"} |
+| collection-showcase (work) | `settings.toneDark` | missing | not in salt-wordpress | owes: the field; dark mode is a token inversion today, with no per-section choice |
+| collection-showcase (work) | `settings.width` | name | stored as section_container | formerly: section_container |
+| collection-showcase (work) | `settings.backgroundImage` | missing | not in salt-wordpress | owes: the background image and its four settings |
+| collection-showcase (work) | `settings.anchorId` | name | stored as section_anchor | formerly: section_anchor |
+| collection-showcase (work) | `settings.firstPageOnly` | missing | not in salt-wordpress | owes: the field, with the listing section that paginates |
+| collection-showcase (work) | `settings.divider` | name | stored as section_divider | formerly: section_divider |
+| collection-showcase (team) | `(layout name)` | name | name collection-showcase; salt-wordpress team | sections.json formerly: team |
+| collection-showcase (team) | `intro` | missing | not in salt-wordpress | owes: the field |
+| collection-showcase (team) | `source` | missing | not in salt-wordpress | owes: one section with a source select in place of five layouts; the former layout slug gives the source |
+| collection-showcase (team) | `layout` | missing | not in salt-wordpress | owes: the accordion and index layouts, and the field on work, team and blog_teaser; services has grid, list and featured; testimonials grid becomes source testimonials with layout grid |
+| collection-showcase (team) | `columns` | condition | condition differs (3 of 5 cases), e.g. {"layout":"list"}: contract hides, salt-wordpress shows; {"layout":"accordion"}: contract hides, salt-wordpress shows | layout owes: the accordion and index layouts, and the field on work, team and blog_teaser; services has grid, list and featured; testimonials grid becomes source testimonials with layout grid |
+| collection-showcase (team) | `query` | name | stored as source, manual, taxonomy_terms, orderby, order, count | formerly: source, manual, taxonomy_terms, orderby, order, count |
+| collection-showcase (team) | `query.mode` | values | choices automatic, by-category, manual; salt-wordpress default, taxonomy, manual | values: {"default":"automatic","taxonomy":"by-category","manual":"manual"} |
+| collection-showcase (team) | `query.mode` | values | default "automatic"; salt-wordpress "default" | values: {"default":"automatic","taxonomy":"by-category","manual":"manual"} |
+| collection-showcase (team) | `query.categories` | type | type select; salt-wordpress taxonomy | owes: one query group in place of six layout fields |
+| collection-showcase (team) | `query.items` | relation | post_type ["service","work","testimonial","post","team_member"]; salt-wordpress ["team_member"] | owes: one query group in place of six layout fields |
+| collection-showcase (team) | `query.order` | options | choices default, newest, title; salt-wordpress (empty), menu_order, date, title | note: Stored as the layout's own source, taxonomy_terms, manual, orderby, order and count; taxonomy_terms becomes categories, manual becomes items, orderby and order fold into order, count stays count. SC-006 offers neither oldest-first nor Z to A, so a stored order direction is dropped on migration. |
+| collection-showcase (team) | `query.order` | values | default "default"; salt-wordpress none | values: {"":"default","menu_order":"default","date":"newest","title":"title"} |
+| collection-showcase (team) | `query.order` | condition | condition differs (1 of 3 cases), e.g. {"mode":"manual"}: contract hides, salt-wordpress shows | owes: one query group in place of six layout fields |
+| collection-showcase (team) | `query.count` | limit | step 1; salt-wordpress none | owes: one query group in place of six layout fields |
+| collection-showcase (team) | `query.count` | condition | condition differs (1 of 3 cases), e.g. {"mode":"manual"}: contract hides, salt-wordpress shows | owes: one query group in place of six layout fields |
+| collection-showcase (team) | `query.direction` | extra | in salt-wordpress, not in the contract | parent owes: one query group in place of six layout fields |
+| collection-showcase (team) | `viewAll` | missing | not in salt-wordpress | owes: the default true on services, where it is false today; team has none |
+| collection-showcase (team) | `viewAllLabel` | missing | not in salt-wordpress | owes: the field; the wording is fixed per collection today |
+| collection-showcase (team) | `settings.spacing` | name | stored as section_spacing | formerly: section_spacing |
+| collection-showcase (team) | `settings.tone` | name | stored as section_background | formerly: section_background |
+| collection-showcase (team) | `settings.tone` | values | choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse | values: {"inverse":"surface-inverse"} |
+| collection-showcase (team) | `settings.toneDark` | missing | not in salt-wordpress | owes: the field; dark mode is a token inversion today, with no per-section choice |
+| collection-showcase (team) | `settings.width` | name | stored as section_container | formerly: section_container |
+| collection-showcase (team) | `settings.backgroundImage` | missing | not in salt-wordpress | owes: the background image and its four settings |
+| collection-showcase (team) | `settings.anchorId` | name | stored as section_anchor | formerly: section_anchor |
+| collection-showcase (team) | `settings.firstPageOnly` | missing | not in salt-wordpress | owes: the field, with the listing section that paginates |
+| collection-showcase (team) | `settings.divider` | name | stored as section_divider | formerly: section_divider |
+| collection-showcase (testimonials) | `(layout name)` | name | name collection-showcase; salt-wordpress testimonials | sections.json formerly: testimonials |
+| collection-showcase (testimonials) | `intro` | missing | not in salt-wordpress | owes: the field |
+| collection-showcase (testimonials) | `source` | missing | not in salt-wordpress | owes: one section with a source select in place of five layouts; the former layout slug gives the source |
+| collection-showcase (testimonials) | `layout` | options | choices grid, list, featured, accordion, index; salt-wordpress grid, slider | owes: the accordion and index layouts, and the field on work, team and blog_teaser; services has grid, list and featured; testimonials grid becomes source testimonials with layout grid |
+| collection-showcase (testimonials) | `columns` | missing | not in salt-wordpress | owes: one select with the strings 2, 3 and 4 on every source; work and blog_teaser offer 2 and 3 with an integer default 3, team uses bare-numeral labels, testimonials has none |
+| collection-showcase (testimonials) | `query` | name | stored as source, manual, orderby, order, count | formerly: source, manual, taxonomy_terms, orderby, order, count |
+| collection-showcase (testimonials) | `query.mode` | values | choices automatic, by-category, manual; salt-wordpress default, taxonomy, manual | values: {"default":"automatic","taxonomy":"by-category","manual":"manual"} |
+| collection-showcase (testimonials) | `query.mode` | values | default "automatic"; salt-wordpress "default" | values: {"default":"automatic","taxonomy":"by-category","manual":"manual"} |
+| collection-showcase (testimonials) | `query.categories` | missing | not in salt-wordpress | parent owes: one query group in place of six layout fields |
+| collection-showcase (testimonials) | `query.items` | relation | post_type ["service","work","testimonial","post","team_member"]; salt-wordpress ["testimonial"] | owes: one query group in place of six layout fields |
+| collection-showcase (testimonials) | `query.order` | options | choices default, newest, title; salt-wordpress (empty), menu_order, date, title | note: Stored as the layout's own source, taxonomy_terms, manual, orderby, order and count; taxonomy_terms becomes categories, manual becomes items, orderby and order fold into order, count stays count. SC-006 offers neither oldest-first nor Z to A, so a stored order direction is dropped on migration. |
+| collection-showcase (testimonials) | `query.order` | values | default "default"; salt-wordpress none | values: {"":"default","menu_order":"default","date":"newest","title":"title"} |
+| collection-showcase (testimonials) | `query.order` | condition | condition differs (1 of 3 cases), e.g. {"mode":"manual"}: contract hides, salt-wordpress shows | owes: one query group in place of six layout fields |
+| collection-showcase (testimonials) | `query.count` | limit | step 1; salt-wordpress none | owes: one query group in place of six layout fields |
+| collection-showcase (testimonials) | `query.count` | condition | condition differs (1 of 3 cases), e.g. {"mode":"manual"}: contract hides, salt-wordpress shows | owes: one query group in place of six layout fields |
+| collection-showcase (testimonials) | `query.direction` | extra | in salt-wordpress, not in the contract | parent owes: one query group in place of six layout fields |
+| collection-showcase (testimonials) | `showRatings` | missing | not in salt-wordpress | owes: the field; testimonials always draws a stored rating today |
+| collection-showcase (testimonials) | `viewAll` | missing | not in salt-wordpress | owes: the default true on services, where it is false today; team has none |
+| collection-showcase (testimonials) | `viewAllLabel` | missing | not in salt-wordpress | owes: the field; the wording is fixed per collection today |
+| collection-showcase (testimonials) | `settings.spacing` | name | stored as section_spacing | formerly: section_spacing |
+| collection-showcase (testimonials) | `settings.tone` | name | stored as section_background | formerly: section_background |
+| collection-showcase (testimonials) | `settings.tone` | values | choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse | values: {"inverse":"surface-inverse"} |
+| collection-showcase (testimonials) | `settings.toneDark` | missing | not in salt-wordpress | owes: the field; dark mode is a token inversion today, with no per-section choice |
+| collection-showcase (testimonials) | `settings.width` | name | stored as section_container | formerly: section_container |
+| collection-showcase (testimonials) | `settings.backgroundImage` | missing | not in salt-wordpress | owes: the background image and its four settings |
+| collection-showcase (testimonials) | `settings.anchorId` | name | stored as section_anchor | formerly: section_anchor |
+| collection-showcase (testimonials) | `settings.firstPageOnly` | missing | not in salt-wordpress | owes: the field, with the listing section that paginates |
+| collection-showcase (testimonials) | `settings.divider` | name | stored as section_divider | formerly: section_divider |
+| collection-showcase (blog_teaser) | `(layout name)` | name | name collection-showcase; salt-wordpress blog_teaser | sections.json formerly: blog_teaser |
+| collection-showcase (blog_teaser) | `intro` | missing | not in salt-wordpress | owes: the field |
+| collection-showcase (blog_teaser) | `source` | missing | not in salt-wordpress | owes: one section with a source select in place of five layouts; the former layout slug gives the source |
+| collection-showcase (blog_teaser) | `layout` | missing | not in salt-wordpress | owes: the accordion and index layouts, and the field on work, team and blog_teaser; services has grid, list and featured; testimonials grid becomes source testimonials with layout grid |
+| collection-showcase (blog_teaser) | `columns` | condition | condition differs (3 of 5 cases), e.g. {"layout":"list"}: contract hides, salt-wordpress shows; {"layout":"accordion"}: contract hides, salt-wordpress shows | layout owes: the accordion and index layouts, and the field on work, team and blog_teaser; services has grid, list and featured; testimonials grid becomes source testimonials with layout grid |
+| collection-showcase (blog_teaser) | `columns` | options | choices 2, 3, 4; salt-wordpress 2, 3 | owes: one select with the strings 2, 3 and 4 on every source; work and blog_teaser offer 2 and 3 with an integer default 3, team uses bare-numeral labels, testimonials has none |
+| collection-showcase (blog_teaser) | `columns` | default | default "3"; salt-wordpress 3 | owes: one select with the strings 2, 3 and 4 on every source; work and blog_teaser offer 2 and 3 with an integer default 3, team uses bare-numeral labels, testimonials has none |
+| collection-showcase (blog_teaser) | `query` | name | stored as source, manual, taxonomy_terms, orderby, order, count | formerly: source, manual, taxonomy_terms, orderby, order, count |
+| collection-showcase (blog_teaser) | `query.mode` | values | choices automatic, by-category, manual; salt-wordpress default, taxonomy, manual | values: {"default":"automatic","taxonomy":"by-category","manual":"manual"} |
+| collection-showcase (blog_teaser) | `query.mode` | values | default "automatic"; salt-wordpress "default" | values: {"default":"automatic","taxonomy":"by-category","manual":"manual"} |
+| collection-showcase (blog_teaser) | `query.categories` | type | type select; salt-wordpress taxonomy | owes: one query group in place of six layout fields |
+| collection-showcase (blog_teaser) | `query.items` | relation | post_type ["service","work","testimonial","post","team_member"]; salt-wordpress ["post"] | owes: one query group in place of six layout fields |
+| collection-showcase (blog_teaser) | `query.order` | options | choices default, newest, title; salt-wordpress (empty), menu_order, date, title | note: Stored as the layout's own source, taxonomy_terms, manual, orderby, order and count; taxonomy_terms becomes categories, manual becomes items, orderby and order fold into order, count stays count. SC-006 offers neither oldest-first nor Z to A, so a stored order direction is dropped on migration. |
+| collection-showcase (blog_teaser) | `query.order` | values | default "default"; salt-wordpress none | values: {"":"default","menu_order":"default","date":"newest","title":"title"} |
+| collection-showcase (blog_teaser) | `query.order` | condition | condition differs (1 of 3 cases), e.g. {"mode":"manual"}: contract hides, salt-wordpress shows | owes: one query group in place of six layout fields |
+| collection-showcase (blog_teaser) | `query.count` | limit | step 1; salt-wordpress none | owes: one query group in place of six layout fields |
+| collection-showcase (blog_teaser) | `query.count` | condition | condition differs (1 of 3 cases), e.g. {"mode":"manual"}: contract hides, salt-wordpress shows | owes: one query group in place of six layout fields |
+| collection-showcase (blog_teaser) | `query.direction` | extra | in salt-wordpress, not in the contract | parent owes: one query group in place of six layout fields |
+| collection-showcase (blog_teaser) | `showTags` | missing | not in salt-wordpress | owes: the field |
+| collection-showcase (blog_teaser) | `groupByCategory` | missing | not in salt-wordpress | owes: the field, with the index layout |
+| collection-showcase (blog_teaser) | `viewAll` | name | stored as view_all | formerly: view_all |
+| collection-showcase (blog_teaser) | `viewAllLabel` | missing | not in salt-wordpress | owes: the field; the wording is fixed per collection today |
+| collection-showcase (blog_teaser) | `settings.spacing` | name | stored as section_spacing | formerly: section_spacing |
+| collection-showcase (blog_teaser) | `settings.tone` | name | stored as section_background | formerly: section_background |
+| collection-showcase (blog_teaser) | `settings.tone` | values | choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse | values: {"inverse":"surface-inverse"} |
+| collection-showcase (blog_teaser) | `settings.toneDark` | missing | not in salt-wordpress | owes: the field; dark mode is a token inversion today, with no per-section choice |
+| collection-showcase (blog_teaser) | `settings.width` | name | stored as section_container | formerly: section_container |
+| collection-showcase (blog_teaser) | `settings.backgroundImage` | missing | not in salt-wordpress | owes: the background image and its four settings |
+| collection-showcase (blog_teaser) | `settings.anchorId` | name | stored as section_anchor | formerly: section_anchor |
+| collection-showcase (blog_teaser) | `settings.firstPageOnly` | missing | not in salt-wordpress | owes: the field, with the listing section that paginates |
+| collection-showcase (blog_teaser) | `settings.divider` | name | stored as section_divider | formerly: section_divider |
+| carousel (scroll_carousel) | `(layout name)` | name | name carousel; salt-wordpress scroll_carousel | sections.json formerly: scroll_carousel |
+| carousel (scroll_carousel) | `intro` | missing | not in salt-wordpress | owes: the field |
+| carousel (scroll_carousel) | `label` | missing | not in salt-wordpress | owes: the field; the track is named Carousel when there is no heading today |
+| carousel (scroll_carousel) | `source` | missing | not in salt-wordpress | owes: the source select: scroll_carousel becomes source inline, a testimonials layout set to slider becomes source testimonials; the other collections are new |
+| carousel (scroll_carousel) | `cardStyle` | name | stored as card_type | formerly: card_type |
+| carousel (scroll_carousel) | `cardStyle` | values | choices generic, quote; salt-wordpress generic, testimonial | values: {"testimonial":"quote"} |
+| carousel (scroll_carousel) | `cards.title` | required | required true; salt-wordpress false | owes: requiring it; a card with text alone is kept today |
+| carousel (scroll_carousel) | `settings.spacing` | name | stored as section_spacing | formerly: section_spacing |
+| carousel (scroll_carousel) | `settings.tone` | name | stored as section_background | formerly: section_background |
+| carousel (scroll_carousel) | `settings.tone` | values | choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse | values: {"inverse":"surface-inverse"} |
+| carousel (scroll_carousel) | `settings.toneDark` | missing | not in salt-wordpress | owes: the field; dark mode is a token inversion today, with no per-section choice |
+| carousel (scroll_carousel) | `settings.width` | name | stored as section_container | formerly: section_container |
+| carousel (scroll_carousel) | `settings.backgroundImage` | missing | not in salt-wordpress | owes: the background image and its four settings |
+| carousel (scroll_carousel) | `settings.anchorId` | name | stored as section_anchor | formerly: section_anchor |
+| carousel (scroll_carousel) | `settings.firstPageOnly` | missing | not in salt-wordpress | owes: the field, with the listing section that paginates |
+| carousel (scroll_carousel) | `settings.divider` | name | stored as section_divider | formerly: section_divider |
+| carousel (testimonials) | `(layout name)` | name | name carousel; salt-wordpress testimonials | sections.json formerly: testimonials |
+| carousel (testimonials) | `intro` | missing | not in salt-wordpress | owes: the field |
+| carousel (testimonials) | `label` | missing | not in salt-wordpress | owes: the field; the track is named Carousel when there is no heading today |
+| carousel (testimonials) | `source` | missing | not in salt-wordpress | owes: the source select: scroll_carousel becomes source inline, a testimonials layout set to slider becomes source testimonials; the other collections are new |
+| carousel (testimonials) | `query` | name | stored as source, manual, orderby, order, count | formerly: source, manual, orderby, order, count |
+| carousel (testimonials) | `query.mode` | values | choices automatic, by-category, manual; salt-wordpress default, taxonomy, manual | values: {"default":"automatic","taxonomy":"by-category","manual":"manual"} |
+| carousel (testimonials) | `query.mode` | values | default "automatic"; salt-wordpress "default" | values: {"default":"automatic","taxonomy":"by-category","manual":"manual"} |
+| carousel (testimonials) | `query.categories` | missing | not in salt-wordpress | parent owes: the query on scroll_carousel; only the testimonials layout has one today |
+| carousel (testimonials) | `query.items` | relation | post_type ["service","work","testimonial","post","team_member"]; salt-wordpress ["testimonial"] | owes: the query on scroll_carousel; only the testimonials layout has one today |
+| carousel (testimonials) | `query.order` | options | choices default, newest, title; salt-wordpress (empty), menu_order, date, title | note: Stored as the layout's own source, taxonomy_terms, manual, orderby, order and count; taxonomy_terms becomes categories, manual becomes items, orderby and order fold into order, count stays count. SC-006 offers neither oldest-first nor Z to A, so a stored order direction is dropped on migration. |
+| carousel (testimonials) | `query.order` | values | default "default"; salt-wordpress none | values: {"":"default","menu_order":"default","date":"newest","title":"title"} |
+| carousel (testimonials) | `query.order` | condition | condition differs (1 of 3 cases), e.g. {"mode":"manual"}: contract hides, salt-wordpress shows | owes: the query on scroll_carousel; only the testimonials layout has one today |
+| carousel (testimonials) | `query.count` | limit | step 1; salt-wordpress none | owes: the query on scroll_carousel; only the testimonials layout has one today |
+| carousel (testimonials) | `query.count` | condition | condition differs (1 of 3 cases), e.g. {"mode":"manual"}: contract hides, salt-wordpress shows | owes: the query on scroll_carousel; only the testimonials layout has one today |
+| carousel (testimonials) | `query.direction` | extra | in salt-wordpress, not in the contract | parent owes: the query on scroll_carousel; only the testimonials layout has one today |
+| carousel (testimonials) | `settings.spacing` | name | stored as section_spacing | formerly: section_spacing |
+| carousel (testimonials) | `settings.tone` | name | stored as section_background | formerly: section_background |
+| carousel (testimonials) | `settings.tone` | values | choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse | values: {"inverse":"surface-inverse"} |
+| carousel (testimonials) | `settings.toneDark` | missing | not in salt-wordpress | owes: the field; dark mode is a token inversion today, with no per-section choice |
+| carousel (testimonials) | `settings.width` | name | stored as section_container | formerly: section_container |
+| carousel (testimonials) | `settings.backgroundImage` | missing | not in salt-wordpress | owes: the background image and its four settings |
+| carousel (testimonials) | `settings.anchorId` | name | stored as section_anchor | formerly: section_anchor |
+| carousel (testimonials) | `settings.firstPageOnly` | missing | not in salt-wordpress | owes: the field, with the listing section that paginates |
+| carousel (testimonials) | `settings.divider` | name | stored as section_divider | formerly: section_divider |
+| carousel (testimonials) | `layout` | extra | in salt-wordpress, not in the contract | sections.json formerly: testimonials when layout slider |
+| contact | `intro` | name | stored as text | formerly: text |
+| contact | `intro` | limit | maxlength 300; salt-wordpress none | owes: the 300-character limit |
+| contact | `showPhone` | name | stored as show_phone | formerly: show_phone |
+| contact | `showEmail` | name | stored as show_email | formerly: show_email |
+| contact | `showAddress` | name | stored as show_address | formerly: show_address |
+| contact | `formIntro` | name | stored as form_intro | formerly: form_intro |
+| contact | `settings.spacing` | name | stored as section_spacing | formerly: section_spacing |
+| contact | `settings.tone` | name | stored as section_background | formerly: section_background |
+| contact | `settings.tone` | values | choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse | values: {"inverse":"surface-inverse"} |
+| contact | `settings.toneDark` | missing | not in salt-wordpress | owes: the field; dark mode is a token inversion today, with no per-section choice |
+| contact | `settings.width` | name | stored as section_container | formerly: section_container |
+| contact | `settings.backgroundImage` | missing | not in salt-wordpress | owes: the background image and its four settings |
+| contact | `settings.anchorId` | name | stored as section_anchor | formerly: section_anchor |
+| contact | `settings.firstPageOnly` | missing | not in salt-wordpress | owes: the field, with the listing section that paginates |
+| contact | `settings.divider` | name | stored as section_divider | formerly: section_divider |
+| locations | `query` | name | stored as source, manual, taxonomy_terms, orderby, order, count | formerly: source, manual, taxonomy_terms, orderby, order, count |
+| locations | `query.mode` | values | choices automatic, by-category, manual; salt-wordpress default, taxonomy, manual | values: {"default":"automatic","taxonomy":"by-category","manual":"manual"} |
+| locations | `query.mode` | values | default "automatic"; salt-wordpress "default" | values: {"default":"automatic","taxonomy":"by-category","manual":"manual"} |
+| locations | `query.order` | options | choices default, newest, title; salt-wordpress (empty), menu_order, date, title | note: Stored as the layout's own source, taxonomy_terms, manual, orderby, order and count; taxonomy_terms becomes categories, manual becomes items, orderby and order fold into order, count stays count. SC-006 offers neither oldest-first nor Z to A, so a stored order direction is dropped on migration. |
+| locations | `query.order` | values | default "default"; salt-wordpress none | values: {"":"default","menu_order":"default","date":"newest","title":"title"} |
+| locations | `query.order` | condition | condition differs (1 of 3 cases), e.g. {"mode":"manual"}: contract hides, salt-wordpress shows | owes: one query group in place of six layout fields |
+| locations | `query.count` | limit | step 1; salt-wordpress none | owes: one query group in place of six layout fields |
+| locations | `query.count` | condition | condition differs (1 of 3 cases), e.g. {"mode":"manual"}: contract hides, salt-wordpress shows | owes: one query group in place of six layout fields |
+| locations | `query.direction` | extra | in salt-wordpress, not in the contract | parent owes: one query group in place of six layout fields |
+| locations | `settings.spacing` | name | stored as section_spacing | formerly: section_spacing |
+| locations | `settings.tone` | name | stored as section_background | formerly: section_background |
+| locations | `settings.tone` | values | choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse | values: {"inverse":"surface-inverse"} |
+| locations | `settings.toneDark` | missing | not in salt-wordpress | owes: the field; dark mode is a token inversion today, with no per-section choice |
+| locations | `settings.width` | name | stored as section_container | formerly: section_container |
+| locations | `settings.backgroundImage` | missing | not in salt-wordpress | owes: the background image and its four settings |
+| locations | `settings.anchorId` | name | stored as section_anchor | formerly: section_anchor |
+| locations | `settings.firstPageOnly` | missing | not in salt-wordpress | owes: the field, with the listing section that paginates |
+| locations | `settings.divider` | name | stored as section_divider | formerly: section_divider |
+| pricing | `plans.features.text` | required | required true; salt-wordpress false | owes: requiring it |
+| pricing | `plans.features.included` | missing | not in salt-wordpress | owes: the field |
+| pricing | `plans.cta` | type | type group; salt-wordpress link | owes: the link shape (label, type, document or url, newTab) in place of an ACF link |
+| pricing | `settings.spacing` | name | stored as section_spacing | formerly: section_spacing |
+| pricing | `settings.tone` | name | stored as section_background | formerly: section_background |
+| pricing | `settings.tone` | values | choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse | values: {"inverse":"surface-inverse"} |
+| pricing | `settings.toneDark` | missing | not in salt-wordpress | owes: the field; dark mode is a token inversion today, with no per-section choice |
+| pricing | `settings.width` | name | stored as section_container | formerly: section_container |
+| pricing | `settings.backgroundImage` | missing | not in salt-wordpress | owes: the background image and its four settings |
+| pricing | `settings.anchorId` | name | stored as section_anchor | formerly: section_anchor |
+| pricing | `settings.firstPageOnly` | missing | not in salt-wordpress | owes: the field, with the listing section that paginates |
+| pricing | `settings.divider` | name | stored as section_divider | formerly: section_divider |
 
 ## Keys
 

@@ -20,9 +20,12 @@
 // translated to the one salt-wordpress stores. Labels and instructions are not compared; see the
 // report's header.
 //
-// Each difference is EXPECTED when the contract field (or its section in sections.json) carries a
-// platforms.wordpress note that accounts for it (formerly, values, owes, or a note on the
-// condition), and UNEXPECTED otherwise.
+// Each difference is EXPECTED only when salt-contract/reports/round-trip-acf.expected.json lists it:
+// its section, field path, kind and exact wording, with the evidence (the owes, formerly, values or
+// note record) that accounts for it. Anything else is UNEXPECTED. --suggest prints the unlisted
+// differences as list entries, with the contract record that may account for each, for a person
+// to review before adding them; --check fails on a stale report, an unexpected difference, or a
+// listed one that no longer occurs.
 import { execFileSync } from 'node:child_process'
 import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
@@ -31,9 +34,11 @@ import { fileURLToPath } from 'node:url'
 
 import { clauses, isMainModule, loadContract, resolveSection, siblingValue } from '../salt-contract/emit/_contract.mjs'
 import { toAcfFieldGroups } from '../salt-contract/emit/acf.mjs'
+import { classify } from './_round_trip.mjs'
 
 const here = path.dirname(fileURLToPath(import.meta.url))
 const reportPath = path.join(here, '..', 'salt-contract', 'reports', 'round-trip-acf.md')
+const expectedPath = path.join(here, '..', 'salt-contract', 'reports', 'round-trip-acf.expected.json')
 
 /**
  * The command line: flags anywhere, at most one positional argument, the salt-wordpress checkout,
@@ -106,17 +111,22 @@ function toWordpress(values, value) {
   return back && typeof back[1] === 'string' ? back[0] : value
 }
 
-function record(section, at, def, kind, text, parent) {
-  const note = wpNote(def)
-  let verdict = 'unexpected'
-  let evidence = ''
-  // The most specific record first: a former name for a name, a note for a condition.
-  if (kind === 'name' && note?.formerly) { verdict = 'expected'; evidence = `formerly: ${[note.formerly].flat().join(', ')}` }
-  else if (kind === 'condition' && note?.note) { verdict = 'expected'; evidence = `note: ${note.note}` }
-  else if (note?.owes) { verdict = 'expected'; evidence = `owes: ${note.owes}` }
-  // A part added or dropped inside a list or group whose own note owes its new shape.
-  else if ((kind === 'missing' || kind === 'extra') && wpNote(parent)?.owes) { verdict = 'expected'; evidence = `parent owes: ${wpNote(parent).owes}` }
-  rows.push({ section, at, kind, text, verdict, evidence })
+// The contract record that may account for a difference: a suggestion for --suggest and the
+// reviewer, never a verdict. The most specific record first: a former name for a name, a values
+// map for values, a note for a condition; a part added or dropped inside a list or group falls back
+// to its parent's owes.
+function suggestionFor(note, kind, parent) {
+  if (kind === 'name' && note?.formerly) return `formerly: ${[note.formerly].flat().join(', ')}`
+  if (kind === 'values' && note?.values) return `values: ${JSON.stringify(note.values)}`
+  if (kind === 'condition' && note?.note) return `note: ${note.note}`
+  if (note?.owes) return `owes: ${note.owes}`
+  if ((kind === 'missing' || kind === 'extra') && wpNote(parent)?.owes) return `parent owes: ${wpNote(parent).owes}`
+  if (note?.note) return `note: ${note.note}`
+  return ''
+}
+
+function record(section, at, def, kind, text, parent, suggestion = suggestionFor(wpNote(def), kind, parent)) {
+  rows.push({ section, at, kind, text, suggestion })
 }
 
 // ACF's reading of a rule, not the contract's isFilled: both sides here are ACF rules, so they are
@@ -226,7 +236,7 @@ function compareLevel(section, entries, theirs, prefix, parentDef, fixed = {}) {
   for (const n of wp) {
     if (claimed.has(n.name)) continue
     if (fixed.selector === n.name) {
-      rows.push({ section, at: `${prefix}${n.name}`, kind: 'extra', text: 'in salt-wordpress, not in the contract', verdict: 'expected', evidence: `sections.json formerly: ${fixed.when}` })
+      record(section, `${prefix}${n.name}`, undefined, 'extra', 'in salt-wordpress, not in the contract', undefined, `sections.json formerly: ${fixed.when}`)
       continue
     }
     record(section, `${prefix}${n.name}`, undefined, 'extra', 'in salt-wordpress, not in the contract', parentDef)
@@ -265,14 +275,10 @@ function compareOne(section, at, e, n, def, ctx) {
   if (cond) {
     // A condition on a sibling salt-wordpress does not have yet is owed with that sibling.
     const owed = clausesOf(def).map((c) => ctx.defs.get(c.field)).find((d) => !ctx.pairs.has(d?.name) && wpNote(d)?.owes)
-    if (owed) rows.push({ section, at, kind: 'condition', text: cond, verdict: 'expected', evidence: `${owed.name} owes: ${wpNote(owed).owes}` })
+    if (owed) record(section, at, def, 'condition', cond, undefined, `${owed.name} owes: ${wpNote(owed).owes}`)
     else diffs.push(['condition', cond])
   }
-  for (const [kind, text] of diffs) {
-    // A difference the field's values map explains is expected whatever else the note says.
-    if (kind === 'values') rows.push({ section, at, kind, text, verdict: 'expected', evidence: `values: ${JSON.stringify(values)}` })
-    else record(section, at, def, kind, text)
-  }
+  for (const [kind, text] of diffs) record(section, at, def, kind, text)
   if (sameType && e.sub_fields && n.sub_fields) {
     const childDefs = def?.type === 'link' ? [] : def?.fields ?? []
     const entries = e.sub_fields.map((c) => ({ e: c, def: childDefs.find((d) => d.name === c.name), at: c.name, siblings: e.sub_fields }))
@@ -292,8 +298,13 @@ function compareQuery(section, prefix, e, found, def) {
   const before = rows.length
   const entries = e.sub_fields.map((c) => ({ e: c, def: partDef(c.name), at: c.name, siblings: e.sub_fields }))
   compareLevel(section, entries, theirs, prefix, def)
+  // The parts carry no notes of their own beyond values. The query's note says how its old fields
+  // fold into the parts' options; any other difference is part of the new group it owes.
   for (const r of rows.slice(before)) {
-    if (r.verdict === 'unexpected' && note) { r.verdict = 'expected'; r.evidence = `note: ${note.note ?? note.owes}` }
+    if (r.suggestion || !note) continue
+    const prefer = r.kind === 'options' ? ['note', 'owes'] : ['owes', 'note']
+    const k = prefer.find((x) => note[x])
+    r.suggestion = k ? `${k}: ${note[k]}` : ''
   }
 }
 
@@ -329,7 +340,7 @@ async function main({ wordpress, check, suggest }) {
       used.add(wl.name)
       const label = theirs.length > 1 ? `${id} (${wl.name})` : id
       if (wl.name !== id) {
-        rows.push({ section: label, at: '(layout name)', kind: 'name', text: `name ${id}; salt-wordpress ${wl.name}`, verdict: 'expected', evidence: `sections.json formerly: ${wl.name}` })
+        record(label, '(layout name)', undefined, 'name', `name ${id}; salt-wordpress ${wl.name}`, undefined, formerly.some((f) => f.name === wl.name) ? `sections.json formerly: ${wl.name}` : '')
       }
       // A layout folded into a section with a source select (sections.json: "source testimonials",
       // or the select's values keyed by layout) holds that one source; fields the contract hides
@@ -358,10 +369,10 @@ async function main({ wordpress, check, suggest }) {
 
   // ── Report ─────────────────────────────────────────────────────────────────────────────────────
 
-  const expected = rows.filter((r) => r.verdict === 'expected')
-  const unexpected = rows.filter((r) => r.verdict === 'unexpected')
+  const list = JSON.parse(readFileSync(expectedPath, 'utf8'))
+  const { expected, unexpected, unseen } = classify(rows, list)
   if (suggest) {
-    console.log(JSON.stringify(unexpected.map((r) => ({ section: r.section, path: r.at, kind: r.kind, difference: r.text, evidence: r.evidence })), null, 2))
+    console.log(JSON.stringify(unexpected.map((r) => ({ section: r.section, path: r.at, kind: r.kind, difference: r.text, evidence: r.suggestion })), null, 2))
     return
   }
   const cell = (s) => String(s).replace(/\|/g, '\\|').replace(/\n/g, ' ')
@@ -380,12 +391,10 @@ async function main({ wordpress, check, suggest }) {
     'must match, so adopting the emitter changes them throughout; and what stays native to ACF',
     '(return formats, wrapper widths, tabs, toolbars, row layouts).',
     '',
-    '**Expected** means the contract records the difference in the field\'s `platforms.wordpress`',
-    'note (`formerly`, `values`, `owes`, or a note on the condition), or sections.json records the',
-    'layout\'s former name. **Unexpected** means nothing in the contract accounts for it. As in the',
-    'Payload round trip, a field whose note owes something counts every difference on it as expected,',
-    'so read the evidence column: it says which record covers each row. A part added or dropped inside',
-    'a list, group or query is covered by its parent\'s note.',
+    '**Expected** means `round-trip-acf.expected.json` lists the difference exactly (section, field,',
+    'kind and wording), with the contract record that accounts for it. **Unexpected** means it is not',
+    'on that reviewed list; **listed, not found** means the list names a difference that no longer',
+    'occurs.',
     '',
     'Matching: the shared settings are stored on the layout itself today (section_spacing and the',
     'rest), so the contract\'s `settings.*` fields are matched there. Where several salt-wordpress',
@@ -395,7 +404,7 @@ async function main({ wordpress, check, suggest }) {
     '',
     '## Summary',
     '',
-    `${rows.length} differences: ${expected.length} expected, ${unexpected.length} unexpected.`,
+    `${rows.length} differences: ${expected.length} expected, ${unexpected.length} unexpected; ${unseen.length} listed, not found.`,
     '',
     '| Section | Compared |',
     '| --- | --- |',
@@ -407,12 +416,17 @@ async function main({ wordpress, check, suggest }) {
     '',
   ]
   if (unexpected.length) {
-    lines.push('## Unexpected', '', '| Section | Field | Difference |', '| --- | --- | --- |')
-    for (const r of unexpected) lines.push(`| ${r.section} | \`${r.at}\` | ${cell(r.text)} |`)
+    lines.push('## Unexpected', '', '| Section | Field | Kind | Difference | Contract record that may account for it |', '| --- | --- | --- | --- | --- |')
+    for (const r of unexpected) lines.push(`| ${r.section} | \`${r.at}\` | ${r.kind} | ${cell(r.text)} | ${cell(r.suggestion || 'none')} |`)
     lines.push('')
   }
-  lines.push('## Expected', '', '| Section | Field | Difference | Recorded as |', '| --- | --- | --- | --- |')
-  for (const r of expected) lines.push(`| ${r.section} | \`${r.at}\` | ${cell(r.text)} | ${cell(r.evidence)} |`)
+  if (unseen.length) {
+    lines.push('## Listed, not found', '', '| Section | Field | Kind | Difference |', '| --- | --- | --- | --- |')
+    for (const e of unseen) lines.push(`| ${e.section} | \`${e.path}\` | ${e.kind} | ${cell(e.difference)} |`)
+    lines.push('')
+  }
+  lines.push('## Expected', '', '| Section | Field | Kind | Difference | Recorded as |', '| --- | --- | --- | --- | --- |')
+  for (const r of expected) lines.push(`| ${r.section} | \`${r.at}\` | ${r.kind} | ${cell(r.text)} | ${cell(r.evidence)} |`)
   lines.push('')
   lines.push(
     '## Keys',
@@ -432,7 +446,11 @@ async function main({ wordpress, check, suggest }) {
     let committed = ''
     try { committed = readFileSync(reportPath, 'utf8') } catch { /* missing is stale */ }
     if (committed !== text) { console.log(`✗ ${path.relative(process.cwd(), reportPath)} is stale; regenerate it`); process.exit(1) }
-    console.log('PASS: the round-trip report is current')
+    if (unexpected.length || unseen.length) {
+      console.log(`✗ ${unexpected.length} unexpected difference(s) and ${unseen.length} listed but not found; see the report`)
+      process.exit(1)
+    }
+    console.log(`PASS: the round-trip report is current: ${expected.length} expected, 0 unexpected`)
   } else {
     writeFileSync(reportPath, text)
     console.log(`wrote ${path.relative(process.cwd(), reportPath)}: ${expected.length} expected, ${unexpected.length} unexpected`)

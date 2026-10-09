@@ -159,7 +159,9 @@ registering them leaves `docs/contracts/slug-registry.json` regenerable as befor
 layout the contract drops disappears from the registry. Without a `slug-migrations.json` entry
 that removal still fails the gate on a non-major release. `acfSlugRegistry(groups)` gives the same
 layouts and names, for a test that wants to see the effect before the theme does.
-`reports/round-trip-acf.md`, which is not shipped either, compares the output with the layouts salt-wordpress ships today.
+`reports/round-trip-acf.md`, which is not shipped either, compares the output with the layouts
+salt-wordpress ships today. A difference is expected only when
+`reports/round-trip-acf.expected.json` lists it, with the contract record that accounts for it.
 
 ## Stylesheets
 
