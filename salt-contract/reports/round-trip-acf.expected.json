@@ -1,0 +1,2732 @@
+[
+  {
+    "section": "hero",
+    "path": "variant",
+    "kind": "options",
+    "difference": "choices full-bleed, split, stacked, minimal; salt-wordpress full-bleed, split, minimal",
+    "evidence": "owes: the stacked option, and a full-bleed hero that sets its words over the section's background image (SC-006)"
+  },
+  {
+    "section": "hero",
+    "path": "image",
+    "kind": "condition",
+    "difference": "condition differs (2 of 4 cases), e.g. {\"variant\":\"full-bleed\"}: contract hides, salt-wordpress shows; {\"variant\":\"minimal\"}: contract hides, salt-wordpress shows",
+    "evidence": "owes: hiding it for full-bleed and minimal, and moving a full-bleed hero's image to the background image setting (SC-006)"
+  },
+  {
+    "section": "hero",
+    "path": "mediaSide",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field"
+  },
+  {
+    "section": "hero",
+    "path": "alignment",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field"
+  },
+  {
+    "section": "hero",
+    "path": "buttons",
+    "kind": "name",
+    "difference": "stored as cta_primary, cta_secondary",
+    "evidence": "formerly: cta_primary, cta_secondary"
+  },
+  {
+    "section": "hero",
+    "path": "buttons",
+    "kind": "type",
+    "difference": "type repeater; salt-wordpress link",
+    "evidence": "owes: a list of up to two buttons in place of two link fields: cta_primary becomes buttons[0] with style primary, cta_secondary buttons[1] with style secondary; internal links store the document, not its address"
+  },
+  {
+    "section": "hero",
+    "path": "settings.spacing",
+    "kind": "name",
+    "difference": "stored as section_spacing",
+    "evidence": "formerly: section_spacing"
+  },
+  {
+    "section": "hero",
+    "path": "settings.tone",
+    "kind": "name",
+    "difference": "stored as section_background",
+    "evidence": "formerly: section_background"
+  },
+  {
+    "section": "hero",
+    "path": "settings.tone",
+    "kind": "values",
+    "difference": "choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse",
+    "evidence": "values: {\"inverse\":\"surface-inverse\"}"
+  },
+  {
+    "section": "hero",
+    "path": "settings.toneDark",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field; dark mode is a token inversion today, with no per-section choice"
+  },
+  {
+    "section": "hero",
+    "path": "settings.width",
+    "kind": "name",
+    "difference": "stored as section_container",
+    "evidence": "formerly: section_container"
+  },
+  {
+    "section": "hero",
+    "path": "settings.backgroundImage",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the background image and its four settings"
+  },
+  {
+    "section": "hero",
+    "path": "settings.anchorId",
+    "kind": "name",
+    "difference": "stored as section_anchor",
+    "evidence": "formerly: section_anchor"
+  },
+  {
+    "section": "hero",
+    "path": "settings.firstPageOnly",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field, with the listing section that paginates"
+  },
+  {
+    "section": "hero",
+    "path": "settings.divider",
+    "kind": "name",
+    "difference": "stored as section_divider",
+    "evidence": "formerly: section_divider"
+  },
+  {
+    "section": "rich-text (rich_text)",
+    "path": "(layout name)",
+    "kind": "name",
+    "difference": "name rich-text; salt-wordpress rich_text",
+    "evidence": "sections.json formerly: rich_text"
+  },
+  {
+    "section": "rich-text (rich_text)",
+    "path": "eyebrow",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field on rich_text; intro already has it"
+  },
+  {
+    "section": "rich-text (rich_text)",
+    "path": "body",
+    "kind": "name",
+    "difference": "stored as content",
+    "evidence": "formerly: content"
+  },
+  {
+    "section": "rich-text (rich_text)",
+    "path": "alignment",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field on rich_text, and the value centre in place of center on intro"
+  },
+  {
+    "section": "rich-text (rich_text)",
+    "path": "settings.spacing",
+    "kind": "name",
+    "difference": "stored as section_spacing",
+    "evidence": "formerly: section_spacing"
+  },
+  {
+    "section": "rich-text (rich_text)",
+    "path": "settings.tone",
+    "kind": "name",
+    "difference": "stored as section_background",
+    "evidence": "formerly: section_background"
+  },
+  {
+    "section": "rich-text (rich_text)",
+    "path": "settings.tone",
+    "kind": "values",
+    "difference": "choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse",
+    "evidence": "values: {\"inverse\":\"surface-inverse\"}"
+  },
+  {
+    "section": "rich-text (rich_text)",
+    "path": "settings.toneDark",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field; dark mode is a token inversion today, with no per-section choice"
+  },
+  {
+    "section": "rich-text (rich_text)",
+    "path": "settings.width",
+    "kind": "name",
+    "difference": "stored as section_container",
+    "evidence": "formerly: section_container"
+  },
+  {
+    "section": "rich-text (rich_text)",
+    "path": "settings.backgroundImage",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the background image and its four settings"
+  },
+  {
+    "section": "rich-text (rich_text)",
+    "path": "settings.anchorId",
+    "kind": "name",
+    "difference": "stored as section_anchor",
+    "evidence": "formerly: section_anchor"
+  },
+  {
+    "section": "rich-text (rich_text)",
+    "path": "settings.firstPageOnly",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field, with the listing section that paginates"
+  },
+  {
+    "section": "rich-text (rich_text)",
+    "path": "settings.divider",
+    "kind": "name",
+    "difference": "stored as section_divider",
+    "evidence": "formerly: section_divider"
+  },
+  {
+    "section": "rich-text (intro)",
+    "path": "(layout name)",
+    "kind": "name",
+    "difference": "name rich-text; salt-wordpress intro",
+    "evidence": "sections.json formerly: intro"
+  },
+  {
+    "section": "rich-text (intro)",
+    "path": "body",
+    "kind": "name",
+    "difference": "stored as content",
+    "evidence": "formerly: content"
+  },
+  {
+    "section": "rich-text (intro)",
+    "path": "alignment",
+    "kind": "name",
+    "difference": "stored as align",
+    "evidence": "formerly: align"
+  },
+  {
+    "section": "rich-text (intro)",
+    "path": "alignment",
+    "kind": "values",
+    "difference": "choices left, centre; salt-wordpress left, center",
+    "evidence": "values: {\"center\":\"centre\"}"
+  },
+  {
+    "section": "rich-text (intro)",
+    "path": "settings.spacing",
+    "kind": "name",
+    "difference": "stored as section_spacing",
+    "evidence": "formerly: section_spacing"
+  },
+  {
+    "section": "rich-text (intro)",
+    "path": "settings.tone",
+    "kind": "name",
+    "difference": "stored as section_background",
+    "evidence": "formerly: section_background"
+  },
+  {
+    "section": "rich-text (intro)",
+    "path": "settings.tone",
+    "kind": "values",
+    "difference": "choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse",
+    "evidence": "values: {\"inverse\":\"surface-inverse\"}"
+  },
+  {
+    "section": "rich-text (intro)",
+    "path": "settings.toneDark",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field; dark mode is a token inversion today, with no per-section choice"
+  },
+  {
+    "section": "rich-text (intro)",
+    "path": "settings.width",
+    "kind": "name",
+    "difference": "stored as section_container",
+    "evidence": "formerly: section_container"
+  },
+  {
+    "section": "rich-text (intro)",
+    "path": "settings.backgroundImage",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the background image and its four settings"
+  },
+  {
+    "section": "rich-text (intro)",
+    "path": "settings.anchorId",
+    "kind": "name",
+    "difference": "stored as section_anchor",
+    "evidence": "formerly: section_anchor"
+  },
+  {
+    "section": "rich-text (intro)",
+    "path": "settings.firstPageOnly",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field, with the listing section that paginates"
+  },
+  {
+    "section": "rich-text (intro)",
+    "path": "settings.divider",
+    "kind": "name",
+    "difference": "stored as section_divider",
+    "evidence": "formerly: section_divider"
+  },
+  {
+    "section": "call-to-action",
+    "path": "(layout name)",
+    "kind": "name",
+    "difference": "name call-to-action; salt-wordpress cta",
+    "evidence": "sections.json formerly: cta"
+  },
+  {
+    "section": "call-to-action",
+    "path": "body",
+    "kind": "name",
+    "difference": "stored as text",
+    "evidence": "formerly: text"
+  },
+  {
+    "section": "call-to-action",
+    "path": "body",
+    "kind": "type",
+    "difference": "type wysiwyg; salt-wordpress textarea",
+    "evidence": "owes: rich text in place of a textarea; a stored plain text migrates as one paragraph"
+  },
+  {
+    "section": "call-to-action",
+    "path": "buttons.link",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the link shape: label, url and style become link (label, type, document or url, newTab) and style; internal links and opening in a new tab are new"
+  },
+  {
+    "section": "call-to-action",
+    "path": "buttons.label",
+    "kind": "extra",
+    "difference": "in salt-wordpress, not in the contract",
+    "evidence": "owes: the link shape: label, url and style become link (label, type, document or url, newTab) and style; internal links and opening in a new tab are new"
+  },
+  {
+    "section": "call-to-action",
+    "path": "buttons.url",
+    "kind": "extra",
+    "difference": "in salt-wordpress, not in the contract",
+    "evidence": "owes: the link shape: label, url and style become link (label, type, document or url, newTab) and style; internal links and opening in a new tab are new"
+  },
+  {
+    "section": "call-to-action",
+    "path": "settings.spacing",
+    "kind": "name",
+    "difference": "stored as section_spacing",
+    "evidence": "formerly: section_spacing"
+  },
+  {
+    "section": "call-to-action",
+    "path": "settings.tone",
+    "kind": "name",
+    "difference": "stored as section_background",
+    "evidence": "formerly: section_background"
+  },
+  {
+    "section": "call-to-action",
+    "path": "settings.tone",
+    "kind": "values",
+    "difference": "choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse",
+    "evidence": "values: {\"inverse\":\"surface-inverse\"}"
+  },
+  {
+    "section": "call-to-action",
+    "path": "settings.toneDark",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field; dark mode is a token inversion today, with no per-section choice"
+  },
+  {
+    "section": "call-to-action",
+    "path": "settings.width",
+    "kind": "name",
+    "difference": "stored as section_container",
+    "evidence": "formerly: section_container"
+  },
+  {
+    "section": "call-to-action",
+    "path": "settings.backgroundImage",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the background image and its four settings"
+  },
+  {
+    "section": "call-to-action",
+    "path": "settings.anchorId",
+    "kind": "name",
+    "difference": "stored as section_anchor",
+    "evidence": "formerly: section_anchor"
+  },
+  {
+    "section": "call-to-action",
+    "path": "settings.firstPageOnly",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field, with the listing section that paginates"
+  },
+  {
+    "section": "call-to-action",
+    "path": "settings.divider",
+    "kind": "name",
+    "difference": "stored as section_divider",
+    "evidence": "formerly: section_divider"
+  },
+  {
+    "section": "media-text",
+    "path": "(layout name)",
+    "kind": "name",
+    "difference": "name media-text; salt-wordpress media_text",
+    "evidence": "sections.json formerly: media_text"
+  },
+  {
+    "section": "media-text",
+    "path": "rows.mediaSide",
+    "kind": "name",
+    "difference": "stored as media_side",
+    "evidence": "formerly: media_side"
+  },
+  {
+    "section": "media-text",
+    "path": "rows.buttons",
+    "kind": "name",
+    "difference": "stored as cta",
+    "evidence": "formerly: cta"
+  },
+  {
+    "section": "media-text",
+    "path": "rows.buttons",
+    "kind": "type",
+    "difference": "type repeater; salt-wordpress link",
+    "evidence": "owes: a list of up to two buttons in place of one link field: cta becomes buttons[0] with style secondary. Visible change: WordPress draws this link today with the link-arrow style (template-parts/sections/media-text.php), so migrated rows change appearance unless the contract adds a link style; and a row with only a second link must move it to buttons[0], closing the gap"
+  },
+  {
+    "section": "media-text",
+    "path": "settings.spacing",
+    "kind": "name",
+    "difference": "stored as section_spacing",
+    "evidence": "formerly: section_spacing"
+  },
+  {
+    "section": "media-text",
+    "path": "settings.tone",
+    "kind": "name",
+    "difference": "stored as section_background",
+    "evidence": "formerly: section_background"
+  },
+  {
+    "section": "media-text",
+    "path": "settings.tone",
+    "kind": "values",
+    "difference": "choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse",
+    "evidence": "values: {\"inverse\":\"surface-inverse\"}"
+  },
+  {
+    "section": "media-text",
+    "path": "settings.toneDark",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field; dark mode is a token inversion today, with no per-section choice"
+  },
+  {
+    "section": "media-text",
+    "path": "settings.width",
+    "kind": "name",
+    "difference": "stored as section_container",
+    "evidence": "formerly: section_container"
+  },
+  {
+    "section": "media-text",
+    "path": "settings.backgroundImage",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the background image and its four settings"
+  },
+  {
+    "section": "media-text",
+    "path": "settings.anchorId",
+    "kind": "name",
+    "difference": "stored as section_anchor",
+    "evidence": "formerly: section_anchor"
+  },
+  {
+    "section": "media-text",
+    "path": "settings.firstPageOnly",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field, with the listing section that paginates"
+  },
+  {
+    "section": "media-text",
+    "path": "settings.divider",
+    "kind": "name",
+    "difference": "stored as section_divider",
+    "evidence": "formerly: section_divider"
+  },
+  {
+    "section": "features",
+    "path": "intro",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field"
+  },
+  {
+    "section": "features",
+    "path": "items.icon",
+    "kind": "type",
+    "difference": "type select; salt-wordpress text",
+    "evidence": "owes: a select of the site's icons in place of a text field holding an icon name"
+  },
+  {
+    "section": "features",
+    "path": "items.text",
+    "kind": "type",
+    "difference": "type wysiwyg; salt-wordpress textarea",
+    "evidence": "owes: rich text in place of a textarea; a stored plain text migrates as one paragraph"
+  },
+  {
+    "section": "features",
+    "path": "items.url",
+    "kind": "name",
+    "difference": "stored as link",
+    "evidence": "formerly: link"
+  },
+  {
+    "section": "features",
+    "path": "items.url",
+    "kind": "type",
+    "difference": "type text; salt-wordpress link",
+    "evidence": "owes: a plain address in place of a link field, whose title and target were already ignored"
+  },
+  {
+    "section": "features",
+    "path": "settings.spacing",
+    "kind": "name",
+    "difference": "stored as section_spacing",
+    "evidence": "formerly: section_spacing"
+  },
+  {
+    "section": "features",
+    "path": "settings.tone",
+    "kind": "name",
+    "difference": "stored as section_background",
+    "evidence": "formerly: section_background"
+  },
+  {
+    "section": "features",
+    "path": "settings.tone",
+    "kind": "values",
+    "difference": "choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse",
+    "evidence": "values: {\"inverse\":\"surface-inverse\"}"
+  },
+  {
+    "section": "features",
+    "path": "settings.toneDark",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field; dark mode is a token inversion today, with no per-section choice"
+  },
+  {
+    "section": "features",
+    "path": "settings.width",
+    "kind": "name",
+    "difference": "stored as section_container",
+    "evidence": "formerly: section_container"
+  },
+  {
+    "section": "features",
+    "path": "settings.backgroundImage",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the background image and its four settings"
+  },
+  {
+    "section": "features",
+    "path": "settings.anchorId",
+    "kind": "name",
+    "difference": "stored as section_anchor",
+    "evidence": "formerly: section_anchor"
+  },
+  {
+    "section": "features",
+    "path": "settings.firstPageOnly",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field, with the listing section that paginates"
+  },
+  {
+    "section": "features",
+    "path": "settings.divider",
+    "kind": "name",
+    "difference": "stored as section_divider",
+    "evidence": "formerly: section_divider"
+  },
+  {
+    "section": "stats",
+    "path": "intro",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field"
+  },
+  {
+    "section": "stats",
+    "path": "items.icon",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field"
+  },
+  {
+    "section": "stats",
+    "path": "items.value",
+    "kind": "name",
+    "difference": "stored as number",
+    "evidence": "formerly: number"
+  },
+  {
+    "section": "stats",
+    "path": "settings.spacing",
+    "kind": "name",
+    "difference": "stored as section_spacing",
+    "evidence": "formerly: section_spacing"
+  },
+  {
+    "section": "stats",
+    "path": "settings.tone",
+    "kind": "name",
+    "difference": "stored as section_background",
+    "evidence": "formerly: section_background"
+  },
+  {
+    "section": "stats",
+    "path": "settings.tone",
+    "kind": "values",
+    "difference": "choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse",
+    "evidence": "values: {\"inverse\":\"surface-inverse\"}"
+  },
+  {
+    "section": "stats",
+    "path": "settings.toneDark",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field; dark mode is a token inversion today, with no per-section choice"
+  },
+  {
+    "section": "stats",
+    "path": "settings.width",
+    "kind": "name",
+    "difference": "stored as section_container",
+    "evidence": "formerly: section_container"
+  },
+  {
+    "section": "stats",
+    "path": "settings.backgroundImage",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the background image and its four settings"
+  },
+  {
+    "section": "stats",
+    "path": "settings.anchorId",
+    "kind": "name",
+    "difference": "stored as section_anchor",
+    "evidence": "formerly: section_anchor"
+  },
+  {
+    "section": "stats",
+    "path": "settings.firstPageOnly",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field, with the listing section that paginates"
+  },
+  {
+    "section": "stats",
+    "path": "settings.divider",
+    "kind": "name",
+    "difference": "stored as section_divider",
+    "evidence": "formerly: section_divider"
+  },
+  {
+    "section": "logos",
+    "path": "intro",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field"
+  },
+  {
+    "section": "logos",
+    "path": "columns",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field; the strip lays itself out today"
+  },
+  {
+    "section": "logos",
+    "path": "items",
+    "kind": "name",
+    "difference": "stored as logos",
+    "evidence": "formerly: logos"
+  },
+  {
+    "section": "logos",
+    "path": "settings.spacing",
+    "kind": "name",
+    "difference": "stored as section_spacing",
+    "evidence": "formerly: section_spacing"
+  },
+  {
+    "section": "logos",
+    "path": "settings.tone",
+    "kind": "name",
+    "difference": "stored as section_background",
+    "evidence": "formerly: section_background"
+  },
+  {
+    "section": "logos",
+    "path": "settings.tone",
+    "kind": "values",
+    "difference": "choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse",
+    "evidence": "values: {\"inverse\":\"surface-inverse\"}"
+  },
+  {
+    "section": "logos",
+    "path": "settings.toneDark",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field; dark mode is a token inversion today, with no per-section choice"
+  },
+  {
+    "section": "logos",
+    "path": "settings.width",
+    "kind": "name",
+    "difference": "stored as section_container",
+    "evidence": "formerly: section_container"
+  },
+  {
+    "section": "logos",
+    "path": "settings.backgroundImage",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the background image and its four settings"
+  },
+  {
+    "section": "logos",
+    "path": "settings.anchorId",
+    "kind": "name",
+    "difference": "stored as section_anchor",
+    "evidence": "formerly: section_anchor"
+  },
+  {
+    "section": "logos",
+    "path": "settings.firstPageOnly",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field, with the listing section that paginates"
+  },
+  {
+    "section": "logos",
+    "path": "settings.divider",
+    "kind": "name",
+    "difference": "stored as section_divider",
+    "evidence": "formerly: section_divider"
+  },
+  {
+    "section": "gallery",
+    "path": "heading",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field; the gallery has no heading today"
+  },
+  {
+    "section": "gallery",
+    "path": "intro",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field"
+  },
+  {
+    "section": "gallery",
+    "path": "columns",
+    "kind": "default",
+    "difference": "default \"3\"; salt-wordpress 3",
+    "evidence": "owes: storing the strings 2, 3 and 4; the default is stored as the integer 3 today"
+  },
+  {
+    "section": "gallery",
+    "path": "columns",
+    "kind": "condition",
+    "difference": "condition differs (1 of 3 cases), e.g. {\"layout\":\"carousel\"}: contract hides, salt-wordpress shows",
+    "evidence": "note: Shown for every layout, with the instruction that only grid and masonry use it."
+  },
+  {
+    "section": "gallery",
+    "path": "label",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field"
+  },
+  {
+    "section": "gallery",
+    "path": "captions",
+    "kind": "default",
+    "difference": "default 1; salt-wordpress 0",
+    "evidence": "owes: the default true; it is false today"
+  },
+  {
+    "section": "gallery",
+    "path": "settings.spacing",
+    "kind": "name",
+    "difference": "stored as section_spacing",
+    "evidence": "formerly: section_spacing"
+  },
+  {
+    "section": "gallery",
+    "path": "settings.tone",
+    "kind": "name",
+    "difference": "stored as section_background",
+    "evidence": "formerly: section_background"
+  },
+  {
+    "section": "gallery",
+    "path": "settings.tone",
+    "kind": "values",
+    "difference": "choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse",
+    "evidence": "values: {\"inverse\":\"surface-inverse\"}"
+  },
+  {
+    "section": "gallery",
+    "path": "settings.toneDark",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field; dark mode is a token inversion today, with no per-section choice"
+  },
+  {
+    "section": "gallery",
+    "path": "settings.width",
+    "kind": "name",
+    "difference": "stored as section_container",
+    "evidence": "formerly: section_container"
+  },
+  {
+    "section": "gallery",
+    "path": "settings.backgroundImage",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the background image and its four settings"
+  },
+  {
+    "section": "gallery",
+    "path": "settings.anchorId",
+    "kind": "name",
+    "difference": "stored as section_anchor",
+    "evidence": "formerly: section_anchor"
+  },
+  {
+    "section": "gallery",
+    "path": "settings.firstPageOnly",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field, with the listing section that paginates"
+  },
+  {
+    "section": "gallery",
+    "path": "settings.divider",
+    "kind": "name",
+    "difference": "stored as section_divider",
+    "evidence": "formerly: section_divider"
+  },
+  {
+    "section": "process",
+    "path": "intro",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field"
+  },
+  {
+    "section": "process",
+    "path": "steps.icon",
+    "kind": "type",
+    "difference": "type select; salt-wordpress text",
+    "evidence": "owes: a select of the site's icons in place of a text field holding an icon name"
+  },
+  {
+    "section": "process",
+    "path": "steps.image",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field"
+  },
+  {
+    "section": "process",
+    "path": "steps.cta",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field"
+  },
+  {
+    "section": "process",
+    "path": "structuredData",
+    "kind": "name",
+    "difference": "stored as schema_toggle",
+    "evidence": "formerly: schema_toggle"
+  },
+  {
+    "section": "process",
+    "path": "settings.spacing",
+    "kind": "name",
+    "difference": "stored as section_spacing",
+    "evidence": "formerly: section_spacing"
+  },
+  {
+    "section": "process",
+    "path": "settings.tone",
+    "kind": "name",
+    "difference": "stored as section_background",
+    "evidence": "formerly: section_background"
+  },
+  {
+    "section": "process",
+    "path": "settings.tone",
+    "kind": "values",
+    "difference": "choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse",
+    "evidence": "values: {\"inverse\":\"surface-inverse\"}"
+  },
+  {
+    "section": "process",
+    "path": "settings.toneDark",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field; dark mode is a token inversion today, with no per-section choice"
+  },
+  {
+    "section": "process",
+    "path": "settings.width",
+    "kind": "name",
+    "difference": "stored as section_container",
+    "evidence": "formerly: section_container"
+  },
+  {
+    "section": "process",
+    "path": "settings.backgroundImage",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the background image and its four settings"
+  },
+  {
+    "section": "process",
+    "path": "settings.anchorId",
+    "kind": "name",
+    "difference": "stored as section_anchor",
+    "evidence": "formerly: section_anchor"
+  },
+  {
+    "section": "process",
+    "path": "settings.firstPageOnly",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field, with the listing section that paginates"
+  },
+  {
+    "section": "process",
+    "path": "settings.divider",
+    "kind": "name",
+    "difference": "stored as section_divider",
+    "evidence": "formerly: section_divider"
+  },
+  {
+    "section": "faq",
+    "path": "intro",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field"
+  },
+  {
+    "section": "faq",
+    "path": "query",
+    "kind": "name",
+    "difference": "stored as source, manual, taxonomy_terms, orderby, order, count",
+    "evidence": "formerly: source, manual, taxonomy_terms, orderby, order, count"
+  },
+  {
+    "section": "faq",
+    "path": "query.mode",
+    "kind": "values",
+    "difference": "choices automatic, by-category, manual; salt-wordpress default, taxonomy, manual",
+    "evidence": "values: {\"default\":\"automatic\",\"taxonomy\":\"by-category\",\"manual\":\"manual\"}"
+  },
+  {
+    "section": "faq",
+    "path": "query.mode",
+    "kind": "values",
+    "difference": "default \"automatic\"; salt-wordpress \"default\"",
+    "evidence": "values: {\"default\":\"automatic\",\"taxonomy\":\"by-category\",\"manual\":\"manual\"}"
+  },
+  {
+    "section": "faq",
+    "path": "query.order",
+    "kind": "options",
+    "difference": "choices default, newest, title; salt-wordpress (empty), menu_order, date, title",
+    "evidence": "note: Stored as the layout's own source, taxonomy_terms, manual, orderby, order and count; taxonomy_terms becomes categories, manual becomes items, orderby and order fold into order, count stays count. SC-006 offers neither oldest-first nor Z to A, so a stored order direction is dropped on migration."
+  },
+  {
+    "section": "faq",
+    "path": "query.order",
+    "kind": "values",
+    "difference": "default \"default\"; salt-wordpress none",
+    "evidence": "values: {\"\":\"default\",\"menu_order\":\"default\",\"date\":\"newest\",\"title\":\"title\"}"
+  },
+  {
+    "section": "faq",
+    "path": "query.order",
+    "kind": "condition",
+    "difference": "condition differs (1 of 3 cases), e.g. {\"mode\":\"manual\"}: contract hides, salt-wordpress shows",
+    "evidence": "owes: one query group in place of six layout fields"
+  },
+  {
+    "section": "faq",
+    "path": "query.count",
+    "kind": "limit",
+    "difference": "step 1; salt-wordpress none",
+    "evidence": "owes: one query group in place of six layout fields"
+  },
+  {
+    "section": "faq",
+    "path": "query.count",
+    "kind": "condition",
+    "difference": "condition differs (1 of 3 cases), e.g. {\"mode\":\"manual\"}: contract hides, salt-wordpress shows",
+    "evidence": "owes: one query group in place of six layout fields"
+  },
+  {
+    "section": "faq",
+    "path": "query.direction",
+    "kind": "extra",
+    "difference": "in salt-wordpress, not in the contract",
+    "evidence": "owes: one query group in place of six layout fields"
+  },
+  {
+    "section": "faq",
+    "path": "structuredData",
+    "kind": "name",
+    "difference": "stored as schema_toggle",
+    "evidence": "formerly: schema_toggle"
+  },
+  {
+    "section": "faq",
+    "path": "settings.spacing",
+    "kind": "name",
+    "difference": "stored as section_spacing",
+    "evidence": "formerly: section_spacing"
+  },
+  {
+    "section": "faq",
+    "path": "settings.tone",
+    "kind": "name",
+    "difference": "stored as section_background",
+    "evidence": "formerly: section_background"
+  },
+  {
+    "section": "faq",
+    "path": "settings.tone",
+    "kind": "values",
+    "difference": "choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse",
+    "evidence": "values: {\"inverse\":\"surface-inverse\"}"
+  },
+  {
+    "section": "faq",
+    "path": "settings.toneDark",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field; dark mode is a token inversion today, with no per-section choice"
+  },
+  {
+    "section": "faq",
+    "path": "settings.width",
+    "kind": "name",
+    "difference": "stored as section_container",
+    "evidence": "formerly: section_container"
+  },
+  {
+    "section": "faq",
+    "path": "settings.backgroundImage",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the background image and its four settings"
+  },
+  {
+    "section": "faq",
+    "path": "settings.anchorId",
+    "kind": "name",
+    "difference": "stored as section_anchor",
+    "evidence": "formerly: section_anchor"
+  },
+  {
+    "section": "faq",
+    "path": "settings.firstPageOnly",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field, with the listing section that paginates"
+  },
+  {
+    "section": "faq",
+    "path": "settings.divider",
+    "kind": "name",
+    "difference": "stored as section_divider",
+    "evidence": "formerly: section_divider"
+  },
+  {
+    "section": "collection-showcase (services)",
+    "path": "(layout name)",
+    "kind": "name",
+    "difference": "name collection-showcase; salt-wordpress services",
+    "evidence": "sections.json formerly: services"
+  },
+  {
+    "section": "collection-showcase (services)",
+    "path": "intro",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field"
+  },
+  {
+    "section": "collection-showcase (services)",
+    "path": "source",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: one section with a source select in place of five layouts; the former layout slug gives the source"
+  },
+  {
+    "section": "collection-showcase (services)",
+    "path": "layout",
+    "kind": "options",
+    "difference": "choices grid, list, featured, accordion, index; salt-wordpress grid, list, featured",
+    "evidence": "owes: the accordion and index layouts, and the field on work, team and blog_teaser; services has grid, list and featured; testimonials grid becomes source testimonials with layout grid"
+  },
+  {
+    "section": "collection-showcase (services)",
+    "path": "columns",
+    "kind": "condition",
+    "difference": "condition differs (3 of 5 cases), e.g. {\"layout\":\"list\"}: contract hides, salt-wordpress shows; {\"layout\":\"accordion\"}: contract hides, salt-wordpress shows",
+    "evidence": "owes: one select with the strings 2, 3 and 4 on every source; work and blog_teaser offer 2 and 3 with an integer default 3, team uses bare-numeral labels, testimonials has none"
+  },
+  {
+    "section": "collection-showcase (services)",
+    "path": "query",
+    "kind": "name",
+    "difference": "stored as source, manual, taxonomy_terms, orderby, order, count",
+    "evidence": "formerly: source, manual, taxonomy_terms, orderby, order, count"
+  },
+  {
+    "section": "collection-showcase (services)",
+    "path": "query.mode",
+    "kind": "values",
+    "difference": "choices automatic, by-category, manual; salt-wordpress default, taxonomy, manual",
+    "evidence": "values: {\"default\":\"automatic\",\"taxonomy\":\"by-category\",\"manual\":\"manual\"}"
+  },
+  {
+    "section": "collection-showcase (services)",
+    "path": "query.mode",
+    "kind": "values",
+    "difference": "default \"automatic\"; salt-wordpress \"default\"",
+    "evidence": "values: {\"default\":\"automatic\",\"taxonomy\":\"by-category\",\"manual\":\"manual\"}"
+  },
+  {
+    "section": "collection-showcase (services)",
+    "path": "query.categories",
+    "kind": "type",
+    "difference": "type select; salt-wordpress taxonomy",
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes"
+  },
+  {
+    "section": "collection-showcase (services)",
+    "path": "query.items",
+    "kind": "relation",
+    "difference": "post_type [\"service\",\"work\",\"testimonial\",\"post\",\"team_member\"]; salt-wordpress [\"service\"]",
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes"
+  },
+  {
+    "section": "collection-showcase (services)",
+    "path": "query.order",
+    "kind": "options",
+    "difference": "choices default, newest, title; salt-wordpress (empty), menu_order, date, title",
+    "evidence": "note: Stored as the layout's own source, taxonomy_terms, manual, orderby, order and count; taxonomy_terms becomes categories, manual becomes items, orderby and order fold into order, count stays count. SC-006 offers neither oldest-first nor Z to A, so a stored order direction is dropped on migration."
+  },
+  {
+    "section": "collection-showcase (services)",
+    "path": "query.order",
+    "kind": "values",
+    "difference": "default \"default\"; salt-wordpress none",
+    "evidence": "values: {\"\":\"default\",\"menu_order\":\"default\",\"date\":\"newest\",\"title\":\"title\"}"
+  },
+  {
+    "section": "collection-showcase (services)",
+    "path": "query.order",
+    "kind": "condition",
+    "difference": "condition differs (1 of 3 cases), e.g. {\"mode\":\"manual\"}: contract hides, salt-wordpress shows",
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes"
+  },
+  {
+    "section": "collection-showcase (services)",
+    "path": "query.count",
+    "kind": "limit",
+    "difference": "step 1; salt-wordpress none",
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes"
+  },
+  {
+    "section": "collection-showcase (services)",
+    "path": "query.count",
+    "kind": "condition",
+    "difference": "condition differs (1 of 3 cases), e.g. {\"mode\":\"manual\"}: contract hides, salt-wordpress shows",
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes"
+  },
+  {
+    "section": "collection-showcase (services)",
+    "path": "query.direction",
+    "kind": "extra",
+    "difference": "in salt-wordpress, not in the contract",
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes"
+  },
+  {
+    "section": "collection-showcase (services)",
+    "path": "showIcons",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field; services always draws its icon today"
+  },
+  {
+    "section": "collection-showcase (services)",
+    "path": "showTags",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field"
+  },
+  {
+    "section": "collection-showcase (services)",
+    "path": "groupByCategory",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field, with the index layout"
+  },
+  {
+    "section": "collection-showcase (services)",
+    "path": "viewAll",
+    "kind": "name",
+    "difference": "stored as view_all",
+    "evidence": "formerly: view_all"
+  },
+  {
+    "section": "collection-showcase (services)",
+    "path": "viewAll",
+    "kind": "default",
+    "difference": "default 1; salt-wordpress 0",
+    "evidence": "owes: the default true on services, where it is false today; team has none"
+  },
+  {
+    "section": "collection-showcase (services)",
+    "path": "viewAllLabel",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field; the wording is fixed per collection today"
+  },
+  {
+    "section": "collection-showcase (services)",
+    "path": "settings.spacing",
+    "kind": "name",
+    "difference": "stored as section_spacing",
+    "evidence": "formerly: section_spacing"
+  },
+  {
+    "section": "collection-showcase (services)",
+    "path": "settings.tone",
+    "kind": "name",
+    "difference": "stored as section_background",
+    "evidence": "formerly: section_background"
+  },
+  {
+    "section": "collection-showcase (services)",
+    "path": "settings.tone",
+    "kind": "values",
+    "difference": "choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse",
+    "evidence": "values: {\"inverse\":\"surface-inverse\"}"
+  },
+  {
+    "section": "collection-showcase (services)",
+    "path": "settings.toneDark",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field; dark mode is a token inversion today, with no per-section choice"
+  },
+  {
+    "section": "collection-showcase (services)",
+    "path": "settings.width",
+    "kind": "name",
+    "difference": "stored as section_container",
+    "evidence": "formerly: section_container"
+  },
+  {
+    "section": "collection-showcase (services)",
+    "path": "settings.backgroundImage",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the background image and its four settings"
+  },
+  {
+    "section": "collection-showcase (services)",
+    "path": "settings.anchorId",
+    "kind": "name",
+    "difference": "stored as section_anchor",
+    "evidence": "formerly: section_anchor"
+  },
+  {
+    "section": "collection-showcase (services)",
+    "path": "settings.firstPageOnly",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field, with the listing section that paginates"
+  },
+  {
+    "section": "collection-showcase (services)",
+    "path": "settings.divider",
+    "kind": "name",
+    "difference": "stored as section_divider",
+    "evidence": "formerly: section_divider"
+  },
+  {
+    "section": "collection-showcase (work)",
+    "path": "(layout name)",
+    "kind": "name",
+    "difference": "name collection-showcase; salt-wordpress work",
+    "evidence": "sections.json formerly: work"
+  },
+  {
+    "section": "collection-showcase (work)",
+    "path": "intro",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field"
+  },
+  {
+    "section": "collection-showcase (work)",
+    "path": "source",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: one section with a source select in place of five layouts; the former layout slug gives the source"
+  },
+  {
+    "section": "collection-showcase (work)",
+    "path": "layout",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the accordion and index layouts, and the field on work, team and blog_teaser; services has grid, list and featured; testimonials grid becomes source testimonials with layout grid"
+  },
+  {
+    "section": "collection-showcase (work)",
+    "path": "columns",
+    "kind": "condition",
+    "difference": "condition differs (3 of 5 cases), e.g. {\"layout\":\"list\"}: contract hides, salt-wordpress shows; {\"layout\":\"accordion\"}: contract hides, salt-wordpress shows",
+    "evidence": "owes: one section in place of five, and the accordion and index layouts"
+  },
+  {
+    "section": "collection-showcase (work)",
+    "path": "columns",
+    "kind": "options",
+    "difference": "choices 2, 3, 4; salt-wordpress 2, 3",
+    "evidence": "owes: one select with the strings 2, 3 and 4 on every source; work and blog_teaser offer 2 and 3 with an integer default 3, team uses bare-numeral labels, testimonials has none"
+  },
+  {
+    "section": "collection-showcase (work)",
+    "path": "columns",
+    "kind": "default",
+    "difference": "default \"3\"; salt-wordpress 3",
+    "evidence": "owes: one select with the strings 2, 3 and 4 on every source; work and blog_teaser offer 2 and 3 with an integer default 3, team uses bare-numeral labels, testimonials has none"
+  },
+  {
+    "section": "collection-showcase (work)",
+    "path": "query",
+    "kind": "name",
+    "difference": "stored as source, manual, taxonomy_terms, orderby, order, count",
+    "evidence": "formerly: source, manual, taxonomy_terms, orderby, order, count"
+  },
+  {
+    "section": "collection-showcase (work)",
+    "path": "query.mode",
+    "kind": "values",
+    "difference": "choices automatic, by-category, manual; salt-wordpress default, taxonomy, manual",
+    "evidence": "values: {\"default\":\"automatic\",\"taxonomy\":\"by-category\",\"manual\":\"manual\"}"
+  },
+  {
+    "section": "collection-showcase (work)",
+    "path": "query.mode",
+    "kind": "values",
+    "difference": "default \"automatic\"; salt-wordpress \"default\"",
+    "evidence": "values: {\"default\":\"automatic\",\"taxonomy\":\"by-category\",\"manual\":\"manual\"}"
+  },
+  {
+    "section": "collection-showcase (work)",
+    "path": "query.categories",
+    "kind": "type",
+    "difference": "type select; salt-wordpress taxonomy",
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes"
+  },
+  {
+    "section": "collection-showcase (work)",
+    "path": "query.items",
+    "kind": "relation",
+    "difference": "post_type [\"service\",\"work\",\"testimonial\",\"post\",\"team_member\"]; salt-wordpress [\"work\"]",
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes"
+  },
+  {
+    "section": "collection-showcase (work)",
+    "path": "query.order",
+    "kind": "options",
+    "difference": "choices default, newest, title; salt-wordpress (empty), menu_order, date, title",
+    "evidence": "note: Stored as the layout's own source, taxonomy_terms, manual, orderby, order and count; taxonomy_terms becomes categories, manual becomes items, orderby and order fold into order, count stays count. SC-006 offers neither oldest-first nor Z to A, so a stored order direction is dropped on migration."
+  },
+  {
+    "section": "collection-showcase (work)",
+    "path": "query.order",
+    "kind": "values",
+    "difference": "default \"default\"; salt-wordpress none",
+    "evidence": "values: {\"\":\"default\",\"menu_order\":\"default\",\"date\":\"newest\",\"title\":\"title\"}"
+  },
+  {
+    "section": "collection-showcase (work)",
+    "path": "query.order",
+    "kind": "condition",
+    "difference": "condition differs (1 of 3 cases), e.g. {\"mode\":\"manual\"}: contract hides, salt-wordpress shows",
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes"
+  },
+  {
+    "section": "collection-showcase (work)",
+    "path": "query.count",
+    "kind": "limit",
+    "difference": "step 1; salt-wordpress none",
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes"
+  },
+  {
+    "section": "collection-showcase (work)",
+    "path": "query.count",
+    "kind": "condition",
+    "difference": "condition differs (1 of 3 cases), e.g. {\"mode\":\"manual\"}: contract hides, salt-wordpress shows",
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes"
+  },
+  {
+    "section": "collection-showcase (work)",
+    "path": "query.direction",
+    "kind": "extra",
+    "difference": "in salt-wordpress, not in the contract",
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes"
+  },
+  {
+    "section": "collection-showcase (work)",
+    "path": "showTags",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field"
+  },
+  {
+    "section": "collection-showcase (work)",
+    "path": "groupByCategory",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field, with the index layout"
+  },
+  {
+    "section": "collection-showcase (work)",
+    "path": "viewAll",
+    "kind": "name",
+    "difference": "stored as view_all",
+    "evidence": "formerly: view_all"
+  },
+  {
+    "section": "collection-showcase (work)",
+    "path": "viewAllLabel",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field; the wording is fixed per collection today"
+  },
+  {
+    "section": "collection-showcase (work)",
+    "path": "settings.spacing",
+    "kind": "name",
+    "difference": "stored as section_spacing",
+    "evidence": "formerly: section_spacing"
+  },
+  {
+    "section": "collection-showcase (work)",
+    "path": "settings.tone",
+    "kind": "name",
+    "difference": "stored as section_background",
+    "evidence": "formerly: section_background"
+  },
+  {
+    "section": "collection-showcase (work)",
+    "path": "settings.tone",
+    "kind": "values",
+    "difference": "choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse",
+    "evidence": "values: {\"inverse\":\"surface-inverse\"}"
+  },
+  {
+    "section": "collection-showcase (work)",
+    "path": "settings.toneDark",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field; dark mode is a token inversion today, with no per-section choice"
+  },
+  {
+    "section": "collection-showcase (work)",
+    "path": "settings.width",
+    "kind": "name",
+    "difference": "stored as section_container",
+    "evidence": "formerly: section_container"
+  },
+  {
+    "section": "collection-showcase (work)",
+    "path": "settings.backgroundImage",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the background image and its four settings"
+  },
+  {
+    "section": "collection-showcase (work)",
+    "path": "settings.anchorId",
+    "kind": "name",
+    "difference": "stored as section_anchor",
+    "evidence": "formerly: section_anchor"
+  },
+  {
+    "section": "collection-showcase (work)",
+    "path": "settings.firstPageOnly",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field, with the listing section that paginates"
+  },
+  {
+    "section": "collection-showcase (work)",
+    "path": "settings.divider",
+    "kind": "name",
+    "difference": "stored as section_divider",
+    "evidence": "formerly: section_divider"
+  },
+  {
+    "section": "collection-showcase (team)",
+    "path": "(layout name)",
+    "kind": "name",
+    "difference": "name collection-showcase; salt-wordpress team",
+    "evidence": "sections.json formerly: team"
+  },
+  {
+    "section": "collection-showcase (team)",
+    "path": "intro",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field"
+  },
+  {
+    "section": "collection-showcase (team)",
+    "path": "source",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: one section with a source select in place of five layouts; the former layout slug gives the source"
+  },
+  {
+    "section": "collection-showcase (team)",
+    "path": "layout",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the accordion and index layouts, and the field on work, team and blog_teaser; services has grid, list and featured; testimonials grid becomes source testimonials with layout grid"
+  },
+  {
+    "section": "collection-showcase (team)",
+    "path": "columns",
+    "kind": "condition",
+    "difference": "condition differs (3 of 5 cases), e.g. {\"layout\":\"list\"}: contract hides, salt-wordpress shows; {\"layout\":\"accordion\"}: contract hides, salt-wordpress shows",
+    "evidence": "owes: one section in place of five, and the accordion and index layouts"
+  },
+  {
+    "section": "collection-showcase (team)",
+    "path": "query",
+    "kind": "name",
+    "difference": "stored as source, manual, taxonomy_terms, orderby, order, count",
+    "evidence": "formerly: source, manual, taxonomy_terms, orderby, order, count"
+  },
+  {
+    "section": "collection-showcase (team)",
+    "path": "query.mode",
+    "kind": "values",
+    "difference": "choices automatic, by-category, manual; salt-wordpress default, taxonomy, manual",
+    "evidence": "values: {\"default\":\"automatic\",\"taxonomy\":\"by-category\",\"manual\":\"manual\"}"
+  },
+  {
+    "section": "collection-showcase (team)",
+    "path": "query.mode",
+    "kind": "values",
+    "difference": "default \"automatic\"; salt-wordpress \"default\"",
+    "evidence": "values: {\"default\":\"automatic\",\"taxonomy\":\"by-category\",\"manual\":\"manual\"}"
+  },
+  {
+    "section": "collection-showcase (team)",
+    "path": "query.categories",
+    "kind": "type",
+    "difference": "type select; salt-wordpress taxonomy",
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes"
+  },
+  {
+    "section": "collection-showcase (team)",
+    "path": "query.items",
+    "kind": "relation",
+    "difference": "post_type [\"service\",\"work\",\"testimonial\",\"post\",\"team_member\"]; salt-wordpress [\"team_member\"]",
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes"
+  },
+  {
+    "section": "collection-showcase (team)",
+    "path": "query.order",
+    "kind": "options",
+    "difference": "choices default, newest, title; salt-wordpress (empty), menu_order, date, title",
+    "evidence": "note: Stored as the layout's own source, taxonomy_terms, manual, orderby, order and count; taxonomy_terms becomes categories, manual becomes items, orderby and order fold into order, count stays count. SC-006 offers neither oldest-first nor Z to A, so a stored order direction is dropped on migration."
+  },
+  {
+    "section": "collection-showcase (team)",
+    "path": "query.order",
+    "kind": "values",
+    "difference": "default \"default\"; salt-wordpress none",
+    "evidence": "values: {\"\":\"default\",\"menu_order\":\"default\",\"date\":\"newest\",\"title\":\"title\"}"
+  },
+  {
+    "section": "collection-showcase (team)",
+    "path": "query.order",
+    "kind": "condition",
+    "difference": "condition differs (1 of 3 cases), e.g. {\"mode\":\"manual\"}: contract hides, salt-wordpress shows",
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes"
+  },
+  {
+    "section": "collection-showcase (team)",
+    "path": "query.count",
+    "kind": "limit",
+    "difference": "step 1; salt-wordpress none",
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes"
+  },
+  {
+    "section": "collection-showcase (team)",
+    "path": "query.count",
+    "kind": "condition",
+    "difference": "condition differs (1 of 3 cases), e.g. {\"mode\":\"manual\"}: contract hides, salt-wordpress shows",
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes"
+  },
+  {
+    "section": "collection-showcase (team)",
+    "path": "query.direction",
+    "kind": "extra",
+    "difference": "in salt-wordpress, not in the contract",
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes"
+  },
+  {
+    "section": "collection-showcase (team)",
+    "path": "viewAll",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the default true on services, where it is false today; team has none"
+  },
+  {
+    "section": "collection-showcase (team)",
+    "path": "viewAllLabel",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field; the wording is fixed per collection today"
+  },
+  {
+    "section": "collection-showcase (team)",
+    "path": "settings.spacing",
+    "kind": "name",
+    "difference": "stored as section_spacing",
+    "evidence": "formerly: section_spacing"
+  },
+  {
+    "section": "collection-showcase (team)",
+    "path": "settings.tone",
+    "kind": "name",
+    "difference": "stored as section_background",
+    "evidence": "formerly: section_background"
+  },
+  {
+    "section": "collection-showcase (team)",
+    "path": "settings.tone",
+    "kind": "values",
+    "difference": "choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse",
+    "evidence": "values: {\"inverse\":\"surface-inverse\"}"
+  },
+  {
+    "section": "collection-showcase (team)",
+    "path": "settings.toneDark",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field; dark mode is a token inversion today, with no per-section choice"
+  },
+  {
+    "section": "collection-showcase (team)",
+    "path": "settings.width",
+    "kind": "name",
+    "difference": "stored as section_container",
+    "evidence": "formerly: section_container"
+  },
+  {
+    "section": "collection-showcase (team)",
+    "path": "settings.backgroundImage",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the background image and its four settings"
+  },
+  {
+    "section": "collection-showcase (team)",
+    "path": "settings.anchorId",
+    "kind": "name",
+    "difference": "stored as section_anchor",
+    "evidence": "formerly: section_anchor"
+  },
+  {
+    "section": "collection-showcase (team)",
+    "path": "settings.firstPageOnly",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field, with the listing section that paginates"
+  },
+  {
+    "section": "collection-showcase (team)",
+    "path": "settings.divider",
+    "kind": "name",
+    "difference": "stored as section_divider",
+    "evidence": "formerly: section_divider"
+  },
+  {
+    "section": "collection-showcase (testimonials)",
+    "path": "(layout name)",
+    "kind": "name",
+    "difference": "name collection-showcase; salt-wordpress testimonials",
+    "evidence": "sections.json formerly: testimonials"
+  },
+  {
+    "section": "collection-showcase (testimonials)",
+    "path": "intro",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field"
+  },
+  {
+    "section": "collection-showcase (testimonials)",
+    "path": "source",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: one section with a source select in place of five layouts; the former layout slug gives the source"
+  },
+  {
+    "section": "collection-showcase (testimonials)",
+    "path": "layout",
+    "kind": "options",
+    "difference": "choices grid, list, featured, accordion, index; salt-wordpress grid, slider",
+    "evidence": "owes: the accordion and index layouts, and the field on work, team and blog_teaser; services has grid, list and featured; testimonials grid becomes source testimonials with layout grid"
+  },
+  {
+    "section": "collection-showcase (testimonials)",
+    "path": "columns",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: one select with the strings 2, 3 and 4 on every source; work and blog_teaser offer 2 and 3 with an integer default 3, team uses bare-numeral labels, testimonials has none"
+  },
+  {
+    "section": "collection-showcase (testimonials)",
+    "path": "query",
+    "kind": "name",
+    "difference": "stored as source, manual, orderby, order, count",
+    "evidence": "formerly: source, manual, taxonomy_terms, orderby, order, count"
+  },
+  {
+    "section": "collection-showcase (testimonials)",
+    "path": "query.mode",
+    "kind": "values",
+    "difference": "choices automatic, by-category, manual; salt-wordpress default, taxonomy, manual",
+    "evidence": "values: {\"default\":\"automatic\",\"taxonomy\":\"by-category\",\"manual\":\"manual\"}"
+  },
+  {
+    "section": "collection-showcase (testimonials)",
+    "path": "query.mode",
+    "kind": "values",
+    "difference": "default \"automatic\"; salt-wordpress \"default\"",
+    "evidence": "values: {\"default\":\"automatic\",\"taxonomy\":\"by-category\",\"manual\":\"manual\"}"
+  },
+  {
+    "section": "collection-showcase (testimonials)",
+    "path": "query.categories",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes"
+  },
+  {
+    "section": "collection-showcase (testimonials)",
+    "path": "query.items",
+    "kind": "relation",
+    "difference": "post_type [\"service\",\"work\",\"testimonial\",\"post\",\"team_member\"]; salt-wordpress [\"testimonial\"]",
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes"
+  },
+  {
+    "section": "collection-showcase (testimonials)",
+    "path": "query.order",
+    "kind": "options",
+    "difference": "choices default, newest, title; salt-wordpress (empty), menu_order, date, title",
+    "evidence": "note: Stored as the layout's own source, taxonomy_terms, manual, orderby, order and count; taxonomy_terms becomes categories, manual becomes items, orderby and order fold into order, count stays count. SC-006 offers neither oldest-first nor Z to A, so a stored order direction is dropped on migration."
+  },
+  {
+    "section": "collection-showcase (testimonials)",
+    "path": "query.order",
+    "kind": "values",
+    "difference": "default \"default\"; salt-wordpress none",
+    "evidence": "values: {\"\":\"default\",\"menu_order\":\"default\",\"date\":\"newest\",\"title\":\"title\"}"
+  },
+  {
+    "section": "collection-showcase (testimonials)",
+    "path": "query.order",
+    "kind": "condition",
+    "difference": "condition differs (1 of 3 cases), e.g. {\"mode\":\"manual\"}: contract hides, salt-wordpress shows",
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes"
+  },
+  {
+    "section": "collection-showcase (testimonials)",
+    "path": "query.count",
+    "kind": "limit",
+    "difference": "step 1; salt-wordpress none",
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes"
+  },
+  {
+    "section": "collection-showcase (testimonials)",
+    "path": "query.count",
+    "kind": "condition",
+    "difference": "condition differs (1 of 3 cases), e.g. {\"mode\":\"manual\"}: contract hides, salt-wordpress shows",
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes"
+  },
+  {
+    "section": "collection-showcase (testimonials)",
+    "path": "query.direction",
+    "kind": "extra",
+    "difference": "in salt-wordpress, not in the contract",
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes"
+  },
+  {
+    "section": "collection-showcase (testimonials)",
+    "path": "showRatings",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field; testimonials always draws a stored rating today"
+  },
+  {
+    "section": "collection-showcase (testimonials)",
+    "path": "viewAll",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the default true on services, where it is false today; team has none"
+  },
+  {
+    "section": "collection-showcase (testimonials)",
+    "path": "viewAllLabel",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field; the wording is fixed per collection today"
+  },
+  {
+    "section": "collection-showcase (testimonials)",
+    "path": "settings.spacing",
+    "kind": "name",
+    "difference": "stored as section_spacing",
+    "evidence": "formerly: section_spacing"
+  },
+  {
+    "section": "collection-showcase (testimonials)",
+    "path": "settings.tone",
+    "kind": "name",
+    "difference": "stored as section_background",
+    "evidence": "formerly: section_background"
+  },
+  {
+    "section": "collection-showcase (testimonials)",
+    "path": "settings.tone",
+    "kind": "values",
+    "difference": "choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse",
+    "evidence": "values: {\"inverse\":\"surface-inverse\"}"
+  },
+  {
+    "section": "collection-showcase (testimonials)",
+    "path": "settings.toneDark",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field; dark mode is a token inversion today, with no per-section choice"
+  },
+  {
+    "section": "collection-showcase (testimonials)",
+    "path": "settings.width",
+    "kind": "name",
+    "difference": "stored as section_container",
+    "evidence": "formerly: section_container"
+  },
+  {
+    "section": "collection-showcase (testimonials)",
+    "path": "settings.backgroundImage",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the background image and its four settings"
+  },
+  {
+    "section": "collection-showcase (testimonials)",
+    "path": "settings.anchorId",
+    "kind": "name",
+    "difference": "stored as section_anchor",
+    "evidence": "formerly: section_anchor"
+  },
+  {
+    "section": "collection-showcase (testimonials)",
+    "path": "settings.firstPageOnly",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field, with the listing section that paginates"
+  },
+  {
+    "section": "collection-showcase (testimonials)",
+    "path": "settings.divider",
+    "kind": "name",
+    "difference": "stored as section_divider",
+    "evidence": "formerly: section_divider"
+  },
+  {
+    "section": "collection-showcase (blog_teaser)",
+    "path": "(layout name)",
+    "kind": "name",
+    "difference": "name collection-showcase; salt-wordpress blog_teaser",
+    "evidence": "sections.json formerly: blog_teaser"
+  },
+  {
+    "section": "collection-showcase (blog_teaser)",
+    "path": "intro",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field"
+  },
+  {
+    "section": "collection-showcase (blog_teaser)",
+    "path": "source",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: one section with a source select in place of five layouts; the former layout slug gives the source"
+  },
+  {
+    "section": "collection-showcase (blog_teaser)",
+    "path": "layout",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the accordion and index layouts, and the field on work, team and blog_teaser; services has grid, list and featured; testimonials grid becomes source testimonials with layout grid"
+  },
+  {
+    "section": "collection-showcase (blog_teaser)",
+    "path": "columns",
+    "kind": "condition",
+    "difference": "condition differs (3 of 5 cases), e.g. {\"layout\":\"list\"}: contract hides, salt-wordpress shows; {\"layout\":\"accordion\"}: contract hides, salt-wordpress shows",
+    "evidence": "owes: one section in place of five, and the accordion and index layouts"
+  },
+  {
+    "section": "collection-showcase (blog_teaser)",
+    "path": "columns",
+    "kind": "options",
+    "difference": "choices 2, 3, 4; salt-wordpress 2, 3",
+    "evidence": "owes: one select with the strings 2, 3 and 4 on every source; work and blog_teaser offer 2 and 3 with an integer default 3, team uses bare-numeral labels, testimonials has none"
+  },
+  {
+    "section": "collection-showcase (blog_teaser)",
+    "path": "columns",
+    "kind": "default",
+    "difference": "default \"3\"; salt-wordpress 3",
+    "evidence": "owes: one select with the strings 2, 3 and 4 on every source; work and blog_teaser offer 2 and 3 with an integer default 3, team uses bare-numeral labels, testimonials has none"
+  },
+  {
+    "section": "collection-showcase (blog_teaser)",
+    "path": "query",
+    "kind": "name",
+    "difference": "stored as source, manual, taxonomy_terms, orderby, order, count",
+    "evidence": "formerly: source, manual, taxonomy_terms, orderby, order, count"
+  },
+  {
+    "section": "collection-showcase (blog_teaser)",
+    "path": "query.mode",
+    "kind": "values",
+    "difference": "choices automatic, by-category, manual; salt-wordpress default, taxonomy, manual",
+    "evidence": "values: {\"default\":\"automatic\",\"taxonomy\":\"by-category\",\"manual\":\"manual\"}"
+  },
+  {
+    "section": "collection-showcase (blog_teaser)",
+    "path": "query.mode",
+    "kind": "values",
+    "difference": "default \"automatic\"; salt-wordpress \"default\"",
+    "evidence": "values: {\"default\":\"automatic\",\"taxonomy\":\"by-category\",\"manual\":\"manual\"}"
+  },
+  {
+    "section": "collection-showcase (blog_teaser)",
+    "path": "query.categories",
+    "kind": "type",
+    "difference": "type select; salt-wordpress taxonomy",
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes"
+  },
+  {
+    "section": "collection-showcase (blog_teaser)",
+    "path": "query.items",
+    "kind": "relation",
+    "difference": "post_type [\"service\",\"work\",\"testimonial\",\"post\",\"team_member\"]; salt-wordpress [\"post\"]",
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes"
+  },
+  {
+    "section": "collection-showcase (blog_teaser)",
+    "path": "query.order",
+    "kind": "options",
+    "difference": "choices default, newest, title; salt-wordpress (empty), menu_order, date, title",
+    "evidence": "note: Stored as the layout's own source, taxonomy_terms, manual, orderby, order and count; taxonomy_terms becomes categories, manual becomes items, orderby and order fold into order, count stays count. SC-006 offers neither oldest-first nor Z to A, so a stored order direction is dropped on migration."
+  },
+  {
+    "section": "collection-showcase (blog_teaser)",
+    "path": "query.order",
+    "kind": "values",
+    "difference": "default \"default\"; salt-wordpress none",
+    "evidence": "values: {\"\":\"default\",\"menu_order\":\"default\",\"date\":\"newest\",\"title\":\"title\"}"
+  },
+  {
+    "section": "collection-showcase (blog_teaser)",
+    "path": "query.order",
+    "kind": "condition",
+    "difference": "condition differs (1 of 3 cases), e.g. {\"mode\":\"manual\"}: contract hides, salt-wordpress shows",
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes"
+  },
+  {
+    "section": "collection-showcase (blog_teaser)",
+    "path": "query.count",
+    "kind": "limit",
+    "difference": "step 1; salt-wordpress none",
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes"
+  },
+  {
+    "section": "collection-showcase (blog_teaser)",
+    "path": "query.count",
+    "kind": "condition",
+    "difference": "condition differs (1 of 3 cases), e.g. {\"mode\":\"manual\"}: contract hides, salt-wordpress shows",
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes"
+  },
+  {
+    "section": "collection-showcase (blog_teaser)",
+    "path": "query.direction",
+    "kind": "extra",
+    "difference": "in salt-wordpress, not in the contract",
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes"
+  },
+  {
+    "section": "collection-showcase (blog_teaser)",
+    "path": "showTags",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field"
+  },
+  {
+    "section": "collection-showcase (blog_teaser)",
+    "path": "groupByCategory",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field, with the index layout"
+  },
+  {
+    "section": "collection-showcase (blog_teaser)",
+    "path": "viewAll",
+    "kind": "name",
+    "difference": "stored as view_all",
+    "evidence": "formerly: view_all"
+  },
+  {
+    "section": "collection-showcase (blog_teaser)",
+    "path": "viewAllLabel",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field; the wording is fixed per collection today"
+  },
+  {
+    "section": "collection-showcase (blog_teaser)",
+    "path": "settings.spacing",
+    "kind": "name",
+    "difference": "stored as section_spacing",
+    "evidence": "formerly: section_spacing"
+  },
+  {
+    "section": "collection-showcase (blog_teaser)",
+    "path": "settings.tone",
+    "kind": "name",
+    "difference": "stored as section_background",
+    "evidence": "formerly: section_background"
+  },
+  {
+    "section": "collection-showcase (blog_teaser)",
+    "path": "settings.tone",
+    "kind": "values",
+    "difference": "choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse",
+    "evidence": "values: {\"inverse\":\"surface-inverse\"}"
+  },
+  {
+    "section": "collection-showcase (blog_teaser)",
+    "path": "settings.toneDark",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field; dark mode is a token inversion today, with no per-section choice"
+  },
+  {
+    "section": "collection-showcase (blog_teaser)",
+    "path": "settings.width",
+    "kind": "name",
+    "difference": "stored as section_container",
+    "evidence": "formerly: section_container"
+  },
+  {
+    "section": "collection-showcase (blog_teaser)",
+    "path": "settings.backgroundImage",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the background image and its four settings"
+  },
+  {
+    "section": "collection-showcase (blog_teaser)",
+    "path": "settings.anchorId",
+    "kind": "name",
+    "difference": "stored as section_anchor",
+    "evidence": "formerly: section_anchor"
+  },
+  {
+    "section": "collection-showcase (blog_teaser)",
+    "path": "settings.firstPageOnly",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field, with the listing section that paginates"
+  },
+  {
+    "section": "collection-showcase (blog_teaser)",
+    "path": "settings.divider",
+    "kind": "name",
+    "difference": "stored as section_divider",
+    "evidence": "formerly: section_divider"
+  },
+  {
+    "section": "carousel (scroll_carousel)",
+    "path": "(layout name)",
+    "kind": "name",
+    "difference": "name carousel; salt-wordpress scroll_carousel",
+    "evidence": "sections.json formerly: scroll_carousel"
+  },
+  {
+    "section": "carousel (scroll_carousel)",
+    "path": "intro",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field"
+  },
+  {
+    "section": "carousel (scroll_carousel)",
+    "path": "label",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field; the track is named Carousel when there is no heading today"
+  },
+  {
+    "section": "carousel (scroll_carousel)",
+    "path": "source",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the source select: scroll_carousel becomes source inline, a testimonials layout set to slider becomes source testimonials; the other collections are new"
+  },
+  {
+    "section": "carousel (scroll_carousel)",
+    "path": "cardStyle",
+    "kind": "name",
+    "difference": "stored as card_type",
+    "evidence": "formerly: card_type"
+  },
+  {
+    "section": "carousel (scroll_carousel)",
+    "path": "cardStyle",
+    "kind": "values",
+    "difference": "choices generic, quote; salt-wordpress generic, testimonial",
+    "evidence": "values: {\"testimonial\":\"quote\"}"
+  },
+  {
+    "section": "carousel (scroll_carousel)",
+    "path": "cards.title",
+    "kind": "required",
+    "difference": "required true; salt-wordpress false",
+    "evidence": "owes: requiring it; a card with text alone is kept today"
+  },
+  {
+    "section": "carousel (scroll_carousel)",
+    "path": "settings.spacing",
+    "kind": "name",
+    "difference": "stored as section_spacing",
+    "evidence": "formerly: section_spacing"
+  },
+  {
+    "section": "carousel (scroll_carousel)",
+    "path": "settings.tone",
+    "kind": "name",
+    "difference": "stored as section_background",
+    "evidence": "formerly: section_background"
+  },
+  {
+    "section": "carousel (scroll_carousel)",
+    "path": "settings.tone",
+    "kind": "values",
+    "difference": "choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse",
+    "evidence": "values: {\"inverse\":\"surface-inverse\"}"
+  },
+  {
+    "section": "carousel (scroll_carousel)",
+    "path": "settings.toneDark",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field; dark mode is a token inversion today, with no per-section choice"
+  },
+  {
+    "section": "carousel (scroll_carousel)",
+    "path": "settings.width",
+    "kind": "name",
+    "difference": "stored as section_container",
+    "evidence": "formerly: section_container"
+  },
+  {
+    "section": "carousel (scroll_carousel)",
+    "path": "settings.backgroundImage",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the background image and its four settings"
+  },
+  {
+    "section": "carousel (scroll_carousel)",
+    "path": "settings.anchorId",
+    "kind": "name",
+    "difference": "stored as section_anchor",
+    "evidence": "formerly: section_anchor"
+  },
+  {
+    "section": "carousel (scroll_carousel)",
+    "path": "settings.firstPageOnly",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field, with the listing section that paginates"
+  },
+  {
+    "section": "carousel (scroll_carousel)",
+    "path": "settings.divider",
+    "kind": "name",
+    "difference": "stored as section_divider",
+    "evidence": "formerly: section_divider"
+  },
+  {
+    "section": "carousel (testimonials)",
+    "path": "(layout name)",
+    "kind": "name",
+    "difference": "name carousel; salt-wordpress testimonials",
+    "evidence": "sections.json formerly: testimonials"
+  },
+  {
+    "section": "carousel (testimonials)",
+    "path": "intro",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field"
+  },
+  {
+    "section": "carousel (testimonials)",
+    "path": "label",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field; the track is named Carousel when there is no heading today"
+  },
+  {
+    "section": "carousel (testimonials)",
+    "path": "source",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the source select: scroll_carousel becomes source inline, a testimonials layout set to slider becomes source testimonials; the other collections are new"
+  },
+  {
+    "section": "carousel (testimonials)",
+    "path": "query",
+    "kind": "name",
+    "difference": "stored as source, manual, orderby, order, count",
+    "evidence": "formerly: source, manual, orderby, order, count"
+  },
+  {
+    "section": "carousel (testimonials)",
+    "path": "query.mode",
+    "kind": "values",
+    "difference": "choices automatic, by-category, manual; salt-wordpress default, taxonomy, manual",
+    "evidence": "values: {\"default\":\"automatic\",\"taxonomy\":\"by-category\",\"manual\":\"manual\"}"
+  },
+  {
+    "section": "carousel (testimonials)",
+    "path": "query.mode",
+    "kind": "values",
+    "difference": "default \"automatic\"; salt-wordpress \"default\"",
+    "evidence": "values: {\"default\":\"automatic\",\"taxonomy\":\"by-category\",\"manual\":\"manual\"}"
+  },
+  {
+    "section": "carousel (testimonials)",
+    "path": "query.categories",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the query on scroll_carousel; only the testimonials layout has one today; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes"
+  },
+  {
+    "section": "carousel (testimonials)",
+    "path": "query.items",
+    "kind": "relation",
+    "difference": "post_type [\"service\",\"work\",\"testimonial\",\"post\",\"team_member\"]; salt-wordpress [\"testimonial\"]",
+    "evidence": "owes: the query on scroll_carousel; only the testimonials layout has one today; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes"
+  },
+  {
+    "section": "carousel (testimonials)",
+    "path": "query.order",
+    "kind": "options",
+    "difference": "choices default, newest, title; salt-wordpress (empty), menu_order, date, title",
+    "evidence": "note: Stored as the layout's own source, taxonomy_terms, manual, orderby, order and count; taxonomy_terms becomes categories, manual becomes items, orderby and order fold into order, count stays count. SC-006 offers neither oldest-first nor Z to A, so a stored order direction is dropped on migration."
+  },
+  {
+    "section": "carousel (testimonials)",
+    "path": "query.order",
+    "kind": "values",
+    "difference": "default \"default\"; salt-wordpress none",
+    "evidence": "values: {\"\":\"default\",\"menu_order\":\"default\",\"date\":\"newest\",\"title\":\"title\"}"
+  },
+  {
+    "section": "carousel (testimonials)",
+    "path": "query.order",
+    "kind": "condition",
+    "difference": "condition differs (1 of 3 cases), e.g. {\"mode\":\"manual\"}: contract hides, salt-wordpress shows",
+    "evidence": "owes: the query on scroll_carousel; only the testimonials layout has one today; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes"
+  },
+  {
+    "section": "carousel (testimonials)",
+    "path": "query.count",
+    "kind": "limit",
+    "difference": "step 1; salt-wordpress none",
+    "evidence": "owes: the query on scroll_carousel; only the testimonials layout has one today; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes"
+  },
+  {
+    "section": "carousel (testimonials)",
+    "path": "query.count",
+    "kind": "condition",
+    "difference": "condition differs (1 of 3 cases), e.g. {\"mode\":\"manual\"}: contract hides, salt-wordpress shows",
+    "evidence": "owes: the query on scroll_carousel; only the testimonials layout has one today; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes"
+  },
+  {
+    "section": "carousel (testimonials)",
+    "path": "query.direction",
+    "kind": "extra",
+    "difference": "in salt-wordpress, not in the contract",
+    "evidence": "owes: the query on scroll_carousel; only the testimonials layout has one today; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes"
+  },
+  {
+    "section": "carousel (testimonials)",
+    "path": "settings.spacing",
+    "kind": "name",
+    "difference": "stored as section_spacing",
+    "evidence": "formerly: section_spacing"
+  },
+  {
+    "section": "carousel (testimonials)",
+    "path": "settings.tone",
+    "kind": "name",
+    "difference": "stored as section_background",
+    "evidence": "formerly: section_background"
+  },
+  {
+    "section": "carousel (testimonials)",
+    "path": "settings.tone",
+    "kind": "values",
+    "difference": "choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse",
+    "evidence": "values: {\"inverse\":\"surface-inverse\"}"
+  },
+  {
+    "section": "carousel (testimonials)",
+    "path": "settings.toneDark",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field; dark mode is a token inversion today, with no per-section choice"
+  },
+  {
+    "section": "carousel (testimonials)",
+    "path": "settings.width",
+    "kind": "name",
+    "difference": "stored as section_container",
+    "evidence": "formerly: section_container"
+  },
+  {
+    "section": "carousel (testimonials)",
+    "path": "settings.backgroundImage",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the background image and its four settings"
+  },
+  {
+    "section": "carousel (testimonials)",
+    "path": "settings.anchorId",
+    "kind": "name",
+    "difference": "stored as section_anchor",
+    "evidence": "formerly: section_anchor"
+  },
+  {
+    "section": "carousel (testimonials)",
+    "path": "settings.firstPageOnly",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field, with the listing section that paginates"
+  },
+  {
+    "section": "carousel (testimonials)",
+    "path": "settings.divider",
+    "kind": "name",
+    "difference": "stored as section_divider",
+    "evidence": "formerly: section_divider"
+  },
+  {
+    "section": "carousel (testimonials)",
+    "path": "layout",
+    "kind": "extra",
+    "difference": "in salt-wordpress, not in the contract",
+    "evidence": "sections.json formerly: testimonials"
+  },
+  {
+    "section": "contact",
+    "path": "intro",
+    "kind": "name",
+    "difference": "stored as text",
+    "evidence": "formerly: text"
+  },
+  {
+    "section": "contact",
+    "path": "intro",
+    "kind": "limit",
+    "difference": "maxlength 300; salt-wordpress none",
+    "evidence": "owes: the 300-character limit"
+  },
+  {
+    "section": "contact",
+    "path": "showPhone",
+    "kind": "name",
+    "difference": "stored as show_phone",
+    "evidence": "formerly: show_phone"
+  },
+  {
+    "section": "contact",
+    "path": "showEmail",
+    "kind": "name",
+    "difference": "stored as show_email",
+    "evidence": "formerly: show_email"
+  },
+  {
+    "section": "contact",
+    "path": "showAddress",
+    "kind": "name",
+    "difference": "stored as show_address",
+    "evidence": "formerly: show_address"
+  },
+  {
+    "section": "contact",
+    "path": "formIntro",
+    "kind": "name",
+    "difference": "stored as form_intro",
+    "evidence": "formerly: form_intro"
+  },
+  {
+    "section": "contact",
+    "path": "settings.spacing",
+    "kind": "name",
+    "difference": "stored as section_spacing",
+    "evidence": "formerly: section_spacing"
+  },
+  {
+    "section": "contact",
+    "path": "settings.tone",
+    "kind": "name",
+    "difference": "stored as section_background",
+    "evidence": "formerly: section_background"
+  },
+  {
+    "section": "contact",
+    "path": "settings.tone",
+    "kind": "values",
+    "difference": "choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse",
+    "evidence": "values: {\"inverse\":\"surface-inverse\"}"
+  },
+  {
+    "section": "contact",
+    "path": "settings.toneDark",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field; dark mode is a token inversion today, with no per-section choice"
+  },
+  {
+    "section": "contact",
+    "path": "settings.width",
+    "kind": "name",
+    "difference": "stored as section_container",
+    "evidence": "formerly: section_container"
+  },
+  {
+    "section": "contact",
+    "path": "settings.backgroundImage",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the background image and its four settings"
+  },
+  {
+    "section": "contact",
+    "path": "settings.anchorId",
+    "kind": "name",
+    "difference": "stored as section_anchor",
+    "evidence": "formerly: section_anchor"
+  },
+  {
+    "section": "contact",
+    "path": "settings.firstPageOnly",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field, with the listing section that paginates"
+  },
+  {
+    "section": "contact",
+    "path": "settings.divider",
+    "kind": "name",
+    "difference": "stored as section_divider",
+    "evidence": "formerly: section_divider"
+  },
+  {
+    "section": "locations",
+    "path": "query",
+    "kind": "name",
+    "difference": "stored as source, manual, taxonomy_terms, orderby, order, count",
+    "evidence": "formerly: source, manual, taxonomy_terms, orderby, order, count"
+  },
+  {
+    "section": "locations",
+    "path": "query.mode",
+    "kind": "values",
+    "difference": "choices automatic, by-category, manual; salt-wordpress default, taxonomy, manual",
+    "evidence": "values: {\"default\":\"automatic\",\"taxonomy\":\"by-category\",\"manual\":\"manual\"}"
+  },
+  {
+    "section": "locations",
+    "path": "query.mode",
+    "kind": "values",
+    "difference": "default \"automatic\"; salt-wordpress \"default\"",
+    "evidence": "values: {\"default\":\"automatic\",\"taxonomy\":\"by-category\",\"manual\":\"manual\"}"
+  },
+  {
+    "section": "locations",
+    "path": "query.order",
+    "kind": "options",
+    "difference": "choices default, newest, title; salt-wordpress (empty), menu_order, date, title",
+    "evidence": "note: Stored as the layout's own source, taxonomy_terms, manual, orderby, order and count; taxonomy_terms becomes categories, manual becomes items, orderby and order fold into order, count stays count. SC-006 offers neither oldest-first nor Z to A, so a stored order direction is dropped on migration."
+  },
+  {
+    "section": "locations",
+    "path": "query.order",
+    "kind": "values",
+    "difference": "default \"default\"; salt-wordpress none",
+    "evidence": "values: {\"\":\"default\",\"menu_order\":\"default\",\"date\":\"newest\",\"title\":\"title\"}"
+  },
+  {
+    "section": "locations",
+    "path": "query.order",
+    "kind": "condition",
+    "difference": "condition differs (1 of 3 cases), e.g. {\"mode\":\"manual\"}: contract hides, salt-wordpress shows",
+    "evidence": "owes: one query group in place of six layout fields"
+  },
+  {
+    "section": "locations",
+    "path": "query.count",
+    "kind": "limit",
+    "difference": "step 1; salt-wordpress none",
+    "evidence": "owes: one query group in place of six layout fields"
+  },
+  {
+    "section": "locations",
+    "path": "query.count",
+    "kind": "condition",
+    "difference": "condition differs (1 of 3 cases), e.g. {\"mode\":\"manual\"}: contract hides, salt-wordpress shows",
+    "evidence": "owes: one query group in place of six layout fields"
+  },
+  {
+    "section": "locations",
+    "path": "query.direction",
+    "kind": "extra",
+    "difference": "in salt-wordpress, not in the contract",
+    "evidence": "owes: one query group in place of six layout fields"
+  },
+  {
+    "section": "locations",
+    "path": "settings.spacing",
+    "kind": "name",
+    "difference": "stored as section_spacing",
+    "evidence": "formerly: section_spacing"
+  },
+  {
+    "section": "locations",
+    "path": "settings.tone",
+    "kind": "name",
+    "difference": "stored as section_background",
+    "evidence": "formerly: section_background"
+  },
+  {
+    "section": "locations",
+    "path": "settings.tone",
+    "kind": "values",
+    "difference": "choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse",
+    "evidence": "values: {\"inverse\":\"surface-inverse\"}"
+  },
+  {
+    "section": "locations",
+    "path": "settings.toneDark",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field; dark mode is a token inversion today, with no per-section choice"
+  },
+  {
+    "section": "locations",
+    "path": "settings.width",
+    "kind": "name",
+    "difference": "stored as section_container",
+    "evidence": "formerly: section_container"
+  },
+  {
+    "section": "locations",
+    "path": "settings.backgroundImage",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the background image and its four settings"
+  },
+  {
+    "section": "locations",
+    "path": "settings.anchorId",
+    "kind": "name",
+    "difference": "stored as section_anchor",
+    "evidence": "formerly: section_anchor"
+  },
+  {
+    "section": "locations",
+    "path": "settings.firstPageOnly",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field, with the listing section that paginates"
+  },
+  {
+    "section": "locations",
+    "path": "settings.divider",
+    "kind": "name",
+    "difference": "stored as section_divider",
+    "evidence": "formerly: section_divider"
+  },
+  {
+    "section": "pricing",
+    "path": "plans.features.text",
+    "kind": "required",
+    "difference": "required true; salt-wordpress false",
+    "evidence": "owes: requiring it"
+  },
+  {
+    "section": "pricing",
+    "path": "plans.features.included",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field"
+  },
+  {
+    "section": "pricing",
+    "path": "plans.cta",
+    "kind": "type",
+    "difference": "type group; salt-wordpress link",
+    "evidence": "owes: the link shape (label, type, document or url, newTab) in place of an ACF link"
+  },
+  {
+    "section": "pricing",
+    "path": "settings.spacing",
+    "kind": "name",
+    "difference": "stored as section_spacing",
+    "evidence": "formerly: section_spacing"
+  },
+  {
+    "section": "pricing",
+    "path": "settings.tone",
+    "kind": "name",
+    "difference": "stored as section_background",
+    "evidence": "formerly: section_background"
+  },
+  {
+    "section": "pricing",
+    "path": "settings.tone",
+    "kind": "values",
+    "difference": "choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse",
+    "evidence": "values: {\"inverse\":\"surface-inverse\"}"
+  },
+  {
+    "section": "pricing",
+    "path": "settings.toneDark",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field; dark mode is a token inversion today, with no per-section choice"
+  },
+  {
+    "section": "pricing",
+    "path": "settings.width",
+    "kind": "name",
+    "difference": "stored as section_container",
+    "evidence": "formerly: section_container"
+  },
+  {
+    "section": "pricing",
+    "path": "settings.backgroundImage",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the background image and its four settings"
+  },
+  {
+    "section": "pricing",
+    "path": "settings.anchorId",
+    "kind": "name",
+    "difference": "stored as section_anchor",
+    "evidence": "formerly: section_anchor"
+  },
+  {
+    "section": "pricing",
+    "path": "settings.firstPageOnly",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field, with the listing section that paginates"
+  },
+  {
+    "section": "pricing",
+    "path": "settings.divider",
+    "kind": "name",
+    "difference": "stored as section_divider",
+    "evidence": "formerly: section_divider"
+  }
+]

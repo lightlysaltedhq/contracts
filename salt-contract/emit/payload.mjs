@@ -23,8 +23,9 @@
 // the clock, the environment or the file system's listing order.
 import { readFileSync, writeFileSync } from 'node:fs'
 
-import { clauseHolds, clauses, collectionQueryShape, hasVisibleText, isFilled, isMainModule, LINK_SHAPE, loadContract,
-  categorisedSources, categorySources, modeAllowed, normaliseLineEndings, parseEmitterArguments, planSections, siblingValue, sourceValues, SOURCES } from './_contract.mjs'
+import { allowedFor, categorisedSources, categorySources, clauseHolds, clauses, collectionQueryShape, diffSnapshots, hasVisibleText,
+  isFilled, isMainModule, LINK_SHAPE, loadContract, modeAllowed, normaliseLineEndings, parseEmitterArguments, planSections,
+  siblingValue, sourceValues, SOURCES } from './_contract.mjs'
 
 /**
  * Each source's Payload collection and category taxonomy, as Salt for Next.js names them by
@@ -41,8 +42,6 @@ export const SOURCE_DEFAULTS = {
   faqs: { collection: 'faqs', taxonomy: 'faq-categories' },
   locations: { collection: 'locations', taxonomy: 'areas' },
 }
-
-const HEADING_KINDS = { h2: 'heading-2', h3: 'heading-3', h4: 'heading-4' }
 
 const snake = (s) => s.replace(/([a-z0-9])([A-Z])/g, '$1_$2').replace(/-/g, '_').toLowerCase()
 const pascal = (s) => s.split('-').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join('')
@@ -64,19 +63,6 @@ function sourcesFrom(options) {
   const given = options.sources
   const installed = given ? SOURCES.filter((s) => s in given) : SOURCES
   return Object.fromEntries(installed.map((s) => [s, { ...SOURCE_DEFAULTS[s], ...(given?.[s] ?? {}) }]))
-}
-
-function allowedFor(field, headings) {
-  if (!headings) return field.allowed
-  const contractHeadings = field.allowed.filter((k) => k.startsWith('heading-'))
-  if (contractHeadings.length === 0) return field.allowed
-  const wanted = headings.map((h) => HEADING_KINDS[h] ?? h)
-  for (const k of wanted) {
-    if (!contractHeadings.includes(k)) {
-      throw new Error(`headings: ${k} is not allowed by the contract, which allows ${contractHeadings.join(', ')}`)
-    }
-  }
-  return field.allowed.filter((k) => !k.startsWith('heading-') || wanted.includes(k))
 }
 
 function enumNameFor(ctx, name) {
@@ -377,29 +363,6 @@ export function payloadSnapshot(options = {}) {
 
 const keyOf = (item) => (item && typeof item === 'object' ? item.slug ?? item.name ?? item.value : undefined)
 
-function diff(was, now, at, out) {
-  if (Array.isArray(was) && Array.isArray(now) && [...was, ...now].every((x) => keyOf(x) !== undefined)) {
-    const a = new Map(was.map((x) => [keyOf(x), x]))
-    const b = new Map(now.map((x) => [keyOf(x), x]))
-    for (const k of a.keys()) if (!b.has(k)) out.push(`${at}[${k}] is in the snapshot and no longer generated`)
-    for (const k of b.keys()) if (!a.has(k)) out.push(`${at}[${k}] is generated and not in the snapshot`)
-    const common = [...a.keys()].filter((k) => b.has(k))
-    if (common.join('\0') !== [...b.keys()].filter((k) => a.has(k)).join('\0')) out.push(`${at} is in a different order`)
-    for (const k of common) diff(a.get(k), b.get(k), `${at}[${k}]`, out)
-    return
-  }
-  const isObj = (x) => x && typeof x === 'object' && !Array.isArray(x)
-  if (isObj(was) && isObj(now)) {
-    for (const k of new Set([...Object.keys(was), ...Object.keys(now)])) {
-      if (!(k in now)) out.push(`${at}.${k} is in the snapshot and no longer generated`)
-      else if (!(k in was)) out.push(`${at}.${k} is generated and not in the snapshot`)
-      else diff(was[k], now[k], `${at}.${k}`, out)
-    }
-    return
-  }
-  if (JSON.stringify(was) !== JSON.stringify(now)) out.push(`${at} was ${JSON.stringify(was)}, is now ${JSON.stringify(now)}`)
-}
-
 /**
  * Regenerate with `options` and compare with a committed snapshot (its text). `ok` is true only
  * when the two are byte-identical; `problems` names each difference by path, as
@@ -412,7 +375,7 @@ export function checkPayloadSnapshot(snapshot, options = {}) {
   let was
   try { was = JSON.parse(snapshot) } catch (e) { return { ok: false, problems: [`the snapshot is not JSON: ${e.message}`] } }
   const problems = []
-  diff(was, JSON.parse(now), 'blocks', problems)
+  diffSnapshots(was, JSON.parse(now), 'blocks', keyOf, problems)
   // Same structure, different bytes: formatting, which a regenerated snapshot fixes.
   if (!problems.length) problems.push('the snapshot differs from the generated text only in formatting; regenerate it')
   return { ok: false, problems }
