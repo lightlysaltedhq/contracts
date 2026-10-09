@@ -11,6 +11,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import { isFilled, loadContract, siblingValue } from '../salt-contract/emit/_contract.mjs'
+import { toPayloadBlocks } from '../salt-contract/emit/payload.mjs'
 import { acfSlugRegistry, acfSnapshot, checkAcfSnapshot, conditionalLogic, toAcfFieldGroups } from '../salt-contract/emit/acf.mjs'
 
 const emitter = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'salt-contract', 'emit', 'acf.mjs')
@@ -327,7 +328,7 @@ test('R4: a snapshot checked out with CRLF line endings still matches', () => {
 test('R5: a clause with no test, or with two, is refused by the emitter', () => {
   for (const bad of [{ field: 'on' }, { field: 'on', equals: true, in: [true] }, { field: 'on', filled: true, equals: true }]) {
     const fields = [{ name: 'on', type: 'boolean', label: 'On' }, { name: 'text', type: 'text', label: 'Text', condition: bad }]
-    assert.throws(() => probed(fields), /probe\.text condition on on: a clause tests exactly one of equals, in or filled/, JSON.stringify(bad))
+    assert.throws(() => probed(fields), /probe\.text condition: .*a clause is an object with a field name and exactly one of/, JSON.stringify(bad))
   }
 })
 
@@ -361,7 +362,7 @@ test('R3: a source-select section with none of its sources is left out, unless i
   const list = layoutsOf({ sources: {} })
   assert.ok(!list.some((l) => l.name === 'collection-showcase'), list.map((l) => l.name).join(', '))
   assert.throws(() => layoutsOf({ sources: {}, sections: ['collection-showcase'] }),
-    /section collection-showcase needs one of the sources services, case-studies, testimonials, posts, team \(collection-showcase\.query\)/)
+    /section collection-showcase needs one of the sources services, case-studies, testimonials, posts, team \(collection-showcase\.source\)/)
   assert.ok(layoutsOf({ sources: { team: {} } }).some((l) => l.name === 'collection-showcase'))
   // The carousel's cards are written in place, so it stays, offering only that, with no query.
   const carousel = layout(list, 'carousel')
@@ -408,4 +409,30 @@ test('R6: no field loses its provenance or its condition on the way into the sna
   // A deprecation on a field the contract builds in code is kept too.
   const [old] = probed([{ name: 'old', type: 'text', label: 'Old', deprecated: { since: '0.2.0', replacedBy: null } }])
   assert.deepEqual(old.salt, { deprecated: { since: '0.2.0', replacedBy: null } })
+})
+
+test('Payload and ACF leave out and keep the same sections, and offer the same sources, for the same sources', () => {
+  const sets = [undefined, {}, { posts: {} }, { team: {} }, { faqs: {} }, { locations: {} }, { testimonials: {} }, { services: {}, testimonials: {} }]
+  for (const sources of sets) {
+    const payload = toPayloadBlocks({ icons, richTextEditor: (allowed) => ({ allowed }), sources })
+    const acf = layoutsOf({ sources })
+    const at = JSON.stringify(sources)
+    assert.deepEqual(acf.map((l) => l.name), payload.map((b) => b.slug), at)
+    for (const b of payload) {
+      const l = layout(acf, b.slug)
+      // The same top-level fields survive withinSources, and a source select offers the same values.
+      assert.deepEqual(l.sub_fields.map((f) => f.name), b.fields.map((f) => f.name), `${at} ${b.slug}`)
+      const select = b.fields.find((f) => f.name === 'source')
+      if (select) assert.deepEqual(Object.keys(field(l.sub_fields, 'source').choices), select.options.map((o) => o.value), `${at} ${b.slug}.source`)
+    }
+    for (const id of ['faq', 'collection-showcase', 'carousel', 'locations']) {
+      let payloadError = null
+      let acfError = null
+      try { toPayloadBlocks({ icons, richTextEditor: (allowed) => ({ allowed }), sources, sections: [id] }) } catch (e) { payloadError = e.message }
+      try { layoutsOf({ sources, sections: [id] }) } catch (e) { acfError = e.message }
+      assert.equal(acfError, payloadError, `${at} sections: [${id}]`)
+    }
+  }
+  // The carousel keeps its inline cards with no sources, on both.
+  assert.ok(toPayloadBlocks({ icons, richTextEditor: (allowed) => ({ allowed }), sources: {} }).some((b) => b.slug === 'carousel'))
 })

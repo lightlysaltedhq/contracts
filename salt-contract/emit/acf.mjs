@@ -29,7 +29,8 @@
 // timestamp, which a consumer loading the groups from code does not need.
 import { readFileSync, writeFileSync } from 'node:fs'
 
-import { allowedFor, checkedClauses, collectionQueryShape, diffSnapshots, isMainModule, LINK_SHAPE, loadContract, normaliseLineEndings, resolveSection, SOURCES } from './_contract.mjs'
+import { allowedFor, checkedClauses, collectionQueryShape, diffSnapshots, isMainModule, LINK_SHAPE, loadContract,
+  normaliseLineEndings, offeredSources, resolveSection, SOURCES, withinSources } from './_contract.mjs'
 
 /**
  * Each source's post type and category taxonomy, as Salt for WordPress registers them by default.
@@ -160,8 +161,8 @@ function convertField(f, ctx) {
         salt.optionsFrom = 'icons'
         opts = options.icons
       } else if (ctx.path.length === 0 && ctx.sourceSelects.has(f.name)) {
-        // A select that picks a collection-query's source offers only the sources the site has.
-        opts = opts.filter((o) => !SOURCES.includes(o.value) || o.value in ctx.sources)
+        // A select that picks a collection-query's source offers only what the site can satisfy.
+        opts = offeredSources(f, ctx.installed).options
       }
       out.choices = choicesOf(opts, at)
       if (f.default !== undefined) out.default_value = f.default
@@ -254,8 +255,7 @@ function collectionQuery(f, out, ctx) {
     offered = [f.source]
     salt.source = f.source
   } else {
-    const select = ctx.siblings.find((s) => s.name === f.sourceField)
-    offered = (select?.options ?? []).map((o) => o.value).filter((v) => SOURCES.includes(v) && v in ctx.sources)
+    offered = offeredSources(ctx.siblings.find((s) => s.name === f.sourceField), ctx.installed).sources
     salt.sourceField = f.sourceField
   }
   const targets = offered.map((s) => ctx.sources[s])
@@ -285,47 +285,44 @@ function collectionQuery(f, out, ctx) {
 
 // ── Field groups ───────────────────────────────────────────────────────────────────────────────
 
-// A source select's collection sources the site installs, and whether it also offers something
-// that needs none (carousel's cards written in place).
-function offeredBy(fields, query, sources) {
-  const values = (fields.find((s) => s.name === query.sourceField)?.options ?? []).map((o) => o.value)
-  return { all: values.filter((v) => SOURCES.includes(v)), installed: values.filter((v) => SOURCES.includes(v) && v in sources), inline: values.some((v) => !SOURCES.includes(v)) }
-}
-
-// What a section needs from the site's sources and the site lacks, one line each. The rule is
-// payload.mjs's, but a source select that also offers inline items is never unmet: the section
-// still works with those, and its query is left out (see build).
-function unmetSources(fields, sources, at) {
+// What a section needs from the site's sources and the site lacks, one line each: payload.mjs's
+// rule, with offeredSources deciding what a source select can still offer.
+function unmetSources(fields, installed, at, sourceSelects = new Set()) {
   return fields.flatMap((f) => {
     const where = `${at}.${f.name}`
     const need = f.type === 'collection-query' ? f.source : f.type === 'relationship' ? f.to : undefined
-    const own = need && !(need in sources) ? [`the source ${need} (${where})`] : []
-    if (f.type === 'collection-query' && f.sourceField) {
-      const offered = offeredBy(fields, f, sources)
-      if (!offered.installed.length && !offered.inline) own.push(`one of the sources ${offered.all.join(', ')} (${where})`)
+    const own = need && !installed.has(need) ? [`the source ${need} (${where})`] : []
+    // A source select left with no option the site can satisfy cannot be filled in.
+    if (sourceSelects.has(f.name) && offeredSources(f, installed).options.length === 0) {
+      own.push(`one of the sources ${f.options.map((o) => o.value).filter((v) => SOURCES.includes(v)).join(', ')} (${where})`)
     }
-    return [...own, ...(f.fields ? unmetSources(f.fields, sources, where) : [])]
+    return [...own, ...(f.fields ? unmetSources(f.fields, installed, where) : [])]
   })
 }
+
+const sourceSelectsOf = (fields) =>
+  new Set(fields.filter((f) => f.type === 'collection-query' && f.sourceField).map((f) => f.sourceField))
 
 function build(options) {
   const contract = options.contract ?? loadContract()
   const sources = sourcesFrom(options)
+  const installed = new Set(Object.keys(sources))
   // Asked for by name, a section the site cannot carry is an error; by default it is left out.
-  const named = options.sections !== undefined
-  const ids = (options.sections ?? contract.sections.map((s) => s.id)).filter((id) => {
-    const unmet = unmetSources(resolveSection(contract, id).fields, sources, id)
+  const named = options.sections != null
+  const resolved = (options.sections ?? contract.sections.map((s) => s.id)).flatMap((id) => {
+    const { section, fields: all, settings } = resolveSection(contract, id)
+    const sourceSelects = sourceSelectsOf(all)
+    const fields = withinSources(all, installed)
+    const unmet = [
+      ...unmetSources(fields, installed, id, sourceSelects),
+      ...unmetSources(settings, installed, `${id}.settings`),
+    ]
     if (unmet.length && named) throw new Error(`section ${id} needs ${unmet.join(', ')}, which options.sources does not install`)
-    return unmet.length === 0
+    return unmet.length ? [] : [{ id, section, fields, settings, sourceSelects }]
   })
   const keys = new Map()
-  const layouts = ids.map((id) => {
-    const resolved = resolveSection(contract, id)
-    const { section, settings } = resolved
-    // A query whose select offers none of the site's sources has nothing to query.
-    const fields = resolved.fields.filter((f) => !(f.type === 'collection-query' && f.sourceField && !offeredBy(resolved.fields, f, sources).installed.length))
-    const sourceSelects = new Set(resolved.fields.filter((f) => f.type === 'collection-query' && f.sourceField).map((f) => f.sourceField))
-    const base = { options, sources, sourceSelects, keys, scope: id, path: [] }
+  const layouts = resolved.map(({ id, section, fields, settings, sourceSelects }) => {
+    const base = { options, sources, installed, sourceSelects, keys, scope: id, path: [] }
     const shared = settings.length ? [{ name: 'settings', type: 'group', label: 'Section settings', fields: settings }] : []
     return {
       key: `layout_salt_${snake(id)}`,
