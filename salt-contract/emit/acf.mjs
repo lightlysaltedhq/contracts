@@ -217,6 +217,8 @@ function convertField(f, ctx) {
         out.post_type = [...(options.linkTo ?? ['page'])]
       }
       out.return_format = 'id'
+      // A single post_object keeps its choice unless it may be emptied.
+      if (!f.many && !f.required) out.allow_null = 1
       if (f.many) {
         out.filters = ['search']
         if (f.min !== undefined) out.min = f.min

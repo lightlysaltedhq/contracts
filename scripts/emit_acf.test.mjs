@@ -463,3 +463,16 @@ test('Y3: a url-format text is an ACF text, since ACF\'s url field refuses mailt
   const url = field(field(layout(layoutsOf(), 'hero').sub_fields, 'buttons.link').sub_fields, 'url')
   assert.deepEqual([url.type, url.salt], ['text', { format: 'url' }])
 })
+
+test('Y4: a single relationship that is not required can be cleared', () => {
+  const [lead, must] = probed([
+    { name: 'lead', type: 'relationship', label: 'Lead', to: 'services' },
+    { name: 'must', type: 'relationship', label: 'Must', to: 'services', required: true },
+  ])
+  assert.deepEqual([lead.type, lead.allow_null], ['post_object', 1])
+  assert.equal(must.allow_null, undefined)
+  const [go] = probed([{ name: 'go', type: 'link', label: 'Go' }])
+  assert.equal(field(go.sub_fields, 'document').allow_null, 1)
+  const button = field(field(layout(layoutsOf(), 'hero').sub_fields, 'buttons.link').sub_fields, 'document')
+  assert.equal(button.allow_null, undefined) // the button's link is required
+})
