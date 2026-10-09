@@ -287,6 +287,10 @@ function collectionQuery(f, out, ctx) {
     return { ...rest, ...settings, ...(Object.keys(merged).length ? { salt: merged } : {}) }
   }
   out.sub_fields = convertFields(shape.map(({ part, ...p }) => p), ctx).map((field) => {
+    // ACF cannot hide one mode choice per value of the source select (modeAllowed), so the mode
+    // records which sources by-category needs, for the site's acf/validate_value check (the
+    // query's WordPress owes).
+    if (field.name === 'mode' && f.sourceField && 'by-category' in field.choices) return retyped(field, {}, { modeRequires: { 'by-category': withCategories } })
     if (field.name === 'items') return retyped(field, { type: 'relationship', post_type: postTypes, filters: ['search'], return_format: 'id' })
     if (field.name !== 'categories') return field
     // With a source select the field shows only while the select, on the layout above this group,

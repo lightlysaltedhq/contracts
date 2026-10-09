@@ -435,6 +435,9 @@ test('Payload and ACF leave out and keep the same sections, and offer the same s
         const mine = acfQuery.sub_fields.find((f) => f.name === 'categories')
         assert.equal(!!mine, !!theirs, `${at} ${b.slug}.query.categories`)
         if (theirs?.custom?.salt?.categoriesFor) assert.deepEqual(mine.salt.categoriesFor, theirs.custom.salt.categoriesFor, `${at} ${b.slug}.query.categories`)
+        // Where Payload refuses by-category for a source without categories, ACF records the same rule.
+        const theirMode = query.fields[0].custom?.salt?.categoriesFor
+        assert.deepEqual(acfQuery.sub_fields[0].salt?.modeRequires?.['by-category'], theirMode, `${at} ${b.slug}.query.mode`)
       }
     }
     for (const id of ['faq', 'collection-showcase', 'carousel', 'locations']) {
@@ -582,4 +585,19 @@ test('SC-010: with a source select, the categories field shows only for a source
   assert.deepEqual(picker.salt, { taxonomies: ['service_category', 'category'], categoriesFor: ['services', 'posts'] })
   // The rule names the layout's own source select.
   assert.ok(showcase.sub_fields.some((f) => f.key === picker.conditional_logic[0][1].field))
+})
+
+test('SC-010 (modeAllowed): the mode records that by-category needs a source with categories, and Salt for WordPress owes the save check', () => {
+  const carousel = layout(layoutsOf({ sources: { services: {}, testimonials: {} } }), 'carousel')
+  const mode = field(field(carousel.sub_fields, 'query').sub_fields, 'mode')
+  assert.deepEqual(mode.salt, { modeRequires: { 'by-category': ['services'] } })
+  // A fixed source has nothing to check: the choice is there only when the source has categories.
+  assert.equal(field(field(layout(layoutsOf(), 'faq').sub_fields, 'query').sub_fields, 'mode').salt, undefined)
+  // The contract records what ACF cannot do itself.
+  const contract = loadContract()
+  for (const id of ['collection-showcase', 'carousel']) {
+    const owes = contract.fields[id].fields.find((f) => f.name === 'query').platforms.wordpress.owes
+    assert.match(owes, /acf\/validate_value/, id)
+    assert.match(owes, /conditional logic/, id)
+  }
 })
