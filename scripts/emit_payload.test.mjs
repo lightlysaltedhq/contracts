@@ -286,3 +286,16 @@ test('every enum name fits Postgres\'s 63 characters', () => {
   assert.ok(names.length > 0)
   for (const n of names) assert.ok(n.length <= 63, n)
 })
+
+test('R8: a stored null is no value, and only a never-set sibling takes its default', () => {
+  const bg = field(block(blocks(), 'hero').fields, 'settings.backgroundImage').fields
+  const strength = field(bg, 'scrimStrength') // image filled, scrim equals true; scrim defaults to true
+  assert.equal(shows(strength, { image: 12 }), true)
+  assert.equal(shows(strength, { image: 12, scrim: null }), false)
+  const image = field(block(blocks(), 'hero').fields, 'image') // variant in split, stacked; default full-bleed
+  assert.equal(shows(image, { variant: null }), false)
+  const showcase = block(blocks(), 'collection-showcase')
+  const label = field(showcase.fields, 'viewAllLabel') // viewAll equals true; viewAll defaults to true
+  assert.equal(shows(label, {}), true)
+  assert.equal(shows(label, { viewAll: null }), false)
+})

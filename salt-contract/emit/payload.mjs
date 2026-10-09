@@ -25,7 +25,7 @@ import { readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 
-import { clauses, collectionQueryShape, hasVisibleText, isFilled, LINK_SHAPE, loadContract, resolveSection, SOURCES } from './_contract.mjs'
+import { clauses, collectionQueryShape, hasVisibleText, isFilled, LINK_SHAPE, loadContract, resolveSection, siblingValue, SOURCES } from './_contract.mjs'
 
 /**
  * Each source's Payload collection and category taxonomy, as Salt for Next.js names them by
@@ -50,14 +50,10 @@ const pascal = (s) => s.split('-').map((w) => w.charAt(0).toUpperCase() + w.slic
 
 export { hasVisibleText, isFilled }
 
-/**
- * Whether every clause holds for these siblings. An absent sibling reads as its contract default,
- * which is what Payload stores on a new block, so a control is not shown and then hidden on save.
- */
+/** Whether every clause holds for these siblings, each read by siblingValue. */
 export function clausesHold(list, siblingData, defaults = {}) {
   return list.every((c) => {
-    const raw = siblingData?.[c.field]
-    const value = raw === undefined || raw === null ? defaults[c.field] ?? raw : raw
+    const value = siblingValue(siblingData, c.field, defaults)
     if ('filled' in c) return isFilled(value) === c.filled
     if ('equals' in c) return value === c.equals
     return c.in.includes(value)

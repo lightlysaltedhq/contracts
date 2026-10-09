@@ -81,6 +81,16 @@ export function isFilled(value) {
   return true
 }
 
+/**
+ * The value a condition reads from a sibling. Only a sibling never set (undefined) takes its
+ * contract default, as a new block is stored with it; a stored null is a cleared value and stays
+ * no value, so the admin and the render read the same thing.
+ */
+export const siblingValue = (siblingData, name, defaults = {}) => {
+  const raw = siblingData?.[name]
+  return raw === undefined ? defaults[name] : raw
+}
+
 /** A condition as a list of clauses, all of which must hold; [] for none. */
 export const clauses = (condition) => (condition === undefined ? [] : [condition].flat())
 
