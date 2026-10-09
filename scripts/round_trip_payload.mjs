@@ -33,7 +33,7 @@ import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { build } from 'esbuild'
 
-import { isMainModule, loadContract, resolveSection } from '../salt-contract/emit/_contract.mjs'
+import { isMainModule, loadContract, normaliseLineEndings, resolveSection } from '../salt-contract/emit/_contract.mjs'
 import { toPayloadBlocks } from '../salt-contract/emit/payload.mjs'
 
 const here = path.dirname(fileURLToPath(import.meta.url))
@@ -61,6 +61,9 @@ export function parseArguments(argv, env = process.env) {
   }
   return { nextjs, check: argv.includes('--check'), suggest: argv.includes('--suggest') }
 }
+
+/** Whether the committed report says what the comparison says, CRLF read as LF. */
+export const reportIsCurrent = (committed, text) => normaliseLineEndings(committed) === normaliseLineEndings(text)
 
 // ── Load salt-nextjs's field half ──────────────────────────────────────────────────────────────
 
@@ -385,7 +388,7 @@ async function main({ nextjs, check, suggest }) {
   if (check) {
     let committed = ''
     try { committed = readFileSync(reportPath, 'utf8') } catch { /* missing is stale */ }
-    if (committed !== text) { console.log(`✗ ${path.relative(process.cwd(), reportPath)} is stale; regenerate it`); process.exit(1) }
+    if (!reportIsCurrent(committed, text)) { console.log(`✗ ${path.relative(process.cwd(), reportPath)} is stale; regenerate it`); process.exit(1) }
     if (unexpected.length || unseen.length) {
       console.log(`✗ ${unexpected.length} unexpected difference(s) and ${unseen.length} listed but not found; see the report`)
       process.exit(1)

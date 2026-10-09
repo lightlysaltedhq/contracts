@@ -58,3 +58,10 @@ test('S3: --check and --suggest together are refused, as --suggest would skip th
     assert.throws(() => parseArguments(['--check', '--suggest', dir], {}), /--check and --suggest cannot be used together/)
   } finally { rmSync(dir, { recursive: true, force: true }) }
 })
+
+test('S7: a committed report checked out with CRLF line endings is still current', async () => {
+  const { reportIsCurrent } = await import('./round_trip_payload.mjs')
+  const text = '# Payload round trip\n\n| a | b |\n'
+  assert.equal(reportIsCurrent(text.replace(/\n/g, '\r\n'), text), true)
+  assert.equal(reportIsCurrent(text.replace('a', 'c'), text), false)
+})
