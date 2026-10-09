@@ -2,10 +2,11 @@
 // The ACF round trip: what salt-contract/emit/acf.mjs generates for each section, against the
 // Flexible Content layouts salt-wordpress ships today. Writes salt-contract/reports/round-trip-acf.md.
 //
-//   node scripts/round_trip_acf.mjs <salt-wordpress checkout> [--check]
+//   node scripts/round_trip_acf.mjs [--check] [<salt-wordpress checkout>]
 //
-// Needs a salt-wordpress checkout and `php` on the path, so it is not part of `npm run verify`; the
-// report it writes is committed, and --check fails when the committed one is stale.
+// Needs a salt-wordpress checkout (the path, or SALT_WORDPRESS_DIR; there is no guessed default)
+// and `php` on the path, so it is not part of `npm run verify`. The report it writes is committed,
+// and --check fails when the committed one is stale.
 //
 // salt-wordpress's field files are PHP that build their arrays with `__()` and helper functions,
 // so they are loaded, not parsed: a short PHP script does what its own bin/extract-slugs.php does
@@ -23,18 +24,37 @@
 // platforms.wordpress note that accounts for it (formerly, values, owes, or a note on the
 // condition), and UNEXPECTED otherwise.
 import { execFileSync } from 'node:child_process'
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import { clauses, loadContract, resolveSection, siblingValue } from '../salt-contract/emit/_contract.mjs'
+import { clauses, isMainModule, loadContract, resolveSection, siblingValue } from '../salt-contract/emit/_contract.mjs'
 import { toAcfFieldGroups } from '../salt-contract/emit/acf.mjs'
 
 const here = path.dirname(fileURLToPath(import.meta.url))
 const reportPath = path.join(here, '..', 'salt-contract', 'reports', 'round-trip-acf.md')
-const wordpress = path.resolve(process.argv[2] ?? path.join(here, '..', '..', '..', 'Products', 'Salt', 'salt-wordpress'))
-const check = process.argv.includes('--check')
+
+/**
+ * The command line: flags anywhere, at most one positional argument, the salt-wordpress checkout,
+ * which falls back to SALT_WORDPRESS_DIR and must exist. Worktrees sit apart from the checkouts,
+ * so no sibling path is guessed.
+ */
+export function parseArguments(argv, env = process.env) {
+  const flags = new Set(['--check', '--suggest'])
+  const unknown = argv.filter((a) => a.startsWith('--') && !flags.has(a))
+  if (unknown.length) throw new Error(`unknown option ${unknown.join(', ')}`)
+  const check = argv.includes('--check')
+  const suggest = argv.includes('--suggest')
+  if (check && suggest) throw new Error('--check and --suggest cannot be used together')
+  const positional = argv.filter((a) => !a.startsWith('--'))
+  if (positional.length > 1) throw new Error(`one salt-wordpress checkout, not ${positional.length}`)
+  const given = positional[0] ?? env.SALT_WORDPRESS_DIR
+  if (!given) throw new Error('pass a salt-wordpress checkout or set SALT_WORDPRESS_DIR')
+  const wordpress = path.resolve(given)
+  if (!existsSync(path.join(wordpress, 'inc', 'fields'))) throw new Error(`salt-wordpress checkout not found: ${wordpress} has no inc/fields`)
+  return { wordpress, check, suggest }
+}
 
 // ── Load salt-wordpress's field groups ─────────────────────────────────────────────────────────
 
@@ -56,26 +76,23 @@ salt_test_do_action( 'acf/init' );
 salt_test_do_action( 'init' );
 echo json_encode( $GLOBALS['salt_captured_groups'], JSON_UNESCAPED_SLASHES );
 `
-const work = mkdtempSync(path.join(tmpdir(), 'salt-round-trip-acf-'))
-let wpGroups
-try {
-  writeFileSync(path.join(work, 'load.php'), LOADER)
-  wpGroups = JSON.parse(execFileSync('php', [path.join(work, 'load.php'), wordpress], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 }))
-} finally { rmSync(work, { recursive: true, force: true }) }
-const wpCommit = execFileSync('git', ['-C', wordpress, 'rev-parse', '--short', 'HEAD'], { encoding: 'utf8' }).trim()
-const wpVersion = /^Version:\s*(\S+)/m.exec(readFileSync(path.join(wordpress, 'style.css'), 'utf8'))?.[1] ?? 'unknown'
-const wpSections = wpGroups.find((g) => g.key === 'group_salt_sections')
-const wpLayouts = [wpSections.fields[0].layouts].flat().flatMap((l) => (Array.isArray(l) ? l : [l]))
-
-// Every source salt-wordpress registers, with its own slugs (the emitter's defaults).
-const icons = [{ value: 'star', label: 'Star' }, { value: 'check', label: 'Check' }]
-const contract = loadContract()
-const emitted = toAcfFieldGroups({ icons })[0].fields[0].layouts
+function loadWordpress(wordpress) {
+  const work = mkdtempSync(path.join(tmpdir(), 'salt-round-trip-acf-'))
+  try {
+    writeFileSync(path.join(work, 'load.php'), LOADER)
+    const groups = JSON.parse(execFileSync('php', [path.join(work, 'load.php'), wordpress], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 }))
+    const commit = execFileSync('git', ['-C', wordpress, 'rev-parse', '--short', 'HEAD'], { encoding: 'utf8' }).trim()
+    const version = /^Version:\s*(\S+)/m.exec(readFileSync(path.join(wordpress, 'style.css'), 'utf8'))?.[1] ?? 'unknown'
+    return { groups, commit, version }
+  } finally {
+    rmSync(work, { recursive: true, force: true })
+  }
+}
 
 // ── Compare ────────────────────────────────────────────────────────────────────────────────────
 
-const rows = []
-const keyRows = []
+let rows = []
+let keyRows = []
 const FAMILY = { radio: 'select', button_group: 'select' }
 const family = (t) => FAMILY[t] ?? t
 const named = (fields) => (fields ?? []).filter((f) => f.name)
@@ -280,125 +297,150 @@ function compareQuery(section, prefix, e, found, def) {
   }
 }
 
-const sectionRows = []
-const used = new Set()
-for (const layout of emitted) {
-  const id = layout.name
-  const s = contract.sections.find((x) => x.id === id)
-  const formerly = s.platforms?.wordpress?.formerly ?? []
-  const names = formerly.length ? formerly.map((f) => f.name) : [id]
-  const theirs = names.map((n) => wpLayouts.find((l) => l.name === n)).filter(Boolean)
-  if (!theirs.length) {
-    const w = s.platforms?.wordpress
-    sectionRows.push({ id, status: `not in salt-wordpress (sections.json: ${w?.status ?? 'none'}${w?.owes ? `, owes ${w.owes}` : ''})` })
-    continue
-  }
-  const { fields, settings } = resolveSection(contract, id)
-  for (const wl of theirs) {
-    used.add(wl.name)
-    const label = theirs.length > 1 ? `${id} (${wl.name})` : id
-    if (wl.name !== id) {
-      rows.push({ section: label, at: '(layout name)', kind: 'name', text: `name ${id}; salt-wordpress ${wl.name}`, verdict: 'expected', evidence: `sections.json formerly: ${wl.name}` })
-    }
-    // A layout folded into a section with a source select (sections.json: "source testimonials",
-    // or the select's values keyed by layout) holds that one source; fields the contract hides
-    // for it do not apply, and the field its `when` names is the one that chose the fold.
-    const former = formerly.find((f) => f.name === wl.name)
-    const sourceDef = fields.find((d) => d.name === 'source' && d.type === 'select')
-    const fixed = {}
-    if (sourceDef) {
-      const value = /^source (\S+)$/.exec(former?.note ?? '')?.[1] ?? wpNote(sourceDef)?.values?.[wl.name]
-      if (value) fixed.source = value
-    }
-    if (former?.when) Object.assign(fixed, { selector: former.when.split(' ')[0], when: `${wl.name} when ${former.when}` })
-    const applies = (def) => clausesOf(def).every((c) => !(c.field in fixed) || ('equals' in c ? c.equals === fixed[c.field] : 'in' in c ? c.in.includes(fixed[c.field]) : true))
-    // The settings group's fields are stored on the layout itself today, so they are matched there.
-    const settingsGroup = layout.sub_fields.find((f) => f.name === 'settings')
-    const entries = [
-      ...layout.sub_fields.filter((f) => f !== settingsGroup && applies(fields.find((d) => d.name === f.name))).map((f) => ({ e: f, def: fields.find((d) => d.name === f.name), at: f.name, siblings: layout.sub_fields })),
-      ...(settingsGroup?.sub_fields ?? []).map((f) => ({ e: f, def: settings.find((d) => d.name === f.name), at: `settings.${f.name}`, siblings: settingsGroup.sub_fields })),
-    ]
-    compareLevel(label, entries, wl.sub_fields, '', undefined, fixed)
-    sectionRows.push({ id: label, status: `compared with ${wl.name}` })
-  }
-}
-const unmatched = wpLayouts.filter((l) => !used.has(l.name)).map((l) => l.name)
-const otherGroups = wpGroups.filter((g) => g.key !== 'group_salt_sections').map((g) => g.key)
+// ── Run ────────────────────────────────────────────────────────────────────────────────────────
 
-// ── Report ─────────────────────────────────────────────────────────────────────────────────────
+async function main({ wordpress, check, suggest }) {
+  const { groups: wpGroups, commit: wpCommit, version: wpVersion } = loadWordpress(wordpress)
+  const wpSections = wpGroups.find((g) => g.key === 'group_salt_sections')
+  const wpLayouts = [wpSections.fields[0].layouts].flat().flatMap((l) => (Array.isArray(l) ? l : [l]))
+  rows = []
+  keyRows = []
 
-const expected = rows.filter((r) => r.verdict === 'expected')
-const unexpected = rows.filter((r) => r.verdict === 'unexpected')
-const cell = (s) => String(s).replace(/\|/g, '\\|').replace(/\n/g, ' ')
-const lines = [
-  '# ACF round trip',
-  '',
-  'Generated by `node scripts/round_trip_acf.mjs <salt-wordpress>`; do not edit. It compares what',
-  '`emit/acf.mjs` generates from this contract with the Flexible Content layouts salt-wordpress ships',
-  `(salt ${wpVersion}, commit ${wpCommit}), section by section. salt-wordpress's field files were`,
-  'loaded with `php` under its own test shims, as its bin/extract-slugs.php loads them, not parsed.',
-  '',
-  'Compared: field names, types (select, radio and button_group count as one: the widget stays',
-  'native), choices, defaults, required, limits, the post types and taxonomy a relation reads, and',
-  'conditional logic (by behaviour, over every combination of the siblings either side reads).',
-  'Not compared: labels and instructions, which salt-wordpress words differently and SC-003 says',
-  'must match, so adopting the emitter changes them throughout; and what stays native to ACF',
-  '(return formats, wrapper widths, tabs, toolbars, row layouts).',
-  '',
-  '**Expected** means the contract records the difference in the field\'s `platforms.wordpress`',
-  'note (`formerly`, `values`, `owes`, or a note on the condition), or sections.json records the',
-  'layout\'s former name. **Unexpected** means nothing in the contract accounts for it. As in the',
-  'Payload round trip, a field whose note owes something counts every difference on it as expected,',
-  'so read the evidence column: it says which record covers each row. A part added or dropped inside',
-  'a list, group or query is covered by its parent\'s note.',
-  '',
-  'Matching: the shared settings are stored on the layout itself today (section_spacing and the',
-  'rest), so the contract\'s `settings.*` fields are matched there. Where several salt-wordpress',
-  'layouts fold into one section, each is compared on its own; a layout that stands for one source',
-  '(sections.json: "source testimonials", or the source select\'s values keyed by layout) is compared',
-  'with that source chosen, so fields the contract hides for it are left out.',
-  '',
-  '## Summary',
-  '',
-  `${rows.length} differences: ${expected.length} expected, ${unexpected.length} unexpected.`,
-  '',
-  '| Section | Compared |',
-  '| --- | --- |',
-  ...sectionRows.map((s) => `| ${s.id} | ${cell(s.status)} |`),
-  '',
-  `salt-wordpress layouts no contract section claims: ${unmatched.length ? unmatched.join(', ') : 'none'}.`,
-  '',
-  `Field groups not compared, because the contract defines no fields for them: ${otherGroups.join(', ')}.`,
-  '',
-]
-if (unexpected.length) {
-  lines.push('## Unexpected', '', '| Section | Field | Difference |', '| --- | --- | --- |')
-  for (const r of unexpected) lines.push(`| ${r.section} | \`${r.at}\` | ${cell(r.text)} |`)
+  // Every source salt-wordpress registers, with its own slugs (the emitter's defaults).
+  const icons = [{ value: 'star', label: 'Star' }, { value: 'check', label: 'Check' }]
+  const contract = loadContract()
+  const emitted = toAcfFieldGroups({ icons })[0].fields[0].layouts
+
+  const sectionRows = []
+  const used = new Set()
+  for (const layout of emitted) {
+    const id = layout.name
+    const s = contract.sections.find((x) => x.id === id)
+    const formerly = s.platforms?.wordpress?.formerly ?? []
+    const names = formerly.length ? formerly.map((f) => f.name) : [id]
+    const theirs = names.map((n) => wpLayouts.find((l) => l.name === n)).filter(Boolean)
+    if (!theirs.length) {
+      const w = s.platforms?.wordpress
+      sectionRows.push({ id, status: `not in salt-wordpress (sections.json: ${w?.status ?? 'none'}${w?.owes ? `, owes ${w.owes}` : ''})` })
+      continue
+    }
+    const { fields, settings } = resolveSection(contract, id)
+    for (const wl of theirs) {
+      used.add(wl.name)
+      const label = theirs.length > 1 ? `${id} (${wl.name})` : id
+      if (wl.name !== id) {
+        rows.push({ section: label, at: '(layout name)', kind: 'name', text: `name ${id}; salt-wordpress ${wl.name}`, verdict: 'expected', evidence: `sections.json formerly: ${wl.name}` })
+      }
+      // A layout folded into a section with a source select (sections.json: "source testimonials",
+      // or the select's values keyed by layout) holds that one source; fields the contract hides
+      // for it do not apply, and the field its `when` names is the one that chose the fold.
+      const former = formerly.find((f) => f.name === wl.name)
+      const sourceDef = fields.find((d) => d.name === 'source' && d.type === 'select')
+      const fixed = {}
+      if (sourceDef) {
+        const value = /^source (\S+)$/.exec(former?.note ?? '')?.[1] ?? wpNote(sourceDef)?.values?.[wl.name]
+        if (value) fixed.source = value
+      }
+      if (former?.when) Object.assign(fixed, { selector: former.when.split(' ')[0], when: `${wl.name} when ${former.when}` })
+      const applies = (def) => clausesOf(def).every((c) => !(c.field in fixed) || ('equals' in c ? c.equals === fixed[c.field] : 'in' in c ? c.in.includes(fixed[c.field]) : true))
+      // The settings group's fields are stored on the layout itself today, so they are matched there.
+      const settingsGroup = layout.sub_fields.find((f) => f.name === 'settings')
+      const entries = [
+        ...layout.sub_fields.filter((f) => f !== settingsGroup && applies(fields.find((d) => d.name === f.name))).map((f) => ({ e: f, def: fields.find((d) => d.name === f.name), at: f.name, siblings: layout.sub_fields })),
+        ...(settingsGroup?.sub_fields ?? []).map((f) => ({ e: f, def: settings.find((d) => d.name === f.name), at: `settings.${f.name}`, siblings: settingsGroup.sub_fields })),
+      ]
+      compareLevel(label, entries, wl.sub_fields, '', undefined, fixed)
+      sectionRows.push({ id: label, status: `compared with ${wl.name}` })
+    }
+  }
+  const unmatched = wpLayouts.filter((l) => !used.has(l.name)).map((l) => l.name)
+  const otherGroups = wpGroups.filter((g) => g.key !== 'group_salt_sections').map((g) => g.key)
+
+  // ── Report ─────────────────────────────────────────────────────────────────────────────────────
+
+  const expected = rows.filter((r) => r.verdict === 'expected')
+  const unexpected = rows.filter((r) => r.verdict === 'unexpected')
+  if (suggest) {
+    console.log(JSON.stringify(unexpected.map((r) => ({ section: r.section, path: r.at, kind: r.kind, difference: r.text, evidence: r.evidence })), null, 2))
+    return
+  }
+  const cell = (s) => String(s).replace(/\|/g, '\\|').replace(/\n/g, ' ')
+  const lines = [
+    '# ACF round trip',
+    '',
+    'Generated by `node scripts/round_trip_acf.mjs <salt-wordpress>`; do not edit. It compares what',
+    '`emit/acf.mjs` generates from this contract with the Flexible Content layouts salt-wordpress ships',
+    `(salt ${wpVersion}, commit ${wpCommit}), section by section. salt-wordpress's field files were`,
+    'loaded with `php` under its own test shims, as its bin/extract-slugs.php loads them, not parsed.',
+    '',
+    'Compared: field names, types (select, radio and button_group count as one: the widget stays',
+    'native), choices, defaults, required, limits, the post types and taxonomy a relation reads, and',
+    'conditional logic (by behaviour, over every combination of the siblings either side reads).',
+    'Not compared: labels and instructions, which salt-wordpress words differently and SC-003 says',
+    'must match, so adopting the emitter changes them throughout; and what stays native to ACF',
+    '(return formats, wrapper widths, tabs, toolbars, row layouts).',
+    '',
+    '**Expected** means the contract records the difference in the field\'s `platforms.wordpress`',
+    'note (`formerly`, `values`, `owes`, or a note on the condition), or sections.json records the',
+    'layout\'s former name. **Unexpected** means nothing in the contract accounts for it. As in the',
+    'Payload round trip, a field whose note owes something counts every difference on it as expected,',
+    'so read the evidence column: it says which record covers each row. A part added or dropped inside',
+    'a list, group or query is covered by its parent\'s note.',
+    '',
+    'Matching: the shared settings are stored on the layout itself today (section_spacing and the',
+    'rest), so the contract\'s `settings.*` fields are matched there. Where several salt-wordpress',
+    'layouts fold into one section, each is compared on its own; a layout that stands for one source',
+    '(sections.json: "source testimonials", or the source select\'s values keyed by layout) is compared',
+    'with that source chosen, so fields the contract hides for it are left out.',
+    '',
+    '## Summary',
+    '',
+    `${rows.length} differences: ${expected.length} expected, ${unexpected.length} unexpected.`,
+    '',
+    '| Section | Compared |',
+    '| --- | --- |',
+    ...sectionRows.map((s) => `| ${s.id} | ${cell(s.status)} |`),
+    '',
+    `salt-wordpress layouts no contract section claims: ${unmatched.length ? unmatched.join(', ') : 'none'}.`,
+    '',
+    `Field groups not compared, because the contract defines no fields for them: ${otherGroups.join(', ')}.`,
+    '',
+  ]
+  if (unexpected.length) {
+    lines.push('## Unexpected', '', '| Section | Field | Difference |', '| --- | --- | --- |')
+    for (const r of unexpected) lines.push(`| ${r.section} | \`${r.at}\` | ${cell(r.text)} |`)
+    lines.push('')
+  }
+  lines.push('## Expected', '', '| Section | Field | Difference | Recorded as |', '| --- | --- | --- | --- |')
+  for (const r of expected) lines.push(`| ${r.section} | \`${r.at}\` | ${cell(r.text)} | ${cell(r.evidence)} |`)
   lines.push('')
-}
-lines.push('## Expected', '', '| Section | Field | Difference | Recorded as |', '| --- | --- | --- | --- |')
-for (const r of expected) lines.push(`| ${r.section} | \`${r.at}\` | ${cell(r.text)} | ${cell(r.evidence)} |`)
-lines.push('')
-lines.push(
-  '## Keys',
-  '',
-  'Fields matched by name (query parts by their mapped name) whose ACF key changes. ACF stores each',
-  'value\'s key beside it (`_<name>`), so the migration that renames fields should rewrite those rows',
-  'too, or they point at a key that no longer exists until the post is saved again.',
-  '',
-  '| Section | Field | Emitted key | salt-wordpress key |',
-  '| --- | --- | --- | --- |',
-  ...keyRows.map((r) => `| ${r.section} | \`${r.at}\` | \`${r.mine}\` | \`${r.theirs}\` |`),
-  '',
-)
-const text = lines.join('\n')
+  lines.push(
+    '## Keys',
+    '',
+    'Fields matched by name (query parts by their mapped name) whose ACF key changes. ACF stores each',
+    'value\'s key beside it (`_<name>`), so the migration that renames fields should rewrite those rows',
+    'too, or they point at a key that no longer exists until the post is saved again.',
+    '',
+    '| Section | Field | Emitted key | salt-wordpress key |',
+    '| --- | --- | --- | --- |',
+    ...keyRows.map((r) => `| ${r.section} | \`${r.at}\` | \`${r.mine}\` | \`${r.theirs}\` |`),
+    '',
+  )
+  const text = lines.join('\n')
 
-if (check) {
-  let committed = ''
-  try { committed = readFileSync(reportPath, 'utf8') } catch { /* missing is stale */ }
-  if (committed !== text) { console.log(`✗ ${path.relative(process.cwd(), reportPath)} is stale; regenerate it`); process.exit(1) }
-  console.log('PASS: the round-trip report is current')
-} else {
-  writeFileSync(reportPath, text)
-  console.log(`wrote ${path.relative(process.cwd(), reportPath)}: ${expected.length} expected, ${unexpected.length} unexpected`)
+  if (check) {
+    let committed = ''
+    try { committed = readFileSync(reportPath, 'utf8') } catch { /* missing is stale */ }
+    if (committed !== text) { console.log(`✗ ${path.relative(process.cwd(), reportPath)} is stale; regenerate it`); process.exit(1) }
+    console.log('PASS: the round-trip report is current')
+  } else {
+    writeFileSync(reportPath, text)
+    console.log(`wrote ${path.relative(process.cwd(), reportPath)}: ${expected.length} expected, ${unexpected.length} unexpected`)
+  }
+}
+
+if (isMainModule(import.meta.url)) {
+  let args
+  try { args = parseArguments(process.argv.slice(2)) } catch (e) { console.error(e.message); process.exit(2) }
+  await main(args)
 }
