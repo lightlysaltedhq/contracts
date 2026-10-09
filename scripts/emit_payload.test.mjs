@@ -606,3 +606,10 @@ test('(b) the emitter CLI refuses a flag without a value, a flag as a value, and
   assert.equal(code, 2)
   assert.match(err, /--check needs a value, not the flag --options/)
 })
+
+test('Q4: an empty flag value is refused, so an unset variable never runs as no options', async () => {
+  const { parseEmitterArguments } = await import('../salt-contract/emit/_contract.mjs')
+  assert.throws(() => parseEmitterArguments(['--check', 'a.json', '--options', '']), /--options needs a value, not an empty one/)
+  assert.throws(() => parseEmitterArguments(['--check', 'a.json', '--write', '']), /--write needs a value, not an empty one/)
+  assert.throws(() => parseEmitterArguments(['--check', '']), /--check needs a value, not an empty one/)
+})

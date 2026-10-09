@@ -110,8 +110,8 @@ export function clauseHolds(c, value) {
 
 /**
  * An emitter CLI's arguments: `--check <snapshot>` or `--write <snapshot>`, not both, and an
- * optional `--options <file>`. Throws on a flag with no value, a flag given as a value, an unknown
- * argument, or neither action, so a typo never runs as something else. Returns
+ * optional `--options <file>`. Throws on a flag with no value, an empty value, a flag given as a
+ * value, an unknown argument, or neither action, so a typo never runs as something else. Returns
  * { check, write, options }, each a path or undefined.
  */
 export function parseEmitterArguments(argv) {
@@ -121,6 +121,8 @@ export function parseEmitterArguments(argv) {
     if (!(flag in values)) throw new Error(`unknown argument ${flag}`)
     const value = argv[i + 1]
     if (value === undefined) throw new Error(`${flag} needs a value`)
+    // An empty value is most often an unset variable; read as absent, it would check the wrong thing.
+    if (value === '') throw new Error(`${flag} needs a value, not an empty one`)
     if (value.startsWith('--')) throw new Error(`${flag} needs a value, not the flag ${value}`)
     values[flag] = value
     i++
