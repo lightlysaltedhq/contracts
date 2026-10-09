@@ -36,6 +36,9 @@ for (const [what, edit, pattern] of [
   }, /styles\/salt\.css is not what the sources build/],
   ['a bundle edited by hand', (dir) => writeFileSync(path.join(dir, 'styles', BUNDLE), `${readFileSync(path.join(pkg, 'styles', BUNDLE), 'utf8')} `), /is not what the sources build/],
   ['no bundle', (dir) => rmSync(path.join(dir, 'styles', BUNDLE)), /styles\/salt\.css is missing/],
+  // Review Q6: the load order and styles/ must name the same sources.
+  ['a source the load order does not name', (dir) => writeFileSync(path.join(dir, 'styles', 'forms.css'), '.salt-x { display: block; }\n'), /styles\/forms\.css is not in the bundle's load order/],
+  ['a load-order source styles/ does not hold', (dir) => rmSync(path.join(dir, 'styles', 'views.css')), /the bundle's load order names styles\/views\.css, which styles\/ does not hold/],
 ]) {
   test(`the bundle check and the stylesheet gate fail ${what}`, () => {
     const dir = copy(edit)

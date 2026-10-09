@@ -6,7 +6,7 @@
 // gate (check_salt_stylesheets.mjs) fails when the committed bundle is not what this builds.
 //
 //   node scripts/build_salt_bundle.mjs [--check] [package-dir]
-import { readFileSync, writeFileSync } from 'node:fs'
+import { readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { transformSync } from 'esbuild'
@@ -28,6 +28,13 @@ export const buildFrom = (dir) => buildBundle(Object.fromEntries(LOAD_ORDER.map(
 
 /** Why the committed bundle in a package directory is not what its sources build, or null. */
 export function bundleProblem(dir) {
+  // The gate reads every styles/*.css; the bundle reads only LOAD_ORDER. They must be one list, or
+  // a rule the gate passes never ships, or the bundle cannot be built.
+  const sources = readdirSync(path.join(dir, 'styles')).filter((f) => f.endsWith('.css') && f !== BUNDLE).sort()
+  const unordered = sources.filter((f) => !LOAD_ORDER.includes(f))
+  if (unordered.length) return `styles/${unordered[0]} is not in the bundle's load order; add it to LOAD_ORDER in scripts/build_salt_bundle.mjs, in its place, or take it out`
+  const absent = LOAD_ORDER.filter((f) => !sources.includes(f))
+  if (absent.length) return `the bundle's load order names styles/${absent[0]}, which styles/ does not hold`
   let committed = null
   try { committed = readFileSync(path.join(dir, 'styles', BUNDLE), 'utf8') } catch { /* reported below */ }
   if (committed === null) return `styles/${BUNDLE} is missing; build it with node scripts/build_salt_bundle.mjs`
