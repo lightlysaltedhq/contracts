@@ -424,7 +424,7 @@
     },
     {
       "topic": "ruling",
-      "text": "Every id the footer draws is fixed and reserved (section#anchors), because the footer is drawn without sight of the page's sections and cannot suffix them. A column title is salt-footer-column-<n>, <n> its column's position among the columns with links, counting from 0. The consent panel's title is salt-consent-title, and each category's checkbox and description are salt-consent-<category> and salt-consent-<category>-description, for analytics, embeds and marketing."
+      "text": "Every id the footer draws is fixed and reserved (section#anchors), because the footer is drawn without sight of the page's sections and cannot suffix them. A column title is salt-footer-column-<n>, <n> its column's position among the columns with links, counting from 0. The consent panel's title is salt-consent-title, and each category's checkbox and description are salt-consent-<category> and salt-consent-<category>-description, where <category> is the category's id in lower-case letters only (analytics, embeds, marketing), so a later category is covered by the same reserved form."
     }
   ],
   "platforms": {
