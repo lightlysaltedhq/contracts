@@ -8,13 +8,15 @@ Salted's decision log for Product Salt.
 
 - The owner's rulings of 09/10/2026 (SC-007, SC-008) are applied, and no open question remains;
   the markup schema drops the `open-question` note topic.
-  - An id an editor set is never changed by a generated one. `section#anchors` settles ids at
-    render in three steps: the reserved document ids, then editors' anchors (one that equals a
-    reserved id takes the suffix, SC-008), then generated ids in the page body, such as
-    `<section id>-heading`, form and tab ids and the service view's heading ids. The ids the
-    header, footer and consent panel draw are reserved forms, since neither platform draws them
-    with sight of the page's sections. A suffix counts up until the id is unique on the page, so `main`
-    beside an explicit `main-2` renders `main-3`; it is applied at render and never stored.
+  - Every id the system draws is `<owner>__<part>` (SC-012). The owner is the component, section or
+    view id as `sections.json` names it, or `<anchor>`, the section's settled id, for ids inside a
+    section. Parts are numbered from 1: `site-header__submenu-2`, `<anchor>__heading`,
+    `<anchor>__tab-2`, `service__benefits-heading`. An anchor is slugged on save to lower-case
+    letters, digits and single hyphens, so it never contains `__` and never meets a drawn id. Only
+    the landmark ids stay plain (`main`, `content`, `header`, `footer`, `nav`, `site-navigation`,
+    `search`, `skip-link`). An anchor equal to one becomes `<anchor>-section`, and a repeat takes
+    `-2`, `-3`. A section with no anchor mints its id from its section id after every editor's
+    anchor. Nothing is added to an anchor on save.
   - The post, service, archive and search view bodies are fixed as Salt for Next.js's example app
     writes them (`salt-post__*`, `salt-service__*`, `salt-related`, `salt-archive__*`,
     `salt-search__results`). The post's author is the shared `author-box` component, and Salt for
@@ -28,14 +30,20 @@ Salted's decision log for Product Salt.
   - The section has no container element.
   - Salt for WordPress's `owes` records each change, including its `picture_sources` opt-in and the
     glyphs `chevron-right`, `external-link`, `moon` and `sun`.
-- The header fixes every id it draws: `site-navigation` and `salt-header-nav-submenu-<n>` in the
-  bar, with `-drawer` after each prefix in the drawer. The footer's column ids are
-  `salt-footer-column-<n>` and the consent panel's are `salt-consent-*`; all are reserved. A footer social link with no glyph carries
-  the profile's name as text.
+- The header fixes every id it draws: `site-navigation` (a landmark), and
+  `site-header__submenu-<n>`, `site-header__drawer-navigation` and
+  `site-header__drawer-submenu-<n>`. The footer's column titles are `site-footer__column-<n>`, and
+  the consent panel it draws uses `site-footer__consent-title`, `site-footer__consent-<category>`
+  and `site-footer__consent-<category>-description`. A footer social link with no glyph carries the
+  profile's name as text.
 - `contract/sections.json` declares component variants (card's `style`), and the gate refuses
   component markup that describes a variant or option its entry does not declare, a vocabulary
   variant that offers a value twice or defaults outside its options, an icon name `icons` does not
-  list (in attributes or `dataAttributes`), and an icon field whose default is not a content name.
+  list (in attributes or `dataAttributes`), and an icon field whose default is not a content name, and any id the markup draws or points at that is
+  not a landmark id, `<anchor>`, or `<owner>__<part>`.
+- The markup records the custom properties the shared stylesheets read (the case study's aside rows
+  and measure, and the header's scriptless phone layout), and that fit and focal point reach the
+  `img` as inline `object-fit` and `object-position` (SC-011).
 - The sections schema drops `openQuestions`.
 - Locations' open-now rule states one order, hours carried past midnight included.
 - The package exists, with its gate (`npm run salt-contract` at the repository root) and its
