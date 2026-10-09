@@ -49,8 +49,9 @@
         {
           "name": "value",
           "kind": "text",
-          "from": "field",
-          "field": "items.value"
+          "from": "logic",
+          "field": "items.value",
+          "description": "Never null: the logic drops a stat whose value cleans away (SC-009) or does not resolve, as Salt for Next.js's resolver does."
         },
         {
           "name": "suffix",

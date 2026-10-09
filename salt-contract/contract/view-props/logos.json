@@ -49,8 +49,9 @@
           "name": "image",
           "kind": "object",
           "of": "image",
-          "from": "field",
-          "field": "items.image"
+          "from": "logic",
+          "field": "items.image",
+          "description": "Never null: the logic drops a logo whose image does not resolve (a deleted upload), as Salt for Next.js's resolver does."
         },
         {
           "name": "name",

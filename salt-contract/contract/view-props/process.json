@@ -69,8 +69,9 @@
         {
           "name": "title",
           "kind": "text",
-          "from": "field",
-          "field": "steps.title"
+          "from": "logic",
+          "field": "steps.title",
+          "description": "Never null: the logic drops a step whose title cleans away (SC-009) or does not resolve, as Salt for Next.js's resolver does."
         },
         {
           "name": "text",

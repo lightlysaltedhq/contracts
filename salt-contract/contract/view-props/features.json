@@ -56,8 +56,9 @@
         {
           "name": "title",
           "kind": "text",
-          "from": "field",
-          "field": "items.title"
+          "from": "logic",
+          "field": "items.title",
+          "description": "Never null: the logic drops a feature whose title cleans away (SC-009) or does not resolve, as Salt for Next.js's resolver does."
         },
         {
           "name": "text",

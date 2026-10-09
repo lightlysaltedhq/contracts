@@ -58,15 +58,16 @@
         {
           "name": "label",
           "kind": "text",
-          "from": "field",
-          "field": "tabs.label"
+          "from": "logic",
+          "field": "tabs.label",
+          "description": "Never null: the logic drops a tab whose label cleans away (SC-009) or does not resolve, as Salt for Next.js's resolver does."
         },
         {
           "name": "content",
           "kind": "rich-text",
-          "from": "field",
+          "from": "logic",
           "field": "tabs.content",
-          "nullable": true
+          "description": "Never null: the logic drops a tab whose content cleans away (SC-009) or does not resolve, as Salt for Next.js's resolver does."
         }
       ]
     }
@@ -74,7 +75,7 @@
   "platforms": {
     "nextjs": {
       "formerly": "TabsBlockData",
-      "owes": "named, and a tab's content as nullable"
+      "owes": "named"
     },
     "wordpress": {
       "owes": "a view template that takes these props, split from the section's logic"

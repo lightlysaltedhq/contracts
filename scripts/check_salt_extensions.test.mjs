@@ -139,10 +139,17 @@ test('an enum prop offering other values than its select fails', () => {
   expectFail((json) => json('contract/view-props/hero.json', (d) => { props(d, 'variant').values.pop() }), /offers full-bleed\|split\|stacked, but field variant offers/)
 })
 test('a prop from an optional field that is not nullable fails', () => {
-  expectFail((json) => json('contract/view-props/tabs.json', (d) => { delete d.types.tab.props.find((p) => p.name === 'content').nullable }), /tab\.content: field tabs\.content may be left empty, so the prop is nullable/)
+  expectFail((json) => json('contract/view-props/hero.json', (d) => { delete d.data.find((p) => p.name === 'heading').nullable }), /data\.heading: field heading can clean or resolve to nothing, so the prop is nullable/)
 })
-test('a prop from a required field that is nullable fails', () => {
-  expectFail((json) => json('contract/view-props/tabs.json', (d) => { d.types.tab.props.find((p) => p.name === 'label').nullable = true }), /tab\.label: field tabs\.label is required, so the prop is never null/)
+test('a prop from a required field that is not nullable fails, since SC-009 can empty it', () => {
+  expectFail((json) => json('contract/view-props/tabs.json', (d) => {
+    const label = d.types.tab.props.find((p) => p.name === 'label')
+    label.from = 'field'
+    delete label.description
+  }), /tab\.label: field tabs\.label can clean or resolve to nothing, so the prop is nullable/)
+})
+test('a non-null logic prop over an emptiable field that does not say how fails', () => {
+  expectFail((json) => json('contract/view-props/logos.json', (d) => { delete d.types.logo.props.find((p) => p.name === 'image').description }), /logo\.image: never null though field items\.image can be empty/)
 })
 test('an object of an unknown type fails', () => {
   expectFail((json) => json('contract/view-props/hero.json', (d) => { props(d, 'image').of = 'picture' }), /of picture names no type/)

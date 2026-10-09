@@ -20,8 +20,10 @@
 //    through groups and list rows by dots, or a shared setting the section keeps as
 //    `settings.<name>`. A `from: field` prop takes its field's name, and an enum drawn from a
 //    select offers exactly the select's options, so a generated type cannot drift from the editor.
-//    It is nullable exactly when its field can be left empty (any text, image, link, relationship or
-//    number field not marked required).
+//    It is nullable whenever its field can clean or resolve to nothing (any text, textarea, rich
+//    text, image, link, relationship or number field, required or not, and a select with no
+//    default that is not required); a non-null value backed by such a field comes from the logic,
+//    with a description saying how the logic guarantees it.
 //    Every `of` names a type in the file or in _shared.json; a list may also hold a scalar kind.
 // 3. REPLACED LOGIC (schema/replaced-logic.schema.json). Its examples validate against it, name
 //    only contract sections, and list no contract section as client-only.
@@ -165,11 +167,13 @@ function checkProps(file, owner, props, fieldsDoc, types) {
     }
     if (!field) { fails.push(`${at}: field ${prop.field} is not a field of this section`); continue }
     if (prop.from === 'field' && prop.name !== steps.at(-1)) fails.push(`${at}: comes from field ${prop.field}, so it takes that field's name, ${steps.at(-1)}`)
-    // A field an editor can leave empty gives a nullable prop, and a required one a prop that is
-    // never null. A value the logic guarantees (a row it drops when empty) comes `from: logic`.
-    if (prop.from === 'field' && CAN_BE_EMPTY.has(field.type) && !field.many && !['list', 'boolean', 'enum'].includes(prop.kind)) {
-      if (field.required && prop.nullable) fails.push(`${at}: field ${prop.field} is required, so the prop is never null; drop nullable`)
-      if (!field.required && !prop.nullable) fails.push(`${at}: field ${prop.field} may be left empty, so the prop is nullable`)
+    // A field whose value can clean or resolve to nothing gives a nullable prop, required or not:
+    // SC-009 empties whitespace-only text, and an image or document can be deleted. Only the logic
+    // can promise a value (by dropping the row without one), and it says how in the description.
+    const canBeEmpty = !field.many && (CAN_BE_EMPTY.has(field.type) || (!field.required && field.default === undefined && field.type === 'select'))
+    if (canBeEmpty && !['list'].includes(prop.kind) && !prop.nullable) {
+      if (prop.from === 'field') fails.push(`${at}: field ${prop.field} can clean or resolve to nothing, so the prop is nullable; a value the logic guarantees comes from: logic`)
+      else if (prop.from === 'logic' && !prop.description) fails.push(`${at}: never null though field ${prop.field} can be empty, so its description says how the logic guarantees it`)
     }
     if (prop.from === 'field' && prop.kind === 'enum' && field.type === 'select' && Array.isArray(field.options)) {
       const want = field.options.map((o) => o.value)

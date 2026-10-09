@@ -31,8 +31,9 @@
         {
           "name": "name",
           "kind": "text",
-          "from": "field",
-          "field": "plans.name"
+          "from": "logic",
+          "field": "plans.name",
+          "description": "Never null: the logic drops a plan whose name cleans away (SC-009); with none left, the section draws nothing."
         },
         {
           "name": "price",
@@ -76,8 +77,9 @@
         {
           "name": "text",
           "kind": "text",
-          "from": "field",
-          "field": "plans.features.text"
+          "from": "logic",
+          "field": "plans.features.text",
+          "description": "Never null: the logic drops a feature line whose text cleans away (SC-009)."
         },
         {
           "name": "included",
