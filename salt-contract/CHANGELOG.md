@@ -8,15 +8,18 @@ Salted's decision log for Product Salt.
 
 - The owner's rulings of 09/10/2026 (SC-007, SC-008) are applied, and no open question remains;
   the markup schema drops the `open-question` note topic.
-  - Every id the system draws is `<owner>__<part>` (SC-012). The owner is the component, section or
-    view id as `sections.json` names it, or `<anchor>`, the section's settled id, for ids inside a
-    section. Parts are numbered from 1: `site-header__submenu-2`, `<anchor>__heading`,
-    `<anchor>__tab-2`, `service__benefits-heading`. An anchor is slugged on save to lower-case
-    letters, digits and single hyphens, so it never contains `__` and never meets a drawn id. Only
-    the landmark ids stay plain (`main`, `content`, `header`, `footer`, `nav`, `site-navigation`,
-    `search`, `skip-link`). An anchor equal to one becomes `<anchor>-section`, and a repeat takes
-    `-2`, `-3`. A section with no anchor mints its id from its section id after every editor's
-    anchor. Nothing is added to an anchor on save.
+  - - Every id the system draws is `<owner>__<part>` (SC-012). The owner is the component, section
+    or view id as `sections.json` names it, or `<anchor>`, the section's settled id, for ids inside
+    a section. Parts are numbered from 1: `site-header__submenu-2`, `<anchor>__heading`,
+    `<anchor>__tab-2`, `service__benefits-heading`. An anchor is slugged to lower-case letters,
+    digits and single hyphens (Latin accents folded, other scripts dropped), on save and again at
+    render to whatever is stored, so it never contains `__` and never meets a drawn id; an empty
+    slug counts as no anchor. Only the landmark ids stay plain (`main`, `content`, `header`,
+    `footer`, `nav`, `site-navigation`, `search`, `skip-link`). Editors' anchors that are neither
+    landmarks nor repeats keep their ids first. A landmark clash then becomes `<anchor>-section` and
+    a repeat takes `-2`, `-3`, each skipping any anchor set anywhere on the page, so `faq, faq,
+    faq-2` renders `faq, faq-3, faq-2`. A section with no anchor mints its id from its section id
+    after every editor's anchor. Nothing is added to an anchor on save.
   - The post, service, archive and search view bodies are fixed as Salt for Next.js's example app
     writes them (`salt-post__*`, `salt-service__*`, `salt-related`, `salt-archive__*`,
     `salt-search__results`). The post's author is the shared `author-box` component, and Salt for
@@ -39,11 +42,14 @@ Salted's decision log for Product Salt.
 - `contract/sections.json` declares component variants (card's `style`), and the gate refuses
   component markup that describes a variant or option its entry does not declare, a vocabulary
   variant that offers a value twice or defaults outside its options, an icon name `icons` does not
-  list (in attributes or `dataAttributes`), and an icon field whose default is not a content name, and any id the markup draws or points at that is
-  not a landmark id, `<anchor>`, or `<owner>__<part>`.
+  list (in attributes or `dataAttributes`), and an icon field whose default is not a content name,
+  and any id the markup draws or points at (every id-referencing attribute, `href` fragments
+  included) that is not a landmark id, `<anchor>` (only inside sections), or `<owner>__<part>`.
 - The markup records the custom properties the shared stylesheets read (the case study's aside rows
-  and measure, and the header's scriptless phone layout), and that fit and focal point reach the
-  `img` as inline `object-fit` and `object-position` (SC-011).
+  and measure, and the header's scriptless phone layout, a noscript style in the document head), and
+  that fit and focal point reach the `img` as inline `object-fit` and `object-position` (SC-011).
+- The case study names its four sections by `case-study__<part>-heading`, and the contact form's
+  honeypot is `<anchor>__trap`.
 - The sections schema drops `openQuestions`.
 - Locations' open-now rule states one order, hours carried past midnight included.
 - The package exists, with its gate (`npm run salt-contract` at the repository root) and its
