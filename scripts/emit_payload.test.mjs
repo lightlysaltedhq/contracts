@@ -466,3 +466,14 @@ test('U2: a sourceField naming no sibling select is refused, naming the field', 
   const notSelect = [{ name: 'nope', type: 'text', label: 'Nope' }, ...fields]
   assert.throws(() => toPayloadBlocks({ contract: probe(notSelect) }), /probe\.query: sourceField nope names no sibling select/)
 })
+
+test('U4: a field conditioned on a field left out is left out with it, transitively', () => {
+  const chain = [
+    { name: 'showTags', type: 'boolean', label: 'Tags', condition: { field: 'source', equals: 'posts' } },
+    { name: 'tagStyle', type: 'select', label: 'Style', options: [{ value: 'a', label: 'A' }, { value: 'b', label: 'B' }], condition: { field: 'showTags', equals: true } },
+    { name: 'tagNote', type: 'text', label: 'Note', condition: { field: 'tagStyle', equals: 'b' } },
+  ]
+  const names = (sources) => toPayloadBlocks({ contract: probe(sourced(chain)), sources })[0].fields.map((f) => f.name)
+  assert.deepEqual(names({}), ['source'])
+  assert.deepEqual(names({ posts: {} }), ['source', 'query', 'showTags', 'tagStyle', 'tagNote'])
+})

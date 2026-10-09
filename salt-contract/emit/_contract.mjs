@@ -165,8 +165,9 @@ export const sourceSelectsOf = (fields) =>
  * options are offeredSources' options, computed once here, so an emitter offers `options` as given
  * and never re-applies the rule. Left out: a collection-query read from a select that offers no
  * installed source, and a field whose condition names a source select only by values that select
- * no longer offers (the carousel's showTags with no source that has categories). A select left
- * with no option is unmetSources' to report. Top level only, where source selects live.
+ * no longer offers (the carousel's showTags with no source that has categories), and any field
+ * whose condition names a field left out. A select left with no option is unmetSources' to report.
+ * Top level only, where source selects live.
  */
 export function withinSources(fields, installed) {
   const selects = sourceSelectsOf(fields)
@@ -179,7 +180,15 @@ export function withinSources(fields, installed) {
   })
   const queriesNothing = (f) => f.type === 'collection-query' && f.sourceField && selects.has(f.sourceField) &&
     !valuesOf(f.sourceField).some((v) => SOURCES.includes(v))
-  return narrowed.filter((f) => !queriesNothing(f) && reachable(f))
+  // A field conditioned on one left out could never show, so it goes too, and so on down the chain.
+  const gone = new Set(narrowed.filter((f) => queriesNothing(f) || !reachable(f)).map((f) => f.name))
+  for (let grew = true; grew;) {
+    grew = false
+    for (const f of narrowed) {
+      if (!gone.has(f.name) && clauses(f.condition).some((c) => isClause(c) && gone.has(c.field))) { gone.add(f.name); grew = true }
+    }
+  }
+  return narrowed.filter((f) => !gone.has(f.name))
 }
 
 /**
