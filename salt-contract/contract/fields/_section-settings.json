@@ -297,7 +297,7 @@
       "type": "text",
       "format": "anchor",
       "label": "Anchor",
-      "description": "Optional, for links to this section. Saved as a slug of lower-case letters, digits and single hyphens: any other run of characters, underscores included, becomes one hyphen. On the page, an anchor that is one of the landmark ids main, content, header, footer, nav, site-navigation, search or skip-link becomes <anchor>-section, and a repeat takes -2, -3. Ids the page draws itself contain __, so they never meet yours. Nothing is added on save, as markup/section#anchors says.",
+      "description": "Optional, for links to this section. Saved as a slug of lower-case letters, digits and single hyphens: any other run of characters, underscores included, becomes one hyphen. On the page, your anchor keeps its id unless it is one of the landmark ids main, content, header, footer, nav, site-navigation, search or skip-link (it becomes <anchor>-section) or repeats an earlier section's (it takes -2, -3); a suffix never takes an anchor another section set. Ids the page draws itself contain __, so they never meet yours. Nothing is added on save, as markup/section#anchors says.",
       "platforms": {
         "nextjs": {
           "formerly": "settings.anchorId",
