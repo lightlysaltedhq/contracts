@@ -25,7 +25,7 @@
 //    contract/token-layer.json, everything named there is read, no name is listed twice, and a name
 //    is `optional` exactly when every read of it carries a fallback.
 // 4. THE CLASS VOCABULARY. Every salt-* class a selector names is on an element in
-//    contract/markup/*.json, or is listed in UNMARKED with its reason.
+//    contract/markup/*.json.
 //
 // The checks are `checkStylesheets(files)`, over a map of the package's files by path (`styles/x.css`,
 // `contract/…json`), so the test runs its cases in memory; run as a script, it reads the package from
@@ -6052,16 +6052,6 @@ export function checkStylesheets(files) {
   // least, or a class the markup contract has yet to record. Classes are read where the markup puts
   // them on an element: a root, an element and its children, and a variant's tree. Not a rule's or a
   // note's mention, a platform's former name, a hook (kept with no rule) or an omitted class.
-  const UNMARKED = [
-    /* PENDING the view-body classes SC-007 gives the archive, post and service views (less the post's
-       author block, which SC-008 makes the shared author-box), which a parallel branch adds to
-       contract/markup/{archive,post,search,service}.json. views.css styles them now. Remove this block
-       once both have merged: the gate fails on an entry the markup already carries. */
-    ...['salt-archive__portrait', 'salt-archive__profile', 'salt-archive__strapline', 'salt-post__adjacent',
-      'salt-post__adjacent-label', 'salt-post__breadcrumb', 'salt-post__byline', 'salt-post__category',
-      'salt-post__footer', 'salt-post__media', 'salt-post__meta', 'salt-post__tags', 'salt-service__intro', 'salt-service__price-label',
-      'salt-service__summary', 'salt-related__list'].map((name) => ({ class: name, pending: true, reason: 'SC-007 view body, pending its markup' })),
-  ]
   const onElements = new Set()
   const collect = (node) => {
     if (Array.isArray(node)) { node.forEach(collect); return }
@@ -6086,15 +6076,11 @@ export function checkStylesheets(files) {
     }
   }
   if (markupFiles.length === 0) fails.push('contract/markup/ holds no markup files, so no styled class can be found on an element')
-  const unmarked = new Map(UNMARKED.map((entry) => [entry.class, entry]))
   for (const [name, files] of [...styled].sort()) {
-    if (onElements.has(name) || unmarked.has(name)) continue
-    fails.push(`${[...files].join(', ')} style(s) .${name}, which no element in contract/markup/ carries; add it to the markup or to UNMARKED with its reason`)
+    if (onElements.has(name)) continue
+    fails.push(`${[...files].join(', ')} style(s) .${name}, which no element in contract/markup/ carries; add it to the markup or take the rule out`)
   }
-  for (const entry of UNMARKED) {
-    if (!styled.has(entry.class)) fails.push(`UNMARKED lists .${entry.class}, which no stylesheet styles; take it out`)
-    else if (onElements.has(entry.class)) fails.push(`UNMARKED lists .${entry.class}, which contract/markup/ now carries; take it out${entry.pending ? ' (the pending view classes have landed)' : ''}`)
-  }
+
 
   const named = [...reads.keys()].filter((name) => !declaredHere.has(name))
   return {
@@ -6102,7 +6088,7 @@ export function checkStylesheets(files) {
     reached: 'all',
     summary: `PASS: ${String(parsed.size)} stylesheet(s) parse whole; ${String(CONTRACTS.length)} decision contract(s) hold; ` +
       `the token layer names the ${String(named.length)} custom properties they and the markup read (${String(named.filter((n) => reads.get(n).withFallback === reads.get(n).count).length)} optional); ` +
-      `${String(styled.size)} salt-* classes styled, ${String(UNMARKED.length)} of them listed in UNMARKED.`,
+      `${String(styled.size)} salt-* classes styled, each on a markup element.`,
   }
 }
 

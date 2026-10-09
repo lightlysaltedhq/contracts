@@ -109,11 +109,11 @@
         { "name": "--salt-section-space", "meaning": "A band's block space: var(--space-section-<spacing>), absent when spacing is none.", "source": "markup", "ref": "contract/markup/section.json", "optional": true },
         { "name": "--salt-scrim-alpha", "meaning": "The scrim's strength over a background image: var(--scrim-<strength>).", "source": "markup", "ref": "contract/markup/section.json" },
         { "name": "--salt-rating-fill", "meaning": "How much of a rating's five stars is filled, as a percentage.", "source": "markup", "ref": "contract/markup/card.json", "optional": true },
-        { "name": "--salt-case-study-view-aside-rows", "meaning": "How many of a case study band's rows its aside spans.", "source": "markup", "ref": "contract/markup/case-study.json (not yet recorded there)" },
-        { "name": "--salt-case-study-view-measure", "meaning": "A case study band's measure, when it sets one.", "source": "markup", "ref": "contract/markup/case-study.json (not yet recorded there)", "optional": true },
-        { "name": "--salt-header-phone-menu", "meaning": "Without script, shows the phone menu: the header's noscript style sets it.", "source": "markup", "ref": "contract/markup/site-header.json", "optional": true },
-        { "name": "--salt-header-phone-burger", "meaning": "Without script, hides the burger: the header's noscript style sets it.", "source": "markup", "ref": "contract/markup/site-header.json", "optional": true },
-        { "name": "--salt-header-phone-wrap", "meaning": "Without script, lets the header row wrap: the header's noscript style sets it.", "source": "markup", "ref": "contract/markup/site-header.json", "optional": true }
+        { "name": "--salt-case-study-view-aside-rows", "meaning": "How many of a case study band's rows its aside spans.", "source": "markup", "ref": "contract/markup/case-study.json" },
+        { "name": "--salt-case-study-view-measure", "meaning": "A case study band's measure, when it sets one.", "source": "markup", "ref": "contract/markup/case-study.json", "optional": true },
+        { "name": "--salt-header-phone-menu", "meaning": "Without script, shows the phone menu: the noscript style in the document head sets it.", "source": "markup", "ref": "contract/markup/page.json, the noscript style in the head", "optional": true },
+        { "name": "--salt-header-phone-burger", "meaning": "Without script, hides the burger: the noscript style in the document head sets it.", "source": "markup", "ref": "contract/markup/page.json, the noscript style in the head", "optional": true },
+        { "name": "--salt-header-phone-wrap", "meaning": "Without script, lets the header row wrap: the noscript style in the document head sets it.", "source": "markup", "ref": "contract/markup/page.json, the noscript style in the head", "optional": true }
       ]
     },
     {

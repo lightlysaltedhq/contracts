@@ -69,19 +69,9 @@ let next = 0
 /* Every contract's failure seen by any case, for the coverage case at the end. */
 const failed = new Set()
 
-/*
- * PENDING lightlysaltedhq/contracts#6, which records in the markup the five custom properties the
- * token layer says the markup writes and no markup file does yet. Until it merges the gate fails on
- * exactly those five (the end-to-end case below holds that), so the in-memory cases run on the
- * package plus this stand-in record, and each sees only its own subject. Delete it, and the five
- * names below, with UNMARKED once #6 has merged and this branch is rebased.
- */
-const PENDING_WRITES = ['--salt-case-study-view-aside-rows', '--salt-case-study-view-measure', '--salt-header-phone-menu', '--salt-header-phone-burger', '--salt-header-phone-wrap']
-const PENDING_FAILS = PENDING_WRITES.map((name) => `✗ contract/token-layer.json says the markup writes ${name}, but no file in contract/markup/ does`)
 
 /* The committed package, read once; each case edits a copy of this map in memory. */
 const COMMITTED_FILES = readPackage(PACKAGE)
-COMMITTED_FILES.set('contract/markup/zz-pending-6.json', JSON.stringify({ root: { attributes: { style: PENDING_WRITES.map((name) => `${name}: x`).join('; ') } } }))
 
 /* A stylesheet is named by its file, `blocks.css`; anything else by its path in the package. */
 const target = (file) => (file.includes('/') ? file : `styles/${file}`)
@@ -2344,8 +2334,6 @@ describe('every class the stylesheets style is on an element in the markup contr
     ['a class only a note mentions', [formerOnly, ['blocks.css', appending('.salt-noted {\n  margin: 0;\n}')]], 'style(s) .salt-noted, which no element'],
     ['a class the markup omits', [formerOnly, ['blocks.css', appending('.salt-omitted {\n  margin: 0;\n}')]], 'style(s) .salt-omitted, which no element'],
     ['a class in a descendant of a selector', [['blocks.css', appending('.salt-card .salt-invented-child {\n  margin: 0;\n}')]], 'style(s) .salt-invented-child'],
-    ['a pending view class no stylesheet styles any more', [['views.css', (css) => css.replace('.salt-service__price-label {\n  color: var(--color-ink-muted);\n}\n\n.salt-service__price-label::after {\n  content: \':\';\n}\n', '')]], 'UNMARKED lists .salt-service__price-label, which no stylesheet styles'],
-    ['a pending view class the markup now carries', [addFile('contract/markup/zz-landed.json', JSON.stringify({ root: { classes: ['salt-post__media'] } }))], 'UNMARKED lists .salt-post__media, which contract/markup/ now carries; take it out (the pending view classes have landed)'],
   ])('fails %s', (_case, edits, message) => {
     const { code, output } = runRaw(...edits)
     expect(output).toContain(message)
@@ -2365,53 +2353,23 @@ describe('every class the stylesheets style is on an element in the markup contr
 /* The command line, end to end: the cases above call the checks in memory, so two run the script as
    CI does, on the committed package and on a copy on disk with one defect. */
 describe('the script, run as CI runs it', () => {
-  /* Exactly the five writes #6 records, or none once it has merged: never some of them. */
-  const committedLines = (args) => {
+  const passes = (args) => {
     const result = spawnSync(process.execPath, args, { encoding: 'utf8' })
-    const lines = result.stdout.split('\n').filter((line) => line.startsWith('✗'))
-    return { result, lines }
-  }
-  const holdsPending = ({ result, lines }) => {
-    assert.ok(lines.length === 0 || JSON.stringify([...lines].sort()) === JSON.stringify([...PENDING_FAILS].sort()), `expected no failures or exactly the five #6 records, got:\n${lines.join('\n')}`)
-    expect(result.status).toBe(lines.length === 0 ? 0 : 1)
-    if (lines.length === 0) expect(result.stdout).toContain('PASS: ')
+    expect(result.stdout).toContain('PASS: ')
+    expect(result.status).toBe(0)
   }
 
-  it('passes the committed package, or fails it on exactly the five writes #6 records', () => {
-    holdsPending(committedLines([GATE]))
-  })
+  it('passes the committed package', () => passes([GATE]))
 
   it('runs when invoked through a symlink, as an installed bin would be', () => {
     const dir = mkdtempSync(path.join(tmpdir(), 'salt-stylesheet-gate-link-'))
     try {
       const link = path.join(dir, 'gate.mjs')
       symlinkSync(GATE, link)
-      holdsPending(committedLines([link, PACKAGE]))
+      passes([link, PACKAGE])
     } finally {
       rmSync(dir, { recursive: true, force: true })
     }
-  })
-
-  /* The tripwire for the stand-in: once the real markup writes any of the five, delete it. */
-  /* Which of the five the markup now writes, or null when the run stopped before the token layer and
-     so says nothing about them (other cases report why). */
-  const pendingCarried = (files) => {
-    const { fails, reached } = checkStylesheets(files)
-    if (reached !== 'all') return null
-    const output = fails.map((f) => `✗ ${f}`).join('\n')
-    return PENDING_FAILS.filter((line) => !output.includes(line)).map((line) => line.match(/writes (--[\w-]+)/)[1])
-  }
-
-  it('judges the stand-in only when the token layer stage ran', () => {
-    const broken = readPackage(PACKAGE)
-    broken.set('styles/blocks.css', `${broken.get('styles/blocks.css')}\n.salt-x { .salt-y { margin: 0; } }\n`)
-    expect(pendingCarried(broken)).toBe(null)
-  })
-
-  it('still needs the PENDING stand-in for #6', (t) => {
-    const carried = pendingCarried(readPackage(PACKAGE))
-    if (carried === null) { t.skip('the gate stopped before the token layer'); return }
-    assert.deepEqual(carried, [], `the markup now writes ${carried.join(', ')}: delete the stand-in, PENDING_WRITES and PENDING_FAILS (and UNMARKED's pending block)`)
   })
 
   it('fails a copy on disk with one defect, naming it', () => {
