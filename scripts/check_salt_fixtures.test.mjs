@@ -720,6 +720,13 @@ test('page: the first section\'s hero image is the page\'s priority image (revie
   expectFail(['page'], (io) => io.html('page/hero-split-image.html', ' fetchpriority="high"', ' loading="lazy"'), /the priority image must be in hero's image \(section#priority-media\)/)
 })
 
+test('page: the first section holds the priority image, so a lazy hero image fails (settling a)', () => {
+  expectFail(['page'], (io) => {
+    io.json('page/hero-split-image.json', (d) => { d.context.priorityMedia = false })
+    io.html('page/hero-split-image.html', ' fetchpriority="high"', ' loading="lazy"')
+  }, /context\.priorityMedia is false, but the page's section is its first \(index 0\), which the plan grants the priority image/)
+})
+
 // ── 4. The normaliser ─────────────────────────────────────────────────────────────────────────
 test('normaliser: one that drops an attribute fails the mutation check', () => {
   expectFail(HERO, (io) => {

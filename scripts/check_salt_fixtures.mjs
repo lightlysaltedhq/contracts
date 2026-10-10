@@ -295,6 +295,10 @@ function checkOtherInput(c) {
     c.anchor = settings?.anchorId
     c.track = nested.track
     c.index = nested.index
+    // A page's section is planned as any: the first (index 0) holds the priority image.
+    if (kind === 'page' && Number.isInteger(nested.index) && typeof ctx.priorityMedia === 'boolean' && ctx.priorityMedia !== (nested.index === 0)) {
+      fail(`${at}.json: context.priorityMedia is ${ctx.priorityMedia}, but the page's section is ${nested.index === 0 ? 'its first (index 0), which the plan grants the priority image' : `number ${nested.index}, which never holds it`} (section#priority-media)`)
+    }
   }
   return true
 }
