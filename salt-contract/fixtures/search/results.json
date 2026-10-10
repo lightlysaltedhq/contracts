@@ -1,0 +1,62 @@
+{
+  "$comment": "document shape: { query, count, results: [{ title, url, kind, note? }] } for the current page; route.pagination as in listing. site.search is { path, maxLength } (the form's action and the input's maxlength). labels: search (the h1), landmark, field, submit, results (the heading, with {n} the count and {q} the query), more, noResults, nav, previous, next, page (with {n}); kind shows the result's own kind word (Post, Page, Service) unchanged. The search-form markup declares no value attribute on the input, which the checker enforces, so the query is kept only in document.query and the input draws no value.",
+  "view": "search",
+  "summary": "A search for a query with three results on page 1 of 2: the h1, the form, the results heading, the 'more' line, three results (a title link, a kind and, on one, a note) and pagination.",
+  "context": {
+    "priorityMedia": false,
+    "path": "/search/"
+  },
+  "site": {
+    "name": "Hedgerow & Co",
+    "search": {
+      "path": "/search/",
+      "maxLength": 100
+    },
+    "labels": {
+      "search": "Search",
+      "landmark": "Search the site",
+      "field": "Search",
+      "submit": "Search",
+      "results": "{n} results for “{q}”",
+      "more": "More pages match than are listed here. Try a more specific search.",
+      "noResults": "Nothing matched “{q}”. Try a different word.",
+      "kind": "{kind}",
+      "nav": "Search results pages",
+      "previous": "Previous",
+      "next": "Next",
+      "page": "Page {n}"
+    }
+  },
+  "document": {
+    "query": "hedge",
+    "count": 14,
+    "results": [
+      {
+        "title": "A beginner's guide to hedge laying",
+        "url": "/journal/hedge-laying/",
+        "kind": "Post",
+        "note": "An old craft that still keeps livestock in and wildlife housed."
+      },
+      {
+        "title": "Hedge cutting",
+        "url": "/services/hedge-cutting/",
+        "kind": "Service"
+      },
+      {
+        "title": "Boundaries and screening",
+        "url": "/boundaries/",
+        "kind": "Page"
+      }
+    ]
+  },
+  "route": {
+    "pagination": {
+      "current": 1,
+      "total": 2,
+      "hrefs": {
+        "1": "/search/?q=hedge",
+        "2": "/search/?q=hedge&page=2"
+      }
+    }
+  }
+}

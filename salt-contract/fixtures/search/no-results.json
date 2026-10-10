@@ -1,0 +1,35 @@
+{
+  "$comment": "Same site shape as results. The empty state is the form and a sentence (labels.noResults with {q} the query), never an empty list or a results section. The input draws no value (the markup declares none).",
+  "view": "search",
+  "summary": "A search for a query that matches nothing: the h1, the form, and the empty sentence; no results section.",
+  "context": {
+    "priorityMedia": false,
+    "path": "/search/"
+  },
+  "site": {
+    "name": "Hedgerow & Co",
+    "search": {
+      "path": "/search/",
+      "maxLength": 100
+    },
+    "labels": {
+      "search": "Search",
+      "landmark": "Search the site",
+      "field": "Search",
+      "submit": "Search",
+      "results": "{n} results for “{q}”",
+      "more": "More pages match than are listed here. Try a more specific search.",
+      "noResults": "Nothing matched “{q}”. Try a different word.",
+      "kind": "{kind}",
+      "nav": "Search results pages",
+      "previous": "Previous",
+      "next": "Next",
+      "page": "Page {n}"
+    }
+  },
+  "document": {
+    "query": "xylophone",
+    "count": 0,
+    "results": []
+  }
+}

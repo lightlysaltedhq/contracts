@@ -1,0 +1,24 @@
+{
+  "$comment": "site.search is { path, maxLength }; site.home is the home page path. Order: h1, message, search form, home link (the link is a bare a in main, not in a paragraph).",
+  "view": "not-found",
+  "summary": "A 404 page on a site with search and a home page: the title, the message, the search form and the home link.",
+  "context": {
+    "priorityMedia": false,
+    "path": "/old-page/"
+  },
+  "site": {
+    "home": "/",
+    "search": {
+      "path": "/search/",
+      "maxLength": 100
+    },
+    "labels": {
+      "notFound": "Page not found",
+      "message": "The page you were looking for has moved or never existed.",
+      "home": "Back to the home page",
+      "landmark": "Search the site",
+      "field": "Search",
+      "submit": "Search"
+    }
+  }
+}

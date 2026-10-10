@@ -1,0 +1,18 @@
+{
+  "view": "service",
+  "summary": "A service page with only a title: the header holds the h1, and the intro, benefits, price, call to action and related services are all left out.",
+  "context": {
+    "priorityMedia": false,
+    "path": "/services/lawn-care/"
+  },
+  "site": {
+    "labels": {
+      "benefits": "What you get",
+      "price": "From",
+      "relatedServices": "Related services"
+    }
+  },
+  "document": {
+    "title": "Lawn care"
+  }
+}

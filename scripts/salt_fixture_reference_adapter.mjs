@@ -14,9 +14,11 @@ const here = path.dirname(fileURLToPath(import.meta.url))
 const dir = path.resolve(process.argv[2] ?? path.join(here, '..', 'salt-contract'))
 let input
 try { input = JSON.parse(readFileSync(0, 'utf8')) } catch (e) { process.stderr.write(`stdin is not a case input: ${e.message}\n`); process.exit(2) }
-const sdir = path.join(dir, 'fixtures', String(input?.section ?? ''))
+// The case names its fixture set under its kind's key: section, chrome or view.
+const id = input?.section ?? input?.chrome ?? input?.view ?? ''
+const sdir = path.join(dir, 'fixtures', String(id))
 let names = []
 try { names = readdirSync(sdir).filter((f) => f.endsWith('.json')) } catch { /* reported below */ }
 const match = names.find((f) => isDeepStrictEqual(JSON.parse(readFileSync(path.join(sdir, f), 'utf8')), input))
-if (!match) { process.stderr.write(`no fixture of section ${JSON.stringify(input?.section)} has this input\n`); process.exit(1) }
+if (!match) { process.stderr.write(`no fixture of ${JSON.stringify(id)} has this input\n`); process.exit(1) }
 process.stdout.write(readFileSync(path.join(sdir, match.replace(/\.json$/, '.html')), 'utf8'))

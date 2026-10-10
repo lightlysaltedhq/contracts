@@ -1,0 +1,36 @@
+<main id="main" tabindex="-1">
+  <h1>Search</h1>
+  <search class="salt-search" aria-label="Search the site">
+    <form class="salt-search__form" action="/search/" method="get">
+      <label class="salt-search__label" for="search-form__input">Search</label>
+      <input class="salt-search__input" id="search-form__input" type="search" name="q" maxlength="100" enterkeyhint="search">
+      <button class="salt-button" type="submit" data-style="primary">Search</button>
+    </form>
+  </search>
+  <section aria-labelledby="search__results-heading">
+    <h2 id="search__results-heading">14 results for “hedge”</h2>
+    <p>More pages match than are listed here. Try a more specific search.</p>
+    <ul class="salt-search__results" role="list">
+      <li>
+        <a href="/journal/hedge-laying/">A beginner's guide to hedge laying</a>
+        <p>Post</p>
+        <p>An old craft that still keeps livestock in and wildlife housed.</p>
+      </li>
+      <li>
+        <a href="/services/hedge-cutting/">Hedge cutting</a>
+        <p>Service</p>
+      </li>
+      <li>
+        <a href="/boundaries/">Boundaries and screening</a>
+        <p>Page</p>
+      </li>
+    </ul>
+    <nav class="salt-pagination" aria-label="Search results pages">
+      <ul class="salt-pagination__list" role="list">
+        <li><a class="salt-pagination__link" href="/search/?q=hedge" aria-label="Page 1" aria-current="page">1</a></li>
+        <li><a class="salt-pagination__link" href="/search/?q=hedge&amp;page=2" aria-label="Page 2">2</a></li>
+        <li><a class="salt-pagination__link" data-step="next" rel="next" href="/search/?q=hedge&amp;page=2">Next</a></li>
+      </ul>
+    </nav>
+  </section>
+</main>

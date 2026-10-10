@@ -463,6 +463,54 @@ test('arrows: only a section\'s call to action takes the site\'s arrow', () => {
   }, /"Choose Starter[^"]*" draws an arrow, which only a section's call to action takes/)
 })
 
+// The site chrome and the page views (SC-018).
+const HEADER = 'site-header/menu-submenus-phone-cta-sticky'
+const SWAPS = 'site-header/light-and-dark-logo'
+test('chrome: the chrome and the views SC-018 names are required', () => {
+  expectFail(HERO, () => {}, /site-header has no fixtures \(fixtures\/site-header\/<case>\.json and \.html\), which SC-018 requires/)
+  expectFail(HERO, () => {}, /not-found has no fixtures/)
+})
+test('chrome: a chrome or view case passes its own checks', () => {
+  const dir = copy(['site-header', 'post', 'archive'])
+  try {
+    const r = run(dir)
+    assert.doesNotMatch(r.out, /fixtures\/(site-header|post|archive)\//, r.out)
+  } finally { rmSync(dir, { recursive: true, force: true }) }
+})
+test('chrome: a site key that is not declared fails, and logoHeight must be whole px', () => {
+  expectFail(['site-header'], (io) => io.json(`${HEADER}.json`, (d) => { d.site.logoHeightPx = 48 }), /site\.logoHeightPx is not a declared site key/)
+  expectFail(['site-header'], (io) => io.json(`${HEADER}.json`, (d) => { d.site.logoHeight = '48px' }), /site\.logoHeight is the logo's drawn height, a whole number of px/)
+})
+test('chrome: the chrome never holds priority media, and a view must say whether it does', () => {
+  expectFail(['site-header'], (io) => io.json(`${HEADER}.json`, (d) => { d.context.priorityMedia = false }), /the chrome never holds the priority image/)
+  expectFail(['post'], (io) => io.json('post/full.json', (d) => { delete d.context.priorityMedia }), /context\.priorityMedia must say whether the plan grants this view/)
+})
+test('chrome: a case under the wrong kind key fails', () => {
+  expectFail(['post'], (io) => io.json('post/full.json', (d) => { d.chrome = d.view; delete d.view }), /unknown key chrome/)
+})
+test('chrome: a view with a second h1 fails, and so does an h1 in the chrome', () => {
+  // Inside content the markup leaves open (a nested section's block, the drawer's panel), so the
+  // heading rule itself is what fails.
+  expectFail(['archive'], (io) => io.html('archive/topic.html', 'data-block="listing">', 'data-block="listing">\n          <h1>Again</h1>'), /a view draws exactly one h1, its title \(section#single-h1\); this draws 2/)
+  expectFail(['site-header'], (io) => io.html('site-header/drawer-open.html', '<div class="salt-drawer__panel">', '<div class="salt-drawer__panel">\n        <h1>Menu</h1>'), /the site-header draws an h1; the page's h1 belongs to its main/)
+})
+test('chrome: an id that is no landmark, anchor or vocabulary-owned part fails', () => {
+  expectFail(['archive'], (io) => io.html('archive/topic.html', 'data-block="listing">', 'data-block="listing">\n          <p id="intro-1">x</p>'), /id intro-1 is not a landmark id, a section's anchor or <owner>__<part>/)
+  expectFail(['archive'], (io) => io.html('archive/topic.html', 'data-block="listing">', 'data-block="listing">\n          <p id="nowhere__intro">x</p>'), /id nowhere__intro is not a landmark id/)
+})
+test('chrome: the logo\'s sizes is its drawn width at site.logoHeight', () => {
+  expectFail(['site-header'], (io) => io.json(`${HEADER}.json`, (d) => { d.site.logoHeight = 40 }), /sizes="180px"; its slot \(logo\) gives "150px"/)
+})
+test('chrome: a logo is matched to its record by the exact template, never by prefix', () => {
+  // The dark image's own record is renamed away; a record whose template is a prefix of its src
+  // must not stand in for it.
+  expectFail(['site-header'], (io) => io.json(`${SWAPS}.json`, (d) => {
+    const dark = d.site.logo.dark
+    d.media[dark].url = 'https://uploads.example/hollow-oak-night-{width}.png'
+    d.media.prefix = { url: 'https://uploads.example/hollow-oak-{width}.png', width: 480, height: 120, alt: '' }
+  }), /src https:\/\/uploads\.example\/hollow-oak-dark-480\.png fills no media record's template exactly/)
+})
+
 // ── 4. The normaliser ─────────────────────────────────────────────────────────────────────────
 test('normaliser: one that drops an attribute fails the mutation check', () => {
   expectFail(HERO, (io) => {

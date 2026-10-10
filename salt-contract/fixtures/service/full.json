@@ -1,0 +1,70 @@
+{
+  "$comment": "document shape: { title, summary, intro (rich text HTML), benefits: [string], priceFrom (display value), cta: { label, type, document, newTab }, related: [card items resolved for display, with image media ids] }. The view takes labels benefits, price and relatedServices from site.labels. The service view has no priority image.",
+  "view": "service",
+  "summary": "A service page with every part set: title, summary, an introduction whose first heading renders h2, benefits, a price, a primary call to action without an arrow, and two related service cards.",
+  "context": {
+    "priorityMedia": false,
+    "path": "/services/garden-design/"
+  },
+  "site": {
+    "arrow": "→",
+    "labels": {
+      "benefits": "What you get",
+      "price": "From",
+      "relatedServices": "Related services"
+    }
+  },
+  "documents": {
+    "enquire": {
+      "href": "/contact/",
+      "title": "Contact"
+    }
+  },
+  "media": {
+    "garden-design": {
+      "url": "https://uploads.example/garden-design-{width}.jpg",
+      "width": 1200,
+      "height": 800,
+      "alt": "A curved border of grasses and salvias"
+    },
+    "planting-plans": {
+      "url": "https://uploads.example/planting-plans-{width}.jpg",
+      "width": 800,
+      "height": 600,
+      "alt": "A planting plan drawn in pencil and watercolour"
+    }
+  },
+  "document": {
+    "title": "Garden design",
+    "summary": "Plans drawn to suit the plot, the soil and the way you use the space.",
+    "intro": "<p>Every plan starts with a visit, a soil test and a long conversation about how you use the garden.</p><h2>How it works</h2><p>We draw two options, agree one, then plant it ourselves.</p>",
+    "benefits": [
+      "A scaled plan you can build from",
+      "Planting chosen for your soil",
+      "One team from sketch to planting"
+    ],
+    "priceFrom": "£500",
+    "cta": {
+      "label": "Book a consultation",
+      "type": "internal",
+      "document": "enquire",
+      "newTab": false
+    },
+    "related": [
+      {
+        "id": "planting-plans",
+        "title": "Planting plans",
+        "href": "/services/planting-plans/",
+        "image": "planting-plans",
+        "text": "Borders planned plant by plant, season by season."
+      },
+      {
+        "id": "garden-design-build",
+        "title": "Garden build",
+        "href": "/services/garden-build/",
+        "image": "garden-design",
+        "text": "Paths, walls and beds built to the plan."
+      }
+    ]
+  }
+}

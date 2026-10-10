@@ -1,0 +1,16 @@
+{
+  "$comment": "No site.search and no site.home: search is not offered and no home page exists, so neither the form nor the home link is drawn.",
+  "view": "not-found",
+  "summary": "A 404 page on a site with no search and no home page: the title and the message only.",
+  "context": {
+    "priorityMedia": false,
+    "path": "/old-page/"
+  },
+  "site": {
+    "labels": {
+      "notFound": "Page not found",
+      "message": "The page you were looking for has moved or never existed.",
+      "home": "Back to the home page"
+    }
+  }
+}

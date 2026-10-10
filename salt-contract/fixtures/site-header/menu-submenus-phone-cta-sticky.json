@@ -1,0 +1,74 @@
+{
+  "$comment": "site shape: { name, home, logo: { light, dark? } (media ids), logoHeight, labels: { navigation, submenu, menu, closeMenu, phone?, theme? }, header: { menu: [{ label, href?, children?: [{ label, href }] }], phone: { text, tel }, cta: { label, href }, sticky }, themeToggle }. An item with children and no href draws its label as the span form. The span toggle carries type=\"button\" because the markup requires it of the toggle in both forms. The menu's second item has three children and no url, so its label is a span with tabindex 0 and its toggle the span form (aria-hidden, before script). The current page is the second child, so that item carries data-current-section and the sublink aria-current. The phone +44 1935 123456 gives tel:+441935123456 (section#display-forms).",
+  "chrome": "site-header",
+  "summary": "Light logo image drawn 48px high, a four-item menu whose second item has three children (one current), a phone number, a call to action and the sticky setting on.",
+  "context": {
+    "locale": "en-GB",
+    "path": "/services/planting-plans/"
+  },
+  "site": {
+    "name": "Hollow Oak Garden Design",
+    "home": "/",
+    "logo": {
+      "light": "logo"
+    },
+    "logoHeight": 48,
+    "labels": {
+      "navigation": "Main",
+      "submenu": "Show submenu",
+      "menu": "Menu",
+      "closeMenu": "Close menu",
+      "phone": "Call Hollow Oak"
+    },
+    "header": {
+      "menu": [
+        {
+          "label": "Home",
+          "href": "/"
+        },
+        {
+          "label": "Services",
+          "children": [
+            {
+              "label": "Garden design",
+              "href": "/services/garden-design/"
+            },
+            {
+              "label": "Planting plans",
+              "href": "/services/planting-plans/"
+            },
+            {
+              "label": "Hedge laying",
+              "href": "/services/hedge-laying/"
+            }
+          ]
+        },
+        {
+          "label": "Journal",
+          "href": "/journal/"
+        },
+        {
+          "label": "Contact",
+          "href": "/contact/"
+        }
+      ],
+      "phone": {
+        "text": "+44 1935 123456",
+        "tel": "tel:+441935123456"
+      },
+      "cta": {
+        "label": "Book a visit",
+        "href": "/contact/"
+      },
+      "sticky": true
+    }
+  },
+  "media": {
+    "logo": {
+      "url": "https://uploads.example/hollow-oak-{width}.png",
+      "width": 600,
+      "height": 160,
+      "alt": "Hollow Oak Garden Design"
+    }
+  }
+}

@@ -1,0 +1,80 @@
+{
+  "$comment": "As archive/topic. document { kind: \"author\", title, href, strapline, biography, photo (media id) } is this case's own shape. First page, so the profile is drawn: portrait (thumb, lazy, in div.salt-archive__portrait), strapline, biography. Two cards, one page: no pagination (route.pagination.total is 1). The listing keeps three-column card sizes (the section's grid is three columns whatever the count).",
+  "view": "archive",
+  "summary": "An author's archive on its first page: the author as h1, the profile with portrait, strapline and biography, then the listing section with two cards and no pagination.",
+  "context": {
+    "priorityMedia": false,
+    "locale": "en-GB",
+    "path": "/journal/author/priya-shah/"
+  },
+  "site": {
+    "arrow": "→",
+    "labels": {
+      "nav": "Pagination",
+      "previous": "Previous",
+      "next": "Next",
+      "page": "Page",
+      "empty": "There are no posts to show yet."
+    }
+  },
+  "document": {
+    "kind": "author",
+    "title": "Priya Shah",
+    "href": "/journal/author/priya-shah/",
+    "strapline": "Head gardener at Hollin Farm",
+    "biography": "Priya has run the kitchen garden at Hollin Farm for eleven years and writes about soil, water and patience.",
+    "photo": "priya",
+    "listing": {
+      "anchorId": "posts",
+      "heading": "Latest posts",
+      "track": "listing-1"
+    }
+  },
+  "media": {
+    "priya": {
+      "url": "https://uploads.example/priya-shah-{width}.jpg",
+      "width": 400,
+      "height": 400,
+      "alt": "Priya Shah smiling in a greenhouse"
+    },
+    "soil": {
+      "url": "https://uploads.example/soil-health-{width}.jpg",
+      "width": 800,
+      "height": 600,
+      "alt": "Hands holding a handful of dark compost"
+    },
+    "fennel": {
+      "url": "https://uploads.example/fennel-{width}.jpg",
+      "width": 800,
+      "height": 600,
+      "alt": "Bronze fennel in flower beside a path"
+    }
+  },
+  "route": {
+    "cards": [
+      {
+        "id": "soil",
+        "title": "Feeding your soil, not your plants",
+        "href": "/journal/feeding-your-soil/",
+        "image": "soil",
+        "date": "2026-03-12",
+        "text": "Why compost does more than any bottle of feed."
+      },
+      {
+        "id": "fennel",
+        "title": "Fennel that earns its place",
+        "href": "/journal/fennel/",
+        "image": "fennel",
+        "date": "2025-11-04",
+        "text": "Tall, tough and loved by hoverflies."
+      }
+    ],
+    "pagination": {
+      "current": 1,
+      "total": 1,
+      "hrefs": {
+        "1": "/journal/author/priya-shah/"
+      }
+    }
+  }
+}

@@ -10,8 +10,11 @@ const elementsOf = (el) => el.children.filter((c) => c.type === 'element')
  * The slot an img takes, or null when no placement covers it. `ancestors` runs from the img's
  * parent outwards; `section` and `values` are the case's, with `defaults` for unset fields.
  */
-export function slotOf(img, ancestors, section, effective) {
+export function slotOf(img, ancestors, outer, effective) {
   const cls = classesOf(img)
+  // A section nested in a view (the archive's listing) is read as that section.
+  const block = ancestors.find((a) => a.attrs.some(([n]) => n === 'data-block'))
+  const section = block ? block.attrs.find(([n]) => n === 'data-block')[1] : outer
   const within = (c) => ancestors.find((a) => classesOf(a).includes(c))
   const columns = String(effective('columns') ?? '3')
   if (cls.includes('salt-section__media')) return { slot: 'full', band: false }
@@ -30,6 +33,11 @@ export function slotOf(img, ancestors, section, effective) {
   if (cls.includes('salt-logos__image')) return { slot: 'thumb', band: false }
   if (cls.includes('salt-process__image')) return effective('layout') === 'cards' ? { slot: 'card', band: true, columns: '3' } : { slot: 'content', band: true }
   if (within('salt-showcase__caption')) return { slot: 'thumb', band: false }
+  // The views (blog-views.tsx, catalogue-views.tsx): the post's image is the content slot, the
+  // archive's portrait and the author box's photo thumbs, and a related card the card slot.
+  if (within('salt-post__media')) return { slot: 'content', band: false }
+  if (within('salt-archive__portrait') || within('salt-author-box__media')) return { slot: 'thumb', band: false }
+  if (within('salt-related__list')) return { slot: 'card', band: false }
   if (!within('salt-showcase__media')) return null
   if (section === 'collection-showcase') {
     const layout = effective('layout')
