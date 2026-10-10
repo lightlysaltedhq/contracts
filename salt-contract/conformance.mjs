@@ -15,6 +15,11 @@
 //    site) is byte-identical to styles/salt.css, the one bundle both platforms serve. The package's
 //    own copy is refused: comparing it with itself would prove nothing.
 //
+// The site chrome (site-header, site-footer) and the page views (post, service, archive, search,
+// not-found) have fixtures too (SC-018). They have no fields of their own, so the runner holds each
+// to the fixtures and class checks, reports it by file, and the run conforms only when every file
+// it runs passes as well.
+//
 // An implementation conforms only when all four ran for every section it ships and all pass
 // (SC-017): a run without a field snapshot or a stylesheet pin fails. A run that leaves a check or
 // a section out is allowed only with --partial, and its report says "partial, not conforming".
@@ -34,6 +39,10 @@ const packageDir = path.dirname(fileURLToPath(import.meta.url))
 const readJson = (file) => JSON.parse(readFileSync(file, 'utf8'))
 
 export const REPORT_FORMAT = 'salt-conformance/1'
+// The chrome components with fixtures; every view in contract/sections.json may have them too.
+export const CHROME = ['site-header', 'site-footer']
+// The files SC-018 requires of every implementation: a full run cannot declare them not shipped.
+export const REQUIRED_FILES = [...CHROME, 'post', 'service', 'archive', 'search', 'not-found']
 
 // ── Arguments ─────────────────────────────────────────────────────────────────────────────────
 
@@ -481,16 +490,25 @@ async function pool(items, jobs, work) {
 export async function runConformance(options) {
   const dir = options.dir ?? packageDir
   const pkg = readJson(path.join(dir, 'package.json'))
-  const ids = readJson(path.join(dir, 'contract', 'sections.json')).sections.map((s) => s.id)
+  const vocab = readJson(path.join(dir, 'contract', 'sections.json'))
+  const ids = vocab.sections.map((s) => s.id)
+  // The chrome and the views with fixtures, each run as a file of its own (SC-018).
+  const fileIds = [...CHROME, ...vocab.views.map((v) => v.id)].filter((id) => existsSync(path.join(dir, 'fixtures', id)))
+  const kindOf = (id) => (CHROME.includes(id) ? 'chrome' : 'view')
   for (const [flag, list] of [['--sections', options.sections], ['--not-shipped', options.notShipped]]) {
-    for (const id of list ?? []) if (!ids.includes(id)) throw new Error(`${flag}: ${id} is not a section in contract/sections.json`)
+    for (const id of list ?? []) if (!ids.includes(id) && !fileIds.includes(id)) throw new Error(`${flag}: ${id} is not a section in contract/sections.json, nor a chrome or view file with fixtures`)
   }
   if (options.sections && !options.partial) throw new Error('sections runs only some sections: a run of some is partial, so pass partial')
   const notShipped = new Set(options.notShipped ?? [])
+  if (!options.partial) {
+    for (const id of notShipped) if (REQUIRED_FILES.includes(id)) throw new Error(`--not-shipped: ${id} is required of every implementation (SC-018); only a --partial run may leave it out`)
+  }
   for (const id of options.sections ?? []) {
     if (notShipped.has(id)) throw new Error(`${id} is in --sections and --not-shipped; a section is run or not shipped, not both`)
   }
   const run = ids.filter((id) => (options.sections ? options.sections.includes(id) || notShipped.has(id) : true))
+  const runFiles = fileIds.filter((id) => (options.sections ? options.sections.includes(id) || notShipped.has(id) : true))
+  // The chrome and views alone show nothing of the sections, which are what a site is built from.
   if (run.every((id) => notShipped.has(id))) throw new Error('the run ships no section, so there is nothing to show conforming')
   const timeout = options.timeout ?? 60000
   const jobs = options.jobs ?? availableParallelism()
@@ -516,7 +534,7 @@ export async function runConformance(options) {
     ? (input) => runCommand(options.adapter.command, input, timeout)
     : (input) => runEndpoint(options.adapter.endpoint, input, timeout)
 
-  const tasks = run.filter((id) => !notShipped.has(id)).flatMap((section) => casesOf(dir, section).map((c) => ({ section, ...c })))
+  const tasks = [...run, ...runFiles].filter((id) => !notShipped.has(id)).flatMap((section) => casesOf(dir, section).map((c) => ({ section, ...c })))
   const outcomes = await pool(tasks, jobs, async (t) => ({ ...t, result: await render(t.input) }))
 
   // A section declared not shipped whose own classes the output draws is shipped after all.
@@ -537,8 +555,8 @@ export async function runConformance(options) {
     return `${owner} is declared not shipped, and the output uses its class ${c} (${cases.join(', ')})`
   })
 
-  const sections = run.map((id) => {
-    if (notShipped.has(id)) return { id, status: 'not shipped' }
+  // The fixtures and class checks for one file's cases.
+  const judge = (id) => {
     const mine = outcomes.filter((o) => o.section === id)
     const failures = []
     const unknown = new Map()
@@ -553,8 +571,15 @@ export async function runConformance(options) {
         }
       }
     }
-    const fixtures = { total: mine.length, passed: mine.length - failures.length, failed: failures.length, failures }
-    const classes = { status: unknown.size ? 'fail' : 'pass', unknown: [...unknown].sort().map(([name, cases]) => ({ class: name, cases })) }
+    return {
+      fixtures: { total: mine.length, passed: mine.length - failures.length, failed: failures.length, failures },
+      classes: { status: unknown.size ? 'fail' : 'pass', unknown: [...unknown].sort().map(([name, cases]) => ({ class: name, cases })) },
+    }
+  }
+
+  const sections = run.map((id) => {
+    if (notShipped.has(id)) return { id, status: 'not shipped' }
+    const { fixtures, classes } = judge(id)
     const own = fields?.bySection.get(id) ?? []
     const fieldParity = fields ? { status: own.length || fields.problems.length ? 'fail' : 'pass', problems: own } : { status: 'not run', problems: [] }
     const stylesheets = { status: styles ? (styles.ok ? 'pass' : 'fail') : 'not run' }
@@ -566,6 +591,15 @@ export async function runConformance(options) {
     return { id, status, fixtures, fields: fieldParity, classes, stylesheets }
   })
 
+  // The chrome and views: fixtures and classes only, as they have no fields; the stylesheet pin is
+  // the run's. A file with no case cannot be shown to conform.
+  const files = runFiles.map((id) => {
+    if (notShipped.has(id)) return { id, kind: kindOf(id), status: 'not shipped' }
+    const { fixtures, classes } = judge(id)
+    const status = fixtures.total > 0 && fixtures.failed === 0 && classes.status === 'pass' ? 'pass' : 'fail'
+    return { id, kind: kindOf(id), status, fixtures, classes }
+  })
+
   const count = (status) => sections.filter((s) => s.status === status).length
   return {
     format: REPORT_FORMAT,
@@ -573,13 +607,16 @@ export async function runConformance(options) {
     platform: options.platform,
     implementation: { version: options.implementationVersion ?? null },
     adapter: options.adapter.command ? { kind: 'command', target: options.adapter.command } : { kind: 'endpoint', target: options.adapter.endpoint },
-    ok: !options.partial && count('fail') === 0 && count('incomplete') === 0 && !(fields?.problems.length) && styles?.ok !== false && problems.length === 0,
+    ok: !options.partial && count('fail') === 0 && count('incomplete') === 0 && !(fields?.problems.length) && styles?.ok !== false && problems.length === 0 &&
+      files.every((f) => f.status !== 'fail'),
     partial: Boolean(options.partial),
     problems,
-    summary: { pass: count('pass'), fail: count('fail'), incomplete: count('incomplete'), notShipped: count('not shipped') },
+    summary: { pass: count('pass'), fail: count('fail'), incomplete: count('incomplete'), notShipped: count('not shipped'),
+      files: { pass: files.filter((f) => f.status === 'pass').length, fail: files.filter((f) => f.status === 'fail').length, notShipped: files.filter((f) => f.status === 'not shipped').length } },
     fields: fields ? { platform: fields.platform, snapshot: fields.snapshot, options: fields.options, problems: fields.problems } : null,
     stylesheets: styles,
     sections,
+    files,
   }
 }
 
@@ -609,7 +646,8 @@ export function renderMarkdown(report) {
   lines.push(`# Salt conformance: ${report.platform}${impl} against ${report.contract.package} ${report.contract.version}`, '')
   const { pass, fail, incomplete, notShipped } = report.summary
   const verdict = report.partial ? 'Partial, not conforming' : report.ok ? 'Pass' : 'Fail'
-  lines.push(`**${verdict}.** ${pass} section(s) pass, ${fail} fail, ${incomplete} incomplete, ${notShipped} not shipped. ` +
+  const fileCount = report.summary.files ? ` Chrome and views: ${report.summary.files.pass} pass, ${report.summary.files.fail} fail, ${report.summary.files.notShipped} not shipped.` : ''
+  lines.push(`**${verdict}.** ${pass} section(s) pass, ${fail} fail, ${incomplete} incomplete, ${notShipped} not shipped.${fileCount} ` +
     `Adapter: ${report.adapter.kind} ${code(report.adapter.target)}.`, '')
   lines.push('| Section | Fixtures | Field parity | Classes | Stylesheet pin |', '| --- | --- | --- | --- | --- |')
   for (const s of report.sections) {
@@ -617,6 +655,13 @@ export function renderMarkdown(report) {
     const classes = s.classes.status === 'pass' ? 'pass' : `${s.classes.unknown.length} unknown`
     const fields = s.fields.status === 'fail' ? `fail (${s.fields.problems.length})` : s.fields.status
     lines.push(`| ${s.id} | ${s.fixtures.passed}/${s.fixtures.total} | ${fields} | ${classes} | ${s.stylesheets.status} |`)
+  }
+  if (report.files?.length) {
+    lines.push('', '| Chrome and views | Kind | Fixtures | Classes |', '| --- | --- | --- | --- |')
+    for (const f of report.files) {
+      if (f.status === 'not shipped') { lines.push(`| ${f.id} | ${f.kind} | not shipped | not shipped |`); continue }
+      lines.push(`| ${f.id} | ${f.kind} | ${f.fixtures.passed}/${f.fixtures.total} | ${f.classes.status === 'pass' ? 'pass' : `${f.classes.unknown.length} unknown`} |`)
+    }
   }
   lines.push('')
   const st = report.stylesheets
@@ -636,14 +681,14 @@ export function renderMarkdown(report) {
     lines.push('', '## Run problems', '')
     for (const p of report.problems) lines.push(`- ${cell(p)}`)
   }
-  const failing = report.sections.filter((s) => s.status === 'fail')
+  const failing = [...report.sections, ...(report.files ?? [])].filter((s) => s.status === 'fail')
   if (failing.length) lines.push('', '## Failures')
   for (const s of failing) {
     lines.push('', `### ${s.id}`, '')
     if (s.fixtures.total === 0) lines.push('- no fixture cases: the section cannot be shown to conform')
     for (const f of s.fixtures.failures) lines.push(`- \`${s.id}/${f.case}\`: ${describeFailure(f)}`)
     for (const u of s.classes.unknown) lines.push(`- class ${code(u.class)} is on no element in contract/markup (cases: ${u.cases.join(', ')})`)
-    for (const p of s.fields.problems) lines.push(`- fields: ${p}`)
+    for (const p of s.fields?.problems ?? []) lines.push(`- fields: ${p}`)
   }
   return `${lines.join('\n')}\n`
 }

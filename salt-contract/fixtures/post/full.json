@@ -1,0 +1,118 @@
+{
+  "$comment": "Shapes of site and document are this case's own (the gate checks only declared site keys): site.home { href, title }, site.collectionIndexes.post { href, title } (the blog index), site.timezone; document { title, href, date (YYYY-MM-DD), readingMinutes, category/topics [{ title, href }], author { name, href?, role, bio, photo (media id) }, featuredImage (media id), body (rich-text string, stored h3 renders h2 at base 1), share { heading, services [{ service, href }], copy }, adjacent { newer, older: { title, href } } }. Share intents are the services' public share URLs for the post's canonical URL. The markup does not say whether the three meta spans are separated; one space is drawn between them. The contract has no site key for showing the breadcrumb, byline, share or author box; each is drawn here because the document supplies its data.",
+  "view": "post",
+  "summary": "A full blog post: breadcrumb, category, byline linked to the author's archive, long date, reading time, the featured image as the priority image, a body whose stored h3 renders h2, tags, share links, the author box, and newer and older neighbours.",
+  "context": {
+    "priorityMedia": true,
+    "locale": "en-GB",
+    "path": "/journal/feeding-your-soil/"
+  },
+  "site": {
+    "name": "Hollin Farm",
+    "home": {
+      "href": "/",
+      "title": "Home"
+    },
+    "collectionIndexes": {
+      "post": {
+        "href": "/journal/",
+        "title": "Journal"
+      }
+    },
+    "timezone": "Europe/London",
+    "labels": {
+      "breadcrumb": "Breadcrumb",
+      "byline": "By",
+      "readTime": "{n} min read",
+      "tags": "Tags",
+      "adjacent": "More posts",
+      "newer": "Newer",
+      "older": "Older",
+      "group": "Share this post",
+      "copy": "Copy link",
+      "author": "About the author",
+      "writtenBy": "Written by",
+      "services": {
+        "x": "X",
+        "facebook": "Facebook",
+        "linkedin": "LinkedIn",
+        "email": "Email"
+      }
+    }
+  },
+  "media": {
+    "feature": {
+      "url": "https://uploads.example/feeding-your-soil-{width}.jpg",
+      "width": 1600,
+      "height": 1067,
+      "alt": "Hands holding a handful of dark compost over a vegetable bed"
+    },
+    "priya": {
+      "url": "https://uploads.example/priya-shah-{width}.jpg",
+      "width": 400,
+      "height": 400,
+      "alt": "Priya Shah smiling in a greenhouse"
+    }
+  },
+  "document": {
+    "title": "Feeding your soil, not your plants",
+    "href": "/journal/feeding-your-soil/",
+    "date": "2026-03-12",
+    "readingMinutes": 4,
+    "category": {
+      "title": "Soil",
+      "href": "/journal/topic/soil/"
+    },
+    "topics": [
+      {
+        "title": "Soil",
+        "href": "/journal/topic/soil/"
+      },
+      {
+        "title": "Composting",
+        "href": "/journal/topic/composting/"
+      }
+    ],
+    "author": {
+      "name": "Priya Shah",
+      "href": "/journal/author/priya-shah/",
+      "role": "Head gardener",
+      "bio": "Priya has run the kitchen garden at Hollin Farm for eleven years and writes about soil, water and patience.",
+      "photo": "priya"
+    },
+    "featuredImage": "feature",
+    "body": "<p>Most gardeners reach for a bottle of feed the moment leaves turn pale. The soil is usually the better place to start.</p><h3>Why compost does the heavy lifting</h3><p>A <strong>well-rotted</strong> mulch feeds the organisms that feed your plants, and it holds water through a dry spell.</p><p>Spread it two inches deep each autumn and leave the worms to do the digging. See <a href=\"/journal/hedge-laying/\">our guide to hedge laying</a> for the other end of the garden.</p>",
+    "share": {
+      "heading": "Share",
+      "services": [
+        {
+          "service": "x",
+          "href": "https://x.com/intent/post?url=https%3A%2F%2Fexample.com%2Fjournal%2Ffeeding-your-soil%2F"
+        },
+        {
+          "service": "facebook",
+          "href": "https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fexample.com%2Fjournal%2Ffeeding-your-soil%2F"
+        },
+        {
+          "service": "linkedin",
+          "href": "https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2Fexample.com%2Fjournal%2Ffeeding-your-soil%2F"
+        },
+        {
+          "service": "email",
+          "href": "mailto:?subject=Feeding%20your%20soil%2C%20not%20your%20plants&body=https%3A%2F%2Fexample.com%2Fjournal%2Ffeeding-your-soil%2F"
+        }
+      ],
+      "copy": true
+    },
+    "adjacent": {
+      "newer": {
+        "title": "A spring sowing calendar",
+        "href": "/journal/spring-sowing-calendar/"
+      },
+      "older": {
+        "title": "A beginner's guide to hedge laying",
+        "href": "/journal/hedge-laying/"
+      }
+    }
+  }
+}

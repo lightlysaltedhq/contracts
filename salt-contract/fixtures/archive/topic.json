@@ -1,0 +1,87 @@
+{
+  "$comment": "document { kind: \"topic\", title, description, href } is this case's own shape. The listing section is the one listing.json draws: anchor posts (id posts, heading id posts__heading), its heading h2 because the view's h1 is the archive title, so card titles are h3 (body base 2 + 1). The listing is not the page's first section as a hero would be, but the view gives it no priority image (archive.json has no priorityMedia), so context.priorityMedia is false and every card image is lazy. Route data as listing/cards-with-pagination.json: pagination.hrefs maps page numbers to paths.",
+  "view": "archive",
+  "summary": "A topic archive on its first page: the topic as h1 with its description, no profile, and the listing section (heading h2) with three cards with images and page 1 of 2 pagination.",
+  "context": {
+    "priorityMedia": false,
+    "locale": "en-GB",
+    "path": "/journal/topic/soil/"
+  },
+  "site": {
+    "arrow": "→",
+    "labels": {
+      "nav": "Pagination",
+      "previous": "Previous",
+      "next": "Next",
+      "page": "Page",
+      "empty": "There are no posts to show yet."
+    }
+  },
+  "document": {
+    "kind": "topic",
+    "title": "Soil",
+    "href": "/journal/topic/soil/",
+    "description": "Everything we have learned about feeding, mulching and looking after the ground under your plants.",
+    "listing": {
+      "anchorId": "posts",
+      "heading": "Latest posts",
+      "track": "listing-1"
+    }
+  },
+  "media": {
+    "soil": {
+      "url": "https://uploads.example/soil-health-{width}.jpg",
+      "width": 800,
+      "height": 600,
+      "alt": "Hands holding a handful of dark compost"
+    },
+    "rain": {
+      "url": "https://uploads.example/rain-barrel-{width}.jpg",
+      "width": 800,
+      "height": 600,
+      "alt": "A water butt beside a greenhouse door"
+    },
+    "compost": {
+      "url": "https://uploads.example/compost-{width}.jpg",
+      "width": 800,
+      "height": 600,
+      "alt": "A three-bay compost heap in different stages"
+    }
+  },
+  "route": {
+    "cards": [
+      {
+        "id": "soil",
+        "title": "Feeding your soil, not your plants",
+        "href": "/journal/feeding-your-soil/",
+        "image": "soil",
+        "date": "2026-03-12",
+        "text": "Why compost does more than any bottle of feed."
+      },
+      {
+        "id": "rain",
+        "title": "Catching rain for a dry July",
+        "href": "/journal/catching-rain/",
+        "image": "rain",
+        "date": "2026-02-19",
+        "text": "A water butt pays for itself by midsummer."
+      },
+      {
+        "id": "compost",
+        "title": "A three-bay compost system",
+        "href": "/journal/three-bay-compost/",
+        "image": "compost",
+        "date": "2026-01-22",
+        "text": "Hot, cooling and ready: one heap for each stage."
+      }
+    ],
+    "pagination": {
+      "current": 1,
+      "total": 2,
+      "hrefs": {
+        "1": "/journal/topic/soil/",
+        "2": "/journal/topic/soil/page/2/"
+      }
+    }
+  }
+}

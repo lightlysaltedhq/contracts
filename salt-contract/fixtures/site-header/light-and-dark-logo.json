@@ -1,0 +1,53 @@
+{
+  "$comment": "site shape: { name, home, logo: { light, dark? } (media ids), logoHeight, labels: { navigation, submenu, menu, closeMenu, phone?, theme? }, header: { menu: [{ label, href?, children?: [{ label, href }] }], phone: { text, tel }, cta: { label, href }, sticky }, themeToggle }. An item with children and no href draws its label as the span form. No logoHeight, so the logo draws at the 32px default (no style attribute, sizes 128px for these 480 by 120 uploads). The link is named by aria-label and both images have an empty alt.",
+  "chrome": "site-header",
+  "summary": "Light and dark logo images (data-swaps) at the default drawn height and a flat three-item menu with the current page on the first item.",
+  "context": {
+    "path": "/"
+  },
+  "site": {
+    "name": "Hollow Oak Garden Design",
+    "home": "/",
+    "logo": {
+      "light": "logo-light",
+      "dark": "logo-dark"
+    },
+    "labels": {
+      "navigation": "Main",
+      "submenu": "Show submenu",
+      "menu": "Menu",
+      "closeMenu": "Close menu",
+      "phone": "Call Hollow Oak"
+    },
+    "header": {
+      "menu": [
+        {
+          "label": "Home",
+          "href": "/"
+        },
+        {
+          "label": "Journal",
+          "href": "/journal/"
+        },
+        {
+          "label": "Contact",
+          "href": "/contact/"
+        }
+      ]
+    }
+  },
+  "media": {
+    "logo-light": {
+      "url": "https://uploads.example/hollow-oak-light-{width}.png",
+      "width": 480,
+      "height": 120,
+      "alt": "Hollow Oak Garden Design"
+    },
+    "logo-dark": {
+      "url": "https://uploads.example/hollow-oak-dark-{width}.png",
+      "width": 480,
+      "height": 120,
+      "alt": "Hollow Oak Garden Design"
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "$comment": "site shape: { name, home, labels: { menu, closeMenu, ... }, header: { menu: [{ label, href?, children?: [{ label, href }] }], phone, cta: { label, href }, sticky } }. No logo, so the site name is the wordmark. With no menu the nav, phone, call to action and theme toggle are not drawn; the burger always is.",
+  "chrome": "site-header",
+  "summary": "A header for a site with no logo image, menu, phone number, call to action or theme toggle: the site name as the wordmark and the burger.",
+  "context": {
+    "path": "/"
+  },
+  "site": {
+    "name": "Hollow Oak Garden Design",
+    "home": "/",
+    "labels": {
+      "menu": "Menu"
+    }
+  }
+}

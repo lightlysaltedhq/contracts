@@ -463,6 +463,151 @@ test('arrows: only a section\'s call to action takes the site\'s arrow', () => {
   }, /"Choose Starter[^"]*" draws an arrow, which only a section's call to action takes/)
 })
 
+// The site chrome and the page views (SC-018).
+const HEADER = 'site-header/menu-submenus-phone-cta-sticky'
+const SWAPS = 'site-header/light-and-dark-logo'
+test('chrome: the chrome and the views SC-018 names are required', () => {
+  expectFail(HERO, () => {}, /site-header has no fixtures \(fixtures\/site-header\/<case>\.json and \.html\), which SC-018 requires/)
+  expectFail(HERO, () => {}, /not-found has no fixtures/)
+})
+test('chrome: a chrome or view case passes its own checks', () => {
+  const dir = copy(['site-header', 'post', 'archive'])
+  try {
+    const r = run(dir)
+    assert.doesNotMatch(r.out, /fixtures\/(site-header|post|archive)\//, r.out)
+  } finally { rmSync(dir, { recursive: true, force: true }) }
+})
+test('chrome: a site key that is not declared fails, and logoHeight must be whole px', () => {
+  expectFail(['site-header'], (io) => io.json(`${HEADER}.json`, (d) => { d.site.logoHeightPx = 48 }), /site\.logoHeightPx is not a declared site key/)
+  expectFail(['site-header'], (io) => io.json(`${HEADER}.json`, (d) => { d.site.logoHeight = '48px' }), /site\.logoHeight is the logo's drawn height, a whole number of px/)
+})
+test('chrome: the chrome never holds priority media, and a view must say whether it does', () => {
+  expectFail(['site-header'], (io) => io.json(`${HEADER}.json`, (d) => { d.context.priorityMedia = false }), /the chrome never holds the priority image/)
+  expectFail(['post'], (io) => io.json('post/full.json', (d) => { delete d.context.priorityMedia }), /context\.priorityMedia must say whether the plan grants this view/)
+})
+test('chrome: a case under the wrong kind key fails', () => {
+  expectFail(['post'], (io) => io.json('post/full.json', (d) => { d.chrome = d.view; delete d.view }), /unknown key chrome/)
+})
+test('chrome: a view with a second h1 fails, and so does an h1 in the chrome', () => {
+  // Inside content the markup leaves open (a nested section's block, the drawer's panel), so the
+  // heading rule itself is what fails.
+  expectFail(['archive'], (io) => io.html('archive/topic.html', 'data-block="listing">', 'data-block="listing">\n          <h1>Again</h1>'), /a view draws exactly one h1, its title \(section#single-h1\); this draws 2/)
+  expectFail(['site-header'], (io) => io.html('site-header/drawer-open.html', '<div class="salt-drawer__panel">', '<div class="salt-drawer__panel">\n        <h1>Menu</h1>'), /the site-header draws an h1; the page's h1 belongs to its main/)
+})
+test('chrome: an id that is no landmark, anchor or vocabulary-owned part fails', () => {
+  expectFail(['archive'], (io) => io.html('archive/topic.html', 'data-block="listing">', 'data-block="listing">\n          <p id="intro-1">x</p>'), /id intro-1 is not a landmark id, a section's anchor or <owner>__<part>/)
+  expectFail(['archive'], (io) => io.html('archive/topic.html', 'data-block="listing">', 'data-block="listing">\n          <p id="nowhere__intro">x</p>'), /id nowhere__intro is not a landmark id/)
+})
+test('chrome: the logo\'s sizes is its drawn width at site.logoHeight', () => {
+  expectFail(['site-header'], (io) => io.json(`${HEADER}.json`, (d) => { d.site.logoHeight = 40 }), /sizes="180px"; its slot \(logo\) gives "150px"/)
+})
+test('chrome: a logo is matched to its record by the exact template, never by prefix', () => {
+  // The dark image's own record is renamed away; a record whose template is a prefix of its src
+  // must not stand in for it.
+  expectFail(['site-header'], (io) => io.json(`${SWAPS}.json`, (d) => {
+    const dark = d.site.logo.dark
+    d.media[dark].url = 'https://uploads.example/hollow-oak-night-{width}.png'
+    d.media.prefix = { url: 'https://uploads.example/hollow-oak-{width}.png', width: 480, height: 120, alt: '' }
+  }), /src https:\/\/uploads\.example\/hollow-oak-dark-480\.png fills no media record's template exactly/)
+})
+
+// Review of #13, 1 and 2: landmark ids on their own elements; owners from this file only.
+test('chrome: a nested section anchored with a landmark id fails, and a landmark id off its element', () => {
+  expectFail(['archive'], (io) => {
+    const rel = 'fixtures/archive/topic.html'
+    io.write(rel, readFileSync(path.join(io.dir, rel), 'utf8').replace('id="posts"', 'id="site-navigation"').replaceAll('posts__heading', 'site-navigation__heading'))
+    io.json('archive/topic.json', (d) => { d.document.listing.anchorId = 'site-navigation' })
+  }, /a section anchored with the landmark id site-navigation renders as site-navigation-section/)
+  expectFail(['archive'], (io) => io.html('archive/topic.html', 'data-block="listing">', 'data-block="listing">\n          <p id="main">x</p>'), /the landmark id main is on <p>, not its landmark element/)
+})
+test('chrome: an id owned by a file this one does not draw fails', () => {
+  expectFail(['site-footer'], (io) => io.html('site-footer/consent-panel-open.html', 'id="site-footer__consent-analytics-description">', 'id="site-footer__consent-analytics-description"><span id="site-header__submenu-2">x</span>'), /id site-header__submenu-2 is not a landmark id, a section's anchor or <owner>__<part> owned by site-footer/)
+})
+
+test('chrome: a nested section\'s card titles rank below its heading (review of #13, 3)', () => {
+  expectFail(['archive'], (io) => {
+    const rel = 'fixtures/archive/topic.html'
+    io.write(rel, readFileSync(path.join(io.dir, rel), 'utf8').replace(/<h3>/g, '<h2>').replace(/<\/h3>/g, '</h2>'))
+  }, /<h2> in the nested section posts ranks at or above its heading's level 2/)
+})
+
+test('images: a related service card takes the grid\'s card slot, three columns at the default measure (review of #13, 5)', async () => {
+  const { slotOf, sizesOf } = await import('./salt_image_slots.mjs')
+  const table = JSON.parse(readFileSync(path.join(pkg, 'contract/image-sizes.json'), 'utf8'))
+  const list = { name: 'ul', attrs: [['class', 'salt-grid salt-showcase salt-related__list']], children: [] }
+  const media = { name: 'div', attrs: [['class', 'salt-showcase__media']], children: [] }
+  const placed = slotOf({ attrs: [], children: [] }, [media, list], 'service', () => undefined)
+  assert.equal(sizesOf(table, placed, placed.fixedBand), table.slots.card.bands.default['3'])
+})
+
+test('chrome: aria-current marks the link to context.path, and only it (review of #13, 6)', () => {
+  const FOOT = 'site-footer/columns-socials-copyright'
+  expectFail(['site-footer'], (io) => io.json(`${FOOT}.json`, (d) => { d.context.path = '/journal/' }), /marks \/about\/ current, but the page's path is \/journal\//)
+  expectFail(['site-footer'], (io) => io.html(`${FOOT}.html`, ' aria-current="page">About us', '>About us'), /link to \/about\/, the page's path, lacks aria-current="page"/)
+  expectFail(['post'], (io) => io.json('post/full.json', (d) => { delete d.context.path }), /marks a link current, but the case gives no context\.path/)
+  expectFail(['site-header'], (io) => io.html('site-header/light-and-dark-logo.html', /<a class="salt-nav__link" href="(\/[a-z]+\/)">/.exec(readFileSync(path.join(pkg, 'fixtures/site-header/light-and-dark-logo.html'), 'utf8'))[0],
+    /<a class="salt-nav__link" href="(\/[a-z]+\/)">/.exec(readFileSync(path.join(pkg, 'fixtures/site-header/light-and-dark-logo.html'), 'utf8'))[0].replace('">', '" aria-current="page">')), /marks \/[a-z]+\/ current, but the page's path is \//)
+})
+test('chrome: a menu that links the current page twice marks both current (review of #13, A)', () => {
+  const FOOT = 'site-footer/columns-socials-copyright'
+  const dir = copy(['site-footer'], (io) => io.html(`${FOOT}.html`, '<a class="salt-footer__link" href="/about/" aria-current="page">About us</a>',
+    '<a class="salt-footer__link" href="/about/" aria-current="page">About us</a></li>\n            <li><a class="salt-footer__link" href="/about/" aria-current="page">Who we are</a>'))
+  try {
+    const r = run(dir)
+    assert.doesNotMatch(r.out, /fixtures\/site-footer\//, r.out)
+  } finally { rmSync(dir, { recursive: true, force: true }) }
+})
+
+test('chrome: a nested section takes its anchor, spacing and track from document.listing (review of #13, 8)', () => {
+  expectFail(['archive'], (io) => io.json('archive/topic.json', (d) => { d.document.listing.anchorId = 'stories' }), /<section\.salt-section> id="posts" is not "<anchor>"/)
+  expectFail(['archive'], (io) => io.json('archive/topic.json', (d) => { d.document.listing.settings = { spacing: 'lg' } }), /data-spacing="md" disagrees with the case, which gives "lg"/)
+  expectFail(['archive'], (io) => io.json('archive/topic.json', (d) => { d.document.listing.track = 'listing-2' }), /data-track="listing-1" disagrees with the case, which gives "listing-2"/)
+  expectFail(['archive'], (io) => io.json('archive/topic.json', (d) => { delete d.document.listing }), /the archive nests a section, so document\.listing must describe it/)
+})
+
+test('chrome: a nested section with a background image must draw it, as a section case does (review of #13, B)', () => {
+  const withImage = (d) => { d.document.listing.settings = { backgroundImage: { image: 'soil' } }; d.media.soil.focalPoint = { x: 30, y: 60 } }
+  const tag = 'data-track="listing-1"'
+  // Without data-media: refused, as for a section case.
+  expectFail(['archive'], (io) => io.json('archive/topic.json', withImage), /<section\.salt-section> lacks data-media, which the markup requires when a background image is/)
+  // With data-media but no background layer: the layer is required.
+  expectFail(['archive'], (io) => { io.json('archive/topic.json', withImage); io.html('archive/topic.html', tag, `data-media ${tag}`) }, /background is not drawn, but a background image is set/)
+  // With the layer but no focal point in its style: the focal-point style is required.
+  expectFail(['archive'], (io) => {
+    io.json('archive/topic.json', withImage)
+    const u = (w) => `https://uploads.example/soil-health-${w}.jpg`
+    const bg = `<img class="salt-section__media" src="${u(800)}" srcset="${u(640)} 640w, ${u(750)} 750w, ${u(800)} 800w" sizes="100vw" width="800" height="600" alt="" aria-hidden="true" loading="lazy" decoding="async">` +
+      '\n    <div class="salt-section__scrim" style="--salt-scrim-alpha: var(--scrim-strong)"></div>'
+    io.html('archive/topic.html', `${tag} style`, `data-media ${tag} style`)
+    io.html('archive/topic.html', '    <div class="salt-section__content">', `    ${bg}\n    <div class="salt-section__content">`)
+  }, /<img\.salt-section__media> lacks style, which the markup requires when/)
+})
+
+test('chrome: data-current-section marks the item whose submenu links the page, and no other (review of #13, C)', () => {
+  expectFail(['site-header'], (io) => {
+    io.html(`${HEADER}.html`, '<li class="salt-nav__item" data-current-section>', '<li class="salt-nav__item">')
+    io.html(`${HEADER}.html`, '<li class="salt-nav__item">\n          <a class="salt-nav__link" href="/journal/">', '<li class="salt-nav__item" data-current-section>\n          <a class="salt-nav__link" href="/journal/">')
+  }, /<li\.salt-nav__item> carries data-current-section, but no link in its submenu is to \/services\/planting-plans\//)
+})
+
+test('chrome: document.listing\'s heading is the nested heading\'s text, and its anchor is given once (review of #13, D)', () => {
+  expectFail(['archive'], (io) => io.json('archive/topic.json', (d) => { d.document.listing.heading = 'Older posts' }), /the nested section's heading reads "Latest posts"; document\.listing\.heading gives "Older posts"/)
+  expectFail(['archive'], (io) => io.json('archive/topic.json', (d) => { d.document.listing.heading = 3 }), /document\.listing\.heading is the nested section's heading text/)
+  expectFail(['archive'], (io) => io.json('archive/topic.json', (d) => { d.document.listing.settings = { anchorId: 'stories' } }), /document\.listing\.settings\.anchorId is "stories", but the section's anchor is "posts"/)
+})
+
+test('chrome: the gate requires exactly the runner\'s list of chrome and view files, from one place (review of #13, E)', async () => {
+  const { REQUIRED_FILES } = await import('../salt-contract/conformance.mjs')
+  const dir = copy(HERO)
+  try {
+    const missing = [...run(dir).out.matchAll(/✗ ([a-z-]+) has no fixtures \(fixtures\/[a-z-]+\/<case>\.json and \.html\), which SC-018 requires/g)].map((m) => m[1])
+    assert.deepEqual(missing.sort(), [...REQUIRED_FILES].sort())
+  } finally { rmSync(dir, { recursive: true, force: true }) }
+  const src = readFileSync(script, 'utf8')
+  assert.match(src, /import \{[^}]*\bREQUIRED_FILES\b[^}]*\} from '\.\.\/salt-contract\/conformance\.mjs'/, 'the gate imports the runner\'s list')
+  assert.doesNotMatch(src, /\[[^\]]*'not-found'[^\]]*\]/, 'the gate keeps no list of its own')
+})
+
 // ── 4. The normaliser ─────────────────────────────────────────────────────────────────────────
 test('normaliser: one that drops an attribute fails the mutation check', () => {
   expectFail(HERO, (io) => {

@@ -1,0 +1,45 @@
+{
+  "$comment": "site.consent is { labels: { preferences, title, save, cancel }, categories: [{ id, label, description }] }. state.consentPanelOpen draws the dialog. The dialog's open attribute is not declared by the markup, so it is drawn without it (the adapter's state is the case's state). The consent-description element has no declared children, so the description is plain text inside it. The consent-save and consent-cancel buttons are button-form components with their label as text.",
+  "chrome": "site-footer",
+  "summary": "The consent preferences panel open: its dialog with a title, two categories (analytics, marketing) each with checkbox, label and description, and save and cancel buttons, beside the footer's links and consent control.",
+  "context": {
+    "path": "/"
+  },
+  "state": {
+    "consentPanelOpen": true
+  },
+  "site": {
+    "name": "Hartley Gardens",
+    "home": "/",
+    "organisation": "Hartley Gardens",
+    "labels": {
+      "navigation": "Footer",
+      "preferences": "Cookie preferences"
+    },
+    "consent": {
+      "labels": {
+        "preferences": "Cookie preferences",
+        "title": "Cookie preferences",
+        "save": "Save preferences",
+        "cancel": "Cancel"
+      },
+      "categories": [
+        { "id": "analytics", "label": "Analytics", "description": "Helps us see which pages are read, with no personal details." },
+        { "id": "marketing", "label": "Marketing", "description": "Lets us measure how our adverts perform." }
+      ]
+    },
+    "footer": {
+      "tone": "surface",
+      "showLogo": false,
+      "columns": [
+        {
+          "links": [
+            { "label": "Contact", "href": "/contact/" },
+            { "label": "Privacy policy", "href": "/privacy/" }
+          ]
+        }
+      ],
+      "copyright": "© 2026 Hartley Gardens"
+    }
+  }
+}

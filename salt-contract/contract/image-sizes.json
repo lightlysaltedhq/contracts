@@ -257,6 +257,34 @@
       "when": "always"
     },
     {
+      "markup": "post",
+      "image": ".salt-post__media img",
+      "slot": "content",
+      "band": false,
+      "when": "the featured image"
+    },
+    {
+      "markup": "author-box",
+      "image": ".salt-author-box__media img",
+      "slot": "thumb",
+      "band": false,
+      "when": "the author's photo"
+    },
+    {
+      "markup": "archive",
+      "image": ".salt-archive__portrait img",
+      "slot": "thumb",
+      "band": false,
+      "when": "an author's portrait"
+    },
+    {
+      "markup": "service",
+      "image": ".salt-related__list .salt-showcase__media img",
+      "slot": "card",
+      "band": true,
+      "when": "a related service's card: the view's .salt-grid, three columns (stepping to two and one as the grid does), in the default measure"
+    },
+    {
       "markup": "site-logo",
       "image": "img.salt-logo__image",
       "slot": "logo",

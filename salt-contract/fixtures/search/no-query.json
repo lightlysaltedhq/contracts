@@ -1,0 +1,30 @@
+{
+  "$comment": "Same site shape as results. No query: the h1 and the form only, with no value on the input, no empty sentence and no results section.",
+  "view": "search",
+  "summary": "The search page reached without a query: the h1 and an empty search form only.",
+  "context": {
+    "priorityMedia": false,
+    "path": "/search/"
+  },
+  "site": {
+    "name": "Hedgerow & Co",
+    "search": {
+      "path": "/search/",
+      "maxLength": 100
+    },
+    "labels": {
+      "search": "Search",
+      "landmark": "Search the site",
+      "field": "Search",
+      "submit": "Search",
+      "results": "{n} results for “{q}”",
+      "more": "More pages match than are listed here. Try a more specific search.",
+      "noResults": "Nothing matched “{q}”. Try a different word.",
+      "kind": "{kind}",
+      "nav": "Search results pages",
+      "previous": "Previous",
+      "next": "Next",
+      "page": "Page {n}"
+    }
+  }
+}

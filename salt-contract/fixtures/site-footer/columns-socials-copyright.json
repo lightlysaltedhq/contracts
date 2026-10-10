@@ -1,0 +1,53 @@
+{
+  "$comment": "site.footer is { tone, showLogo, columns: [{ title?, links: [{ label, href }] }], text (rich text), profiles: [{ name, url, icon? }], copyright }. site.consent is { labels: { preferences }, categories }. The consent control is drawn without aria-disabled: the consent-control note says it is aria-disabled until script hydrates, but the button does not declare that attribute, so it is not drawn (reported). The third profile (Substack) has no glyph in contract/sections.json icons, so its name is drawn as text.",
+  "chrome": "site-footer",
+  "summary": "Three titled columns of links with the current page marked, footer text, three social profiles (two with a glyph, one drawn as its name), the copyright line and the consent preferences control, on the surface tone.",
+  "context": {
+    "path": "/about/"
+  },
+  "site": {
+    "name": "Hartley Gardens",
+    "home": "/",
+    "organisation": "Hartley Gardens",
+    "labels": {
+      "navigation": "Footer",
+      "social": "Social media",
+      "preferences": "Cookie preferences"
+    },
+    "footer": {
+      "tone": "surface",
+      "showLogo": false,
+      "columns": [
+        {
+          "title": "Studio",
+          "links": [
+            { "label": "About us", "href": "/about/" },
+            { "label": "Our work", "href": "/work/" },
+            { "label": "Journal", "href": "/journal/" }
+          ]
+        },
+        {
+          "title": "Services",
+          "links": [
+            { "label": "Garden design", "href": "/services/garden-design/" },
+            { "label": "Planting", "href": "/services/planting/" }
+          ]
+        },
+        {
+          "title": "Help",
+          "links": [
+            { "label": "Contact", "href": "/contact/" },
+            { "label": "Privacy policy", "href": "/privacy/" }
+          ]
+        }
+      ],
+      "text": "<p>We plan, plant and look after gardens across <strong>Bristol and Bath</strong>.</p>",
+      "profiles": [
+        { "name": "Instagram", "url": "https://www.instagram.com/hartleygardens", "icon": "instagram" },
+        { "name": "LinkedIn", "url": "https://www.linkedin.com/company/hartley-gardens", "icon": "linkedin" },
+        { "name": "Substack", "url": "https://hartleygardens.substack.com" }
+      ],
+      "copyright": "© 2026 Hartley Gardens"
+    }
+  }
+}

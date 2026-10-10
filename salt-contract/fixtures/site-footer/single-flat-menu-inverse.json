@@ -1,0 +1,44 @@
+{
+  "$comment": "site.footer.columns holds one column with no title: a single flat menu, as WordPress has (SC-006). The markup says its list 'takes the nav's name' but declares only aria-labelledby (when the column has a title), so the untitled list carries no naming attribute of its own and the nav's aria-label names the region (reported). site.logo.light names a media id; no dark logo is set, so the link carries no data-swaps. The logo is drawn at site.logoHeight 40.",
+  "chrome": "site-footer",
+  "summary": "A single flat menu as one untitled column, on the surface-inverse tone, with the light logo in the brand block, the copyright line and the consent control, and no socials.",
+  "context": {
+    "path": "/"
+  },
+  "media": {
+    "hartley-logo": {
+      "url": "https://uploads.example/hartley-logo-{width}.png",
+      "width": 480,
+      "height": 120,
+      "alt": "Hartley Gardens"
+    }
+  },
+  "site": {
+    "name": "Hartley Gardens",
+    "home": "/",
+    "organisation": "Hartley Gardens",
+    "logo": {
+      "light": "hartley-logo"
+    },
+    "logoHeight": 40,
+    "labels": {
+      "navigation": "Footer",
+      "preferences": "Cookie preferences"
+    },
+    "footer": {
+      "tone": "surface-inverse",
+      "showLogo": true,
+      "columns": [
+        {
+          "links": [
+            { "label": "About us", "href": "/about/" },
+            { "label": "Our work", "href": "/work/" },
+            { "label": "Contact", "href": "/contact/" },
+            { "label": "Privacy policy", "href": "/privacy/" }
+          ]
+        }
+      ],
+      "copyright": "© 2026 Hartley Gardens"
+    }
+  }
+}

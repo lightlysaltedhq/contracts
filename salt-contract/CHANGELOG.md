@@ -6,6 +6,19 @@ Salted's decision log for Product Salt.
 
 ## Unreleased (0.1.0, drafting)
 
+- Fixtures for the site chrome and page views (SC-018): 20 cases for `site-header`, `site-footer`
+  and the `post`, `service`, `archive`, `search` and `not-found` views, 100 cases in all. A case
+  names its kind by its key (`section`, `chrome`, `view`); chrome and view cases read `site`,
+  `document`, `route` and `state`, and the adapter renders the header or footer element, or the
+  view's `main#main`. The fixtures gate reads them against their own markup: one h1 per view and
+  none in the chrome; landmark ids only on their landmark elements; `<owner>__<part>` owners limited
+  to the file, the components it draws and its nested sections; a view's nested section described
+  by `document.listing` and held to the heading rules; `aria-current` tied to the page's path; view
+  images in their slots, related service cards in the grid's card slot. `site` keys are declared,
+  `site.logoHeight` among them, and a logo is matched to its media record by its exact template. The
+  conformance runner runs the chrome and views too, each reported as a file of its own and counted
+  in the verdict; `--sections` and `--not-shipped` take their ids, and a full run refuses the SC-018
+  files as not shipped.
 - `styles/salt.css` (`./styles/salt.css`): the one stylesheet both platforms serve, byte for byte.
   It is the six shared stylesheets in load order (base, sections, primitives, blocks, chrome,
   views), minified with comments stripped (45 KB), built deterministically by `npm run
