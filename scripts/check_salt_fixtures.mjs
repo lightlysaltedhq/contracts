@@ -542,6 +542,28 @@ function linkFor(c, el) {
   return found.length === 1 ? found[0] : undefined
 }
 const newTab = (c, el) => { const link = linkFor(c, el); return link ? link.newTab === true : undefined }
+// A button row's stored style (a list of { link, style } rows: the hero's, the call to action's, a
+// media-text row's), or that list field's default, found by the button's label.
+function buttonStyle(c, el) {
+  const label = labelOf(el)
+  const found = []
+  const walk = (fields, v) => {
+    if (!Array.isArray(fields)) return
+    for (const f of fields) {
+      const value = v?.[f.name]
+      if (f.type === 'list' && Array.isArray(value)) {
+        const style = f.fields.find((x) => x.name === 'style' && x.type === 'select')
+        const hasLink = f.fields.some((x) => x.name === 'link' && x.type === 'link')
+        for (const row of value) {
+          if (style && hasLink && row?.link?.label === label) found.push(row.style ?? style.default)
+          walk(f.fields, row)
+        }
+      } else if (f.type === 'group' && isObject(value)) walk(f.fields, value)
+    }
+  }
+  walk(c.fieldsDoc?.fields, c.values)
+  return found.length === 1 ? found[0] : undefined
+}
 const currentPage = (c, el) => (c.input.route?.pagination ? textOf(el) === String(c.input.route.pagination.current) : undefined)
 // The tabs section: how many panels render, and whether they are tabbed (tab-set.json: more than
 // one panel and a name, the heading or else the label).
@@ -650,6 +672,12 @@ function backgroundStyle(c) {
 // A data attribute that mirrors one of the section's fields carries that field's value.
 const field = (name) => (c) => { const v = effective(c, name); return v === undefined ? undefined : String(v) }
 const VALUE = {
+  'button:root:data-style': buttonStyle,
+  // pricing.json: a plan's call to action is primary when the plan is featured, secondary otherwise.
+  'pricing:action:data-style': (c, el) => {
+    const plan = (c.values?.plans ?? []).filter((p) => p.cta?.label === labelOf(el))
+    return plan.length === 1 ? (plan[0].featured ? 'primary' : 'secondary') : undefined
+  },
   'hero:root:data-align': field('alignment'),
   'hero:root:data-media-side': field('mediaSide'),
   'rich-text:root:data-align': field('alignment'),

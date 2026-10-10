@@ -762,6 +762,15 @@ test('page: a nested faq\'s group name is faq-<its index> (settling d)', () => {
   expectFail(['page'], (io) => faqPage(io, 'faq-1'), /name="faq-1" disagrees with the case, which gives "faq-0"/)
 })
 
+test('markup: a button\'s data-style is its row\'s stored style (settling e)', () => {
+  // split-image-left stores primary then secondary; media-text rows default to secondary.
+  markupFails('data-style="secondary" data-track-control="cta"><span class="salt-button__label">Get in touch', 'data-style="ghost" data-track-control="cta"><span class="salt-button__label">Get in touch',
+    /data-style="ghost" disagrees with the case, which gives "secondary"/)
+  expectFail(['media-text'], (io) => io.html('media-text/single-one-row-first.html', 'data-style="secondary"', 'data-style="primary"'), /data-style="primary" disagrees with the case, which gives "secondary"/)
+  // pricing.json: primary when the plan is featured.
+  expectFail(['pricing'], (io) => io.html('pricing/three-plans-featured.html', 'data-style="primary"', 'data-style="secondary"'), /data-style="secondary" disagrees with the case, which gives "primary"/)
+})
+
 // ── 4. The normaliser ─────────────────────────────────────────────────────────────────────────
 test('normaliser: one that drops an attribute fails the mutation check', () => {
   expectFail(HERO, (io) => {
