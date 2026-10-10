@@ -771,6 +771,14 @@ test('markup: a button\'s data-style is its row\'s stored style (settling e)', (
   expectFail(['pricing'], (io) => io.html('pricing/three-plans-featured.html', 'data-style="primary"', 'data-style="secondary"'), /data-style="secondary" disagrees with the case, which gives "primary"/)
 })
 
+test('page: the first section\'s heading claims the h1, derived, and a fallback h1 beside it fails (settling f)', () => {
+  expectFail(['page'], (io) => io.json(`${PAGE}.json`, (d) => { d.document.sections[0].headingLevel = 2 }), /document\.sections\[0\]\.headingLevel is 2, but the page's first section claims the h1 \(section#single-h1\)/)
+  expectFail(['page'], (io) => io.html(`${PAGE}.html`, '<main id="main" tabindex="-1">', '<main id="main" tabindex="-1">\n      <h1 class="salt-sr-only">About us</h1>'), /the page draws the fallback heading, but its section's heading claims the h1 \(section#fallback-heading\)/)
+  // With no headingLevel given, the level is derived, and the page still passes.
+  const dir = copy(['page'], (io) => io.json(`${PAGE}.json`, (d) => { delete d.document.sections[0].headingLevel }))
+  try { assert.doesNotMatch(run(dir).out, /fixtures\/page\//, run(dir).out) } finally { rmSync(dir, { recursive: true, force: true }) }
+})
+
 // ── 4. The normaliser ─────────────────────────────────────────────────────────────────────────
 test('normaliser: one that drops an attribute fails the mutation check', () => {
   expectFail(HERO, (io) => {

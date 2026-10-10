@@ -283,7 +283,10 @@ function checkOtherInput(c) {
       const n = Number(/-([1-9][0-9]*)$/.exec(nested.track ?? '')?.[1])
       if (n > nested.index + 1) fail(`${p}.track ${nested.track} counts ${n} ${nested.section} sections, but only ${nested.index + 1} come up to this one (index ${nested.index}, from 0)`)
     }
-    if (nested.headingLevel !== undefined && ![1, 2].includes(nested.headingLevel)) fail(`${p}.headingLevel is 1 (the section claims the page's h1) or 2`)
+    // Its heading level is the plan's, derived: a page's one section is its first, with no heading
+    // before it, so it claims the h1; a view's ranks under the view's h1 (section#single-h1).
+    const level = kind === 'page' ? 1 : 2
+    if (nested.headingLevel !== undefined && nested.headingLevel !== level) fail(`${p}.headingLevel is ${nested.headingLevel}, but ${kind === 'page' ? "the page's first section claims the h1" : "a view's section ranks under the view's h1, at 2"} (section#single-h1)`)
     // Its field values, as a section case's: checked against its own fields file, with its
     // settled anchor in values.settings.anchorId (review of #14, 1 and 5).
     const fieldsDoc = readJson(`contract/fields/${nested.section}.json`)
@@ -293,7 +296,7 @@ function checkOtherInput(c) {
     checkFields(fieldsDoc.fields, own, `${p}.values`, c)
     if (!isObject(settings) || !SLUG.test(settings.anchorId ?? '') || landmarks.has(settings.anchorId)) fail(`${p}.values.settings.anchorId must be the nested section's settled anchor: a slug, not a landmark id`)
     if (isObject(settings)) checkFields(settingsFields(fieldsDoc), settings, `${p}.values.settings`, c)
-    c.nested = { ...nested, fieldsDoc }
+    c.nested = { ...nested, headingLevel: level, fieldsDoc }
     c.values = values
     c.fieldsDoc = fieldsDoc
     c.sectionId = nested.section
@@ -984,6 +987,10 @@ function checkMarkup(c) {
   // A page draws the header's scriptless phone layout in its head whenever it draws the header
   // (page.json, SC-019).
   if (c.kind === 'page') {
+    // The fallback heading is drawn only when no section claims the h1 (section#fallback-heading).
+    if ((bindings.get('fallback-heading') ?? []).length && c.anchor && every().some((e) => attr(e, 'id') === `${c.anchor}__heading`)) {
+      fail(`${at}.html: the page draws the fallback heading, but its section's heading claims the h1 (section#fallback-heading)`)
+    }
     const header = every().some((e) => e.name === 'header' && classesOf(e).includes('salt-header'))
     const scriptless = (bindings.get('scriptless') ?? []).length > 0
     if (header && !scriptless) fail(`${at}.html: the page draws the header, so its head carries the scriptless phone layout's noscript style (page.json)`)
@@ -1091,7 +1098,7 @@ function checkMarkup(c) {
       const inside = descendants(nested).filter((el) => HEADING.test(el.name))
       const own = inside.find((el) => attr(el, 'id') === `${attr(nested, 'id')}__heading`)
       // In a view the nested heading is h2, under the view's h1; on a page it is the plan's level.
-      const level = c.nested?.headingLevel ?? 2
+      const level = c.nested?.headingLevel ?? (c.kind === 'page' ? 1 : 2)
       const base = own ? Number(own.name[1]) : level
       if (own && base !== level) fail(`${at}.html: the nested section ${attr(nested, 'id')}'s heading is ${own.name}; the plan gives it h${level} (section#heading-level)`)
       for (const h of inside) {
