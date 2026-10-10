@@ -565,6 +565,24 @@ test('chrome: a nested section takes its anchor, spacing and track from document
   expectFail(['archive'], (io) => io.json('archive/topic.json', (d) => { delete d.document.listing }), /the archive nests a section, so document\.listing must describe it/)
 })
 
+test('chrome: a nested section with a background image must draw it, as a section case does (review of #13, B)', () => {
+  const withImage = (d) => { d.document.listing.settings = { backgroundImage: { image: 'soil' } }; d.media.soil.focalPoint = { x: 30, y: 60 } }
+  const tag = 'data-track="listing-1"'
+  // Without data-media: refused, as for a section case.
+  expectFail(['archive'], (io) => io.json('archive/topic.json', withImage), /<section\.salt-section> lacks data-media, which the markup requires when a background image is/)
+  // With data-media but no background layer: the layer is required.
+  expectFail(['archive'], (io) => { io.json('archive/topic.json', withImage); io.html('archive/topic.html', tag, `data-media ${tag}`) }, /background is not drawn, but a background image is set/)
+  // With the layer but no focal point in its style: the focal-point style is required.
+  expectFail(['archive'], (io) => {
+    io.json('archive/topic.json', withImage)
+    const u = (w) => `https://uploads.example/soil-health-${w}.jpg`
+    const bg = `<img class="salt-section__media" src="${u(800)}" srcset="${u(640)} 640w, ${u(750)} 750w, ${u(800)} 800w" sizes="100vw" width="800" height="600" alt="" aria-hidden="true" loading="lazy" decoding="async">` +
+      '\n    <div class="salt-section__scrim" style="--salt-scrim-alpha: var(--scrim-strong)"></div>'
+    io.html('archive/topic.html', `${tag} style`, `data-media ${tag} style`)
+    io.html('archive/topic.html', '    <div class="salt-section__content">', `    ${bg}\n    <div class="salt-section__content">`)
+  }, /<img\.salt-section__media> lacks style, which the markup requires when/)
+})
+
 // ── 4. The normaliser ─────────────────────────────────────────────────────────────────────────
 test('normaliser: one that drops an attribute fails the mutation check', () => {
   expectFail(HERO, (io) => {

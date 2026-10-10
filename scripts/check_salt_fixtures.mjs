@@ -270,6 +270,11 @@ function checkOtherInput(c) {
     const fieldsDoc = readJson('contract/fields/listing.json')
     if (listing.settings !== undefined) checkFields(settingsFields(fieldsDoc), listing.settings, `${p}.settings`, c)
     c.nested = { ...listing, fieldsDoc }
+    c.settings = listing.settings ?? {}
+    c.settingsDoc = fieldsDoc
+    c.anchor = listing.anchorId
+    c.track = listing.track
+    c.index = listing.index
   }
   return true
 }
@@ -315,7 +320,13 @@ function checkInput(c) {
   }
   if (isObject(settings)) checkFields(settingsFields(fieldsDoc), settings, `${at}.json values.settings`, c)
   c.fieldsDoc = fieldsDoc
+  // The section wrapper's data, settled once: every reader of the wrapper (its tones, spacing,
+  // background, track and anchor) reads these, for a section case and a view's nested section alike.
+  c.settings = settings
+  c.settingsDoc = fieldsDoc
   c.anchor = settings?.anchorId
+  c.track = ctx.track
+  c.index = ctx.index
   return true
 }
 
@@ -323,9 +334,7 @@ const effective = (c, field) => {
   const f = c.fieldsDoc?.fields.find((x) => x.name === field)
   return c.input.values?.[field] ?? f?.default
 }
-const effectiveSetting = (c, name) => (c.kind !== 'section'
-  ? (c.nested ? c.nested.settings?.[name] ?? settingsFields(c.nested.fieldsDoc).find((f) => f.name === name)?.default : undefined)
-  : c.input.values?.settings?.[name] ?? settingsFields(c.fieldsDoc ?? {}).find((f) => f.name === name)?.default)
+const effectiveSetting = (c, name) => (c.settingsDoc ? c.settings?.[name] ?? settingsFields(c.settingsDoc).find((f) => f.name === name)?.default : undefined)
 
 // ── 3. Expected HTML against the markup ──────────────────────────────────────────────────────
 const dataRules = (doc, role) => Object.fromEntries((doc?.dataAttributes ?? []).filter((d) => d.on === role).map((d) => [d.name,
@@ -424,19 +433,14 @@ const canonStyle = (v) => v.split(';').map((d) => d.trim()).filter(Boolean).map(
   return i === -1 ? d : `${d.slice(0, i).trim()}:${d.slice(i + 1).trim().replace(/\s+/g, ' ')}`
 }).join(';')
 
-// Placeholders the case fixes; any other <placeholder> matches any text.
-// A chrome or view case fixes none of these: a section nested in a view has its own anchor, which
-// the id rule holds to the anchor drawn on it, so there each placeholder matches any text.
-const placeholders = (c) => (c.kind !== 'section' ? (!c.nested ? {} : {
-  '<anchor>': c.nested.anchorId,
-  ...(c.nested.index !== undefined ? { '<section index>': String(c.nested.index) } : {}),
-  '<spacing>': effectiveSetting(c, 'spacing'),
-  '<strength>': c.nested.settings?.backgroundImage?.scrimStrength ?? 'strong',
-}) : {
+// Placeholders the case fixes, from the wrapper's settled data (a section case, or a view's
+// nested section); any other <placeholder> matches any text. A chrome case, or a view nesting no
+// section, fixes none.
+const placeholders = (c) => (c.anchor == null ? {} : {
   '<anchor>': c.anchor,
-  '<section index>': String(c.input.context.index),
+  ...(c.index !== undefined ? { '<section index>': String(c.index) } : {}),
   '<spacing>': effectiveSetting(c, 'spacing'),
-  '<strength>': c.input.values?.settings?.backgroundImage?.scrimStrength ?? 'strong',
+  '<strength>': c.settings?.backgroundImage?.scrimStrength ?? 'strong',
 })
 
 function templateMatch(tpl, value, name, c) {
@@ -457,8 +461,8 @@ function templateMatch(tpl, value, name, c) {
 // attributes optional.
 const textOf = (el) => el.children.map((x) => (x.type === 'text' ? x.value : textOf(x))).join('').replace(/\s+/g, ' ').trim()
 const isImage = (c, id) => typeof id === 'string' && isObject(c.input.media?.[id])
-const background = (c) => isImage(c, c.input.values?.settings?.backgroundImage?.image)
-const scrimOn = (c) => background(c) && c.input.values.settings.backgroundImage.scrim !== false
+const background = (c) => isImage(c, c.settings?.backgroundImage?.image)
+const scrimOn = (c) => background(c) && c.settings.backgroundImage.scrim !== false
 // The stored link a drawn button stands for, found by its label.
 // A button's own words: its text without the site's arrow, which is decoration.
 const labelOf = (el) => el.children.map((x) => (x.type === 'text' ? x.value : classesOf(x).includes('salt-arrow') ? '' : labelOf(x))).join('').replace(/\s+/g, ' ').trim()
@@ -506,6 +510,8 @@ function telHref(shown) {
 }
 const WHEN = {
   'section:root:data-media': (c) => background(c),
+  // A drawn background always has a fit, so its style always applies (media.json).
+  'section:background:style': (c) => background(c),
   'section:root:data-divider': (c) => effectiveSetting(c, 'divider') === true,
   'section:root:data-collapse-top': (c) => c.input.context.collapseTop === true,
   'section:root:style': (c) => effectiveSetting(c, 'spacing') !== 'none',
@@ -553,7 +559,7 @@ function rowSide(c, el) {
 const KEYWORD = { 'top-left': 'top left', top: 'top', 'top-right': 'top right', left: 'left', centre: 'center', right: 'right',
   'bottom-left': 'bottom left', bottom: 'bottom', 'bottom-right': 'bottom right' }
 function backgroundStyle(c) {
-  const bg = c.input.values?.settings?.backgroundImage ?? {}
+  const bg = c.settings?.backgroundImage ?? {}
   const position = bg.position ?? 'focal-point'
   const focal = c.input.media?.[bg.image]?.focalPoint
   const at = position === 'focal-point' ? (focal ? `${focal.x}% ${focal.y}%` : null) : KEYWORD[position]
@@ -561,7 +567,7 @@ function backgroundStyle(c) {
 }
 const VALUE = {
   'section:background:style': backgroundStyle,
-  'section:root:data-track': (c) => (c.kind === 'section' ? c.input.context.track : c.nested?.track),
+  'section:root:data-track': (c) => c.track,
   'section:root:data-tone': (c) => effectiveSetting(c, 'tone'),
   'section:root:data-tone-dark': darkTone,
   'section:root:data-spacing': (c) => effectiveSetting(c, 'spacing'),
@@ -774,7 +780,7 @@ function checkMarkup(c) {
   // Optional elements whose condition the case answers: the background and its scrim, the
   // hero's media, and every section element whose condition is "<field> is set".
   const drawn = (role) => (bindings.get(role) ?? []).length > 0
-  const expectations = c.kind !== 'section' ? [] : [
+  const expectations = !c.settingsDoc ? [] : [
     ['background', background(c), 'a background image is set'],
     ['scrim', scrimOn(c), 'a background image is drawn and the scrim is on'],
   ]
