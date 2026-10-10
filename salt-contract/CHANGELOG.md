@@ -4,7 +4,16 @@ Newest first. Dates are DD/MM/YYYY. What each part of a version means, and how a
 announced and migrated, is in `RELEASE-POLICY.md`. Decisions cited as `SC-nnn` are in Lightly
 Salted's decision log for Product Salt.
 
-## Unreleased (0.1.0, drafting)
+## 1.0.0 (release candidate; dated when the owner pushes `salt-contract-v1.0.0`)
+
+**Semver call: MAJOR, the first release.** Nothing was published before it (the `0.x` drafting line
+stayed private), so no implementation conformed to an earlier version and no site has a migration to
+make. From here every field id, class name, markup element, data attribute, export path and fixture
+is public contract: changing or removing one is MAJOR under `RELEASE-POLICY.md` section 2. The tag
+waits until at least one implementation has run the conformance runner against this release
+candidate (SC-018).
+
+### Added
 
 - The page fixture and the chrome markup gaps (SC-019). `page.json`'s head declares the link to
   the served `salt.css`. Page cases (`page` is a required file) compare the body and only Salt's head

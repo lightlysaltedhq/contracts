@@ -1,6 +1,6 @@
 {
   "$schema": "../../schema/markup.schema.json",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "id": "archive",
   "kind": "view",
   "summary": "Archive and category pages: a listing with a heading.",

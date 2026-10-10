@@ -1,6 +1,6 @@
 {
   "$schema": "../../schema/markup.schema.json",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "id": "page",
   "kind": "view",
   "summary": "A builder page. Its file also draws the document skeleton every view sits in, once.",

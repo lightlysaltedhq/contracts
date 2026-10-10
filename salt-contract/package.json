@@ -1,7 +1,6 @@
 {
   "name": "@lightlysaltedhq/salt-contract",
-  "version": "0.1.0",
-  "private": true,
+  "version": "1.0.0",
   "description": "The platform-neutral Salt contract: section and component vocabulary, field definitions, markup, the shared stylesheets, extension points and fixtures that Salt for Next.js and Salt for WordPress both conform to. Rules and markup, never brand values.",
   "license": "MIT",
   "repository": {

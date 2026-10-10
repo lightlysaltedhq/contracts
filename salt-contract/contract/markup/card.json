@@ -1,6 +1,6 @@
 {
   "$schema": "../../schema/markup.schema.json",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "id": "card",
   "kind": "component",
   "summary": "One card. The generic style serves services, case studies, posts, team, features and inline cards; the quote style serves testimonials.",

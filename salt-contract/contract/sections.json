@@ -1,6 +1,6 @@
 {
   "$schema": "../schema/sections.schema.json",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "$comment": "The vocabulary both implementations rename to (SC-001). Ids are canonical; each platform's former names and stored option values are mapped under platforms.<platform>.formerly, so its migration can be generated. Variants listed here are the selects that change a section's layout, and the styles a parent picks for a component, which has no fields file; every other field is in contract/fields. Visitor output and editor fields must match (SC-003). Drafted 08/10/2026 from inventories of salt-nextjs 0.11.0 and salt-wordpress 5.0.0.",
   "sections": [
     {

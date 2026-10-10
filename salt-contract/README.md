@@ -72,8 +72,10 @@ receives and the choices on offer.
 
 ## Status
 
-`0.x` is the drafting line and is not published. `1.0.0` is the first release, staged from CI by
-npm trusted publishing and approved by the owner. See `RELEASE-POLICY.md` for what each part of a
+`1.0.0` is the first release: prepared on `main`, staged from CI by npm trusted publishing when
+the owner pushes the `salt-contract-v1.0.0` tag, and approved by the owner. Until the registry
+serves it, it is a release candidate, not published. The `0.x` drafting line was never
+published. See `RELEASE-POLICY.md` for what each part of a
 version means.
 
 ## Checks
@@ -457,7 +459,7 @@ report).
 ```json
 {
   "format": "salt-conformance/1",
-  "contract": { "package": "@lightlysaltedhq/salt-contract", "version": "0.1.0" },
+  "contract": { "package": "@lightlysaltedhq/salt-contract", "version": "1.0.0" },
   "platform": "nextjs",
   "implementation": { "version": "0.4.0" },
   "adapter": { "kind": "command", "target": "node scripts/salt-adapter.mjs" },
@@ -466,7 +468,7 @@ report).
   "summary": { "pass": 15, "fail": 1, "incomplete": 0, "notShipped": 1 },
   "fields": { "platform": "payload", "snapshot": "…", "options": "…", "problems": [] },
   "problems": [],
-  "stylesheets": { "served": "…", "bundle": "styles/salt.css", "contract": "0.1.0", "ok": true, "status": "identical" },
+  "stylesheets": { "served": "…", "bundle": "styles/salt.css", "contract": "1.0.0", "ok": true, "status": "identical" },
   "sections": [
     {
       "id": "hero",
