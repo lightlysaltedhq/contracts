@@ -779,6 +779,12 @@ test('page: the first section\'s heading claims the h1, derived, and a fallback 
   try { assert.doesNotMatch(run(dir).out, /fixtures\/page\//, run(dir).out) } finally { rmSync(dir, { recursive: true, force: true }) }
 })
 
+test('page: the nested heading is compared with white space collapsed on both sides (settling g)', () => {
+  const dir = copy(['page'], (io) => io.json(`${PAGE}.json`, (d) => { d.document.sections[0].values.heading = 'About\n  us ' }))
+  try { assert.doesNotMatch(run(dir).out, /fixtures\/page\/header-section-footer/, run(dir).out) } finally { rmSync(dir, { recursive: true, force: true }) }
+  expectFail(['page'], (io) => io.json(`${PAGE}.json`, (d) => { d.document.sections[0].values.heading = 'About\n  them' }), /the nested section's heading reads "About us"; its values give "About them"/)
+})
+
 // ── 4. The normaliser ─────────────────────────────────────────────────────────────────────────
 test('normaliser: one that drops an attribute fails the mutation check', () => {
   expectFail(HERO, (io) => {

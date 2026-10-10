@@ -1112,7 +1112,9 @@ function checkMarkup(c) {
     // The nested section's heading is its values' heading, word for word.
     if (c.nested && filledText(c.values.heading)) {
       const heading = all.find((el) => attr(el, 'id') === `${c.anchor}__heading`)
-      if (heading && textOf(heading) !== c.values.heading.trim()) fail(`${at}.html: the nested section's heading reads ${JSON.stringify(textOf(heading))}; its values give ${JSON.stringify(c.values.heading)}`)
+      // White space collapsed alike on both sides, as textOf reads the drawn heading.
+      const want = c.values.heading.replace(/\s+/g, ' ').trim()
+      if (heading && textOf(heading) !== want) fail(`${at}.html: the nested section's heading reads ${JSON.stringify(textOf(heading))}; its values give ${JSON.stringify(want)}`)
     }
     const owners = drawnBy(doc.id)
     for (const el of all) {
