@@ -30,6 +30,7 @@
 //    changes its output.
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
 import path from 'node:path'
+import { CHROME, REQUIRED_FILES } from '../salt-contract/conformance.mjs'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 
 const here = path.dirname(fileURLToPath(import.meta.url))
@@ -65,8 +66,8 @@ const descendants = (el) => elementsOf(el).flatMap((c) => [c, ...descendants(c)]
 // A fixture set is a section's, the site chrome's (the header and footer components) or a page
 // view's; its input names it under that kind's key (README, "Fixtures"). SC-018 requires the
 // chrome and these views before 1.0.0.
-const CHROME = ['site-header', 'site-footer']
-const REQUIRED_VIEWS = ['post', 'service', 'archive', 'search', 'not-found']
+// The chrome components and the required views are the runner's lists, so the gate and the
+// conformance run cannot disagree about what SC-018 requires.
 const kindOf = (id) => (vocab.sections.some((s) => s.id === id) ? 'section' : CHROME.includes(id) ? 'chrome' : (vocab.views ?? []).some((v) => v.id === id) ? 'view' : null)
 const fixturesDir = path.join(dir, 'fixtures')
 const cases = []
@@ -1117,7 +1118,7 @@ for (const s of vocab.sections) {
   if (!mine.some((c) => c.renders && effectiveSetting(c, 'tone') === 'surface-inverse')) fail(`section ${s.id}: no case on the inverse band (tone surface-inverse)`)
   for (const c of mine.filter((x) => x.renders)) for (const k of Object.keys(used)) used[k].add(c.input.values?.settings?.[k] ?? (k === 'toneDark' ? undefined : effectiveSetting(c, k)))
 }
-for (const id of [...CHROME, ...REQUIRED_VIEWS]) {
+for (const id of REQUIRED_FILES) {
   if (!cases.some((c) => c.section === id && c.renders)) fail(`${id} has no fixtures (fixtures/${id}/<case>.json and .html), which SC-018 requires before 1.0.0`)
 }
 for (const f of settingsFile.fields.filter((x) => Object.keys(used).includes(x.name))) {

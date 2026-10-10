@@ -596,6 +596,18 @@ test('chrome: document.listing\'s heading is the nested heading\'s text, and its
   expectFail(['archive'], (io) => io.json('archive/topic.json', (d) => { d.document.listing.settings = { anchorId: 'stories' } }), /document\.listing\.settings\.anchorId is "stories", but the section's anchor is "posts"/)
 })
 
+test('chrome: the gate requires exactly the runner\'s list of chrome and view files, from one place (review of #13, E)', async () => {
+  const { REQUIRED_FILES } = await import('../salt-contract/conformance.mjs')
+  const dir = copy(HERO)
+  try {
+    const missing = [...run(dir).out.matchAll(/✗ ([a-z-]+) has no fixtures \(fixtures\/[a-z-]+\/<case>\.json and \.html\), which SC-018 requires/g)].map((m) => m[1])
+    assert.deepEqual(missing.sort(), [...REQUIRED_FILES].sort())
+  } finally { rmSync(dir, { recursive: true, force: true }) }
+  const src = readFileSync(script, 'utf8')
+  assert.match(src, /import \{[^}]*\bREQUIRED_FILES\b[^}]*\} from '\.\.\/salt-contract\/conformance\.mjs'/, 'the gate imports the runner\'s list')
+  assert.doesNotMatch(src, /\[[^\]]*'not-found'[^\]]*\]/, 'the gate keeps no list of its own')
+})
+
 // ── 4. The normaliser ─────────────────────────────────────────────────────────────────────────
 test('normaliser: one that drops an attribute fails the mutation check', () => {
   expectFail(HERO, (io) => {
