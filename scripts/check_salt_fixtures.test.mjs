@@ -511,6 +511,18 @@ test('chrome: a logo is matched to its record by the exact template, never by pr
   }), /src https:\/\/uploads\.example\/hollow-oak-dark-480\.png fills no media record's template exactly/)
 })
 
+// Review of #13, 1 and 2: landmark ids on their own elements; owners from this file only.
+test('chrome: a nested section anchored with a landmark id fails, and a landmark id off its element', () => {
+  expectFail(['archive'], (io) => {
+    const rel = 'fixtures/archive/topic.html'
+    io.write(rel, readFileSync(path.join(io.dir, rel), 'utf8').replace('id="posts"', 'id="site-navigation"').replaceAll('posts__heading', 'site-navigation__heading'))
+  }, /a section anchored with the landmark id site-navigation renders as site-navigation-section/)
+  expectFail(['archive'], (io) => io.html('archive/topic.html', 'data-block="listing">', 'data-block="listing">\n          <p id="main">x</p>'), /the landmark id main is on <p>, not its landmark element/)
+})
+test('chrome: an id owned by a file this one does not draw fails', () => {
+  expectFail(['site-footer'], (io) => io.html('site-footer/consent-panel-open.html', 'id="site-footer__consent-analytics-description">', 'id="site-footer__consent-analytics-description"><span id="site-header__submenu-2">x</span>'), /id site-header__submenu-2 is not a landmark id, a section's anchor or <owner>__<part> owned by site-footer/)
+})
+
 // ── 4. The normaliser ─────────────────────────────────────────────────────────────────────────
 test('normaliser: one that drops an attribute fails the mutation check', () => {
   expectFail(HERO, (io) => {

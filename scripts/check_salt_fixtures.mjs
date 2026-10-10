@@ -707,7 +707,24 @@ function documentSpec(c) {
     spec: { role: 'root', alts: [{ tags: arr(doc.root.element), classes: doc.root.classes ?? [], ...withSources([[doc.id, 'root', dataRules(doc, 'root')], [doc.id, 'root', doc.root.attributes]]), children: doc.elements ?? [], doc }] },
   }
 }
-const vocabularyIds = new Set([...vocab.sections, ...(vocab.components ?? []), ...(vocab.views ?? [])].map((x) => x.id))
+// A file and every component it draws, through the components' own uses.
+function drawnBy(id, seen = new Set()) {
+  if (seen.has(id)) return seen
+  seen.add(id)
+  for (const used of markup.get(id)?.uses ?? []) drawnBy(used, seen)
+  return seen
+}
+// The element each landmark id names (section#landmarks).
+const LANDMARK_ON = {
+  main: (el) => el.name === 'main',
+  content: (el) => el.name === 'main',
+  header: (el) => el.name === 'header',
+  footer: (el) => el.name === 'footer',
+  nav: (el) => el.name === 'nav',
+  'site-navigation': (el) => el.name === 'nav',
+  search: (el) => el.name === 'search',
+  'skip-link': (el) => el.name === 'a',
+}
 
 const HEADING = /^h([1-6])$/
 
@@ -862,14 +879,25 @@ function checkMarkup(c) {
     // Ids (SC-012): a landmark id, a nested section's anchor, or <owner>__<part> with the owner a
     // vocabulary id or one of those anchors.
     const anchors = new Set(all.filter((el) => classesOf(el).includes('salt-section')).map((el) => attr(el, 'id')).filter(Boolean))
+    const owners = drawnBy(doc.id)
     for (const el of all) {
       const id = attr(el, 'id')
       if (id === undefined) continue
       if (ids.has(id)) fail(`${at}.html: id ${id} is drawn twice`)
       ids.set(id, el)
       const owned = /^([a-z0-9]+(?:-[a-z0-9]+)*)__[a-z0-9]+(-[a-z0-9]+)*$/.exec(id)
-      const ok = landmarks.has(id) || (anchors.has(id) && SLUG.test(id) && !landmarks.has(id)) || (owned && (vocabularyIds.has(owned[1]) || anchors.has(owned[1])))
-      if (!ok) fail(`${at}.html: id ${id} is not a landmark id, a section's anchor or <owner>__<part> with a vocabulary id or anchor as owner (SC-012)`)
+      // A landmark id belongs on its landmark element only; a section anchored with one takes the
+      // -section suffix (SC-013), so a nested section never carries it.
+      if (landmarks.has(id)) {
+        if (classesOf(el).includes('salt-section')) fail(`${at}.html: a section anchored with the landmark id ${id} renders as ${id}-section (section#anchors, SC-013)`)
+        else if (!LANDMARK_ON[id]?.(el)) fail(`${at}.html: the landmark id ${id} is on ${describe(el)}, not its landmark element`)
+        continue
+      }
+      if (anchors.has(id) && SLUG.test(id)) continue
+      // An owner is this file, a component it draws, or a section nested in it (SC-012).
+      if (!(owned && (owners.has(owned[1]) || anchors.has(owned[1])))) {
+        fail(`${at}.html: id ${id} is not a landmark id, a section's anchor or <owner>__<part> owned by ${doc.id}, a component it draws or a section nested in it (SC-012)`)
+      }
     }
     for (const el of all) {
       for (const name of ['aria-labelledby', 'aria-describedby', 'aria-controls', 'for']) {
