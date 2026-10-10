@@ -31,7 +31,8 @@
           "anchorId": "posts"
         }
       },
-      "track": "listing-1"
+      "track": "listing-1",
+      "index": 0
     }
   },
   "media": {

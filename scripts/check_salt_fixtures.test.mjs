@@ -727,6 +727,12 @@ test('page: the first section holds the priority image, so a lazy hero image fai
   }, /context\.priorityMedia is false, but the page's section is its first \(index 0\), which the plan grants the priority image/)
 })
 
+test('page: a nested section keeps the section rules for its index and track (settling b)', () => {
+  expectFail(['page'], (io) => io.json('page/hero-split-image.json', (d) => { d.document.sections[0].index = 3; d.document.sections[0].track = 'hero-9' }), /document\.sections\[0\]\.index is 3, but a page's one section is its first, index 0/)
+  expectFail(['page'], (io) => io.json('page/hero-split-image.json', (d) => { d.document.sections[0].track = 'hero-9' }), /document\.sections\[0\]\.track hero-9 counts 9 hero sections, but only 1 come up to this one/)
+  expectFail(['archive'], (io) => io.json('archive/topic.json', (d) => { delete d.document.listing.index }), /document\.listing\.index counts the page's sections from 0, and is required/)
+})
+
 // ── 4. The normaliser ─────────────────────────────────────────────────────────────────────────
 test('normaliser: one that drops an attribute fails the mutation check', () => {
   expectFail(HERO, (io) => {

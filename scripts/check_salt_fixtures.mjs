@@ -275,7 +275,14 @@ function checkOtherInput(c) {
     for (const k of Object.keys(nested)) if (!keys.includes(k) || (k === 'section' && input.document?.listing !== undefined && nested.section !== 'listing')) fail(`${p}.${k}: the nested section is described by ${(sections ? keys : keys.slice(1)).join(', ')}`)
     if (!vocab.sections.some((x) => x.id === nested.section)) { fail(`${p}.section is not a section in contract/sections.json`); return true }
     if (typeof nested.track !== 'string' || !new RegExp(`^${nested.section}-[1-9][0-9]*$`).test(nested.track)) fail(`${p}.track must be ${nested.section}-<n> (section#data-track)`)
-    if (nested.index !== undefined && !(Number.isInteger(nested.index) && nested.index >= 0)) fail(`${p}.index counts the page's sections from 0`)
+    // The section cases' rules for index and track (section#data-track): the index is required,
+    // a page's one section is its first, and the track counts no more sections than come up to it.
+    if (!(Number.isInteger(nested.index) && nested.index >= 0)) fail(`${p}.index counts the page's sections from 0, and is required`)
+    else {
+      if (kind === 'page' && nested.index !== 0) fail(`${p}.index is ${nested.index}, but a page's one section is its first, index 0`)
+      const n = Number(/-([1-9][0-9]*)$/.exec(nested.track ?? '')?.[1])
+      if (n > nested.index + 1) fail(`${p}.track ${nested.track} counts ${n} ${nested.section} sections, but only ${nested.index + 1} come up to this one (index ${nested.index}, from 0)`)
+    }
     if (nested.headingLevel !== undefined && ![1, 2].includes(nested.headingLevel)) fail(`${p}.headingLevel is 1 (the section claims the page's h1) or 2`)
     // Its field values, as a section case's: checked against its own fields file, with its
     // settled anchor in values.settings.anchorId (review of #14, 1 and 5).
