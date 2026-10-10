@@ -1,0 +1,40 @@
+{
+  "$comment": "The button form exists only once the scheme is known: Salt for Next.js swaps it in after hydration, reading the stored choice; a platform that renders it on the server, as Salt for WordPress would, draws it when it can read the visitor's stored choice before rendering (a cookie) and the span otherwise. state.themeScheme is that known scheme. site shape: { name, home, logo: { light, dark? } (media ids), logoHeight, labels: { navigation, submenu, menu, closeMenu, phone?, theme? }, header: { menu: [{ label, href?, children?: [{ label, href }] }], phone: { text, tel }, cta: { label, href }, sticky }, themeToggle }. An item with children and no href draws its label as the span form. The theme toggle is offered (site.themeToggle true) and named (labels.theme).",
+  "chrome": "site-header",
+  "summary": "The same header once the scheme is known (dark): the theme toggle in its button form, type button, pressed, named, with the moon glyph.",
+  "context": {
+    "path": "/journal/"
+  },
+  "site": {
+    "name": "Hollow Oak Garden Design",
+    "home": "/",
+    "themeToggle": true,
+    "labels": {
+      "navigation": "Main",
+      "submenu": "Show submenu",
+      "menu": "Menu",
+      "closeMenu": "Close menu",
+      "phone": "Call Hollow Oak",
+      "theme": "Colour theme"
+    },
+    "header": {
+      "menu": [
+        {
+          "label": "Home",
+          "href": "/"
+        },
+        {
+          "label": "Journal",
+          "href": "/journal/"
+        },
+        {
+          "label": "Contact",
+          "href": "/contact/"
+        }
+      ]
+    }
+  },
+  "state": {
+    "themeScheme": "dark"
+  }
+}

@@ -706,6 +706,15 @@ test('page: the stylesheet link points at salt.css (review of #14, 4)', () => {
   expectFail(['page'], (io) => io.html(`${PAGE}.html`, 'href="/salt.css"', 'href="/site.css"'), /the page's stylesheet link points at \/site\.css; its file name is salt\.css/)
 })
 
+test('chrome: the theme toggle\'s form follows the scheme the case knows (review of #14, 7)', () => {
+  // No known scheme: the span server form, never the button.
+  expectFail(['site-header'], (io) => io.html('site-header/theme-toggle.html', '<span class="salt-theme-toggle" aria-hidden="true"></span>',
+    '<button class="salt-theme-toggle" type="button" aria-pressed="false" aria-label="Colour theme"></button>'), /the theme toggle is drawn as a button, but the case knows no scheme \(state\.themeScheme\), so it is the span server form/)
+  // A known dark scheme: pressed, with the moon.
+  expectFail(['site-header'], (io) => io.html('site-header/theme-toggle-button.html', 'aria-pressed="true"', 'aria-pressed="false"'), /the theme toggle's aria-pressed is false; the dark scheme gives true/)
+  expectFail(['site-header'], (io) => io.html('site-header/theme-toggle-button.html', 'data-icon="moon"', 'data-icon="sun"'), /the theme toggle draws the sun glyph; the dark scheme gives moon/)
+})
+
 // ── 4. The normaliser ─────────────────────────────────────────────────────────────────────────
 test('normaliser: one that drops an attribute fails the mutation check', () => {
   expectFail(HERO, (io) => {

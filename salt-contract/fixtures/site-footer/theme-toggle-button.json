@@ -1,0 +1,69 @@
+{
+  "$comment": "The button form exists only once the scheme is known: Salt for Next.js swaps it in after hydration, reading the stored choice; a platform that renders it on the server, as Salt for WordPress would, draws it when it can read the visitor's stored choice before rendering (a cookie) and the span otherwise. state.themeScheme is that known scheme. site.displayPreferences is { labels: { summary, fontSize, decrease, reset, increase, contrast, grayscale, motion }, scale: bool, toggles: [contrast, grayscale, motion], motionDefault: 'reduce'|null }; site.themeToggle is { placed: 'footer', labels: { theme } }. The widget is drawn in its server form: root div hidden (script reveals it), no data-motion-default (the site does not default to reduced motion), toggles aria-pressed=\"false\". The markup declares no text, label or children for the scale label, the scale buttons, the toggles so the scale label and the buttons carry the visible words as text and each button's accessible name is its text (the scale buttons also carry aria-label, which the markup declares). The display-preferences toggles omit 'theme' because the footer places its own theme toggle.",
+  "chrome": "site-footer",
+  "summary": "The footer's theme toggle once the scheme is known (light): its button form, type button, not pressed, named, with the sun glyph, beside the display preferences.",
+  "context": {
+    "path": "/"
+  },
+  "site": {
+    "name": "Hartley Gardens",
+    "home": "/",
+    "organisation": "Hartley Gardens",
+    "labels": {
+      "navigation": "Footer",
+      "social": "Social media",
+      "theme": "Dark mode",
+      "preferences": "Cookie preferences"
+    },
+    "themeToggle": {
+      "placed": "footer"
+    },
+    "displayPreferences": {
+      "labels": {
+        "summary": "Display preferences",
+        "fontSize": "Text size",
+        "decrease": "Smaller text",
+        "reset": "Reset text size",
+        "increase": "Larger text",
+        "contrast": "High contrast",
+        "grayscale": "Greyscale",
+        "motion": "Reduce motion"
+      },
+      "scale": true,
+      "toggles": [
+        "contrast",
+        "grayscale",
+        "motion"
+      ]
+    },
+    "footer": {
+      "tone": "surface",
+      "showLogo": false,
+      "columns": [
+        {
+          "links": [
+            {
+              "label": "Contact",
+              "href": "/contact/"
+            },
+            {
+              "label": "Accessibility",
+              "href": "/accessibility/"
+            }
+          ]
+        }
+      ],
+      "profiles": [
+        {
+          "name": "Instagram",
+          "url": "https://www.instagram.com/hartleygardens",
+          "icon": "instagram"
+        }
+      ],
+      "copyright": "© 2026 Hartley Gardens"
+    }
+  },
+  "state": {
+    "themeScheme": "light"
+  }
+}

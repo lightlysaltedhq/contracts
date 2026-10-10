@@ -257,6 +257,7 @@ function checkOtherInput(c) {
   if (kind === 'chrome' && ctx.priorityMedia !== undefined) fail(`${at}.json: the chrome never holds the priority image (section#priority-media), so its context has no priorityMedia`)
   if (ctx.locale !== undefined && !(typeof ctx.locale === 'string' && Intl.DateTimeFormat.supportedLocalesOf(ctx.locale).length)) fail(`${at}.json: context.locale must be a BCP 47 locale the platform knows, such as en-GB`)
   if (ctx.path !== undefined && !(typeof ctx.path === 'string' && ctx.path.startsWith('/'))) fail(`${at}.json: context.path is the page's path, starting with /`)
+  if (input.state?.themeScheme !== undefined && !['light', 'dark'].includes(input.state.themeScheme)) fail(`${at}.json: state.themeScheme is light or dark, the scheme the platform knows when it renders`)
   checkSiteAndMedia(c)
   c.anchor = null
   // A section nested in a view or a page is described by the case: document.listing (the archive's
@@ -891,6 +892,21 @@ function checkMarkup(c) {
     if (attr(a, 'href') !== want) fail(`${at}.html: the phone link "${textOf(a)}" has href ${attr(a, 'href')}; section#display-forms gives ${want ?? 'no link'}`)
   }
   for (const e of every()) for (const [name, value] of e.attrs) if (value.includes('\\/')) fail(`${at}.html: ${describe(e)} ${name} escapes a slash; JSON in an attribute is written without (section#display-forms)`)
+
+  // The theme toggle's form follows the scheme the case knows (state.themeScheme): none, the empty
+  // span server form; light or dark, the button, pressed for dark, with the sun or the moon.
+  for (const toggle of every().filter((e) => classesOf(e).includes('salt-theme-toggle'))) {
+    const scheme = input.state?.themeScheme
+    if (scheme === undefined && toggle.name !== 'span') fail(`${at}.html: the theme toggle is drawn as a button, but the case knows no scheme (state.themeScheme), so it is the span server form`)
+    if (scheme !== undefined && toggle.name !== 'button') fail(`${at}.html: the case knows the ${scheme} scheme, so the theme toggle is its button form`)
+    if (scheme !== undefined && toggle.name === 'button') {
+      const pressed = String(scheme === 'dark')
+      if (attr(toggle, 'aria-pressed') !== pressed) fail(`${at}.html: the theme toggle's aria-pressed is ${attr(toggle, 'aria-pressed')}; the ${scheme} scheme gives ${pressed}`)
+      const glyphs = descendants(toggle).filter((e) => e.name === 'svg').map((e) => attr(e, 'data-icon'))
+      const want = scheme === 'dark' ? 'moon' : 'sun'
+      if (glyphs.length !== 1 || glyphs[0] !== want) fail(`${at}.html: the theme toggle draws the ${glyphs.join(' and ') || 'no'} glyph; the ${scheme} scheme gives ${want}`)
+    }
+  }
 
   // A page draws the header's scriptless phone layout in its head whenever it draws the header
   // (page.json, SC-019).
