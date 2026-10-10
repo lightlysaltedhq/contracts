@@ -345,8 +345,8 @@ function maskPerRequest(el, insideForm = false) {
 /**
  * The part of a whole document a page fixture compares (SC-019): the head elements the contract
  * owns, the stylesheet link to salt.css and the noscript holding the header's scriptless style,
- * and the body, whole but for script elements, which are each platform's delivery (as the head's
- * other content is). The stylesheet's address is the platform's, so its href is reduced to the
+ * and the body, whole but for its own attributes and the script, style and link elements each
+ * platform delivers there (as the head's other content is); the contract's body markup draws none. The stylesheet's address is the platform's, so its href is reduced to the
  * file name; the conformance runner's stylesheet pin compares the bytes it serves. The html
  * element's attributes are the platform's too. Returns HTML for normalise() or compare().
  */
@@ -361,9 +361,13 @@ export function pageOf(html) {
     (c.name === 'link' && /(^|\s)stylesheet(\s|$)/i.test(attrOf(c, 'rel') ?? '') && /(^|\/)salt\.css$/.test((attrOf(c, 'href') ?? '').replace(/[?#].*$/, ''))) ||
     (c.name === 'noscript' && textOf(c).includes('--salt-header-phone'))))
     .map((c) => (c.name === 'link' ? { ...c, attrs: c.attrs.map(([n, v]) => [n, n === 'href' ? 'salt.css' : v]) } : c))
-  const strip = (el) => ({ ...el, children: el.children.filter((c) => !(c.type === 'element' && c.name === 'script')).map((c) => (c.type === 'element' ? strip(c) : c)) })
+  // Delivery the platform writes into the body (wp_footer's scripts, inline styles and late
+  // stylesheets; Next's scripts) goes. The contract's body markup draws none of these elements.
+  const DELIVERY = new Set(['script', 'style', 'link'])
+  const strip = (el) => ({ ...el, children: el.children.filter((c) => !(c.type === 'element' && DELIVERY.has(c.name))).map((c) => (c.type === 'element' ? strip(c) : c)) })
+  // The body's own attributes are the platform's too (body_class(), next/font's className).
   const page = { type: 'element', name: '#root', attrs: [], children: [{ type: 'element', name: 'html', attrs: [], children: [
-    { type: 'element', name: 'head', attrs: [], children: owned }, strip(body)] }] }
+    { type: 'element', name: 'head', attrs: [], children: owned }, { ...strip(body), attrs: [] }] }] }
   return serialise(page)
 }
 

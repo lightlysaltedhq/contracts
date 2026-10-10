@@ -682,6 +682,19 @@ test('page: the page kind is defined once, in the runner, and the gate imports i
   assert.doesNotMatch(src, /id === 'page'/, 'the gate names no page kind of its own')
 })
 
+test('pageOf: WordPress-shaped body attributes and footer delivery do not count (review of #14, 2)', async () => {
+  const { pageOf } = await import('../salt-contract/normalise.mjs')
+  const head = '<head><link rel="stylesheet" href="/salt.css"></head>'
+  const ours = `<html>${head}<body><a class="salt-skip-link" href="#main">Skip</a><main id="main"></main></body></html>`
+  const wp = `<html>${head}<body class="home page-template-default page page-id-2 wp-custom-logo"><a class="salt-skip-link" href="#main">Skip</a><main id="main"></main>` +
+    `<link rel='stylesheet' id='salt-print-css' href='/print.css' media='print'><style id='global-styles-inline-css'>body{}</style>` +
+    `<script type="speculationrules">{}</script><script src='/wp-includes/js/x.js' id='x-js'></script></body></html>`
+  same(pageOf(ours), pageOf(wp))
+  // next/font's className on body too; a real body element still counts.
+  same(pageOf(ours), pageOf(ours.replace('<body>', '<body class="__variable_a1b2">')))
+  differ(pageOf(ours), pageOf(wp.replace('</main>', '</main><p>Extra</p>')))
+})
+
 // ── 4. The normaliser ─────────────────────────────────────────────────────────────────────────
 test('normaliser: one that drops an attribute fails the mutation check', () => {
   expectFail(HERO, (io) => {

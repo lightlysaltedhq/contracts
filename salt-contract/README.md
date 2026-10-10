@@ -336,8 +336,9 @@ written in the implementation's own repository; the contract fixes only its inte
     header, its sections (`document.sections`) and its footer. The runner compares it through
     `pageOf` (normalise.mjs): only the head elements the contract owns (the link to the served
     `salt.css`, its `href` read as the file name, and the scriptless phone layout's `noscript`
-    style) and the body, without its `script` elements; the rest of head, and the `html`
-    element's attributes, are the platform's (SC-019).
+    style) and the body, without its own attributes and the `script`, `style` and `link`
+    elements the platform delivers there (the contract's body markup draws none); the rest of
+    head, and the `html` element's attributes, are the platform's (SC-019).
 
   It exits 0. A non-zero exit
   fails the case; diagnostics go to stderr, never stdout. One process per case.

@@ -185,7 +185,7 @@
     },
     {
       "topic": "ruling",
-      "text": "A page fixture compares the body and the head elements above (SC-019): the comparison drops the head's other content, the html element's attributes and the body's script elements, which are each platform's delivery, and reads the stylesheet's href as its file name."
+      "text": "A page fixture compares the body and the head elements above (SC-019): the comparison drops the head's other content, the html and body elements' attributes, and the script, style and link elements in the body, which are each platform's delivery (the contract's body markup draws none of them), and reads the stylesheet's href as its file name."
     }
   ],
   "platforms": {
