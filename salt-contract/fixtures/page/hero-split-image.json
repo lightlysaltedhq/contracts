@@ -1,7 +1,7 @@
 {
-  "$comment": "A whole page (SC-019): the comparison reads Salt's head (the salt.css link and the scriptless phone layout's noscript style, drawn because the header is) and the body. Its parts are the wordmark header, one rich-text section claiming the h1, and the footer, whose current link is the page's path. The section is document.sections[0]: its section id and its field values, from which its block is read against rich-text's own markup. site merges the header's and the footer's data, with labels.skip for the skip link.",
+  "$comment": "A whole page whose one section is hero/split-image-left's hero, given as document.sections[0] (its section id and field values). The block is read against hero.json with its variant and conditions answered by those values; the page's priority image is the first section's, by hero.json's priorityMedia (SC-019).",
   "page": "page",
-  "summary": "A page with the header, one section and the footer: the skip link first, the section claiming the h1, and Salt's head (the stylesheet link and the scriptless style).",
+  "summary": "A page whose first section is a split hero with an image: its data-media-side comes from its values, and, as the page's first section, its image is the page's priority image (fetchpriority=high).",
   "context": {
     "priorityMedia": true,
     "locale": "en-GB",
@@ -84,22 +84,63 @@
         }
       ],
       "copyright": "© 2026 Hartley Gardens"
+    },
+    "arrow": "→"
+  },
+  "media": {
+    "terrace": {
+      "url": "https://uploads.example/terrace-{width}.jpg",
+      "width": 1600,
+      "height": 1067,
+      "alt": "A terrace of raised beds planted with lavender"
+    }
+  },
+  "documents": {
+    "work": {
+      "href": "/work/",
+      "title": "Our work"
+    },
+    "contact": {
+      "href": "/contact/",
+      "title": "Contact"
     }
   },
   "document": {
-    "title": "About us",
+    "title": "Home",
     "sections": [
       {
-        "section": "rich-text",
+        "section": "hero",
         "values": {
-          "heading": "About us",
-          "body": "<p>Three gardeners and one van, working across Bristol and Bath since 2014.</p>",
+          "variant": "split",
+          "eyebrow": "Bristol and Bath",
+          "heading": "Gardens designed to be lived in",
+          "subheading": "We plan, plant and look after gardens across the West Country.",
+          "image": "terrace",
+          "mediaSide": "left",
+          "buttons": [
+            {
+              "link": {
+                "label": "See our work",
+                "type": "internal",
+                "document": "work"
+              },
+              "style": "primary"
+            },
+            {
+              "link": {
+                "label": "Get in touch",
+                "type": "internal",
+                "document": "contact"
+              },
+              "style": "secondary"
+            }
+          ],
           "settings": {
-            "anchorId": "about-us"
+            "anchorId": "hero-split"
           }
         },
         "headingLevel": 1,
-        "track": "rich-text-1",
+        "track": "hero-1",
         "index": 0
       }
     ]

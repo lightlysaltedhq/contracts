@@ -25,8 +25,12 @@
     "biography": "Priya has run the kitchen garden at Hollin Farm for eleven years and writes about soil, water and patience.",
     "photo": "priya",
     "listing": {
-      "anchorId": "posts",
-      "heading": "Latest posts",
+      "values": {
+        "heading": "Latest posts",
+        "settings": {
+          "anchorId": "posts"
+        }
+      },
       "track": "listing-1"
     }
   },

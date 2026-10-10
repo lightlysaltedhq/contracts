@@ -271,21 +271,28 @@ function checkOtherInput(c) {
     : Array.isArray(sections) && sections.length === 1 ? [`${at}.json document.sections[0]`, sections[0]] : [null, undefined]
   if (nested !== undefined) {
     if (!isObject(nested)) { fail(`${p} must be an object`); return true }
-    const keys = ['section', 'anchorId', 'heading', 'headingLevel', 'track', 'index', 'settings']
-    for (const k of Object.keys(nested)) if (!keys.includes(k) || (k === 'section' && input.document?.listing !== undefined && nested.section !== 'listing')) fail(`${p}.${k}: the nested section is described by ${keys.slice(1).join(', ')}${sections ? ' and its section id' : ''}`)
+    const keys = ['section', 'values', 'headingLevel', 'track', 'index']
+    for (const k of Object.keys(nested)) if (!keys.includes(k) || (k === 'section' && input.document?.listing !== undefined && nested.section !== 'listing')) fail(`${p}.${k}: the nested section is described by ${(sections ? keys : keys.slice(1)).join(', ')}`)
     if (!vocab.sections.some((x) => x.id === nested.section)) { fail(`${p}.section is not a section in contract/sections.json`); return true }
-    if (!SLUG.test(nested.anchorId ?? '') || landmarks.has(nested.anchorId)) fail(`${p}.anchorId must be the nested section's settled anchor: a slug, not a landmark id`)
     if (typeof nested.track !== 'string' || !new RegExp(`^${nested.section}-[1-9][0-9]*$`).test(nested.track)) fail(`${p}.track must be ${nested.section}-<n> (section#data-track)`)
     if (nested.index !== undefined && !(Number.isInteger(nested.index) && nested.index >= 0)) fail(`${p}.index counts the page's sections from 0`)
-    if (nested.heading !== undefined && !filledText(nested.heading)) fail(`${p}.heading is the nested section's heading text, a non-empty string, or absent for none`)
     if (nested.headingLevel !== undefined && ![1, 2].includes(nested.headingLevel)) fail(`${p}.headingLevel is 1 (the section claims the page's h1) or 2`)
-    if (nested.settings?.anchorId !== undefined && nested.settings.anchorId !== nested.anchorId) fail(`${p}.settings.anchorId is ${JSON.stringify(nested.settings.anchorId)}, but the section's anchor is ${JSON.stringify(nested.anchorId)}; give it once, as anchorId`)
+    // Its field values, as a section case's: checked against its own fields file, with its
+    // settled anchor in values.settings.anchorId (review of #14, 1 and 5).
     const fieldsDoc = readJson(`contract/fields/${nested.section}.json`)
-    if (nested.settings !== undefined) checkFields(settingsFields(fieldsDoc), nested.settings, `${p}.settings`, c)
+    const values = nested.values
+    if (!isObject(values)) { fail(`${p}.values must be the nested section's field values`); return true }
+    const { settings, ...own } = values
+    checkFields(fieldsDoc.fields, own, `${p}.values`, c)
+    if (!isObject(settings) || !SLUG.test(settings.anchorId ?? '') || landmarks.has(settings.anchorId)) fail(`${p}.values.settings.anchorId must be the nested section's settled anchor: a slug, not a landmark id`)
+    if (isObject(settings)) checkFields(settingsFields(fieldsDoc), settings, `${p}.values.settings`, c)
     c.nested = { ...nested, fieldsDoc }
-    c.settings = nested.settings ?? {}
+    c.values = values
+    c.fieldsDoc = fieldsDoc
+    c.sectionId = nested.section
+    c.settings = settings ?? {}
     c.settingsDoc = fieldsDoc
-    c.anchor = nested.anchorId
+    c.anchor = settings?.anchorId
     c.track = nested.track
     c.index = nested.index
   }
@@ -335,6 +342,8 @@ function checkInput(c) {
   c.fieldsDoc = fieldsDoc
   // The section wrapper's data, settled once: every reader of the wrapper (its tones, spacing,
   // background, track and anchor) reads these, for a section case and a view's nested section alike.
+  c.values = values
+  c.sectionId = section
   c.settings = settings
   c.settingsDoc = fieldsDoc
   c.anchor = settings?.anchorId
@@ -345,7 +354,7 @@ function checkInput(c) {
 
 const effective = (c, field) => {
   const f = c.fieldsDoc?.fields.find((x) => x.name === field)
-  return c.input.values?.[field] ?? f?.default
+  return c.values?.[field] ?? f?.default
 }
 const effectiveSetting = (c, name) => (c.settingsDoc ? c.settings?.[name] ?? settingsFields(c.settingsDoc).find((f) => f.name === name)?.default : undefined)
 
@@ -398,21 +407,38 @@ function withSources(sources) {
   return { attrs, from }
 }
 
-// The section a chrome, view or page case nests (document.listing or document.sections), whose
-// own root the generic section wrapper's block is read as; its content stays the section's own.
-let nestedSection = null
+// The case whose section a view or page nests (document.listing or document.sections): the
+// generic section wrapper's block is read as that section's own tree, its variant chosen and its
+// conditions answered by its own values (review of #14, 5).
+let nestedCase = null
+
+/** A section's own root and elements, with each variant the case's values choose applied. */
+function sectionTree(c) {
+  const doc = markup.get(c.sectionId)
+  let { root } = doc
+  let elements = doc.elements ?? []
+  for (const v of doc.variants ?? []) {
+    const option = v.options[effective(c, v.field)]
+    if (option) ({ root, elements } = applyOption(root, elements, option))
+  }
+  return { doc, root, elements }
+}
 
 function expand(nodes, doc) {
   return nodes.flatMap((n) => {
     if (n.component) {
       let comp = markup.get(n.component)
-      if (comp?.id === 'section' && nestedSection) {
-        const own = markup.get(nestedSection)
+      if (comp?.id === 'section' && nestedCase) {
+        const { doc: own, root, elements } = sectionTree(nestedCase)
         comp = { ...comp, elements: mapNodes(comp.elements, (b) => (b.role !== 'block' ? b : {
-          ...b,
-          classes: [...new Set([...(b.classes ?? []), ...(own.root.classes ?? [])])],
-          extraAttrs: { ...dataRules(own, 'root'), ...(own.root.attributes ?? {}) },
+          role: 'block',
+          element: root.element,
+          classes: [...new Set([...(b.classes ?? []), ...(root.classes ?? [])])],
+          children: elements,
+          attributes: b.attributes,
+          extraAttrs: { ...dataRules(own, 'root'), ...(root.attributes ?? {}) },
           extraId: own.id,
+          childDoc: own,
         })) }
       }
       if (!comp) { fail(`markup: ${doc.id} uses component ${n.component}, which has no markup`); return [] }
@@ -501,15 +527,15 @@ function linkFor(c, el) {
     if (typeof v.type === 'string' && ['internal', 'external'].includes(v.type) && v.label === label) found.push(v)
     Object.values(v).forEach(walk)
   }
-  walk(c.input.values)
+  walk(c.values)
   return found.length === 1 ? found[0] : undefined
 }
 const newTab = (c, el) => { const link = linkFor(c, el); return link ? link.newTab === true : undefined }
 const currentPage = (c, el) => (c.input.route?.pagination ? textOf(el) === String(c.input.route.pagination.current) : undefined)
 // The tabs section: how many panels render, and whether they are tabbed (tab-set.json: more than
 // one panel and a name, the heading or else the label).
-const panelsOf = (c) => (c.input.values?.tabs ?? []).filter((t) => filledText(t.label)).length
-const tabbed = (c) => (c.section === 'tabs' ? panelsOf(c) > 1 && (filledText(c.input.values.heading) || filledText(c.input.values.label)) : undefined)
+const panelsOf = (c) => (c.values?.tabs ?? []).filter((t) => filledText(t.label)).length
+const tabbed = (c) => (c.sectionId === 'tabs' ? panelsOf(c) > 1 && (filledText(c.values.heading) || filledText(c.values.label)) : undefined)
 // The page window pagination.json fixes: the first, the last, and the current page with one
 // neighbour each side; a run left out is one gap (null), and a one-page gap is drawn as the page.
 function pageWindow(current, total) {
@@ -560,7 +586,7 @@ const WHEN = {
   'section:root:data-divider': (c) => effectiveSetting(c, 'divider') === true,
   'section:root:data-collapse-top': (c) => c.input.context.collapseTop === true,
   'section:root:style': (c) => effectiveSetting(c, 'spacing') !== 'none',
-  'hero:root:data-media-side': (c) => effective(c, 'variant') === 'split' && isImage(c, c.input.values.image),
+  'hero:root:data-media-side': (c) => effective(c, 'variant') === 'split' && isImage(c, c.values.image),
   'hero:root:data-align': (c) => effective(c, 'variant') === 'minimal',
   'button:root:target': newTab,
   'button:root:rel': newTab,
@@ -595,7 +621,7 @@ function rowSide(c, el) {
   // Single: the stored side of the k-th row that renders.
   const fields = c.fieldsDoc.fields.find((f) => f.name === 'rows').fields
   const byName = new Map(fields.map((f) => [f.name, f]))
-  const shown = (c.input.values.rows ?? []).filter((r) => ['image', 'heading', 'content', 'buttons'].some((n) => n === 'image' ? isImage(c, r.image) : filled(byName.get(n), r[n])))
+  const shown = (c.values.rows ?? []).filter((r) => ['image', 'heading', 'content', 'buttons'].some((n) => n === 'image' ? isImage(c, r.image) : filled(byName.get(n), r[n])))
   const row = shown[k]
   return row ? row.mediaSide ?? byName.get('mediaSide').default : undefined
 }
@@ -610,7 +636,20 @@ function backgroundStyle(c) {
   const at = position === 'focal-point' ? (focal ? `${focal.x}% ${focal.y}%` : null) : KEYWORD[position]
   return `object-fit: ${bg.fit ?? 'cover'}${at ? `; object-position: ${at}` : ''}`
 }
+// A data attribute that mirrors one of the section's fields carries that field's value.
+const field = (name) => (c) => { const v = effective(c, name); return v === undefined ? undefined : String(v) }
 const VALUE = {
+  'hero:root:data-align': field('alignment'),
+  'hero:root:data-media-side': field('mediaSide'),
+  'rich-text:root:data-align': field('alignment'),
+  'features:list:data-columns': field('columns'),
+  'stats:list:data-columns': field('columns'),
+  'logos:list:data-columns': field('columns'),
+  'logos:list:data-greyscale': field('greyscale'),
+  'gallery:list:data-columns': field('columns'),
+  'collection-showcase:root:data-source': field('source'),
+  'collection-showcase:list:data-columns': field('columns'),
+  'carousel:root:data-source': field('source'),
   'search-form:input:value': (c) => c.input.document?.query,
   // An untitled column's list takes the footer navigation's name.
   'site-footer:links:aria-label': (c, el) => { for (let p = c.parents.get(el); p; p = c.parents.get(p)) if (p.name === 'nav') return attr(p, 'aria-label') },
@@ -744,13 +783,7 @@ function matcher(c) {
 // section's own file, everything around it against section.json.
 function wrapperSpec(c) {
   const wrapper = markup.get('section')
-  const doc = markup.get(c.section)
-  let { root } = doc
-  let elements = doc.elements ?? []
-  for (const v of doc.variants ?? []) {
-    const option = v.options[effective(c, v.field)]
-    if (option) ({ root, elements } = applyOption(root, elements, option))
-  }
+  const { doc, root, elements } = sectionTree(c)
   const children = mapNodes(wrapper.elements, (n) => {
     if (n.role !== 'block') return n
     return {
@@ -820,7 +853,7 @@ function checkMarkup(c) {
   const every = () => [root, ...descendants(root)]
   c.parents = new Map()
   for (const el of [root, ...descendants(root)]) for (const child of elementsOf(el)) c.parents.set(child, el)
-  nestedSection = c.kind === 'section' ? null : c.nested?.section ?? null
+  nestedCase = c.kind === 'section' || !c.nested ? null : c
   const { doc, spec, elements } = c.kind === 'section' ? wrapperSpec(c) : documentSpec(c)
   const m = matcher(c)
   const bindings = m.one(spec, root, 0, 0, '')
@@ -833,16 +866,16 @@ function checkMarkup(c) {
     ['background', background(c), 'a background image is set'],
     ['scrim', scrimOn(c), 'a background image is drawn and the scrim is on'],
   ]
-  if (doc.id === 'hero' && c.kind === 'section') expectations.push(['media', ['split', 'stacked'].includes(effective(c, 'variant')) && isImage(c, input.values.image), 'variant split or stacked with an image'])
+  if (c.sectionId === 'hero') expectations.push(['media', ['split', 'stacked'].includes(effective(c, 'variant')) && isImage(c, c.values.image), 'variant split or stacked with an image'])
   const fieldsByName = new Map((c.fieldsDoc?.fields ?? []).map((f) => [f.name, f]))
   const visitWhen = (nodes) => {
     for (const n of nodes) {
       const m = n.optional && /^([a-z][a-zA-Z0-9]*) is set$/.exec(n.when ?? '')
-      if (m && fieldsByName.has(m[1])) expectations.push([n.role, filled(fieldsByName.get(m[1]), input.values[m[1]]), n.when])
+      if (m && fieldsByName.has(m[1])) expectations.push([n.role, filled(fieldsByName.get(m[1]), c.values?.[m[1]]), n.when])
       visitWhen(n.children ?? [])
     }
   }
-  if (c.kind === 'section') visitWhen(elements)
+  if (c.sectionId) visitWhen(c.kind === 'section' ? elements : sectionTree(c).elements)
   for (const [role, holds, when] of expectations) {
     if (holds && !drawn(role)) fail(`${at}.html: ${role} is not drawn, but ${when} (the markup draws it then)`)
     if (!holds && drawn(role)) fail(`${at}.html: ${role} is drawn, but the markup draws it only when ${when}`)
@@ -1028,13 +1061,11 @@ function checkMarkup(c) {
     // Ids (SC-012): a landmark id, a nested section's anchor, or <owner>__<part> with the owner a
     // vocabulary id or one of those anchors.
     const anchors = new Set(all.filter((el) => classesOf(el).includes('salt-section')).map((el) => attr(el, 'id')).filter(Boolean))
-    if (anchors.size && !c.nested) fail(`${at}.json: the ${doc.id} nests a section, so document.listing (a view) or document.sections (a page) must describe it (its section, anchorId, track and settings)`)
-    // The nested section's heading is document.listing.heading, word for word, or there is none.
-    if (c.nested) {
+    if (anchors.size && !c.nested) fail(`${at}.json: the ${doc.id} nests a section, so document.listing (a view) or document.sections (a page) must describe it (its section, values, track and index)`)
+    // The nested section's heading is its values' heading, word for word.
+    if (c.nested && filledText(c.values.heading)) {
       const heading = all.find((el) => attr(el, 'id') === `${c.anchor}__heading`)
-      const want = c.nested.heading
-      if (want !== undefined && (!heading || textOf(heading) !== want)) fail(`${at}.html: the nested section's heading reads ${heading ? JSON.stringify(textOf(heading)) : 'nothing'}; the case's ${c.input.document?.listing ? 'document.listing' : 'document.sections[0]'}.heading gives ${JSON.stringify(want)}`)
-      if (want === undefined && heading) fail(`${at}.html: the nested section draws a heading, but the case gives it none`)
+      if (heading && textOf(heading) !== c.values.heading.trim()) fail(`${at}.html: the nested section's heading reads ${JSON.stringify(textOf(heading))}; its values give ${JSON.stringify(c.values.heading)}`)
     }
     const owners = drawnBy(doc.id)
     for (const el of all) {
@@ -1108,12 +1139,13 @@ function checkMarkup(c) {
   }
   const backgroundImg = bindings.get('background')?.[0]
   // A role, or the roles the first item may sit in (the carousel's track, list or lone card).
-  const role = doc.priorityMedia?.role
+  // A page's priority image is its first section's, by that section's own rule (review of #14, 6).
+  const role = (c.kind === 'page' && c.nested ? markup.get(c.sectionId).priorityMedia : doc.priorityMedia)?.role
   const within = arr(role ?? []).flatMap((r) => bindings.get(r) ?? []).flatMap((el) => (el.name === 'img' ? [el] : descendants(el).filter((d) => d.name === 'img')))
   const expected = !ctx.priorityMedia ? null : backgroundImg ?? (within.length ? (c.kind === 'view' ? within.slice(0, 1) : within) : null)
   if (!ctx.priorityMedia && priority.length) fail(`${at}.html: the plan grants no priority media, but an img carries fetchpriority=high`)
   if (expected && !(Array.isArray(expected) ? expected.includes(priority[0]) : priority[0] === expected)) {
-    fail(`${at}.html: the priority image must be ${backgroundImg ? 'the section background' : `in ${doc.id}'s ${role}`} (section#priority-media)`)
+    fail(`${at}.html: the priority image must be ${backgroundImg ? 'the section background' : `in ${c.kind === 'page' ? c.sectionId : doc.id}'s ${role}`} (section#priority-media)`)
   }
   if (ctx.priorityMedia && !expected && priority.length) fail(`${at}.html: an img claims priority, but ${doc.id}'s markup gives priority to none here`)
 }

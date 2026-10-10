@@ -91,7 +91,12 @@
     "sections": [
       {
         "section": "rich-text",
-        "anchorId": "welcome",
+        "values": {
+          "body": "<p>Planting, paving and aftercare across Bristol and Bath.</p>",
+          "settings": {
+            "anchorId": "welcome"
+          }
+        },
         "track": "rich-text-1",
         "index": 0
       }
