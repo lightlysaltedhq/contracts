@@ -282,7 +282,7 @@
       "image": ".salt-related__list .salt-showcase__media img",
       "slot": "card",
       "band": true,
-      "when": "a related service's card: the view's .salt-grid, three columns (stepping to two and one as the grid does), in the default measure"
+      "when": "a related service's card: the view's .salt-grid, three columns (stepping to two and one as the grid does), in the full band, since no shared stylesheet gives a view's main a measure"
     },
     {
       "markup": "site-logo",

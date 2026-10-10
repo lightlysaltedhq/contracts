@@ -1,7 +1,7 @@
 {
-  "$comment": "The theme toggle is its server form, the empty span[aria-hidden] Salt for Next.js renders until script knows the scheme (SC-019). site.displayPreferences is { labels: { summary, fontSize, decrease, reset, increase, contrast, grayscale, motion }, scale: bool, toggles: [contrast, grayscale, motion], motionDefault: 'reduce'|null }; site.themeToggle is { placed: 'footer', labels: { theme } }. The widget is drawn in its server form: root div hidden (script reveals it), no data-motion-default (the site does not default to reduced motion), toggles aria-pressed=\"false\". The markup declares no text, label or children for the scale label, the scale buttons, the toggles so the scale label and the buttons carry the visible words as text and each button's accessible name is its text (the scale buttons also carry aria-label, which the markup declares). The display-preferences toggles omit 'theme' because the footer places its own theme toggle.",
+  "$comment": "The button form exists only once the scheme is known: Salt for Next.js swaps it in after hydration, reading the stored choice; a platform that renders it on the server, as Salt for WordPress would, draws it when it can read the visitor's stored choice before rendering (a cookie) and the span otherwise. state.themeScheme is that known scheme. site.displayPreferences is { labels: { summary, fontSize, decrease, reset, increase, contrast, grayscale, motion }, scale: bool, toggles: [contrast, grayscale, motion], motionDefault: 'reduce'|null }; site.themeToggle is { placed: 'footer', labels: { theme } }. The widget is drawn in its server form: root div hidden (script reveals it), no data-motion-default (the site does not default to reduced motion), toggles aria-pressed=\"false\". The markup declares no text, label or children for the scale label, the scale buttons, the toggles so the scale label and the buttons carry the visible words as text and each button's accessible name is its text (the scale buttons also carry aria-label, which the markup declares). The display-preferences toggles omit 'theme' because the footer places its own theme toggle.",
   "chrome": "site-footer",
-  "summary": "The site offers display preferences (font size buttons plus contrast, greyscale and reduced-motion toggles, hidden until script reveals them) and places its theme toggle in the footer, between the social links and the display preferences as the base order says.",
+  "summary": "The footer's theme toggle once the scheme is known (light): its button form, type button, not pressed, named, with the sun glyph, beside the display preferences.",
   "context": {
     "path": "/"
   },
@@ -62,5 +62,8 @@
       ],
       "copyright": "© 2026 Hartley Gardens"
     }
+  },
+  "state": {
+    "themeScheme": "light"
   }
 }

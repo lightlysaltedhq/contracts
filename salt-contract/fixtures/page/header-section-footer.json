@@ -1,0 +1,107 @@
+{
+  "$comment": "A whole page (SC-019): the comparison reads Salt's head (the salt.css link and the scriptless phone layout's noscript style, drawn because the header is) and the body. Its parts are the wordmark header, one rich-text section claiming the h1, and the footer, whose current link is the page's path. The section is document.sections[0]: its section id and its field values, from which its block is read against rich-text's own markup. site merges the header's and the footer's data, with labels.skip for the skip link.",
+  "page": "page",
+  "summary": "A page with the header, one section and the footer: the skip link first, the section claiming the h1, and Salt's head (the stylesheet link and the scriptless style).",
+  "context": {
+    "priorityMedia": true,
+    "locale": "en-GB",
+    "path": "/about/"
+  },
+  "site": {
+    "name": "Hollow Oak Garden Design",
+    "home": "/",
+    "organisation": "Hartley Gardens",
+    "labels": {
+      "navigation": "Footer",
+      "social": "Social media",
+      "preferences": "Cookie preferences",
+      "menu": "Menu",
+      "skip": "Skip to content"
+    },
+    "footer": {
+      "tone": "surface",
+      "showLogo": false,
+      "columns": [
+        {
+          "title": "Studio",
+          "links": [
+            {
+              "label": "About us",
+              "href": "/about/"
+            },
+            {
+              "label": "Our work",
+              "href": "/work/"
+            },
+            {
+              "label": "Journal",
+              "href": "/journal/"
+            }
+          ]
+        },
+        {
+          "title": "Services",
+          "links": [
+            {
+              "label": "Garden design",
+              "href": "/services/garden-design/"
+            },
+            {
+              "label": "Planting",
+              "href": "/services/planting/"
+            }
+          ]
+        },
+        {
+          "title": "Help",
+          "links": [
+            {
+              "label": "Contact",
+              "href": "/contact/"
+            },
+            {
+              "label": "Privacy policy",
+              "href": "/privacy/"
+            }
+          ]
+        }
+      ],
+      "text": "<p>We plan, plant and look after gardens across <strong>Bristol and Bath</strong>.</p>",
+      "profiles": [
+        {
+          "name": "Instagram",
+          "url": "https://www.instagram.com/hartleygardens",
+          "icon": "instagram"
+        },
+        {
+          "name": "LinkedIn",
+          "url": "https://www.linkedin.com/company/hartley-gardens",
+          "icon": "linkedin"
+        },
+        {
+          "name": "Substack",
+          "url": "https://hartleygardens.substack.com"
+        }
+      ],
+      "copyright": "© 2026 Hartley Gardens"
+    }
+  },
+  "document": {
+    "title": "About us",
+    "sections": [
+      {
+        "section": "rich-text",
+        "values": {
+          "heading": "About us",
+          "body": "<p>Three gardeners and one van, working across Bristol and Bath since 2014.</p>",
+          "settings": {
+            "anchorId": "about-us"
+          }
+        },
+        "headingLevel": 1,
+        "track": "rich-text-1",
+        "index": 0
+      }
+    ]
+  }
+}

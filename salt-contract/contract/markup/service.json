@@ -268,7 +268,7 @@
       ],
       "owes": [
         "Name the benefits and related sections: the ids service__benefits-heading and service__related-heading on their h2s, and aria-labelledby on each section (section#labelled-by).",
-        "A related card's image declares the card slot for the default band at three columns (contract/image-sizes.json), the grid it is drawn in; catalogue-views.tsx passes the unbanded card slot, which is a carousel slide's."
+        "A related card's image declares the card slot for the full band at three columns (contract/image-sizes.json), the grid it is drawn in, which no shared stylesheet narrows; catalogue-views.tsx passes the unbanded card slot, which is a carousel slide's."
       ]
     }
   }

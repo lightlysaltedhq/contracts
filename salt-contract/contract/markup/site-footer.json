@@ -96,6 +96,10 @@
                     "aria-labelledby": {
                       "value": "site-footer__column-<n>",
                       "when": "the column has a title"
+                    },
+                    "aria-label": {
+                      "value": "from:the footer navigation's name (labels.navigation)",
+                      "when": "the column has no title: a single flat menu's list takes the nav's name (SC-006, SC-019)"
                     }
                   },
                   "children": [
@@ -198,22 +202,52 @@
             },
             {
               "role": "theme-toggle",
-              "element": "button",
+              "element": [
+                "button",
+                "span"
+              ],
               "classes": [
                 "salt-theme-toggle"
               ],
               "attributes": {
-                "type": "button",
+                "type": {
+                  "value": "button",
+                  "when": "button form"
+                },
                 "aria-pressed": {
                   "enum": [
                     "true",
                     "false"
-                  ]
+                  ],
+                  "when": "button form"
                 },
-                "aria-label": "from:labels.theme"
+                "aria-label": {
+                  "value": "from:labels.theme",
+                  "when": "button form"
+                },
+                "aria-hidden": {
+                  "value": "true",
+                  "when": "span form, before script mounts the toggle"
+                }
               },
               "optional": true,
-              "when": "the theme toggle is placed in the footer and named"
+              "when": "the theme toggle is placed in the footer and named",
+              "children": [
+                {
+                  "role": "theme-glyph",
+                  "component": "icon",
+                  "attributes": {
+                    "data-size": "sm"
+                  },
+                  "repeat": {
+                    "from": "sun, moon",
+                    "max": 2
+                  },
+                  "optional": true,
+                  "when": "button form: the glyph for the scheme in force"
+                }
+              ],
+              "note": "As the header's: the empty span[aria-hidden] until script mounts the button with its glyph (SC-019)."
             },
             {
               "role": "display-preferences",
@@ -267,6 +301,7 @@
                     "salt-consent-panel"
                   ],
                   "attributes": {
+                    "open": "",
                     "aria-labelledby": "site-footer__consent-title"
                   },
                   "optional": true,
@@ -357,7 +392,8 @@
                         }
                       ]
                     }
-                  ]
+                  ],
+                  "note": "Drawn only when open, so always with open (SC-019)."
                 }
               ]
             }
@@ -506,7 +542,8 @@
       ],
       "owes": [
         "Rename to salt-footer*; data-tone on the footer; columns, its single menu as one untitled column; the consent control and panel when an integration needs consent; social icons named by role=img and aria-label.",
-        "The column and consent panel ids exactly as the ruling note fixes them (SC-012)."
+        "The column and consent panel ids exactly as the ruling note fixes them (SC-012).",
+        "SC-019: the theme toggle's server form is the empty span[aria-hidden] and its button draws the sun or moon glyph; an untitled column's list carries the nav's name as aria-label; the consent panel dialog carries open."
       ]
     }
   }

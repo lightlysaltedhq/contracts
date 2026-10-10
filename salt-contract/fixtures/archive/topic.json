@@ -23,9 +23,14 @@
     "href": "/journal/topic/soil/",
     "description": "Everything we have learned about feeding, mulching and looking after the ground under your plants.",
     "listing": {
-      "anchorId": "posts",
-      "heading": "Latest posts",
-      "track": "listing-1"
+      "values": {
+        "heading": "Latest posts",
+        "settings": {
+          "anchorId": "posts"
+        }
+      },
+      "track": "listing-1",
+      "index": 0
     }
   },
   "media": {

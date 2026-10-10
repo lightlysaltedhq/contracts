@@ -30,7 +30,7 @@
 //    changes its output.
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
 import path from 'node:path'
-import { CHROME, REQUIRED_FILES } from '../salt-contract/conformance.mjs'
+import { CHROME, REQUIRED_FILES, fileKind } from '../salt-contract/conformance.mjs'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 
 const here = path.dirname(fileURLToPath(import.meta.url))
@@ -68,7 +68,9 @@ const descendants = (el) => elementsOf(el).flatMap((c) => [c, ...descendants(c)]
 // chrome and these views before 1.0.0.
 // The chrome components and the required views are the runner's lists, so the gate and the
 // conformance run cannot disagree about what SC-018 requires.
-const kindOf = (id) => (vocab.sections.some((s) => s.id === id) ? 'section' : CHROME.includes(id) ? 'chrome' : (vocab.views ?? []).some((v) => v.id === id) ? 'view' : null)
+// A chrome, view or page file's kind is the runner's (fileKind), so the two read it alike.
+const kindOf = (id) => (vocab.sections.some((s) => s.id === id) ? 'section'
+  : CHROME.includes(id) || (vocab.views ?? []).some((v) => v.id === id) ? fileKind(id) : null)
 const fixturesDir = path.join(dir, 'fixtures')
 const cases = []
 if (existsSync(fixturesDir)) {
@@ -240,44 +242,73 @@ function checkSiteAndMedia(c) {
 // A chrome or view case: no fields file (the header, footer and views read site settings and the
 // document, not a section's fields), so its input is checked for shape, and its context says only
 // what the page decides for it.
-const OTHER_INPUT_KEYS = ['$comment', 'chrome', 'view', 'summary', 'context', 'media', 'documents', 'collections', 'route', 'site', 'document', 'state']
+const OTHER_INPUT_KEYS = ['$comment', 'chrome', 'view', 'page', 'summary', 'context', 'media', 'documents', 'collections', 'route', 'site', 'document', 'state']
 const OTHER_CONTEXT_KEYS = ['priorityMedia', 'locale', 'now', 'path']
 function checkOtherInput(c) {
   const { input, at, section, kind } = c
   if (!isObject(input)) { fail(`${at}.json is not an object`); return false }
-  for (const k of Object.keys(input)) if (!OTHER_INPUT_KEYS.includes(k) || (k === 'chrome' && kind !== 'chrome') || (k === 'view' && kind !== 'view')) fail(`${at}.json: unknown key ${k}`)
+  for (const k of Object.keys(input)) if (!OTHER_INPUT_KEYS.includes(k) || (['chrome', 'view', 'page'].includes(k) && k !== kind)) fail(`${at}.json: unknown key ${k}`)
   if (input[kind] !== section) fail(`${at}.json: ${kind} is ${JSON.stringify(input[kind])}; its directory says ${section}`)
   if (!filledText(input.summary)) fail(`${at}.json: summary must say what the case shows`)
   const ctx = input.context
   if (!isObject(ctx)) { fail(`${at}.json: context is required`); return false }
   for (const k of Object.keys(ctx)) if (!OTHER_CONTEXT_KEYS.includes(k)) fail(`${at}.json: context.${k} is not a ${kind} context key (${OTHER_CONTEXT_KEYS.join(', ')})`)
-  if (kind === 'view' && typeof ctx.priorityMedia !== 'boolean') fail(`${at}.json: context.priorityMedia must say whether the plan grants this view the priority image`)
+  if ((kind === 'view' || kind === 'page') && typeof ctx.priorityMedia !== 'boolean') fail(`${at}.json: context.priorityMedia must say whether the plan grants this ${kind} the priority image`)
   if (kind === 'chrome' && ctx.priorityMedia !== undefined) fail(`${at}.json: the chrome never holds the priority image (section#priority-media), so its context has no priorityMedia`)
   if (ctx.locale !== undefined && !(typeof ctx.locale === 'string' && Intl.DateTimeFormat.supportedLocalesOf(ctx.locale).length)) fail(`${at}.json: context.locale must be a BCP 47 locale the platform knows, such as en-GB`)
   if (ctx.path !== undefined && !(typeof ctx.path === 'string' && ctx.path.startsWith('/'))) fail(`${at}.json: context.path is the page's path, starting with /`)
+  if (input.state?.themeScheme !== undefined && !['light', 'dark'].includes(input.state.themeScheme)) fail(`${at}.json: state.themeScheme is light or dark, the scheme the platform knows when it renders`)
   checkSiteAndMedia(c)
   c.anchor = null
-  // A section nested in a view (the archive's listing) is described by document.listing: its
-  // settled anchor, its data-track, its index (from 0) and its shared settings, so its id, its
-  // heading's id, its spacing style and its data attributes are fixed by the case, not guessed.
-  const listing = input.document?.listing
-  if (listing !== undefined) {
-    const p = `${at}.json document.listing`
-    if (!isObject(listing)) { fail(`${p} must be an object`); return true }
-    for (const k of Object.keys(listing)) if (!['anchorId', 'heading', 'track', 'index', 'settings'].includes(k)) fail(`${p}.${k}: the nested section is described by anchorId, heading, track, index and settings`)
-    if (!SLUG.test(listing.anchorId ?? '') || landmarks.has(listing.anchorId)) fail(`${p}.anchorId must be the nested section's settled anchor: a slug, not a landmark id`)
-    if (typeof listing.track !== 'string' || !/^listing-[1-9][0-9]*$/.test(listing.track)) fail(`${p}.track must be listing-<n> (section#data-track)`)
-    if (listing.index !== undefined && !(Number.isInteger(listing.index) && listing.index >= 0)) fail(`${p}.index counts the page's sections from 0`)
-    if (listing.heading !== undefined && !filledText(listing.heading)) fail(`${p}.heading is the nested section's heading text, a non-empty string, or absent for none`)
-    if (listing.settings?.anchorId !== undefined && listing.settings.anchorId !== listing.anchorId) fail(`${p}.settings.anchorId is ${JSON.stringify(listing.settings.anchorId)}, but the section's anchor is ${JSON.stringify(listing.anchorId)}; give it once, as anchorId`)
-    const fieldsDoc = readJson('contract/fields/listing.json')
-    if (listing.settings !== undefined) checkFields(settingsFields(fieldsDoc), listing.settings, `${p}.settings`, c)
-    c.nested = { ...listing, fieldsDoc }
-    c.settings = listing.settings ?? {}
+  // A section nested in a view or a page is described by the case: document.listing (the archive's
+  // listing) or document.sections (a page's, one section per case): its section id, settled anchor,
+  // heading, data-track, index (from 0), heading level and shared settings, so its id, its heading,
+  // its spacing style and its data attributes are fixed by the case, not guessed.
+  if (input.document?.listing !== undefined && input.document?.sections !== undefined) fail(`${at}.json: document gives listing and sections; a case nests one section`)
+  const sections = input.document?.sections
+  if (sections !== undefined && !(Array.isArray(sections) && sections.length === 1)) fail(`${at}.json: document.sections lists the page's one section (a page case nests one)`)
+  const [p, nested] = input.document?.listing !== undefined ? [`${at}.json document.listing`, { section: 'listing', ...input.document.listing }]
+    : Array.isArray(sections) && sections.length === 1 ? [`${at}.json document.sections[0]`, sections[0]] : [null, undefined]
+  if (nested !== undefined) {
+    if (!isObject(nested)) { fail(`${p} must be an object`); return true }
+    const keys = ['section', 'values', 'headingLevel', 'track', 'index']
+    for (const k of Object.keys(nested)) if (!keys.includes(k) || (k === 'section' && input.document?.listing !== undefined && nested.section !== 'listing')) fail(`${p}.${k}: the nested section is described by ${(sections ? keys : keys.slice(1)).join(', ')}`)
+    if (!vocab.sections.some((x) => x.id === nested.section)) { fail(`${p}.section is not a section in contract/sections.json`); return true }
+    if (typeof nested.track !== 'string' || !new RegExp(`^${nested.section}-[1-9][0-9]*$`).test(nested.track)) fail(`${p}.track must be ${nested.section}-<n> (section#data-track)`)
+    // The section cases' rules for index and track (section#data-track): the index is required,
+    // a page's one section is its first, and the track counts no more sections than come up to it.
+    if (!(Number.isInteger(nested.index) && nested.index >= 0)) fail(`${p}.index counts the page's sections from 0, and is required`)
+    else {
+      if (kind === 'page' && nested.index !== 0) fail(`${p}.index is ${nested.index}, but a page's one section is its first, index 0`)
+      const n = Number(/-([1-9][0-9]*)$/.exec(nested.track ?? '')?.[1])
+      if (n > nested.index + 1) fail(`${p}.track ${nested.track} counts ${n} ${nested.section} sections, but only ${nested.index + 1} come up to this one (index ${nested.index}, from 0)`)
+    }
+    // Its heading level is the plan's, derived: a page's one section is its first, with no heading
+    // before it, so it claims the h1; a view's ranks under the view's h1 (section#single-h1).
+    const level = kind === 'page' ? 1 : 2
+    if (nested.headingLevel !== undefined && nested.headingLevel !== level) fail(`${p}.headingLevel is ${nested.headingLevel}, but ${kind === 'page' ? "the page's first section claims the h1" : "a view's section ranks under the view's h1, at 2"} (section#single-h1)`)
+    // Its field values, as a section case's: checked against its own fields file, with its
+    // settled anchor in values.settings.anchorId (review of #14, 1 and 5).
+    const fieldsDoc = readJson(`contract/fields/${nested.section}.json`)
+    const values = nested.values
+    if (!isObject(values)) { fail(`${p}.values must be the nested section's field values`); return true }
+    const { settings, ...own } = values
+    checkFields(fieldsDoc.fields, own, `${p}.values`, c)
+    if (!isObject(settings) || !SLUG.test(settings.anchorId ?? '') || landmarks.has(settings.anchorId)) fail(`${p}.values.settings.anchorId must be the nested section's settled anchor: a slug, not a landmark id`)
+    if (isObject(settings)) checkFields(settingsFields(fieldsDoc), settings, `${p}.values.settings`, c)
+    c.nested = { ...nested, headingLevel: level, fieldsDoc }
+    c.values = values
+    c.fieldsDoc = fieldsDoc
+    c.sectionId = nested.section
+    c.settings = settings ?? {}
     c.settingsDoc = fieldsDoc
-    c.anchor = listing.anchorId
-    c.track = listing.track
-    c.index = listing.index
+    c.anchor = settings?.anchorId
+    c.track = nested.track
+    c.index = nested.index
+    // A page's section is planned as any: the first (index 0) holds the priority image.
+    if (kind === 'page' && Number.isInteger(nested.index) && typeof ctx.priorityMedia === 'boolean' && ctx.priorityMedia !== (nested.index === 0)) {
+      fail(`${at}.json: context.priorityMedia is ${ctx.priorityMedia}, but the page's section is ${nested.index === 0 ? 'its first (index 0), which the plan grants the priority image' : `number ${nested.index}, which never holds it`} (section#priority-media)`)
+    }
   }
   return true
 }
@@ -325,6 +356,8 @@ function checkInput(c) {
   c.fieldsDoc = fieldsDoc
   // The section wrapper's data, settled once: every reader of the wrapper (its tones, spacing,
   // background, track and anchor) reads these, for a section case and a view's nested section alike.
+  c.values = values
+  c.sectionId = section
   c.settings = settings
   c.settingsDoc = fieldsDoc
   c.anchor = settings?.anchorId
@@ -335,7 +368,7 @@ function checkInput(c) {
 
 const effective = (c, field) => {
   const f = c.fieldsDoc?.fields.find((x) => x.name === field)
-  return c.input.values?.[field] ?? f?.default
+  return c.values?.[field] ?? f?.default
 }
 const effectiveSetting = (c, name) => (c.settingsDoc ? c.settings?.[name] ?? settingsFields(c.settingsDoc).find((f) => f.name === name)?.default : undefined)
 
@@ -388,10 +421,40 @@ function withSources(sources) {
   return { attrs, from }
 }
 
+// The case whose section a view or page nests (document.listing or document.sections): the
+// generic section wrapper's block is read as that section's own tree, its variant chosen and its
+// conditions answered by its own values (review of #14, 5).
+let nestedCase = null
+
+/** A section's own root and elements, with each variant the case's values choose applied. */
+function sectionTree(c) {
+  const doc = markup.get(c.sectionId)
+  let { root } = doc
+  let elements = doc.elements ?? []
+  for (const v of doc.variants ?? []) {
+    const option = v.options[effective(c, v.field)]
+    if (option) ({ root, elements } = applyOption(root, elements, option))
+  }
+  return { doc, root, elements }
+}
+
 function expand(nodes, doc) {
   return nodes.flatMap((n) => {
     if (n.component) {
-      const comp = markup.get(n.component)
+      let comp = markup.get(n.component)
+      if (comp?.id === 'section' && nestedCase) {
+        const { doc: own, root, elements } = sectionTree(nestedCase)
+        comp = { ...comp, elements: mapNodes(comp.elements, (b) => (b.role !== 'block' ? b : {
+          role: 'block',
+          element: root.element,
+          classes: [...new Set([...(b.classes ?? []), ...(root.classes ?? [])])],
+          children: elements,
+          attributes: b.attributes,
+          extraAttrs: { ...dataRules(own, 'root'), ...(root.attributes ?? {}) },
+          extraId: own.id,
+          childDoc: own,
+        })) }
+      }
       if (!comp) { fail(`markup: ${doc.id} uses component ${n.component}, which has no markup`); return [] }
       if (comp.fragment) {
         return expand(comp.elements.map((e) => (n.optional ? { ...e, optional: true } : e)), comp)
@@ -478,15 +541,37 @@ function linkFor(c, el) {
     if (typeof v.type === 'string' && ['internal', 'external'].includes(v.type) && v.label === label) found.push(v)
     Object.values(v).forEach(walk)
   }
-  walk(c.input.values)
+  walk(c.values)
   return found.length === 1 ? found[0] : undefined
 }
 const newTab = (c, el) => { const link = linkFor(c, el); return link ? link.newTab === true : undefined }
+// A button row's stored style (a list of { link, style } rows: the hero's, the call to action's, a
+// media-text row's), or that list field's default, found by the button's label.
+function buttonStyle(c, el) {
+  const label = labelOf(el)
+  const found = []
+  const walk = (fields, v) => {
+    if (!Array.isArray(fields)) return
+    for (const f of fields) {
+      const value = v?.[f.name]
+      if (f.type === 'list' && Array.isArray(value)) {
+        const style = f.fields.find((x) => x.name === 'style' && x.type === 'select')
+        const hasLink = f.fields.some((x) => x.name === 'link' && x.type === 'link')
+        for (const row of value) {
+          if (style && hasLink && row?.link?.label === label) found.push(row.style ?? style.default)
+          walk(f.fields, row)
+        }
+      } else if (f.type === 'group' && isObject(value)) walk(f.fields, value)
+    }
+  }
+  walk(c.fieldsDoc?.fields, c.values)
+  return found.length === 1 ? found[0] : undefined
+}
 const currentPage = (c, el) => (c.input.route?.pagination ? textOf(el) === String(c.input.route.pagination.current) : undefined)
 // The tabs section: how many panels render, and whether they are tabbed (tab-set.json: more than
 // one panel and a name, the heading or else the label).
-const panelsOf = (c) => (c.input.values?.tabs ?? []).filter((t) => filledText(t.label)).length
-const tabbed = (c) => (c.section === 'tabs' ? panelsOf(c) > 1 && (filledText(c.input.values.heading) || filledText(c.input.values.label)) : undefined)
+const panelsOf = (c) => (c.values?.tabs ?? []).filter((t) => filledText(t.label)).length
+const tabbed = (c) => (c.sectionId === 'tabs' ? panelsOf(c) > 1 && (filledText(c.values.heading) || filledText(c.values.label)) : undefined)
 // The page window pagination.json fixes: the first, the last, and the current page with one
 // neighbour each side; a run left out is one gap (null), and a one-page gap is drawn as the page.
 function pageWindow(current, total) {
@@ -511,14 +596,33 @@ function telHref(shown) {
   if (digits === '' || digits.length > 15) return null
   return `tel:${international ? '+' : ''}${digits}`
 }
+const isButton = (c, el) => el.name === 'button'
+const isSpan = (c, el) => el.name === 'span'
+const columnTitled = (c, el) => elementsOf(c.parents.get(el) ?? { children: [] }).some((k) => classesOf(k).includes('salt-footer__title'))
 const WHEN = {
+  // SC-019: the submenu toggle and the theme toggle are a span before script and a button after;
+  // each form carries its own attributes.
+  'site-header:toggle:type': isButton,
+  'site-header:toggle:aria-hidden': isSpan,
+  'site-header:theme-toggle:type': isButton,
+  'site-header:theme-toggle:aria-pressed': isButton,
+  'site-header:theme-toggle:aria-label': isButton,
+  'site-header:theme-toggle:aria-hidden': isSpan,
+  'site-footer:theme-toggle:type': isButton,
+  'site-footer:theme-toggle:aria-pressed': isButton,
+  'site-footer:theme-toggle:aria-label': isButton,
+  'site-footer:theme-toggle:aria-hidden': isSpan,
+  'site-header:phone-icon:data-size': () => false,
+  'search-form:input:value': (c) => filledText(c.input.document?.query),
+  'site-footer:links:aria-label': (c, el) => !columnTitled(c, el),
+  'site-footer:links:aria-labelledby': columnTitled,
   'section:root:data-media': (c) => background(c),
   // A drawn background always has a fit, so its style always applies (media.json).
   'section:background:style': (c) => background(c),
   'section:root:data-divider': (c) => effectiveSetting(c, 'divider') === true,
   'section:root:data-collapse-top': (c) => c.input.context.collapseTop === true,
   'section:root:style': (c) => effectiveSetting(c, 'spacing') !== 'none',
-  'hero:root:data-media-side': (c) => effective(c, 'variant') === 'split' && isImage(c, c.input.values.image),
+  'hero:root:data-media-side': (c) => effective(c, 'variant') === 'split' && isImage(c, c.values.image),
   'hero:root:data-align': (c) => effective(c, 'variant') === 'minimal',
   'button:root:target': newTab,
   'button:root:rel': newTab,
@@ -553,7 +657,7 @@ function rowSide(c, el) {
   // Single: the stored side of the k-th row that renders.
   const fields = c.fieldsDoc.fields.find((f) => f.name === 'rows').fields
   const byName = new Map(fields.map((f) => [f.name, f]))
-  const shown = (c.input.values.rows ?? []).filter((r) => ['image', 'heading', 'content', 'buttons'].some((n) => n === 'image' ? isImage(c, r.image) : filled(byName.get(n), r[n])))
+  const shown = (c.values.rows ?? []).filter((r) => ['image', 'heading', 'content', 'buttons'].some((n) => n === 'image' ? isImage(c, r.image) : filled(byName.get(n), r[n])))
   const row = shown[k]
   return row ? row.mediaSide ?? byName.get('mediaSide').default : undefined
 }
@@ -568,14 +672,37 @@ function backgroundStyle(c) {
   const at = position === 'focal-point' ? (focal ? `${focal.x}% ${focal.y}%` : null) : KEYWORD[position]
   return `object-fit: ${bg.fit ?? 'cover'}${at ? `; object-position: ${at}` : ''}`
 }
+// A data attribute that mirrors one of the section's fields carries that field's value.
+const field = (name) => (c) => { const v = effective(c, name); return v === undefined ? undefined : String(v) }
 const VALUE = {
+  'button:root:data-style': buttonStyle,
+  // pricing.json: a plan's call to action is primary when the plan is featured, secondary otherwise.
+  'pricing:action:data-style': (c, el) => {
+    const plan = (c.values?.plans ?? []).filter((p) => p.cta?.label === labelOf(el))
+    return plan.length === 1 ? (plan[0].featured ? 'primary' : 'secondary') : undefined
+  },
+  'hero:root:data-align': field('alignment'),
+  'hero:root:data-media-side': field('mediaSide'),
+  'rich-text:root:data-align': field('alignment'),
+  'features:list:data-columns': field('columns'),
+  'stats:list:data-columns': field('columns'),
+  'logos:list:data-columns': field('columns'),
+  'logos:list:data-greyscale': field('greyscale'),
+  'gallery:list:data-columns': field('columns'),
+  'collection-showcase:root:data-source': field('source'),
+  'collection-showcase:list:data-columns': field('columns'),
+  'carousel:root:data-source': field('source'),
+  'search-form:input:value': (c) => c.input.document?.query,
+  // An untitled column's list takes the footer navigation's name.
+  'site-footer:links:aria-label': (c, el) => { for (let p = c.parents.get(el); p; p = c.parents.get(p)) if (p.name === 'nav') return attr(p, 'aria-label') },
   'section:background:style': backgroundStyle,
   'section:root:data-track': (c) => c.track,
   'section:root:data-tone': (c) => effectiveSetting(c, 'tone'),
   'section:root:data-tone-dark': darkTone,
   'section:root:data-spacing': (c) => effectiveSetting(c, 'spacing'),
   'section:root:data-width': (c) => effectiveSetting(c, 'width'),
-  'accordion:item:name': (c) => (groupName[c.section] ? `${groupName[c.section]}-${c.input.context.index}` : undefined),
+  // The section's own id and index, settled for a section case and a nested section alike.
+  'accordion:item:name': (c) => (groupName[c.sectionId] && c.index !== undefined ? `${groupName[c.sectionId]}-${c.index}` : undefined),
   'media-text:row:data-media-side': rowSide,
   // A contact field's type and autocomplete follow its name (contact-form.json, SC-016).
   'contact-form:input:type': (c, el) => ({ name: 'text', email: 'email', phone: 'tel' })[attr(el, 'name')],
@@ -699,13 +826,7 @@ function matcher(c) {
 // section's own file, everything around it against section.json.
 function wrapperSpec(c) {
   const wrapper = markup.get('section')
-  const doc = markup.get(c.section)
-  let { root } = doc
-  let elements = doc.elements ?? []
-  for (const v of doc.variants ?? []) {
-    const option = v.options[effective(c, v.field)]
-    if (option) ({ root, elements } = applyOption(root, elements, option))
-  }
+  const { doc, root, elements } = sectionTree(c)
   const children = mapNodes(wrapper.elements, (n) => {
     if (n.role !== 'block') return n
     return {
@@ -775,6 +896,7 @@ function checkMarkup(c) {
   const every = () => [root, ...descendants(root)]
   c.parents = new Map()
   for (const el of [root, ...descendants(root)]) for (const child of elementsOf(el)) c.parents.set(child, el)
+  nestedCase = c.kind === 'section' || !c.nested ? null : c
   const { doc, spec, elements } = c.kind === 'section' ? wrapperSpec(c) : documentSpec(c)
   const m = matcher(c)
   const bindings = m.one(spec, root, 0, 0, '')
@@ -787,16 +909,16 @@ function checkMarkup(c) {
     ['background', background(c), 'a background image is set'],
     ['scrim', scrimOn(c), 'a background image is drawn and the scrim is on'],
   ]
-  if (doc.id === 'hero' && c.kind === 'section') expectations.push(['media', ['split', 'stacked'].includes(effective(c, 'variant')) && isImage(c, input.values.image), 'variant split or stacked with an image'])
+  if (c.sectionId === 'hero') expectations.push(['media', ['split', 'stacked'].includes(effective(c, 'variant')) && isImage(c, c.values.image), 'variant split or stacked with an image'])
   const fieldsByName = new Map((c.fieldsDoc?.fields ?? []).map((f) => [f.name, f]))
   const visitWhen = (nodes) => {
     for (const n of nodes) {
       const m = n.optional && /^([a-z][a-zA-Z0-9]*) is set$/.exec(n.when ?? '')
-      if (m && fieldsByName.has(m[1])) expectations.push([n.role, filled(fieldsByName.get(m[1]), input.values[m[1]]), n.when])
+      if (m && fieldsByName.has(m[1])) expectations.push([n.role, filled(fieldsByName.get(m[1]), c.values?.[m[1]]), n.when])
       visitWhen(n.children ?? [])
     }
   }
-  if (c.kind === 'section') visitWhen(elements)
+  if (c.sectionId) visitWhen(c.kind === 'section' ? elements : sectionTree(c).elements)
   for (const [role, holds, when] of expectations) {
     if (holds && !drawn(role)) fail(`${at}.html: ${role} is not drawn, but ${when} (the markup draws it then)`)
     if (!holds && drawn(role)) fail(`${at}.html: ${role} is drawn, but the markup draws it only when ${when}`)
@@ -846,6 +968,39 @@ function checkMarkup(c) {
     if (attr(a, 'href') !== want) fail(`${at}.html: the phone link "${textOf(a)}" has href ${attr(a, 'href')}; section#display-forms gives ${want ?? 'no link'}`)
   }
   for (const e of every()) for (const [name, value] of e.attrs) if (value.includes('\\/')) fail(`${at}.html: ${describe(e)} ${name} escapes a slash; JSON in an attribute is written without (section#display-forms)`)
+
+  // The theme toggle's form follows the scheme the case knows (state.themeScheme): none, the empty
+  // span server form; light or dark, the button, pressed for dark, with the sun or the moon.
+  for (const toggle of every().filter((e) => classesOf(e).includes('salt-theme-toggle'))) {
+    const scheme = input.state?.themeScheme
+    if (scheme === undefined && toggle.name !== 'span') fail(`${at}.html: the theme toggle is drawn as a button, but the case knows no scheme (state.themeScheme), so it is the span server form`)
+    if (scheme !== undefined && toggle.name !== 'button') fail(`${at}.html: the case knows the ${scheme} scheme, so the theme toggle is its button form`)
+    if (scheme !== undefined && toggle.name === 'button') {
+      const pressed = String(scheme === 'dark')
+      if (attr(toggle, 'aria-pressed') !== pressed) fail(`${at}.html: the theme toggle's aria-pressed is ${attr(toggle, 'aria-pressed')}; the ${scheme} scheme gives ${pressed}`)
+      const glyphs = descendants(toggle).filter((e) => e.name === 'svg').map((e) => attr(e, 'data-icon'))
+      const want = scheme === 'dark' ? 'moon' : 'sun'
+      if (glyphs.length !== 1 || glyphs[0] !== want) fail(`${at}.html: the theme toggle draws the ${glyphs.join(' and ') || 'no'} glyph; the ${scheme} scheme gives ${want}`)
+    }
+  }
+
+  // A page draws the header's scriptless phone layout in its head whenever it draws the header
+  // (page.json, SC-019).
+  if (c.kind === 'page') {
+    // The fallback heading is drawn only when no section claims the h1 (section#fallback-heading).
+    if ((bindings.get('fallback-heading') ?? []).length && c.anchor && every().some((e) => attr(e, 'id') === `${c.anchor}__heading`)) {
+      fail(`${at}.html: the page draws the fallback heading, but its section's heading claims the h1 (section#fallback-heading)`)
+    }
+    const header = every().some((e) => e.name === 'header' && classesOf(e).includes('salt-header'))
+    const scriptless = (bindings.get('scriptless') ?? []).length > 0
+    if (header && !scriptless) fail(`${at}.html: the page draws the header, so its head carries the scriptless phone layout's noscript style (page.json)`)
+    if (!header && scriptless) fail(`${at}.html: the page draws no header, so its head carries no scriptless phone layout`)
+    // The stylesheet is salt.css, served verbatim (SC-018); its address is the platform's.
+    for (const link of bindings.get('stylesheet') ?? []) {
+      const href = attr(link, 'href') ?? ''
+      if (!/(^|\/)salt\.css$/.test(href.replace(/[?#].*$/, ''))) fail(`${at}.html: the page's stylesheet link points at ${href}; its file name is salt.css (page.json)`)
+    }
+  }
 
   // aria-current follows the page's path (review of #13, 6): in each navigation (the header's
   // and the drawer's menus, the footer's, a breadcrumb) every link to context.path is current, and
@@ -935,15 +1090,17 @@ function checkMarkup(c) {
     // chrome draws no h1: the page's belongs to its main.
     const h1s = all.filter((el) => el.name === 'h1')
     const title = doc.headings?.role ? bindings.get(doc.headings.role)?.[0] : undefined
-    if (c.kind === 'view' && (h1s.length !== 1 || (title && h1s[0] !== title))) fail(`${at}.html: a view draws exactly one h1, its ${doc.headings?.role ?? 'title'} (section#single-h1); this draws ${h1s.length}`)
+    if ((c.kind === 'view' || c.kind === 'page') && (h1s.length !== 1 || (title && HEADING.test(title.name) && h1s[0] !== title))) fail(`${at}.html: a ${c.kind} draws exactly one h1${c.kind === 'view' ? `, its ${doc.headings?.role ?? 'title'}` : ', a section\'s or the fallback heading'} (section#single-h1); this draws ${h1s.length}`)
     if (c.kind === 'chrome' && h1s.length) fail(`${at}.html: the ${doc.id} draws an h1; the page's h1 belongs to its main (section#single-h1)`)
     // A section nested in a view keeps the body rule: its own heading ranks at the plan's level
     // (2, under the view's h1) and every heading inside it ranks below that (section#body-heading-base).
     for (const nested of all.filter((el) => classesOf(el).includes('salt-section'))) {
       const inside = descendants(nested).filter((el) => HEADING.test(el.name))
       const own = inside.find((el) => attr(el, 'id') === `${attr(nested, 'id')}__heading`)
-      const base = own ? Number(own.name[1]) : 2
-      if (own && base !== 2) fail(`${at}.html: the nested section ${attr(nested, 'id')}'s heading is ${own.name}; under the view's h1 it is h2 (section#heading-level)`)
+      // In a view the nested heading is h2, under the view's h1; on a page it is the plan's level.
+      const level = c.nested?.headingLevel ?? (c.kind === 'page' ? 1 : 2)
+      const base = own ? Number(own.name[1]) : level
+      if (own && base !== level) fail(`${at}.html: the nested section ${attr(nested, 'id')}'s heading is ${own.name}; the plan gives it h${level} (section#heading-level)`)
       for (const h of inside) {
         if (h !== own && Number(h.name[1]) <= base) fail(`${at}.html: ${describe(h)} in the nested section ${attr(nested, 'id')} ranks at or above its heading's level ${base} (section#body-heading-base)`)
       }
@@ -951,13 +1108,13 @@ function checkMarkup(c) {
     // Ids (SC-012): a landmark id, a nested section's anchor, or <owner>__<part> with the owner a
     // vocabulary id or one of those anchors.
     const anchors = new Set(all.filter((el) => classesOf(el).includes('salt-section')).map((el) => attr(el, 'id')).filter(Boolean))
-    if (anchors.size && !c.nested) fail(`${at}.json: the ${doc.id} nests a section, so document.listing must describe it (its anchorId, track and settings)`)
-    // The nested section's heading is document.listing.heading, word for word, or there is none.
-    if (c.nested) {
+    if (anchors.size && !c.nested) fail(`${at}.json: the ${doc.id} nests a section, so document.listing (a view) or document.sections (a page) must describe it (its section, values, track and index)`)
+    // The nested section's heading is its values' heading, word for word.
+    if (c.nested && filledText(c.values.heading)) {
       const heading = all.find((el) => attr(el, 'id') === `${c.anchor}__heading`)
-      const want = c.nested.heading
-      if (want !== undefined && (!heading || textOf(heading) !== want)) fail(`${at}.html: the nested section's heading reads ${heading ? JSON.stringify(textOf(heading)) : 'nothing'}; document.listing.heading gives ${JSON.stringify(want)}`)
-      if (want === undefined && heading) fail(`${at}.html: the nested section draws a heading, but document.listing gives none`)
+      // White space collapsed alike on both sides, as textOf reads the drawn heading.
+      const want = c.values.heading.replace(/\s+/g, ' ').trim()
+      if (heading && textOf(heading) !== want) fail(`${at}.html: the nested section's heading reads ${JSON.stringify(textOf(heading))}; its values give ${JSON.stringify(want)}`)
     }
     const owners = drawnBy(doc.id)
     for (const el of all) {
@@ -1022,17 +1179,22 @@ function checkMarkup(c) {
   if (priority.length > 1) fail(`${at}.html: ${priority.length} images claim fetchpriority=high; at most one does (section#priority-media)`)
   for (const img of imgs) {
     const isPriority = priority.includes(img)
+    // The header logo is above the fold on every page: eager, never lazy (SC-019).
+    let inHeader = false
+    for (let p = c.parents.get(img); p; p = c.parents.get(p)) if (p.name === 'header' && classesOf(p).includes('salt-header')) inHeader = true
+    const loading = classesOf(img).includes('salt-logo__image') && inHeader ? 'eager' : 'lazy'
     if (isPriority && hasAttr(img, 'loading')) fail(`${at}.html: the priority image carries loading; it is never lazy (SC-007)`)
-    if (!isPriority && attr(img, 'loading') !== 'lazy') fail(`${at}.html: an img that is not the priority image must be loading="lazy" (section#priority-media)`)
+    if (!isPriority && attr(img, 'loading') !== loading) fail(`${at}.html: ${loading === 'eager' ? 'the header logo is above the fold, so it must be loading="eager" (SC-019)' : 'an img that is not the priority image must be loading="lazy" (section#priority-media)'}`)
   }
   const backgroundImg = bindings.get('background')?.[0]
   // A role, or the roles the first item may sit in (the carousel's track, list or lone card).
-  const role = doc.priorityMedia?.role
+  // A page's priority image is its first section's, by that section's own rule (review of #14, 6).
+  const role = (c.kind === 'page' && c.nested ? markup.get(c.sectionId).priorityMedia : doc.priorityMedia)?.role
   const within = arr(role ?? []).flatMap((r) => bindings.get(r) ?? []).flatMap((el) => (el.name === 'img' ? [el] : descendants(el).filter((d) => d.name === 'img')))
   const expected = !ctx.priorityMedia ? null : backgroundImg ?? (within.length ? (c.kind === 'view' ? within.slice(0, 1) : within) : null)
   if (!ctx.priorityMedia && priority.length) fail(`${at}.html: the plan grants no priority media, but an img carries fetchpriority=high`)
   if (expected && !(Array.isArray(expected) ? expected.includes(priority[0]) : priority[0] === expected)) {
-    fail(`${at}.html: the priority image must be ${backgroundImg ? 'the section background' : `in ${doc.id}'s ${role}`} (section#priority-media)`)
+    fail(`${at}.html: the priority image must be ${backgroundImg ? 'the section background' : `in ${c.kind === 'page' ? c.sectionId : doc.id}'s ${role}`} (section#priority-media)`)
   }
   if (ctx.priorityMedia && !expected && priority.length) fail(`${at}.html: an img claims priority, but ${doc.id}'s markup gives priority to none here`)
 }
@@ -1131,6 +1293,6 @@ if (fails.length) {
 }
 const rendering = cases.filter((c) => c.renders).length
 const files = (kind) => new Set(cases.filter((c) => c.kind === kind).map((c) => c.section)).size
-console.log(`PASS: ${cases.length} fixture case(s) over ${files('section')} section(s), ${files('chrome')} chrome file(s) and ${files('view')} view(s) (${rendering} rendering, ` +
+console.log(`PASS: ${cases.length} fixture case(s) over ${files('section')} section(s), ${files('chrome')} chrome file(s), ${files('view')} view(s) and ${files('page')} page file (${rendering} rendering, ` +
   `${cases.length - rendering} rendering nothing): every section input valid against its fields and every other well formed, every expected HTML valid against ` +
   'its markup, every variant option covered; normalise is idempotent and no one-attribute change survives it.')

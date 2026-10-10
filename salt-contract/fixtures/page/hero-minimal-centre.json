@@ -1,0 +1,112 @@
+{
+  "$comment": "A whole page whose one section is hero/minimal-centre-inverse-dark-alt's hero, given as document.sections[0] (its section id and field values). The block is read against hero.json with its variant and conditions answered by those values; the page's priority image is the first section's, by hero.json's priorityMedia (SC-019).",
+  "page": "page",
+  "summary": "A page whose first section is a minimal, centred hero on the inverse band: its data-variant and data-align come from its own values, and its heading claims the page's h1.",
+  "context": {
+    "priorityMedia": true,
+    "locale": "en-GB",
+    "path": "/about/"
+  },
+  "site": {
+    "name": "Hollow Oak Garden Design",
+    "home": "/",
+    "organisation": "Hartley Gardens",
+    "labels": {
+      "navigation": "Footer",
+      "social": "Social media",
+      "preferences": "Cookie preferences",
+      "menu": "Menu",
+      "skip": "Skip to content"
+    },
+    "footer": {
+      "tone": "surface",
+      "showLogo": false,
+      "columns": [
+        {
+          "title": "Studio",
+          "links": [
+            {
+              "label": "About us",
+              "href": "/about/"
+            },
+            {
+              "label": "Our work",
+              "href": "/work/"
+            },
+            {
+              "label": "Journal",
+              "href": "/journal/"
+            }
+          ]
+        },
+        {
+          "title": "Services",
+          "links": [
+            {
+              "label": "Garden design",
+              "href": "/services/garden-design/"
+            },
+            {
+              "label": "Planting",
+              "href": "/services/planting/"
+            }
+          ]
+        },
+        {
+          "title": "Help",
+          "links": [
+            {
+              "label": "Contact",
+              "href": "/contact/"
+            },
+            {
+              "label": "Privacy policy",
+              "href": "/privacy/"
+            }
+          ]
+        }
+      ],
+      "text": "<p>We plan, plant and look after gardens across <strong>Bristol and Bath</strong>.</p>",
+      "profiles": [
+        {
+          "name": "Instagram",
+          "url": "https://www.instagram.com/hartleygardens",
+          "icon": "instagram"
+        },
+        {
+          "name": "LinkedIn",
+          "url": "https://www.linkedin.com/company/hartley-gardens",
+          "icon": "linkedin"
+        },
+        {
+          "name": "Substack",
+          "url": "https://hartleygardens.substack.com"
+        }
+      ],
+      "copyright": "© 2026 Hartley Gardens"
+    }
+  },
+  "document": {
+    "title": "Home",
+    "sections": [
+      {
+        "section": "hero",
+        "values": {
+          "variant": "minimal",
+          "eyebrow": "About us",
+          "heading": "Three gardeners, one van",
+          "alignment": "centre",
+          "settings": {
+            "anchorId": "about",
+            "tone": "surface-inverse",
+            "toneDark": "surface-alt",
+            "spacing": "none"
+          }
+        },
+        "headingLevel": 1,
+        "track": "hero-1",
+        "index": 0
+      }
+    ]
+  }
+}

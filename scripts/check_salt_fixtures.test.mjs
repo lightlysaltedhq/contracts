@@ -169,7 +169,7 @@ test('markup: a required attribute left out fails', () => {
   markupFails(' decoding="async"', '', /<img\.salt-hero__image> lacks decoding, which the markup requires/)
 })
 test('markup: a data attribute value outside its vocabulary fails', () => {
-  markupFails('data-media-side="left"', 'data-media-side="top"', /data-media-side="top" is not one of left, right/)
+  markupFails('data-media-side="left"', 'data-media-side="top"', /data-media-side="top" disagrees with the case, which gives "left"/)
 })
 test('markup: a literal attribute with another value fails', () => {
   markupFails('data-block="hero"', 'data-block="banner"', /data-block="banner" is not "hero"/)
@@ -491,12 +491,12 @@ test('chrome: a case under the wrong kind key fails', () => {
 test('chrome: a view with a second h1 fails, and so does an h1 in the chrome', () => {
   // Inside content the markup leaves open (a nested section's block, the drawer's panel), so the
   // heading rule itself is what fails.
-  expectFail(['archive'], (io) => io.html('archive/topic.html', 'data-block="listing">', 'data-block="listing">\n          <h1>Again</h1>'), /a view draws exactly one h1, its title \(section#single-h1\); this draws 2/)
+  expectFail(['archive'], (io) => io.html('archive/author.html', '<p class="salt-archive__bio">', '<p class="salt-archive__bio"><h1>Again</h1>'), /a view draws exactly one h1, its title \(section#single-h1\); this draws 2/)
   expectFail(['site-header'], (io) => io.html('site-header/drawer-open.html', '<div class="salt-drawer__panel">', '<div class="salt-drawer__panel">\n        <h1>Menu</h1>'), /the site-header draws an h1; the page's h1 belongs to its main/)
 })
 test('chrome: an id that is no landmark, anchor or vocabulary-owned part fails', () => {
-  expectFail(['archive'], (io) => io.html('archive/topic.html', 'data-block="listing">', 'data-block="listing">\n          <p id="intro-1">x</p>'), /id intro-1 is not a landmark id, a section's anchor or <owner>__<part>/)
-  expectFail(['archive'], (io) => io.html('archive/topic.html', 'data-block="listing">', 'data-block="listing">\n          <p id="nowhere__intro">x</p>'), /id nowhere__intro is not a landmark id/)
+  expectFail(['archive'], (io) => io.html('archive/author.html', '<p class="salt-archive__bio">', '<p class="salt-archive__bio"><span id="intro-1">x</span>'), /id intro-1 is not a landmark id, a section's anchor or <owner>__<part>/)
+  expectFail(['archive'], (io) => io.html('archive/author.html', '<p class="salt-archive__bio">', '<p class="salt-archive__bio"><span id="nowhere__intro">x</span>'), /id nowhere__intro is not a landmark id/)
 })
 test('chrome: the logo\'s sizes is its drawn width at site.logoHeight', () => {
   expectFail(['site-header'], (io) => io.json(`${HEADER}.json`, (d) => { d.site.logoHeight = 40 }), /sizes="180px"; its slot \(logo\) gives "150px"/)
@@ -516,9 +516,9 @@ test('chrome: a nested section anchored with a landmark id fails, and a landmark
   expectFail(['archive'], (io) => {
     const rel = 'fixtures/archive/topic.html'
     io.write(rel, readFileSync(path.join(io.dir, rel), 'utf8').replace('id="posts"', 'id="site-navigation"').replaceAll('posts__heading', 'site-navigation__heading'))
-    io.json('archive/topic.json', (d) => { d.document.listing.anchorId = 'site-navigation' })
+    io.json('archive/topic.json', (d) => { d.document.listing.values.settings.anchorId = 'site-navigation' })
   }, /a section anchored with the landmark id site-navigation renders as site-navigation-section/)
-  expectFail(['archive'], (io) => io.html('archive/topic.html', 'data-block="listing">', 'data-block="listing">\n          <p id="main">x</p>'), /the landmark id main is on <p>, not its landmark element/)
+  expectFail(['archive'], (io) => io.html('archive/author.html', '<p class="salt-archive__bio">', '<p class="salt-archive__bio"><span id="main">x</span>'), /the landmark id main is on <span>, not its landmark element/)
 })
 test('chrome: an id owned by a file this one does not draw fails', () => {
   expectFail(['site-footer'], (io) => io.html('site-footer/consent-panel-open.html', 'id="site-footer__consent-analytics-description">', 'id="site-footer__consent-analytics-description"><span id="site-header__submenu-2">x</span>'), /id site-header__submenu-2 is not a landmark id, a section's anchor or <owner>__<part> owned by site-footer/)
@@ -531,13 +531,15 @@ test('chrome: a nested section\'s card titles rank below its heading (review of 
   }, /<h2> in the nested section posts ranks at or above its heading's level 2/)
 })
 
-test('images: a related service card takes the grid\'s card slot, three columns at the default measure (review of #13, 5)', async () => {
+test('images: a related service card takes the grid\'s card slot, three columns in the full band (review of #13, 5; SC-019)', async () => {
   const { slotOf, sizesOf } = await import('./salt_image_slots.mjs')
   const table = JSON.parse(readFileSync(path.join(pkg, 'contract/image-sizes.json'), 'utf8'))
   const list = { name: 'ul', attrs: [['class', 'salt-grid salt-showcase salt-related__list']], children: [] }
   const media = { name: 'div', attrs: [['class', 'salt-showcase__media']], children: [] }
   const placed = slotOf({ attrs: [], children: [] }, [media, list], 'service', () => undefined)
-  assert.equal(sizesOf(table, placed, placed.fixedBand), table.slots.card.bands.default['3'])
+  // No shared stylesheet gives a view's main a measure, so the grid spans the full band (SC-019).
+  assert.equal(placed.fixedBand, 'full')
+  assert.equal(sizesOf(table, placed, placed.fixedBand), table.slots.card.bands.full['3'])
 })
 
 test('chrome: aria-current marks the link to context.path, and only it (review of #13, 6)', () => {
@@ -559,14 +561,14 @@ test('chrome: a menu that links the current page twice marks both current (revie
 })
 
 test('chrome: a nested section takes its anchor, spacing and track from document.listing (review of #13, 8)', () => {
-  expectFail(['archive'], (io) => io.json('archive/topic.json', (d) => { d.document.listing.anchorId = 'stories' }), /<section\.salt-section> id="posts" is not "<anchor>"/)
-  expectFail(['archive'], (io) => io.json('archive/topic.json', (d) => { d.document.listing.settings = { spacing: 'lg' } }), /data-spacing="md" disagrees with the case, which gives "lg"/)
+  expectFail(['archive'], (io) => io.json('archive/topic.json', (d) => { d.document.listing.values.settings.anchorId = 'stories' }), /<section\.salt-section> id="posts" is not "<anchor>"/)
+  expectFail(['archive'], (io) => io.json('archive/topic.json', (d) => { d.document.listing.values.settings.spacing = 'lg' }), /data-spacing="md" disagrees with the case, which gives "lg"/)
   expectFail(['archive'], (io) => io.json('archive/topic.json', (d) => { d.document.listing.track = 'listing-2' }), /data-track="listing-1" disagrees with the case, which gives "listing-2"/)
-  expectFail(['archive'], (io) => io.json('archive/topic.json', (d) => { delete d.document.listing }), /the archive nests a section, so document\.listing must describe it/)
+  expectFail(['archive'], (io) => io.json('archive/topic.json', (d) => { delete d.document.listing }), /the archive nests a section, so document\.listing \(a view\) or document\.sections \(a page\) must describe it/)
 })
 
 test('chrome: a nested section with a background image must draw it, as a section case does (review of #13, B)', () => {
-  const withImage = (d) => { d.document.listing.settings = { backgroundImage: { image: 'soil' } }; d.media.soil.focalPoint = { x: 30, y: 60 } }
+  const withImage = (d) => { d.document.listing.values.settings.backgroundImage = { image: 'soil' }; d.media.soil.focalPoint = { x: 30, y: 60 } }
   const tag = 'data-track="listing-1"'
   // Without data-media: refused, as for a section case.
   expectFail(['archive'], (io) => io.json('archive/topic.json', withImage), /<section\.salt-section> lacks data-media, which the markup requires when a background image is/)
@@ -590,10 +592,10 @@ test('chrome: data-current-section marks the item whose submenu links the page, 
   }, /<li\.salt-nav__item> carries data-current-section, but no link in its submenu is to \/services\/planting-plans\//)
 })
 
-test('chrome: document.listing\'s heading is the nested heading\'s text, and its anchor is given once (review of #13, D)', () => {
-  expectFail(['archive'], (io) => io.json('archive/topic.json', (d) => { d.document.listing.heading = 'Older posts' }), /the nested section's heading reads "Latest posts"; document\.listing\.heading gives "Older posts"/)
-  expectFail(['archive'], (io) => io.json('archive/topic.json', (d) => { d.document.listing.heading = 3 }), /document\.listing\.heading is the nested section's heading text/)
-  expectFail(['archive'], (io) => io.json('archive/topic.json', (d) => { d.document.listing.settings = { anchorId: 'stories' } }), /document\.listing\.settings\.anchorId is "stories", but the section's anchor is "posts"/)
+test('chrome: document.listing\'s values give the nested heading\'s text, and its anchor once (review of #13, D; #14, 1)', () => {
+  expectFail(['archive'], (io) => io.json('archive/topic.json', (d) => { d.document.listing.values.heading = 'Older posts' }), /the nested section's heading reads "Latest posts"; its values give "Older posts"/)
+  expectFail(['archive'], (io) => io.json('archive/topic.json', (d) => { d.document.listing.values.heading = 3 }), /document\.listing\.values\.heading must be a string/)
+  expectFail(['archive'], (io) => io.json('archive/topic.json', (d) => { d.document.listing.anchorId = 'stories' }), /document\.listing\.anchorId: the nested section is described by values, headingLevel, track, index/)
 })
 
 test('chrome: the gate requires exactly the runner\'s list of chrome and view files, from one place (review of #13, E)', async () => {
@@ -606,6 +608,181 @@ test('chrome: the gate requires exactly the runner\'s list of chrome and view fi
   const src = readFileSync(script, 'utf8')
   assert.match(src, /import \{[^}]*\bREQUIRED_FILES\b[^}]*\} from '\.\.\/salt-contract\/conformance\.mjs'/, 'the gate imports the runner\'s list')
   assert.doesNotMatch(src, /\[[^\]]*'not-found'[^\]]*\]/, 'the gate keeps no list of its own')
+})
+
+// SC-019's markup gaps, closed.
+const SC019_HEADER = 'site-header/menu-submenus-phone-cta-sticky'
+test('sc-019: the span form of the submenu toggle carries no type, the button form does', () => {
+  expectFail(['site-header'], (io) => io.html(`${SC019_HEADER}.html`, '<span class="salt-nav__toggle" ', '<span class="salt-nav__toggle" type="button" '), /<span\.salt-nav__toggle> carries type, which the markup draws only when button form/)
+})
+test('sc-019: the theme toggle\'s span server form carries none of the button\'s attributes', () => {
+  expectFail(['site-header'], (io) => io.html('site-header/theme-toggle.html', '<span class="salt-theme-toggle" aria-hidden="true"></span>', '<span class="salt-theme-toggle" aria-hidden="true" aria-pressed="false"></span>'), /<span\.salt-theme-toggle> carries aria-pressed, which the markup draws only when button form/)
+  expectFail(['site-footer'], (io) => io.html('site-footer/display-preferences.html', '<span class="salt-theme-toggle" aria-hidden="true"></span>', '<button class="salt-theme-toggle" type="button" aria-pressed="false"></button>'), /<button\.salt-theme-toggle> lacks aria-label, which the markup requires when button form/)
+})
+test('sc-019: the drawer and the consent panel are drawn open', () => {
+  expectFail(['site-header'], (io) => io.html('site-header/drawer-open.html', '<dialog class="salt-drawer" open', '<dialog class="salt-drawer"'), /<dialog\.salt-drawer> lacks open, which the markup requires/)
+  expectFail(['site-footer'], (io) => io.html('site-footer/consent-panel-open.html', '<dialog class="salt-consent-panel" open', '<dialog class="salt-consent-panel"'), /<dialog\.salt-consent-panel> lacks open, which the markup requires/)
+})
+test('sc-019: the search input keeps the query', () => {
+  expectFail(['search'], (io) => io.html('search/results.html', ' value="hedge"', ''), /<input\.salt-search__input> lacks value, which the markup requires when a query is set/)
+  expectFail(['search'], (io) => io.html('search/results.html', ' value="hedge"', ' value="hedges"'), /value="hedges" disagrees with the case, which gives "hedge"/)
+})
+test('sc-019: an untitled footer column\'s list takes the nav\'s name', () => {
+  expectFail(['site-footer'], (io) => io.html('site-footer/single-flat-menu-inverse.html', 'role="list" aria-label="Footer">', 'role="list">'), /<ul\.salt-footer__links> lacks aria-label, which the markup requires when the column has no title/)
+  expectFail(['site-footer'], (io) => io.html('site-footer/single-flat-menu-inverse.html', 'role="list" aria-label="Footer">', 'role="list" aria-label="Links">'), /aria-label="Links" disagrees with the case, which gives "Footer"/)
+})
+test('sc-019: the header logo loads eagerly, the footer\'s lazily', () => {
+  expectFail(['site-header'], (io) => {
+    const rel = 'fixtures/site-header/light-and-dark-logo.html'
+    io.write(rel, readFileSync(path.join(io.dir, rel), 'utf8').replaceAll('loading="eager"', 'loading="lazy"'))
+  }, /the header logo is above the fold, so it must be loading="eager"/)
+  expectFail(['site-footer'], (io) => {
+    const rel = 'fixtures/site-footer/single-flat-menu-inverse.html'
+    io.write(rel, readFileSync(path.join(io.dir, rel), 'utf8').replace(/(salt-logo__image[^>]*)loading="lazy"/, '$1loading="eager"'))
+  }, /an img that is not the priority image must be loading="lazy"/)
+})
+test('sc-019: the header phone glyph carries no data-size', () => {
+  expectFail(['site-header'], (io) => io.html(`${SC019_HEADER}.html`, 'data-icon="phone" ', 'data-icon="phone" data-size="sm" '), /carries data-size, which the markup draws only when never on the header phone glyph/)
+})
+
+// The page (SC-019).
+const PAGE = 'page/header-section-footer'
+test('page: a page drawing the header must carry the scriptless style in its head', () => {
+  expectFail(['page'], (io) => {
+    const rel = `fixtures/${PAGE}.html`
+    io.write(rel, readFileSync(path.join(io.dir, rel), 'utf8').replace(/ *<noscript>[\s\S]*?<\/noscript>\n/, ''))
+  }, /the page draws the header, so its head carries the scriptless phone layout's noscript style/)
+})
+test('page: the salt.css link is required in the head', () => {
+  expectFail(['page'], (io) => io.html(`${PAGE}.html`, '    <link rel="stylesheet" href="/salt.css">\n', ''), /page\/header-section-footer\.html: .*(requires stylesheet|where the markup has stylesheet)/)
+})
+test('page: a nested section is read against its own root', () => {
+  expectFail(['page'], (io) => io.html(`${PAGE}.html`, 'data-align="left"', 'data-align="justify"'), /data-align="justify" disagrees with the case, which gives "left"/)
+})
+test('page: one h1 on the page, the section\'s or the fallback', () => {
+  expectFail(['page'], (io) => io.html('page/fallback-heading.html', '<h1 class="salt-sr-only">Hartley Gardens</h1>\n', ''), /a page draws exactly one h1, a section's or the fallback heading \(section#single-h1\); this draws 0/)
+})
+test('page: document.sections describes the page\'s one section', () => {
+  expectFail(['page'], (io) => io.json(`${PAGE}.json`, (d) => { d.document.sections.push(d.document.sections[0]) }), /document\.sections lists the page's one section/)
+})
+
+test('page: the page kind is defined once, in the runner, and the gate imports it (review of #14, 10)', () => {
+  const src = readFileSync(script, 'utf8')
+  assert.match(src, /import \{[^}]*\bfileKind\b[^}]*\} from '\.\.\/salt-contract\/conformance\.mjs'/)
+  assert.doesNotMatch(src, /id === 'page'/, 'the gate names no page kind of its own')
+})
+
+test('pageOf: WordPress-shaped body attributes and footer delivery do not count (review of #14, 2)', async () => {
+  const { pageOf } = await import('../salt-contract/normalise.mjs')
+  const head = '<head><link rel="stylesheet" href="/salt.css"></head>'
+  const ours = `<html>${head}<body><a class="salt-skip-link" href="#main">Skip</a><main id="main"></main></body></html>`
+  const wp = `<html>${head}<body class="home page-template-default page page-id-2 wp-custom-logo"><a class="salt-skip-link" href="#main">Skip</a><main id="main"></main>` +
+    `<link rel='stylesheet' id='salt-print-css' href='/print.css' media='print'><style id='global-styles-inline-css'>body{}</style>` +
+    `<script type="speculationrules">{}</script><script src='/wp-includes/js/x.js' id='x-js'></script></body></html>`
+  same(pageOf(ours), pageOf(wp))
+  // next/font's className on body too; a real body element still counts.
+  same(pageOf(ours), pageOf(ours.replace('<body>', '<body class="__variable_a1b2">')))
+  differ(pageOf(ours), pageOf(wp.replace('</main>', '</main><p>Extra</p>')))
+})
+
+test('pageOf: the stylesheet link is its rel and its file name only (review of #14, 3)', async () => {
+  const { pageOf } = await import('../salt-contract/normalise.mjs')
+  const page = (link) => `<html><head>${link}</head><body></body></html>`
+  same(pageOf(page('<link rel="stylesheet" href="/salt.css">')),
+    pageOf(page(`<link rel='stylesheet' id='salt-css' href='https://example.com/wp-content/themes/salt/salt.css?ver=6.6' media='all' data-precedence="default">`)))
+})
+
+test('page: the stylesheet link points at salt.css (review of #14, 4)', () => {
+  expectFail(['page'], (io) => io.html(`${PAGE}.html`, 'href="/salt.css"', 'href="/site.css"'), /the page's stylesheet link points at \/site\.css; its file name is salt\.css/)
+})
+
+test('chrome: the theme toggle\'s form follows the scheme the case knows (review of #14, 7)', () => {
+  // No known scheme: the span server form, never the button.
+  expectFail(['site-header'], (io) => io.html('site-header/theme-toggle.html', '<span class="salt-theme-toggle" aria-hidden="true"></span>',
+    '<button class="salt-theme-toggle" type="button" aria-pressed="false" aria-label="Colour theme"></button>'), /the theme toggle is drawn as a button, but the case knows no scheme \(state\.themeScheme\), so it is the span server form/)
+  // A known dark scheme: pressed, with the moon.
+  expectFail(['site-header'], (io) => io.html('site-header/theme-toggle-button.html', 'aria-pressed="true"', 'aria-pressed="false"'), /the theme toggle's aria-pressed is false; the dark scheme gives true/)
+  expectFail(['site-header'], (io) => io.html('site-header/theme-toggle-button.html', 'data-icon="moon"', 'data-icon="sun"'), /the theme toggle draws the sun glyph; the dark scheme gives moon/)
+})
+
+// A page's section carries its own values, which its block is read against (review of #14, 1, 5, 6).
+test('page: a section\'s values are checked against its own fields (review of #14, 1)', () => {
+  expectFail(['page'], (io) => io.json(`${PAGE}.json`, (d) => { d.document.sections[0].values.title = 'x' }), /document\.sections\[0\]\.values\.title: the fields contract has no field of that name/)
+  expectFail(['page'], (io) => io.json(`${PAGE}.json`, (d) => { d.document.sections[0].values.alignment = 'right' }), /document\.sections\[0\]\.values\.alignment is "right", not one of the field's options/)
+  expectFail(['page'], (io) => io.json(`${PAGE}.json`, (d) => { d.document.sections[0].values.heading = 'Who we are' }), /the nested section's heading reads "About us"; its values give "Who we are"/)
+})
+test('page: a nested hero takes its variant and conditions from its own values (review of #14, 5)', () => {
+  expectFail(['page'], (io) => io.html('page/hero-minimal-centre.html', 'data-align="centre"', 'data-align="left"'), /data-align="left" disagrees with the case, which gives "centre"/)
+  expectFail(['page'], (io) => io.html('page/hero-split-image.html', ' data-media-side="left"', ''), /<div\.salt-block\.salt-hero> lacks data-media-side, which the markup requires when an image is drawn/)
+  expectFail(['page'], (io) => io.json('page/hero-split-image.json', (d) => { d.document.sections[0].values.variant = 'stacked' }), /data-variant="split" is not "stacked"/)
+})
+test('page: the first section\'s hero image is the page\'s priority image (review of #14, 6)', () => {
+  expectFail(['page'], (io) => io.html('page/hero-split-image.html', ' fetchpriority="high"', ' loading="lazy"'), /the priority image must be in hero's image \(section#priority-media\)/)
+})
+
+test('page: the first section holds the priority image, so a lazy hero image fails (settling a)', () => {
+  expectFail(['page'], (io) => {
+    io.json('page/hero-split-image.json', (d) => { d.context.priorityMedia = false })
+    io.html('page/hero-split-image.html', ' fetchpriority="high"', ' loading="lazy"')
+  }, /context\.priorityMedia is false, but the page's section is its first \(index 0\), which the plan grants the priority image/)
+})
+
+test('page: a nested section keeps the section rules for its index and track (settling b)', () => {
+  expectFail(['page'], (io) => io.json('page/hero-split-image.json', (d) => { d.document.sections[0].index = 3; d.document.sections[0].track = 'hero-9' }), /document\.sections\[0\]\.index is 3, but a page's one section is its first, index 0/)
+  expectFail(['page'], (io) => io.json('page/hero-split-image.json', (d) => { d.document.sections[0].track = 'hero-9' }), /document\.sections\[0\]\.track hero-9 counts 9 hero sections, but only 1 come up to this one/)
+  expectFail(['archive'], (io) => io.json('archive/topic.json', (d) => { delete d.document.listing.index }), /document\.listing\.index counts the page's sections from 0, and is required/)
+})
+
+test('pageOf: a print, disabled or alternate salt.css link is a difference; media=all is not (settling c)', async () => {
+  const { pageOf } = await import('../salt-contract/normalise.mjs')
+  const page = (link) => `<html><head>${link}</head><body></body></html>`
+  const ours = pageOf(page('<link rel="stylesheet" href="/salt.css">'))
+  same(ours, pageOf(page('<link rel="stylesheet" href="/salt.css" media="all">')))
+  differ(ours, pageOf(page('<link rel="stylesheet" href="/salt.css" media="print">')))
+  differ(ours, pageOf(page('<link rel="stylesheet" href="/salt.css" disabled>')))
+  differ(ours, pageOf(page('<link rel="alternate stylesheet" href="/salt.css">')))
+})
+
+// A page around faq/one-inverse: its section first (index 0), so its heading is the h1 and its
+// accordion's group faq-0.
+function faqPage(io, name) {
+  const faq = JSON.parse(readFileSync(path.join(pkg, 'fixtures/faq/one-inverse.json'), 'utf8'))
+  const page = JSON.parse(readFileSync(path.join(pkg, `fixtures/${PAGE}.json`), 'utf8'))
+  page.document.sections = [{ section: 'faq', values: faq.values, headingLevel: 1, track: 'faq-1', index: 0 }]
+  page.collections = faq.collections
+  io.write('fixtures/page/faq-first.json', JSON.stringify(page, null, 2))
+  const shell = readFileSync(path.join(pkg, `fixtures/${PAGE}.html`), 'utf8')
+  const section = readFileSync(path.join(pkg, 'fixtures/faq/one-inverse.html'), 'utf8')
+    .replace('<h2 id="faq-one__heading">One quick question</h2>', '<h1 id="faq-one__heading">One quick question</h1>').replaceAll('name="faq-1"', `name="${name}"`)
+  io.write('fixtures/page/faq-first.html', shell.replace(/<section class="salt-section" id="about-us"[\s\S]*?\n {6}<\/section>/, section.trim().replace(/\n/g, '\n      ')))
+}
+test('page: a nested faq\'s group name is faq-<its index> (settling d)', () => {
+  const dir = copy(['page'], (io) => faqPage(io, 'faq-0'))
+  try { assert.doesNotMatch(run(dir).out, /fixtures\/page\/faq-first/, run(dir).out) } finally { rmSync(dir, { recursive: true, force: true }) }
+  expectFail(['page'], (io) => faqPage(io, 'faq-1'), /name="faq-1" disagrees with the case, which gives "faq-0"/)
+})
+
+test('markup: a button\'s data-style is its row\'s stored style (settling e)', () => {
+  // split-image-left stores primary then secondary; media-text rows default to secondary.
+  markupFails('data-style="secondary" data-track-control="cta"><span class="salt-button__label">Get in touch', 'data-style="ghost" data-track-control="cta"><span class="salt-button__label">Get in touch',
+    /data-style="ghost" disagrees with the case, which gives "secondary"/)
+  expectFail(['media-text'], (io) => io.html('media-text/single-one-row-first.html', 'data-style="secondary"', 'data-style="primary"'), /data-style="primary" disagrees with the case, which gives "secondary"/)
+  // pricing.json: primary when the plan is featured.
+  expectFail(['pricing'], (io) => io.html('pricing/three-plans-featured.html', 'data-style="primary"', 'data-style="secondary"'), /data-style="secondary" disagrees with the case, which gives "primary"/)
+})
+
+test('page: the first section\'s heading claims the h1, derived, and a fallback h1 beside it fails (settling f)', () => {
+  expectFail(['page'], (io) => io.json(`${PAGE}.json`, (d) => { d.document.sections[0].headingLevel = 2 }), /document\.sections\[0\]\.headingLevel is 2, but the page's first section claims the h1 \(section#single-h1\)/)
+  expectFail(['page'], (io) => io.html(`${PAGE}.html`, '<main id="main" tabindex="-1">', '<main id="main" tabindex="-1">\n      <h1 class="salt-sr-only">About us</h1>'), /the page draws the fallback heading, but its section's heading claims the h1 \(section#fallback-heading\)/)
+  // With no headingLevel given, the level is derived, and the page still passes.
+  const dir = copy(['page'], (io) => io.json(`${PAGE}.json`, (d) => { delete d.document.sections[0].headingLevel }))
+  try { assert.doesNotMatch(run(dir).out, /fixtures\/page\//, run(dir).out) } finally { rmSync(dir, { recursive: true, force: true }) }
+})
+
+test('page: the nested heading is compared with white space collapsed on both sides (settling g)', () => {
+  const dir = copy(['page'], (io) => io.json(`${PAGE}.json`, (d) => { d.document.sections[0].values.heading = 'About\n  us ' }))
+  try { assert.doesNotMatch(run(dir).out, /fixtures\/page\/header-section-footer/, run(dir).out) } finally { rmSync(dir, { recursive: true, force: true }) }
+  expectFail(['page'], (io) => io.json(`${PAGE}.json`, (d) => { d.document.sections[0].values.heading = 'About\n  them' }), /the nested section's heading reads "About us"; its values give "About them"/)
 })
 
 // ── 4. The normaliser ─────────────────────────────────────────────────────────────────────────

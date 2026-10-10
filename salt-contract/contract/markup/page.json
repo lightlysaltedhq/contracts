@@ -12,8 +12,20 @@
     {
       "role": "head",
       "element": "head",
-      "note": "Only what the contract fixes; each platform writes the rest of head natively.",
+      "note": "Only what the contract owns, which a page fixture compares (SC-019): the link to the served salt.css, then the scriptless phone layout's noscript. Each platform writes the rest of head natively, and the comparison ignores it (normalise.mjs pageOf).",
       "children": [
+        {
+          "role": "stylesheet",
+          "element": "link",
+          "attributes": {
+            "rel": "stylesheet",
+            "href": {
+              "value": "from:the address the platform serves styles/salt.css at",
+              "note": "Its file name is salt.css, which is how the comparison finds it among the platform's own links; the address itself is the platform's, and the conformance runner's stylesheet pin compares the bytes served there."
+            }
+          },
+          "note": "The one shared stylesheet bundle, served verbatim (SC-002, SC-018)."
+        },
         {
           "role": "scriptless",
           "element": "noscript",
@@ -170,6 +182,10 @@
     {
       "topic": "ruling",
       "text": "The scriptless phone layout is the noscript style in head: with no script it keeps the header's menu and call to action on screen below the breakpoint, hides the burger nothing could open, and lets the row wrap, through the three custom properties chrome.css reads. It sits in head because a style element inside noscript is conforming only there; a no-js class removed by script was rejected because it needs a blocking script and leaves a phone whose script fails mid-page with no menu."
+    },
+    {
+      "topic": "ruling",
+      "text": "A page fixture compares the body and the head elements above (SC-019): the comparison drops the head's other content, the html and body elements' attributes, and the script, style and link elements in the body, which are each platform's delivery (the contract's body markup draws none of them), and reads the stylesheet's href as its file name."
     }
   ],
   "platforms": {

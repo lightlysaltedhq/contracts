@@ -37,8 +37,10 @@ export function slotOf(img, ancestors, outer, effective) {
   // archive's portrait and the author box's photo thumbs, and a related card the card slot.
   if (within('salt-post__media')) return { slot: 'content', band: false }
   if (within('salt-archive__portrait') || within('salt-author-box__media')) return { slot: 'thumb', band: false }
-  // The related list is a three-column .salt-grid in the view's default measure (views.css).
-  if (within('salt-related__list')) return { slot: 'card', band: true, columns: '3', fixedBand: 'default' }
+  // The related list is a three-column .salt-grid straight in the view's main, which no shared
+  // stylesheet gives a measure (nor does Salt for Next.js's core; only its example app's site.css
+  // does), so it spans the full band.
+  if (within('salt-related__list')) return { slot: 'card', band: true, columns: '3', fixedBand: 'full' }
   if (!within('salt-showcase__media')) return null
   if (section === 'collection-showcase') {
     const layout = effective('layout')

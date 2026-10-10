@@ -6,6 +6,21 @@ Salted's decision log for Product Salt.
 
 ## Unreleased (0.1.0, drafting)
 
+- The page fixture and the chrome markup gaps (SC-019). `page.json`'s head declares the link to
+  the served `salt.css`. Page cases (`page` is a required file) compare the body and only Salt's head
+  elements, that link read as its `rel` and file name and the scriptless phone layout's `noscript`
+  style, through `pageOf` in `normalise.mjs`; the rest of the head, the `html` and `body` elements'
+  attributes and the body's `script`, `style` and `link` elements are the platform's. The adapter
+  returns the whole document for a page. A section nested in a page or view carries its own field
+  `values` and is held to its own markup, variants and priority image. Data attributes that mirror a
+  field (`data-align`, `data-media-side`, `data-columns`, `data-greyscale`, `data-source`) are tied to
+  that field in every case. Markup: the header's span toggle carries no `type`; the theme toggle is a
+  button, fixtured under `state.themeScheme`, or its empty `span[aria-hidden]` server form, in the
+  header and the footer; the drawer and consent panel carry `open`; the search input keeps the
+  query; an untitled footer column's list takes the nav's name; the header logo is
+  `loading="eager"`, as it is above the fold; the header phone glyph carries no `data-size`; the
+  service view's related cards declare the card slot for the full band, as no stylesheet gives a
+  view's `main` a measure.
 - Fixtures for the site chrome and page views (SC-018): 20 cases for `site-header`, `site-footer`
   and the `post`, `service`, `archive`, `search` and `not-found` views, 100 cases in all. A case
   names its kind by its key (`section`, `chrome`, `view`); chrome and view cases read `site`,
