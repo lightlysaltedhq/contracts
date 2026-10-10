@@ -42,8 +42,12 @@ export const REPORT_FORMAT = 'salt-conformance/1'
 // The chrome components with fixtures; every view in contract/sections.json may have them too.
 export const CHROME = ['site-header', 'site-footer']
 // The files SC-018 requires of every implementation: a full run cannot declare them not shipped.
+// The page skeleton (page.json), a kind of its own: its case is a whole document (SC-019).
+export const PAGE = 'page'
 // SC-018's chrome and views, and the page skeleton (SC-019).
-export const REQUIRED_FILES = [...CHROME, 'post', 'service', 'archive', 'search', 'not-found', 'page']
+export const REQUIRED_FILES = [...CHROME, 'post', 'service', 'archive', 'search', 'not-found', PAGE]
+/** The kind of a chrome, view or page file: chrome, page or view. */
+export const fileKind = (id) => (CHROME.includes(id) ? 'chrome' : id === PAGE ? 'page' : 'view')
 
 // ── Arguments ─────────────────────────────────────────────────────────────────────────────────
 
@@ -495,7 +499,7 @@ export async function runConformance(options) {
   const ids = vocab.sections.map((s) => s.id)
   // The chrome and the views with fixtures, each run as a file of its own (SC-018).
   const fileIds = [...CHROME, ...vocab.views.map((v) => v.id)].filter((id) => existsSync(path.join(dir, 'fixtures', id)))
-  const kindOf = (id) => (CHROME.includes(id) ? 'chrome' : id === 'page' ? 'page' : 'view')
+  const kindOf = fileKind
   for (const [flag, list] of [['--sections', options.sections], ['--not-shipped', options.notShipped]]) {
     for (const id of list ?? []) if (!ids.includes(id) && !fileIds.includes(id)) throw new Error(`${flag}: ${id} is not a section in contract/sections.json, nor a chrome or view file with fixtures`)
   }
@@ -562,7 +566,7 @@ export async function runConformance(options) {
     const failures = []
     const unknown = new Map()
     // A page is compared as pageOf reads it: Salt's own head elements and the body (SC-019).
-    const view = id === 'page' ? pageOf : (html) => html
+    const view = id === PAGE ? pageOf : (html) => html
     for (const o of mine) {
       if (o.result.error) { failures.push({ case: o.name, kind: 'adapter', error: o.result.error, stderr: o.result.stderr }); continue }
       const difference = firstDifference(view(o.html), view(o.result.html))

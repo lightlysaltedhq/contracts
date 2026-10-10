@@ -30,7 +30,7 @@
 //    changes its output.
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
 import path from 'node:path'
-import { CHROME, REQUIRED_FILES } from '../salt-contract/conformance.mjs'
+import { CHROME, REQUIRED_FILES, fileKind } from '../salt-contract/conformance.mjs'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 
 const here = path.dirname(fileURLToPath(import.meta.url))
@@ -68,9 +68,9 @@ const descendants = (el) => elementsOf(el).flatMap((c) => [c, ...descendants(c)]
 // chrome and these views before 1.0.0.
 // The chrome components and the required views are the runner's lists, so the gate and the
 // conformance run cannot disagree about what SC-018 requires.
-// page is the document skeleton (page.json, SC-019), a kind of its own: its case is a whole page.
-const kindOf = (id) => (vocab.sections.some((s) => s.id === id) ? 'section' : CHROME.includes(id) ? 'chrome' : id === 'page' ? 'page'
-  : (vocab.views ?? []).some((v) => v.id === id) ? 'view' : null)
+// A chrome, view or page file's kind is the runner's (fileKind), so the two read it alike.
+const kindOf = (id) => (vocab.sections.some((s) => s.id === id) ? 'section'
+  : CHROME.includes(id) || (vocab.views ?? []).some((v) => v.id === id) ? fileKind(id) : null)
 const fixturesDir = path.join(dir, 'fixtures')
 const cases = []
 if (existsSync(fixturesDir)) {

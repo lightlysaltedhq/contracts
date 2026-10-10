@@ -676,6 +676,12 @@ test('pageOf: the platform\'s head, the html element\'s attributes and body scri
   differ(pageOf(ours), pageOf(theirs.replace('<main id="main">', '<main id="content">')))
 })
 
+test('page: the page kind is defined once, in the runner, and the gate imports it (review of #14, 10)', () => {
+  const src = readFileSync(script, 'utf8')
+  assert.match(src, /import \{[^}]*\bfileKind\b[^}]*\} from '\.\.\/salt-contract\/conformance\.mjs'/)
+  assert.doesNotMatch(src, /id === 'page'/, 'the gate names no page kind of its own')
+})
+
 // ── 4. The normaliser ─────────────────────────────────────────────────────────────────────────
 test('normaliser: one that drops an attribute fails the mutation check', () => {
   expectFail(HERO, (io) => {
