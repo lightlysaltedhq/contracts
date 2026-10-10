@@ -1,6 +1,6 @@
 {
   "$schema": "../schema/image-sizes.schema.json",
-  "version": "1.0.0",
+  "version": "1.0.0-rc.1",
   "$comment": "The default sizes and srcset of every image slot (SC-016), from Salt for Next.js's sizes table (packages/core/src/components/image-sizes.ts, bandSizes, BD-196) and next/image's default widths (next 16). Each image the markup draws declares the sizes its slot gives for the band its section is drawn in (a band is the section's width setting: full, wide, default or narrow; a card slot also takes the grid's column count), and the srcset this file's candidate rule gives for those sizes. The candidate URLs are each platform's image pipeline's, never fixed here; the fixtures name them by a template per image. A client site that swaps a section's view or changes its layout may declare its own sizes for a slot of that section, in salt-overrides.json under imageSizes (schema/replaced-logic.schema.json); conformance compares the defaults, because fixtures render the core views. Salt for WordPress owes these sizes written exactly (auto-sizes disabled, wp_img_tag_add_auto_sizes returning false) and a wp_calculate_image_srcset filter giving exactly the srcset rule below (the candidates at or above the slot's floor, capped at the intrinsic width, plus the intrinsic width, dropping core's default 300, 768, 1024 and 1536 sizes), worked through in markup/media.json's owes. Salt for Next.js owes capping: next/image lists every candidate whatever the upload's width, and must stop at the intrinsic width and add it.",
   "candidates": [
     32,

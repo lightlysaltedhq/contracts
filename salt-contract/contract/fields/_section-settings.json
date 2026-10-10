@@ -1,6 +1,6 @@
 {
   "$schema": "../../schema/field-definition.schema.json",
-  "version": "1.0.0",
+  "version": "1.0.0-rc.1",
   "$comment": "The wrapper settings every section carries, stored in a group named settings on each section. Merged from Salt for Next.js's sectionSettings (13 fields, stored under settings) and Salt for WordPress's five Advanced-tab wrapper fields (stored at the layout's top level as section_*). A section file may change a default or omit a field through its shared object.",
   "section": "section-settings",
   "fields": [

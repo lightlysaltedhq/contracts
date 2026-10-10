@@ -200,13 +200,15 @@ jobs:
         if: steps.registry.outputs.live == 'false'
         run: npm run salt-conformance
 
-      # Until 1.0.0 the package is `private`, and npm refuses to stage a private package. That is
-      # deliberate: a 0.x drafting tag can never reach the registry, even by accident.
+      # Until the release pull request the package is `private`, and npm refuses to stage a private
+      # package. That is deliberate: a drafting or release-candidate tree (1.0.0-rc.N, held under
+      # SC-018 for an implementation's conformance run) can never reach the registry, even by
+      # accident.
       - name: The package is publishable
         if: steps.registry.outputs.live == 'false'
         run: |
           if [ "$(node -p 'require("./salt-contract/package.json").private === true')" = true ]; then
-            echo "::error::salt-contract/package.json is private. Remove \"private\": true in the 1.0.0 release pull request, not before."
+            echo "::error::salt-contract/package.json is private. Remove \"private\": true in the release pull request, after the candidate's conformance run (SC-018), not before."
             exit 1
           fi
 

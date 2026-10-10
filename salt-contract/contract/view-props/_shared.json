@@ -1,6 +1,6 @@
 {
   "$schema": "../../schema/view-props.schema.json",
-  "version": "1.0.0",
+  "version": "1.0.0-rc.1",
   "$comment": "Types every view-props file may name, and the plan every view receives beside its data. Drafted 09/10/2026 from Salt for Next.js 0.11.0's SectionPlan and block data types, renamed where the contract's field names differ.",
   "section": "shared",
   "types": {
