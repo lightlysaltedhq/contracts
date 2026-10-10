@@ -394,7 +394,8 @@ The site chrome (`site-header`, `site-footer`) and the page views with fixtures 
 own under `files` in the JSON report and in its own table in the Markdown one. They have no fields,
 so each is held to the fixtures and class checks; the stylesheet pin is the run's. A run conforms
 only when every file it runs passes as well. `--sections` and `--not-shipped` take their ids like
-a section's.
+a section's, but the chrome and these five views are required of every implementation (SC-018):
+only a `--partial` run may declare one not shipped, and the summary counts it.
 
 Salt for Next.js copies or links the package's file to a static path (`public/salt.css`), links
 it after Tailwind's stylesheet, and passes that file (or `--styles-url` with its URL on a preview):

@@ -66,7 +66,7 @@ test('the reference adapter conforms: all four checks run and pass for every sec
   const { files, ...bySection } = r.report.summary
   assert.deepEqual(bySection, { pass: r.report.sections.length, fail: 0, incomplete: 0, notShipped: 0 })
   // The chrome and every view with fixtures run too, each as a file of its own (SC-018).
-  assert.deepEqual(files, { pass: r.report.files.length, fail: 0 })
+  assert.deepEqual(files, { pass: r.report.files.length, fail: 0, notShipped: 0 })
   assert.deepEqual(r.report.files.map((f) => f.id), ['site-header', 'site-footer', 'post', 'service', 'archive', 'search', 'not-found'])
   for (const f of r.report.files) assert.ok(f.status === 'pass' && f.fixtures.total > 0 && f.classes.status === 'pass', f.id)
   assert.match(r.out, /\| Chrome and views \| Kind \| Fixtures \| Classes \|/)
@@ -218,7 +218,7 @@ test('the chrome and views run too, reported by file: a broken header case fails
     assert.equal(r.report.ok, false)
     // The sections all pass; the run fails on the files alone.
     assert.equal(r.report.summary.fail, 0)
-    assert.deepEqual(r.report.summary.files, { pass: r.report.files.length - 2, fail: 2 })
+    assert.deepEqual(r.report.summary.files, { pass: r.report.files.length - 2, fail: 2, notShipped: 0 })
     const header = r.report.files.find((f) => f.id === 'site-header')
     assert.equal(header.kind, 'chrome')
     assert.equal(header.status, 'fail')
@@ -232,6 +232,16 @@ test('the chrome and views run too, reported by file: a broken header case fails
   } finally {
     rmSync(adapter.dir, { recursive: true, force: true })
   }
+})
+
+test('a full run cannot declare the chrome or an SC-018 view not shipped; a partial one can, and it is counted (review of #13, 4)', async () => {
+  const full = await run(['--platform', 'reference', '--adapter', reference, ...withFields, ...withStyles, '--not-shipped', 'site-footer'])
+  assert.equal(full.code, 2, full.out)
+  assert.match(full.out, /--not-shipped: site-footer is required of every implementation \(SC-018\)/)
+  const partial = await run(['--platform', 'reference', '--adapter', reference, ...withFields, ...withStyles, '--not-shipped', 'site-footer', '--partial'])
+  assert.equal(partial.code, 1, partial.out)
+  assert.deepEqual(partial.report.summary.files, { pass: partial.report.files.length - 1, fail: 0, notShipped: 1 })
+  assert.match(partial.out, /Chrome and views: \d+ pass, 0 fail, 1 not shipped\./)
 })
 
 test('--sections takes a chrome or view id, and a partial run runs only what it names', async () => {

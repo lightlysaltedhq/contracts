@@ -41,6 +41,8 @@ const readJson = (file) => JSON.parse(readFileSync(file, 'utf8'))
 export const REPORT_FORMAT = 'salt-conformance/1'
 // The chrome components with fixtures; every view in contract/sections.json may have them too.
 export const CHROME = ['site-header', 'site-footer']
+// The files SC-018 requires of every implementation: a full run cannot declare them not shipped.
+export const REQUIRED_FILES = [...CHROME, 'post', 'service', 'archive', 'search', 'not-found']
 
 // ── Arguments ─────────────────────────────────────────────────────────────────────────────────
 
@@ -498,6 +500,9 @@ export async function runConformance(options) {
   }
   if (options.sections && !options.partial) throw new Error('sections runs only some sections: a run of some is partial, so pass partial')
   const notShipped = new Set(options.notShipped ?? [])
+  if (!options.partial) {
+    for (const id of notShipped) if (REQUIRED_FILES.includes(id)) throw new Error(`--not-shipped: ${id} is required of every implementation (SC-018); only a --partial run may leave it out`)
+  }
   for (const id of options.sections ?? []) {
     if (notShipped.has(id)) throw new Error(`${id} is in --sections and --not-shipped; a section is run or not shipped, not both`)
   }
@@ -607,7 +612,7 @@ export async function runConformance(options) {
     partial: Boolean(options.partial),
     problems,
     summary: { pass: count('pass'), fail: count('fail'), incomplete: count('incomplete'), notShipped: count('not shipped'),
-      files: { pass: files.filter((f) => f.status === 'pass').length, fail: files.filter((f) => f.status === 'fail').length } },
+      files: { pass: files.filter((f) => f.status === 'pass').length, fail: files.filter((f) => f.status === 'fail').length, notShipped: files.filter((f) => f.status === 'not shipped').length } },
     fields: fields ? { platform: fields.platform, snapshot: fields.snapshot, options: fields.options, problems: fields.problems } : null,
     stylesheets: styles,
     sections,
@@ -641,7 +646,7 @@ export function renderMarkdown(report) {
   lines.push(`# Salt conformance: ${report.platform}${impl} against ${report.contract.package} ${report.contract.version}`, '')
   const { pass, fail, incomplete, notShipped } = report.summary
   const verdict = report.partial ? 'Partial, not conforming' : report.ok ? 'Pass' : 'Fail'
-  const fileCount = report.summary.files ? ` Chrome and views: ${report.summary.files.pass} pass, ${report.summary.files.fail} fail.` : ''
+  const fileCount = report.summary.files ? ` Chrome and views: ${report.summary.files.pass} pass, ${report.summary.files.fail} fail, ${report.summary.files.notShipped} not shipped.` : ''
   lines.push(`**${verdict}.** ${pass} section(s) pass, ${fail} fail, ${incomplete} incomplete, ${notShipped} not shipped.${fileCount} ` +
     `Adapter: ${report.adapter.kind} ${code(report.adapter.target)}.`, '')
   lines.push('| Section | Fixtures | Field parity | Classes | Stylesheet pin |', '| --- | --- | --- | --- | --- |')
