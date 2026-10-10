@@ -863,6 +863,17 @@ function checkMarkup(c) {
     }
   }
 
+  // data-current-section marks the menu item whose submenu links the page, and no other item
+  // (site-header.json; salt-nextjs's isCurrentNavSection): the item's own link to the page is
+  // aria-current's, not this.
+  const path = input.context.path
+  for (const item of every().filter((e) => e.name === 'li' && classesOf(e).includes('salt-nav__item'))) {
+    const submenu = elementsOf(item).find((k) => classesOf(k).includes('salt-nav__submenu'))
+    const holds = path !== undefined && Boolean(submenu) && descendants(submenu).some((a) => a.name === 'a' && attr(a, 'href') === path)
+    if (holds && !hasAttr(item, 'data-current-section')) fail(`${at}.html: ${describe(item)} has a submenu link to ${path}, the page's path, but no data-current-section`)
+    if (!holds && hasAttr(item, 'data-current-section')) fail(`${at}.html: ${describe(item)} carries data-current-section, but no link in its submenu is to ${path ?? 'the page (the case gives no context.path)'}`)
+  }
+
   // A section's call to action takes the site's arrow, in its label span, when the site supplies
   // one; every other button never does (button.json).
   const ARROWED = ['salt-hero__actions', 'salt-cta__actions', 'salt-media-text__actions', 'salt-process__step', 'salt-showcase__view-all']

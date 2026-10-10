@@ -583,6 +583,13 @@ test('chrome: a nested section with a background image must draw it, as a sectio
   }, /<img\.salt-section__media> lacks style, which the markup requires when/)
 })
 
+test('chrome: data-current-section marks the item whose submenu links the page, and no other (review of #13, C)', () => {
+  expectFail(['site-header'], (io) => {
+    io.html(`${HEADER}.html`, '<li class="salt-nav__item" data-current-section>', '<li class="salt-nav__item">')
+    io.html(`${HEADER}.html`, '<li class="salt-nav__item">\n          <a class="salt-nav__link" href="/journal/">', '<li class="salt-nav__item" data-current-section>\n          <a class="salt-nav__link" href="/journal/">')
+  }, /<li\.salt-nav__item> carries data-current-section, but no link in its submenu is to \/services\/planting-plans\//)
+})
+
 // ── 4. The normaliser ─────────────────────────────────────────────────────────────────────────
 test('normaliser: one that drops an attribute fails the mutation check', () => {
   expectFail(HERO, (io) => {
