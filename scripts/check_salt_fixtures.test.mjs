@@ -546,7 +546,16 @@ test('chrome: aria-current marks the link to context.path, and only it (review o
   expectFail(['site-footer'], (io) => io.html(`${FOOT}.html`, ' aria-current="page">About us', '>About us'), /link to \/about\/, the page's path, lacks aria-current="page"/)
   expectFail(['post'], (io) => io.json('post/full.json', (d) => { delete d.context.path }), /marks a link current, but the case gives no context\.path/)
   expectFail(['site-header'], (io) => io.html('site-header/light-and-dark-logo.html', /<a class="salt-nav__link" href="(\/[a-z]+\/)">/.exec(readFileSync(path.join(pkg, 'fixtures/site-header/light-and-dark-logo.html'), 'utf8'))[0],
-    /<a class="salt-nav__link" href="(\/[a-z]+\/)">/.exec(readFileSync(path.join(pkg, 'fixtures/site-header/light-and-dark-logo.html'), 'utf8'))[0].replace('">', '" aria-current="page">')), /marks 2 links current; a menu has one current page/)
+    /<a class="salt-nav__link" href="(\/[a-z]+\/)">/.exec(readFileSync(path.join(pkg, 'fixtures/site-header/light-and-dark-logo.html'), 'utf8'))[0].replace('">', '" aria-current="page">')), /marks \/[a-z]+\/ current, but the page's path is \//)
+})
+test('chrome: a menu that links the current page twice marks both current (review of #13, A)', () => {
+  const FOOT = 'site-footer/columns-socials-copyright'
+  const dir = copy(['site-footer'], (io) => io.html(`${FOOT}.html`, '<a class="salt-footer__link" href="/about/" aria-current="page">About us</a>',
+    '<a class="salt-footer__link" href="/about/" aria-current="page">About us</a></li>\n            <li><a class="salt-footer__link" href="/about/" aria-current="page">Who we are</a>'))
+  try {
+    const r = run(dir)
+    assert.doesNotMatch(r.out, /fixtures\/site-footer\//, r.out)
+  } finally { rmSync(dir, { recursive: true, force: true }) }
 })
 
 test('chrome: a nested section takes its anchor, spacing and track from document.listing (review of #13, 8)', () => {
