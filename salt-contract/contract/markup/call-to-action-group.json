@@ -1,6 +1,6 @@
 {
   "$schema": "../../schema/markup.schema.json",
-  "version": "0.1.0",
+  "version": "1.0.0-rc.1",
   "id": "call-to-action-group",
   "kind": "component",
   "summary": "The row of up to two buttons after a section's words.",

@@ -4,7 +4,65 @@ Newest first. Dates are DD/MM/YYYY. What each part of a version means, and how a
 announced and migrated, is in `RELEASE-POLICY.md`. Decisions cited as `SC-nnn` are in Lightly
 Salted's decision log for Product Salt.
 
-## Unreleased (0.1.0, drafting)
+## 1.0.0 (candidate `1.0.0-rc.1`, prepared 10/10/2026; not published, dated when tagged)
+
+**Semver call: MAJOR, the first release of the contract.** No earlier version was published, so no
+implementation conformed to one. Adopting it is still a migration for existing sites, because the
+contract renames and folds what Salt for WordPress 5.0.0 and Salt for Next.js 0.11.0 store (below,
+*What a site does*). From 1.0.0, each change's part is decided by `RELEASE-POLICY.md`: section 1's
+test, applied through section 2's table, where the stricter row wins.
+
+### Added
+
+- The vocabulary (`./sections`): 17 sections (hero, rich-text, call-to-action, media-text,
+  features, stats, logos, gallery, process, faq, tabs, collection-showcase, carousel, listing,
+  contact, locations, pricing), 29 components and 7 views, each with what each platform calls it
+  today.
+- Field definitions (`./fields/*`): every section's editor fields and the shared section settings,
+  in one platform-neutral form, with each platform's former name and stored value (`formerly`) and
+  what it must change (`owes`). The Payload and ACF emitters (`./emit/payload`, `./emit/acf`)
+  generate each platform's half from them, byte-stable, with a drift check for the consumer.
+- Markup (`./markup/*`): element order, `salt-*` classes, data attributes, ids, heading rules,
+  zero states and priority media for every section, component and view, and the page skeleton.
+- The shared stylesheets (`./styles/*`): base, sections, primitives, blocks, chrome and views, and
+  `styles/salt.css`, the one minified bundle both platforms serve verbatim after Tailwind v4's
+  stylesheet. No colour literals; colours come from the token layer (`./token-layer`).
+- Extension points: four dials (`./dials`: corners, shadows, button style, density) mapped to
+  token-layer tokens and set per site in `salt-overrides.json`; view props per section
+  (`./view-props/*`); the replaced-logic format (`./schema/replaced-logic`).
+- Image sizes (`./image-sizes`): each slot's `sizes` per band and column count, the candidate
+  widths, and the srcset capped at the upload's intrinsic width (SC-016).
+- Fixtures (`./fixtures/*`): 106 cases with their expected HTML, for the 17 sections, the site
+  header and footer, the post, service, archive, search and not-found views, and the page
+  (SC-018, SC-019); and the normaliser both sides are compared through (`./normalise`).
+- The conformance runner (`./conformance`, bin `salt-conformance`): fixtures, field snapshots,
+  class vocabulary and the served stylesheet, reported as `conformance.json` (format
+  `salt-conformance/1`) and `conformance.md`. An implementation conforms only when all four checks
+  ran for everything it ships and all pass (SC-017).
+- Schemas for every contract file (`./schema/*`).
+
+### What a site does
+
+A site moving onto a platform release that pins this contract migrates its stored content once,
+through that platform's own migration. As the first major, 1.0.0 has no earlier major to migrate
+from, so it ships no `contract/migrations/` file (`RELEASE-POLICY.md` section 4); what each site
+moves from is recorded per item instead, and the platforms' releases carry the migrations:
+
+- Salt for WordPress 5.0.0 sites: `intro` folds into `rich-text`; the `services`, `work`, `team`,
+  `blog_teaser` and grid `testimonials` layouts fold into `collection-showcase`, and slider
+  `testimonials` and `scroll_carousel` into `carousel`; section settings move from `section_*` to
+  the shared settings; several option values are renamed. Each layout slug and field name that
+  changes is listed under `formerly` in `contract/sections.json` and `contract/fields/`, and each
+  needs a slug-migration entry (FLEET07).
+- Salt for Next.js 0.11.0 sites: block slugs and option values that change are listed the same
+  way; the Payload migration renames stored blocks and values.
+- Both: render the contract's markup and serve `styles/salt.css` byte for byte, then run
+  `salt-conformance` in CI. What each platform must change is its `owes` in the contract files.
+
+## 0.x drafting (never published)
+
+The drafting record, newest first: an entry higher up supersedes any below it. Counts, open
+questions and "left as work" notes here describe the draft at the time; 1.0.0 above is what ships.
 
 - The page fixture and the chrome markup gaps (SC-019). `page.json`'s head declares the link to
   the served `salt.css`. Page cases (`page` is a required file) compare the body and only Salt's head

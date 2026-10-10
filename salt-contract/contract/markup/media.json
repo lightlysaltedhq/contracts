@@ -1,6 +1,6 @@
 {
   "$schema": "../../schema/markup.schema.json",
-  "version": "0.1.0",
+  "version": "1.0.0-rc.1",
   "id": "media",
   "kind": "component",
   "root": {
@@ -72,7 +72,7 @@
     },
     {
       "topic": "ruling",
-      "text": "Width and height are always drawn, the image's intrinsic size, also when the stylesheet makes it fill its frame (SC-007): they give the browser the aspect ratio before the image loads. The \"when not fill\" condition 0.1.0 drafted goes."
+      "text": "Width and height are always drawn, the image's intrinsic size, also when the stylesheet makes it fill its frame (SC-007): they give the browser the aspect ratio before the image loads. There is no \"when not fill\" condition."
     }
   ],
   "platforms": {

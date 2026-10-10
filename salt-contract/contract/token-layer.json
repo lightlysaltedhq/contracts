@@ -1,6 +1,6 @@
 {
   "$schema": "../schema/token-layer.schema.json",
-  "version": "0.1.0",
+  "version": "1.0.0-rc.1",
   "$comment": "Every custom property the shared stylesheets (styles/*.css) read and do not define, which a runtime must therefore emit for them to work (SC-002). Names only: each value is the implementation's, generated from design-foundations and its brand engine, and the stylesheets reach colour through these alone. A property marked optional has a fallback at every read. Drafted 09/10/2026 from the stylesheets Salt for Next.js shipped at 1472afdd.",
   "writes": [
     { "property": "--salt-section-space", "values": { "spacing": { "field": "_section-settings#spacing", "except": ["none"] } } },

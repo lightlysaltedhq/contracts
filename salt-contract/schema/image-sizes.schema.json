@@ -34,7 +34,7 @@
     },
     "version": {
       "type": "string",
-      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+      "pattern": "^\\d+\\.\\d+\\.\\d+(-rc\\.[1-9][0-9]*)?$"
     },
     "$comment": {
       "type": "string"

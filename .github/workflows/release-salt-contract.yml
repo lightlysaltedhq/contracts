@@ -29,10 +29,12 @@ name: Release salt-contract
 # (D-numbers in this file are design-system decisions: this workflow copies the one written for
 # design-foundations, and its reasoning carries over.)
 #
-# Before tagging, on the release branch, set one version string in salt-contract/package.json and
-# the top-level `version` in each salt-contract/contract/*.json (npm run salt-contract fails
-# otherwise: it allows a version key nowhere else in the contract, and a contract file without one
-# fails too). Then move salt-contract/CHANGELOG.md's Unreleased section under that version, and merge.
+# Before tagging, on the release branch (RELEASE-POLICY.md section 5, SC-020): set one version
+# string in salt-contract/package.json and the top-level `version` in each
+# salt-contract/contract/**/*.json; remove "private": true; date the newest CHANGELOG heading as
+# "## <version> (DD/MM/YYYY)"; and rewrite any wording that still names the candidate (its Status
+# section and example reports in README.md; the CHANGELOG's candidate heading). npm run
+# salt-contract fails a release that misses any of these. Then merge, and tag that merge commit.
 # Consumers move on their own pins afterwards: Salt for Next.js and Salt for WordPress each bump
 # their exact pin in a reviewed pull request, as RELEASE-POLICY.md describes.
 
@@ -200,13 +202,15 @@ jobs:
         if: steps.registry.outputs.live == 'false'
         run: npm run salt-conformance
 
-      # Until 1.0.0 the package is `private`, and npm refuses to stage a private package. That is
-      # deliberate: a 0.x drafting tag can never reach the registry, even by accident.
+      # Until the release pull request the package is `private`, and npm refuses to stage a private
+      # package. That is deliberate: a drafting or release-candidate tree (1.0.0-rc.N, held under
+      # SC-018 for an implementation's conformance run) can never reach the registry, even by
+      # accident.
       - name: The package is publishable
         if: steps.registry.outputs.live == 'false'
         run: |
           if [ "$(node -p 'require("./salt-contract/package.json").private === true')" = true ]; then
-            echo "::error::salt-contract/package.json is private. Remove \"private\": true in the 1.0.0 release pull request, not before."
+            echo "::error::salt-contract/package.json is private. Remove \"private\": true in the release pull request, after the candidate's conformance run (SC-018), not before."
             exit 1
           fi
 
