@@ -256,6 +256,21 @@ function checkOtherInput(c) {
   if (ctx.path !== undefined && !(typeof ctx.path === 'string' && ctx.path.startsWith('/'))) fail(`${at}.json: context.path is the page's path, starting with /`)
   checkSiteAndMedia(c)
   c.anchor = null
+  // A section nested in a view (the archive's listing) is described by document.listing: its
+  // settled anchor, its data-track, its index (from 0) and its shared settings, so its id, its
+  // heading's id, its spacing style and its data attributes are fixed by the case, not guessed.
+  const listing = input.document?.listing
+  if (listing !== undefined) {
+    const p = `${at}.json document.listing`
+    if (!isObject(listing)) { fail(`${p} must be an object`); return true }
+    for (const k of Object.keys(listing)) if (!['anchorId', 'heading', 'track', 'index', 'settings'].includes(k)) fail(`${p}.${k}: the nested section is described by anchorId, heading, track, index and settings`)
+    if (!SLUG.test(listing.anchorId ?? '') || landmarks.has(listing.anchorId)) fail(`${p}.anchorId must be the nested section's settled anchor: a slug, not a landmark id`)
+    if (typeof listing.track !== 'string' || !/^listing-[1-9][0-9]*$/.test(listing.track)) fail(`${p}.track must be listing-<n> (section#data-track)`)
+    if (listing.index !== undefined && !(Number.isInteger(listing.index) && listing.index >= 0)) fail(`${p}.index counts the page's sections from 0`)
+    const fieldsDoc = readJson('contract/fields/listing.json')
+    if (listing.settings !== undefined) checkFields(settingsFields(fieldsDoc), listing.settings, `${p}.settings`, c)
+    c.nested = { ...listing, fieldsDoc }
+  }
   return true
 }
 
@@ -308,7 +323,9 @@ const effective = (c, field) => {
   const f = c.fieldsDoc?.fields.find((x) => x.name === field)
   return c.input.values?.[field] ?? f?.default
 }
-const effectiveSetting = (c, name) => (c.kind !== 'section' ? undefined : c.input.values?.settings?.[name] ?? settingsFields(c.fieldsDoc ?? {}).find((f) => f.name === name)?.default)
+const effectiveSetting = (c, name) => (c.kind !== 'section'
+  ? (c.nested ? c.nested.settings?.[name] ?? settingsFields(c.nested.fieldsDoc).find((f) => f.name === name)?.default : undefined)
+  : c.input.values?.settings?.[name] ?? settingsFields(c.fieldsDoc ?? {}).find((f) => f.name === name)?.default)
 
 // ── 3. Expected HTML against the markup ──────────────────────────────────────────────────────
 const dataRules = (doc, role) => Object.fromEntries((doc?.dataAttributes ?? []).filter((d) => d.on === role).map((d) => [d.name,
@@ -410,7 +427,12 @@ const canonStyle = (v) => v.split(';').map((d) => d.trim()).filter(Boolean).map(
 // Placeholders the case fixes; any other <placeholder> matches any text.
 // A chrome or view case fixes none of these: a section nested in a view has its own anchor, which
 // the id rule holds to the anchor drawn on it, so there each placeholder matches any text.
-const placeholders = (c) => (c.kind !== 'section' ? {} : {
+const placeholders = (c) => (c.kind !== 'section' ? (!c.nested ? {} : {
+  '<anchor>': c.nested.anchorId,
+  ...(c.nested.index !== undefined ? { '<section index>': String(c.nested.index) } : {}),
+  '<spacing>': effectiveSetting(c, 'spacing'),
+  '<strength>': c.nested.settings?.backgroundImage?.scrimStrength ?? 'strong',
+}) : {
   '<anchor>': c.anchor,
   '<section index>': String(c.input.context.index),
   '<spacing>': effectiveSetting(c, 'spacing'),
@@ -539,7 +561,7 @@ function backgroundStyle(c) {
 }
 const VALUE = {
   'section:background:style': backgroundStyle,
-  'section:root:data-track': (c) => c.input.context.track,
+  'section:root:data-track': (c) => (c.kind === 'section' ? c.input.context.track : c.nested?.track),
   'section:root:data-tone': (c) => effectiveSetting(c, 'tone'),
   'section:root:data-tone-dark': darkTone,
   'section:root:data-spacing': (c) => effectiveSetting(c, 'spacing'),
@@ -909,6 +931,7 @@ function checkMarkup(c) {
     // Ids (SC-012): a landmark id, a nested section's anchor, or <owner>__<part> with the owner a
     // vocabulary id or one of those anchors.
     const anchors = new Set(all.filter((el) => classesOf(el).includes('salt-section')).map((el) => attr(el, 'id')).filter(Boolean))
+    if (anchors.size && !c.nested) fail(`${at}.json: the ${doc.id} nests a section, so document.listing must describe it (its anchorId, track and settings)`)
     const owners = drawnBy(doc.id)
     for (const el of all) {
       const id = attr(el, 'id')

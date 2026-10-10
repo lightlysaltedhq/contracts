@@ -516,6 +516,7 @@ test('chrome: a nested section anchored with a landmark id fails, and a landmark
   expectFail(['archive'], (io) => {
     const rel = 'fixtures/archive/topic.html'
     io.write(rel, readFileSync(path.join(io.dir, rel), 'utf8').replace('id="posts"', 'id="site-navigation"').replaceAll('posts__heading', 'site-navigation__heading'))
+    io.json('archive/topic.json', (d) => { d.document.listing.anchorId = 'site-navigation' })
   }, /a section anchored with the landmark id site-navigation renders as site-navigation-section/)
   expectFail(['archive'], (io) => io.html('archive/topic.html', 'data-block="listing">', 'data-block="listing">\n          <p id="main">x</p>'), /the landmark id main is on <p>, not its landmark element/)
 })
@@ -546,6 +547,13 @@ test('chrome: aria-current marks the link to context.path, and only it (review o
   expectFail(['post'], (io) => io.json('post/full.json', (d) => { delete d.context.path }), /marks a link current, but the case gives no context\.path/)
   expectFail(['site-header'], (io) => io.html('site-header/light-and-dark-logo.html', /<a class="salt-nav__link" href="(\/[a-z]+\/)">/.exec(readFileSync(path.join(pkg, 'fixtures/site-header/light-and-dark-logo.html'), 'utf8'))[0],
     /<a class="salt-nav__link" href="(\/[a-z]+\/)">/.exec(readFileSync(path.join(pkg, 'fixtures/site-header/light-and-dark-logo.html'), 'utf8'))[0].replace('">', '" aria-current="page">')), /marks 2 links current; a menu has one current page/)
+})
+
+test('chrome: a nested section takes its anchor, spacing and track from document.listing (review of #13, 8)', () => {
+  expectFail(['archive'], (io) => io.json('archive/topic.json', (d) => { d.document.listing.anchorId = 'stories' }), /<section\.salt-section> id="posts" is not "<anchor>"/)
+  expectFail(['archive'], (io) => io.json('archive/topic.json', (d) => { d.document.listing.settings = { spacing: 'lg' } }), /data-spacing="md" disagrees with the case, which gives "lg"/)
+  expectFail(['archive'], (io) => io.json('archive/topic.json', (d) => { d.document.listing.track = 'listing-2' }), /data-track="listing-1" disagrees with the case, which gives "listing-2"/)
+  expectFail(['archive'], (io) => io.json('archive/topic.json', (d) => { delete d.document.listing }), /the archive nests a section, so document\.listing must describe it/)
 })
 
 // ── 4. The normaliser ─────────────────────────────────────────────────────────────────────────

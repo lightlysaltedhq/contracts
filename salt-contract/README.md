@@ -275,7 +275,7 @@ option covered, and the normaliser sound.
 | `collections` | The items of each source the section reads (`faqs`, `services`, `team` …), in the collection's usual order, each with a string `id`. |
 | `route` | What the route hands a listing: its cards and pagination. |
 | `site` | Site-wide data the markup reads, under declared keys only (the gate refuses any other): `labels` (the strings `labels.<name>` in the markup refers to), `arrow` (the site's arrow glyph), `name`, `home`, `organisation`, `acceptsEnquiries`, `contactForm`, `timezone`, `maps`, `collectionIndexes`, `logo` (`{ light, dark }`, media ids), `logoHeight` (the logo's drawn height in px, the logo slot's input; no other key names it), `header` (menu, phone, call to action, sticky), `footer` (tone, columns, text, socials, copyright, whether it shows the logo), `consent`, `themeToggle`, `displayPreferences` and `search`. |
-| `document` | A view's document: the post, service, archive term or author, search query and results, as the view reads them. |
+| `document` | A view's document: the post, service, archive term or author, search query and results, as the view reads them. A section the view nests (the archive's listing) is `document.listing`: its settled `anchorId`, `heading`, `track` (`listing-<n>`), `index` (from 0) and shared `settings`, which fix its id, its heading's id, its spacing and its data attributes. |
 | `state` | A state the case draws that only a visitor brings about, such as the consent panel open (`consentPanelOpen`). |
 
 Conventions, so that every case is deterministic:
