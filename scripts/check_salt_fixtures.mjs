@@ -267,6 +267,8 @@ function checkOtherInput(c) {
     if (!SLUG.test(listing.anchorId ?? '') || landmarks.has(listing.anchorId)) fail(`${p}.anchorId must be the nested section's settled anchor: a slug, not a landmark id`)
     if (typeof listing.track !== 'string' || !/^listing-[1-9][0-9]*$/.test(listing.track)) fail(`${p}.track must be listing-<n> (section#data-track)`)
     if (listing.index !== undefined && !(Number.isInteger(listing.index) && listing.index >= 0)) fail(`${p}.index counts the page's sections from 0`)
+    if (listing.heading !== undefined && !filledText(listing.heading)) fail(`${p}.heading is the nested section's heading text, a non-empty string, or absent for none`)
+    if (listing.settings?.anchorId !== undefined && listing.settings.anchorId !== listing.anchorId) fail(`${p}.settings.anchorId is ${JSON.stringify(listing.settings.anchorId)}, but the section's anchor is ${JSON.stringify(listing.anchorId)}; give it once, as anchorId`)
     const fieldsDoc = readJson('contract/fields/listing.json')
     if (listing.settings !== undefined) checkFields(settingsFields(fieldsDoc), listing.settings, `${p}.settings`, c)
     c.nested = { ...listing, fieldsDoc }
@@ -949,6 +951,13 @@ function checkMarkup(c) {
     // vocabulary id or one of those anchors.
     const anchors = new Set(all.filter((el) => classesOf(el).includes('salt-section')).map((el) => attr(el, 'id')).filter(Boolean))
     if (anchors.size && !c.nested) fail(`${at}.json: the ${doc.id} nests a section, so document.listing must describe it (its anchorId, track and settings)`)
+    // The nested section's heading is document.listing.heading, word for word, or there is none.
+    if (c.nested) {
+      const heading = all.find((el) => attr(el, 'id') === `${c.anchor}__heading`)
+      const want = c.nested.heading
+      if (want !== undefined && (!heading || textOf(heading) !== want)) fail(`${at}.html: the nested section's heading reads ${heading ? JSON.stringify(textOf(heading)) : 'nothing'}; document.listing.heading gives ${JSON.stringify(want)}`)
+      if (want === undefined && heading) fail(`${at}.html: the nested section draws a heading, but document.listing gives none`)
+    }
     const owners = drawnBy(doc.id)
     for (const el of all) {
       const id = attr(el, 'id')

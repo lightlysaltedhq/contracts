@@ -590,6 +590,12 @@ test('chrome: data-current-section marks the item whose submenu links the page, 
   }, /<li\.salt-nav__item> carries data-current-section, but no link in its submenu is to \/services\/planting-plans\//)
 })
 
+test('chrome: document.listing\'s heading is the nested heading\'s text, and its anchor is given once (review of #13, D)', () => {
+  expectFail(['archive'], (io) => io.json('archive/topic.json', (d) => { d.document.listing.heading = 'Older posts' }), /the nested section's heading reads "Latest posts"; document\.listing\.heading gives "Older posts"/)
+  expectFail(['archive'], (io) => io.json('archive/topic.json', (d) => { d.document.listing.heading = 3 }), /document\.listing\.heading is the nested section's heading text/)
+  expectFail(['archive'], (io) => io.json('archive/topic.json', (d) => { d.document.listing.settings = { anchorId: 'stories' } }), /document\.listing\.settings\.anchorId is "stories", but the section's anchor is "posts"/)
+})
+
 // ── 4. The normaliser ─────────────────────────────────────────────────────────────────────────
 test('normaliser: one that drops an attribute fails the mutation check', () => {
   expectFail(HERO, (io) => {
