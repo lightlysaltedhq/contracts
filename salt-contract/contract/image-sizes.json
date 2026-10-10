@@ -281,8 +281,8 @@
       "markup": "service",
       "image": ".salt-related__list .salt-showcase__media img",
       "slot": "card",
-      "band": false,
-      "when": "a related service's card"
+      "band": true,
+      "when": "a related service's card: the view's .salt-grid, three columns (stepping to two and one as the grid does), in the default measure"
     },
     {
       "markup": "site-logo",

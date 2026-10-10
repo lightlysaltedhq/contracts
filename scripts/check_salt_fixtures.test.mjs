@@ -530,6 +530,15 @@ test('chrome: a nested section\'s card titles rank below its heading (review of 
   }, /<h2> in the nested section posts ranks at or above its heading's level 2/)
 })
 
+test('images: a related service card takes the grid\'s card slot, three columns at the default measure (review of #13, 5)', async () => {
+  const { slotOf, sizesOf } = await import('./salt_image_slots.mjs')
+  const table = JSON.parse(readFileSync(path.join(pkg, 'contract/image-sizes.json'), 'utf8'))
+  const list = { name: 'ul', attrs: [['class', 'salt-grid salt-showcase salt-related__list']], children: [] }
+  const media = { name: 'div', attrs: [['class', 'salt-showcase__media']], children: [] }
+  const placed = slotOf({ attrs: [], children: [] }, [media, list], 'service', () => undefined)
+  assert.equal(sizesOf(table, placed, placed.fixedBand), table.slots.card.bands.default['3'])
+})
+
 // ── 4. The normaliser ─────────────────────────────────────────────────────────────────────────
 test('normaliser: one that drops an attribute fails the mutation check', () => {
   expectFail(HERO, (io) => {

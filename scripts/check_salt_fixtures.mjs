@@ -940,7 +940,7 @@ function checkMarkup(c) {
     })
     if (imageTable.slots[placed.slot]?.drawn && !drawnRecord) { fail(`${at}.html: ${describe(img)} src ${attr(img, 'src')} fills no media record's template exactly`); continue }
     // The band is the section's: the case's own, or, in a view, the nested section's data-width.
-    const band = effectiveSetting(c, 'width') ?? attr(ancestors.find((a) => classesOf(a).includes('salt-section')) ?? { attrs: [] }, 'data-width')
+    const band = placed.fixedBand ?? effectiveSetting(c, 'width') ?? attr(ancestors.find((a) => classesOf(a).includes('salt-section')) ?? { attrs: [] }, 'data-width')
     const sizes = drawnRecord ? drawnSizes(imageTable, placed.slot, drawnRecord, input.site?.logoHeight) : sizesOf(imageTable, placed, band)
     if (attr(img, 'sizes') !== sizes) { fail(`${at}.html: ${describe(img)} sizes="${attr(img, 'sizes')}"; its slot (${placed.slot}${placed.band ? `, band ${band}` : ''}${placed.columns ? `, ${placed.columns} columns` : ''}) gives "${sizes}"`); continue }
     const record = Object.values(input.media ?? {}).find((m) => typeof m.url === 'string' && sourcesOf(imageTable, m, sizes).src === attr(img, 'src'))
