@@ -510,6 +510,25 @@ if (statSync(dir).isDirectory()) {
       }
     } else if (!packed.includes(p)) fails.push(`exported path is not in the tarball: ${p}`)
   }
+
+  // 5. CANDIDATE AND RELEASE (SC-020). A release candidate (x.y.z-rc.N) stays private, so the
+  // release workflow can never stage it before an implementation's conformance run (SC-018). A
+  // release (no prerelease, not private) dates its CHANGELOG heading and ships no candidate's
+  // version string, so the published notes and README never describe an unreleased candidate.
+  const candidate = /-rc\.[1-9][0-9]*$/.test(pkg.version ?? '')
+  if (candidate && pkg.private !== true) fails.push(`${pkg.version} is a release candidate, so package.json keeps "private": true until the release pull request (SC-020)`)
+  if (!candidate && pkg.private !== true) {
+    const changelog = existsSync(path.join(dir, 'CHANGELOG.md')) ? readFileSync(path.join(dir, 'CHANGELOG.md'), 'utf8') : ''
+    const top = changelog.split('\n').find((l) => l.startsWith('## ')) ?? ''
+    const escaped = pkg.version.replace(/\./g, '\\.')
+    if (!new RegExp(`^## ${escaped} \\((0[1-9]|[12][0-9]|3[01])/(0[1-9]|1[0-2])/[0-9]{4}\\)$`).test(top)) {
+      fails.push(`CHANGELOG.md's newest heading must be "## ${pkg.version} (DD/MM/YYYY)" for a release, not "${top}"`)
+    }
+    for (const f of packed.filter((x) => /\.(md|json|mjs|css)$/.test(x))) {
+      const hit = /\b[0-9]+\.[0-9]+\.[0-9]+-rc\.[0-9]+\b/.exec(readFileSync(path.join(dir, f), 'utf8'))
+      if (hit) fails.push(`package/${f} still names the candidate ${hit[0]}; a release ships no candidate's version`)
+    }
+  }
 }
 
 if (fails.length) {
@@ -517,4 +536,4 @@ if (fails.length) {
   process.exit(1)
 }
 console.log(`PASS: ${pkg.name}@${pkg.version}: ${contractFiles.length} contract file(s) at one version, each valid against its schema; ` +
-  'no colour values; the tarball ships only what it declares.')
+  'no colour values; the tarball ships only what it declares; a candidate stays private and a release is dated.')

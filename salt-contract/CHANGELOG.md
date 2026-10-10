@@ -9,11 +9,8 @@ Salted's decision log for Product Salt.
 **Semver call: MAJOR, the first release of the contract.** No earlier version was published, so no
 implementation conformed to one. Adopting it is still a migration for existing sites, because the
 contract renames and folds what Salt for WordPress 5.0.0 and Salt for Next.js 0.11.0 store (below,
-*What a site does*). From 1.0.0, changes follow `RELEASE-POLICY.md` section 2: what could stop a
-conforming implementation conforming, or break a consumer of an export, is MAJOR; an optional
-addition is MINOR; a change no conforming implementation's verdict notices is PATCH. Under SC-018
-the candidate ships as `1.0.0-rc.1`, private, until at least one implementation has run the
-conformance runner against it; the release itself then sets `1.0.0` and dates this heading.
+*What a site does*). From 1.0.0, each change's part is decided by `RELEASE-POLICY.md`: section 1's
+test, applied through section 2's table, where the stricter row wins.
 
 ### Added
 
@@ -47,8 +44,9 @@ conformance runner against it; the release itself then sets `1.0.0` and dates th
 ### What a site does
 
 A site moving onto a platform release that pins this contract migrates its stored content once,
-through that platform's own migration. The contract records every rename; the platforms' releases
-carry the migrations (their conformance Epics):
+through that platform's own migration. As the first major, 1.0.0 has no earlier major to migrate
+from, so it ships no `contract/migrations/` file (`RELEASE-POLICY.md` section 4); what each site
+moves from is recorded per item instead, and the platforms' releases carry the migrations:
 
 - Salt for WordPress 5.0.0 sites: `intro` folds into `rich-text`; the `services`, `work`, `team`,
   `blog_teaser` and grid `testimonials` layouts fold into `collection-showcase`, and slider
@@ -63,8 +61,8 @@ carry the migrations (their conformance Epics):
 
 ## 0.x drafting (never published)
 
-The drafting record, newest first. Later entries supersede earlier ones: counts, open questions
-and "left as work" notes below describe the draft at the time and are settled in 1.0.0 above.
+The drafting record, newest first: an entry higher up supersedes any below it. Counts, open
+questions and "left as work" notes here describe the draft at the time; 1.0.0 above is what ships.
 
 - The page fixture and the chrome markup gaps (SC-019). `page.json`'s head declares the link to
   the served `salt.css`. Page cases (`page` is a required file) compare the body and only Salt's head

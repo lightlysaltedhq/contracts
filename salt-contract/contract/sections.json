@@ -88,8 +88,7 @@
           "status": "ships",
           "formerly": [
             {
-              "name": "richText",
-              "note": "Its alignment option values are mapped when field definitions land."
+              "name": "richText"
             }
           ]
         },

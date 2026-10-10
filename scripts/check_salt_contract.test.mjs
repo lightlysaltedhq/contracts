@@ -621,3 +621,39 @@ test('cross-file: every source a collection-query can read has a categories ruli
   assert.equal(r.code, 1, r.out)
   assert.match(r.out, /source services has no categories ruling in sections\.json \(SC-010\)/)
 })
+
+test('a release candidate that is not private fails (SC-020)', () => {
+  expectFail((f) => {
+    f['package.json'].version = '1.0.0-rc.1'; delete f['package.json'].private
+    f['contract/sections.json'].version = '1.0.0-rc.1'
+  }, /1\.0\.0-rc\.1 is a release candidate, so package\.json keeps "private": true/)
+})
+
+test('a private release candidate passes (SC-020)', () => {
+  const dir = makePackage((f) => { f['package.json'].version = '1.0.0-rc.1'; f['contract/sections.json'].version = '1.0.0-rc.1' })
+  try { const r = run(dir); assert.equal(r.code, 0, r.out) } finally { rmSync(dir, { recursive: true, force: true }) }
+})
+
+const release = (heading, extra = {}) => (f, t) => {
+  f['package.json'].version = '1.0.0'; delete f['package.json'].private
+  f['contract/sections.json'].version = '1.0.0'
+  t['CHANGELOG.md'] = `# Changelog\n\n${heading}\n\n- First.\n`
+  Object.assign(t, extra)
+}
+
+test('a release whose CHANGELOG heading is undated fails (SC-020)', () => {
+  expectFail(release('## 1.0.0 (candidate `1.0.0-rc.1`, not published)'), /newest heading must be "## 1\.0\.0 \(DD\/MM\/YYYY\)"/)
+})
+
+test('a release whose newest heading names another version fails (SC-020)', () => {
+  expectFail(release('## 0.9.0 (01/10/2026)'), /newest heading must be "## 1\.0\.0/)
+})
+
+test('a release that still names a candidate in a shipped file fails (SC-020)', () => {
+  expectFail(release('## 1.0.0 (11/10/2026)', { 'README.md': '# salt-contract\n\nReport: contract 1.0.0-rc.1\n' }), /package\/README\.md still names the candidate 1\.0\.0-rc\.1/)
+})
+
+test('a dated release with no candidate strings passes (SC-020)', () => {
+  const dir = makePackage(release('## 1.0.0 (11/10/2026)'))
+  try { const r = run(dir); assert.equal(r.code, 0, r.out) } finally { rmSync(dir, { recursive: true, force: true }) }
+})

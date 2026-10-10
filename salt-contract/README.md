@@ -72,8 +72,11 @@ receives and the choices on offer.
 
 ## Status
 
-`1.0.0` is the first release, staged from CI by npm trusted publishing when the owner pushes the
-`salt-contract-v1.0.0` tag, and approved by the owner. See `RELEASE-POLICY.md` for what each part
+`1.0.0-rc.1` is the release candidate for `1.0.0`: private, never on the registry, held until at
+least one implementation has run `salt-conformance` against it, whose report names
+`1.0.0-rc.1` (SC-018, SC-020; `RELEASE-POLICY.md` section 5). `1.0.0` is the first release, staged
+from CI by npm trusted publishing when the owner pushes the `salt-contract-v1.0.0` tag, and
+approved by the owner. See `RELEASE-POLICY.md` for what each part
 of a version means.
 
 ## Checks

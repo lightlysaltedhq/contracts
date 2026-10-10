@@ -56,11 +56,15 @@ Every major ships `contract/migrations/<version>.json`, covering everything rena
 
 The file carries the package `version` like any other (section 1). Each implementation generates its own migration from it: a Payload database migration and a `salt-nextjs-migrations` run for Next.js, and a slug-stability entry per removal for WordPress (FLEET07 requires a migration entry for any removed ACF field name or layout slug). The prose lives in the CHANGELOG entry under *What a site does*. Moving to a major is never described as additive.
 
+1.0.0, the first major, has no earlier major, so it ships no migrations file. What Salt for WordPress 5.0.0 and Salt for Next.js 0.11.0 sites move from is recorded per item instead: each section, field and value's `formerly`, and what each platform `owes`. Each implementation generates its first migration from those.
+
 ## 5. Conformance and lag
 
 An implementation states conformance as an exact pin of `@lightlysaltedhq/salt-contract` (no range), as salt-nextjs already pins core exactly. Its conformance report, produced by running the fixtures, records the contract version it ran against. A claim without that version is not a claim.
 
 A major must be adopted by both implementations before the next major is released. Minors may lag by one: an implementation may sit on the previous minor of its current major while the other moves ahead, but not two. The release owner checks both pins and both reports before tagging. If one implementation cannot adopt a major, the owner decides whether the contract change is withdrawn or the lag is recorded as an exception in the CHANGELOG, with a reason and a date.
+
+A release may first be cut as a candidate, `x.y.z-rc.N` (SC-020). A candidate keeps `"private": true`, so the release workflow refuses to stage it, and the package gate fails a candidate that is not private. Implementations run conformance against the candidate, and their reports name it. The release pull request then changes only the version strings, `private` and the dated CHANGELOG heading, plus any wording that names the candidate (the gate fails a release that still ships a candidate's version anywhere in the tarball). A report against the candidate therefore stands for the release. Any other change makes a new candidate, `rc.N+1`, and needs a new run.
 
 Platform-native behaviour is not a conformance matter (SC-003), so a native change that leaves visitor output and editor fields intact needs no contract release.
 
