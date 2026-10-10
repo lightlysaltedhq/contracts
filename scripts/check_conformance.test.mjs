@@ -63,7 +63,13 @@ test('the reference adapter conforms: all four checks run and pass for every sec
   assert.equal(r.report.ok, true)
   assert.equal(r.report.partial, false)
   assert.deepEqual(r.report.problems, [])
-  assert.deepEqual(r.report.summary, { pass: r.report.sections.length, fail: 0, incomplete: 0, notShipped: 0 })
+  const { files, ...bySection } = r.report.summary
+  assert.deepEqual(bySection, { pass: r.report.sections.length, fail: 0, incomplete: 0, notShipped: 0 })
+  // The chrome and every view with fixtures run too, each as a file of its own (SC-018).
+  assert.deepEqual(files, { pass: r.report.files.length, fail: 0 })
+  assert.deepEqual(r.report.files.map((f) => f.id), ['site-header', 'site-footer', 'post', 'service', 'archive', 'search', 'not-found'])
+  for (const f of r.report.files) assert.ok(f.status === 'pass' && f.fixtures.total > 0 && f.classes.status === 'pass', f.id)
+  assert.match(r.out, /\| Chrome and views \| Kind \| Fixtures \| Classes \|/)
   assert.equal(r.report.format, 'salt-conformance/1')
   assert.deepEqual(r.report.contract, { package: '@lightlysaltedhq/salt-contract', version })
   assert.equal(r.report.platform, 'reference')
@@ -124,11 +130,12 @@ import path from 'node:path'
 const pkg = ${JSON.stringify(pkg)}
 const mutations = JSON.parse(readFileSync(${JSON.stringify(path.join(dir, 'mutations.json'))}, 'utf8'))
 const input = JSON.parse(readFileSync(0, 'utf8'))
-const sdir = path.join(pkg, 'fixtures', input.section)
+const id = input.section ?? input.chrome ?? input.view
+const sdir = path.join(pkg, 'fixtures', id)
 const file = readdirSync(sdir).find((f) => f.endsWith('.json') && isDeepStrictEqual(JSON.parse(readFileSync(path.join(sdir, f), 'utf8')), input))
 const name = file.replace(/\\.json$/, '')
 let html = readFileSync(path.join(sdir, name + '.html'), 'utf8')
-const m = mutations[input.section + '/' + name]
+const m = mutations[id + '/' + name]
 if (m?.exit) { process.stderr.write(m.stderr); process.exit(m.exit) }
 if (m?.html !== undefined) html = m.html
 else if (m) {
@@ -200,6 +207,43 @@ test('a broken adapter fails each case it breaks, naming the section, the case a
   }
 })
 
+test('the chrome and views run too, reported by file: a broken header case fails the header and the run (SC-018)', async () => {
+  const adapter = brokenAdapter({
+    'site-header/wordmark-only': { from: 'class="salt-logo"', to: 'class="salt-logo salt-logo--big"' },
+    'post/minimal': { exit: 4, stderr: 'no post template\n' },
+  })
+  try {
+    const r = await run(['--platform', 'broken', '--adapter', adapter.command, ...withFields, ...withStyles])
+    assert.equal(r.code, 1, r.out)
+    assert.equal(r.report.ok, false)
+    // The sections all pass; the run fails on the files alone.
+    assert.equal(r.report.summary.fail, 0)
+    assert.deepEqual(r.report.summary.files, { pass: r.report.files.length - 2, fail: 2 })
+    const header = r.report.files.find((f) => f.id === 'site-header')
+    assert.equal(header.kind, 'chrome')
+    assert.equal(header.status, 'fail')
+    assert.deepEqual(header.fixtures.failures.map((f) => [f.case, f.kind, f.difference, f.name]), [['wordmark-only', 'mismatch', 'attribute', 'class']])
+    assert.deepEqual(header.classes.unknown, [{ class: 'salt-logo--big', cases: ['wordmark-only'] }])
+    const post = r.report.files.find((f) => f.id === 'post')
+    assert.deepEqual([post.kind, post.status, post.fixtures.failures[0].case, post.fixtures.failures[0].error], ['view', 'fail', 'minimal', 'the adapter exited 4'])
+    assert.match(r.out, /\| site-header \| chrome \| \d+\/\d+ \| 1 unknown \|/)
+    assert.ok(r.out.includes('### site-header'), r.out)
+    assert.ok(r.out.includes('- `post/minimal`: the adapter exited 4'), r.out)
+  } finally {
+    rmSync(adapter.dir, { recursive: true, force: true })
+  }
+})
+
+test('--sections takes a chrome or view id, and a partial run runs only what it names', async () => {
+  const r = await run(['--platform', 'reference', '--adapter', reference, ...withFields, ...withStyles, '--sections', 'hero,site-footer', '--partial'])
+  assert.equal(r.code, 1, r.out)
+  assert.deepEqual(r.report.sections.map((s) => s.id), ['hero'])
+  assert.deepEqual(r.report.files.map((f) => [f.id, f.status]), [['site-footer', 'pass']])
+  const bad = await run(['--platform', 'reference', '--adapter', reference, '--sections', 'site-sidebar', '--partial'])
+  assert.equal(bad.code, 2, bad.out)
+  assert.match(bad.out, /site-sidebar is not a section in contract\/sections\.json, nor a chrome or view file with fixtures/)
+})
+
 test('a section the implementation does not ship is reported as not shipped, not failed', async () => {
   const shipped = JSON.parse(readFileSync(path.join(pkg, 'contract', 'sections.json'), 'utf8')).sections.map((s) => s.id).filter((id) => !['pricing', 'tabs'].includes(id))
   const f = snapshotFiles({ ...ICONS, sections: shipped })
@@ -208,7 +252,8 @@ test('a section the implementation does not ship is reported as not shipped, not
   assert.equal(r.code, 0, r.out)
   assert.equal(r.report.ok, true)
   assert.deepEqual(r.report.sections.filter((s) => s.status !== 'pass').map((s) => s.id), ['tabs', 'pricing'])
-  assert.deepEqual(r.report.summary, { pass: 15, fail: 0, incomplete: 0, notShipped: 2 })
+  const { files, ...bySection } = r.report.summary
+  assert.deepEqual(bySection, { pass: 15, fail: 0, incomplete: 0, notShipped: 2 })
   assert.deepEqual(section(r.report, 'pricing'), { id: 'pricing', status: 'not shipped' })
   assert.match(r.out, /\| pricing \| not shipped \|/)
 })
