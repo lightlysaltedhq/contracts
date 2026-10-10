@@ -816,6 +816,25 @@ function checkMarkup(c) {
   }
   for (const e of every()) for (const [name, value] of e.attrs) if (value.includes('\\/')) fail(`${at}.html: ${describe(e)} ${name} escapes a slash; JSON in an attribute is written without (section#display-forms)`)
 
+  // aria-current follows the page's path (review of #13, 6): in each navigation (the header's
+  // and the drawer's menus, the footer's, a breadcrumb) the link to context.path is the current
+  // one, and no other is. Pagination's current page is the case's page, checked with its window.
+  for (const nav of every().filter((e) => e.name === 'nav' && !classesOf(e).includes('salt-pagination'))) {
+    const links = descendants(nav).filter((e) => e.name === 'a')
+    const current = links.filter((a) => attr(a, 'aria-current') === 'page')
+    if (current.length > 1) fail(`${at}.html: ${describe(nav)} marks ${current.length} links current; a menu has one current page`)
+    const path = input.context.path
+    if (path === undefined) {
+      if (current.length) fail(`${at}.json: ${describe(nav)} marks a link current, but the case gives no context.path to say which page this is`)
+      continue
+    }
+    for (const a of links) {
+      const isPath = attr(a, 'href') === path
+      if (isPath && attr(a, 'aria-current') !== 'page') fail(`${at}.html: ${describe(nav)}'s link to ${path}, the page's path, lacks aria-current="page"`)
+      if (!isPath && attr(a, 'aria-current') === 'page') fail(`${at}.html: ${describe(nav)} marks ${attr(a, 'href')} current, but the page's path is ${path}`)
+    }
+  }
+
   // A section's call to action takes the site's arrow, in its label span, when the site supplies
   // one; every other button never does (button.json).
   const ARROWED = ['salt-hero__actions', 'salt-cta__actions', 'salt-media-text__actions', 'salt-process__step', 'salt-showcase__view-all']

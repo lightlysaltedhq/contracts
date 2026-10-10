@@ -539,6 +539,15 @@ test('images: a related service card takes the grid\'s card slot, three columns 
   assert.equal(sizesOf(table, placed, placed.fixedBand), table.slots.card.bands.default['3'])
 })
 
+test('chrome: aria-current marks the link to context.path, and only it (review of #13, 6)', () => {
+  const FOOT = 'site-footer/columns-socials-copyright'
+  expectFail(['site-footer'], (io) => io.json(`${FOOT}.json`, (d) => { d.context.path = '/journal/' }), /marks \/about\/ current, but the page's path is \/journal\//)
+  expectFail(['site-footer'], (io) => io.html(`${FOOT}.html`, ' aria-current="page">About us', '>About us'), /link to \/about\/, the page's path, lacks aria-current="page"/)
+  expectFail(['post'], (io) => io.json('post/full.json', (d) => { delete d.context.path }), /marks a link current, but the case gives no context\.path/)
+  expectFail(['site-header'], (io) => io.html('site-header/light-and-dark-logo.html', /<a class="salt-nav__link" href="(\/[a-z]+\/)">/.exec(readFileSync(path.join(pkg, 'fixtures/site-header/light-and-dark-logo.html'), 'utf8'))[0],
+    /<a class="salt-nav__link" href="(\/[a-z]+\/)">/.exec(readFileSync(path.join(pkg, 'fixtures/site-header/light-and-dark-logo.html'), 'utf8'))[0].replace('">', '" aria-current="page">')), /marks 2 links current; a menu has one current page/)
+})
+
 // ── 4. The normaliser ─────────────────────────────────────────────────────────────────────────
 test('normaliser: one that drops an attribute fails the mutation check', () => {
   expectFail(HERO, (io) => {
