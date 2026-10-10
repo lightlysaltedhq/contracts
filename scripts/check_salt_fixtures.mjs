@@ -68,7 +68,9 @@ const descendants = (el) => elementsOf(el).flatMap((c) => [c, ...descendants(c)]
 // chrome and these views before 1.0.0.
 // The chrome components and the required views are the runner's lists, so the gate and the
 // conformance run cannot disagree about what SC-018 requires.
-const kindOf = (id) => (vocab.sections.some((s) => s.id === id) ? 'section' : CHROME.includes(id) ? 'chrome' : (vocab.views ?? []).some((v) => v.id === id) ? 'view' : null)
+// page is the document skeleton (page.json, SC-019), a kind of its own: its case is a whole page.
+const kindOf = (id) => (vocab.sections.some((s) => s.id === id) ? 'section' : CHROME.includes(id) ? 'chrome' : id === 'page' ? 'page'
+  : (vocab.views ?? []).some((v) => v.id === id) ? 'view' : null)
 const fixturesDir = path.join(dir, 'fixtures')
 const cases = []
 if (existsSync(fixturesDir)) {
@@ -240,44 +242,51 @@ function checkSiteAndMedia(c) {
 // A chrome or view case: no fields file (the header, footer and views read site settings and the
 // document, not a section's fields), so its input is checked for shape, and its context says only
 // what the page decides for it.
-const OTHER_INPUT_KEYS = ['$comment', 'chrome', 'view', 'summary', 'context', 'media', 'documents', 'collections', 'route', 'site', 'document', 'state']
+const OTHER_INPUT_KEYS = ['$comment', 'chrome', 'view', 'page', 'summary', 'context', 'media', 'documents', 'collections', 'route', 'site', 'document', 'state']
 const OTHER_CONTEXT_KEYS = ['priorityMedia', 'locale', 'now', 'path']
 function checkOtherInput(c) {
   const { input, at, section, kind } = c
   if (!isObject(input)) { fail(`${at}.json is not an object`); return false }
-  for (const k of Object.keys(input)) if (!OTHER_INPUT_KEYS.includes(k) || (k === 'chrome' && kind !== 'chrome') || (k === 'view' && kind !== 'view')) fail(`${at}.json: unknown key ${k}`)
+  for (const k of Object.keys(input)) if (!OTHER_INPUT_KEYS.includes(k) || (['chrome', 'view', 'page'].includes(k) && k !== kind)) fail(`${at}.json: unknown key ${k}`)
   if (input[kind] !== section) fail(`${at}.json: ${kind} is ${JSON.stringify(input[kind])}; its directory says ${section}`)
   if (!filledText(input.summary)) fail(`${at}.json: summary must say what the case shows`)
   const ctx = input.context
   if (!isObject(ctx)) { fail(`${at}.json: context is required`); return false }
   for (const k of Object.keys(ctx)) if (!OTHER_CONTEXT_KEYS.includes(k)) fail(`${at}.json: context.${k} is not a ${kind} context key (${OTHER_CONTEXT_KEYS.join(', ')})`)
-  if (kind === 'view' && typeof ctx.priorityMedia !== 'boolean') fail(`${at}.json: context.priorityMedia must say whether the plan grants this view the priority image`)
+  if ((kind === 'view' || kind === 'page') && typeof ctx.priorityMedia !== 'boolean') fail(`${at}.json: context.priorityMedia must say whether the plan grants this ${kind} the priority image`)
   if (kind === 'chrome' && ctx.priorityMedia !== undefined) fail(`${at}.json: the chrome never holds the priority image (section#priority-media), so its context has no priorityMedia`)
   if (ctx.locale !== undefined && !(typeof ctx.locale === 'string' && Intl.DateTimeFormat.supportedLocalesOf(ctx.locale).length)) fail(`${at}.json: context.locale must be a BCP 47 locale the platform knows, such as en-GB`)
   if (ctx.path !== undefined && !(typeof ctx.path === 'string' && ctx.path.startsWith('/'))) fail(`${at}.json: context.path is the page's path, starting with /`)
   checkSiteAndMedia(c)
   c.anchor = null
-  // A section nested in a view (the archive's listing) is described by document.listing: its
-  // settled anchor, its data-track, its index (from 0) and its shared settings, so its id, its
-  // heading's id, its spacing style and its data attributes are fixed by the case, not guessed.
-  const listing = input.document?.listing
-  if (listing !== undefined) {
-    const p = `${at}.json document.listing`
-    if (!isObject(listing)) { fail(`${p} must be an object`); return true }
-    for (const k of Object.keys(listing)) if (!['anchorId', 'heading', 'track', 'index', 'settings'].includes(k)) fail(`${p}.${k}: the nested section is described by anchorId, heading, track, index and settings`)
-    if (!SLUG.test(listing.anchorId ?? '') || landmarks.has(listing.anchorId)) fail(`${p}.anchorId must be the nested section's settled anchor: a slug, not a landmark id`)
-    if (typeof listing.track !== 'string' || !/^listing-[1-9][0-9]*$/.test(listing.track)) fail(`${p}.track must be listing-<n> (section#data-track)`)
-    if (listing.index !== undefined && !(Number.isInteger(listing.index) && listing.index >= 0)) fail(`${p}.index counts the page's sections from 0`)
-    if (listing.heading !== undefined && !filledText(listing.heading)) fail(`${p}.heading is the nested section's heading text, a non-empty string, or absent for none`)
-    if (listing.settings?.anchorId !== undefined && listing.settings.anchorId !== listing.anchorId) fail(`${p}.settings.anchorId is ${JSON.stringify(listing.settings.anchorId)}, but the section's anchor is ${JSON.stringify(listing.anchorId)}; give it once, as anchorId`)
-    const fieldsDoc = readJson('contract/fields/listing.json')
-    if (listing.settings !== undefined) checkFields(settingsFields(fieldsDoc), listing.settings, `${p}.settings`, c)
-    c.nested = { ...listing, fieldsDoc }
-    c.settings = listing.settings ?? {}
+  // A section nested in a view or a page is described by the case: document.listing (the archive's
+  // listing) or document.sections (a page's, one section per case): its section id, settled anchor,
+  // heading, data-track, index (from 0), heading level and shared settings, so its id, its heading,
+  // its spacing style and its data attributes are fixed by the case, not guessed.
+  if (input.document?.listing !== undefined && input.document?.sections !== undefined) fail(`${at}.json: document gives listing and sections; a case nests one section`)
+  const sections = input.document?.sections
+  if (sections !== undefined && !(Array.isArray(sections) && sections.length === 1)) fail(`${at}.json: document.sections lists the page's one section (a page case nests one)`)
+  const [p, nested] = input.document?.listing !== undefined ? [`${at}.json document.listing`, { section: 'listing', ...input.document.listing }]
+    : Array.isArray(sections) && sections.length === 1 ? [`${at}.json document.sections[0]`, sections[0]] : [null, undefined]
+  if (nested !== undefined) {
+    if (!isObject(nested)) { fail(`${p} must be an object`); return true }
+    const keys = ['section', 'anchorId', 'heading', 'headingLevel', 'track', 'index', 'settings']
+    for (const k of Object.keys(nested)) if (!keys.includes(k) || (k === 'section' && input.document?.listing !== undefined && nested.section !== 'listing')) fail(`${p}.${k}: the nested section is described by ${keys.slice(1).join(', ')}${sections ? ' and its section id' : ''}`)
+    if (!vocab.sections.some((x) => x.id === nested.section)) { fail(`${p}.section is not a section in contract/sections.json`); return true }
+    if (!SLUG.test(nested.anchorId ?? '') || landmarks.has(nested.anchorId)) fail(`${p}.anchorId must be the nested section's settled anchor: a slug, not a landmark id`)
+    if (typeof nested.track !== 'string' || !new RegExp(`^${nested.section}-[1-9][0-9]*$`).test(nested.track)) fail(`${p}.track must be ${nested.section}-<n> (section#data-track)`)
+    if (nested.index !== undefined && !(Number.isInteger(nested.index) && nested.index >= 0)) fail(`${p}.index counts the page's sections from 0`)
+    if (nested.heading !== undefined && !filledText(nested.heading)) fail(`${p}.heading is the nested section's heading text, a non-empty string, or absent for none`)
+    if (nested.headingLevel !== undefined && ![1, 2].includes(nested.headingLevel)) fail(`${p}.headingLevel is 1 (the section claims the page's h1) or 2`)
+    if (nested.settings?.anchorId !== undefined && nested.settings.anchorId !== nested.anchorId) fail(`${p}.settings.anchorId is ${JSON.stringify(nested.settings.anchorId)}, but the section's anchor is ${JSON.stringify(nested.anchorId)}; give it once, as anchorId`)
+    const fieldsDoc = readJson(`contract/fields/${nested.section}.json`)
+    if (nested.settings !== undefined) checkFields(settingsFields(fieldsDoc), nested.settings, `${p}.settings`, c)
+    c.nested = { ...nested, fieldsDoc }
+    c.settings = nested.settings ?? {}
     c.settingsDoc = fieldsDoc
-    c.anchor = listing.anchorId
-    c.track = listing.track
-    c.index = listing.index
+    c.anchor = nested.anchorId
+    c.track = nested.track
+    c.index = nested.index
   }
   return true
 }
@@ -388,10 +397,23 @@ function withSources(sources) {
   return { attrs, from }
 }
 
+// The section a chrome, view or page case nests (document.listing or document.sections), whose
+// own root the generic section wrapper's block is read as; its content stays the section's own.
+let nestedSection = null
+
 function expand(nodes, doc) {
   return nodes.flatMap((n) => {
     if (n.component) {
-      const comp = markup.get(n.component)
+      let comp = markup.get(n.component)
+      if (comp?.id === 'section' && nestedSection) {
+        const own = markup.get(nestedSection)
+        comp = { ...comp, elements: mapNodes(comp.elements, (b) => (b.role !== 'block' ? b : {
+          ...b,
+          classes: [...new Set([...(b.classes ?? []), ...(own.root.classes ?? [])])],
+          extraAttrs: { ...dataRules(own, 'root'), ...(own.root.attributes ?? {}) },
+          extraId: own.id,
+        })) }
+      }
       if (!comp) { fail(`markup: ${doc.id} uses component ${n.component}, which has no markup`); return [] }
       if (comp.fragment) {
         return expand(comp.elements.map((e) => (n.optional ? { ...e, optional: true } : e)), comp)
@@ -797,6 +819,7 @@ function checkMarkup(c) {
   const every = () => [root, ...descendants(root)]
   c.parents = new Map()
   for (const el of [root, ...descendants(root)]) for (const child of elementsOf(el)) c.parents.set(child, el)
+  nestedSection = c.kind === 'section' ? null : c.nested?.section ?? null
   const { doc, spec, elements } = c.kind === 'section' ? wrapperSpec(c) : documentSpec(c)
   const m = matcher(c)
   const bindings = m.one(spec, root, 0, 0, '')
@@ -868,6 +891,15 @@ function checkMarkup(c) {
     if (attr(a, 'href') !== want) fail(`${at}.html: the phone link "${textOf(a)}" has href ${attr(a, 'href')}; section#display-forms gives ${want ?? 'no link'}`)
   }
   for (const e of every()) for (const [name, value] of e.attrs) if (value.includes('\\/')) fail(`${at}.html: ${describe(e)} ${name} escapes a slash; JSON in an attribute is written without (section#display-forms)`)
+
+  // A page draws the header's scriptless phone layout in its head whenever it draws the header
+  // (page.json, SC-019).
+  if (c.kind === 'page') {
+    const header = every().some((e) => e.name === 'header' && classesOf(e).includes('salt-header'))
+    const scriptless = (bindings.get('scriptless') ?? []).length > 0
+    if (header && !scriptless) fail(`${at}.html: the page draws the header, so its head carries the scriptless phone layout's noscript style (page.json)`)
+    if (!header && scriptless) fail(`${at}.html: the page draws no header, so its head carries no scriptless phone layout`)
+  }
 
   // aria-current follows the page's path (review of #13, 6): in each navigation (the header's
   // and the drawer's menus, the footer's, a breadcrumb) every link to context.path is current, and
@@ -957,15 +989,17 @@ function checkMarkup(c) {
     // chrome draws no h1: the page's belongs to its main.
     const h1s = all.filter((el) => el.name === 'h1')
     const title = doc.headings?.role ? bindings.get(doc.headings.role)?.[0] : undefined
-    if (c.kind === 'view' && (h1s.length !== 1 || (title && h1s[0] !== title))) fail(`${at}.html: a view draws exactly one h1, its ${doc.headings?.role ?? 'title'} (section#single-h1); this draws ${h1s.length}`)
+    if ((c.kind === 'view' || c.kind === 'page') && (h1s.length !== 1 || (title && HEADING.test(title.name) && h1s[0] !== title))) fail(`${at}.html: a ${c.kind} draws exactly one h1${c.kind === 'view' ? `, its ${doc.headings?.role ?? 'title'}` : ', a section\'s or the fallback heading'} (section#single-h1); this draws ${h1s.length}`)
     if (c.kind === 'chrome' && h1s.length) fail(`${at}.html: the ${doc.id} draws an h1; the page's h1 belongs to its main (section#single-h1)`)
     // A section nested in a view keeps the body rule: its own heading ranks at the plan's level
     // (2, under the view's h1) and every heading inside it ranks below that (section#body-heading-base).
     for (const nested of all.filter((el) => classesOf(el).includes('salt-section'))) {
       const inside = descendants(nested).filter((el) => HEADING.test(el.name))
       const own = inside.find((el) => attr(el, 'id') === `${attr(nested, 'id')}__heading`)
-      const base = own ? Number(own.name[1]) : 2
-      if (own && base !== 2) fail(`${at}.html: the nested section ${attr(nested, 'id')}'s heading is ${own.name}; under the view's h1 it is h2 (section#heading-level)`)
+      // In a view the nested heading is h2, under the view's h1; on a page it is the plan's level.
+      const level = c.nested?.headingLevel ?? 2
+      const base = own ? Number(own.name[1]) : level
+      if (own && base !== level) fail(`${at}.html: the nested section ${attr(nested, 'id')}'s heading is ${own.name}; the plan gives it h${level} (section#heading-level)`)
       for (const h of inside) {
         if (h !== own && Number(h.name[1]) <= base) fail(`${at}.html: ${describe(h)} in the nested section ${attr(nested, 'id')} ranks at or above its heading's level ${base} (section#body-heading-base)`)
       }
@@ -973,13 +1007,13 @@ function checkMarkup(c) {
     // Ids (SC-012): a landmark id, a nested section's anchor, or <owner>__<part> with the owner a
     // vocabulary id or one of those anchors.
     const anchors = new Set(all.filter((el) => classesOf(el).includes('salt-section')).map((el) => attr(el, 'id')).filter(Boolean))
-    if (anchors.size && !c.nested) fail(`${at}.json: the ${doc.id} nests a section, so document.listing must describe it (its anchorId, track and settings)`)
+    if (anchors.size && !c.nested) fail(`${at}.json: the ${doc.id} nests a section, so document.listing (a view) or document.sections (a page) must describe it (its section, anchorId, track and settings)`)
     // The nested section's heading is document.listing.heading, word for word, or there is none.
     if (c.nested) {
       const heading = all.find((el) => attr(el, 'id') === `${c.anchor}__heading`)
       const want = c.nested.heading
-      if (want !== undefined && (!heading || textOf(heading) !== want)) fail(`${at}.html: the nested section's heading reads ${heading ? JSON.stringify(textOf(heading)) : 'nothing'}; document.listing.heading gives ${JSON.stringify(want)}`)
-      if (want === undefined && heading) fail(`${at}.html: the nested section draws a heading, but document.listing gives none`)
+      if (want !== undefined && (!heading || textOf(heading) !== want)) fail(`${at}.html: the nested section's heading reads ${heading ? JSON.stringify(textOf(heading)) : 'nothing'}; the case's ${c.input.document?.listing ? 'document.listing' : 'document.sections[0]'}.heading gives ${JSON.stringify(want)}`)
+      if (want === undefined && heading) fail(`${at}.html: the nested section draws a heading, but the case gives it none`)
     }
     const owners = drawnBy(doc.id)
     for (const el of all) {
@@ -1157,6 +1191,6 @@ if (fails.length) {
 }
 const rendering = cases.filter((c) => c.renders).length
 const files = (kind) => new Set(cases.filter((c) => c.kind === kind).map((c) => c.section)).size
-console.log(`PASS: ${cases.length} fixture case(s) over ${files('section')} section(s), ${files('chrome')} chrome file(s) and ${files('view')} view(s) (${rendering} rendering, ` +
+console.log(`PASS: ${cases.length} fixture case(s) over ${files('section')} section(s), ${files('chrome')} chrome file(s), ${files('view')} view(s) and ${files('page')} page file (${rendering} rendering, ` +
   `${cases.length - rendering} rendering nothing): every section input valid against its fields and every other well formed, every expected HTML valid against ` +
   'its markup, every variant option covered; normalise is idempotent and no one-attribute change survives it.')

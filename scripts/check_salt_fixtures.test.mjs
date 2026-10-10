@@ -564,7 +564,7 @@ test('chrome: a nested section takes its anchor, spacing and track from document
   expectFail(['archive'], (io) => io.json('archive/topic.json', (d) => { d.document.listing.anchorId = 'stories' }), /<section\.salt-section> id="posts" is not "<anchor>"/)
   expectFail(['archive'], (io) => io.json('archive/topic.json', (d) => { d.document.listing.settings = { spacing: 'lg' } }), /data-spacing="md" disagrees with the case, which gives "lg"/)
   expectFail(['archive'], (io) => io.json('archive/topic.json', (d) => { d.document.listing.track = 'listing-2' }), /data-track="listing-1" disagrees with the case, which gives "listing-2"/)
-  expectFail(['archive'], (io) => io.json('archive/topic.json', (d) => { delete d.document.listing }), /the archive nests a section, so document\.listing must describe it/)
+  expectFail(['archive'], (io) => io.json('archive/topic.json', (d) => { delete d.document.listing }), /the archive nests a section, so document\.listing \(a view\) or document\.sections \(a page\) must describe it/)
 })
 
 test('chrome: a nested section with a background image must draw it, as a section case does (review of #13, B)', () => {
@@ -593,7 +593,7 @@ test('chrome: data-current-section marks the item whose submenu links the page, 
 })
 
 test('chrome: document.listing\'s heading is the nested heading\'s text, and its anchor is given once (review of #13, D)', () => {
-  expectFail(['archive'], (io) => io.json('archive/topic.json', (d) => { d.document.listing.heading = 'Older posts' }), /the nested section's heading reads "Latest posts"; document\.listing\.heading gives "Older posts"/)
+  expectFail(['archive'], (io) => io.json('archive/topic.json', (d) => { d.document.listing.heading = 'Older posts' }), /the nested section's heading reads "Latest posts"; the case's document\.listing\.heading gives "Older posts"/)
   expectFail(['archive'], (io) => io.json('archive/topic.json', (d) => { d.document.listing.heading = 3 }), /document\.listing\.heading is the nested section's heading text/)
   expectFail(['archive'], (io) => io.json('archive/topic.json', (d) => { d.document.listing.settings = { anchorId: 'stories' } }), /document\.listing\.settings\.anchorId is "stories", but the section's anchor is "posts"/)
 })
@@ -643,6 +643,37 @@ test('sc-019: the header logo loads eagerly, the footer\'s lazily', () => {
 })
 test('sc-019: the header phone glyph carries no data-size', () => {
   expectFail(['site-header'], (io) => io.html(`${SC019_HEADER}.html`, 'data-icon="phone" ', 'data-icon="phone" data-size="sm" '), /carries data-size, which the markup draws only when never on the header phone glyph/)
+})
+
+// The page (SC-019).
+const PAGE = 'page/header-section-footer'
+test('page: a page drawing the header must carry the scriptless style in its head', () => {
+  expectFail(['page'], (io) => {
+    const rel = `fixtures/${PAGE}.html`
+    io.write(rel, readFileSync(path.join(io.dir, rel), 'utf8').replace(/ *<noscript>[\s\S]*?<\/noscript>\n/, ''))
+  }, /the page draws the header, so its head carries the scriptless phone layout's noscript style/)
+})
+test('page: the salt.css link is required in the head', () => {
+  expectFail(['page'], (io) => io.html(`${PAGE}.html`, '    <link rel="stylesheet" href="/salt.css">\n', ''), /page\/header-section-footer\.html: .*(requires stylesheet|where the markup has stylesheet)/)
+})
+test('page: a nested section is read against its own root', () => {
+  expectFail(['page'], (io) => io.html(`${PAGE}.html`, 'data-align="left"', 'data-align="justify"'), /data-align="justify" is not one of left, centre/)
+})
+test('page: one h1 on the page, the section\'s or the fallback', () => {
+  expectFail(['page'], (io) => io.html('page/fallback-heading.html', '<h1 class="salt-sr-only">Hartley Gardens</h1>\n', ''), /a page draws exactly one h1, a section's or the fallback heading \(section#single-h1\); this draws 0/)
+})
+test('page: document.sections describes the page\'s one section', () => {
+  expectFail(['page'], (io) => io.json(`${PAGE}.json`, (d) => { d.document.sections[0].heading = 'Who we are' }), /the nested section's heading reads "About us"; the case's document\.sections\[0\]\.heading gives "Who we are"/)
+  expectFail(['page'], (io) => io.json(`${PAGE}.json`, (d) => { d.document.sections.push(d.document.sections[0]) }), /document\.sections lists the page's one section/)
+})
+test('pageOf: the platform\'s head, the html element\'s attributes and body scripts do not count; Salt\'s head and the body do', async () => {
+  const { pageOf } = await import('../salt-contract/normalise.mjs')
+  const ours = '<!doctype html><html><head><link rel="stylesheet" href="/salt.css"><noscript><style>.salt-header{--salt-header-phone-menu:inline-flex}</style></noscript></head><body><main id="main"></main></body></html>'
+  const theirs = '<!doctype html><html lang="en-GB" class="font-x"><head><meta charset="utf-8"><title>T</title><link rel="stylesheet" href="/_next/static/a.css"><link rel="stylesheet" href="https://cdn.example/wp/salt.css?ver=4"><noscript><style>.salt-header{--salt-header-phone-menu:inline-flex}</style></noscript><script src="/a.js"></script></head><body><main id="main"></main><script>self.__next_f=[]</script></body></html>'
+  same(pageOf(ours), pageOf(theirs))
+  differ(pageOf(ours), pageOf(theirs.replace('/salt.css?ver=4', '/site.css')))
+  differ(pageOf(ours), pageOf(theirs.replace(/<noscript>[\s\S]*?<\/noscript>/, '')))
+  differ(pageOf(ours), pageOf(theirs.replace('<main id="main">', '<main id="content">')))
 })
 
 // ── 4. The normaliser ─────────────────────────────────────────────────────────────────────────

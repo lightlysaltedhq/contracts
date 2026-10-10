@@ -30,7 +30,7 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, realpathSync, writeFi
 import { availableParallelism } from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { compare, parse } from './normalise.mjs'
+import { compare, pageOf, parse } from './normalise.mjs'
 import { checkPayloadSnapshot } from './emit/payload.mjs'
 import { checkAcfSnapshot } from './emit/acf.mjs'
 import { isMainModule } from './emit/_contract.mjs'
@@ -42,7 +42,8 @@ export const REPORT_FORMAT = 'salt-conformance/1'
 // The chrome components with fixtures; every view in contract/sections.json may have them too.
 export const CHROME = ['site-header', 'site-footer']
 // The files SC-018 requires of every implementation: a full run cannot declare them not shipped.
-export const REQUIRED_FILES = [...CHROME, 'post', 'service', 'archive', 'search', 'not-found']
+// SC-018's chrome and views, and the page skeleton (SC-019).
+export const REQUIRED_FILES = [...CHROME, 'post', 'service', 'archive', 'search', 'not-found', 'page']
 
 // ── Arguments ─────────────────────────────────────────────────────────────────────────────────
 
@@ -494,7 +495,7 @@ export async function runConformance(options) {
   const ids = vocab.sections.map((s) => s.id)
   // The chrome and the views with fixtures, each run as a file of its own (SC-018).
   const fileIds = [...CHROME, ...vocab.views.map((v) => v.id)].filter((id) => existsSync(path.join(dir, 'fixtures', id)))
-  const kindOf = (id) => (CHROME.includes(id) ? 'chrome' : 'view')
+  const kindOf = (id) => (CHROME.includes(id) ? 'chrome' : id === 'page' ? 'page' : 'view')
   for (const [flag, list] of [['--sections', options.sections], ['--not-shipped', options.notShipped]]) {
     for (const id of list ?? []) if (!ids.includes(id) && !fileIds.includes(id)) throw new Error(`${flag}: ${id} is not a section in contract/sections.json, nor a chrome or view file with fixtures`)
   }
@@ -560,11 +561,13 @@ export async function runConformance(options) {
     const mine = outcomes.filter((o) => o.section === id)
     const failures = []
     const unknown = new Map()
+    // A page is compared as pageOf reads it: Salt's own head elements and the body (SC-019).
+    const view = id === 'page' ? pageOf : (html) => html
     for (const o of mine) {
       if (o.result.error) { failures.push({ case: o.name, kind: 'adapter', error: o.result.error, stderr: o.result.stderr }); continue }
-      const difference = firstDifference(o.html, o.result.html)
+      const difference = firstDifference(view(o.html), view(o.result.html))
       if (difference) { const { kind, ...rest } = difference; failures.push({ case: o.name, kind: 'mismatch', difference: kind, ...rest }) }
-      const { actual } = compare('', o.result.html)
+      const { actual } = compare('', view(o.result.html))
       for (const m of actual.matchAll(/ class="([^"]*)"/g)) {
         for (const c of m[1].split(' ')) {
           if (c.startsWith('salt-') && !vocabulary.has(c)) unknown.set(c, [...new Set([...(unknown.get(c) ?? []), o.name])])
@@ -646,7 +649,7 @@ export function renderMarkdown(report) {
   lines.push(`# Salt conformance: ${report.platform}${impl} against ${report.contract.package} ${report.contract.version}`, '')
   const { pass, fail, incomplete, notShipped } = report.summary
   const verdict = report.partial ? 'Partial, not conforming' : report.ok ? 'Pass' : 'Fail'
-  const fileCount = report.summary.files ? ` Chrome and views: ${report.summary.files.pass} pass, ${report.summary.files.fail} fail, ${report.summary.files.notShipped} not shipped.` : ''
+  const fileCount = report.summary.files ? ` Chrome, views and page: ${report.summary.files.pass} pass, ${report.summary.files.fail} fail, ${report.summary.files.notShipped} not shipped.` : ''
   lines.push(`**${verdict}.** ${pass} section(s) pass, ${fail} fail, ${incomplete} incomplete, ${notShipped} not shipped.${fileCount} ` +
     `Adapter: ${report.adapter.kind} ${code(report.adapter.target)}.`, '')
   lines.push('| Section | Fixtures | Field parity | Classes | Stylesheet pin |', '| --- | --- | --- | --- | --- |')
@@ -657,7 +660,7 @@ export function renderMarkdown(report) {
     lines.push(`| ${s.id} | ${s.fixtures.passed}/${s.fixtures.total} | ${fields} | ${classes} | ${s.stylesheets.status} |`)
   }
   if (report.files?.length) {
-    lines.push('', '| Chrome and views | Kind | Fixtures | Classes |', '| --- | --- | --- | --- |')
+    lines.push('', '| Chrome, views and page | Kind | Fixtures | Classes |', '| --- | --- | --- | --- |')
     for (const f of report.files) {
       if (f.status === 'not shipped') { lines.push(`| ${f.id} | ${f.kind} | not shipped | not shipped |`); continue }
       lines.push(`| ${f.id} | ${f.kind} | ${f.fixtures.passed}/${f.fixtures.total} | ${f.classes.status === 'pass' ? 'pass' : `${f.classes.unknown.length} unknown`} |`)

@@ -342,6 +342,31 @@ function maskPerRequest(el, insideForm = false) {
   for (const c of el.children) if (c.type === 'element') maskPerRequest(c, inside)
 }
 
+/**
+ * The part of a whole document a page fixture compares (SC-019): the head elements the contract
+ * owns, the stylesheet link to salt.css and the noscript holding the header's scriptless style,
+ * and the body, whole but for script elements, which are each platform's delivery (as the head's
+ * other content is). The stylesheet's address is the platform's, so its href is reduced to the
+ * file name; the conformance runner's stylesheet pin compares the bytes it serves. The html
+ * element's attributes are the platform's too. Returns HTML for normalise() or compare().
+ */
+export function pageOf(html) {
+  const root = parse(String(html))
+  const find = (el, name) => el.children.find((c) => c.type === 'element' && c.name === name)
+  const doc = find(root, 'html') ?? root
+  const head = find(doc, 'head') ?? { children: [] }
+  const body = find(doc, 'body') ?? { type: 'element', name: 'body', attrs: [], children: [] }
+  const textOf = (el) => el.children.map((c) => (c.type === 'text' ? c.value : textOf(c))).join('')
+  const owned = head.children.filter((c) => c.type === 'element' && (
+    (c.name === 'link' && /(^|\s)stylesheet(\s|$)/i.test(attrOf(c, 'rel') ?? '') && /(^|\/)salt\.css$/.test((attrOf(c, 'href') ?? '').replace(/[?#].*$/, ''))) ||
+    (c.name === 'noscript' && textOf(c).includes('--salt-header-phone'))))
+    .map((c) => (c.name === 'link' ? { ...c, attrs: c.attrs.map(([n, v]) => [n, n === 'href' ? 'salt.css' : v]) } : c))
+  const strip = (el) => ({ ...el, children: el.children.filter((c) => !(c.type === 'element' && c.name === 'script')).map((c) => (c.type === 'element' ? strip(c) : c)) })
+  const page = { type: 'element', name: '#root', attrs: [], children: [{ type: 'element', name: 'html', attrs: [], children: [
+    { type: 'element', name: 'head', attrs: [], children: owned }, strip(body)] }] }
+  return serialise(page)
+}
+
 /** The canonical form of an HTML fragment: two fragments are equivalent when these are equal. */
 export function normalise(html) {
   const root = parse(String(html))
