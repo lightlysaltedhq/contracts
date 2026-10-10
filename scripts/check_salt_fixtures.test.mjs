@@ -608,6 +608,41 @@ test('chrome: the gate requires exactly the runner\'s list of chrome and view fi
   assert.doesNotMatch(src, /\[[^\]]*'not-found'[^\]]*\]/, 'the gate keeps no list of its own')
 })
 
+// SC-019's markup gaps, closed.
+const SC019_HEADER = 'site-header/menu-submenus-phone-cta-sticky'
+test('sc-019: the span form of the submenu toggle carries no type, the button form does', () => {
+  expectFail(['site-header'], (io) => io.html(`${SC019_HEADER}.html`, '<span class="salt-nav__toggle" ', '<span class="salt-nav__toggle" type="button" '), /<span\.salt-nav__toggle> carries type, which the markup draws only when button form/)
+})
+test('sc-019: the theme toggle\'s span server form carries none of the button\'s attributes', () => {
+  expectFail(['site-header'], (io) => io.html('site-header/theme-toggle.html', '<span class="salt-theme-toggle" aria-hidden="true"></span>', '<span class="salt-theme-toggle" aria-hidden="true" aria-pressed="false"></span>'), /<span\.salt-theme-toggle> carries aria-pressed, which the markup draws only when button form/)
+  expectFail(['site-footer'], (io) => io.html('site-footer/display-preferences.html', '<span class="salt-theme-toggle" aria-hidden="true"></span>', '<button class="salt-theme-toggle" type="button" aria-pressed="false"></button>'), /<button\.salt-theme-toggle> lacks aria-label, which the markup requires when button form/)
+})
+test('sc-019: the drawer and the consent panel are drawn open', () => {
+  expectFail(['site-header'], (io) => io.html('site-header/drawer-open.html', '<dialog class="salt-drawer" open', '<dialog class="salt-drawer"'), /<dialog\.salt-drawer> lacks open, which the markup requires/)
+  expectFail(['site-footer'], (io) => io.html('site-footer/consent-panel-open.html', '<dialog class="salt-consent-panel" open', '<dialog class="salt-consent-panel"'), /<dialog\.salt-consent-panel> lacks open, which the markup requires/)
+})
+test('sc-019: the search input keeps the query', () => {
+  expectFail(['search'], (io) => io.html('search/results.html', ' value="hedge"', ''), /<input\.salt-search__input> lacks value, which the markup requires when a query is set/)
+  expectFail(['search'], (io) => io.html('search/results.html', ' value="hedge"', ' value="hedges"'), /value="hedges" disagrees with the case, which gives "hedge"/)
+})
+test('sc-019: an untitled footer column\'s list takes the nav\'s name', () => {
+  expectFail(['site-footer'], (io) => io.html('site-footer/single-flat-menu-inverse.html', 'role="list" aria-label="Footer">', 'role="list">'), /<ul\.salt-footer__links> lacks aria-label, which the markup requires when the column has no title/)
+  expectFail(['site-footer'], (io) => io.html('site-footer/single-flat-menu-inverse.html', 'role="list" aria-label="Footer">', 'role="list" aria-label="Links">'), /aria-label="Links" disagrees with the case, which gives "Footer"/)
+})
+test('sc-019: the header logo loads eagerly, the footer\'s lazily', () => {
+  expectFail(['site-header'], (io) => {
+    const rel = 'fixtures/site-header/light-and-dark-logo.html'
+    io.write(rel, readFileSync(path.join(io.dir, rel), 'utf8').replaceAll('loading="eager"', 'loading="lazy"'))
+  }, /the header logo is above the fold, so it must be loading="eager"/)
+  expectFail(['site-footer'], (io) => {
+    const rel = 'fixtures/site-footer/single-flat-menu-inverse.html'
+    io.write(rel, readFileSync(path.join(io.dir, rel), 'utf8').replace(/(salt-logo__image[^>]*)loading="lazy"/, '$1loading="eager"'))
+  }, /an img that is not the priority image must be loading="lazy"/)
+})
+test('sc-019: the header phone glyph carries no data-size', () => {
+  expectFail(['site-header'], (io) => io.html(`${SC019_HEADER}.html`, 'data-icon="phone" ', 'data-icon="phone" data-size="sm" '), /carries data-size, which the markup draws only when never on the header phone glyph/)
+})
+
 // ── 4. The normaliser ─────────────────────────────────────────────────────────────────────────
 test('normaliser: one that drops an attribute fails the mutation check', () => {
   expectFail(HERO, (io) => {

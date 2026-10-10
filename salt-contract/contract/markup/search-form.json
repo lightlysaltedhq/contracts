@@ -46,7 +46,11 @@
             "type": "search",
             "name": "q",
             "maxlength": "from:query max",
-            "enterkeyhint": "search"
+            "enterkeyhint": "search",
+            "value": {
+              "value": "from:the query",
+              "when": "a query is set: the input keeps it (SC-019)"
+            }
           }
         },
         {
@@ -107,7 +111,8 @@
         }
       ],
       "owes": [
-        "The contract's markup instead of core searchform. The input's id is search-form__input (SC-012)."
+        "The contract's markup instead of core searchform. The input's id is search-form__input (SC-012).",
+        "SC-019: the input keeps the query as its value."
       ]
     }
   }

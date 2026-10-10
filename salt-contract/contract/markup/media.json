@@ -23,10 +23,11 @@
       "height": "from:image",
       "loading": {
         "enum": [
-          "lazy"
+          "lazy",
+          "eager"
         ],
         "when": "not priority",
-        "note": "Never on the priority image, which is eager by default."
+        "note": "lazy, but eager on the header logo, which is above the fold (site-logo.json, SC-019). Never on the priority image, which is eager by default."
       },
       "fetchpriority": {
         "value": "high",

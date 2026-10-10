@@ -26,7 +26,8 @@
       "children": [
         {
           "role": "logo",
-          "component": "site-logo"
+          "component": "site-logo",
+          "note": "Above the fold on every page, so its images load eagerly (site-logo.json, SC-019)."
         },
         {
           "role": "nav",
@@ -110,7 +111,10 @@
                         "salt-nav__toggle"
                       ],
                       "attributes": {
-                        "type": "button",
+                        "type": {
+                          "value": "button",
+                          "when": "button form (after script); the span server form carries none (SC-019)"
+                        },
                         "aria-expanded": {
                           "enum": [
                             "true",
@@ -121,7 +125,7 @@
                         "aria-label": "from:labels.submenu",
                         "aria-hidden": {
                           "value": "true",
-                          "when": "span before script"
+                          "when": "span form, before script"
                         }
                       },
                       "optional": true,
@@ -201,19 +205,33 @@
         },
         {
           "role": "theme-toggle",
-          "element": "button",
+          "element": [
+            "button",
+            "span"
+          ],
           "classes": [
             "salt-theme-toggle"
           ],
           "attributes": {
-            "type": "button",
+            "type": {
+              "value": "button",
+              "when": "button form"
+            },
             "aria-pressed": {
               "enum": [
                 "true",
                 "false"
-              ]
+              ],
+              "when": "button form"
             },
-            "aria-label": "from:labels.theme"
+            "aria-label": {
+              "value": "from:labels.theme",
+              "when": "button form"
+            },
+            "aria-hidden": {
+              "value": "true",
+              "when": "span form, before script mounts the toggle"
+            }
           },
           "optional": true,
           "when": "the theme toggle is offered in the header and named",
@@ -227,10 +245,12 @@
               "repeat": {
                 "from": "sun, moon",
                 "max": 2
-              }
+              },
+              "optional": true,
+              "when": "button form: the glyph for the scheme in force"
             }
           ],
-          "note": "A span.salt-theme-toggle[aria-hidden] placeholder until script mounts it."
+          "note": "The server form is span.salt-theme-toggle[aria-hidden] with nothing inside, as Salt for Next.js's ThemeToggle renders it until it knows the scheme; script swaps in the button with its glyph (SC-019)."
         },
         {
           "role": "phone",
@@ -252,7 +272,15 @@
               "role": "phone-icon",
               "component": "icon",
               "attributes": {
-                "data-icon": "phone"
+                "data-icon": "phone",
+                "data-size": {
+                  "enum": [
+                    "sm",
+                    "md",
+                    "lg"
+                  ],
+                  "when": "never on the header phone glyph, which the stylesheet sizes; Salt for Next.js draws it with none"
+                }
               }
             },
             {
@@ -329,6 +357,7 @@
             "salt-drawer"
           ],
           "attributes": {
+            "open": "",
             "aria-label": "from:labels.menu",
             "tabindex": "-1"
           },
@@ -355,7 +384,8 @@
               "text": "the nav again, the phone link, the call to action",
               "note": "The drawer's copy of the nav carries ids of its own, so no id is on the page twice: the nav is site-header__drawer-navigation, and each submenu is site-header__drawer-submenu-<n>, its toggle's aria-controls naming that id. <n> is the same in both copies (SC-012)."
             }
-          ]
+          ],
+          "note": "Drawn only when open, so always with open (SC-019)."
         }
       ]
     }
@@ -522,7 +552,8 @@
       ],
       "owes": [
         "Rename to salt-header and salt-nav*; the burger, drawer, submenu disclosure, phone link and theme toggle; data-site-header. data-sticky in place of is-sticky, and the id site-navigation on the main navigation (SC-006). The bar's and the drawer's ids exactly as the ruling note fixes them (SC-012).",
-        "The noscript style setting --salt-header-phone-menu, --salt-header-phone-burger and --salt-header-phone-wrap, printed in the document head (page.json)."
+        "The noscript style setting --salt-header-phone-menu, --salt-header-phone-burger and --salt-header-phone-wrap, printed in the document head (page.json).",
+        "SC-019: the submenu toggle's span form carries no type; the theme toggle's server form is the empty span[aria-hidden]; the drawer dialog carries open; the phone glyph carries no data-size."
       ]
     }
   }

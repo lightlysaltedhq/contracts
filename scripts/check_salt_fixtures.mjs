@@ -511,7 +511,26 @@ function telHref(shown) {
   if (digits === '' || digits.length > 15) return null
   return `tel:${international ? '+' : ''}${digits}`
 }
+const isButton = (c, el) => el.name === 'button'
+const isSpan = (c, el) => el.name === 'span'
+const columnTitled = (c, el) => elementsOf(c.parents.get(el) ?? { children: [] }).some((k) => classesOf(k).includes('salt-footer__title'))
 const WHEN = {
+  // SC-019: the submenu toggle and the theme toggle are a span before script and a button after;
+  // each form carries its own attributes.
+  'site-header:toggle:type': isButton,
+  'site-header:toggle:aria-hidden': isSpan,
+  'site-header:theme-toggle:type': isButton,
+  'site-header:theme-toggle:aria-pressed': isButton,
+  'site-header:theme-toggle:aria-label': isButton,
+  'site-header:theme-toggle:aria-hidden': isSpan,
+  'site-footer:theme-toggle:type': isButton,
+  'site-footer:theme-toggle:aria-pressed': isButton,
+  'site-footer:theme-toggle:aria-label': isButton,
+  'site-footer:theme-toggle:aria-hidden': isSpan,
+  'site-header:phone-icon:data-size': () => false,
+  'search-form:input:value': (c) => filledText(c.input.document?.query),
+  'site-footer:links:aria-label': (c, el) => !columnTitled(c, el),
+  'site-footer:links:aria-labelledby': columnTitled,
   'section:root:data-media': (c) => background(c),
   // A drawn background always has a fit, so its style always applies (media.json).
   'section:background:style': (c) => background(c),
@@ -569,6 +588,9 @@ function backgroundStyle(c) {
   return `object-fit: ${bg.fit ?? 'cover'}${at ? `; object-position: ${at}` : ''}`
 }
 const VALUE = {
+  'search-form:input:value': (c) => c.input.document?.query,
+  // An untitled column's list takes the footer navigation's name.
+  'site-footer:links:aria-label': (c, el) => { for (let p = c.parents.get(el); p; p = c.parents.get(p)) if (p.name === 'nav') return attr(p, 'aria-label') },
   'section:background:style': backgroundStyle,
   'section:root:data-track': (c) => c.track,
   'section:root:data-tone': (c) => effectiveSetting(c, 'tone'),
@@ -1022,8 +1044,12 @@ function checkMarkup(c) {
   if (priority.length > 1) fail(`${at}.html: ${priority.length} images claim fetchpriority=high; at most one does (section#priority-media)`)
   for (const img of imgs) {
     const isPriority = priority.includes(img)
+    // The header logo is above the fold on every page: eager, never lazy (SC-019).
+    let inHeader = false
+    for (let p = c.parents.get(img); p; p = c.parents.get(p)) if (p.name === 'header' && classesOf(p).includes('salt-header')) inHeader = true
+    const loading = classesOf(img).includes('salt-logo__image') && inHeader ? 'eager' : 'lazy'
     if (isPriority && hasAttr(img, 'loading')) fail(`${at}.html: the priority image carries loading; it is never lazy (SC-007)`)
-    if (!isPriority && attr(img, 'loading') !== 'lazy') fail(`${at}.html: an img that is not the priority image must be loading="lazy" (section#priority-media)`)
+    if (!isPriority && attr(img, 'loading') !== loading) fail(`${at}.html: ${loading === 'eager' ? 'the header logo is above the fold, so it must be loading="eager" (SC-019)' : 'an img that is not the priority image must be loading="lazy" (section#priority-media)'}`)
   }
   const backgroundImg = bindings.get('background')?.[0]
   // A role, or the roles the first item may sit in (the carousel's track, list or lone card).

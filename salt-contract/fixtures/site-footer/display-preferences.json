@@ -1,5 +1,5 @@
 {
-  "$comment": "site.displayPreferences is { labels: { summary, fontSize, decrease, reset, increase, contrast, grayscale, motion }, scale: bool, toggles: [contrast, grayscale, motion], motionDefault: 'reduce'|null }; site.themeToggle is { placed: 'footer', labels: { theme } }. The widget is drawn in its server form: root div hidden (script reveals it), no data-motion-default (the site does not default to reduced motion), toggles aria-pressed=\"false\". The markup declares no text, label or children for the scale label, the scale buttons, the toggles or the footer theme toggle, so the scale label and the buttons carry the visible words as text and each button's accessible name is its text (the scale buttons also carry aria-label, which the markup declares); the footer's theme toggle button is drawn empty with only aria-label and aria-pressed, since the markup declares no icon child for it (reported). The display-preferences toggles omit 'theme' because the footer places its own theme toggle.",
+  "$comment": "The theme toggle is its server form, the empty span[aria-hidden] Salt for Next.js renders until script knows the scheme (SC-019). site.displayPreferences is { labels: { summary, fontSize, decrease, reset, increase, contrast, grayscale, motion }, scale: bool, toggles: [contrast, grayscale, motion], motionDefault: 'reduce'|null }; site.themeToggle is { placed: 'footer', labels: { theme } }. The widget is drawn in its server form: root div hidden (script reveals it), no data-motion-default (the site does not default to reduced motion), toggles aria-pressed=\"false\". The markup declares no text, label or children for the scale label, the scale buttons, the toggles so the scale label and the buttons carry the visible words as text and each button's accessible name is its text (the scale buttons also carry aria-label, which the markup declares). The display-preferences toggles omit 'theme' because the footer places its own theme toggle.",
   "chrome": "site-footer",
   "summary": "The site offers display preferences (font size buttons plus contrast, greyscale and reduced-motion toggles, hidden until script reveals them) and places its theme toggle in the footer, between the social links and the display preferences as the base order says.",
   "context": {
@@ -30,7 +30,11 @@
         "motion": "Reduce motion"
       },
       "scale": true,
-      "toggles": ["contrast", "grayscale", "motion"]
+      "toggles": [
+        "contrast",
+        "grayscale",
+        "motion"
+      ]
     },
     "footer": {
       "tone": "surface",
@@ -38,13 +42,23 @@
       "columns": [
         {
           "links": [
-            { "label": "Contact", "href": "/contact/" },
-            { "label": "Accessibility", "href": "/accessibility/" }
+            {
+              "label": "Contact",
+              "href": "/contact/"
+            },
+            {
+              "label": "Accessibility",
+              "href": "/accessibility/"
+            }
           ]
         }
       ],
       "profiles": [
-        { "name": "Instagram", "url": "https://www.instagram.com/hartleygardens", "icon": "instagram" }
+        {
+          "name": "Instagram",
+          "url": "https://www.instagram.com/hartleygardens",
+          "icon": "instagram"
+        }
       ],
       "copyright": "© 2026 Hartley Gardens"
     }

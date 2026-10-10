@@ -33,7 +33,14 @@
         "salt-logo__light"
       ],
       "attributes": {
-        "alt": ""
+        "alt": "",
+        "loading": {
+          "enum": [
+            "eager",
+            "lazy"
+          ],
+          "note": "eager in the header, which is above the fold on every page, so lazy loading would delay it and the largest contentful paint with it; lazy in the footer. Eager, not fetchpriority=high: that is the one priority image's (section#priority-media), and loading=\"eager\" is what both platforms can write, where next/image cannot omit the attribute without claiming priority (SC-019)."
+        }
       },
       "optional": true,
       "when": "a light image is set"
@@ -46,7 +53,14 @@
         "salt-logo__dark"
       ],
       "attributes": {
-        "alt": ""
+        "alt": "",
+        "loading": {
+          "enum": [
+            "eager",
+            "lazy"
+          ],
+          "note": "eager in the header, which is above the fold on every page, so lazy loading would delay it and the largest contentful paint with it; lazy in the footer. Eager, not fetchpriority=high: that is the one priority image's (section#priority-media), and loading=\"eager\" is what both platforms can write, where next/image cannot omit the attribute without claiming priority (SC-019)."
+        }
       },
       "optional": true,
       "when": "a light and a dark image are set"
@@ -130,7 +144,13 @@
         }
       ],
       "owes": [
-        "data-swaps instead of has-dark; name on the link; --logo-height inline."
+        "data-swaps instead of has-dark; name on the link; --logo-height inline.",
+        "SC-019: the header logo's images carry loading=\"eager\", the footer's loading=\"lazy\"."
+      ]
+    },
+    "nextjs": {
+      "owes": [
+        "SC-019: the header logo's images carry loading=\"eager\"; next/image lazy-loads them by default."
       ]
     }
   }

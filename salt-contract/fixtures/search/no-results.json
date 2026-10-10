@@ -1,5 +1,5 @@
 {
-  "$comment": "Same site shape as results. The empty state is the form and a sentence (labels.noResults with {q} the query), never an empty list or a results section. The input draws no value (the markup declares none).",
+  "$comment": "Same site shape as results. The empty state is the form and a sentence (labels.noResults with {q} the query), never an empty list or a results section. The input keeps the query as its value (SC-019).",
   "view": "search",
   "summary": "A search for a query that matches nothing: the h1, the form, and the empty sentence; no results section.",
   "context": {
