@@ -358,11 +358,13 @@ export function pageOf(html) {
   const body = find(doc, 'body') ?? { type: 'element', name: 'body', attrs: [], children: [] }
   const textOf = (el) => el.children.map((c) => (c.type === 'text' ? c.value : textOf(c))).join('')
   const owned = head.children.filter((c) => c.type === 'element' && (
-    (c.name === 'link' && /(^|\s)stylesheet(\s|$)/i.test(attrOf(c, 'rel') ?? '') && /(^|\/)salt\.css$/.test((attrOf(c, 'href') ?? '').replace(/[?#].*$/, ''))) ||
+    (c.name === 'link' && (attrOf(c, 'rel') ?? '').trim().toLowerCase() === 'stylesheet' && /(^|\/)salt\.css$/.test((attrOf(c, 'href') ?? '').replace(/[?#].*$/, ''))) ||
     (c.name === 'noscript' && textOf(c).includes('--salt-header-phone'))))
-    // The link is its rel and its file name: an id, a media query, a data-precedence or a ?ver= the
-    // platform adds says nothing the contract owns.
-    .map((c) => (c.name === 'link' ? { ...c, attrs: [['rel', 'stylesheet'], ['href', 'salt.css']] } : c))
+    // The link is its rel, its file name, and whatever changes whether it applies: a media other
+    // than all (the default, which says nothing) and disabled. An id, a data-precedence or a ?ver=
+    // the platform adds says nothing the contract owns.
+    .map((c) => (c.name === 'link' ? { ...c, attrs: [['rel', 'stylesheet'], ['href', 'salt.css'],
+      ...c.attrs.filter(([n, v]) => (n === 'media' && v.trim().toLowerCase() !== 'all') || n === 'disabled')] } : c))
   // Delivery the platform writes into the body (wp_footer's scripts, inline styles and late
   // stylesheets; Next's scripts) goes. The contract's body markup draws none of these elements.
   const DELIVERY = new Set(['script', 'style', 'link'])

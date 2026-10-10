@@ -733,6 +733,16 @@ test('page: a nested section keeps the section rules for its index and track (se
   expectFail(['archive'], (io) => io.json('archive/topic.json', (d) => { delete d.document.listing.index }), /document\.listing\.index counts the page's sections from 0, and is required/)
 })
 
+test('pageOf: a print, disabled or alternate salt.css link is a difference; media=all is not (settling c)', async () => {
+  const { pageOf } = await import('../salt-contract/normalise.mjs')
+  const page = (link) => `<html><head>${link}</head><body></body></html>`
+  const ours = pageOf(page('<link rel="stylesheet" href="/salt.css">'))
+  same(ours, pageOf(page('<link rel="stylesheet" href="/salt.css" media="all">')))
+  differ(ours, pageOf(page('<link rel="stylesheet" href="/salt.css" media="print">')))
+  differ(ours, pageOf(page('<link rel="stylesheet" href="/salt.css" disabled>')))
+  differ(ours, pageOf(page('<link rel="alternate stylesheet" href="/salt.css">')))
+})
+
 // ── 4. The normaliser ─────────────────────────────────────────────────────────────────────────
 test('normaliser: one that drops an attribute fails the mutation check', () => {
   expectFail(HERO, (io) => {

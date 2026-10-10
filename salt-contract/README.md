@@ -335,7 +335,7 @@ written in the implementation's own repository; the contract fixes only its inte
   - the `page`: the whole document, from `<!doctype html>`, as the platform serves it, with its
     header, its sections (`document.sections`) and its footer. The runner compares it through
     `pageOf` (normalise.mjs): only the head elements the contract owns (the link to the served
-    `salt.css`, read as its `rel` and its file name only, so a platform's `id`, `media`, `data-precedence` or `?ver=` query does not count, and the scriptless phone layout's `noscript`
+    `salt.css`, found by `rel` exactly `stylesheet` and the file name, and read as those plus whatever changes whether it applies: a `media` other than `all` (`all` is the default, so it is dropped) and `disabled`, compared as written; a platform's `id`, `data-precedence` or `?ver=` query does not count, and the scriptless phone layout's `noscript`
     style) and the body, without its own attributes and the `script`, `style` and `link`
     elements the platform delivers there (the contract's body markup draws none); the rest of
     head, and the `html` element's attributes, are the platform's (SC-019).
