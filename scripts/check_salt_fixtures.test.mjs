@@ -695,6 +695,13 @@ test('pageOf: WordPress-shaped body attributes and footer delivery do not count 
   differ(pageOf(ours), pageOf(wp.replace('</main>', '</main><p>Extra</p>')))
 })
 
+test('pageOf: the stylesheet link is its rel and its file name only (review of #14, 3)', async () => {
+  const { pageOf } = await import('../salt-contract/normalise.mjs')
+  const page = (link) => `<html><head>${link}</head><body></body></html>`
+  same(pageOf(page('<link rel="stylesheet" href="/salt.css">')),
+    pageOf(page(`<link rel='stylesheet' id='salt-css' href='https://example.com/wp-content/themes/salt/salt.css?ver=6.6' media='all' data-precedence="default">`)))
+})
+
 // ── 4. The normaliser ─────────────────────────────────────────────────────────────────────────
 test('normaliser: one that drops an attribute fails the mutation check', () => {
   expectFail(HERO, (io) => {

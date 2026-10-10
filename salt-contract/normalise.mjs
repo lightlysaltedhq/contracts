@@ -360,7 +360,9 @@ export function pageOf(html) {
   const owned = head.children.filter((c) => c.type === 'element' && (
     (c.name === 'link' && /(^|\s)stylesheet(\s|$)/i.test(attrOf(c, 'rel') ?? '') && /(^|\/)salt\.css$/.test((attrOf(c, 'href') ?? '').replace(/[?#].*$/, ''))) ||
     (c.name === 'noscript' && textOf(c).includes('--salt-header-phone'))))
-    .map((c) => (c.name === 'link' ? { ...c, attrs: c.attrs.map(([n, v]) => [n, n === 'href' ? 'salt.css' : v]) } : c))
+    // The link is its rel and its file name: an id, a media query, a data-precedence or a ?ver= the
+    // platform adds says nothing the contract owns.
+    .map((c) => (c.name === 'link' ? { ...c, attrs: [['rel', 'stylesheet'], ['href', 'salt.css']] } : c))
   // Delivery the platform writes into the body (wp_footer's scripts, inline styles and late
   // stylesheets; Next's scripts) goes. The contract's body markup draws none of these elements.
   const DELIVERY = new Set(['script', 'style', 'link'])
