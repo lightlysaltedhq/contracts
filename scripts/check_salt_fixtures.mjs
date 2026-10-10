@@ -876,6 +876,17 @@ function checkMarkup(c) {
     const title = doc.headings?.role ? bindings.get(doc.headings.role)?.[0] : undefined
     if (c.kind === 'view' && (h1s.length !== 1 || (title && h1s[0] !== title))) fail(`${at}.html: a view draws exactly one h1, its ${doc.headings?.role ?? 'title'} (section#single-h1); this draws ${h1s.length}`)
     if (c.kind === 'chrome' && h1s.length) fail(`${at}.html: the ${doc.id} draws an h1; the page's h1 belongs to its main (section#single-h1)`)
+    // A section nested in a view keeps the body rule: its own heading ranks at the plan's level
+    // (2, under the view's h1) and every heading inside it ranks below that (section#body-heading-base).
+    for (const nested of all.filter((el) => classesOf(el).includes('salt-section'))) {
+      const inside = descendants(nested).filter((el) => HEADING.test(el.name))
+      const own = inside.find((el) => attr(el, 'id') === `${attr(nested, 'id')}__heading`)
+      const base = own ? Number(own.name[1]) : 2
+      if (own && base !== 2) fail(`${at}.html: the nested section ${attr(nested, 'id')}'s heading is ${own.name}; under the view's h1 it is h2 (section#heading-level)`)
+      for (const h of inside) {
+        if (h !== own && Number(h.name[1]) <= base) fail(`${at}.html: ${describe(h)} in the nested section ${attr(nested, 'id')} ranks at or above its heading's level ${base} (section#body-heading-base)`)
+      }
+    }
     // Ids (SC-012): a landmark id, a nested section's anchor, or <owner>__<part> with the owner a
     // vocabulary id or one of those anchors.
     const anchors = new Set(all.filter((el) => classesOf(el).includes('salt-section')).map((el) => attr(el, 'id')).filter(Boolean))

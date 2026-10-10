@@ -523,6 +523,13 @@ test('chrome: an id owned by a file this one does not draw fails', () => {
   expectFail(['site-footer'], (io) => io.html('site-footer/consent-panel-open.html', 'id="site-footer__consent-analytics-description">', 'id="site-footer__consent-analytics-description"><span id="site-header__submenu-2">x</span>'), /id site-header__submenu-2 is not a landmark id, a section's anchor or <owner>__<part> owned by site-footer/)
 })
 
+test('chrome: a nested section\'s card titles rank below its heading (review of #13, 3)', () => {
+  expectFail(['archive'], (io) => {
+    const rel = 'fixtures/archive/topic.html'
+    io.write(rel, readFileSync(path.join(io.dir, rel), 'utf8').replace(/<h3>/g, '<h2>').replace(/<\/h3>/g, '</h2>'))
+  }, /<h2> in the nested section posts ranks at or above its heading's level 2/)
+})
+
 // ── 4. The normaliser ─────────────────────────────────────────────────────────────────────────
 test('normaliser: one that drops an attribute fails the mutation check', () => {
   expectFail(HERO, (io) => {
