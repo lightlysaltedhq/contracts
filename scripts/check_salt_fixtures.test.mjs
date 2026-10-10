@@ -743,6 +743,25 @@ test('pageOf: a print, disabled or alternate salt.css link is a difference; medi
   differ(ours, pageOf(page('<link rel="alternate stylesheet" href="/salt.css">')))
 })
 
+// A page around faq/one-inverse: its section first (index 0), so its heading is the h1 and its
+// accordion's group faq-0.
+function faqPage(io, name) {
+  const faq = JSON.parse(readFileSync(path.join(pkg, 'fixtures/faq/one-inverse.json'), 'utf8'))
+  const page = JSON.parse(readFileSync(path.join(pkg, `fixtures/${PAGE}.json`), 'utf8'))
+  page.document.sections = [{ section: 'faq', values: faq.values, headingLevel: 1, track: 'faq-1', index: 0 }]
+  page.collections = faq.collections
+  io.write('fixtures/page/faq-first.json', JSON.stringify(page, null, 2))
+  const shell = readFileSync(path.join(pkg, `fixtures/${PAGE}.html`), 'utf8')
+  const section = readFileSync(path.join(pkg, 'fixtures/faq/one-inverse.html'), 'utf8')
+    .replace('<h2 id="faq-one__heading">One quick question</h2>', '<h1 id="faq-one__heading">One quick question</h1>').replaceAll('name="faq-1"', `name="${name}"`)
+  io.write('fixtures/page/faq-first.html', shell.replace(/<section class="salt-section" id="about-us"[\s\S]*?\n {6}<\/section>/, section.trim().replace(/\n/g, '\n      ')))
+}
+test('page: a nested faq\'s group name is faq-<its index> (settling d)', () => {
+  const dir = copy(['page'], (io) => faqPage(io, 'faq-0'))
+  try { assert.doesNotMatch(run(dir).out, /fixtures\/page\/faq-first/, run(dir).out) } finally { rmSync(dir, { recursive: true, force: true }) }
+  expectFail(['page'], (io) => faqPage(io, 'faq-1'), /name="faq-1" disagrees with the case, which gives "faq-0"/)
+})
+
 // ── 4. The normaliser ─────────────────────────────────────────────────────────────────────────
 test('normaliser: one that drops an attribute fails the mutation check', () => {
   expectFail(HERO, (io) => {

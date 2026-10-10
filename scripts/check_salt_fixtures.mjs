@@ -670,7 +670,8 @@ const VALUE = {
   'section:root:data-tone-dark': darkTone,
   'section:root:data-spacing': (c) => effectiveSetting(c, 'spacing'),
   'section:root:data-width': (c) => effectiveSetting(c, 'width'),
-  'accordion:item:name': (c) => (groupName[c.section] ? `${groupName[c.section]}-${c.input.context.index}` : undefined),
+  // The section's own id and index, settled for a section case and a nested section alike.
+  'accordion:item:name': (c) => (groupName[c.sectionId] && c.index !== undefined ? `${groupName[c.sectionId]}-${c.index}` : undefined),
   'media-text:row:data-media-side': rowSide,
   // A contact field's type and autocomplete follow its name (contact-form.json, SC-016).
   'contact-form:input:type': (c, el) => ({ name: 'text', email: 'email', phone: 'tel' })[attr(el, 'name')],
