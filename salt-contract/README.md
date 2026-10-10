@@ -253,8 +253,9 @@ implementation's runtime emits (its generated `theme.css`).
 ## Fixtures
 
 Modelled on GOV.UK Frontend's component fixtures: one directory per section, per chrome component
-(`site-header`, `site-footer`) and per page view (`post`, `service`, `archive`, `search`,
-`not-found`; SC-018), and in it a pair of files per case. `<case>.json` is the input; `<case>.html` is the default HTML for it, or an empty
+(`site-header`, `site-footer`), per page view (`post`, `service`, `archive`, `search`,
+`not-found`; SC-018) and for the page skeleton (`page`; SC-019), and in it a pair of files per
+case. `<case>.json` is the input; `<case>.html` is the default HTML for it, or an empty
 file when the case renders nothing (section#zero-state). A case's name describes its state
 (`split-image-left`, `one-item`, `empty`). An implementation reads them from the package as
 `@lightlysaltedhq/salt-contract/fixtures/<section>/<case>.json` and `.html` (the `./fixtures/*`
@@ -266,7 +267,7 @@ option covered, and the normaliser sound.
 
 | Key | What it holds |
 | --- | --- |
-| `section`, `chrome` or `view` | Which kind the case is, holding its id, the same as the directory: a section, a chrome component (`site-header`, `site-footer`) or a view (`post`, `service`, `archive`, `search`, `not-found`). A chrome or view case has no `values` (no fields file describes them): it reads `site`, `document`, `route` and `state`. |
+| `section`, `chrome`, `view` or `page` | Which kind the case is, holding its id, the same as the directory: a section, a chrome component (`site-header`, `site-footer`), a view (`post`, `service`, `archive`, `search`, `not-found`) or the page (`page`). A chrome, view or page case has no `values` (no fields file describes them): it reads `site`, `document`, `route` and `state`. A page's one section is `document.sections`, shaped as `document.listing` below with its `section` id and the `headingLevel` the plan gives it (1 when it claims the page's h1). |
 | `summary` | What the case shows, in a sentence or two. |
 | `values` | The section's stored field values, named and shaped as `contract/fields/<section>.json` says, with the shared settings under `settings`. A field left out takes its default. |
 | `context` | For a chrome or view case: `priorityMedia` (a view: whether the plan grants it the priority image; the chrome never takes it), `locale`, `now` and `path` (the page's path, which sets `aria-current`). For a section, what the page plan decides for this band, describing a page that can exist: `index` (the plan's index, the section's position among the page's sections from 0, view-props/_shared.json, which also names an accordion group, `faq-<index>`), `track` (its `data-track`, `<section>-<n>` with n no more than `index` + 1, section#data-track), `headingLevel` (1 when no heading has rendered before the section, otherwise 2, section#single-h1), `headingRendered` (true when a heading rendered earlier on the page), `priorityMedia` (true for the first section, index 0, only, section#priority-media), and where they apply `collapseTop` (section#adjacent-collapse, never on the first section) `now` (an ISO 8601 time, for the locations' open-now status) and `locale` (a BCP 47 locale, `en-GB` in every case that draws a date, a time or a phone, which display as section#display-forms says). |
@@ -330,7 +331,13 @@ written in the implementation's own repository; the contract fixes only its inte
   - a `chrome` component: the `header.salt-header` or `footer.salt-footer` element and
     everything in it, as the page draws it, from the case's `site` (and `state`);
   - a `view`: the `main#main` element and everything in it, as `page.json` places it, for the
-    case's `document`.
+    case's `document`;
+  - the `page`: the whole document, from `<!doctype html>`, as the platform serves it, with its
+    header, its sections (`document.sections`) and its footer. The runner compares it through
+    `pageOf` (normalise.mjs): only the head elements the contract owns (the link to the served
+    `salt.css`, its `href` read as the file name, and the scriptless phone layout's `noscript`
+    style) and the body, without its `script` elements; the rest of head, and the `html`
+    element's attributes, are the platform's (SC-019).
 
   It exits 0. A non-zero exit
   fails the case; diagnostics go to stderr, never stdout. One process per case.
@@ -389,12 +396,14 @@ its report says "partial, not conforming": `ok` is false, `partial` is true and 
 must ship at least one section, and a section declared not shipped (`--not-shipped`) must stay
 out of the output: a class only its markup draws, written by another section, fails the run.
 
-The site chrome (`site-header`, `site-footer`) and the page views with fixtures (`post`,
-`service`, `archive`, `search`, `not-found`) are run too (SC-018), each reported as a file of its
+The site chrome (`site-header`, `site-footer`), the page views with fixtures (`post`,
+`service`, `archive`, `search`, `not-found`; SC-018) and the page (`page`, compared through
+`pageOf`; SC-019) are run too, each reported as a file of its
 own under `files` in the JSON report and in its own table in the Markdown one. They have no fields,
 so each is held to the fixtures and class checks; the stylesheet pin is the run's. A run conforms
 only when every file it runs passes as well. `--sections` and `--not-shipped` take their ids like
-a section's, but the chrome and these five views are required of every implementation (SC-018):
+a section's, but the chrome, these five views and the page are required of every implementation
+(SC-018, SC-019):
 only a `--partial` run may declare one not shipped, and the summary counts it.
 
 Salt for Next.js copies or links the package's file to a static path (`public/salt.css`), links

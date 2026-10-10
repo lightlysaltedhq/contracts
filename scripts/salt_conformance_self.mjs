@@ -35,7 +35,7 @@ try {
       execFileSync(process.execPath, args, { stdio: ['ignore', 'pipe', 'inherit'] })
       const { summary } = JSON.parse(readFileSync(path.join(dir, platform, 'conformance.json'), 'utf8'))
       console.log(`PASS: the reference adapter conforms with the ${platform} snapshot: ${summary.pass} section(s), all four checks each; ` +
-        `${summary.files.pass} chrome and view file(s), fixtures and classes each.`)
+        `${summary.files.pass} chrome, view and page file(s), fixtures and classes each.`)
     } catch (e) {
       failed = true
       process.stdout.write(e.stdout ?? '')

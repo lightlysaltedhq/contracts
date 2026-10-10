@@ -67,9 +67,10 @@ test('the reference adapter conforms: all four checks run and pass for every sec
   assert.deepEqual(bySection, { pass: r.report.sections.length, fail: 0, incomplete: 0, notShipped: 0 })
   // The chrome and every view with fixtures run too, each as a file of its own (SC-018).
   assert.deepEqual(files, { pass: r.report.files.length, fail: 0, notShipped: 0 })
-  assert.deepEqual(r.report.files.map((f) => f.id), ['site-header', 'site-footer', 'post', 'service', 'archive', 'search', 'not-found'])
+  assert.deepEqual(r.report.files.map((f) => f.id), ['site-header', 'site-footer', 'page', 'post', 'service', 'archive', 'search', 'not-found'])
+  assert.equal(r.report.files.find((f) => f.id === 'page').kind, 'page')
   for (const f of r.report.files) assert.ok(f.status === 'pass' && f.fixtures.total > 0 && f.classes.status === 'pass', f.id)
-  assert.match(r.out, /\| Chrome and views \| Kind \| Fixtures \| Classes \|/)
+  assert.match(r.out, /\| Chrome, views and page \| Kind \| Fixtures \| Classes \|/)
   assert.equal(r.report.format, 'salt-conformance/1')
   assert.deepEqual(r.report.contract, { package: '@lightlysaltedhq/salt-contract', version })
   assert.equal(r.report.platform, 'reference')
@@ -130,7 +131,7 @@ import path from 'node:path'
 const pkg = ${JSON.stringify(pkg)}
 const mutations = JSON.parse(readFileSync(${JSON.stringify(path.join(dir, 'mutations.json'))}, 'utf8'))
 const input = JSON.parse(readFileSync(0, 'utf8'))
-const id = input.section ?? input.chrome ?? input.view
+const id = input.section ?? input.chrome ?? input.view ?? input.page
 const sdir = path.join(pkg, 'fixtures', id)
 const file = readdirSync(sdir).find((f) => f.endsWith('.json') && isDeepStrictEqual(JSON.parse(readFileSync(path.join(sdir, f), 'utf8')), input))
 const name = file.replace(/\\.json$/, '')
@@ -241,7 +242,25 @@ test('a full run cannot declare the chrome or an SC-018 view not shipped; a part
   const partial = await run(['--platform', 'reference', '--adapter', reference, ...withFields, ...withStyles, '--not-shipped', 'site-footer', '--partial'])
   assert.equal(partial.code, 1, partial.out)
   assert.deepEqual(partial.report.summary.files, { pass: partial.report.files.length - 1, fail: 0, notShipped: 1 })
-  assert.match(partial.out, /Chrome and views: \d+ pass, 0 fail, 1 not shipped\./)
+  assert.match(partial.out, /Chrome, views and page: \d+ pass, 0 fail, 1 not shipped\./)
+})
+
+test('a page is compared through pageOf: the platform\'s head and body scripts pass, a dropped scriptless style fails (SC-019)', async () => {
+  const platform = String.raw`<meta charset="utf-8"><title>About us</title><script src="/_next/a.js"></script>`
+  const adapter = brokenAdapter({
+    'page/header-section-footer': { from: '<head>', to: `<head>${platform}` },
+    'page/fallback-heading': { from: '<noscript>[\\s\\S]*?</noscript>', to: '' },
+  })
+  try {
+    const r = await run(['--platform', 'broken', '--adapter', adapter.command, ...withFields, ...withStyles])
+    assert.equal(r.code, 1, r.out)
+    const page = r.report.files.find((f) => f.id === 'page')
+    assert.equal(page.kind, 'page')
+    assert.deepEqual(page.fixtures.failures.map((f) => [f.case, f.kind, f.difference]), [['fallback-heading', 'mismatch', 'missing']])
+    assert.match(page.fixtures.failures[0].path, /^html > head > noscript/)
+  } finally {
+    rmSync(adapter.dir, { recursive: true, force: true })
+  }
 })
 
 test('--sections takes a chrome or view id, and a partial run runs only what it names', async () => {

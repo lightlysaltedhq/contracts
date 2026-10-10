@@ -15,7 +15,7 @@ const dir = path.resolve(process.argv[2] ?? path.join(here, '..', 'salt-contract
 let input
 try { input = JSON.parse(readFileSync(0, 'utf8')) } catch (e) { process.stderr.write(`stdin is not a case input: ${e.message}\n`); process.exit(2) }
 // The case names its fixture set under its kind's key: section, chrome or view.
-const id = input?.section ?? input?.chrome ?? input?.view ?? ''
+const id = input?.section ?? input?.chrome ?? input?.view ?? input?.page ?? ''
 const sdir = path.join(dir, 'fixtures', String(id))
 let names = []
 try { names = readdirSync(sdir).filter((f) => f.endsWith('.json')) } catch { /* reported below */ }
