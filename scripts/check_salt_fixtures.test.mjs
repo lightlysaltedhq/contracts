@@ -702,6 +702,10 @@ test('pageOf: the stylesheet link is its rel and its file name only (review of #
     pageOf(page(`<link rel='stylesheet' id='salt-css' href='https://example.com/wp-content/themes/salt/salt.css?ver=6.6' media='all' data-precedence="default">`)))
 })
 
+test('page: the stylesheet link points at salt.css (review of #14, 4)', () => {
+  expectFail(['page'], (io) => io.html(`${PAGE}.html`, 'href="/salt.css"', 'href="/site.css"'), /the page's stylesheet link points at \/site\.css; its file name is salt\.css/)
+})
+
 // ── 4. The normaliser ─────────────────────────────────────────────────────────────────────────
 test('normaliser: one that drops an attribute fails the mutation check', () => {
   expectFail(HERO, (io) => {

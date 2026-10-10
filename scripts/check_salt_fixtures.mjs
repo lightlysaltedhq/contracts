@@ -899,6 +899,11 @@ function checkMarkup(c) {
     const scriptless = (bindings.get('scriptless') ?? []).length > 0
     if (header && !scriptless) fail(`${at}.html: the page draws the header, so its head carries the scriptless phone layout's noscript style (page.json)`)
     if (!header && scriptless) fail(`${at}.html: the page draws no header, so its head carries no scriptless phone layout`)
+    // The stylesheet is salt.css, served verbatim (SC-018); its address is the platform's.
+    for (const link of bindings.get('stylesheet') ?? []) {
+      const href = attr(link, 'href') ?? ''
+      if (!/(^|\/)salt\.css$/.test(href.replace(/[?#].*$/, ''))) fail(`${at}.html: the page's stylesheet link points at ${href}; its file name is salt.css (page.json)`)
+    }
   }
 
   // aria-current follows the page's path (review of #13, 6): in each navigation (the header's
