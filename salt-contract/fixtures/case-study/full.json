@@ -1,0 +1,116 @@
+{
+  "$comment": "document shape: { title, client, summary, results: [{ stat, label }], details: [{ label, value }], image (media id), challenge and solution (rich text HTML, a stored h3 renders h3 at base 2), gallery: [media id], externalUrl, services: [card items resolved for display, with image media ids] }. The view takes labels back, results, challenge, solution, gallery, liveSite and services from site.labels, and the back link's address from site.collectionIndexes['case-study'] (the case studies' index). site.caseStudy is left out, so the featured image is in the flow, the default layout (case-study/aside draws the other). No case draws the header as a band (data-header band), which the markup describes only in a note.",
+  "view": "case-study",
+  "summary": "A case study with every part set, in the default layout: a link back to the index, the title, client, summary, three results, three project details, the featured image as the priority image, a challenge, a solution whose stored h3 renders h3, a gallery of two images, the live-site link opening in a new tab, and two delivered service cards.",
+  "context": {
+    "priorityMedia": true,
+    "path": "/work/hollin-farm-walled-garden/"
+  },
+  "site": {
+    "arrow": "→",
+    "collectionIndexes": {
+      "case-study": {
+        "href": "/work/",
+        "title": "Our work"
+      }
+    },
+    "labels": {
+      "back": "All projects",
+      "results": "The project in numbers",
+      "challenge": "The challenge",
+      "solution": "What we did",
+      "gallery": "Gallery",
+      "liveSite": "Visit the farm's site",
+      "services": "Services delivered"
+    }
+  },
+  "media": {
+    "walled-garden": {
+      "url": "https://uploads.example/walled-garden-{width}.jpg",
+      "width": 2400,
+      "height": 1350,
+      "alt": "The restored walled garden in June, its beds full of vegetables and cut flowers"
+    },
+    "walled-garden-beds": {
+      "url": "https://uploads.example/walled-garden-beds-{width}.jpg",
+      "width": 1600,
+      "height": 1200,
+      "alt": "Raised oak beds edged with box along the south wall"
+    },
+    "walled-garden-path": {
+      "url": "https://uploads.example/walled-garden-path-{width}.jpg",
+      "width": 1200,
+      "height": 900,
+      "alt": "A brick path through the garden to the restored glasshouse"
+    },
+    "garden-design": {
+      "url": "https://uploads.example/garden-design-{width}.jpg",
+      "width": 1200,
+      "height": 800,
+      "alt": "A curved border of grasses and salvias"
+    },
+    "planting-plans": {
+      "url": "https://uploads.example/planting-plans-{width}.jpg",
+      "width": 800,
+      "height": 600,
+      "alt": "A planting plan drawn in pencil and watercolour"
+    }
+  },
+  "document": {
+    "title": "Restoring the walled garden",
+    "client": "Hollin Farm",
+    "summary": "A derelict Victorian kitchen garden brought back into production for the farm shop and café.",
+    "results": [
+      {
+        "stat": "1.2 acres",
+        "label": "back in production"
+      },
+      {
+        "stat": "140",
+        "label": "varieties grown in the first year"
+      },
+      {
+        "stat": "60%",
+        "label": "of the café's vegetables grown on site"
+      }
+    ],
+    "details": [
+      {
+        "label": "Location",
+        "value": "North Yorkshire"
+      },
+      {
+        "label": "Duration",
+        "value": "Eighteen months"
+      },
+      {
+        "label": "Year",
+        "value": "2025"
+      }
+    ],
+    "image": "walled-garden",
+    "challenge": "<p>The walls were sound, but forty years of bramble and ash saplings had taken the beds, and the glasshouse had lost most of its glass.</p>",
+    "solution": "<p>We cleared the garden by hand to keep the old box edging, then laid out the beds again on the original plan.</p><h3>Planting for the café</h3><p>The planting follows the café's menu through the year, with <strong>salad and herbs</strong> nearest the kitchen door.</p>",
+    "gallery": [
+      "walled-garden-beds",
+      "walled-garden-path"
+    ],
+    "externalUrl": "https://hollinfarm.example/",
+    "services": [
+      {
+        "id": "garden-design",
+        "title": "Garden design",
+        "href": "/services/garden-design/",
+        "image": "garden-design",
+        "text": "Plans drawn to suit the plot, the soil and the way you use the space."
+      },
+      {
+        "id": "planting-plans",
+        "title": "Planting plans",
+        "href": "/services/planting-plans/",
+        "image": "planting-plans",
+        "text": "Borders planned plant by plant, season by season."
+      }
+    ]
+  }
+}

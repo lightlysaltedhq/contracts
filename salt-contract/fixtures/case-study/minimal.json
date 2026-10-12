@@ -1,0 +1,22 @@
+{
+  "$comment": "Same shapes as case-study/full. The document has only its title, so the header holds the h1 alone and every optional part is left out. context.priorityMedia is true but the case study has no image to claim it.",
+  "view": "case-study",
+  "summary": "A case study with only a title: no back link, client, summary, results, details, featured image, challenge, solution, gallery, live-site link or services.",
+  "context": {
+    "priorityMedia": true,
+    "path": "/work/village-green/"
+  },
+  "site": {
+    "labels": {
+      "results": "The project in numbers",
+      "challenge": "The challenge",
+      "solution": "What we did",
+      "gallery": "Gallery",
+      "liveSite": "Visit the site",
+      "services": "Services delivered"
+    }
+  },
+  "document": {
+    "title": "The village green"
+  }
+}

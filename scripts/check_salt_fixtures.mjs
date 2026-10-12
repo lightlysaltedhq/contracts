@@ -219,7 +219,7 @@ function settingsFields(fieldsDoc) {
 // list is a typo or an undeclared shape, and is refused. logoHeight is the logo's drawn height in
 // px (contract/image-sizes.json, the logo slot).
 const SITE_KEYS = ['arrow', 'labels', 'collectionIndexes', 'acceptsEnquiries', 'organisation', 'contactForm', 'timezone', 'maps',
-  'name', 'home', 'logo', 'logoHeight', 'header', 'footer', 'consent', 'themeToggle', 'displayPreferences', 'search']
+  'name', 'home', 'logo', 'logoHeight', 'header', 'footer', 'consent', 'themeToggle', 'displayPreferences', 'search', 'caseStudy']
 
 function checkSiteAndMedia(c) {
   const { input, at } = c
@@ -227,6 +227,9 @@ function checkSiteAndMedia(c) {
   for (const k of Object.keys(input.site ?? {})) if (!SITE_KEYS.includes(k)) fail(`${at}.json: site.${k} is not a declared site key (${SITE_KEYS.join(', ')})`)
   const h = input.site?.logoHeight
   if (h !== undefined && !(Number.isInteger(h) && h > 0)) fail(`${at}.json: site.logoHeight is the logo's drawn height, a whole number of px`)
+  // The case study view's layout, the site's in code rather than a stored value (case-study.json).
+  const media = input.site?.caseStudy?.media
+  if (input.site?.caseStudy !== undefined && !(isObject(input.site.caseStudy) && Object.keys(input.site.caseStudy).every((k) => k === 'media') && ['flow', 'aside'].includes(media ?? 'flow'))) fail(`${at}.json: site.caseStudy is { media }, flow or aside, where the case study view draws its featured image`)
   for (const [id, m] of Object.entries(input.media ?? {})) {
     const p = `${at}.json media.${id}`
     // The record names the upload, never its sizes or srcset: those are the slot's (SC-016).
