@@ -286,6 +286,7 @@ function checkOtherInput(c) {
   if (ctx.path !== undefined && !(typeof ctx.path === 'string' && ctx.path.startsWith('/'))) fail(`${at}.json: context.path is the page's path, starting with /`)
   if (input.state !== undefined && !isObject(input.state)) fail(`${at}.json: state is an object`)
   for (const k of Object.keys(isObject(input.state) ? input.state : {})) if (!STATES.includes(k)) fail(`${at}.json: state.${k} is not a documented state (${STATES.join(', ')})`)
+  for (const k of ['consentPanelOpen', 'drawerOpen']) if (isObject(input.state) && k in input.state && typeof input.state[k] !== 'boolean') fail(`${at}.json: state.${k} is true or false; it is ${JSON.stringify(input.state[k])}`)
   if (input.state?.themeScheme !== undefined && !['light', 'dark'].includes(input.state.themeScheme)) fail(`${at}.json: state.themeScheme is light or dark, the scheme the platform knows when it renders`)
   // Rich text is given as stored in a view as in a section (SC-023): body headings are h3 and h4,
   // and the view's base level decides what each is drawn as.

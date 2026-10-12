@@ -804,12 +804,20 @@ test('sc-024: a panel is drawn open if and only if the case\'s state says so', (
   expectFail(['site-header'], undrawn('site-header', 'drawer-open'), /drawer-open\.html: state\.drawerOpen says the drawer is open, but it is not drawn/)
   expectFail(['site-footer'], (io) => io.json('site-footer/display-preferences.json', (d) => { d.state = { drawerOpen: true } }), /display-preferences\.html: state\.drawerOpen says the drawer is open, but it is not drawn/)
 })
+test('sc-024: a panel\'s state is true or false, and nothing else', () => {
+  for (const [set, name, key] of [['site-footer', 'consent-panel-open', 'consentPanelOpen'], ['site-header', 'drawer-open', 'drawerOpen']]) {
+    for (const value of ['false', 'true', {}, [], 1, 0, null]) {
+      expectFail([set], (io) => io.json(`${set}/${name}.json`, (d) => { d.state = { [key]: value } }), new RegExp(`${name}\\.json: state\\.${key} is true or false; it is `))
+    }
+  }
+  for (const state of ['open', [], 1, null]) expectFail(['site-footer'], (io) => io.json('site-footer/display-preferences.json', (d) => { d.state = state }), /display-preferences\.json: state is an object/)
+})
 test('sc-024: every state is documented, and the README\'s state row and the gate agree', () => {
   const readme = readFileSync(path.join(pkg, 'README.md'), 'utf8')
-  assert.ok(readme.includes('`drawerOpen`: ') && readme.includes('`themeScheme`'))
+  assert.ok(readme.includes('`drawerOpen` (') && readme.includes('`themeScheme`'))
   expectFail(['site-footer'], (io) => io.json('site-footer/display-preferences.json', (d) => { d.state = { menuOpen: true } }), /state\.menuOpen is not a documented state \(consentPanelOpen, drawerOpen, themeScheme\)/)
-  expectFail(['site-footer'], (io) => io.write('README.md', readme.replace('`drawerOpen`: ', '`searchOpen`: the search is open. `drawerOpen`: ')), /README\.md documents the state searchOpen, which the gate does not know/)
-  expectFail(['site-footer'], (io) => io.write('README.md', readme.replace('`drawerOpen`: ', 'The drawer: ')), /README\.md's `state` row does not document drawerOpen, a state the gate knows/)
+  expectFail(['site-footer'], (io) => io.write('README.md', readme.replace('`drawerOpen` (', '`searchOpen`: the search is open. `drawerOpen` (')), /README\.md documents the state searchOpen, which the gate does not know/)
+  expectFail(['site-footer'], (io) => io.write('README.md', readme.replace('`drawerOpen` (', 'The drawer (')), /README\.md's `state` row does not document drawerOpen, a state the gate knows/)
   expectFail(['site-footer'], (io) => io.write('README.md', readme.replace('| `state` |', '| `states` |')), /README\.md: no `state` row/)
 })
 test('sc-019: the search input keeps the query', () => {
