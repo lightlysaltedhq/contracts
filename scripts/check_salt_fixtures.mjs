@@ -264,7 +264,8 @@ const STATES = ['consentPanelOpen', 'drawerOpen', 'themeScheme']
 {
   const readme = path.join(dir, 'README.md')
   const row = existsSync(readme) ? readFileSync(readme, 'utf8').split('\n').find((l) => l.startsWith('| `state` |')) : undefined
-  if (existsSync(readme) && row === undefined) fail('README.md: no `state` row in the fixtures\' input table')
+  if (!existsSync(readme)) fail('README.md is missing, so the states a case may carry are documented nowhere')
+  else if (row === undefined) fail('README.md: no `state` row in the fixtures\' input table')
   if (row !== undefined) {
     const documented = [...new Set([...row.matchAll(/`([a-z]+(?:[A-Z][a-z]*)+)`/g)].map((m) => m[1]))]
     for (const k of documented) if (!STATES.includes(k)) fail(`README.md documents the state ${k}, which the gate does not know`)

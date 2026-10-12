@@ -20,6 +20,7 @@ function copy(sections, edit = () => {}) {
   const dir = mkdtempSync(path.join(tmpdir(), 'salt-fixtures-gate-'))
   cpSync(path.join(pkg, 'contract'), path.join(dir, 'contract'), { recursive: true })
   cpSync(path.join(pkg, 'normalise.mjs'), path.join(dir, 'normalise.mjs'))
+  cpSync(path.join(pkg, 'README.md'), path.join(dir, 'README.md'))
   cpSync(path.join(pkg, 'styles'), path.join(dir, 'styles'), { recursive: true })
   for (const s of sections) cpSync(path.join(pkg, 'fixtures', s), path.join(dir, 'fixtures', s), { recursive: true })
   const file = (rel) => path.join(dir, 'fixtures', rel)
@@ -819,6 +820,7 @@ test('sc-024: every state is documented, and the README\'s state row and the gat
   expectFail(['site-footer'], (io) => io.write('README.md', readme.replace('`drawerOpen` (', '`searchOpen`: the search is open. `drawerOpen` (')), /README\.md documents the state searchOpen, which the gate does not know/)
   expectFail(['site-footer'], (io) => io.write('README.md', readme.replace('`drawerOpen` (', 'The drawer (')), /README\.md's `state` row does not document drawerOpen, a state the gate knows/)
   expectFail(['site-footer'], (io) => io.write('README.md', readme.replace('| `state` |', '| `states` |')), /README\.md: no `state` row/)
+  expectFail(['site-footer'], (io) => rmSync(path.join(io.dir, 'README.md')), /README\.md is missing, so the states a case may carry are documented nowhere/)
 })
 test('sc-019: the search input keeps the query', () => {
   expectFail(['search'], (io) => io.html('search/results.html', ' value="hedge"', ''), /<input\.salt-search__input> lacks value, which the markup requires when a query is set/)
