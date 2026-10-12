@@ -986,6 +986,13 @@ test('normalise: style spacing does not count, a declaration does', () => {
   same('<div style="--salt-section-space: var(--space-section-md);"></div>', '<div style="--salt-section-space:var(--space-section-md)"></div>')
   differ('<div style="object-fit: cover"></div>', '<div style="object-fit: contain"></div>')
 })
+test('normalise: a framework\'s own attributes on an image are not masked (SC-024)', () => {
+  const img = (extra = '', style = 'object-fit: cover') => `<img class="salt-hero__image" src="/u/a.jpg" alt="" style="${style}"${extra}>`
+  differ(img(), img(' data-nimg="1"'))
+  differ(img(), img(' data-nimg="fill"'))
+  differ(img(), img('', 'color: transparent; object-fit: cover'))
+  differ('<img src="/u/a.jpg" alt="">', '<img src="/u/a.jpg" alt="" style="color:transparent">')
+})
 test('normalise: white space between the children of a flex or grid container does not count', () => {
   // The three cases the review of #10's fixes raised: a flex actions row, an inline-flex tab
   // control and a grid process step, each written by a template one element to a line.
