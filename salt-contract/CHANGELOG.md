@@ -43,6 +43,9 @@ test, applied through section 2's table, where the stricter row wins.
   field schema's platform note, keyed by part for a collection-query.
 - The `settings.anchorId` description states the slug rule in plain words, with no WordPress
   function name and no file path (SC-023). The rule itself is unchanged, in `markup/section.json`.
+  No description an editor is shown cites a decision, a file or a platform function:
+  `settings.toneDark` and the carousel's `cardStyle` are reworded too, and a test holds every
+  emitted description to it on both platforms.
 - Markup (`./markup/*`): element order, `salt-*` classes, data attributes, ids, heading rules,
   zero states and priority media for every section, component and view, and the page skeleton.
 - The shared stylesheets (`./styles/*`): base, sections, primitives, blocks, chrome and views, and

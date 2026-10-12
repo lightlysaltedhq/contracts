@@ -111,7 +111,7 @@
         "field": "source",
         "equals": "inline"
       },
-      "description": "The variant contract/sections.json names cardStyle.",
+      "description": "How each card you add here is drawn.",
       "platforms": {
         "wordpress": {
           "formerly": "card_type",

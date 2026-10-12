@@ -12,6 +12,7 @@ import { fileURLToPath } from 'node:url'
 import Ajv2020 from 'ajv/dist/2020.js'
 
 import { hasVisibleText, loadContract } from '../salt-contract/emit/_contract.mjs'
+import { acfSnapshot } from '../salt-contract/emit/acf.mjs'
 import { checkPayloadSnapshot, isFilled, payloadSnapshot, PLATFORM_ADDITIONS, toPayloadBlocks, VOCABULARIES } from '../salt-contract/emit/payload.mjs'
 
 const emitter = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'salt-contract', 'emit', 'payload.mjs')
@@ -386,6 +387,29 @@ test('SC-023: the anchor\'s description states its rule with no WordPress functi
   const { description } = field(block(blocks(), 'hero').fields, 'settings.anchorId').admin
   assert.match(description, /lower-case letters, digits and single hyphens/)
   assert.doesNotMatch(description, /sanitize_|[a-z]+_[a-z]+\(|\.(json|php|ts)\b|markup\/|#/)
+})
+
+test('SC-023: no description an editor is shown cites a decision, a file or a platform function, on either platform', () => {
+  const shown = []
+  const walk = (node, at) => {
+    if (Array.isArray(node)) { node.forEach((x, i) => walk(x, `${at}[${x?.slug ?? x?.name ?? i}]`)); return }
+    if (!node || typeof node !== 'object') return
+    for (const [key, value] of Object.entries(node)) {
+      if ((key === 'description' || key === 'instructions') && typeof value === 'string') shown.push([`${at}.${key}`, value])
+      else if (key !== 'custom' && key !== 'salt') walk(value, `${at}.${key}`)
+    }
+  }
+  const icons = JSON.parse(readFileSync(path.join(path.dirname(emitter), '..', 'contract', 'sections.json'), 'utf8')).icons.content.map((value) => ({ value, label: value }))
+  walk(JSON.parse(payloadSnapshot({ icons })), 'payload')
+  walk(JSON.parse(acfSnapshot({ icons })), 'acf')
+  assert.ok(shown.length > 100, `${shown.length} descriptions read`)
+  const refused = [
+    ['a decision id', /\b(SC|BD|D|FLEET)-?\d+\b/],
+    ['a file path', /[\w-]+\.(json|php|tsx?|mjs|css|md)\b|\b(contract|markup|fields|schema|inc|src)\/[\w-]/],
+    ['a platform function', /\b[a-z]+(_[a-z]+)+\b|\b[a-zA-Z_]+\(/],
+    ['a markup rule reference', /\b[a-z-]+#[a-z-]+/],
+  ]
+  for (const [at, text] of shown) for (const [what, pattern] of refused) assert.doesNotMatch(text, pattern, `${at} cites ${what}`)
 })
 
 test('every enum name fits Postgres\'s 63 characters', () => {
