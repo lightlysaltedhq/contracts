@@ -4,7 +4,7 @@ Newest first. Dates are DD/MM/YYYY. What each part of a version means, and how a
 announced and migrated, is in `RELEASE-POLICY.md`. Decisions cited as `SC-nnn` are in Lightly
 Salted's decision log for Product Salt.
 
-## 1.0.0 (candidate `1.0.0-rc.2`, prepared 12/10/2026; not published, dated when tagged)
+## 1.0.0 (candidate `1.0.0-rc.3`, prepared 12/10/2026; not published, dated when tagged)
 
 **Semver call: MAJOR, the first release of the contract.** No earlier version was published, so no
 implementation conformed to one. Adopting it is still a migration for existing sites, because the
@@ -76,6 +76,15 @@ test, applied through section 2's table, where the stricter row wins.
   `archive/topic`'s and `search/results`'s expected HTML do; which links are drawn, their order,
   labels, `rel`, `data-step` and `aria-current` still compare, and a link with no address
   differs. A listing section's pagination compares whole.
+- Three rulings on the run against `1.0.0-rc.2` (SC-024). A framework's own attributes on an image
+  are not masked: `next/image`'s `data-nimg` and inline `color:transparent` differ, and
+  `markup/media.json` records that Salt for Next.js owes its own `img`. The footer's consent
+  control is drawn `aria-disabled="true"` until script hydrates: `markup/site-footer.json` declares
+  the attribute its note already described, the five footer fixtures and the four page fixtures
+  expect it, and the gate requires it of every fixture. An icon's `fill` and `stroke` are artwork,
+  like what is inside it (SC-007): the normaliser drops both from `svg.salt-icon`, so a filled
+  mark passes against a stroked fixture, while the svg's every other attribute still compares and
+  the gate still holds each of the two to the values `markup/icon.json` allows.
 - The case-study view has fixtures and is required of every implementation (SC-021).
   `fixtures/case-study/` holds four cases (`full`, `aside`, `band` and `minimal`), `case-study`
   joins `REQUIRED_FILES`, and a full conformance run refuses to declare it not shipped. The
