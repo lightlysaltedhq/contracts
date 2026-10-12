@@ -159,7 +159,8 @@ function convertField(f, ctx) {
       }
       break
     case 'select': {
-      typed('select')
+      // The contract says which selects are radios (the schema's control), on ACF as on Payload.
+      typed(f.control === 'radio' ? 'radio' : 'select')
       let opts = f.options
       if (f.optionsFrom === 'icons') {
         if (!Array.isArray(options.icons)) {

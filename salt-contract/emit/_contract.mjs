@@ -350,13 +350,15 @@ export function planSections(contract, { installed = new Set(SOURCES), sections 
 
 /**
  * The link's fixed shape (field-definition schema, "link"). `withLabel: false` drops `label`.
- * `requiredWithLink` marks the parts a required link must have.
+ * `requiredWithLink` marks the parts a required link must have. Its type is a radio (the schema's
+ * `control`), as every link's is in Salt for Next.js 0.11.0 (SC-023).
  */
 export const LINK_SHAPE = [
   { name: 'label', type: 'text', label: 'Label', description: 'The visible text of the link.', requiredWithLink: true },
   {
     name: 'type',
     type: 'select',
+    control: 'radio',
     label: 'Type',
     options: [
       { value: 'internal', label: 'A page on this site' },

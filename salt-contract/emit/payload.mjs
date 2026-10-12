@@ -163,7 +163,8 @@ function convertField(f, ctx) {
       }
       break
     case 'select': {
-      out.type = 'select'
+      // The contract says which selects are radios (the schema's control); its layout is the consumer's.
+      out.type = f.control === 'radio' ? 'radio' : 'select'
       out.label = f.label
       if (f.required) out.required = true
       let opts = f.options

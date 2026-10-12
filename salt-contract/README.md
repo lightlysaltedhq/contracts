@@ -184,6 +184,13 @@ is refused. On ACF the picker's `conditional_logic` names the layout's source se
 per source with categories; ACF cannot hide one mode choice per source, so the mode field records
 the rule in `salt.modeRequires` for the site's save check.
 
+**Radios.** The contract says which selects are radios (SC-023): a select marked
+`"control": "radio"` in its field definition is a Payload `radio` and an ACF `radio`, offering and
+storing what a select would, and the snapshot checks compare the type. One field is marked today,
+the `type` of every link (internal or external), which is part of the link's fixed shape in
+`emit/_contract.mjs`. A radio's layout stays the platform's: on Payload it is `admin.layout`, one
+of the keys a consumer may add.
+
 **Enum names.** Every select carries the name of its Postgres enum type (`enumName`), and the
 snapshot check compares it. There is one type per vocabulary (SC-023, after Salt for Next.js's
 BD-035): selects that offer the same values in the same order share a type, named in

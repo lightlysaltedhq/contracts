@@ -31,6 +31,10 @@ test, applied through section 2's table, where the stricter row wins.
   neither snapshot. The check sees the clauses a field records under `custom.salt.condition`,
   and fails a snapshot that drops, adds or changes them; it does not see whether a field has an
   `admin.condition`, or what it does. A comparison may arrive in a later minor.
+- The contract says which selects are radios (SC-023). The field schema's select gains an
+  optional `control`, whose one value is `radio`; both emitters draw such a select as a radio
+  (Payload `radio`, ACF `radio`) with a select's options, default and stored value. A link's
+  `type` is the one radio. Its layout is the platform's (`admin.layout` on Payload).
 - Postgres enum types, one per vocabulary (SC-023, after Salt for Next.js's BD-035). Selects that
   offer the same values share one type, named in `VOCABULARIES` in `emit/payload.mjs`:
   `enum_grid_columns`, `enum_button_style`, `enum_alignment` and `enum_media_side`. The site's

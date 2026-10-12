@@ -195,8 +195,11 @@ test('a link is the fixed group, its document a post object of linkTo, required 
   const link = field(hero.sub_fields, 'buttons.link')
   assert.deepEqual([link.type, link.required, link.salt], ['group', undefined, { link: true }])
   assert.deepEqual(link.sub_fields.map((f) => [f.name, f.type, f.required ?? 0]), [
-    ['label', 'text', 1], ['type', 'select', 0], ['document', 'post_object', 1], ['url', 'text', 1], ['newTab', 'true_false', 0],
+    ['label', 'text', 1], ['type', 'radio', 0], ['document', 'post_object', 1], ['url', 'text', 1], ['newTab', 'true_false', 0],
   ])
+  // The link's type is a radio on ACF as on Payload (SC-023): the same choices and default a select has.
+  const type = field(link.sub_fields, 'type')
+  assert.deepEqual([type.choices, type.default_value, type.allow_null], [{ internal: 'A page on this site', external: 'An external address' }, 'internal', undefined])
   const document = field(link.sub_fields, 'document')
   assert.deepEqual(document.post_type, ['page', 'post'])
   assert.equal(shows(document, { type: 'internal' }, link.sub_fields), true)

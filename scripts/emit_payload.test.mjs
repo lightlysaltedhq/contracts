@@ -79,6 +79,8 @@ test('SC-023: a consumer may add the listed keys to a field, at any depth, and t
     // Beside a description the contract gives, on a nested field with no admin of its own, and on a setting.
     Object.assign(at('hero', 'buttons').admin, { components: { RowLabel: { path: 'site/admin', exportName: 'RowLabel' } }, initCollapsed: true })
     at('hero', 'image').admin.components = { afterInput: [{ path: 'site/admin', exportName: 'SizeNotice' }] }
+    // A radio's layout goes on a radio: the link's type is one.
+    assert.equal(at('hero', 'buttons.link.type').type, 'radio')
     at('hero', 'buttons.link.type').admin = { layout: 'horizontal' }
     at('hero', 'settings.anchorId').hooks = { beforeValidate: [null] }
   })
@@ -292,10 +294,13 @@ test('a link is the fixed group, its document pointing at linkTo, required parts
   const link = field(hero.fields, 'buttons.link')
   assert.equal(link.type, 'group')
   assert.deepEqual(link.fields.map((f) => [f.name, f.type, !!f.required]), [
-    ['label', 'text', true], ['type', 'select', false], ['document', 'relationship', true], ['url', 'text', true], ['newTab', 'checkbox', false],
+    ['label', 'text', true], ['type', 'radio', false], ['document', 'relationship', true], ['url', 'text', true], ['newTab', 'checkbox', false],
   ])
+  // The link's type is a radio (SC-023): the contract says so, and it stores what a select would.
   const type = field(link.fields, 'type')
-  assert.deepEqual([type.enumName, type.defaultValue], ['enum_link_type', 'internal'])
+  assert.deepEqual([type.enumName, type.defaultValue, type.options.map((o) => o.value)], ['enum_link_type', 'internal', ['internal', 'external']])
+  // No other select of the contract is one: a select not marked a radio stays a drop-down.
+  assert.deepEqual([...new Set(selectsOf(blocks()).filter(([, f]) => f.type === 'radio').map(([at]) => at.split('.').slice(-2).join('.')))], ['link.type', 'cta.type'])
   const document = field(link.fields, 'document')
   assert.deepEqual(document.relationTo, ['pages', 'posts'])
   assert.equal(shows(document, { type: 'internal' }), true)
@@ -394,7 +399,7 @@ test('every enum name fits Postgres\'s 63 characters', () => {
 // Every select the blocks hold, as [path, field].
 const selectsOf = (list) => {
   const out = []
-  const walk = (fields, at) => { for (const f of fields) { if (f.type === 'select') out.push([`${at}.${f.name}`, f]); if (f.fields) walk(f.fields, `${at}.${f.name}`) } }
+  const walk = (fields, at) => { for (const f of fields) { if (f.type === 'select' || f.type === 'radio') out.push([`${at}.${f.name}`, f]); if (f.fields) walk(f.fields, `${at}.${f.name}`) } }
   for (const b of list) walk(b.fields, b.slug)
   return out
 }
