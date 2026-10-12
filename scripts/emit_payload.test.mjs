@@ -112,9 +112,19 @@ test('SC-023: a field whose only admin content is a condition takes the listed k
     at('carousel', 'cards').hooks = { beforeValidate: [null] }
   })
   assert.deepEqual(checkPayloadSnapshot(snapshot, { icons }), { ok: true, problems: [] })
-  // An unlisted key there still fails, named.
-  assert.deepEqual(checkPayloadSnapshot(decorated((at) => { at('carousel', 'cards').admin = { initCollapsed: true, readOnly: true } }), { icons }).problems,
-    ['blocks[carousel].fields[cards].admin is in the snapshot and no longer generated'])
+  // A difference inside admin there is reported at its own key, never at admin or at a listed key.
+  assert.deepEqual(checkPayloadSnapshot(decorated((at) => { at('carousel', 'cards').admin = { initCollapsed: true, readOnly: true, description: 'Ours.' } }), { icons }).problems, [
+    'blocks[carousel].fields[cards].admin.readOnly is in the snapshot and no longer generated',
+    'blocks[carousel].fields[cards].admin.description is in the snapshot and no longer generated',
+  ])
+  // The same on a field with no admin at all, and for a description the contract gives and the snapshot lacks.
+  assert.deepEqual(checkPayloadSnapshot(decorated((at) => {
+    at('hero', 'buttons.link.newTab').admin = { layout: 'horizontal', description: 'Ours.' }
+    delete at('hero', 'image').admin
+  }), { icons }).problems, [
+    'blocks[hero].fields[image].admin.description is generated and not in the snapshot',
+    'blocks[hero].fields[buttons].fields[link].fields[newTab].admin.description is in the snapshot and no longer generated',
+  ])
 })
 
 test('SC-023: whether a field has an admin condition is not seen, with or without a listed key beside it; its record is', () => {

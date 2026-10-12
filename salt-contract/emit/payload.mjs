@@ -428,19 +428,23 @@ function without(obj, [key, ...rest]) {
   return kept
 }
 
-// Fields as they are compared, at every depth: without the consumer's additions, and without an
-// `admin` that holds nothing. A field whose only admin content is a condition serialises as
-// `"admin": {}`, since the function drops out, so an empty admin says no more than an absent one.
-function comparable(fields) {
+// Fields as they are compared, at every depth: without the consumer's additions, and with an
+// `admin` that holds nothing read as an absent one. A field whose only admin content is a
+// condition serialises as `"admin": {}`, since the function drops out, so an empty admin says no
+// more than none. `empty` says which of the two every such field is given: none, for comparing
+// bytes, or an empty one, so that the diff names the key inside `admin` that differs.
+function comparable(fields, empty) {
   if (!Array.isArray(fields)) return fields
   return fields.map((field) => {
     if (!isRecord(field)) return field
     let own = PLATFORM_ADDITIONS.reduce((f, p) => without(f, p.split('.')), field)
     if (isRecord(own.admin) && Object.keys(own.admin).length === 0) own = without(own, ['admin'])
-    return 'fields' in own ? { ...own, fields: comparable(own.fields) } : own
+    if (empty && !('admin' in own)) own = { ...own, admin: {} }
+    return 'fields' in own ? { ...own, fields: comparable(own.fields, empty) } : own
   })
 }
-const comparableBlocks = (blocks) => (Array.isArray(blocks) ? blocks.map((b) => (isRecord(b) && 'fields' in b ? { ...b, fields: comparable(b.fields) } : b)) : blocks)
+const comparableBlocks = (blocks, empty = false) =>
+  (Array.isArray(blocks) ? blocks.map((b) => (isRecord(b) && 'fields' in b ? { ...b, fields: comparable(b.fields, empty) } : b)) : blocks)
 
 /**
  * Regenerate with `options` and compare with a committed snapshot (its text). `ok` is true only
@@ -455,11 +459,11 @@ export function checkPayloadSnapshot(snapshot, options = {}) {
   if (now === snapshot) return { ok: true, problems: [] }
   let parsed
   try { parsed = JSON.parse(snapshot) } catch (e) { return { ok: false, problems: [`the snapshot is not JSON: ${e.message}`] } }
+  const problems = []
+  diffSnapshots(comparableBlocks(parsed, true), comparableBlocks(JSON.parse(now), true), 'blocks', keyOf, problems)
+  if (problems.length) return { ok: false, problems }
   const was = comparableBlocks(parsed)
   const generated = comparableBlocks(JSON.parse(now))
-  const problems = []
-  diffSnapshots(was, generated, 'blocks', keyOf, problems)
-  if (problems.length) return { ok: false, problems }
   // Same structure: the bytes still have to agree, in the snapshot as committed (its formatting)
   // and in what is compared (its key order). A regenerated snapshot fixes either.
   if (serialisePayloadBlocks(parsed) === snapshot && serialisePayloadBlocks(was) === serialisePayloadBlocks(generated)) return { ok: true, problems: [] }
