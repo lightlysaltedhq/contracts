@@ -144,14 +144,23 @@ exactly the keys `PLATFORM_ADDITIONS` in `emit/payload.mjs` lists, and nothing e
 Each is left out whole, at any depth of a block's fields, and only on a field: a block's own keys,
 an option and `custom.salt` compare in full. Any other added key fails, and so does a change to a
 key the contract generates, whatever sits beside it: `admin.description` still compares on a field
-that also carries `admin.components`. What is left is compared byte for byte. A validator is a
-function, so it never reaches a snapshot.
+that also carries `admin.components`. An `admin` that holds nothing, before or after these keys
+are taken out, compares as an absent one on both sides. What is left is compared byte for byte. A
+validator is a function, so it never reaches a snapshot.
 
 **Conditions are not compared in 1.0.0** (SC-023). `admin.condition` is a function and drops out
-of both the committed and the regenerated snapshot. The check compares the clauses each field
-records under `custom.salt.condition`; it does not run, or read, the consumer's own condition. A
-consumer whose condition shows a field at other times than the contract's clauses say therefore
-still passes. A comparison of conditions may arrive in a later minor version.
+of both the committed and the regenerated snapshot.
+
+- *Seen:* the record. Each conditioned field carries its clauses under `custom.salt.condition`,
+  and that is a generated value like any other: a snapshot that drops, adds or changes it fails.
+- *Not seen:* the function. Whether a field has an `admin.condition` at all, and what it does,
+  are invisible. A consumer that drops a generated condition, adds one to a field the contract
+  always shows, or shows a field at other times than the clauses say, passes in each case, and
+  the result is the same with or without one of the keys above on that field. (A field whose only
+  admin content is a condition serialises as `"admin": {}`, which is why an empty `admin` and an
+  absent one are read alike.)
+
+A comparison of conditions may arrive in a later minor version.
 
 **Fitting the site's sources.** `planSections` in `emit/_contract.mjs` decides, for every emitter,
 which sections a site gets. A section that needs a source the site does not install is left out,

@@ -92,15 +92,49 @@ test('SC-023: a key outside the list fails, beside a listed one or alone', () =>
     ['blocks[hero].fields[buttons].admin.readOnly is in the snapshot and no longer generated'])
   assert.deepEqual(problemsOf((at) => { at('hero', 'heading').access = {} }),
     ['blocks[hero].fields[heading].access is in the snapshot and no longer generated'])
-  // An admin the consumer adds and leaves empty is not one of the keys, so it is still a difference.
-  assert.deepEqual(problemsOf((at) => { at('hero', 'buttons.link.type').admin = {} }),
-    ['blocks[hero].fields[buttons].fields[link].fields[type].admin is in the snapshot and no longer generated'])
   // The keys are a field's: on the block, an option or the custom.salt record they compare.
   assert.deepEqual(problemsOf((at, list) => { block(list, 'hero').hooks = {} }), ['blocks[hero].hooks is in the snapshot and no longer generated'])
   assert.deepEqual(problemsOf((at) => { at('hero', 'variant').options[0].hooks = {} }),
     ['blocks[hero].fields[variant].options[full-bleed].hooks is in the snapshot and no longer generated'])
   assert.deepEqual(problemsOf((at) => { at('hero', 'settings.anchorId').custom.salt.hooks = {} }),
     ['blocks[hero].fields[settings].fields[anchorId].custom.salt.hooks is in the snapshot and no longer generated'])
+})
+
+test('SC-023: a field whose only admin content is a condition takes the listed keys too', () => {
+  // The condition is a function, so the generated snapshot holds an empty admin for such a field.
+  const cards = field(block(JSON.parse(payloadSnapshot({ icons })), 'carousel').fields, 'cards')
+  assert.deepEqual(cards.admin, {})
+  const snapshot = decorated((at) => {
+    at('carousel', 'cards').admin = { components: { RowLabel: { path: 'site/admin', exportName: 'RowLabel' } }, initCollapsed: true }
+    at('carousel', 'cards').hooks = { beforeValidate: [null] }
+  })
+  assert.deepEqual(checkPayloadSnapshot(snapshot, { icons }), { ok: true, problems: [] })
+  // An unlisted key there still fails, named.
+  assert.deepEqual(checkPayloadSnapshot(decorated((at) => { at('carousel', 'cards').admin = { initCollapsed: true, readOnly: true } }), { icons }).problems,
+    ['blocks[carousel].fields[cards].admin is in the snapshot and no longer generated'])
+})
+
+test('SC-023: whether a field has an admin condition is not seen, with or without a listed key beside it; its record is', () => {
+  // In a snapshot a condition is an admin with nothing in it: `conditioned` has one, `plain` has no admin.
+  const conditioned = ['carousel', 'cards']
+  const plain = ['hero', 'buttons.link.newTab']
+  assert.equal(field(block(JSON.parse(payloadSnapshot({ icons })), 'hero').fields, 'buttons.link.newTab').admin, undefined)
+  const cases = {
+    'a condition dropped': (at) => { delete at(...conditioned).admin },
+    'a condition dropped, a listed key beside it': (at) => { delete at(...conditioned).admin; at(...conditioned).hooks = {} },
+    'a condition kept, a listed key beside it': (at) => { at(...conditioned).admin = { initCollapsed: true } },
+    'a condition added': (at) => { at(...plain).admin = {} },
+    'a condition added, a listed key beside it': (at) => { at(...plain).admin = { components: { Field: { path: 'site/admin' } } } },
+  }
+  for (const [what, decorate] of Object.entries(cases)) assert.deepEqual(checkPayloadSnapshot(decorated(decorate), { icons }), { ok: true, problems: [] }, what)
+  // The clauses a field records are generated values, so dropping or changing them fails either way.
+  for (const beside of [false, true]) {
+    const { problems } = checkPayloadSnapshot(decorated((at) => {
+      delete at(...conditioned).custom.salt.condition
+      if (beside) at(...conditioned).admin = { initCollapsed: true }
+    }), { icons })
+    assert.deepEqual(problems, ['blocks[carousel].fields[cards].custom.salt.condition is generated and not in the snapshot'])
+  }
 })
 
 test('SC-023: a listed key cannot hide a change to a value the contract owns', () => {

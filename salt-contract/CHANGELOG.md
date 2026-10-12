@@ -26,9 +26,11 @@ test, applied through section 2's table, where the stricter row wins.
   `emit/payload.mjs` names the keys a consumer may add to a field: `admin.components`,
   `admin.initCollapsed`, `admin.layout` and `hooks`. `checkPayloadSnapshot` leaves out exactly
   those, on a field at any depth, and compares everything else byte for byte, so any other added
-  key and any change to a generated one still fails. Admin conditions are not compared in 1.0.0:
-  a condition is a function and is in neither snapshot, so the check reads only the clauses a
-  field records under `custom.salt.condition`. A comparison may arrive in a later minor.
+  key and any change to a generated one still fails. An `admin` holding nothing compares as an
+  absent one. Admin conditions are not compared in 1.0.0: a condition is a function and is in
+  neither snapshot. The check sees the clauses a field records under `custom.salt.condition`,
+  and fails a snapshot that drops, adds or changes them; it does not see whether a field has an
+  `admin.condition`, or what it does. A comparison may arrive in a later minor.
 - Postgres enum types, one per vocabulary (SC-023, after Salt for Next.js's BD-035). Selects that
   offer the same values share one type, named in `VOCABULARIES` in `emit/payload.mjs`:
   `enum_grid_columns`, `enum_button_style`, `enum_alignment` and `enum_media_side`. The site's

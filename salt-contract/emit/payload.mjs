@@ -25,10 +25,16 @@
 // ── Conditions are not compared in 1.0.0 (SC-023) ────────────────────────────────────────────
 //
 // `admin.condition` is a function, so it is in neither the committed snapshot nor the regenerated
-// one. `checkPayloadSnapshot` compares the clauses a field records under `custom.salt.condition`
-// and nothing of the function beside them: a consumer whose own condition shows a field at other
-// times than those clauses say still passes. Whether a consumer's conditions behave as the
-// contract's is therefore not part of conformance to 1.0.0; a comparison may come in a later minor.
+// one. What `checkPayloadSnapshot` sees is the record: the clauses a field carries under
+// `custom.salt.condition`, compared like any other generated value, so a snapshot that drops,
+// adds or changes that record fails. What it does not see is the function. Whether a field has an
+// `admin.condition` at all, and what it does, are both invisible: a consumer that drops a
+// generated condition, adds one of its own to a field the contract shows always, or shows a field
+// at other times than the clauses say, passes in each case, with or without one of its additions
+// on the same field. (A field whose only admin content is a condition serialises as an empty
+// `admin`; the check reads an empty `admin` and an absent one as the same thing, on both sides.)
+// Whether a consumer's conditions behave as the contract's is therefore not part of conformance
+// to 1.0.0; a comparison may come in a later minor.
 //
 // Byte-stable: objects are built in the contract's order with a fixed key order, and nothing reads
 // the clock, the environment or the file system's listing order.
@@ -403,41 +409,44 @@ const keyOf = (item) => (item && typeof item === 'object' ? item.slug ?? item.na
  *
  * A path is left out whole, with everything under it, and only on a field: a block's own keys, an
  * option and `custom.salt` are compared in full. Every other key of `admin` (its description, its
- * step) is the contract's and still compares, so a listed key cannot carry a change to one.
+ * step) is the contract's and still compares, so a listed key cannot carry a change to one. An
+ * `admin` holding nothing, with or without these keys taken out, compares as an absent one.
  */
 export const PLATFORM_ADDITIONS = ['admin.components', 'admin.initCollapsed', 'admin.layout', 'hooks']
 
 const isRecord = (x) => Boolean(x) && typeof x === 'object' && !Array.isArray(x)
 
-// `obj` without what `keys` leads to; the same object when it has nothing there. An object the
-// removal empties held nothing else, so it goes too; one that was already empty stays and compares.
+// `obj` without what `keys` leads to; the same object when it has nothing there.
 function without(obj, [key, ...rest]) {
   if (!isRecord(obj) || !(key in obj)) return obj
-  const below = rest.length ? without(obj[key], rest) : undefined
-  if (rest.length && below === obj[key]) return obj
-  if (rest.length && Object.keys(below).length) return { ...obj, [key]: below }
+  if (rest.length) {
+    const below = without(obj[key], rest)
+    return below === obj[key] ? obj : { ...obj, [key]: below }
+  }
   const { [key]: gone, ...kept } = obj
   return kept
 }
 
-// Fields without the consumer's additions, at every depth; the same list when it holds none.
-function withoutAdditions(fields) {
+// Fields as they are compared, at every depth: without the consumer's additions, and without an
+// `admin` that holds nothing. A field whose only admin content is a condition serialises as
+// `"admin": {}`, since the function drops out, so an empty admin says no more than an absent one.
+function comparable(fields) {
   if (!Array.isArray(fields)) return fields
-  const out = fields.map((field) => {
+  return fields.map((field) => {
     if (!isRecord(field)) return field
-    const own = PLATFORM_ADDITIONS.reduce((f, p) => without(f, p.split('.')), field)
-    const below = withoutAdditions(own.fields)
-    return below === own.fields ? own : { ...own, fields: below }
+    let own = PLATFORM_ADDITIONS.reduce((f, p) => without(f, p.split('.')), field)
+    if (isRecord(own.admin) && Object.keys(own.admin).length === 0) own = without(own, ['admin'])
+    return 'fields' in own ? { ...own, fields: comparable(own.fields) } : own
   })
-  return out.every((f, i) => f === fields[i]) ? fields : out
 }
+const comparableBlocks = (blocks) => (Array.isArray(blocks) ? blocks.map((b) => (isRecord(b) && 'fields' in b ? { ...b, fields: comparable(b.fields) } : b)) : blocks)
 
 /**
  * Regenerate with `options` and compare with a committed snapshot (its text). `ok` is true only
  * when the two are byte-identical once the consumer's additions (PLATFORM_ADDITIONS, and nothing
- * else) are left out of the snapshot's fields; `problems` names each difference by path, as
- * `blocks[hero].fields[heading] is in the snapshot and no longer generated`.
- * Conditions are not compared (SC-023; this file's header).
+ * else) and any `admin` left holding nothing are taken out of the fields of both; `problems` names
+ * each difference by path, as `blocks[hero].fields[heading] is in the snapshot and no longer
+ * generated`. Conditions are not compared (SC-023; this file's header).
  */
 export function checkPayloadSnapshot(snapshot, options = {}) {
   const now = normaliseLineEndings(payloadSnapshot(options))
@@ -445,17 +454,15 @@ export function checkPayloadSnapshot(snapshot, options = {}) {
   if (now === snapshot) return { ok: true, problems: [] }
   let parsed
   try { parsed = JSON.parse(snapshot) } catch (e) { return { ok: false, problems: [`the snapshot is not JSON: ${e.message}`] } }
-  const was = Array.isArray(parsed) ? parsed.map((b) => {
-    const fields = isRecord(b) ? withoutAdditions(b.fields) : undefined
-    return fields === b?.fields ? b : { ...b, fields }
-  }) : parsed
-  // With additions left out, the bytes compared are the rest of the snapshot as the emitter serialises it.
-  if (Array.isArray(parsed) && was.some((b, i) => b !== parsed[i]) && serialisePayloadBlocks(was) === now) return { ok: true, problems: [] }
+  const was = comparableBlocks(parsed)
+  const generated = comparableBlocks(JSON.parse(now))
   const problems = []
-  diffSnapshots(was, JSON.parse(now), 'blocks', keyOf, problems)
-  // Same structure, different bytes: formatting, which a regenerated snapshot fixes.
-  if (!problems.length) problems.push('the snapshot differs from the generated text only in formatting; regenerate it')
-  return { ok: false, problems }
+  diffSnapshots(was, generated, 'blocks', keyOf, problems)
+  if (problems.length) return { ok: false, problems }
+  // Same structure: the bytes still have to agree, in the snapshot as committed (its formatting)
+  // and in what is compared (its key order). A regenerated snapshot fixes either.
+  if (serialisePayloadBlocks(parsed) === snapshot && serialisePayloadBlocks(was) === serialisePayloadBlocks(generated)) return { ok: true, problems: [] }
+  return { ok: false, problems: ['the snapshot differs from the generated text only in formatting; regenerate it'] }
 }
 
 // ── CLI ────────────────────────────────────────────────────────────────────────────────────────
