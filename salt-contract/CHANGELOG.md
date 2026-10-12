@@ -105,9 +105,13 @@ moves from is recorded per item instead, and the platforms' releases carry the m
   needs a slug-migration entry (FLEET07).
 - Salt for Next.js 0.11.0 sites: block slugs and option values that change are listed the same
   way; the Payload migration renames stored blocks and values. It renames the Postgres enum types
-  too (SC-023): each select whose type had another name records it as `formerlyEnum`. The types
-  that fold into one (the three button styles into `enum_button_style`, the two media sides into
-  `enum_media_side`) move their columns to the shared type; they are not a plain rename. A select
+  too (SC-023): each select whose type had another name records it as `formerlyEnum`, which
+  covers the 52 selects of 0.11.0's blocks whose type name changes, and the mode and order of the
+  queries the contract folds. The types that fold into one move their columns to the shared type;
+  they are not a plain rename: the three button styles (`enum_hero_button_style`,
+  `enum_cta_button_style`, `enum_media_text_button_style`) into `enum_button_style`, the two media
+  sides (`enum_hero_media_side`, `enum_media_text_side`) into `enum_media_side`, and the two query
+  modes (`enum_content_query_mode`, `enum_content_query_mode_unfiltered`) into `enum_query_mode`. A select
   0.11.0 left to Payload's derived type name (the two alignments, the three icons, the showcase's
   and the carousel's source) has no fixed former name to record, so the migration reads it from
   the site's schema.
