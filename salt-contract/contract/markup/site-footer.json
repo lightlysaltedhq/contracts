@@ -1,6 +1,6 @@
 {
   "$schema": "../../schema/markup.schema.json",
-  "version": "1.0.0-rc.2",
+  "version": "1.0.0-rc.3",
   "id": "site-footer",
   "kind": "component",
   "root": {
@@ -278,10 +278,14 @@
                   "attributes": {
                     "type": "button",
                     "data-style": "secondary",
-                    "data-salt-consent-preferences": ""
+                    "data-salt-consent-preferences": "",
+                    "aria-disabled": {
+                      "value": "true",
+                      "when": "until script hydrates: always, but beside the open consent panel, which only script opens. No other state says anything of this control"
+                    }
                   },
                   "text": "from:labels.preferences",
-                  "note": "aria-disabled until script hydrates."
+                  "note": "Drawn aria-disabled=\"true\", never disabled, so it keeps its place in the tab order; script removes the attribute when it hydrates (SC-024)."
                 },
                 {
                   "role": "consent-announce",
@@ -409,7 +413,7 @@
   },
   "script": {
     "kind": "progressive",
-    "withoutScript": "Footer links and text; the consent control is drawn disabled.",
+    "withoutScript": "Footer links and text; the consent control is drawn aria-disabled=\"true\".",
     "withScript": "The consent preferences dialog and the theme toggle."
   },
   "uses": [

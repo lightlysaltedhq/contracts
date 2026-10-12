@@ -20,6 +20,7 @@ function copy(sections, edit = () => {}) {
   const dir = mkdtempSync(path.join(tmpdir(), 'salt-fixtures-gate-'))
   cpSync(path.join(pkg, 'contract'), path.join(dir, 'contract'), { recursive: true })
   cpSync(path.join(pkg, 'normalise.mjs'), path.join(dir, 'normalise.mjs'))
+  cpSync(path.join(pkg, 'README.md'), path.join(dir, 'README.md'))
   cpSync(path.join(pkg, 'styles'), path.join(dir, 'styles'), { recursive: true })
   for (const s of sections) cpSync(path.join(pkg, 'fixtures', s), path.join(dir, 'fixtures', s), { recursive: true })
   const file = (rel) => path.join(dir, 'fixtures', rel)
@@ -761,6 +762,66 @@ test('sc-019: the drawer and the consent panel are drawn open', () => {
   expectFail(['site-header'], (io) => io.html('site-header/drawer-open.html', '<dialog class="salt-drawer" open', '<dialog class="salt-drawer"'), /<dialog\.salt-drawer> lacks open, which the markup requires/)
   expectFail(['site-footer'], (io) => io.html('site-footer/consent-panel-open.html', '<dialog class="salt-consent-panel" open', '<dialog class="salt-consent-panel"'), /<dialog\.salt-consent-panel> lacks open, which the markup requires/)
 })
+test('sc-024: the consent control is aria-disabled="true" everywhere but beside its open panel', () => {
+  const CONTROL = ' data-salt-consent-preferences="" aria-disabled="true">'
+  const HYDRATED = ' data-salt-consent-preferences="">'
+  const lacks = /<button\.salt-button> lacks aria-disabled, which the markup requires when until script hydrates/
+  const carries = /<button\.salt-button> carries aria-disabled, which the markup draws only when until script hydrates/
+  // A scheme says nothing of this control: theme-toggle-button carries it.
+  for (const name of ['columns-socials-copyright', 'display-preferences', 'single-flat-menu-inverse', 'theme-toggle-button']) expectFail(['site-footer'], (io) => io.html(`site-footer/${name}.html`, CONTROL, HYDRATED), lacks)
+  for (const name of ['fallback-heading', 'header-section-footer', 'hero-minimal-centre', 'hero-split-image']) expectFail(['page'], (io) => io.html(`page/${name}.html`, CONTROL, HYDRATED), lacks)
+  // Only script opens the panel, so the control beside it has hydrated.
+  expectFail(['site-footer'], (io) => io.html('site-footer/consent-panel-open.html', HYDRATED, CONTROL), carries)
+  // The drawer's state says nothing of this control.
+  const drawer = copy(['site-footer'], (io) => io.json('site-footer/display-preferences.json', (d) => { d.state = { drawerOpen: true } }))
+  try { assert.doesNotMatch(run(drawer).out, /aria-disabled/, run(drawer).out) } finally { rmSync(drawer, { recursive: true, force: true }) }
+  // The state decides, not the case's name: with the dialog and its state both gone, the control is the server's again.
+  const DIALOG = /\s*<dialog class="salt-consent-panel"[\s\S]*<\/dialog>/
+  expectFail(['site-footer'], (io) => {
+    io.json('site-footer/consent-panel-open.json', (d) => { delete d.state })
+    const rel = 'fixtures/site-footer/consent-panel-open.html'
+    const html = readFileSync(path.join(io.dir, rel), 'utf8')
+    assert.match(html, DIALOG)
+    io.write(rel, html.replace(DIALOG, ''))
+  }, lacks)
+  expectFail(['site-footer'], (io) => io.html('site-footer/display-preferences.html', CONTROL, ' data-salt-consent-preferences="" aria-disabled="false">'), /<button\.salt-button> aria-disabled="false" is not "true"/)
+  expectFail(['site-footer'], (io) => io.html('site-footer/display-preferences.html', CONTROL, ' data-salt-consent-preferences="" disabled>'), /<button\.salt-button> carries disabled, which the markup does not declare/)
+})
+test('sc-024: a panel is drawn open if and only if the case\'s state says so', () => {
+  const DIALOG = /\s*<dialog class="salt-(?:consent-panel|drawer)"[\s\S]*<\/dialog>/
+  const undrawn = (set, name) => (io) => {
+    const rel = `fixtures/${set}/${name}.html`
+    const html = readFileSync(path.join(io.dir, rel), 'utf8')
+    assert.match(html, DIALOG)
+    io.write(rel, html.replace(DIALOG, ''))
+  }
+  // The open dialog without its state, and with the state false.
+  expectFail(['site-footer'], (io) => io.json('site-footer/consent-panel-open.json', (d) => { delete d.state }), /consent-panel-open\.html: the consent panel is drawn, but the case's state does not say it is open \(state\.consentPanelOpen\)/)
+  expectFail(['site-footer'], (io) => io.json('site-footer/consent-panel-open.json', (d) => { d.state = { consentPanelOpen: false } }), /the consent panel is drawn, but the case's state does not say it is open/)
+  expectFail(['site-header'], (io) => io.json('site-header/drawer-open.json', (d) => { delete d.state }), /drawer-open\.html: the drawer is drawn, but the case's state does not say it is open \(state\.drawerOpen\)/)
+  // The state without the dialog.
+  expectFail(['site-footer'], undrawn('site-footer', 'consent-panel-open'), /consent-panel-open\.html: state\.consentPanelOpen says the consent panel is open, but it is not drawn/)
+  expectFail(['site-footer'], (io) => io.json('site-footer/display-preferences.json', (d) => { d.state = { consentPanelOpen: true } }), /display-preferences\.html: state\.consentPanelOpen says the consent panel is open, but it is not drawn/)
+  expectFail(['site-header'], undrawn('site-header', 'drawer-open'), /drawer-open\.html: state\.drawerOpen says the drawer is open, but it is not drawn/)
+  expectFail(['site-footer'], (io) => io.json('site-footer/display-preferences.json', (d) => { d.state = { drawerOpen: true } }), /display-preferences\.html: state\.drawerOpen says the drawer is open, but it is not drawn/)
+})
+test('sc-024: a panel\'s state is true or false, and nothing else', () => {
+  for (const [set, name, key] of [['site-footer', 'consent-panel-open', 'consentPanelOpen'], ['site-header', 'drawer-open', 'drawerOpen']]) {
+    for (const value of ['false', 'true', {}, [], 1, 0, null]) {
+      expectFail([set], (io) => io.json(`${set}/${name}.json`, (d) => { d.state = { [key]: value } }), new RegExp(`${name}\\.json: state\\.${key} is true or false; it is `))
+    }
+  }
+  for (const state of ['open', [], 1, null]) expectFail(['site-footer'], (io) => io.json('site-footer/display-preferences.json', (d) => { d.state = state }), /display-preferences\.json: state is an object/)
+})
+test('sc-024: every state is documented, and the README\'s state row and the gate agree', () => {
+  const readme = readFileSync(path.join(pkg, 'README.md'), 'utf8')
+  assert.ok(readme.includes('`drawerOpen` (') && readme.includes('`themeScheme`'))
+  expectFail(['site-footer'], (io) => io.json('site-footer/display-preferences.json', (d) => { d.state = { menuOpen: true } }), /state\.menuOpen is not a documented state \(consentPanelOpen, drawerOpen, themeScheme\)/)
+  expectFail(['site-footer'], (io) => io.write('README.md', readme.replace('`drawerOpen` (', '`searchOpen`: the search is open. `drawerOpen` (')), /README\.md documents the state searchOpen, which the gate does not know/)
+  expectFail(['site-footer'], (io) => io.write('README.md', readme.replace('`drawerOpen` (', 'The drawer (')), /README\.md's `state` row does not document drawerOpen, a state the gate knows/)
+  expectFail(['site-footer'], (io) => io.write('README.md', readme.replace('| `state` |', '| `states` |')), /README\.md: no `state` row/)
+  expectFail(['site-footer'], (io) => rmSync(path.join(io.dir, 'README.md')), /README\.md is missing, so the states a case may carry are documented nowhere/)
+})
 test('sc-019: the search input keeps the query', () => {
   expectFail(['search'], (io) => io.html('search/results.html', ' value="hedge"', ''), /<input\.salt-search__input> lacks value, which the markup requires when a query is set/)
   expectFail(['search'], (io) => io.html('search/results.html', ' value="hedge"', ' value="hedges"'), /value="hedges" disagrees with the case, which gives "hedge"/)
@@ -936,6 +997,20 @@ test('normaliser: one that ignores attribute values fails the mutation check', (
     io.write('normalise.mjs', src.replace("if (name === 'src') return stripOrigin(value.trim())", "if (name === 'src' || name === 'alt') return name === 'alt' ? '' : stripOrigin(value.trim())"))
   }, /changing alt on <img\.salt-hero__image> does not change normalise's output/)
 })
+test('normaliser: an icon\'s fill and stroke are the only attributes of it left out of the mutation check (SC-024)', () => {
+  expectFail(['features'], (io) => {
+    const src = readFileSync(path.join(pkg, 'normalise.mjs'), 'utf8')
+    io.write('normalise.mjs', src.replace("n !== 'fill' && n !== 'stroke'", "n !== 'fill' && n !== 'stroke' && n !== 'data-size'"))
+  }, /removing data-size on <svg\.salt-icon> does not change normalise's output/)
+  // The gate still holds each to the two values icon.json allows, and requires both.
+  const ICON = 'features/many-items-linked.html'
+  expectFail(['features'], (io) => io.html(ICON, 'fill="none" stroke="currentColor"', 'fill="red" stroke="currentColor"'), /<svg\.salt-icon> fill="red" is not one of none, currentColor/)
+  expectFail(['features'], (io) => io.html(ICON, 'fill="none" stroke="currentColor"', 'fill="none" stroke="2"'), /<svg\.salt-icon> stroke="2" is not one of currentColor, none/)
+  expectFail(['features'], (io) => io.html(ICON, ' fill="none" stroke="currentColor"', ' fill="none"'), /<svg\.salt-icon> lacks stroke, which the markup requires/)
+  expectFail(['features'], (io) => io.html(ICON, ' fill="none" stroke="currentColor"', ' fill="none" stroke="currentColor" stroke-width="2"'), /<svg\.salt-icon> carries stroke-width, which the markup does not declare/)
+  const dir = copy(['features'], (io) => io.html(ICON, 'fill="none" stroke="currentColor"', 'fill="currentColor" stroke="none"'))
+  try { assert.doesNotMatch(run(dir).out, /fixtures\/features\//, run(dir).out) } finally { rmSync(dir, { recursive: true, force: true }) }
+})
 test('normaliser: one that is not idempotent fails', () => {
   expectFail(HERO, (io) => {
     const src = readFileSync(path.join(pkg, 'normalise.mjs'), 'utf8')
@@ -986,6 +1061,13 @@ test('normalise: style spacing does not count, a declaration does', () => {
   same('<div style="--salt-section-space: var(--space-section-md);"></div>', '<div style="--salt-section-space:var(--space-section-md)"></div>')
   differ('<div style="object-fit: cover"></div>', '<div style="object-fit: contain"></div>')
 })
+test('normalise: a framework\'s own attributes on an image are not masked (SC-024)', () => {
+  const img = (extra = '', style = 'object-fit: cover') => `<img class="salt-hero__image" src="/u/a.jpg" alt="" style="${style}"${extra}>`
+  differ(img(), img(' data-nimg="1"'))
+  differ(img(), img(' data-nimg="fill"'))
+  differ(img(), img('', 'color: transparent; object-fit: cover'))
+  differ('<img src="/u/a.jpg" alt="">', '<img src="/u/a.jpg" alt="" style="color:transparent">')
+})
 test('normalise: white space between the children of a flex or grid container does not count', () => {
   // The three cases the review of #10's fixes raised: a flex actions row, an inline-flex tab
   // control and a grid process step, each written by a template one element to a line.
@@ -1026,6 +1108,29 @@ test('normalise: icon artwork does not count, the icon and its name do', () => {
   same('<svg class="salt-icon" data-icon="check"><path d="M1 2"/></svg>', '<svg class="salt-icon" data-icon="check"><path d="M9 9z"></path><path d="M0 0"></path></svg>')
   differ('<svg class="salt-icon" data-icon="check"></svg>', '<svg class="salt-icon" data-icon="star"></svg>')
   differ('<svg class="other"><path d="M1 2"/></svg>', '<svg class="other"><path d="M2 2"/></svg>')
+})
+test('normalise: an icon\'s fill and stroke are artwork, and nothing else on it is (SC-024)', () => {
+  const icon = (attrs) => `<svg ${Object.entries({ class: 'salt-icon', 'data-icon': 'linkedin', 'data-size': 'md', viewBox: '0 0 24 24', width: '24', height: '24',
+    focusable: 'false', role: 'img', 'aria-label': 'LinkedIn', fill: 'none', stroke: 'currentColor', ...attrs }).filter(([, v]) => v !== null).map(([n, v]) => `${n}="${v}"`).join(' ')}></svg>`
+  // A filled mark against the fixture's stroked one, in either direction, and with either left out.
+  same(icon({}), icon({ fill: 'currentColor', stroke: 'none' }))
+  same(icon({ fill: 'currentColor', stroke: 'none' }), icon({}))
+  same(icon({}), icon({ fill: null, stroke: null }))
+  // What the contract fixes on the svg still compares.
+  for (const [name, value] of Object.entries({ 'data-icon': 'globe', class: 'salt-icon salt-icon--brand', 'data-size': 'sm', role: 'presentation', 'aria-label': 'Linked In',
+    viewBox: '0 0 16 16', width: '16', height: '16', focusable: 'true' })) {
+    differ(icon({}), icon({ [name]: value }))
+    differ(icon({}), icon({ [name]: null }))
+  }
+  differ(icon({ role: null, 'aria-label': null, 'aria-hidden': 'true' }), icon({ role: null, 'aria-label': null, 'aria-hidden': 'false' }))
+  differ(icon({ role: null, 'aria-label': null, 'aria-hidden': 'true' }), icon({ role: null, 'aria-label': null }))
+  // So does any attribute the markup does not name: the rest of a stroke belongs inside the artwork.
+  for (const extra of ['stroke-width', 'stroke-linecap', 'stroke-linejoin', 'fill-rule', 'style']) differ(icon({}), icon({ [extra]: 'x' }))
+  // On an svg that is no icon, fill and stroke compare.
+  differ('<svg class="other" fill="none"></svg>', '<svg class="other" fill="currentColor"></svg>')
+  differ('<svg class="other" stroke="currentColor"></svg>', '<svg class="other" stroke="none"></svg>')
+  differ('<svg fill="none"></svg>', '<svg></svg>')
+  differ('<span class="salt-icon" fill="none"></span>', '<span class="salt-icon" fill="currentColor"></span>')
 })
 test('normalise: ids are compared as written (SC-012)', () => {
   differ('<h2 id="faq__heading">x</h2>', '<h2 id="faq-heading">x</h2>')

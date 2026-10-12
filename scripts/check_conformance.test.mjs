@@ -269,6 +269,48 @@ test('a page is compared through pageOf: the platform\'s head and body scripts p
   }
 })
 
+test('a framework\'s own attributes on an image fail the case: the runner masks neither data-nimg nor an added declaration (SC-024)', async () => {
+  const adapter = brokenAdapter({
+    'hero/split-image-left': { from: ' fetchpriority="high" decoding="async">', to: ' fetchpriority="high" decoding="async" data-nimg="1">' },
+    'hero/full-bleed-background-inverse': { from: 'style="object-fit: cover; object-position: 30% 60%"', to: 'style="color:transparent;object-fit:cover;object-position:30% 60%"' },
+  })
+  try {
+    const r = await run(['--platform', 'broken', '--adapter', adapter.command, '--sections', 'hero', '--partial'])
+    assert.equal(r.code, 1, r.out)
+    assert.equal(section(r.report, 'hero').fixtures.failed, 2)
+    const nimg = failure(r.report, 'hero', 'split-image-left')
+    assert.deepEqual([nimg.difference, nimg.name, nimg.expected, nimg.found], ['attribute', 'data-nimg', null, '1'])
+    const style = failure(r.report, 'hero', 'full-bleed-background-inverse')
+    assert.deepEqual([style.difference, style.name, style.expected, style.found],
+      ['attribute', 'style', 'object-fit:cover;object-position:30% 60%', 'color:transparent;object-fit:cover;object-position:30% 60%'])
+  } finally {
+    rmSync(adapter.dir, { recursive: true, force: true })
+  }
+})
+
+test('an icon\'s fill and stroke are not compared, every other attribute of it is (SC-024)', async () => {
+  const STROKED = 'aria-label="LinkedIn" fill="none" stroke="currentColor"'
+  const adapter = brokenAdapter({
+    'site-footer/columns-socials-copyright': { from: STROKED, to: 'aria-label="LinkedIn" fill="currentColor" stroke="none"' },
+    'site-footer/theme-toggle-button': { from: 'fill="none" stroke="currentColor"', to: 'fill="none" stroke="currentColor" stroke-width="2"' },
+    'site-footer/display-preferences': { from: 'data-icon="instagram"', to: 'data-icon="globe"' },
+  })
+  try {
+    const r = await run(['--platform', 'broken', '--adapter', adapter.command, '--sections', 'hero,site-footer', '--partial'])
+    assert.equal(r.code, 1, r.out)
+    const footer = r.report.files.find((f) => f.id === 'site-footer')
+    // The filled mark is no failure: its case is among those that passed.
+    assert.equal(footer.fixtures.passed, footer.fixtures.total - 2)
+    assert.ok(!footer.fixtures.failures.some((f) => f.case === 'columns-socials-copyright'))
+    assert.deepEqual(footer.fixtures.failures.map((f) => [f.case, f.difference, f.name, f.expected, f.found]), [
+      ['display-preferences', 'attribute', 'data-icon', 'instagram', 'globe'],
+      ['theme-toggle-button', 'attribute', 'stroke-width', null, '2'],
+    ])
+  } finally {
+    rmSync(adapter.dir, { recursive: true, force: true })
+  }
+})
+
 test('an archive\'s and a search\'s pagination addresses are not compared, their structure is, and a listing section\'s still are (SC-023)', async () => {
   const fixture = (rel) => readFileSync(path.join(pkg, 'fixtures', rel), 'utf8')
   const archive = fixture('archive/topic.html').replaceAll('{{salt:page-href}}', '/blog/topics/soil?page=2')

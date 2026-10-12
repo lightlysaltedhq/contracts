@@ -72,11 +72,12 @@ receives and the choices on offer.
 
 ## Status
 
-`1.0.0-rc.2` is the release candidate for `1.0.0`: private, never on the registry, held until an
+`1.0.0-rc.3` is the release candidate for `1.0.0`: private, never on the registry, held until an
 implementation's run of `salt-conformance` against it conforms in full, in a report that names
-`1.0.0-rc.2` (SC-017, SC-018, SC-020, SC-022; `RELEASE-POLICY.md` section 5). It follows
-`1.0.0-rc.1`, whose first run raised eight questions about the contract itself; the owner's
-rulings on them (SC-023) changed contract files, which makes a new candidate and needs a new run. `1.0.0` is the first release, staged
+`1.0.0-rc.3` (SC-017, SC-018, SC-020, SC-022; `RELEASE-POLICY.md` section 5). It follows
+`1.0.0-rc.1`, whose first run raised eight questions about the contract itself, and `1.0.0-rc.2`,
+whose run raised three more; the owner's rulings on them (SC-023, SC-024) changed contract files,
+which each time makes a new candidate and needs a new run. `1.0.0` is the first release, staged
 from CI by npm trusted publishing when the owner pushes the `salt-contract-v1.0.0` tag, and
 approved by the owner. See `RELEASE-POLICY.md` for what each part
 of a version means.
@@ -339,7 +340,7 @@ option covered, and the normaliser sound.
 | `route` | What the route hands a listing: its cards and pagination. |
 | `site` | Site-wide data the markup reads, under declared keys only (the gate refuses any other): `labels` (the strings `labels.<name>` in the markup refers to), `arrow` (the site's arrow glyph), `name`, `home`, `organisation`, `acceptsEnquiries`, `contactForm`, `timezone`, `maps`, `collectionIndexes`, `logo` (`{ light, dark }`, media ids), `logoHeight` (the logo's drawn height in px, the logo slot's input; no other key names it), `header` (menu, phone, call to action, sticky), `footer` (tone, columns, text, socials, copyright, whether it shows the logo), `consent`, `themeToggle`, `displayPreferences`, `search` and `caseStudy` (the case study view's layout, which a site sets once for all its case studies: `{ media, header, headerTone, headerToneDark }`, where `media` is `flow` by default or `aside`, and `header` is `plain` by default or `band`, which draws the header as a toned section band and alone takes `headerTone` and the optional `headerToneDark`; Salt for Next.js sets these in code, and Salt for WordPress on an ACF options page, so editors can change them). A view's variant a site sets this way names its key in its markup (`variants[].site`), and every option its entry in `sections.json` offers needs a case. |
 | `document` | A view's document: the post, service, archive term or author, search query and results, as the view reads them. A section the view nests (the archive's listing) is `document.listing`: its `values` (the section's field values, shaped and checked as a section case's, with its settled anchor in `values.settings.anchorId`), `track` (its `data-track`), `index` (from 0, required, for `<section index>`; its track counts no more sections than come up to it) and, if given, `headingLevel`, which must agree with the derived level (2 in a view, under its h1). Its block is read against that section's own markup, its variant and conditions answered by its values, so its id, heading, spacing, data attributes and content are fixed by the case. |
-| `state` | A state the case draws that only a visitor brings about, such as the consent panel open (`consentPanelOpen`), or that the platform knows only sometimes when it renders: `themeScheme` (`light` or `dark`), the stored scheme, with which the theme toggle is its button form, pressed for dark and showing the sun or the moon; without it, its empty span server form. |
+| `state` | What the case knows beyond its content. Each key says how the one element it concerns is drawn and nothing of any other: a case is not before or after script as a whole. `consentPanelOpen` (`true` or `false`): the visitor has opened the footer's consent panel, which only script does, so its dialog is drawn, as it is in no other case, and the consent control beside it has hydrated and carries no `aria-disabled`; in every other case it carries `aria-disabled="true"` (SC-024). `drawerOpen` (`true` or `false`): the visitor has opened the header's drawer, so its dialog is drawn, as it is in no other case. `themeScheme` (`light` or `dark`): the stored scheme, which the platform knows only sometimes when it renders, with which the theme toggle is its button form, pressed for dark and showing the sun or the moon; without it, its empty span server form. The gate refuses a state this row does not document, and fails when the row documents one it does not know, or when this row or this file is missing. |
 
 Conventions, so that every case is deterministic:
 
@@ -372,8 +373,13 @@ platform: attribute order, class order, white space a browser does not draw (at 
 and between the children of a flex or grid container, a list `scripts/salt_normalise_containers.mjs`
 derives from `styles/`; between two inline elements in normal flow a run is one space and counts),
 boolean-attribute forms, character-reference forms, comments, the upload host in `src` and
-`srcset`, and the artwork inside `svg.salt-icon` (the glyph names are the contract, the artwork is
-each platform's, SC-007), and in the contact form, exactly four per-request values, which the
+`srcset`, and the artwork of `svg.salt-icon`: what is inside it, and its `fill` and `stroke`, so a
+filled mark and an outlined one agree (the glyph names are the contract, the artwork is each
+platform's; SC-007, SC-024). The svg's every other attribute compares, `stroke-width` and
+`stroke-linecap` included, which belong inside the artwork; `fill` and `stroke` compare on any
+other svg; and the fixtures gate still holds each to the two values `contract/markup/icon.json`
+allows. A framework's own attributes are not removed: `next/image`'s `data-nimg` and inline
+`color:transparent` differ (SC-024). In the contact form, exactly four per-request values, which the
 expected HTML writes as declared placeholders: the form's `action` as `{{salt:form-action}}`, the
 hidden `formToken` and `challengeToken` values as `{{salt:form-token}}` and
 `{{salt:challenge-token}}`, and the challenge question (its label's text) as
@@ -537,7 +543,7 @@ report).
 ```json
 {
   "format": "salt-conformance/1",
-  "contract": { "package": "@lightlysaltedhq/salt-contract", "version": "1.0.0-rc.2" },
+  "contract": { "package": "@lightlysaltedhq/salt-contract", "version": "1.0.0-rc.3" },
   "platform": "nextjs",
   "implementation": { "version": "0.4.0" },
   "adapter": { "kind": "command", "target": "node scripts/salt-adapter.mjs" },
@@ -546,7 +552,7 @@ report).
   "summary": { "pass": 15, "fail": 1, "incomplete": 0, "notShipped": 1 },
   "fields": { "platform": "payload", "snapshot": "…", "options": "…", "problems": [] },
   "problems": [],
-  "stylesheets": { "served": "…", "bundle": "styles/salt.css", "contract": "1.0.0-rc.2", "ok": true, "status": "identical" },
+  "stylesheets": { "served": "…", "bundle": "styles/salt.css", "contract": "1.0.0-rc.3", "ok": true, "status": "identical" },
   "sections": [
     {
       "id": "hero",

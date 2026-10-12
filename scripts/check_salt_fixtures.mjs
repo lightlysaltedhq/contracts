@@ -26,8 +26,8 @@
 //    source (SC-007); at most one img is the priority image, which is never lazy, every other img
 //    is lazy, and the priority image is the one the plan and the markup's priorityMedia choose.
 // 4. THE NORMALISER (normalise.mjs). It is idempotent on every expected HTML, and removing or
-//    changing any one attribute of any element (outside icon artwork, which it drops by design)
-//    changes its output.
+//    changing any one attribute of any element (outside icon artwork, which it drops by design:
+//    what is inside an icon, and its fill and stroke) changes its output.
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
 import path from 'node:path'
 import { CHROME, REQUIRED_FILES, fileKind } from '../salt-contract/conformance.mjs'
@@ -258,6 +258,20 @@ function checkSiteAndMedia(c) {
 // what the page decides for it.
 const OTHER_INPUT_KEYS = ['$comment', 'chrome', 'view', 'page', 'summary', 'context', 'media', 'documents', 'collections', 'route', 'site', 'document', 'state']
 const OTHER_CONTEXT_KEYS = ['priorityMedia', 'locale', 'now', 'path']
+// The states a case may carry, as the README's `state` row documents them (checked here, so the
+// two cannot drift). Each says how the element it concerns is drawn, and nothing of any other.
+const STATES = ['consentPanelOpen', 'drawerOpen', 'themeScheme']
+{
+  const readme = path.join(dir, 'README.md')
+  const row = existsSync(readme) ? readFileSync(readme, 'utf8').split('\n').find((l) => l.startsWith('| `state` |')) : undefined
+  if (!existsSync(readme)) fail('README.md is missing, so the states a case may carry are documented nowhere')
+  else if (row === undefined) fail('README.md: no `state` row in the fixtures\' input table')
+  if (row !== undefined) {
+    const documented = [...new Set([...row.matchAll(/`([a-z]+(?:[A-Z][a-z]*)+)`/g)].map((m) => m[1]))]
+    for (const k of documented) if (!STATES.includes(k)) fail(`README.md documents the state ${k}, which the gate does not know`)
+    for (const k of STATES) if (!documented.includes(k)) fail(`README.md's \`state\` row does not document ${k}, a state the gate knows`)
+  }
+}
 function checkOtherInput(c) {
   const { input, at, section, kind } = c
   if (!isObject(input)) { fail(`${at}.json is not an object`); return false }
@@ -271,6 +285,9 @@ function checkOtherInput(c) {
   if (kind === 'chrome' && ctx.priorityMedia !== undefined) fail(`${at}.json: the chrome never holds the priority image (section#priority-media), so its context has no priorityMedia`)
   if (ctx.locale !== undefined && !(typeof ctx.locale === 'string' && Intl.DateTimeFormat.supportedLocalesOf(ctx.locale).length)) fail(`${at}.json: context.locale must be a BCP 47 locale the platform knows, such as en-GB`)
   if (ctx.path !== undefined && !(typeof ctx.path === 'string' && ctx.path.startsWith('/'))) fail(`${at}.json: context.path is the page's path, starting with /`)
+  if (input.state !== undefined && !isObject(input.state)) fail(`${at}.json: state is an object`)
+  for (const k of Object.keys(isObject(input.state) ? input.state : {})) if (!STATES.includes(k)) fail(`${at}.json: state.${k} is not a documented state (${STATES.join(', ')})`)
+  for (const k of ['consentPanelOpen', 'drawerOpen']) if (isObject(input.state) && k in input.state && typeof input.state[k] !== 'boolean') fail(`${at}.json: state.${k} is true or false; it is ${JSON.stringify(input.state[k])}`)
   if (input.state?.themeScheme !== undefined && !['light', 'dark'].includes(input.state.themeScheme)) fail(`${at}.json: state.themeScheme is light or dark, the scheme the platform knows when it renders`)
   // Rich text is given as stored in a view as in a section (SC-023): body headings are h3 and h4,
   // and the view's base level decides what each is drawn as.
@@ -658,6 +675,9 @@ const WHEN = {
   'site-footer:theme-toggle:aria-label': isButton,
   'site-footer:theme-toggle:aria-hidden': isSpan,
   'site-header:phone-icon:data-size': () => false,
+  // SC-024: the consent control is aria-disabled until script hydrates it, which the open consent
+  // panel alone shows. No other state says anything of this control.
+  'site-footer:consent-control:aria-disabled': (c) => c.input.state?.consentPanelOpen !== true,
   'search-form:input:value': (c) => filledText(c.input.document?.query),
   'site-footer:links:aria-label': (c, el) => !columnTitled(c, el),
   'site-footer:links:aria-labelledby': columnTitled,
@@ -960,6 +980,14 @@ function checkMarkup(c) {
   const every = () => [root, ...descendants(root)]
   c.parents = new Map()
   for (const el of [root, ...descendants(root)]) for (const child of elementsOf(el)) c.parents.set(child, el)
+  // A panel only a visitor opens is drawn, open, if and only if the case's state says so. Asked
+  // before the markup is matched, so a case that breaks it is told so first.
+  for (const [key, cls, what] of [['consentPanelOpen', 'salt-consent-panel', 'the consent panel'], ['drawerOpen', 'salt-drawer', 'the drawer']]) {
+    const isDrawn = every().some((e) => e.name === 'dialog' && classesOf(e).includes(cls))
+    const open = c.input.state?.[key] === true
+    if (isDrawn && !open) fail(`${at}.html: ${what} is drawn, but the case's state does not say it is open (state.${key})`)
+    if (!isDrawn && open) fail(`${at}.html: state.${key} says ${what} is open, but it is not drawn`)
+  }
   nestedCase = c.kind === 'section' || !c.nested ? null : c
   const { doc, spec, elements } = c.kind === 'section' ? wrapperSpec(c) : documentSpec(c)
   const m = matcher(c)
@@ -1289,6 +1317,10 @@ const declaredMask = (el, name, insideForm) =>
   (name === 'action' && el.name === 'form' && classesOf(el).includes('salt-contact__form')) ||
   (insideForm && name === 'value' && el.name === 'input' && attr(el, 'type') === 'hidden' && ['formToken', 'challengeToken'].includes(attr(el, 'name')))
 
+// An icon's fill and stroke are artwork, dropped by design (SC-024); the markup check above still
+// holds each to the values icon.json allows. Held here as the form's masks are.
+const declaredArtwork = (el, name) => el.name === 'svg' && classesOf(el).includes('salt-icon') && (name === 'fill' || name === 'stroke')
+
 function checkNormaliser(c) {
   if (!c.renders) return
   const canonical = normalise(c.html)
@@ -1306,6 +1338,7 @@ function checkNormaliser(c) {
     for (let k = 0; k < el.attrs.length; k++) {
       const saved = el.attrs
       const [name, value] = saved[k]
+      if (declaredArtwork(el, name)) continue
       // The contact form's declared per-request values are masked by design (SC-016): another
       // value is no difference, but a missing or empty one is. The list is the contract's, held
       // here rather than asked of the normaliser, so a normaliser that masks more is caught.

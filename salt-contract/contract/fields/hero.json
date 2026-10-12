@@ -1,6 +1,6 @@
 {
   "$schema": "../../schema/field-definition.schema.json",
-  "version": "1.0.0-rc.2",
+  "version": "1.0.0-rc.3",
   "section": "hero",
   "shared": {
     "id": "section-settings"
