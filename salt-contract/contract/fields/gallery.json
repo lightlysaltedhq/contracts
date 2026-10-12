@@ -81,7 +81,7 @@
           "note": "Hidden for the carousel layout, as layout !== carousel."
         },
         "wordpress": {
-          "owes": "storing the strings 2, 3 and 4; the default is stored as the integer 3 today",
+          "owes": "storing the strings 2, 3 and 4; the default is stored as the integer 3 today; a select, where the columns are a button group today (SC-023)",
           "note": "Shown for every layout, with the instruction that only grid and masonry use it."
         }
       }

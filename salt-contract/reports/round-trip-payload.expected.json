@@ -557,7 +557,7 @@
     "path": "query",
     "kind": "condition",
     "difference": "condition differs (5 of 6 cases), e.g. {}: contract shows, salt-nextjs hides; {\"source\":\"case-studies\"}: contract shows, salt-nextjs hides",
-    "evidence": "owes: one query group read against the chosen source in place of one group per source; a team category taxonomy, so by-category is offered for team as on WordPress (SC-006)"
+    "evidence": "owes: one query group read against the chosen source in place of one group per source; a team category taxonomy, so by-category is offered for team as on WordPress (SC-006); a select for the query's mode, which is a radio today (SC-023)"
   },
   {
     "section": "collection-showcase",
@@ -648,7 +648,7 @@
     "path": "query",
     "kind": "condition",
     "difference": "condition differs (4 of 6 cases), e.g. {\"source\":\"case-studies\"}: contract shows, salt-nextjs hides; {\"source\":\"testimonials\"}: contract shows, salt-nextjs hides",
-    "evidence": "owes: one query group read against the chosen source in place of one group per source; a team category taxonomy, so by-category is offered for team as on WordPress (SC-006)"
+    "evidence": "owes: one query group read against the chosen source in place of one group per source; a team category taxonomy, so by-category is offered for team as on WordPress (SC-006); a select for the query's mode, which is a radio today (SC-023)"
   },
   {
     "section": "carousel",
@@ -824,5 +824,26 @@
     "kind": "default",
     "difference": "default false; salt-nextjs none",
     "evidence": "owes: the default false in place of no default (SC-008)"
+  },
+  {
+    "section": "faq",
+    "path": "query.mode",
+    "kind": "type",
+    "difference": "type select; salt-nextjs radio",
+    "evidence": "owes: a select for the query's mode, which is a radio today (SC-023)"
+  },
+  {
+    "section": "collection-showcase",
+    "path": "query.mode",
+    "kind": "type",
+    "difference": "type select; salt-nextjs radio",
+    "evidence": "owes: one query group read against the chosen source in place of one group per source; a team category taxonomy, so by-category is offered for team as on WordPress (SC-006); a select for the query's mode, which is a radio today (SC-023)"
+  },
+  {
+    "section": "carousel",
+    "path": "query.mode",
+    "kind": "type",
+    "difference": "type select; salt-nextjs radio",
+    "evidence": "owes: one query group read against the chosen source in place of one group per source; a team category taxonomy, so by-category is offered for team as on WordPress (SC-006); a select for the query's mode, which is a radio today (SC-023)"
   }
 ]

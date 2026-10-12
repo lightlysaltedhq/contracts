@@ -767,7 +767,7 @@
     "path": "columns",
     "kind": "default",
     "difference": "default \"3\"; salt-wordpress 3",
-    "evidence": "owes: storing the strings 2, 3 and 4; the default is stored as the integer 3 today"
+    "evidence": "owes: storing the strings 2, 3 and 4; the default is stored as the integer 3 today; a select, where the columns are a button group today (SC-023)"
   },
   {
     "section": "gallery",
@@ -998,28 +998,28 @@
     "path": "query.order",
     "kind": "condition",
     "difference": "condition differs (1 of 3 cases), e.g. {\"mode\":\"manual\"}: contract hides, salt-wordpress shows",
-    "evidence": "owes: one query group in place of six layout fields"
+    "evidence": "owes: one query group in place of six layout fields; a select for the query's mode, which is a button group today (SC-023)"
   },
   {
     "section": "faq",
     "path": "query.count",
     "kind": "limit",
     "difference": "step 1; salt-wordpress none",
-    "evidence": "owes: one query group in place of six layout fields"
+    "evidence": "owes: one query group in place of six layout fields; a select for the query's mode, which is a button group today (SC-023)"
   },
   {
     "section": "faq",
     "path": "query.count",
     "kind": "condition",
     "difference": "condition differs (1 of 3 cases), e.g. {\"mode\":\"manual\"}: contract hides, salt-wordpress shows",
-    "evidence": "owes: one query group in place of six layout fields"
+    "evidence": "owes: one query group in place of six layout fields; a select for the query's mode, which is a button group today (SC-023)"
   },
   {
     "section": "faq",
     "path": "query.direction",
     "kind": "extra",
     "difference": "in salt-wordpress, not in the contract",
-    "evidence": "owes: one query group in place of six layout fields"
+    "evidence": "owes: one query group in place of six layout fields; a select for the query's mode, which is a button group today (SC-023)"
   },
   {
     "section": "faq",
@@ -1124,7 +1124,7 @@
     "path": "columns",
     "kind": "condition",
     "difference": "condition differs (3 of 5 cases), e.g. {\"layout\":\"list\"}: contract hides, salt-wordpress shows; {\"layout\":\"accordion\"}: contract hides, salt-wordpress shows",
-    "evidence": "owes: one select with the strings 2, 3 and 4 on every source; work and blog_teaser offer 2 and 3 with an integer default 3, team uses bare-numeral labels, testimonials has none"
+    "evidence": "owes: one select with the strings 2, 3 and 4 on every source; work and blog_teaser offer 2 and 3 with an integer default 3, team uses bare-numeral labels, testimonials has none; a select, where the columns are a button group today (SC-023)"
   },
   {
     "section": "collection-showcase (services)",
@@ -1152,14 +1152,14 @@
     "path": "query.categories",
     "kind": "type",
     "difference": "type select; salt-wordpress taxonomy",
-    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes"
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; a select for the query's mode, which is a button group today (SC-023)"
   },
   {
     "section": "collection-showcase (services)",
     "path": "query.items",
     "kind": "relation",
     "difference": "post_type [\"service\",\"work\",\"testimonial\",\"post\",\"team_member\"]; salt-wordpress [\"service\"]",
-    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes"
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; a select for the query's mode, which is a button group today (SC-023)"
   },
   {
     "section": "collection-showcase (services)",
@@ -1180,28 +1180,28 @@
     "path": "query.order",
     "kind": "condition",
     "difference": "condition differs (1 of 3 cases), e.g. {\"mode\":\"manual\"}: contract hides, salt-wordpress shows",
-    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes"
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; a select for the query's mode, which is a button group today (SC-023)"
   },
   {
     "section": "collection-showcase (services)",
     "path": "query.count",
     "kind": "limit",
     "difference": "step 1; salt-wordpress none",
-    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes"
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; a select for the query's mode, which is a button group today (SC-023)"
   },
   {
     "section": "collection-showcase (services)",
     "path": "query.count",
     "kind": "condition",
     "difference": "condition differs (1 of 3 cases), e.g. {\"mode\":\"manual\"}: contract hides, salt-wordpress shows",
-    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes"
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; a select for the query's mode, which is a button group today (SC-023)"
   },
   {
     "section": "collection-showcase (services)",
     "path": "query.direction",
     "kind": "extra",
     "difference": "in salt-wordpress, not in the contract",
-    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes"
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; a select for the query's mode, which is a button group today (SC-023)"
   },
   {
     "section": "collection-showcase (services)",
@@ -1348,14 +1348,14 @@
     "path": "columns",
     "kind": "options",
     "difference": "choices 2, 3, 4; salt-wordpress 2, 3",
-    "evidence": "owes: one select with the strings 2, 3 and 4 on every source; work and blog_teaser offer 2 and 3 with an integer default 3, team uses bare-numeral labels, testimonials has none"
+    "evidence": "owes: one select with the strings 2, 3 and 4 on every source; work and blog_teaser offer 2 and 3 with an integer default 3, team uses bare-numeral labels, testimonials has none; a select, where the columns are a button group today (SC-023)"
   },
   {
     "section": "collection-showcase (work)",
     "path": "columns",
     "kind": "default",
     "difference": "default \"3\"; salt-wordpress 3",
-    "evidence": "owes: one select with the strings 2, 3 and 4 on every source; work and blog_teaser offer 2 and 3 with an integer default 3, team uses bare-numeral labels, testimonials has none"
+    "evidence": "owes: one select with the strings 2, 3 and 4 on every source; work and blog_teaser offer 2 and 3 with an integer default 3, team uses bare-numeral labels, testimonials has none; a select, where the columns are a button group today (SC-023)"
   },
   {
     "section": "collection-showcase (work)",
@@ -1383,14 +1383,14 @@
     "path": "query.categories",
     "kind": "type",
     "difference": "type select; salt-wordpress taxonomy",
-    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes"
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; a select for the query's mode, which is a button group today (SC-023)"
   },
   {
     "section": "collection-showcase (work)",
     "path": "query.items",
     "kind": "relation",
     "difference": "post_type [\"service\",\"work\",\"testimonial\",\"post\",\"team_member\"]; salt-wordpress [\"work\"]",
-    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes"
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; a select for the query's mode, which is a button group today (SC-023)"
   },
   {
     "section": "collection-showcase (work)",
@@ -1411,28 +1411,28 @@
     "path": "query.order",
     "kind": "condition",
     "difference": "condition differs (1 of 3 cases), e.g. {\"mode\":\"manual\"}: contract hides, salt-wordpress shows",
-    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes"
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; a select for the query's mode, which is a button group today (SC-023)"
   },
   {
     "section": "collection-showcase (work)",
     "path": "query.count",
     "kind": "limit",
     "difference": "step 1; salt-wordpress none",
-    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes"
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; a select for the query's mode, which is a button group today (SC-023)"
   },
   {
     "section": "collection-showcase (work)",
     "path": "query.count",
     "kind": "condition",
     "difference": "condition differs (1 of 3 cases), e.g. {\"mode\":\"manual\"}: contract hides, salt-wordpress shows",
-    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes"
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; a select for the query's mode, which is a button group today (SC-023)"
   },
   {
     "section": "collection-showcase (work)",
     "path": "query.direction",
     "kind": "extra",
     "difference": "in salt-wordpress, not in the contract",
-    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes"
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; a select for the query's mode, which is a button group today (SC-023)"
   },
   {
     "section": "collection-showcase (work)",
@@ -1586,14 +1586,14 @@
     "path": "query.categories",
     "kind": "type",
     "difference": "type select; salt-wordpress taxonomy",
-    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes"
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; a select for the query's mode, which is a button group today (SC-023)"
   },
   {
     "section": "collection-showcase (team)",
     "path": "query.items",
     "kind": "relation",
     "difference": "post_type [\"service\",\"work\",\"testimonial\",\"post\",\"team_member\"]; salt-wordpress [\"team_member\"]",
-    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes"
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; a select for the query's mode, which is a button group today (SC-023)"
   },
   {
     "section": "collection-showcase (team)",
@@ -1614,28 +1614,28 @@
     "path": "query.order",
     "kind": "condition",
     "difference": "condition differs (1 of 3 cases), e.g. {\"mode\":\"manual\"}: contract hides, salt-wordpress shows",
-    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes"
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; a select for the query's mode, which is a button group today (SC-023)"
   },
   {
     "section": "collection-showcase (team)",
     "path": "query.count",
     "kind": "limit",
     "difference": "step 1; salt-wordpress none",
-    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes"
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; a select for the query's mode, which is a button group today (SC-023)"
   },
   {
     "section": "collection-showcase (team)",
     "path": "query.count",
     "kind": "condition",
     "difference": "condition differs (1 of 3 cases), e.g. {\"mode\":\"manual\"}: contract hides, salt-wordpress shows",
-    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes"
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; a select for the query's mode, which is a button group today (SC-023)"
   },
   {
     "section": "collection-showcase (team)",
     "path": "query.direction",
     "kind": "extra",
     "difference": "in salt-wordpress, not in the contract",
-    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes"
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; a select for the query's mode, which is a button group today (SC-023)"
   },
   {
     "section": "collection-showcase (team)",
@@ -1747,7 +1747,7 @@
     "path": "columns",
     "kind": "missing",
     "difference": "not in salt-wordpress",
-    "evidence": "owes: one select with the strings 2, 3 and 4 on every source; work and blog_teaser offer 2 and 3 with an integer default 3, team uses bare-numeral labels, testimonials has none"
+    "evidence": "owes: one select with the strings 2, 3 and 4 on every source; work and blog_teaser offer 2 and 3 with an integer default 3, team uses bare-numeral labels, testimonials has none; a select, where the columns are a button group today (SC-023)"
   },
   {
     "section": "collection-showcase (testimonials)",
@@ -1775,14 +1775,14 @@
     "path": "query.categories",
     "kind": "missing",
     "difference": "not in salt-wordpress",
-    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes"
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; a select for the query's mode, which is a button group today (SC-023)"
   },
   {
     "section": "collection-showcase (testimonials)",
     "path": "query.items",
     "kind": "relation",
     "difference": "post_type [\"service\",\"work\",\"testimonial\",\"post\",\"team_member\"]; salt-wordpress [\"testimonial\"]",
-    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes"
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; a select for the query's mode, which is a button group today (SC-023)"
   },
   {
     "section": "collection-showcase (testimonials)",
@@ -1803,28 +1803,28 @@
     "path": "query.order",
     "kind": "condition",
     "difference": "condition differs (1 of 3 cases), e.g. {\"mode\":\"manual\"}: contract hides, salt-wordpress shows",
-    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes"
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; a select for the query's mode, which is a button group today (SC-023)"
   },
   {
     "section": "collection-showcase (testimonials)",
     "path": "query.count",
     "kind": "limit",
     "difference": "step 1; salt-wordpress none",
-    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes"
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; a select for the query's mode, which is a button group today (SC-023)"
   },
   {
     "section": "collection-showcase (testimonials)",
     "path": "query.count",
     "kind": "condition",
     "difference": "condition differs (1 of 3 cases), e.g. {\"mode\":\"manual\"}: contract hides, salt-wordpress shows",
-    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes"
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; a select for the query's mode, which is a button group today (SC-023)"
   },
   {
     "section": "collection-showcase (testimonials)",
     "path": "query.direction",
     "kind": "extra",
     "difference": "in salt-wordpress, not in the contract",
-    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes"
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; a select for the query's mode, which is a button group today (SC-023)"
   },
   {
     "section": "collection-showcase (testimonials)",
@@ -1950,14 +1950,14 @@
     "path": "columns",
     "kind": "options",
     "difference": "choices 2, 3, 4; salt-wordpress 2, 3",
-    "evidence": "owes: one select with the strings 2, 3 and 4 on every source; work and blog_teaser offer 2 and 3 with an integer default 3, team uses bare-numeral labels, testimonials has none"
+    "evidence": "owes: one select with the strings 2, 3 and 4 on every source; work and blog_teaser offer 2 and 3 with an integer default 3, team uses bare-numeral labels, testimonials has none; a select, where the columns are a button group today (SC-023)"
   },
   {
     "section": "collection-showcase (blog_teaser)",
     "path": "columns",
     "kind": "default",
     "difference": "default \"3\"; salt-wordpress 3",
-    "evidence": "owes: one select with the strings 2, 3 and 4 on every source; work and blog_teaser offer 2 and 3 with an integer default 3, team uses bare-numeral labels, testimonials has none"
+    "evidence": "owes: one select with the strings 2, 3 and 4 on every source; work and blog_teaser offer 2 and 3 with an integer default 3, team uses bare-numeral labels, testimonials has none; a select, where the columns are a button group today (SC-023)"
   },
   {
     "section": "collection-showcase (blog_teaser)",
@@ -1985,14 +1985,14 @@
     "path": "query.categories",
     "kind": "type",
     "difference": "type select; salt-wordpress taxonomy",
-    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes"
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; a select for the query's mode, which is a button group today (SC-023)"
   },
   {
     "section": "collection-showcase (blog_teaser)",
     "path": "query.items",
     "kind": "relation",
     "difference": "post_type [\"service\",\"work\",\"testimonial\",\"post\",\"team_member\"]; salt-wordpress [\"post\"]",
-    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes"
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; a select for the query's mode, which is a button group today (SC-023)"
   },
   {
     "section": "collection-showcase (blog_teaser)",
@@ -2013,28 +2013,28 @@
     "path": "query.order",
     "kind": "condition",
     "difference": "condition differs (1 of 3 cases), e.g. {\"mode\":\"manual\"}: contract hides, salt-wordpress shows",
-    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes"
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; a select for the query's mode, which is a button group today (SC-023)"
   },
   {
     "section": "collection-showcase (blog_teaser)",
     "path": "query.count",
     "kind": "limit",
     "difference": "step 1; salt-wordpress none",
-    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes"
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; a select for the query's mode, which is a button group today (SC-023)"
   },
   {
     "section": "collection-showcase (blog_teaser)",
     "path": "query.count",
     "kind": "condition",
     "difference": "condition differs (1 of 3 cases), e.g. {\"mode\":\"manual\"}: contract hides, salt-wordpress shows",
-    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes"
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; a select for the query's mode, which is a button group today (SC-023)"
   },
   {
     "section": "collection-showcase (blog_teaser)",
     "path": "query.direction",
     "kind": "extra",
     "difference": "in salt-wordpress, not in the contract",
-    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes"
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; a select for the query's mode, which is a button group today (SC-023)"
   },
   {
     "section": "collection-showcase (blog_teaser)",
@@ -2293,14 +2293,14 @@
     "path": "query.categories",
     "kind": "missing",
     "difference": "not in salt-wordpress",
-    "evidence": "owes: the query on scroll_carousel; only the testimonials layout has one today; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes"
+    "evidence": "owes: the query on scroll_carousel; only the testimonials layout has one today; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; a select for the query's mode, which is a button group today (SC-023)"
   },
   {
     "section": "carousel (testimonials)",
     "path": "query.items",
     "kind": "relation",
     "difference": "post_type [\"service\",\"work\",\"testimonial\",\"post\",\"team_member\"]; salt-wordpress [\"testimonial\"]",
-    "evidence": "owes: the query on scroll_carousel; only the testimonials layout has one today; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes"
+    "evidence": "owes: the query on scroll_carousel; only the testimonials layout has one today; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; a select for the query's mode, which is a button group today (SC-023)"
   },
   {
     "section": "carousel (testimonials)",
@@ -2321,28 +2321,28 @@
     "path": "query.order",
     "kind": "condition",
     "difference": "condition differs (1 of 3 cases), e.g. {\"mode\":\"manual\"}: contract hides, salt-wordpress shows",
-    "evidence": "owes: the query on scroll_carousel; only the testimonials layout has one today; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes"
+    "evidence": "owes: the query on scroll_carousel; only the testimonials layout has one today; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; a select for the query's mode, which is a button group today (SC-023)"
   },
   {
     "section": "carousel (testimonials)",
     "path": "query.count",
     "kind": "limit",
     "difference": "step 1; salt-wordpress none",
-    "evidence": "owes: the query on scroll_carousel; only the testimonials layout has one today; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes"
+    "evidence": "owes: the query on scroll_carousel; only the testimonials layout has one today; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; a select for the query's mode, which is a button group today (SC-023)"
   },
   {
     "section": "carousel (testimonials)",
     "path": "query.count",
     "kind": "condition",
     "difference": "condition differs (1 of 3 cases), e.g. {\"mode\":\"manual\"}: contract hides, salt-wordpress shows",
-    "evidence": "owes: the query on scroll_carousel; only the testimonials layout has one today; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes"
+    "evidence": "owes: the query on scroll_carousel; only the testimonials layout has one today; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; a select for the query's mode, which is a button group today (SC-023)"
   },
   {
     "section": "carousel (testimonials)",
     "path": "query.direction",
     "kind": "extra",
     "difference": "in salt-wordpress, not in the contract",
-    "evidence": "owes: the query on scroll_carousel; only the testimonials layout has one today; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes"
+    "evidence": "owes: the query on scroll_carousel; only the testimonials layout has one today; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; a select for the query's mode, which is a button group today (SC-023)"
   },
   {
     "section": "carousel (testimonials)",
@@ -2559,28 +2559,28 @@
     "path": "query.order",
     "kind": "condition",
     "difference": "condition differs (1 of 3 cases), e.g. {\"mode\":\"manual\"}: contract hides, salt-wordpress shows",
-    "evidence": "owes: one query group in place of six layout fields"
+    "evidence": "owes: one query group in place of six layout fields; a select for the query's mode, which is a button group today (SC-023)"
   },
   {
     "section": "locations",
     "path": "query.count",
     "kind": "limit",
     "difference": "step 1; salt-wordpress none",
-    "evidence": "owes: one query group in place of six layout fields"
+    "evidence": "owes: one query group in place of six layout fields; a select for the query's mode, which is a button group today (SC-023)"
   },
   {
     "section": "locations",
     "path": "query.count",
     "kind": "condition",
     "difference": "condition differs (1 of 3 cases), e.g. {\"mode\":\"manual\"}: contract hides, salt-wordpress shows",
-    "evidence": "owes: one query group in place of six layout fields"
+    "evidence": "owes: one query group in place of six layout fields; a select for the query's mode, which is a button group today (SC-023)"
   },
   {
     "section": "locations",
     "path": "query.direction",
     "kind": "extra",
     "difference": "in salt-wordpress, not in the contract",
-    "evidence": "owes: one query group in place of six layout fields"
+    "evidence": "owes: one query group in place of six layout fields; a select for the query's mode, which is a button group today (SC-023)"
   },
   {
     "section": "locations",
@@ -2728,5 +2728,89 @@
     "kind": "name",
     "difference": "stored as section_divider",
     "evidence": "formerly: section_divider"
+  },
+  {
+    "section": "gallery",
+    "path": "columns",
+    "kind": "type",
+    "difference": "type select; salt-wordpress button_group",
+    "evidence": "owes: storing the strings 2, 3 and 4; the default is stored as the integer 3 today; a select, where the columns are a button group today (SC-023)"
+  },
+  {
+    "section": "faq",
+    "path": "query.mode",
+    "kind": "type",
+    "difference": "type select; salt-wordpress button_group",
+    "evidence": "owes: one query group in place of six layout fields; a select for the query's mode, which is a button group today (SC-023)"
+  },
+  {
+    "section": "collection-showcase (services)",
+    "path": "query.mode",
+    "kind": "type",
+    "difference": "type select; salt-wordpress button_group",
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; a select for the query's mode, which is a button group today (SC-023)"
+  },
+  {
+    "section": "collection-showcase (work)",
+    "path": "columns",
+    "kind": "type",
+    "difference": "type select; salt-wordpress button_group",
+    "evidence": "owes: one select with the strings 2, 3 and 4 on every source; work and blog_teaser offer 2 and 3 with an integer default 3, team uses bare-numeral labels, testimonials has none; a select, where the columns are a button group today (SC-023)"
+  },
+  {
+    "section": "collection-showcase (work)",
+    "path": "query.mode",
+    "kind": "type",
+    "difference": "type select; salt-wordpress button_group",
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; a select for the query's mode, which is a button group today (SC-023)"
+  },
+  {
+    "section": "collection-showcase (team)",
+    "path": "columns",
+    "kind": "type",
+    "difference": "type select; salt-wordpress button_group",
+    "evidence": "owes: one select with the strings 2, 3 and 4 on every source; work and blog_teaser offer 2 and 3 with an integer default 3, team uses bare-numeral labels, testimonials has none; a select, where the columns are a button group today (SC-023)"
+  },
+  {
+    "section": "collection-showcase (team)",
+    "path": "query.mode",
+    "kind": "type",
+    "difference": "type select; salt-wordpress button_group",
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; a select for the query's mode, which is a button group today (SC-023)"
+  },
+  {
+    "section": "collection-showcase (testimonials)",
+    "path": "query.mode",
+    "kind": "type",
+    "difference": "type select; salt-wordpress button_group",
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; a select for the query's mode, which is a button group today (SC-023)"
+  },
+  {
+    "section": "collection-showcase (blog_teaser)",
+    "path": "columns",
+    "kind": "type",
+    "difference": "type select; salt-wordpress button_group",
+    "evidence": "owes: one select with the strings 2, 3 and 4 on every source; work and blog_teaser offer 2 and 3 with an integer default 3, team uses bare-numeral labels, testimonials has none; a select, where the columns are a button group today (SC-023)"
+  },
+  {
+    "section": "collection-showcase (blog_teaser)",
+    "path": "query.mode",
+    "kind": "type",
+    "difference": "type select; salt-wordpress button_group",
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; a select for the query's mode, which is a button group today (SC-023)"
+  },
+  {
+    "section": "carousel (testimonials)",
+    "path": "query.mode",
+    "kind": "type",
+    "difference": "type select; salt-wordpress button_group",
+    "evidence": "owes: the query on scroll_carousel; only the testimonials layout has one today; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; a select for the query's mode, which is a button group today (SC-023)"
+  },
+  {
+    "section": "locations",
+    "path": "query.mode",
+    "kind": "type",
+    "difference": "type select; salt-wordpress button_group",
+    "evidence": "owes: one query group in place of six layout fields; a select for the query's mode, which is a button group today (SC-023)"
   }
 ]

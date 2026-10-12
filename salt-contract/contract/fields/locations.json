@@ -58,7 +58,7 @@
               "title": "title"
             }
           },
-          "owes": "one query group in place of six layout fields",
+          "owes": "one query group in place of six layout fields; a select for the query's mode, which is a button group today (SC-023)",
           "note": "Stored as the layout's own source, taxonomy_terms, manual, orderby, order and count; taxonomy_terms becomes categories, manual becomes items, orderby and order fold into order, count stays count. SC-006 offers neither oldest-first nor Z to A, so a stored order direction is dropped on migration."
         }
       }
