@@ -12,7 +12,7 @@ import { fileURLToPath } from 'node:url'
 import Ajv2020 from 'ajv/dist/2020.js'
 
 import { hasVisibleText, loadContract } from '../salt-contract/emit/_contract.mjs'
-import { checkPayloadSnapshot, isFilled, payloadSnapshot, toPayloadBlocks } from '../salt-contract/emit/payload.mjs'
+import { checkPayloadSnapshot, isFilled, payloadSnapshot, PLATFORM_ADDITIONS, toPayloadBlocks } from '../salt-contract/emit/payload.mjs'
 
 const emitter = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'salt-contract', 'emit', 'payload.mjs')
 const icons = [{ value: 'star', label: 'Star' }, { value: 'check', label: 'Check' }]
@@ -64,6 +64,68 @@ test('the drift check passes an unchanged snapshot and fails a renamed field, na
   const changed = structuredClone(contract)
   changed.fields.hero.fields.find((f) => f.name === 'buttons').max = 3
   assert.deepEqual(checkPayloadSnapshot(snapshot, { icons, contract: changed }).problems, ['blocks[hero].fields[buttons].maxRows was 2, is now 3'])
+})
+
+// A snapshot of the emitter's blocks after `decorate` has changed them, as a consumer's would be.
+const decorated = (decorate) => {
+  const list = JSON.parse(payloadSnapshot({ icons }))
+  decorate((slug, dotted) => field(block(list, slug).fields, dotted), list)
+  return JSON.stringify(list, null, 2) + '\n'
+}
+
+test('SC-023: a consumer may add the listed keys to a field, at any depth, and the check still passes', () => {
+  assert.deepEqual(PLATFORM_ADDITIONS, ['admin.components', 'admin.initCollapsed', 'admin.layout', 'hooks'])
+  const snapshot = decorated((at) => {
+    // Beside a description the contract gives, on a nested field with no admin of its own, and on a setting.
+    Object.assign(at('hero', 'buttons').admin, { components: { RowLabel: { path: 'site/admin', exportName: 'RowLabel' } }, initCollapsed: true })
+    at('hero', 'image').admin.components = { afterInput: [{ path: 'site/admin', exportName: 'SizeNotice' }] }
+    at('hero', 'buttons.link.type').admin = { layout: 'horizontal' }
+    at('hero', 'settings.anchorId').hooks = { beforeValidate: [null] }
+  })
+  assert.notEqual(snapshot, payloadSnapshot({ icons }))
+  assert.deepEqual(checkPayloadSnapshot(snapshot, { icons }), { ok: true, problems: [] })
+})
+
+test('SC-023: a key outside the list fails, beside a listed one or alone', () => {
+  const problemsOf = (decorate) => checkPayloadSnapshot(decorated(decorate), { icons }).problems
+  assert.deepEqual(problemsOf((at) => { Object.assign(at('hero', 'buttons').admin, { initCollapsed: true, readOnly: true }) }),
+    ['blocks[hero].fields[buttons].admin.readOnly is in the snapshot and no longer generated'])
+  assert.deepEqual(problemsOf((at) => { at('hero', 'heading').access = {} }),
+    ['blocks[hero].fields[heading].access is in the snapshot and no longer generated'])
+  // An admin the consumer adds and leaves empty is not one of the keys, so it is still a difference.
+  assert.deepEqual(problemsOf((at) => { at('hero', 'buttons.link.type').admin = {} }),
+    ['blocks[hero].fields[buttons].fields[link].fields[type].admin is in the snapshot and no longer generated'])
+  // The keys are a field's: on the block, an option or the custom.salt record they compare.
+  assert.deepEqual(problemsOf((at, list) => { block(list, 'hero').hooks = {} }), ['blocks[hero].hooks is in the snapshot and no longer generated'])
+  assert.deepEqual(problemsOf((at) => { at('hero', 'variant').options[0].hooks = {} }),
+    ['blocks[hero].fields[variant].options[full-bleed].hooks is in the snapshot and no longer generated'])
+  assert.deepEqual(problemsOf((at) => { at('hero', 'settings.anchorId').custom.salt.hooks = {} }),
+    ['blocks[hero].fields[settings].fields[anchorId].custom.salt.hooks is in the snapshot and no longer generated'])
+})
+
+test('SC-023: a listed key cannot hide a change to a value the contract owns', () => {
+  const was = field(block(JSON.parse(payloadSnapshot({ icons })), 'hero').fields, 'image').admin.description
+  const { ok, problems } = checkPayloadSnapshot(decorated((at) => {
+    at('hero', 'image').admin = { components: { afterInput: [] }, description: 'Reworded on the site.' }
+    at('hero', 'buttons').admin.initCollapsed = true
+    at('hero', 'buttons').maxRows = 5
+    at('hero', 'settings.anchorId').hooks = { beforeValidate: [null] }
+    at('hero', 'settings.anchorId').custom.salt.format = 'url'
+  }), { icons })
+  assert.equal(ok, false)
+  assert.deepEqual(problems, [
+    `blocks[hero].fields[image].admin.description was "Reworded on the site.", is now ${JSON.stringify(was)}`,
+    'blocks[hero].fields[buttons].maxRows was 5, is now 2',
+    'blocks[hero].fields[settings].fields[anchorId].custom.salt.format was "url", is now "anchor"',
+  ])
+  // Without its additions the rest is still compared byte for byte: a moved key is formatting.
+  const moved = decorated((at) => {
+    const heading = at('hero', 'heading')
+    const { name, ...rest } = heading
+    for (const k of Object.keys(heading)) delete heading[k]
+    Object.assign(heading, rest, { name, hooks: {} })
+  })
+  assert.deepEqual(checkPayloadSnapshot(moved, { icons }).problems, ['the snapshot differs from the generated text only in formatting; regenerate it'])
 })
 
 test('the CLI exits 1 on drift and 0 when the snapshot matches', () => {

@@ -128,6 +128,29 @@ diff and migrate. Options that JSON can carry also work from the command line:
 `node emit/payload.mjs --check <snapshot> [--options <options.json>]` exits 1 on drift, and
 `--write <snapshot>` regenerates it. CRLF line endings are read as LF.
 
+**What a consumer may add.** A consumer decorates the generated fields for its own admin, and its
+snapshot is of the blocks it hands Payload, so those additions are in it. The check leaves out
+exactly the keys `PLATFORM_ADDITIONS` in `emit/payload.mjs` lists, and nothing else (SC-023):
+
+| Key of a field | What it is |
+| --- | --- |
+| `admin.components` | Payload's admin components for the field: a list's row label, a notice beside an input. |
+| `admin.initCollapsed` | Whether a list or group starts collapsed in the admin. |
+| `admin.layout` | A radio's layout. |
+| `hooks` | The field's hooks. |
+
+Each is left out whole, at any depth of a block's fields, and only on a field: a block's own keys,
+an option and `custom.salt` compare in full. Any other added key fails, and so does a change to a
+key the contract generates, whatever sits beside it: `admin.description` still compares on a field
+that also carries `admin.components`. What is left is compared byte for byte. A validator is a
+function, so it never reaches a snapshot.
+
+**Conditions are not compared in 1.0.0** (SC-023). `admin.condition` is a function and drops out
+of both the committed and the regenerated snapshot. The check compares the clauses each field
+records under `custom.salt.condition`; it does not run, or read, the consumer's own condition. A
+consumer whose condition shows a field at other times than the contract's clauses say therefore
+still passes. A comparison of conditions may arrive in a later minor version.
+
 **Fitting the site's sources.** `planSections` in `emit/_contract.mjs` decides, for every emitter,
 which sections a site gets. A section that needs a source the site does not install is left out,
 or refused with the missing source and field named when `sections` lists it (`null` counts as not
@@ -378,7 +401,9 @@ pins. For every section it ships it checks four things:
   than 200 fails that case, with its stderr (or the response body) in the report.
 - **Field parity.** The implementation's committed field snapshot is checked with the emitter's own
   `checkPayloadSnapshot` or `checkAcfSnapshot` (the drift checks above), using the implementation's
-  real options, and each problem is filed under its section. Every shipped section must be in the
+  real options, and each problem is filed under its section. On Payload the keys a consumer may
+  add to a field are left out and admin conditions are not compared (SC-023; "What a consumer may
+  add" and "Conditions are not compared in 1.0.0", above). Every shipped section must be in the
   snapshot ("not in the field snapshot" otherwise). A problem under a block or layout that is no
   contract section, or under a section declared not shipped, is about the whole snapshot and fails
   every shipped section; so does a section declared not shipped whose fields are in the snapshot,

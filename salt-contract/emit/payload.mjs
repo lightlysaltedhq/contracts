@@ -16,8 +16,19 @@
 // anything type-checks.
 //
 // Pure data: no Payload import, and nothing read but the contract's own files. What the contract
-// leaves to the platform (admin components, hooks, validators, enum names beyond these) is the
-// consumer's to add; `custom.salt` says what each field was generated from so it can.
+// leaves to the platform is the consumer's to add; `custom.salt` says what each field was
+// generated from so it can. A validator is a function and drops out of the snapshot. The keys that
+// do reach it (admin components, hooks, initCollapsed, a radio's layout) are PLATFORM_ADDITIONS
+// below, the one list `checkPayloadSnapshot` leaves out of the comparison (SC-023); a key outside
+// it still fails.
+//
+// ── Conditions are not compared in 1.0.0 (SC-023) ────────────────────────────────────────────
+//
+// `admin.condition` is a function, so it is in neither the committed snapshot nor the regenerated
+// one. `checkPayloadSnapshot` compares the clauses a field records under `custom.salt.condition`
+// and nothing of the function beside them: a consumer whose own condition shows a field at other
+// times than those clauses say still passes. Whether a consumer's conditions behave as the
+// contract's is therefore not part of conformance to 1.0.0; a comparison may come in a later minor.
 //
 // Byte-stable: objects are built in the contract's order with a fixed key order, and nothing reads
 // the clock, the environment or the file system's listing order.
@@ -364,16 +375,65 @@ export function payloadSnapshot(options = {}) {
 const keyOf = (item) => (item && typeof item === 'object' ? item.slug ?? item.name ?? item.value : undefined)
 
 /**
+ * The keys a consumer may add to a field of a block (SC-023), each as its path from the field, and
+ * the only keys `checkPayloadSnapshot` leaves out of the comparison:
+ *
+ *   admin.components    Payload's admin components for the field: a list's row label, a notice
+ *                       beside an input. They change the admin screen and nothing that is stored.
+ *   admin.initCollapsed whether a list or group starts collapsed in the admin
+ *   admin.layout        a radio's layout
+ *   hooks               the field's hooks; functions, so only their slots reach a snapshot
+ *
+ * A path is left out whole, with everything under it, and only on a field: a block's own keys, an
+ * option and `custom.salt` are compared in full. Every other key of `admin` (its description, its
+ * step) is the contract's and still compares, so a listed key cannot carry a change to one.
+ */
+export const PLATFORM_ADDITIONS = ['admin.components', 'admin.initCollapsed', 'admin.layout', 'hooks']
+
+const isRecord = (x) => Boolean(x) && typeof x === 'object' && !Array.isArray(x)
+
+// `obj` without what `keys` leads to; the same object when it has nothing there. An object the
+// removal empties held nothing else, so it goes too; one that was already empty stays and compares.
+function without(obj, [key, ...rest]) {
+  if (!isRecord(obj) || !(key in obj)) return obj
+  const below = rest.length ? without(obj[key], rest) : undefined
+  if (rest.length && below === obj[key]) return obj
+  if (rest.length && Object.keys(below).length) return { ...obj, [key]: below }
+  const { [key]: gone, ...kept } = obj
+  return kept
+}
+
+// Fields without the consumer's additions, at every depth; the same list when it holds none.
+function withoutAdditions(fields) {
+  if (!Array.isArray(fields)) return fields
+  const out = fields.map((field) => {
+    if (!isRecord(field)) return field
+    const own = PLATFORM_ADDITIONS.reduce((f, p) => without(f, p.split('.')), field)
+    const below = withoutAdditions(own.fields)
+    return below === own.fields ? own : { ...own, fields: below }
+  })
+  return out.every((f, i) => f === fields[i]) ? fields : out
+}
+
+/**
  * Regenerate with `options` and compare with a committed snapshot (its text). `ok` is true only
- * when the two are byte-identical; `problems` names each difference by path, as
+ * when the two are byte-identical once the consumer's additions (PLATFORM_ADDITIONS, and nothing
+ * else) are left out of the snapshot's fields; `problems` names each difference by path, as
  * `blocks[hero].fields[heading] is in the snapshot and no longer generated`.
+ * Conditions are not compared (SC-023; this file's header).
  */
 export function checkPayloadSnapshot(snapshot, options = {}) {
   const now = normaliseLineEndings(payloadSnapshot(options))
   snapshot = normaliseLineEndings(snapshot)
   if (now === snapshot) return { ok: true, problems: [] }
-  let was
-  try { was = JSON.parse(snapshot) } catch (e) { return { ok: false, problems: [`the snapshot is not JSON: ${e.message}`] } }
+  let parsed
+  try { parsed = JSON.parse(snapshot) } catch (e) { return { ok: false, problems: [`the snapshot is not JSON: ${e.message}`] } }
+  const was = Array.isArray(parsed) ? parsed.map((b) => {
+    const fields = isRecord(b) ? withoutAdditions(b.fields) : undefined
+    return fields === b?.fields ? b : { ...b, fields }
+  }) : parsed
+  // With additions left out, the bytes compared are the rest of the snapshot as the emitter serialises it.
+  if (Array.isArray(parsed) && was.some((b, i) => b !== parsed[i]) && serialisePayloadBlocks(was) === now) return { ok: true, problems: [] }
   const problems = []
   diffSnapshots(was, JSON.parse(now), 'blocks', keyOf, problems)
   // Same structure, different bytes: formatting, which a regenerated snapshot fixes.
