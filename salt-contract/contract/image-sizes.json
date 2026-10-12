@@ -230,31 +230,31 @@
     },
     {
       "markup": "case-study",
-      "image": "the featured image (role image)",
+      "image": ".salt-case-study-view[data-media=aside] > .salt-case-study-view__media img",
       "slot": "aside",
       "band": true,
-      "when": "the aside layout"
+      "when": "the featured image in the aside layout, whose columns sit on a default band's measure"
     },
     {
       "markup": "case-study",
-      "image": "the featured image (role image)",
+      "image": ".salt-case-study-view__media img",
       "slot": "content",
       "band": false,
-      "when": "any other layout"
+      "when": "the featured image in the flow, the default layout"
     },
     {
       "markup": "case-study",
-      "image": "a gallery image",
+      "image": ".salt-case-study-view__frame img",
       "slot": "content",
       "band": false,
-      "when": "always"
+      "when": "a gallery image"
     },
     {
       "markup": "case-study",
-      "image": "a related case study's card image",
+      "image": ".salt-case-study-view__services .salt-showcase__media img",
       "slot": "card",
       "band": false,
-      "when": "always"
+      "when": "a delivered service's card"
     },
     {
       "markup": "post",

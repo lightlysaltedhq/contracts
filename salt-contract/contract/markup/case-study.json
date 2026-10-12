@@ -326,11 +326,18 @@
               },
               "children": [
                 {
-                  "role": "service-card",
-                  "component": "card",
+                  "role": "service-item",
+                  "element": "li",
                   "repeat": {
                     "from": "services"
-                  }
+                  },
+                  "children": [
+                    {
+                      "role": "service-card",
+                      "component": "card",
+                      "note": "Generic style, title at h3; never the priority image."
+                    }
+                  ]
                 }
               ]
             }
@@ -410,8 +417,16 @@
     },
     "nextjs": {
       "owes": [
-        "Name its four sections: the ids case-study__challenge-heading, case-study__solution-heading, case-study__gallery-heading and case-study__services-heading on their h2s, and aria-labelledby on each section (section#labelled-by, SC-012)."
+        "Name its four sections: the ids case-study__challenge-heading, case-study__solution-heading, case-study__gallery-heading and case-study__services-heading on their h2s, and aria-labelledby on each section (section#labelled-by, SC-012).",
+        "Write --salt-case-study-view-measure as the contract gives it, var(--container-5xl) for a default band (fixtures/case-study/aside); case-study-view.tsx writes the band's measure as a rem length (64rem)."
       ]
     }
+  },
+  "priorityMedia": {
+    "role": "image",
+    "when": "an image is set",
+    "rules": [
+      "section#priority-media"
+    ]
   }
 }
