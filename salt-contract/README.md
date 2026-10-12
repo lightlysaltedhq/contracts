@@ -369,15 +369,15 @@ hidden `formToken` and `challengeToken` values as `{{salt:form-token}}` and
 type and every other attribute still compares. It never touches ids, which SC-012 makes deterministic. The gate proves
 that removing or changing any one attribute of any expected HTML changes its output.
 
-`normalise.mjs` also exports `archiveOf(html)`, which the conformance runner applies to both sides
-of an archive view's cases before `normalise`, and to no other case (SC-023). It replaces the
-`href` of every `a.salt-pagination__link` that has one with `{{salt:page-href}}`, and an archive's
-expected HTML writes that placeholder. An archive's page addresses are its platform's routing
+`normalise.mjs` also exports `routedOf(html)`, which the conformance runner applies to both sides
+of the archive and search views' cases before `normalise`, and to no other case (SC-023). It
+replaces the `href` of every `a.salt-pagination__link` that has one with `{{salt:page-href}}`, and
+those views' expected HTML writes that placeholder. Their page addresses are the platform's routing
 (SC-003), so their shape is not compared: `/journal/topic/soil/page/2/` and `/blog/topics/soil?page=2`
-both pass. Everything else about the pagination is: which links are drawn and in what order, the
+both pass, as do `/search/?q=hedge&page=2` and `/?s=hedge&paged=2`. Everything else about the pagination is: which links are drawn and in what order, the
 gaps, each link's label, `rel`, `data-step` and `aria-current`, and that each link has an address
-at all (one with no `href`, or one empty or all white space, differs). The pagination a listing section or the
-search view draws is compared whole, addresses included.
+at all (one with no `href`, or one empty or all white space, differs). The pagination a listing section draws is
+compared whole, addresses included: its `route` supplies them and the section draws what it is given.
 
 ### The adapter protocol
 
@@ -416,9 +416,9 @@ written in the implementation's own repository; the contract fixes only its inte
   record's `{width}` template (a custom loader on Next.js, an upload URL filter on WordPress), so
   the URLs compare and the widths are the platform's own.
 - Form delivery, routing and admin stay native (SC-003): where a case needs a route's data, the
-  case supplies it in `route`. An archive view's adapter may draw the pagination addresses the
-  case gives or the ones its own routing builds, since the runner does not compare their shape
-  (SC-023; `archiveOf`, above).
+  case supplies it in `route`. An archive or search view's adapter may draw the pagination addresses
+  the case gives or the ones its own routing builds, since the runner does not compare their shape
+  (SC-023; `routedOf`, above).
 
 ## Conformance
 
@@ -467,9 +467,9 @@ The site chrome (`site-header`, `site-footer`), the page views with fixtures (`p
 `service`, `archive`, `search`, `not-found`; SC-018, and `case-study`; SC-021) and the page (`page`, compared through
 `pageOf`; SC-019) are run too, each reported as a file of its
 own under `files` in the JSON report and in its own table in the Markdown one. They have no fields,
-so each is held to the fixtures and class checks; the stylesheet pin is the run's. An archive's
-cases are compared through `archiveOf`, so the shape of its pagination addresses is not checked
-and the rest of its pagination is (SC-023). A run conforms
+so each is held to the fixtures and class checks; the stylesheet pin is the run's. The archive's
+and the search's cases are compared through `routedOf`, so the shape of their pagination addresses
+is not checked and the rest of their pagination is (SC-023). A run conforms
 only when every file it runs passes as well. `--sections` and `--not-shipped` take their ids like
 a section's, but the chrome, these six views and the page are required of every implementation
 (SC-018, SC-019, SC-021):

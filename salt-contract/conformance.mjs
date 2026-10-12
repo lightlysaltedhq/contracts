@@ -18,8 +18,8 @@
 // The site chrome (site-header, site-footer) and the page views (post, service, archive, search,
 // not-found; SC-018, and case-study; SC-021) have fixtures too. They have no fields of their own,
 // so the runner holds each to the fixtures and class checks, reports it by file, and the run
-// conforms only when every file it runs passes as well. In the archive view's cases the address of
-// each pagination link is replaced by a placeholder on both sides before comparing (archiveOf in
+// conforms only when every file it runs passes as well. In the archive and search views' cases the address of
+// each pagination link is replaced by a placeholder on both sides before comparing (routedOf in
 // normalise.mjs, SC-023): the links, their order, labels and current-page state are checked, and
 // the shape of their URLs, which is routing (SC-003), is not.
 //
@@ -33,7 +33,7 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, realpathSync, writeFi
 import { availableParallelism } from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { archiveOf, compare, pageOf, parse } from './normalise.mjs'
+import { compare, pageOf, parse, routedOf } from './normalise.mjs'
 import { checkPayloadSnapshot } from './emit/payload.mjs'
 import { checkAcfSnapshot } from './emit/acf.mjs'
 import { isMainModule } from './emit/_contract.mjs'
@@ -47,8 +47,8 @@ export const CHROME = ['site-header', 'site-footer']
 // The files SC-018 requires of every implementation: a full run cannot declare them not shipped.
 // The page skeleton (page.json), a kind of its own: its case is a whole document (SC-019).
 export const PAGE = 'page'
-// The archive view, whose pagination addresses the runner does not compare (SC-023).
-export const ARCHIVE = 'archive'
+// The views whose own routing builds their pagination's addresses, which the runner does not compare (SC-023).
+export const ROUTED = ['archive', 'search']
 // SC-018's chrome and views, the case study view (SC-021), and the page skeleton (SC-019).
 export const REQUIRED_FILES = [...CHROME, 'post', 'service', 'case-study', 'archive', 'search', 'not-found', PAGE]
 /** The kind of a chrome, view or page file: chrome, page or view. */
@@ -571,9 +571,9 @@ export async function runConformance(options) {
     const failures = []
     const unknown = new Map()
     // A page is compared as pageOf reads it: Salt's own head elements and the body (SC-019). An
-    // archive is compared as archiveOf reads it: its pagination's addresses are routing, which is
-    // the platform's (SC-003), so each is a placeholder on both sides (SC-023).
-    const view = id === PAGE ? pageOf : id === ARCHIVE ? archiveOf : (html) => html
+    // archive or a search is compared as routedOf reads it: its pagination's addresses are routing,
+    // which is the platform's (SC-003), so each is a placeholder on both sides (SC-023).
+    const view = id === PAGE ? pageOf : ROUTED.includes(id) ? routedOf : (html) => html
     for (const o of mine) {
       if (o.result.error) { failures.push({ case: o.name, kind: 'adapter', error: o.result.error, stderr: o.result.stderr }); continue }
       const difference = firstDifference(view(o.html), view(o.result.html))

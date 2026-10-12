@@ -57,13 +57,13 @@ test, applied through section 2's table, where the stricter row wins.
   stored form in a view as in a section: `service/full`'s intro holds the stored `h3`, drawn as
   `h2`, and the gate refuses any other heading level in a view's document. A collection is drawn
   in its stored order: a case's `collections` are already ordered, an adapter passes them through,
-  and the contract names no sort (`collection-showcase/grid-team-contacts`). An archive view's
-  pagination is compared without the shape of its addresses, which is routing and stays native
-  (SC-003): the runner reads both sides of an archive's cases through `archiveOf` in
+  and the contract names no sort (`collection-showcase/grid-team-contacts`). The archive and search
+  views' pagination is compared without the shape of its addresses, which is routing and stays
+  native (SC-003): the runner reads both sides of those views' cases through `routedOf` in
   `normalise.mjs`, which writes each pagination link's `href` as `{{salt:page-href}}`, as
-  `archive/topic`'s expected HTML does; which links are drawn, their order, labels, `rel`,
-  `data-step` and `aria-current` still compare. A listing section's and the search view's
-  pagination compare whole.
+  `archive/topic`'s and `search/results`'s expected HTML do; which links are drawn, their order,
+  labels, `rel`, `data-step` and `aria-current` still compare, and a link with no address
+  differs. A listing section's pagination compares whole.
 - The case-study view has fixtures and is required of every implementation (SC-021).
   `fixtures/case-study/` holds four cases (`full`, `aside`, `band` and `minimal`), `case-study`
   joins `REQUIRED_FILES`, and a full conformance run refuses to declare it not shipped. The

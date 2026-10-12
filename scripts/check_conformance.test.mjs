@@ -269,24 +269,30 @@ test('a page is compared through pageOf: the platform\'s head and body scripts p
   }
 })
 
-test('an archive\'s pagination addresses are not compared, its structure is, and a listing section\'s still are (SC-023)', async () => {
-  const expected = readFileSync(path.join(pkg, 'fixtures', 'archive', 'topic.html'), 'utf8')
-  const routed = expected.replaceAll('{{salt:page-href}}', '/blog/topics/soil?page=2')
-  assert.notEqual(routed, expected)
+test('an archive\'s and a search\'s pagination addresses are not compared, their structure is, and a listing section\'s still are (SC-023)', async () => {
+  const fixture = (rel) => readFileSync(path.join(pkg, 'fixtures', rel), 'utf8')
+  const archive = fixture('archive/topic.html').replaceAll('{{salt:page-href}}', '/blog/topics/soil?page=2')
+  const search = fixture('search/results.html').replaceAll('{{salt:page-href}}', '/?s=hedge&amp;paged=2')
+  assert.ok(archive.includes('/blog/topics/soil?page=2') && search.includes('/?s=hedge&amp;paged=2'))
   const shape = brokenAdapter({
-    'archive/topic': { html: routed },
+    'archive/topic': { html: archive },
+    'search/results': { html: search },
     'listing/cards-with-pagination': { from: 'href="/journal/page/3/" aria-label', to: 'href="/journal?page=3" aria-label' },
   })
-  const structure = brokenAdapter({ 'archive/topic': { html: routed.replace(' aria-current="page"', '') } })
+  const structure = brokenAdapter({
+    'archive/topic': { html: archive.replace(' aria-current="page"', '') },
+    'search/results': { html: search.replace('aria-label="Page 2"', 'aria-label="2"') },
+  })
   try {
     const r = await run(['--platform', 'broken', '--adapter', shape.command, ...withFields, ...withStyles])
     assert.equal(r.code, 1, r.out)
-    assert.equal(r.report.files.find((f) => f.id === 'archive').status, 'pass')
+    for (const id of ['archive', 'search']) assert.equal(r.report.files.find((f) => f.id === id).status, 'pass', id)
     const { name, expected: was, found } = failure(r.report, 'listing', 'cards-with-pagination')
     assert.deepEqual([name, was, found], ['href', '/journal/page/3/', '/journal?page=3'])
-    const s = await run(['--platform', 'broken', '--adapter', structure.command, '--sections', 'hero,archive', '--partial'])
-    const archive = s.report.files.find((f) => f.id === 'archive')
-    assert.deepEqual(archive.fixtures.failures.map((f) => [f.case, f.difference, f.name, f.expected, f.found]), [['topic', 'attribute', 'aria-current', 'page', null]])
+    const s = await run(['--platform', 'broken', '--adapter', structure.command, '--sections', 'hero,archive,search', '--partial'])
+    const failures = (id) => s.report.files.find((f) => f.id === id).fixtures.failures.map((f) => [f.case, f.difference, f.name, f.expected, f.found])
+    assert.deepEqual(failures('archive'), [['topic', 'attribute', 'aria-current', 'page', null]])
+    assert.deepEqual(failures('search'), [['results', 'attribute', 'aria-label', 'Page 2', '2']])
   } finally {
     rmSync(shape.dir, { recursive: true, force: true })
     rmSync(structure.dir, { recursive: true, force: true })

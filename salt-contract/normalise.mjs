@@ -37,9 +37,10 @@
 //    Each is matched by element, class, name or id, never by pattern, so a field's type, name or
 //    any other attribute still compares.
 //
-// 10. Not here, but in archiveOf below, which the conformance runner applies to an archive view's
-//    cases alone (SC-023): the address of each pagination link becomes {{salt:page-href}}, since
-//    the shape of an archive's page addresses is routing, which SC-003 leaves to each platform.
+// 10. Not here, but in routedOf below, which the conformance runner applies to the archive and
+//    search views' cases alone (SC-023): the address of each pagination link becomes
+//    {{salt:page-href}}, since the shape of a view's page addresses is routing, which SC-003
+//    leaves to each platform.
 //
 // Ids are not normalised: SC-012 makes every drawn id deterministic, so an id that differs is a
 // real difference. Input must close its elements (both platforms' serialisers do); no implied end
@@ -398,14 +399,15 @@ export function compare(expected, actual) {
 }
 
 /**
- * An archive view as its fixtures compare it (SC-023): the href of every a.salt-pagination__link
- * that has one becomes {{salt:page-href}}, which the expected HTML writes in its place. Routing is
+ * An archive or search view as its fixtures compare it (SC-023): the href of every
+ * a.salt-pagination__link that has one becomes {{salt:page-href}}, which the expected HTML writes
+ * in its place. Routing is
  * each platform's (SC-003), so the shape of a page's address is not compared; that each link is
  * there and has an address, their order, their labels, the gaps, rel, data-step and aria-current
  * all still are. A link with no href, or one empty or all white space, is left as it is and differs. Returns HTML
  * for normalise() or compare().
  */
-export function archiveOf(html) {
+export function routedOf(html) {
   const root = parse(String(html))
   const mask = (el) => {
     if (el.name === 'a' && hasClass(el, 'salt-pagination__link')) {
