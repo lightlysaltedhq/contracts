@@ -1,12 +1,13 @@
 {
-  "$comment": "Same shapes as case-study/full. site.caseStudy.media is the layout the site sets in code for its case studies (the view's media prop), not a stored value: aside draws the featured image beside the parts it runs alongside (the challenge, the solution and the live-site link), which the view counts and writes as --salt-case-study-view-aside-rows; the measure is a default band's, 64rem. Two results draw data-columns 2.",
+  "$comment": "Same shapes as case-study/full. site.caseStudy.media is the layout the site sets in code for its case studies (the view's media prop), not a stored value: aside draws the featured image beside the parts it runs alongside (the challenge, the solution and the live-site link), which the view counts and writes as --salt-case-study-view-aside-rows; the measure is a default band's, 64rem. The delivered service sits below the parts, confined to the measure, so its card takes the card slot in the default band. Two results draw data-columns 2.",
   "view": "case-study",
-  "summary": "A case study in the aside layout: the featured image, as the priority image, beside a challenge, a solution and the live-site link, under a header with the client and two results; no back link, details, gallery or services.",
+  "summary": "A case study in the aside layout: the featured image, as the priority image, beside a challenge, a solution and the live-site link, under a header with the client and two results; one delivered service card below them, confined to the measure; no back link, details or gallery.",
   "context": {
     "priorityMedia": true,
     "path": "/work/riverside-courtyard/"
   },
   "site": {
+    "arrow": "→",
     "caseStudy": {
       "media": "aside"
     },
@@ -25,6 +26,12 @@
       "width": 2400,
       "height": 1350,
       "alt": "A shaded courtyard of ferns and multi-stemmed birches beside the river"
+    },
+    "shade-planting": {
+      "url": "https://uploads.example/shade-planting-{width}.jpg",
+      "width": 1200,
+      "height": 800,
+      "alt": "Hostas and ferns under a multi-stemmed birch"
     }
   },
   "document": {
@@ -43,6 +50,15 @@
     "image": "courtyard",
     "challenge": "<p>A north-facing yard between two wings, in shade from October to March and used for bins.</p>",
     "solution": "<p>We paved it in reclaimed stone and planted for shade, so the restaurant could seat guests outside from spring.</p>",
-    "externalUrl": "https://riversidehotel.example/"
+    "externalUrl": "https://riversidehotel.example/",
+    "services": [
+      {
+        "id": "shade-planting",
+        "title": "Shade planting",
+        "href": "/services/shade-planting/",
+        "image": "shade-planting",
+        "text": "Planting for the corners the sun never reaches."
+      }
+    ]
   }
 }

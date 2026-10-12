@@ -251,10 +251,17 @@
     },
     {
       "markup": "case-study",
+      "image": ".salt-case-study-view[data-media=aside] > .salt-case-study-view__services .salt-showcase__media img",
+      "slot": "card",
+      "band": true,
+      "when": "a delivered service's card in the aside layout: the view's .salt-grid, three columns (stepping to two and one as the grid does), in the default band, since primitives.css confines the services to the aside's measure"
+    },
+    {
+      "markup": "case-study",
       "image": ".salt-case-study-view__services .salt-showcase__media img",
       "slot": "card",
       "band": true,
-      "when": "a delivered service's card: the view's .salt-grid, three columns (stepping to two and one as the grid does), in the full band, as the service view's related cards, since no shared stylesheet gives a view's section a measure"
+      "when": "a delivered service's card in the flow, the default layout: the view's .salt-grid, three columns (stepping to two and one as the grid does), in the full band, as the service view's related cards, since no shared stylesheet gives a view's section a measure"
     },
     {
       "markup": "post",

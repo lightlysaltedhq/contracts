@@ -662,6 +662,12 @@ test('sc-021: the aside\'s measure is a default band\'s 64rem and its rows the p
   // The count follows the document: one part fewer, one row fewer.
   expectFail(['case-study'], (io) => io.json('case-study/aside.json', (d) => { delete d.document.externalUrl }), /<article\.salt-case-study-view> style="--salt-case-study-view-aside-rows: 3;/)
 })
+test('sc-021: a delivered service\'s card takes the default band in the aside and the full band in the flow, at three columns', () => {
+  const full = 'sizes="(min-width: 48.01rem) calc((100vw - 3rem) / 3), (min-width: 40.01rem) calc((100vw - 1.5rem) / 2), calc(100vw)"'
+  const byDefault = 'sizes="(min-width: 75rem) 19rem, (min-width: 64rem) 19.1467rem, (min-width: 48.01rem) calc((100vw - 5rem) / 3), (min-width: 40.01rem) calc((100vw - 3.5rem) / 2), calc(100vw - 2rem)"'
+  expectFail(['case-study'], (io) => io.html('case-study/aside.html', byDefault, full), /fixtures\/case-study\/aside\.html: <img> sizes="\(min-width: 48\.01rem\) calc\(\(100vw - 3rem\) \/ 3\)[^"]*"; its slot \(card, band default, 3 columns\)/)
+  expectFail(['case-study'], (io) => io.html('case-study/full.html', full, byDefault), /fixtures\/case-study\/full\.html: <img> sizes="\(min-width: 75rem\) 19rem[^"]*"; its slot \(card, band full, 3 columns\)/)
+})
 const BAND = 'case-study/band.html'
 const BAND_HEADER = '<header class="salt-section salt-case-study-view__header" data-tone="brand-tint" data-tone-dark="surface-inverse" data-spacing="md" data-width="default" style="--salt-section-space: var(--space-section-md)">'
 test('sc-021: a header band is required of some case, and the site gives it as header band with its tones', () => {
