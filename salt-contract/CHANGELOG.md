@@ -32,9 +32,25 @@ test, applied through section 2's table, where the stricter row wins.
   (`./view-props/*`); the replaced-logic format (`./schema/replaced-logic`).
 - Image sizes (`./image-sizes`): each slot's `sizes` per band and column count, the candidate
   widths, and the srcset capped at the upload's intrinsic width (SC-016).
-- Fixtures (`./fixtures/*`): 106 cases with their expected HTML, for the 17 sections, the site
-  header and footer, the post, service, archive, search and not-found views, and the page
-  (SC-018, SC-019); and the normaliser both sides are compared through (`./normalise`).
+- Fixtures (`./fixtures/*`): 110 cases with their expected HTML, for the 17 sections, the site
+  header and footer, the post, service, case-study, archive, search and not-found views, and the
+  page (SC-018, SC-019, SC-021); and the normaliser both sides are compared through
+  (`./normalise`).
+- The case-study view has fixtures and is required of every implementation (SC-021).
+  `fixtures/case-study/` holds four cases (`full`, `aside`, `band` and `minimal`), `case-study`
+  joins `REQUIRED_FILES`, and a full conformance run refuses to declare it not shipped. The
+  markup closes two gaps: each delivered service's card sits in an `li`, and the view declares its
+  priority image (role `image`). The header band, once a note, is the view's `header` variant
+  (`plain` or `band`), keyed to a site option through the markup's new `variants[].site`; a band
+  draws the header as a section band, with its tones, `md` spacing, the default width, the
+  spacing's custom property and its parts in `div.salt-section__content`. A new declared site key,
+  `site.caseStudy` (`media`, `header`, `headerTone`, `headerToneDark`), carries the view's layout
+  into a fixture's input, and the gate ties it to the HTML: `data-media`, the aside's row count
+  and its measure (a rem length, 64rem for a default band) follow the input. The case-study
+  image placements in `image-sizes.json` name their img by selector; a delivered service's card
+  takes the card slot at three columns, in the full band in the flow and the default band in the
+  aside. Salt for Next.js owes naming the view's four sections and that card slot; Salt for
+  WordPress owes the markup, and an ACF options page for the band and the aside layout.
 - The conformance runner (`./conformance`, bin `salt-conformance`): fixtures, field snapshots,
   class vocabulary and the served stylesheet, reported as `conformance.json` (format
   `salt-conformance/1`) and `conformance.md`. An implementation conforms only when all four checks
