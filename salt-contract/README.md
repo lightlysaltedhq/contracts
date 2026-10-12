@@ -257,7 +257,7 @@ implementation's runtime emits (its generated `theme.css`).
 
 Modelled on GOV.UK Frontend's component fixtures: one directory per section, per chrome component
 (`site-header`, `site-footer`), per page view (`post`, `service`, `archive`, `search`,
-`not-found`; SC-018) and for the page skeleton (`page`; SC-019), and in it a pair of files per
+`not-found`; SC-018, and `case-study`; SC-021) and for the page skeleton (`page`; SC-019), and in it a pair of files per
 case. `<case>.json` is the input; `<case>.html` is the default HTML for it, or an empty
 file when the case renders nothing (section#zero-state). A case's name describes its state
 (`split-image-left`, `one-item`, `empty`). An implementation reads them from the package as
@@ -270,7 +270,7 @@ option covered, and the normaliser sound.
 
 | Key | What it holds |
 | --- | --- |
-| `section`, `chrome`, `view` or `page` | Which kind the case is, holding its id, the same as the directory: a section, a chrome component (`site-header`, `site-footer`), a view (`post`, `service`, `archive`, `search`, `not-found`) or the page (`page`). A chrome, view or page case has no `values` (no fields file describes them): it reads `site`, `document`, `route` and `state`. A page's one section is `document.sections`, shaped as `document.listing` below with its `section` id; its heading level is derived (1: a page's one section is its first and claims the h1, so no fallback heading is drawn beside its heading), and a `headingLevel`, if given, must agree; the page's priority image is that section's, by its own markup's rule. |
+| `section`, `chrome`, `view` or `page` | Which kind the case is, holding its id, the same as the directory: a section, a chrome component (`site-header`, `site-footer`), a view (`post`, `service`, `case-study`, `archive`, `search`, `not-found`) or the page (`page`). A chrome, view or page case has no `values` (no fields file describes them): it reads `site`, `document`, `route` and `state`. A page's one section is `document.sections`, shaped as `document.listing` below with its `section` id; its heading level is derived (1: a page's one section is its first and claims the h1, so no fallback heading is drawn beside its heading), and a `headingLevel`, if given, must agree; the page's priority image is that section's, by its own markup's rule. |
 | `summary` | What the case shows, in a sentence or two. |
 | `values` | The section's stored field values, named and shaped as `contract/fields/<section>.json` says, with the shared settings under `settings`. A field left out takes its default. |
 | `context` | For a chrome or view case: `priorityMedia` (a view: whether the plan grants it the priority image; the chrome never takes it), `locale`, `now` and `path` (the page's path, which sets `aria-current`). For a section, what the page plan decides for this band, describing a page that can exist: `index` (the plan's index, the section's position among the page's sections from 0, view-props/_shared.json, which also names an accordion group, `faq-<index>`), `track` (its `data-track`, `<section>-<n>` with n no more than `index` + 1, section#data-track), `headingLevel` (1 when no heading has rendered before the section, otherwise 2, section#single-h1), `headingRendered` (true when a heading rendered earlier on the page), `priorityMedia` (true for the first section, index 0, only, section#priority-media), and where they apply `collapseTop` (section#adjacent-collapse, never on the first section) `now` (an ISO 8601 time, for the locations' open-now status) and `locale` (a BCP 47 locale, `en-GB` in every case that draws a date, a time or a phone, which display as section#display-forms says). |
@@ -278,7 +278,7 @@ option covered, and the normaliser sound.
 | `documents` | The pages internal links name, by id: `{ href, title }`. |
 | `collections` | The items of each source the section reads (`faqs`, `services`, `team` …), in the collection's usual order, each with a string `id`. |
 | `route` | What the route hands a listing: its cards and pagination. |
-| `site` | Site-wide data the markup reads, under declared keys only (the gate refuses any other): `labels` (the strings `labels.<name>` in the markup refers to), `arrow` (the site's arrow glyph), `name`, `home`, `organisation`, `acceptsEnquiries`, `contactForm`, `timezone`, `maps`, `collectionIndexes`, `logo` (`{ light, dark }`, media ids), `logoHeight` (the logo's drawn height in px, the logo slot's input; no other key names it), `header` (menu, phone, call to action, sticky), `footer` (tone, columns, text, socials, copyright, whether it shows the logo), `consent`, `themeToggle`, `displayPreferences` and `search`. |
+| `site` | Site-wide data the markup reads, under declared keys only (the gate refuses any other): `labels` (the strings `labels.<name>` in the markup refers to), `arrow` (the site's arrow glyph), `name`, `home`, `organisation`, `acceptsEnquiries`, `contactForm`, `timezone`, `maps`, `collectionIndexes`, `logo` (`{ light, dark }`, media ids), `logoHeight` (the logo's drawn height in px, the logo slot's input; no other key names it), `header` (menu, phone, call to action, sticky), `footer` (tone, columns, text, socials, copyright, whether it shows the logo), `consent`, `themeToggle`, `displayPreferences`, `search` and `caseStudy` (the case study view's layout, which a site sets once for all its case studies: `{ media, header, headerTone, headerToneDark }`, where `media` is `flow` by default or `aside`, and `header` is `plain` by default or `band`, which draws the header as a toned section band and alone takes `headerTone` and the optional `headerToneDark`; Salt for Next.js sets these in code, and Salt for WordPress on an ACF options page, so editors can change them). A view's variant a site sets this way names its key in its markup (`variants[].site`), and every option its entry in `sections.json` offers needs a case. |
 | `document` | A view's document: the post, service, archive term or author, search query and results, as the view reads them. A section the view nests (the archive's listing) is `document.listing`: its `values` (the section's field values, shaped and checked as a section case's, with its settled anchor in `values.settings.anchorId`), `track` (its `data-track`), `index` (from 0, required, for `<section index>`; its track counts no more sections than come up to it) and, if given, `headingLevel`, which must agree with the derived level (2 in a view, under its h1). Its block is read against that section's own markup, its variant and conditions answered by its values, so its id, heading, spacing, data attributes and content are fixed by the case. |
 | `state` | A state the case draws that only a visitor brings about, such as the consent panel open (`consentPanelOpen`), or that the platform knows only sometimes when it renders: `themeScheme` (`light` or `dark`), the stored scheme, with which the theme toggle is its button form, pressed for dark and showing the sun or the moon; without it, its empty span server form. |
 
@@ -401,13 +401,13 @@ must ship at least one section, and a section declared not shipped (`--not-shipp
 out of the output: a class only its markup draws, written by another section, fails the run.
 
 The site chrome (`site-header`, `site-footer`), the page views with fixtures (`post`,
-`service`, `archive`, `search`, `not-found`; SC-018) and the page (`page`, compared through
+`service`, `archive`, `search`, `not-found`; SC-018, and `case-study`; SC-021) and the page (`page`, compared through
 `pageOf`; SC-019) are run too, each reported as a file of its
 own under `files` in the JSON report and in its own table in the Markdown one. They have no fields,
 so each is held to the fixtures and class checks; the stylesheet pin is the run's. A run conforms
 only when every file it runs passes as well. `--sections` and `--not-shipped` take their ids like
-a section's, but the chrome, these five views and the page are required of every implementation
-(SC-018, SC-019):
+a section's, but the chrome, these six views and the page are required of every implementation
+(SC-018, SC-019, SC-021):
 only a `--partial` run may declare one not shipped, and the summary counts it.
 
 Salt for Next.js copies or links the package's file to a static path (`public/salt.css`), links

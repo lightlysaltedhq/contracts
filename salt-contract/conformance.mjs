@@ -16,9 +16,9 @@
 //    own copy is refused: comparing it with itself would prove nothing.
 //
 // The site chrome (site-header, site-footer) and the page views (post, service, archive, search,
-// not-found) have fixtures too (SC-018). They have no fields of their own, so the runner holds each
-// to the fixtures and class checks, reports it by file, and the run conforms only when every file
-// it runs passes as well.
+// not-found; SC-018, and case-study; SC-021) have fixtures too. They have no fields of their own,
+// so the runner holds each to the fixtures and class checks, reports it by file, and the run
+// conforms only when every file it runs passes as well.
 //
 // An implementation conforms only when all four ran for every section it ships and all pass
 // (SC-017): a run without a field snapshot or a stylesheet pin fails. A run that leaves a check or
@@ -44,8 +44,8 @@ export const CHROME = ['site-header', 'site-footer']
 // The files SC-018 requires of every implementation: a full run cannot declare them not shipped.
 // The page skeleton (page.json), a kind of its own: its case is a whole document (SC-019).
 export const PAGE = 'page'
-// SC-018's chrome and views, and the page skeleton (SC-019).
-export const REQUIRED_FILES = [...CHROME, 'post', 'service', 'archive', 'search', 'not-found', PAGE]
+// SC-018's chrome and views, the case study view (SC-021), and the page skeleton (SC-019).
+export const REQUIRED_FILES = [...CHROME, 'post', 'service', 'case-study', 'archive', 'search', 'not-found', PAGE]
 /** The kind of a chrome, view or page file: chrome, page or view. */
 export const fileKind = (id) => (CHROME.includes(id) ? 'chrome' : id === PAGE ? 'page' : 'view')
 

@@ -5,7 +5,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { execFileSync } from 'node:child_process'
-import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { cpSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -467,7 +467,7 @@ test('arrows: only a section\'s call to action takes the site\'s arrow', () => {
 const HEADER = 'site-header/menu-submenus-phone-cta-sticky'
 const SWAPS = 'site-header/light-and-dark-logo'
 test('chrome: the chrome and the views SC-018 names are required', () => {
-  expectFail(HERO, () => {}, /site-header has no fixtures \(fixtures\/site-header\/<case>\.json and \.html\), which SC-018 requires/)
+  expectFail(HERO, () => {}, /site-header has no fixtures \(fixtures\/site-header\/<case>\.json and \.html\), which SC-018 and SC-021 require/)
   expectFail(HERO, () => {}, /not-found has no fixtures/)
 })
 test('chrome: a chrome or view case passes its own checks', () => {
@@ -602,12 +602,96 @@ test('chrome: the gate requires exactly the runner\'s list of chrome and view fi
   const { REQUIRED_FILES } = await import('../salt-contract/conformance.mjs')
   const dir = copy(HERO)
   try {
-    const missing = [...run(dir).out.matchAll(/✗ ([a-z-]+) has no fixtures \(fixtures\/[a-z-]+\/<case>\.json and \.html\), which SC-018 requires/g)].map((m) => m[1])
+    const missing = [...run(dir).out.matchAll(/✗ ([a-z-]+) has no fixtures \(fixtures\/[a-z-]+\/<case>\.json and \.html\), which SC-018 and SC-021 require/g)].map((m) => m[1])
     assert.deepEqual(missing.sort(), [...REQUIRED_FILES].sort())
   } finally { rmSync(dir, { recursive: true, force: true }) }
   const src = readFileSync(script, 'utf8')
   assert.match(src, /import \{[^}]*\bREQUIRED_FILES\b[^}]*\} from '\.\.\/salt-contract\/conformance\.mjs'/, 'the gate imports the runner\'s list')
   assert.doesNotMatch(src, /\[[^\]]*'not-found'[^\]]*\]/, 'the gate keeps no list of its own')
+})
+
+// The case study view (SC-021).
+test('sc-021: the case study view is required: the package without its fixtures fails, naming it alone', () => {
+  const others = readdirSync(path.join(pkg, 'fixtures')).filter((s) => s !== 'case-study')
+  const dir = copy(others)
+  try {
+    const r = run(dir)
+    assert.notEqual(r.code, 0, r.out)
+    const missing = [...r.out.matchAll(/✗ ([a-z-]+) has no fixtures/g)].map((m) => m[1])
+    assert.deepEqual(missing, ['case-study'], r.out)
+  } finally { rmSync(dir, { recursive: true, force: true }) }
+})
+test('sc-021: the case study cases pass their own checks', () => {
+  const dir = copy(['case-study'])
+  try { assert.doesNotMatch(run(dir).out, /fixtures\/case-study\//, run(dir).out) } finally { rmSync(dir, { recursive: true, force: true }) }
+})
+test('sc-021: the featured image takes the aside slot in the aside layout and the content slot in the flow', () => {
+  expectFail(['case-study'], (io) => io.html('case-study/aside.html', 'sizes="(min-width: 64rem) 23.83rem, 100vw"', 'sizes="(min-width: 64rem) 60rem, 100vw"'),
+    /fixtures\/case-study\/aside\.html: <img> sizes="\(min-width: 64rem\) 60rem, 100vw"; its slot \(aside, band default\) gives "\(min-width: 64rem\) 23\.83rem, 100vw"/)
+  expectFail(['case-study'], (io) => {
+    io.json('case-study/full.json', (d) => { d.site.caseStudy = { media: 'aside' } })
+    io.html('case-study/full.html', '<article class="salt-case-study-view">', '<article class="salt-case-study-view" data-media="aside" style="--salt-case-study-view-aside-rows: 4; --salt-case-study-view-measure: 64rem">')
+  },
+    /fixtures\/case-study\/full\.html: <img> sizes="\(min-width: 64rem\) 60rem, 100vw"; its slot \(aside, band default\)/)
+})
+test('sc-021: the featured image is the priority image, and site.caseStudy.media is flow or aside', () => {
+  expectFail(['case-study'], (io) => io.html('case-study/full.html', 'fetchpriority="high" decoding="async"', 'loading="lazy" decoding="async"'), /fixtures\/case-study\/full\.html: the priority image must be in case-study's image/)
+  expectFail(['case-study'], (io) => io.json('case-study/aside.json', (d) => { d.site.caseStudy.media = 'side' }), /site\.caseStudy is \{ media, header, headerTone, headerToneDark \}: media flow or aside/)
+})
+const ASIDE_ARTICLE = '<article class="salt-case-study-view" data-media="aside" style="--salt-case-study-view-aside-rows: 3; --salt-case-study-view-measure: 64rem">'
+test('sc-021: the article is laid out aside exactly when the site says aside, an image is set and a part runs beside it', () => {
+  // A flow input with aside HTML.
+  expectFail(['case-study'], (io) => io.json('case-study/aside.json', (d) => { d.site.caseStudy.media = 'flow' }), /fixtures\/case-study\/aside\.html: .*<article\.salt-case-study-view> carries data-media, which the markup draws only when media aside/)
+  expectFail(['case-study'], (io) => io.html('case-study/full.html', '<article class="salt-case-study-view">', ASIDE_ARTICLE.replace('rows: 3', 'rows: 4')), /fixtures\/case-study\/full\.html: .*<article\.salt-case-study-view> carries data-media, which the markup draws only when media aside/)
+  // An aside input with flow HTML.
+  expectFail(['case-study'], (io) => io.html('case-study/aside.html', ASIDE_ARTICLE, '<article class="salt-case-study-view">'), /fixtures\/case-study\/aside\.html: .*<article\.salt-case-study-view> lacks data-media, which the markup requires when media aside/)
+  expectFail(['case-study'], (io) => io.html('case-study/aside.html', ' style="--salt-case-study-view-aside-rows: 3; --salt-case-study-view-measure: 64rem"', ''), /<article\.salt-case-study-view> lacks style, which the markup requires when data-media is aside/)
+  // Aside, but nothing to sit beside: the image stays in the flow.
+  expectFail(['case-study'], (io) => {
+    io.json('case-study/aside.json', (d) => { delete d.document.challenge; delete d.document.solution; delete d.document.gallery; delete d.document.externalUrl })
+    io.html('case-study/aside.html', ' style="--salt-case-study-view-aside-rows: 3; --salt-case-study-view-measure: 64rem"', '')
+  }, /<article\.salt-case-study-view> carries data-media, which the markup draws only when/)
+})
+test('sc-021: the aside\'s measure is a default band\'s 64rem and its rows the parts the view counts beside the image', () => {
+  const style = (rows, measure) => `style="--salt-case-study-view-aside-rows: ${rows}; --salt-case-study-view-measure: ${measure}"`
+  const swap = (rows, measure) => (io) => io.html('case-study/aside.html', style(3, '64rem'), style(rows, measure))
+  expectFail(['case-study'], swap(3, 'var(--container-5xl)'), /<article\.salt-case-study-view> style="--salt-case-study-view-aside-rows: 3; --salt-case-study-view-measure: var\(--container-5xl\)"/)
+  expectFail(['case-study'], swap(3, '80ch'), /<article\.salt-case-study-view> style="[^"]*measure: 80ch"/)
+  expectFail(['case-study'], swap(4, '64rem'), /<article\.salt-case-study-view> style="--salt-case-study-view-aside-rows: 4;/)
+  expectFail(['case-study'], swap('three', '64rem'), /<article\.salt-case-study-view> style="--salt-case-study-view-aside-rows: three;/)
+  // The count follows the document: one part fewer, one row fewer.
+  expectFail(['case-study'], (io) => io.json('case-study/aside.json', (d) => { delete d.document.externalUrl }), /<article\.salt-case-study-view> style="--salt-case-study-view-aside-rows: 3;/)
+})
+test('sc-021: a delivered service\'s card takes the full band in the flow, and in the aside the default band from 64rem and the full band below', () => {
+  const full = 'sizes="(min-width: 48.01rem) calc((100vw - 3rem) / 3), (min-width: 40.01rem) calc((100vw - 1.5rem) / 2), calc(100vw)"'
+  const byDefault = 'sizes="(min-width: 75rem) 19rem, (min-width: 64rem) 19.1467rem, (min-width: 48.01rem) calc((100vw - 5rem) / 3), (min-width: 40.01rem) calc((100vw - 3.5rem) / 2), calc(100vw - 2rem)"'
+  const mixed = 'sizes="(min-width: 75rem) 19rem, (min-width: 64rem) 19.1467rem, (min-width: 48.01rem) calc((100vw - 3rem) / 3), (min-width: 40.01rem) calc((100vw - 1.5rem) / 2), calc(100vw)"'
+  // Below 64rem the aside lays out as the flow, so the default band's narrower widths under-declare.
+  expectFail(['case-study'], (io) => io.html('case-study/aside.html', mixed, byDefault), /fixtures\/case-study\/aside\.html: <img> sizes="\(min-width: 75rem\) 19rem[^"]*calc\(100vw - 2rem\)"; its slot \(aside-card\) gives "[^"]*calc\(100vw\)"/)
+  // From 64rem the services keep to the measure, so the full band's widths over-declare.
+  expectFail(['case-study'], (io) => io.html('case-study/aside.html', mixed, full), /fixtures\/case-study\/aside\.html: <img> sizes="\(min-width: 48\.01rem\)[^"]*"; its slot \(aside-card\)/)
+  expectFail(['case-study'], (io) => io.html('case-study/full.html', full, byDefault), /fixtures\/case-study\/full\.html: <img> sizes="\(min-width: 75rem\) 19rem[^"]*"; its slot \(card, band full, 3 columns\)/)
+})
+const BAND = 'case-study/band.html'
+const BAND_HEADER = '<header class="salt-section salt-case-study-view__header" data-tone="brand-tint" data-tone-dark="surface-inverse" data-spacing="md" data-width="default" style="--salt-section-space: var(--space-section-md)">'
+test('sc-021: a header band is required of some case, and the site gives it as header band with its tones', () => {
+  expectFail(['case-study'], (io) => io.json('case-study/band.json', (d) => { delete d.site.caseStudy.header }), /view case-study: no case renders header band \(site\.caseStudy\.header\)/)
+  expectFail(['case-study'], (io) => io.json('case-study/band.json', (d) => { delete d.site.caseStudy.headerTone }), /site\.caseStudy is .*with a band only, its tone/)
+  expectFail(['case-study'], (io) => io.json('case-study/full.json', (d) => { d.site.caseStudy = { headerTone: 'surface' } }), /fixtures\/case-study\/full\.json: site\.caseStudy is .*with a band only/)
+})
+test('sc-021: the header band is drawn as a section band: its tones the site\'s, md spacing, the default width and the spacing\'s property', () => {
+  expectFail(['case-study'], (io) => io.html(BAND, 'data-tone="brand-tint"', 'data-tone="surface"'), /data-tone="surface" disagrees with the case, which gives "brand-tint"/)
+  expectFail(['case-study'], (io) => io.html(BAND, 'data-tone-dark="surface-inverse"', 'data-tone-dark="brand-tint"'), /data-tone-dark="brand-tint" disagrees with the case, which gives "surface-inverse"/)
+  expectFail(['case-study'], (io) => io.json('case-study/band.json', (d) => { delete d.site.caseStudy.headerToneDark }), /data-tone-dark="surface-inverse" disagrees with the case, which gives "brand-tint"/)
+  expectFail(['case-study'], (io) => io.html(BAND, ' data-spacing="md"', ' data-spacing="lg"'), /data-spacing="lg" is not "md"/)
+  expectFail(['case-study'], (io) => io.html(BAND, ' data-width="default"', ''), /<header\.salt-section\.salt-case-study-view__header> lacks data-width, which the markup requires/)
+  expectFail(['case-study'], (io) => io.html(BAND, ' style="--salt-section-space: var(--space-section-md)"', ''), /<header\.salt-section\.salt-case-study-view__header> lacks style, which the markup requires/)
+  expectFail(['case-study'], (io) => io.html(BAND, 'class="salt-section salt-case-study-view__header"', 'class="salt-case-study-view__header"'), /<header\.salt-case-study-view__header> has classes "salt-case-study-view__header"; the markup gives "salt-case-study-view__header salt-section"/)
+})
+test('sc-021: the band\'s parts sit in its content div, and only a band\'s article carries data-header', () => {
+  expectFail(['case-study'], (io) => io.html(BAND, `${BAND_HEADER}\n      <div class="salt-section__content">`, BAND_HEADER), /<p\.salt-case-study-view__back> where the markup has header-content \(div\)/)
+  expectFail(['case-study'], (io) => io.html(BAND, ' data-header="band"', ''), /<article\.salt-case-study-view> lacks data-header, which the markup requires/)
+  expectFail(['case-study'], (io) => io.html('case-study/minimal.html', '<article class="salt-case-study-view">', '<article class="salt-case-study-view" data-header="band">'), /fixtures\/case-study\/minimal\.html: .*<article\.salt-case-study-view> carries data-header, which the markup does not declare/)
 })
 
 // SC-019's markup gaps, closed.

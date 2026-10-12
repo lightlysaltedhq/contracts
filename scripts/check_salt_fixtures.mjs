@@ -65,7 +65,7 @@ const descendants = (el) => elementsOf(el).flatMap((c) => [c, ...descendants(c)]
 // ── Cases ─────────────────────────────────────────────────────────────────────────────────────
 // A fixture set is a section's, the site chrome's (the header and footer components) or a page
 // view's; its input names it under that kind's key (README, "Fixtures"). SC-018 requires the
-// chrome and these views before 1.0.0.
+// chrome and these views before 1.0.0, and SC-021 the case study view.
 // The chrome components and the required views are the runner's lists, so the gate and the
 // conformance run cannot disagree about what SC-018 requires.
 // A chrome, view or page file's kind is the runner's (fileKind), so the two read it alike.
@@ -219,7 +219,7 @@ function settingsFields(fieldsDoc) {
 // list is a typo or an undeclared shape, and is refused. logoHeight is the logo's drawn height in
 // px (contract/image-sizes.json, the logo slot).
 const SITE_KEYS = ['arrow', 'labels', 'collectionIndexes', 'acceptsEnquiries', 'organisation', 'contactForm', 'timezone', 'maps',
-  'name', 'home', 'logo', 'logoHeight', 'header', 'footer', 'consent', 'themeToggle', 'displayPreferences', 'search']
+  'name', 'home', 'logo', 'logoHeight', 'header', 'footer', 'consent', 'themeToggle', 'displayPreferences', 'search', 'caseStudy']
 
 function checkSiteAndMedia(c) {
   const { input, at } = c
@@ -227,6 +227,20 @@ function checkSiteAndMedia(c) {
   for (const k of Object.keys(input.site ?? {})) if (!SITE_KEYS.includes(k)) fail(`${at}.json: site.${k} is not a declared site key (${SITE_KEYS.join(', ')})`)
   const h = input.site?.logoHeight
   if (h !== undefined && !(Number.isInteger(h) && h > 0)) fail(`${at}.json: site.logoHeight is the logo's drawn height, a whole number of px`)
+  // The case study view's layout, set once by the site rather than stored per case study
+  // (case-study.json):
+  // where it draws its featured image, and whether its header is a band, with the band's tones.
+  const cs = input.site?.caseStudy
+  if (cs !== undefined) {
+    const tones = settingsFile.fields.find((f) => f.name === 'tone').options.map((o) => o.value)
+    const band = cs?.header === 'band'
+    if (!(isObject(cs) && Object.keys(cs).every((k) => ['media', 'header', 'headerTone', 'headerToneDark'].includes(k)) &&
+      ['flow', 'aside'].includes(cs.media ?? 'flow') && ['plain', 'band'].includes(cs.header ?? 'plain') &&
+      (band ? tones.includes(cs.headerTone) : cs.headerTone === undefined) &&
+      (cs.headerToneDark === undefined || (band && tones.includes(cs.headerToneDark))))) {
+      fail(`${at}.json: site.caseStudy is { media, header, headerTone, headerToneDark }: media flow or aside, where the case study view draws its featured image; header plain or band; and with a band only, its tone and optionally its dark tone, each one of ${tones.join(', ')}`)
+    }
+  }
   for (const [id, m] of Object.entries(input.media ?? {})) {
     const p = `${at}.json media.${id}`
     // The record names the upload, never its sizes or srcset: those are the slot's (SC-016).
@@ -501,12 +515,17 @@ const canonStyle = (v) => v.split(';').map((d) => d.trim()).filter(Boolean).map(
 
 // Placeholders the case fixes, from the wrapper's settled data (a section case, or a view's
 // nested section); any other <placeholder> matches any text. A chrome case, or a view nesting no
-// section, fixes none.
-const placeholders = (c) => (c.anchor == null ? {} : {
-  '<anchor>': c.anchor,
-  ...(c.index !== undefined ? { '<section index>': String(c.index) } : {}),
-  '<spacing>': effectiveSetting(c, 'spacing'),
-  '<strength>': c.settings?.backgroundImage?.scrimStrength ?? 'strong',
+// section, fixes none, except the case study view: its aside's rows are the parts the view counts
+// beside the image, and its measure a default band's, 64rem, since a fixture draws no site that
+// widened its bands (case-study.json).
+const placeholders = (c) => ({
+  ...(c.section === 'case-study' ? { '<n>': String(caseStudyBeside(c)), '<measure>': '64rem' } : {}),
+  ...(c.anchor == null ? {} : {
+    '<anchor>': c.anchor,
+    ...(c.index !== undefined ? { '<section index>': String(c.index) } : {}),
+    '<spacing>': effectiveSetting(c, 'spacing'),
+    '<strength>': c.settings?.backgroundImage?.scrimStrength ?? 'strong',
+  }),
 })
 
 function templateMatch(tpl, value, name, c) {
@@ -528,6 +547,21 @@ function templateMatch(tpl, value, name, c) {
 const textOf = (el) => el.children.map((x) => (x.type === 'text' ? x.value : textOf(x))).join('').replace(/\s+/g, ' ').trim()
 const isImage = (c, id) => typeof id === 'string' && isObject(c.input.media?.[id])
 const background = (c) => isImage(c, c.settings?.backgroundImage?.image)
+// The case study view's aside (case-study-view.tsx): the parts the image runs beside are the
+// challenge, the solution, a gallery with images and a safe live-site link; with none, or no
+// image, the image stays in the flow whatever the site's layout. A safe link is relative or
+// http, https, mailto or tel, as isSafeHref allows, after the whitespace and control characters
+// a browser strips.
+const safeHref = (v) => {
+  if (typeof v !== 'string' || v === '') return false
+  const m = /^([a-z][a-z0-9+.-]*):/i.exec(v.replace(/[\u0000-\u0020]/g, ''))
+  return !m || ['http', 'https', 'mailto', 'tel'].includes(m[1].toLowerCase())
+}
+const caseStudyBeside = (c) => {
+  const d = c.input.document ?? {}
+  return [filledText(d.challenge), filledText(d.solution), (d.gallery ?? []).some((id) => isImage(c, id)), safeHref(d.externalUrl)].filter(Boolean).length
+}
+const caseStudyAside = (c) => c.input.site?.caseStudy?.media === 'aside' && isImage(c, c.input.document?.image) && caseStudyBeside(c) > 0
 const scrimOn = (c) => background(c) && c.settings.backgroundImage.scrim !== false
 // The stored link a drawn button stands for, found by its label.
 // A button's own words: its text without the site's arrow, which is decoration.
@@ -617,6 +651,8 @@ const WHEN = {
   'site-footer:links:aria-label': (c, el) => !columnTitled(c, el),
   'site-footer:links:aria-labelledby': columnTitled,
   'section:root:data-media': (c) => background(c),
+  'case-study:article:data-media': caseStudyAside,
+  'case-study:article:style': caseStudyAside,
   // A drawn background always has a fit, so its style always applies (media.json).
   'section:background:style': (c) => background(c),
   'section:root:data-divider': (c) => effectiveSetting(c, 'divider') === true,
@@ -701,6 +737,10 @@ const VALUE = {
   'section:root:data-tone-dark': darkTone,
   'section:root:data-spacing': (c) => effectiveSetting(c, 'spacing'),
   'section:root:data-width': (c) => effectiveSetting(c, 'width'),
+  // The case study's header band takes its tones from the site, the dark one falling back to the
+  // tone as a section's auto does (case-study.json, SC-021).
+  'case-study:header:data-tone': (c) => c.input.site?.caseStudy?.headerTone,
+  'case-study:header:data-tone-dark': (c) => c.input.site?.caseStudy?.headerToneDark ?? c.input.site?.caseStudy?.headerTone,
   // The section's own id and index, settled for a section case and a nested section alike.
   'accordion:item:name': (c) => (groupName[c.sectionId] && c.index !== undefined ? `${groupName[c.sectionId]}-${c.index}` : undefined),
   'media-text:row:data-media-side': rowSide,
@@ -850,13 +890,26 @@ function wrapperSpec(c) {
   }
 }
 
-// A chrome component's or a view's own tree, its root the file's root.
+// A view's variant the site sets for all its documents (markup variant.site): the value the case's site gives
+// it, or its entry's default in sections.json.
+const entryOf = (id) => [...(vocab.components ?? []), ...(vocab.views ?? [])].find((e) => e.id === id)
+const siteVariant = (c, mv) => c.input.site?.[mv.site]?.[mv.field] ?? entryOf(c.section)?.variants?.find((v) => v.field === mv.field)?.default
+
+// A chrome component's or a view's own tree, its root the file's root, with each variant the
+// case's site chooses applied.
 function documentSpec(c) {
   const doc = markup.get(c.section)
+  let { root } = doc
+  let elements = doc.elements ?? []
+  for (const mv of doc.variants ?? []) {
+    if (!mv.site) { fail(`markup: ${doc.id}'s variant ${mv.field} names no site key, so no case can choose it`); continue }
+    const option = mv.options[siteVariant(c, mv)]
+    if (option) ({ root, elements } = applyOption(root, elements, option))
+  }
   return {
     doc,
-    elements: doc.elements ?? [],
-    spec: { role: 'root', alts: [{ tags: arr(doc.root.element), classes: doc.root.classes ?? [], ...withSources([[doc.id, 'root', dataRules(doc, 'root')], [doc.id, 'root', doc.root.attributes]]), children: doc.elements ?? [], doc }] },
+    elements,
+    spec: { role: 'root', alts: [{ tags: arr(root.element), classes: root.classes ?? [], ...withSources([[doc.id, 'root', dataRules(doc, 'root')], [doc.id, 'root', root.attributes]]), children: elements, doc }] },
   }
 }
 // A file and every component it draws, through the components' own uses.
@@ -1094,7 +1147,9 @@ function checkMarkup(c) {
     if (c.kind === 'chrome' && h1s.length) fail(`${at}.html: the ${doc.id} draws an h1; the page's h1 belongs to its main (section#single-h1)`)
     // A section nested in a view keeps the body rule: its own heading ranks at the plan's level
     // (2, under the view's h1) and every heading inside it ranks below that (section#body-heading-base).
-    for (const nested of all.filter((el) => classesOf(el).includes('salt-section'))) {
+    // A nested section always has its settled id; the case study's header band, drawn as a band
+    // but no section, has none and holds the view's h1.
+    for (const nested of all.filter((el) => classesOf(el).includes('salt-section') && attr(el, 'id') !== undefined)) {
       const inside = descendants(nested).filter((el) => HEADING.test(el.name))
       const own = inside.find((el) => attr(el, 'id') === `${attr(nested, 'id')}__heading`)
       // In a view the nested heading is h2, under the view's h1; on a page it is the plan's level.
@@ -1280,8 +1335,16 @@ for (const s of vocab.sections) {
   if (!mine.some((c) => c.renders && effectiveSetting(c, 'tone') === 'surface-inverse')) fail(`section ${s.id}: no case on the inverse band (tone surface-inverse)`)
   for (const c of mine.filter((x) => x.renders)) for (const k of Object.keys(used)) used[k].add(c.input.values?.settings?.[k] ?? (k === 'toneDark' ? undefined : effectiveSetting(c, k)))
 }
+// A view's variants the site sets: every option its entry offers is drawn by a case.
+for (const e of vocab.views ?? []) {
+  for (const v of e.variants ?? []) {
+    const mv = (markup.get(e.id)?.variants ?? []).find((x) => x.field === v.field)
+    if (!mv?.site) continue
+    for (const o of v.options) if (!cases.some((c) => c.section === e.id && c.renders && siteVariant(c, mv) === o.value)) fail(`view ${e.id}: no case renders ${v.field} ${o.value} (site.${mv.site}.${v.field})`)
+  }
+}
 for (const id of REQUIRED_FILES) {
-  if (!cases.some((c) => c.section === id && c.renders)) fail(`${id} has no fixtures (fixtures/${id}/<case>.json and .html), which SC-018 requires before 1.0.0`)
+  if (!cases.some((c) => c.section === id && c.renders)) fail(`${id} has no fixtures (fixtures/${id}/<case>.json and .html), which SC-018 and SC-021 require before 1.0.0`)
 }
 for (const f of settingsFile.fields.filter((x) => Object.keys(used).includes(x.name))) {
   for (const o of f.options) if (!used[f.name].has(o.value)) fail(`no case renders settings.${f.name} ${o.value}`)

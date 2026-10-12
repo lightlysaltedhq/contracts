@@ -1,0 +1,64 @@
+{
+  "$comment": "Same shapes as case-study/full. site.caseStudy.media is the layout the site sets once for its case studies (Next.js's media prop, WordPress's options page), not a value stored per case study: aside draws the featured image beside the parts it runs alongside (the challenge, the solution and the live-site link), which the view counts and writes as --salt-case-study-view-aside-rows; the measure is a default band's, 64rem. The delivered service sits below the parts, confined to the measure, so its card takes the aside-card slot: the default band's card from 64rem and the full band's below. Two results draw data-columns 2.",
+  "view": "case-study",
+  "summary": "A case study in the aside layout: the featured image, as the priority image, beside a challenge, a solution and the live-site link, under a header with the client and two results; one delivered service card below them, confined to the measure; no back link, details or gallery.",
+  "context": {
+    "priorityMedia": true,
+    "path": "/work/riverside-courtyard/"
+  },
+  "site": {
+    "arrow": "→",
+    "caseStudy": {
+      "media": "aside"
+    },
+    "labels": {
+      "results": "The project in numbers",
+      "challenge": "The challenge",
+      "solution": "What we did",
+      "gallery": "Gallery",
+      "liveSite": "Visit the hotel's site",
+      "services": "Services delivered"
+    }
+  },
+  "media": {
+    "courtyard": {
+      "url": "https://uploads.example/riverside-courtyard-{width}.jpg",
+      "width": 2400,
+      "height": 1350,
+      "alt": "A shaded courtyard of ferns and multi-stemmed birches beside the river"
+    },
+    "shade-planting": {
+      "url": "https://uploads.example/shade-planting-{width}.jpg",
+      "width": 1200,
+      "height": 800,
+      "alt": "Hostas and ferns under a multi-stemmed birch"
+    }
+  },
+  "document": {
+    "title": "A courtyard by the river",
+    "client": "The Riverside Hotel",
+    "results": [
+      {
+        "stat": "38",
+        "label": "covers added outdoors"
+      },
+      {
+        "stat": "6 weeks",
+        "label": "from plan to planting"
+      }
+    ],
+    "image": "courtyard",
+    "challenge": "<p>A north-facing yard between two wings, in shade from October to March and used for bins.</p>",
+    "solution": "<p>We paved it in reclaimed stone and planted for shade, so the restaurant could seat guests outside from spring.</p>",
+    "externalUrl": "https://riversidehotel.example/",
+    "services": [
+      {
+        "id": "shade-planting",
+        "title": "Shade planting",
+        "href": "/services/shade-planting/",
+        "image": "shade-planting",
+        "text": "Planting for the corners the sun never reaches."
+      }
+    ]
+  }
+}

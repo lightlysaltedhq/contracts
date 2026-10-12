@@ -330,6 +330,10 @@
         "field": {
           "$ref": "#/$defs/fieldName"
         },
+        "site": {
+          "$ref": "#/$defs/fieldName",
+          "description": "A view's variant the site sets once for all its documents (in code, or on an options page) rather than a field stored per document: the key under a fixture input's site that holds it (site.<site>.<field>). Left unset there, the default its entry in sections.json gives applies."
+        },
         "sameOrder": {
           "type": "boolean",
           "description": "true when every option draws the same elements in the same order and differs only in attribute values and classes (section#variants-keep-order). false records a section that breaks that rule; `note` says why."

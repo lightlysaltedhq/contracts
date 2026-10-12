@@ -84,6 +84,10 @@
         "narrow": "(min-width: 64rem) 23.83rem, 100vw"
       }
     },
+    "aside-card": {
+      "description": "A card of the case study view's delivered services in the aside layout: from 64rem, where primitives.css confines the services to the measure, a default band's card at three columns; below it, where the aside lays out as the flow, a full band's.",
+      "sizes": "(min-width: 75rem) 19rem, (min-width: 64rem) 19.1467rem, (min-width: 48.01rem) calc((100vw - 3rem) / 3), (min-width: 40.01rem) calc((100vw - 1.5rem) / 2), calc(100vw)"
+    },
     "wide": {
       "description": "A wide measure, unbanded.",
       "sizes": "(min-width: 80rem) 76rem, 100vw"
@@ -230,31 +234,38 @@
     },
     {
       "markup": "case-study",
-      "image": "the featured image (role image)",
+      "image": ".salt-case-study-view[data-media=aside] > .salt-case-study-view__media img",
       "slot": "aside",
       "band": true,
-      "when": "the aside layout"
+      "when": "the featured image in the aside layout, whose columns sit on a default band's measure"
     },
     {
       "markup": "case-study",
-      "image": "the featured image (role image)",
+      "image": ".salt-case-study-view__media img",
       "slot": "content",
       "band": false,
-      "when": "any other layout"
+      "when": "the featured image in the flow, the default layout"
     },
     {
       "markup": "case-study",
-      "image": "a gallery image",
+      "image": ".salt-case-study-view__frame img",
       "slot": "content",
       "band": false,
-      "when": "always"
+      "when": "a gallery image"
     },
     {
       "markup": "case-study",
-      "image": "a related case study's card image",
+      "image": ".salt-case-study-view[data-media=aside] > .salt-case-study-view__services .salt-showcase__media img",
+      "slot": "aside-card",
+      "band": false,
+      "when": "a delivered service's card in the aside layout: the view's .salt-grid, three columns (stepping to two and one as the grid does), in the default band from 64rem, where primitives.css confines the services to the aside's measure, and the full band below it, where the aside lays out as the flow"
+    },
+    {
+      "markup": "case-study",
+      "image": ".salt-case-study-view__services .salt-showcase__media img",
       "slot": "card",
-      "band": false,
-      "when": "always"
+      "band": true,
+      "when": "a delivered service's card in the flow, the default layout: the view's .salt-grid, three columns (stepping to two and one as the grid does), in the full band, as the service view's related cards, since no shared stylesheet gives a view's section a measure"
     },
     {
       "markup": "post",

@@ -1395,6 +1395,24 @@
     {
       "id": "case-study",
       "label": "Case study",
+      "variants": [
+        {
+          "field": "header",
+          "label": "Header",
+          "options": [
+            {
+              "value": "plain",
+              "label": "Plain: the header in the article's flow"
+            },
+            {
+              "value": "band",
+              "label": "Band: the header drawn as a toned section band"
+            }
+          ],
+          "default": "plain",
+          "note": "Not a field stored per case study: the site sets it once, Salt for Next.js in code (case-study-view.tsx draws the band when headerTone is set) and Salt for WordPress on an ACF options page. A fixture's input gives it as site.caseStudy.header, and the band's tones as site.caseStudy.headerTone and headerToneDark."
+        }
+      ],
       "platforms": {
         "nextjs": {
           "status": "ships",

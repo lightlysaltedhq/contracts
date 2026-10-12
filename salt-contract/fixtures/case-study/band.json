@@ -1,0 +1,53 @@
+{
+  "$comment": "Same shapes as case-study/full. site.caseStudy.header is band, which the site sets once for its case studies (Next.js's headerTone, WordPress's options page), with the band's tone brand-tint and its dark tone surface-inverse: the header is drawn as section.json draws a band (salt-section, data-tone, data-tone-dark, data-spacing md, data-width default and the spacing's --salt-section-space), its parts inside div.salt-section__content, and the article carries data-header band. No image, so nothing claims the priority image.",
+  "view": "case-study",
+  "summary": "A case study whose header is a toned band: a link back to the index, the title, client, summary, two results and one project detail inside the band, then a challenge in the article's flow.",
+  "context": {
+    "priorityMedia": true,
+    "path": "/work/riverside-allotments/"
+  },
+  "site": {
+    "collectionIndexes": {
+      "case-study": {
+        "href": "/work/",
+        "title": "Our work"
+      }
+    },
+    "labels": {
+      "back": "All projects",
+      "results": "The project in numbers",
+      "challenge": "The challenge",
+      "solution": "What we did",
+      "gallery": "Gallery",
+      "liveSite": "Visit the site",
+      "services": "Services delivered"
+    },
+    "caseStudy": {
+      "header": "band",
+      "headerTone": "brand-tint",
+      "headerToneDark": "surface-inverse"
+    }
+  },
+  "document": {
+    "title": "Riverside allotments",
+    "client": "Ashby Parish Council",
+    "summary": "Thirty plots laid out on a disused paddock by the river, with a shared shed and water.",
+    "results": [
+      {
+        "stat": "30",
+        "label": "plots let in the first month"
+      },
+      {
+        "stat": "12",
+        "label": "households on the waiting list"
+      }
+    ],
+    "details": [
+      {
+        "label": "Location",
+        "value": "Leicestershire"
+      }
+    ],
+    "challenge": "<p>The paddock flooded every winter, so the plots had to sit above the river's usual reach.</p>"
+  }
+}
