@@ -188,8 +188,12 @@ the rule in `salt.modeRequires` for the site's save check.
 `"control": "radio"` in its field definition is a Payload `radio` and an ACF `radio`, offering and
 storing what a select would, and the snapshot checks compare the type. One field is marked today,
 the `type` of every link (internal or external), which is part of the link's fixed shape in
-`emit/_contract.mjs`. A radio's layout stays the platform's: on Payload it is `admin.layout`, one
-of the keys a consumer may add.
+`emit/_contract.mjs`. It is the only one: every other select, a collection-query's `mode` among
+them, is a drop-down, and a radio needs a default or to be required, since it cannot be cleared.
+A radio's layout stays the platform's: on Payload it is `admin.layout`, one of the keys a consumer
+may add. Where an implementation draws another widget today (Salt for Next.js a radio for a
+query's mode; Salt for WordPress a button group for a query's mode and for the gallery's and the
+showcase's columns), the field's `owes` says so and the round trips list the difference.
 
 **Enum names.** Every select carries the name of its Postgres enum type (`enumName`), and the
 snapshot check compares it. There is one type per vocabulary (SC-023, after Salt for Next.js's
@@ -200,7 +204,8 @@ settings, a link's parts and a collection-query's parts are one type each, named
 (`enum_section_tone`, `enum_link_type`, `enum_query_mode`), and any other select is named by its
 section and path. The site's icons are the exception: the options are the site's, so each icon
 select keeps its own type. Where Salt for Next.js 0.11.0 gave a select's type another name, the
-field records it as `platforms.nextjs.formerlyEnum` (keyed by part for a collection-query), so a
+field records it as `platforms.nextjs.formerlyEnum` (keyed by part for a collection-query; 12
+records carrying 17 former names), so a
 migration generated from the contract renames or folds every such type. A select that 0.11.0 left
 to Payload's derived name has no fixed former name to record; the site's own schema gives it.
 

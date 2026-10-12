@@ -34,13 +34,18 @@ test, applied through section 2's table, where the stricter row wins.
 - The contract says which selects are radios (SC-023). The field schema's select gains an
   optional `control`, whose one value is `radio`; both emitters draw such a select as a radio
   (Payload `radio`, ACF `radio`) with a select's options, default and stored value. A link's
-  `type` is the one radio. Its layout is the platform's (`admin.layout` on Payload).
+  `type` is the one radio; a collection-query's `mode` is a select, like every other select. A
+  radio needs a default or to be required. Its layout is the platform's (`admin.layout` on
+  Payload). Where a platform draws another widget today, the field's `owes` records it: Salt for
+  Next.js a radio for a query's mode, Salt for WordPress a button group for a query's mode and
+  for the gallery's and the showcase's columns.
 - Postgres enum types, one per vocabulary (SC-023, after Salt for Next.js's BD-035). Selects that
   offer the same values share one type, named in `VOCABULARIES` in `emit/payload.mjs`:
   `enum_grid_columns`, `enum_button_style`, `enum_alignment` and `enum_media_side`. The site's
   icons keep one type per select. Where Salt for Next.js 0.11.0 named a select's type otherwise,
   the field records the former name as `platforms.nextjs.formerlyEnum`, a new optional key of the
-  field schema's platform note, keyed by part for a collection-query.
+  field schema's platform note, keyed by part for a collection-query: 12 records carrying 17
+  former names.
 - The `settings.anchorId` description states the slug rule in plain words, with no WordPress
   function name and no file path (SC-023). The rule itself is unchanged, in `markup/section.json`.
   No description an editor is shown cites a decision, a file or a platform function:
