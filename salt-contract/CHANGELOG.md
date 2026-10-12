@@ -80,10 +80,12 @@ test, applied through section 2's table, where the stricter row wins.
   are not masked: `next/image`'s `data-nimg` and inline `color:transparent` differ, and
   `markup/media.json` records that Salt for Next.js owes its own `img`. The footer's consent
   control is drawn `aria-disabled="true"` until script hydrates and not after:
-  `markup/site-footer.json` declares the attribute its note already described, the three footer
-  fixtures and the four page fixtures the server draws expect it, and the two whose `state` script
-  brings about (`consent-panel-open`, `theme-toggle-button`) do not. The gate reads the case's
-  `state`: the attribute is required of a case with none and refused in one with any. An icon's `fill` and `stroke` are artwork,
+  `markup/site-footer.json` declares the attribute its note already described, four footer fixtures
+  and the four page fixtures expect it, and `consent-panel-open` does not, since only script
+  opens the panel. The gate reads the case's `state`: the attribute is refused in a state only
+  script brings about (`consentPanelOpen`, `drawerOpen`) and required everywhere else, a case
+  that knows only a scheme (`themeScheme`) included, which a platform may draw on the server. The
+  gate holds both kinds by name and fails when they and the README's `state` row disagree. An icon's `fill` and `stroke` are artwork,
   like what is inside it (SC-007): the normaliser drops both from `svg.salt-icon`, so a filled
   mark passes against a stroked fixture, while the svg's every other attribute still compares and
   the gate still holds each of the two to the values `markup/icon.json` allows.

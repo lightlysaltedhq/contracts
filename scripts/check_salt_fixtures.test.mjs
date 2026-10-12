@@ -761,19 +761,30 @@ test('sc-019: the drawer and the consent panel are drawn open', () => {
   expectFail(['site-header'], (io) => io.html('site-header/drawer-open.html', '<dialog class="salt-drawer" open', '<dialog class="salt-drawer"'), /<dialog\.salt-drawer> lacks open, which the markup requires/)
   expectFail(['site-footer'], (io) => io.html('site-footer/consent-panel-open.html', '<dialog class="salt-consent-panel" open', '<dialog class="salt-consent-panel"'), /<dialog\.salt-consent-panel> lacks open, which the markup requires/)
 })
-test('sc-024: the consent control is aria-disabled="true" as the server draws it, and not in a case whose state script brings about', () => {
+test('sc-024: the consent control is aria-disabled="true" as the server draws it, and not in a state only script brings about', () => {
   const CONTROL = ' data-salt-consent-preferences="" aria-disabled="true">'
   const HYDRATED = ' data-salt-consent-preferences="">'
   const lacks = /<button\.salt-button> lacks aria-disabled, which the markup requires when as the server draws it/
   const carries = /<button\.salt-button> carries aria-disabled, which the markup draws only when as the server draws it/
-  for (const name of ['columns-socials-copyright', 'display-preferences', 'single-flat-menu-inverse']) expectFail(['site-footer'], (io) => io.html(`site-footer/${name}.html`, CONTROL, HYDRATED), lacks)
+  // A known scheme is no sign of script: theme-toggle-button is still the server's.
+  for (const name of ['columns-socials-copyright', 'display-preferences', 'single-flat-menu-inverse', 'theme-toggle-button']) expectFail(['site-footer'], (io) => io.html(`site-footer/${name}.html`, CONTROL, HYDRATED), lacks)
   for (const name of ['fallback-heading', 'header-section-footer', 'hero-minimal-centre', 'hero-split-image']) expectFail(['page'], (io) => io.html(`page/${name}.html`, CONTROL, HYDRATED), lacks)
-  // The open panel and the toggle's button form are states script brings about: after hydration.
-  for (const name of ['consent-panel-open', 'theme-toggle-button']) expectFail(['site-footer'], (io) => io.html(`site-footer/${name}.html`, HYDRATED, CONTROL), carries)
+  // Only script opens the panel or the drawer: after hydration.
+  expectFail(['site-footer'], (io) => io.html('site-footer/consent-panel-open.html', HYDRATED, CONTROL), carries)
+  expectFail(['site-footer'], (io) => io.json('site-footer/display-preferences.json', (d) => { d.state = { drawerOpen: true } }), carries)
   // The case's state decides, not its name: the same HTML with the state taken away is the server's.
   expectFail(['site-footer'], (io) => io.json('site-footer/consent-panel-open.json', (d) => { delete d.state }), lacks)
+  expectFail(['site-footer'], (io) => io.json('site-footer/consent-panel-open.json', (d) => { d.state = { consentPanelOpen: false } }), lacks)
   expectFail(['site-footer'], (io) => io.html('site-footer/display-preferences.html', CONTROL, ' data-salt-consent-preferences="" aria-disabled="false">'), /<button\.salt-button> aria-disabled="false" is not "true"/)
   expectFail(['site-footer'], (io) => io.html('site-footer/display-preferences.html', CONTROL, ' data-salt-consent-preferences="" disabled>'), /<button\.salt-button> carries disabled, which the markup does not declare/)
+})
+test('sc-024: every state is classed, and the README\'s state row and the gate agree', () => {
+  const readme = readFileSync(path.join(pkg, 'README.md'), 'utf8')
+  assert.ok(readme.includes('(`drawerOpen`)') && readme.includes('`themeScheme`'))
+  expectFail(['site-footer'], (io) => io.json('site-footer/display-preferences.json', (d) => { d.state = { menuOpen: true } }), /state\.menuOpen is not a documented state \(consentPanelOpen, drawerOpen, themeScheme\)/)
+  expectFail(['site-footer'], (io) => io.write('README.md', readme.replace('(`drawerOpen`)', '(`drawerOpen`) or the search open (`searchOpen`)')), /README\.md documents the state searchOpen, which the gate classes neither/)
+  expectFail(['site-footer'], (io) => io.write('README.md', readme.replace(' or the header\'s drawer open (`drawerOpen`)', '')), /README\.md's `state` row does not document drawerOpen, a state the gate knows/)
+  expectFail(['site-footer'], (io) => io.write('README.md', readme.replace('| `state` |', '| `states` |')), /README\.md: no `state` row/)
 })
 test('sc-019: the search input keeps the query', () => {
   expectFail(['search'], (io) => io.html('search/results.html', ' value="hedge"', ''), /<input\.salt-search__input> lacks value, which the markup requires when a query is set/)

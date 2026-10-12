@@ -281,7 +281,7 @@
                     "data-salt-consent-preferences": "",
                     "aria-disabled": {
                       "value": "true",
-                      "when": "as the server draws it, until script hydrates; never once it has, so not in a state only script brings about (the open panel, the theme toggle's button form)"
+                      "when": "as the server draws it, until script hydrates; never once it has, so not in a state only script brings about (the consent panel or the drawer open). A known scheme is not one: the theme toggle's button form may be the server's"
                     }
                   },
                   "text": "from:labels.preferences",
