@@ -628,12 +628,26 @@ test('sc-021: the case study cases pass their own checks', () => {
 test('sc-021: the featured image takes the aside slot in the aside layout and the content slot in the flow', () => {
   expectFail(['case-study'], (io) => io.html('case-study/aside.html', 'sizes="(min-width: 64rem) 23.83rem, 100vw"', 'sizes="(min-width: 64rem) 60rem, 100vw"'),
     /fixtures\/case-study\/aside\.html: <img> sizes="\(min-width: 64rem\) 60rem, 100vw"; its slot \(aside, band default\) gives "\(min-width: 64rem\) 23\.83rem, 100vw"/)
-  expectFail(['case-study'], (io) => io.html('case-study/full.html', '<article class="salt-case-study-view">', '<article class="salt-case-study-view" data-media="aside" style="--salt-case-study-view-aside-rows: 4; --salt-case-study-view-measure: 64rem">'),
+  expectFail(['case-study'], (io) => {
+    io.json('case-study/full.json', (d) => { d.site.caseStudy = { media: 'aside' } })
+    io.html('case-study/full.html', '<article class="salt-case-study-view">', '<article class="salt-case-study-view" data-media="aside" style="--salt-case-study-view-aside-rows: 4; --salt-case-study-view-measure: 64rem">')
+  },
     /fixtures\/case-study\/full\.html: <img> sizes="\(min-width: 64rem\) 60rem, 100vw"; its slot \(aside, band default\)/)
 })
 test('sc-021: the featured image is the priority image, and site.caseStudy.media is flow or aside', () => {
   expectFail(['case-study'], (io) => io.html('case-study/full.html', 'fetchpriority="high" decoding="async"', 'loading="lazy" decoding="async"'), /fixtures\/case-study\/full\.html: the priority image must be in case-study's image/)
   expectFail(['case-study'], (io) => io.json('case-study/aside.json', (d) => { d.site.caseStudy.media = 'side' }), /site\.caseStudy is \{ media, header, headerTone, headerToneDark \}: media flow or aside/)
+})
+const ASIDE_ARTICLE = '<article class="salt-case-study-view" data-media="aside" style="--salt-case-study-view-aside-rows: 3; --salt-case-study-view-measure: 64rem">'
+test('sc-021: the article is laid out aside exactly when the site says aside, an image is set and a part runs beside it', () => {
+  // A flow input with aside HTML.
+  expectFail(['case-study'], (io) => io.json('case-study/aside.json', (d) => { d.site.caseStudy.media = 'flow' }), /fixtures\/case-study\/aside\.html: .*<article\.salt-case-study-view> carries data-media, which the markup draws only when media aside/)
+  expectFail(['case-study'], (io) => io.html('case-study/full.html', '<article class="salt-case-study-view">', ASIDE_ARTICLE.replace('rows: 3', 'rows: 4')), /fixtures\/case-study\/full\.html: .*<article\.salt-case-study-view> carries data-media, which the markup draws only when media aside/)
+  // An aside input with flow HTML.
+  expectFail(['case-study'], (io) => io.html('case-study/aside.html', ASIDE_ARTICLE, '<article class="salt-case-study-view">'), /fixtures\/case-study\/aside\.html: .*<article\.salt-case-study-view> lacks data-media, which the markup requires when media aside/)
+  expectFail(['case-study'], (io) => io.html('case-study/aside.html', ' style="--salt-case-study-view-aside-rows: 3; --salt-case-study-view-measure: 64rem"', ''), /<article\.salt-case-study-view> lacks style, which the markup requires when data-media is aside/)
+  // Aside, but nothing to sit beside: the image stays in the flow.
+  expectFail(['case-study'], (io) => io.json('case-study/aside.json', (d) => { delete d.document.challenge; delete d.document.solution; delete d.document.gallery; delete d.document.externalUrl }), /<article\.salt-case-study-view> carries data-media, which the markup draws only when/)
 })
 const BAND = 'case-study/band.html'
 const BAND_HEADER = '<header class="salt-section salt-case-study-view__header" data-tone="brand-tint" data-tone-dark="surface-inverse" data-spacing="md" data-width="default" style="--salt-section-space: var(--space-section-md)">'

@@ -541,6 +541,21 @@ function templateMatch(tpl, value, name, c) {
 const textOf = (el) => el.children.map((x) => (x.type === 'text' ? x.value : textOf(x))).join('').replace(/\s+/g, ' ').trim()
 const isImage = (c, id) => typeof id === 'string' && isObject(c.input.media?.[id])
 const background = (c) => isImage(c, c.settings?.backgroundImage?.image)
+// The case study view's aside (case-study-view.tsx): the parts the image runs beside are the
+// challenge, the solution, a gallery with images and a safe live-site link; with none, or no
+// image, the image stays in the flow whatever the site's layout. A safe link is relative or
+// http, https, mailto or tel, as isSafeHref allows, after the whitespace and control characters
+// a browser strips.
+const safeHref = (v) => {
+  if (typeof v !== 'string' || v === '') return false
+  const m = /^([a-z][a-z0-9+.-]*):/i.exec(v.replace(/[\u0000-\u0020]/g, ''))
+  return !m || ['http', 'https', 'mailto', 'tel'].includes(m[1].toLowerCase())
+}
+const caseStudyBeside = (c) => {
+  const d = c.input.document ?? {}
+  return [filledText(d.challenge), filledText(d.solution), (d.gallery ?? []).some((id) => isImage(c, id)), safeHref(d.externalUrl)].filter(Boolean).length
+}
+const caseStudyAside = (c) => c.input.site?.caseStudy?.media === 'aside' && isImage(c, c.input.document?.image) && caseStudyBeside(c) > 0
 const scrimOn = (c) => background(c) && c.settings.backgroundImage.scrim !== false
 // The stored link a drawn button stands for, found by its label.
 // A button's own words: its text without the site's arrow, which is decoration.
@@ -630,6 +645,8 @@ const WHEN = {
   'site-footer:links:aria-label': (c, el) => !columnTitled(c, el),
   'site-footer:links:aria-labelledby': columnTitled,
   'section:root:data-media': (c) => background(c),
+  'case-study:article:data-media': caseStudyAside,
+  'case-study:article:style': caseStudyAside,
   // A drawn background always has a fit, so its style always applies (media.json).
   'section:background:style': (c) => background(c),
   'section:root:data-divider': (c) => effectiveSetting(c, 'divider') === true,
