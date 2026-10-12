@@ -631,9 +631,30 @@ test('sc-021: the featured image takes the aside slot in the aside layout and th
   expectFail(['case-study'], (io) => io.html('case-study/full.html', '<article class="salt-case-study-view">', '<article class="salt-case-study-view" data-media="aside" style="--salt-case-study-view-aside-rows: 4; --salt-case-study-view-measure: 64rem">'),
     /fixtures\/case-study\/full\.html: <img> sizes="\(min-width: 64rem\) 60rem, 100vw"; its slot \(aside, band default\)/)
 })
-test('sc-021: the featured image is the priority image, and site.caseStudy is { media }, flow or aside', () => {
+test('sc-021: the featured image is the priority image, and site.caseStudy.media is flow or aside', () => {
   expectFail(['case-study'], (io) => io.html('case-study/full.html', 'fetchpriority="high" decoding="async"', 'loading="lazy" decoding="async"'), /fixtures\/case-study\/full\.html: the priority image must be in case-study's image/)
-  expectFail(['case-study'], (io) => io.json('case-study/aside.json', (d) => { d.site.caseStudy.media = 'side' }), /site\.caseStudy is \{ media \}, flow or aside/)
+  expectFail(['case-study'], (io) => io.json('case-study/aside.json', (d) => { d.site.caseStudy.media = 'side' }), /site\.caseStudy is \{ media, header, headerTone, headerToneDark \}: media flow or aside/)
+})
+const BAND = 'case-study/band.html'
+const BAND_HEADER = '<header class="salt-section salt-case-study-view__header" data-tone="brand-tint" data-tone-dark="surface-inverse" data-spacing="md" data-width="default" style="--salt-section-space: var(--space-section-md)">'
+test('sc-021: a header band is required of some case, and the site gives it as header band with its tones', () => {
+  expectFail(['case-study'], (io) => io.json('case-study/band.json', (d) => { delete d.site.caseStudy.header }), /view case-study: no case renders header band \(site\.caseStudy\.header\)/)
+  expectFail(['case-study'], (io) => io.json('case-study/band.json', (d) => { delete d.site.caseStudy.headerTone }), /site\.caseStudy is .*with a band only, its tone/)
+  expectFail(['case-study'], (io) => io.json('case-study/full.json', (d) => { d.site.caseStudy = { headerTone: 'surface' } }), /fixtures\/case-study\/full\.json: site\.caseStudy is .*with a band only/)
+})
+test('sc-021: the header band is drawn as a section band: its tones the site\'s, md spacing, the default width and the spacing\'s property', () => {
+  expectFail(['case-study'], (io) => io.html(BAND, 'data-tone="brand-tint"', 'data-tone="surface"'), /data-tone="surface" disagrees with the case, which gives "brand-tint"/)
+  expectFail(['case-study'], (io) => io.html(BAND, 'data-tone-dark="surface-inverse"', 'data-tone-dark="brand-tint"'), /data-tone-dark="brand-tint" disagrees with the case, which gives "surface-inverse"/)
+  expectFail(['case-study'], (io) => io.json('case-study/band.json', (d) => { delete d.site.caseStudy.headerToneDark }), /data-tone-dark="surface-inverse" disagrees with the case, which gives "brand-tint"/)
+  expectFail(['case-study'], (io) => io.html(BAND, ' data-spacing="md"', ' data-spacing="lg"'), /data-spacing="lg" is not "md"/)
+  expectFail(['case-study'], (io) => io.html(BAND, ' data-width="default"', ''), /<header\.salt-section\.salt-case-study-view__header> lacks data-width, which the markup requires/)
+  expectFail(['case-study'], (io) => io.html(BAND, ' style="--salt-section-space: var(--space-section-md)"', ''), /<header\.salt-section\.salt-case-study-view__header> lacks style, which the markup requires/)
+  expectFail(['case-study'], (io) => io.html(BAND, 'class="salt-section salt-case-study-view__header"', 'class="salt-case-study-view__header"'), /<header\.salt-case-study-view__header> has classes "salt-case-study-view__header"; the markup gives "salt-case-study-view__header salt-section"/)
+})
+test('sc-021: the band\'s parts sit in its content div, and only a band\'s article carries data-header', () => {
+  expectFail(['case-study'], (io) => io.html(BAND, `${BAND_HEADER}\n      <div class="salt-section__content">`, BAND_HEADER), /<p\.salt-case-study-view__back> where the markup has header-content \(div\)/)
+  expectFail(['case-study'], (io) => io.html(BAND, ' data-header="band"', ''), /<article\.salt-case-study-view> lacks data-header, which the markup requires/)
+  expectFail(['case-study'], (io) => io.html('case-study/minimal.html', '<article class="salt-case-study-view">', '<article class="salt-case-study-view" data-header="band">'), /fixtures\/case-study\/minimal\.html: .*<article\.salt-case-study-view> carries data-header, which the markup does not declare/)
 })
 
 // SC-019's markup gaps, closed.

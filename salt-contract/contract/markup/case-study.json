@@ -20,10 +20,6 @@
         "salt-case-study-view"
       ],
       "attributes": {
-        "data-header": {
-          "value": "band",
-          "when": "a header tone is set"
-        },
         "data-media": {
           "value": "aside",
           "when": "media aside, an image and a sidebar part"
@@ -153,8 +149,7 @@
                 }
               ]
             }
-          ],
-          "note": "With a header tone: also salt-section, with data-tone, data-tone-dark, data-spacing=md and data-width=default, and its parts inside div.salt-section__content."
+          ]
         },
         {
           "role": "media",
@@ -347,6 +342,181 @@
           }
         }
       ]
+    }
+  ],
+  "variants": [
+    {
+      "field": "header",
+      "site": "caseStudy",
+      "sameOrder": false,
+      "options": {
+        "band": {
+          "elements": {
+            "article": {
+              "attributes": {
+                "data-header": "band"
+              }
+            }
+          },
+          "replace": {
+            "header": {
+              "role": "header",
+              "element": "header",
+              "classes": [
+                "salt-section",
+                "salt-case-study-view__header"
+              ],
+              "attributes": {
+                "data-tone": {
+                  "enum": [
+                    "surface",
+                    "surface-alt",
+                    "brand-tint",
+                    "surface-inverse"
+                  ],
+                  "note": "site.caseStudy.headerTone"
+                },
+                "data-tone-dark": {
+                  "enum": [
+                    "surface",
+                    "surface-alt",
+                    "brand-tint",
+                    "surface-inverse"
+                  ],
+                  "note": "site.caseStudy.headerToneDark, or the tone itself when that is unset, written server-side as a section's is."
+                },
+                "data-spacing": "md",
+                "data-width": "default",
+                "style": "--salt-section-space: var(--space-section-md)"
+              },
+              "children": [
+                {
+                  "role": "header-content",
+                  "element": "div",
+                  "classes": [
+                    "salt-section__content"
+                  ],
+                  "children": [
+                    {
+                      "role": "back",
+                      "element": "p",
+                      "classes": [
+                        "salt-case-study-view__back"
+                      ],
+                      "optional": true,
+                      "when": "the index has a safe href",
+                      "children": [
+                        {
+                          "role": "back-link",
+                          "element": "a",
+                          "classes": [
+                            "salt-case-study-view__back-link"
+                          ],
+                          "attributes": {
+                            "href": "from:index.href"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "role": "title",
+                      "element": "h1",
+                      "text": "from:caseStudy.title"
+                    },
+                    {
+                      "role": "client",
+                      "element": "p",
+                      "classes": [
+                        "salt-case-study-view__client"
+                      ],
+                      "optional": true,
+                      "when": "client is set"
+                    },
+                    {
+                      "role": "summary",
+                      "element": "p",
+                      "classes": [
+                        "salt-case-study-view__summary"
+                      ],
+                      "optional": true,
+                      "when": "summary is set"
+                    },
+                    {
+                      "role": "results",
+                      "element": "ul",
+                      "classes": [
+                        "salt-grid",
+                        "salt-case-study-view__results"
+                      ],
+                      "attributes": {
+                        "role": "list",
+                        "aria-label": "from:labels.results",
+                        "data-columns": {
+                          "enum": [
+                            "2",
+                            "4"
+                          ],
+                          "when": "two or fewer, or four or more"
+                        }
+                      },
+                      "optional": true,
+                      "when": "results are set",
+                      "children": [
+                        {
+                          "role": "result",
+                          "component": "stat",
+                          "repeat": {
+                            "from": "results"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "role": "details",
+                      "element": "dl",
+                      "classes": [
+                        "salt-case-study-view__details"
+                      ],
+                      "optional": true,
+                      "when": "details are set",
+                      "children": [
+                        {
+                          "role": "detail",
+                          "element": "div",
+                          "classes": [
+                            "salt-case-study-view__detail"
+                          ],
+                          "repeat": {
+                            "from": "details"
+                          },
+                          "children": [
+                            {
+                              "role": "detail-label",
+                              "element": "dt",
+                              "classes": [
+                                "salt-case-study-view__detail-label"
+                              ]
+                            },
+                            {
+                              "role": "detail-value",
+                              "element": "dd",
+                              "classes": [
+                                "salt-case-study-view__detail-value"
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "note": "The header drawn as section.json draws a band, so the tone's roles, a site's rules for a band's measure and its full-bleed exemptions all reach it: salt-section with the tones, md spacing, the default width and the spacing's custom property, and its parts inside div.salt-section__content."
+        }
+      },
+      "note": "plain draws the base tree. band wraps the header's parts in a content div, so the order differs from plain's."
     }
   ],
   "headings": {

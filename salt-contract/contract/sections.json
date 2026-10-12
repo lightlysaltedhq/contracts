@@ -1395,6 +1395,24 @@
     {
       "id": "case-study",
       "label": "Case study",
+      "variants": [
+        {
+          "field": "header",
+          "label": "Header",
+          "options": [
+            {
+              "value": "plain",
+              "label": "Plain: the header in the article's flow"
+            },
+            {
+              "value": "band",
+              "label": "Band: the header drawn as a toned section band"
+            }
+          ],
+          "default": "plain",
+          "note": "Not an editor field: the site sets it in code (case-study-view.tsx draws the band when headerTone is set). A fixture's input gives it as site.caseStudy.header, and the band's tones as site.caseStudy.headerTone and headerToneDark."
+        }
+      ],
       "platforms": {
         "nextjs": {
           "status": "ships",
