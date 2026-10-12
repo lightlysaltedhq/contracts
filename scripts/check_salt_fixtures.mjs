@@ -227,7 +227,8 @@ function checkSiteAndMedia(c) {
   for (const k of Object.keys(input.site ?? {})) if (!SITE_KEYS.includes(k)) fail(`${at}.json: site.${k} is not a declared site key (${SITE_KEYS.join(', ')})`)
   const h = input.site?.logoHeight
   if (h !== undefined && !(Number.isInteger(h) && h > 0)) fail(`${at}.json: site.logoHeight is the logo's drawn height, a whole number of px`)
-  // The case study view's layout, the site's in code rather than a stored value (case-study.json):
+  // The case study view's layout, set once by the site rather than stored per case study
+  // (case-study.json):
   // where it draws its featured image, and whether its header is a band, with the band's tones.
   const cs = input.site?.caseStudy
   if (cs !== undefined) {
@@ -889,7 +890,7 @@ function wrapperSpec(c) {
   }
 }
 
-// A view's variant the site sets in code (markup variant.site): the value the case's site gives
+// A view's variant the site sets for all its documents (markup variant.site): the value the case's site gives
 // it, or its entry's default in sections.json.
 const entryOf = (id) => [...(vocab.components ?? []), ...(vocab.views ?? [])].find((e) => e.id === id)
 const siteVariant = (c, mv) => c.input.site?.[mv.site]?.[mv.field] ?? entryOf(c.section)?.variants?.find((v) => v.field === mv.field)?.default
@@ -1334,7 +1335,7 @@ for (const s of vocab.sections) {
   if (!mine.some((c) => c.renders && effectiveSetting(c, 'tone') === 'surface-inverse')) fail(`section ${s.id}: no case on the inverse band (tone surface-inverse)`)
   for (const c of mine.filter((x) => x.renders)) for (const k of Object.keys(used)) used[k].add(c.input.values?.settings?.[k] ?? (k === 'toneDark' ? undefined : effectiveSetting(c, k)))
 }
-// A view's variants the site sets in code: every option its entry offers is drawn by a case.
+// A view's variants the site sets: every option its entry offers is drawn by a case.
 for (const e of vocab.views ?? []) {
   for (const v of e.variants ?? []) {
     const mv = (markup.get(e.id)?.variants ?? []).find((x) => x.field === v.field)

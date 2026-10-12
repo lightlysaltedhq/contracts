@@ -1,5 +1,5 @@
 {
-  "$comment": "Same shapes as case-study/full. site.caseStudy.header is band, which the site sets in code (the view's headerTone), with the band's tone brand-tint and its dark tone surface-inverse: the header is drawn as section.json draws a band (salt-section, data-tone, data-tone-dark, data-spacing md, data-width default and the spacing's --salt-section-space), its parts inside div.salt-section__content, and the article carries data-header band. No image, so nothing claims the priority image.",
+  "$comment": "Same shapes as case-study/full. site.caseStudy.header is band, which the site sets once for its case studies (Next.js's headerTone, WordPress's options page), with the band's tone brand-tint and its dark tone surface-inverse: the header is drawn as section.json draws a band (salt-section, data-tone, data-tone-dark, data-spacing md, data-width default and the spacing's --salt-section-space), its parts inside div.salt-section__content, and the article carries data-header band. No image, so nothing claims the priority image.",
   "view": "case-study",
   "summary": "A case study whose header is a toned band: a link back to the index, the title, client, summary, two results and one project detail inside the band, then a challenge in the article's flow.",
   "context": {

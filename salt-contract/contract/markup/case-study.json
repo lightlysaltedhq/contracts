@@ -582,7 +582,8 @@
       "owes": [
         "The case-study view's markup above.",
         "The style custom properties --salt-case-study-view-aside-rows and --salt-case-study-view-measure on the article when the media is aside.",
-        "The section heading ids case-study__challenge-heading, case-study__solution-heading, case-study__gallery-heading and case-study__services-heading, each named by its section's aria-labelledby (SC-012)."
+        "The section heading ids case-study__challenge-heading, case-study__solution-heading, case-study__gallery-heading and case-study__services-heading, each named by its section's aria-labelledby (SC-012).",
+        "An ACF options page on which editors set the case-study view's header band (the header variant, plain or band, with the band's tone and dark tone) and its aside layout (the featured image in the flow or aside), the settings a fixture gives as site.caseStudy: header, headerTone, headerToneDark and media."
       ]
     },
     "nextjs": {

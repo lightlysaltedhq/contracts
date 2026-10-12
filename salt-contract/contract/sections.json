@@ -1410,7 +1410,7 @@
             }
           ],
           "default": "plain",
-          "note": "Not an editor field: the site sets it in code (case-study-view.tsx draws the band when headerTone is set). A fixture's input gives it as site.caseStudy.header, and the band's tones as site.caseStudy.headerTone and headerToneDark."
+          "note": "Not a field stored per case study: the site sets it once, Salt for Next.js in code (case-study-view.tsx draws the band when headerTone is set) and Salt for WordPress on an ACF options page. A fixture's input gives it as site.caseStudy.header, and the band's tones as site.caseStudy.headerTone and headerToneDark."
         }
       ],
       "platforms": {

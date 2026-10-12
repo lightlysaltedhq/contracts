@@ -332,7 +332,7 @@
         },
         "site": {
           "$ref": "#/$defs/fieldName",
-          "description": "A view's variant the site sets in code rather than a stored field: the key under a fixture input's site that holds it (site.<site>.<field>). Left unset there, the default its entry in sections.json gives applies."
+          "description": "A view's variant the site sets once for all its documents (in code, or on an options page) rather than a field stored per document: the key under a fixture input's site that holds it (site.<site>.<field>). Left unset there, the default its entry in sections.json gives applies."
         },
         "sameOrder": {
           "type": "boolean",
