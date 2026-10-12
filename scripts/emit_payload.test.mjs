@@ -414,12 +414,15 @@ test('SC-023: no description an editor is shown cites a decision, a file or a pl
   walk(JSON.parse(acfSnapshot({ icons })), 'acf')
   assert.ok(shown.length > 100, `${shown.length} descriptions read`)
   const refused = [
-    ['a decision id', /\b(SC|BD|D|FLEET)-?\d+\b/],
+    ['a decision id', /\b(SC|BD|ID|EP|D|FLEET)-?\d+\b/i],
     ['a file path', /[\w-]+\.(json|php|tsx?|mjs|css|md)\b|\b(contract|markup|fields|schema|inc|src)\/[\w-]/],
     ['a platform function', /\b[a-z]+(_[a-z]+)+\b|\b[a-zA-Z_]+\(/],
     ['a markup rule reference', /\b[a-z-]+#[a-z-]+/],
   ]
   for (const [at, text] of shown) for (const [what, pattern] of refused) assert.doesNotMatch(text, pattern, `${at} cites ${what}`)
+  const decision = refused[0][1]
+  for (const id of ['SC-016', 'sc-016', 'BD-035', 'ID-3622', 'EP-66', 'ep-66']) assert.match(`As ${id} says.`, decision, id)
+  for (const plain of ['anchorId', 'Up to 24 items.', 'A 16:9 picture', 'Shown mid-2026 onwards.']) assert.doesNotMatch(plain, decision, plain)
 })
 
 test('every enum name fits Postgres\'s 63 characters', () => {
