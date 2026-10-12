@@ -107,6 +107,9 @@
       "default": "grid",
       "description": "Index is offered only for a collection whose items have their own pages.",
       "platforms": {
+        "nextjs": {
+          "formerlyEnum": "enum_showcase_layout"
+        },
         "wordpress": {
           "owes": "the accordion and index layouts, and the field on work, team and blog_teaser; services has grid, list and featured; testimonials grid becomes source testimonials with layout grid"
         }
@@ -170,6 +173,13 @@
               "date": "newest",
               "title": "title"
             }
+          },
+          "formerlyEnum": {
+            "mode": [
+              "enum_content_query_mode",
+              "enum_content_query_mode_unfiltered"
+            ],
+            "order": "enum_content_query_sort_by"
           },
           "owes": "one query group read against the chosen source in place of one group per source; a team category taxonomy, so by-category is offered for team as on WordPress (SC-006)",
           "note": "Stored as {mode, terms, items, sortBy, limit}; terms becomes categories, sortBy becomes order, limit becomes count."

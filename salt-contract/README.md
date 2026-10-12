@@ -173,6 +173,19 @@ is refused. On ACF the picker's `conditional_logic` names the layout's source se
 per source with categories; ACF cannot hide one mode choice per source, so the mode field records
 the rule in `salt.modeRequires` for the site's save check.
 
+**Enum names.** Every select carries the name of its Postgres enum type (`enumName`), and the
+snapshot check compares it. There is one type per vocabulary (SC-023, after Salt for Next.js's
+BD-035): selects that offer the same values in the same order share a type, named in
+`VOCABULARIES` in `emit/payload.mjs` (`enum_grid_columns`, `enum_button_style`, `enum_alignment`,
+`enum_media_side`), so the name does not change with the sections a site emits. The shared
+settings, a link's parts and a collection-query's parts are one type each, named by their scope
+(`enum_section_tone`, `enum_link_type`, `enum_query_mode`), and any other select is named by its
+section and path. The site's icons are the exception: the options are the site's, so each icon
+select keeps its own type. Where Salt for Next.js 0.11.0 gave a select's type another name, the
+field records it as `platforms.nextjs.formerlyEnum` (keyed by part for a collection-query), so a
+migration generated from the contract renames or folds every such type. A select that 0.11.0 left
+to Payload's derived name has no fixed former name to record; the site's own schema gives it.
+
 Faults in the contract's own shape are refused whatever the site installs: a malformed condition;
 a `sourceField` naming no sibling select, or one offering no source; and a collection-query that
 reads its source from a select anywhere but the section's top level (in a list, a group or the

@@ -76,9 +76,26 @@ function sourcesFrom(options) {
   return Object.fromEntries(installed.map((s) => [s, { ...SOURCE_DEFAULTS[s], ...(given?.[s] ?? {}) }]))
 }
 
-function enumNameFor(ctx, name) {
+/**
+ * The vocabularies more than one select offers, each with the one Postgres type that holds it
+ * (salt-nextjs BD-035, SC-023): selects offering the same values in the same order share a type,
+ * so the columns of five sections are one `enum_grid_columns` and not five types alike. The name
+ * is fixed here, not taken from a field's path, so it does not change with the sections a site
+ * emits. The shared settings, a link's parts and a collection-query's parts are one type each
+ * already, named by their scope. The site's icons are the exception BD-035 makes: the options are
+ * the site's, not a vocabulary of the contract's, and each icon select keeps a type of its own.
+ */
+export const VOCABULARIES = {
+  enum_grid_columns: ['2', '3', '4'],
+  enum_button_style: ['primary', 'secondary', 'ghost'],
+  enum_alignment: ['left', 'centre'],
+  enum_media_side: ['left', 'right'],
+}
+
+function enumNameFor(ctx, name, values) {
   if (ctx.enumPrefix) return `${ctx.enumPrefix}_${snake(name)}`
-  return `enum_${[ctx.scope, ...ctx.path, name].map(snake).join('_')}`
+  const shared = values && Object.keys(VOCABULARIES).find((n) => VOCABULARIES[n].join('\0') === values.join('\0'))
+  return shared ?? `enum_${[ctx.scope, ...ctx.path, name].map(snake).join('_')}`
 }
 
 const defaultsOf = (fields) =>
@@ -151,7 +168,7 @@ function convertField(f, ctx) {
         salt.optionsFrom = 'icons'
         opts = options.icons
       }
-      out.enumName = enumNameFor(ctx, f.name)
+      out.enumName = enumNameFor(ctx, f.name, f.optionsFrom ? null : opts.map((o) => o.value))
       out.options = opts.map((o) => ({ label: o.label, value: o.value }))
       if (f.default !== undefined) out.defaultValue = f.default
       break

@@ -12,7 +12,7 @@ import { fileURLToPath } from 'node:url'
 import Ajv2020 from 'ajv/dist/2020.js'
 
 import { hasVisibleText, loadContract } from '../salt-contract/emit/_contract.mjs'
-import { checkPayloadSnapshot, isFilled, payloadSnapshot, PLATFORM_ADDITIONS, toPayloadBlocks } from '../salt-contract/emit/payload.mjs'
+import { checkPayloadSnapshot, isFilled, payloadSnapshot, PLATFORM_ADDITIONS, toPayloadBlocks, VOCABULARIES } from '../salt-contract/emit/payload.mjs'
 
 const emitter = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'salt-contract', 'emit', 'payload.mjs')
 const icons = [{ value: 'star', label: 'Star' }, { value: 'check', label: 'Check' }]
@@ -279,7 +279,7 @@ test('a list maps to an array with its row label, item label and row limits', ()
   const features = field(block(blocks(), 'features').fields, 'items')
   assert.equal(features.custom.salt.rowLabel, 'title')
   // A select inside a row is named by its path, which stays inside Postgres's 63 characters.
-  assert.equal(field(block(blocks(), 'media-text').fields, 'rows.buttons.style').enumName, 'enum_media_text_rows_buttons_style')
+  assert.equal(field(block(blocks(), 'process').fields, 'steps.icon').enumName, 'enum_process_steps_icon')
 })
 
 test('icons come from the site, and a section that needs them refuses to build without them', () => {
@@ -355,6 +355,66 @@ test('every enum name fits Postgres\'s 63 characters', () => {
   for (const b of blocks()) walk(b.fields)
   assert.ok(names.length > 0)
   for (const n of names) assert.ok(n.length <= 63, n)
+})
+
+// Every select the blocks hold, as [path, field].
+const selectsOf = (list) => {
+  const out = []
+  const walk = (fields, at) => { for (const f of fields) { if (f.type === 'select') out.push([`${at}.${f.name}`, f]); if (f.fields) walk(f.fields, `${at}.${f.name}`) } }
+  for (const b of list) walk(b.fields, b.slug)
+  return out
+}
+const valuesOf = (f) => f.options.map((o) => o.value).join('|')
+
+test('SC-023: one Postgres type per vocabulary, and one vocabulary per type (BD-035)', () => {
+  const selects = selectsOf(blocks())
+  const names = new Map()
+  const vocabularies = new Map()
+  for (const [at, f] of selects) {
+    // One name, one list of values: Payload's Postgres adapter keeps the last list registered under a name.
+    assert.equal(names.get(f.enumName) ?? valuesOf(f), valuesOf(f), `${at}: ${f.enumName} already holds other values`)
+    names.set(f.enumName, valuesOf(f))
+    // The site's icons are BD-035's exception: the options are the site's, so each select keeps its own type.
+    if (f.custom?.salt?.optionsFrom === 'icons') continue
+    assert.equal(vocabularies.get(valuesOf(f)) ?? f.enumName, f.enumName, `${at}: the values ${valuesOf(f)} already have the type ${vocabularies.get(valuesOf(f))}; name the vocabulary in VOCABULARIES`)
+    vocabularies.set(valuesOf(f), f.enumName)
+  }
+  const named = (slug, dotted) => field(block(blocks(), slug).fields, dotted).enumName
+  for (const slug of ['features', 'stats', 'logos', 'gallery', 'collection-showcase']) assert.equal(named(slug, 'columns'), 'enum_grid_columns')
+  assert.deepEqual([named('hero', 'buttons.style'), named('call-to-action', 'buttons.style'), named('media-text', 'rows.buttons.style')], Array(3).fill('enum_button_style'))
+  assert.deepEqual([named('hero', 'alignment'), named('rich-text', 'alignment')], ['enum_alignment', 'enum_alignment'])
+  assert.deepEqual([named('hero', 'mediaSide'), named('media-text', 'rows.mediaSide')], ['enum_media_side', 'enum_media_side'])
+  // Every name in the list is used, and holds the values the list gives it.
+  for (const [name, values] of Object.entries(VOCABULARIES)) assert.equal(names.get(name), values.join('|'), name)
+  // The name is the vocabulary's, so it does not change with the sections a site emits.
+  assert.equal(field(block(blocks({ sections: ['logos'] }), 'logos').fields, 'columns').enumName, 'enum_grid_columns')
+})
+
+test('SC-023: each former enum name the contract records is on a select the emitter names otherwise', () => {
+  const contract = loadContract()
+  const emitted = new Map(selectsOf(blocks()))
+  let records = 0
+  const walk = (fields, at) => {
+    for (const f of fields) {
+      const here = `${at}.${f.name}`
+      const former = f.platforms?.nextjs?.formerlyEnum
+      if (former !== undefined) {
+        // A composite field records its parts by name; a select records its own.
+        const parts = typeof former === 'string' || Array.isArray(former) ? [[here, former]] : Object.entries(former).map(([part, was]) => [`${here}.${part}`, was])
+        for (const [target, was] of parts) {
+          const now = emitted.get(target)?.enumName
+          assert.ok(now, `${target} records a former enum name and is not a select the emitter generates`)
+          for (const name of [was].flat()) { assert.notEqual(name, now, `${target}: ${name} is the name it has now, so it is no rename`); records++ }
+        }
+      }
+      if (f.fields) walk(f.fields, here)
+    }
+  }
+  for (const [id, doc] of Object.entries(contract.fields)) walk(doc.fields, id)
+  // The shared settings are generated into every section; hero stands for them.
+  walk(contract.settings, 'hero.settings')
+  assert.equal(records, 17)
+  assert.equal(emitted.get('hero.settings.backgroundImage.fit').enumName, 'enum_section_background_image_fit')
 })
 
 test('R8: a stored null is no value, and only a never-set sibling takes its default', () => {

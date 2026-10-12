@@ -229,6 +229,39 @@
             ]
           }
         },
+        "formerlyEnum": {
+          "description": "On Salt for Next.js, the Postgres enum type a select's column had before the contract's (emit/payload.mjs gives the new name as the field's enumName); several when types fold into one. For a composite field, keyed by its part (a collection-query's mode and order). A migration renames the type, or moves the column to the contract's type where several fold into one.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/text"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/text"
+              }
+            },
+            {
+              "type": "object",
+              "minProperties": 1,
+              "additionalProperties": {
+                "oneOf": [
+                  {
+                    "$ref": "#/$defs/text"
+                  },
+                  {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                      "$ref": "#/$defs/text"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
         "owes": {
           "description": "What this platform must add or change to conform.",
           "$ref": "#/$defs/text"

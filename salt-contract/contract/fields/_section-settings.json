@@ -180,6 +180,11 @@
           "condition": {
             "field": "image",
             "filled": true
+          },
+          "platforms": {
+            "nextjs": {
+              "formerlyEnum": "enum_section_bg_fit"
+            }
           }
         },
         {
@@ -238,6 +243,7 @@
               "values": {
                 "": "focal-point"
               },
+              "formerlyEnum": "enum_section_bg_position",
               "owes": "the value focal-point in place of an empty string"
             }
           }
@@ -280,7 +286,12 @@
               "field": "scrim",
               "equals": true
             }
-          ]
+          ],
+          "platforms": {
+            "nextjs": {
+              "formerlyEnum": "enum_section_scrim_strength"
+            }
+          }
         }
       ],
       "platforms": {

@@ -70,7 +70,12 @@
               "label": "Ghost"
             }
           ],
-          "default": "primary"
+          "default": "primary",
+          "platforms": {
+            "nextjs": {
+              "formerlyEnum": "enum_cta_button_style"
+            }
+          }
         }
       ],
       "platforms": {

@@ -50,6 +50,10 @@
               "title": "title"
             }
           },
+          "formerlyEnum": {
+            "mode": "enum_content_query_mode",
+            "order": "enum_content_query_sort_by"
+          },
           "note": "Stored as {mode, terms, items, sortBy, limit}; terms becomes categories, sortBy becomes order, limit becomes count."
         },
         "wordpress": {

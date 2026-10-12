@@ -99,6 +99,9 @@
         "equals": "split"
       },
       "platforms": {
+        "nextjs": {
+          "formerlyEnum": "enum_hero_media_side"
+        },
         "wordpress": {
           "owes": "the field"
         }
@@ -162,7 +165,12 @@
               "label": "Ghost"
             }
           ],
-          "default": "primary"
+          "default": "primary",
+          "platforms": {
+            "nextjs": {
+              "formerlyEnum": "enum_hero_button_style"
+            }
+          }
         }
       ],
       "platforms": {
