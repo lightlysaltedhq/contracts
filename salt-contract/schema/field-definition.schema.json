@@ -625,6 +625,40 @@
               }
             }
           }
+        },
+        {
+          "if": {
+            "required": [
+              "control"
+            ],
+            "properties": {
+              "type": {
+                "const": "select"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "options"
+            ],
+            "anyOf": [
+              {
+                "required": [
+                  "default"
+                ]
+              },
+              {
+                "required": [
+                  "required"
+                ],
+                "properties": {
+                  "required": {
+                    "const": true
+                  }
+                }
+              }
+            ]
+          }
         }
       ]
     },
@@ -755,7 +789,7 @@
           ]
         },
         "control": {
-          "description": "radio: the select is drawn as a radio group, on Payload (type radio) and on ACF (type radio) alike. It offers and stores what a select would. Left out, the select is a drop-down. A radio's layout is each platform's to set.",
+          "description": "radio: the select is drawn as a radio group, on Payload (type radio) and on ACF (type radio) alike. It offers and stores what a select would. Left out, the select is a drop-down. A radio's layout is each platform's to set. A radio cannot be cleared once chosen, so it needs a default or to be required, and its options are the contract's own, never optionsFrom.",
           "enum": [
             "radio"
           ]

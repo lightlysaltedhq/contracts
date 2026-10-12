@@ -512,6 +512,25 @@ test('a former enum name is recorded only for Salt for Next.js, on a select or a
   assert.equal(validate(query({ nextjs: { formerlyEnum: { sortBy: 'enum_sort' } } })), false)
 })
 
+test('a radio needs a default or to be required, and options of the contract\'s own (re-review of #17, 2)', () => {
+  const schemaFile = path.join(path.dirname(emitter), '..', 'schema', 'field-definition.schema.json')
+  const validate = new Ajv2020({ strict: false }).compile(JSON.parse(readFileSync(schemaFile, 'utf8')))
+  const options = [{ value: 'a', label: 'A' }, { value: 'b', label: 'B' }]
+  const radio = (rest) => ({ $schema: '../../schema/field-definition.schema.json', version: '0.1.0', section: 'probe', shared: { id: 'section-settings' },
+    fields: [{ name: 'kind', type: 'select', control: 'radio', label: 'Kind', ...rest }] })
+  assert.equal(validate(radio({ options, default: 'a' })), true)
+  assert.equal(validate(radio({ options, required: true })), true)
+  // Payload's radio cannot be cleared, so one with nothing chosen and nothing required is refused.
+  assert.equal(validate(radio({ options })), false)
+  assert.equal(validate(radio({ options, required: false })), false)
+  assert.equal(validate(radio({ optionsFrom: 'icons' })), false)
+  assert.equal(validate(radio({ optionsFrom: 'icons', default: 'star' })), false)
+  assert.equal(validate(radio({ options, default: 'a', control: 'buttons' })), false)
+  // A select without the control is held to none of this.
+  const { control, ...select } = radio({ options }).fields[0]
+  assert.equal(validate({ ...radio({}), fields: [select] }), true)
+})
+
 test('R8: a stored null is no value, and only a never-set sibling takes its default', () => {
   const bg = field(block(blocks(), 'hero').fields, 'settings.backgroundImage').fields
   const strength = field(bg, 'scrimStrength') // image filled, scrim equals true; scrim defaults to true
