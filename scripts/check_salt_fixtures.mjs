@@ -658,6 +658,8 @@ const WHEN = {
   'site-footer:theme-toggle:aria-label': isButton,
   'site-footer:theme-toggle:aria-hidden': isSpan,
   'site-header:phone-icon:data-size': () => false,
+  // SC-024: a fixture is the footer as the server draws it, the consent control not yet hydrated.
+  'site-footer:consent-control:aria-disabled': () => true,
   'search-form:input:value': (c) => filledText(c.input.document?.query),
   'site-footer:links:aria-label': (c, el) => !columnTitled(c, el),
   'site-footer:links:aria-labelledby': columnTitled,

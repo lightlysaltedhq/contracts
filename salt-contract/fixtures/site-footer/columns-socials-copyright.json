@@ -1,5 +1,5 @@
 {
-  "$comment": "site.footer is { tone, showLogo, columns: [{ title?, links: [{ label, href }] }], text (rich text), profiles: [{ name, url, icon? }], copyright }. site.consent is { labels: { preferences }, categories }. The consent control is drawn without aria-disabled: the consent-control note says it is aria-disabled until script hydrates, but the button does not declare that attribute, so it is not drawn (reported). The third profile (Substack) has no glyph in contract/sections.json icons, so its name is drawn as text.",
+  "$comment": "site.footer is { tone, showLogo, columns: [{ title?, links: [{ label, href }] }], text (rich text), profiles: [{ name, url, icon? }], copyright }. site.consent is { labels: { preferences }, categories }. The consent control is drawn aria-disabled=\"true\", as the server draws it until script hydrates (SC-024). The third profile (Substack) has no glyph in contract/sections.json icons, so its name is drawn as text.",
   "chrome": "site-footer",
   "summary": "Three titled columns of links with the current page marked, footer text, three social profiles (two with a glyph, one drawn as its name), the copyright line and the consent preferences control, on the surface tone.",
   "context": {
