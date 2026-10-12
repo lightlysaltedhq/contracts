@@ -31,7 +31,7 @@
         "style": {
           "value": "--salt-case-study-view-aside-rows: <n>; --salt-case-study-view-measure: <measure>",
           "when": "data-media is aside",
-          "note": "<n> is the number of grid rows the image spans beside the article's parts, counted by the view, since the grid cannot count them. <measure> is the band's measure, var(--container-5xl) for a default band unless a site that widened its bands passes the same width. The stylesheet (primitives.css) reads both."
+          "note": "<n> is the number of grid rows the image spans beside the article's parts, counted by the view, since the grid cannot count them. <measure> is the band's measure, a rem length: 64rem for a default band (the default measure, --container-5xl), unless a site that widened its bands passes its own width. The stylesheet (primitives.css) reads both."
         }
       },
       "children": [
@@ -418,7 +418,6 @@
     "nextjs": {
       "owes": [
         "Name its four sections: the ids case-study__challenge-heading, case-study__solution-heading, case-study__gallery-heading and case-study__services-heading on their h2s, and aria-labelledby on each section (section#labelled-by, SC-012).",
-        "Write --salt-case-study-view-measure as the contract gives it, var(--container-5xl) for a default band (fixtures/case-study/aside); case-study-view.tsx writes the band's measure as a rem length (64rem).",
         "A delivered service's card image declares the card slot for the full band at three columns (contract/image-sizes.json), as the service view's related cards, the grid it is drawn in, which no shared stylesheet narrows; case-study-view.tsx passes the unbanded card slot, which is a carousel slide's."
       ]
     }
