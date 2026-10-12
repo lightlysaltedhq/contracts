@@ -281,7 +281,7 @@
                     "data-salt-consent-preferences": "",
                     "aria-disabled": {
                       "value": "true",
-                      "when": "as the server draws it, until script hydrates"
+                      "when": "as the server draws it, until script hydrates; never once it has, so not in a state only script brings about (the open panel, the theme toggle's button form)"
                     }
                   },
                   "text": "from:labels.preferences",

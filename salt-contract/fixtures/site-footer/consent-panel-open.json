@@ -1,5 +1,5 @@
 {
-  "$comment": "site.consent is { labels: { preferences, title, save, cancel }, categories: [{ id, label, description }] }. state.consentPanelOpen draws the dialog; the consent control beside it is still as the server draws it, aria-disabled=\"true\" (SC-024). The dialog carries open: it is drawn only when open (SC-019). The consent-description element has no declared children, so the description is plain text inside it. The consent-save and consent-cancel buttons are button-form components with their label as text.",
+  "$comment": "site.consent is { labels: { preferences, title, save, cancel }, categories: [{ id, label, description }] }. state.consentPanelOpen draws the dialog. Only script opens it, so the consent control beside it has hydrated and carries no aria-disabled (SC-024). The dialog carries open: it is drawn only when open (SC-019). The consent-description element has no declared children, so the description is plain text inside it. The consent-save and consent-cancel buttons are button-form components with their label as text.",
   "chrome": "site-footer",
   "summary": "The consent preferences panel open: its dialog with a title, two categories (analytics, marketing) each with checkbox, label and description, and save and cancel buttons, beside the footer's links and consent control.",
   "context": {

@@ -761,14 +761,19 @@ test('sc-019: the drawer and the consent panel are drawn open', () => {
   expectFail(['site-header'], (io) => io.html('site-header/drawer-open.html', '<dialog class="salt-drawer" open', '<dialog class="salt-drawer"'), /<dialog\.salt-drawer> lacks open, which the markup requires/)
   expectFail(['site-footer'], (io) => io.html('site-footer/consent-panel-open.html', '<dialog class="salt-consent-panel" open', '<dialog class="salt-consent-panel"'), /<dialog\.salt-consent-panel> lacks open, which the markup requires/)
 })
-test('sc-024: the consent control is drawn aria-disabled="true", in the footer and in a page', () => {
+test('sc-024: the consent control is aria-disabled="true" as the server draws it, and not in a case whose state script brings about', () => {
   const CONTROL = ' data-salt-consent-preferences="" aria-disabled="true">'
-  for (const name of ['columns-socials-copyright', 'consent-panel-open', 'display-preferences', 'single-flat-menu-inverse', 'theme-toggle-button']) {
-    expectFail(['site-footer'], (io) => io.html(`site-footer/${name}.html`, CONTROL, ' data-salt-consent-preferences="">'), /<button\.salt-button> lacks aria-disabled, which the markup requires when as the server draws it/)
-  }
+  const HYDRATED = ' data-salt-consent-preferences="">'
+  const lacks = /<button\.salt-button> lacks aria-disabled, which the markup requires when as the server draws it/
+  const carries = /<button\.salt-button> carries aria-disabled, which the markup draws only when as the server draws it/
+  for (const name of ['columns-socials-copyright', 'display-preferences', 'single-flat-menu-inverse']) expectFail(['site-footer'], (io) => io.html(`site-footer/${name}.html`, CONTROL, HYDRATED), lacks)
+  for (const name of ['fallback-heading', 'header-section-footer', 'hero-minimal-centre', 'hero-split-image']) expectFail(['page'], (io) => io.html(`page/${name}.html`, CONTROL, HYDRATED), lacks)
+  // The open panel and the toggle's button form are states script brings about: after hydration.
+  for (const name of ['consent-panel-open', 'theme-toggle-button']) expectFail(['site-footer'], (io) => io.html(`site-footer/${name}.html`, HYDRATED, CONTROL), carries)
+  // The case's state decides, not its name: the same HTML with the state taken away is the server's.
+  expectFail(['site-footer'], (io) => io.json('site-footer/consent-panel-open.json', (d) => { delete d.state }), lacks)
   expectFail(['site-footer'], (io) => io.html('site-footer/display-preferences.html', CONTROL, ' data-salt-consent-preferences="" aria-disabled="false">'), /<button\.salt-button> aria-disabled="false" is not "true"/)
   expectFail(['site-footer'], (io) => io.html('site-footer/display-preferences.html', CONTROL, ' data-salt-consent-preferences="" disabled>'), /<button\.salt-button> carries disabled, which the markup does not declare/)
-  expectFail(['page'], (io) => io.html('page/hero-split-image.html', CONTROL, ' data-salt-consent-preferences="">'), /<button\.salt-button> lacks aria-disabled, which the markup requires when as the server draws it/)
 })
 test('sc-019: the search input keeps the query', () => {
   expectFail(['search'], (io) => io.html('search/results.html', ' value="hedge"', ''), /<input\.salt-search__input> lacks value, which the markup requires when a query is set/)

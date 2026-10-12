@@ -658,8 +658,9 @@ const WHEN = {
   'site-footer:theme-toggle:aria-label': isButton,
   'site-footer:theme-toggle:aria-hidden': isSpan,
   'site-header:phone-icon:data-size': () => false,
-  // SC-024: a fixture is the footer as the server draws it, the consent control not yet hydrated.
-  'site-footer:consent-control:aria-disabled': () => true,
+  // SC-024: the consent control is aria-disabled as the server draws it and not once script has
+  // run. A case's state is what script brings about, so a case with one is after hydration.
+  'site-footer:consent-control:aria-disabled': (c) => Object.keys(c.input.state ?? {}).length === 0,
   'search-form:input:value': (c) => filledText(c.input.document?.query),
   'site-footer:links:aria-label': (c, el) => !columnTitled(c, el),
   'site-footer:links:aria-labelledby': columnTitled,
