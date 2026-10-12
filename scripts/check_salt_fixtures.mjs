@@ -272,6 +272,17 @@ function checkOtherInput(c) {
   if (ctx.locale !== undefined && !(typeof ctx.locale === 'string' && Intl.DateTimeFormat.supportedLocalesOf(ctx.locale).length)) fail(`${at}.json: context.locale must be a BCP 47 locale the platform knows, such as en-GB`)
   if (ctx.path !== undefined && !(typeof ctx.path === 'string' && ctx.path.startsWith('/'))) fail(`${at}.json: context.path is the page's path, starting with /`)
   if (input.state?.themeScheme !== undefined && !['light', 'dark'].includes(input.state.themeScheme)) fail(`${at}.json: state.themeScheme is light or dark, the scheme the platform knows when it renders`)
+  // Rich text is given as stored in a view as in a section (SC-023): body headings are h3 and h4,
+  // and the view's base level decides what each is drawn as.
+  if (kind === 'view') {
+    const visit = (v, p) => {
+      if (typeof v === 'string') {
+        const outside = descendants(parse(v)).find((el) => /^h[1-6]$/.test(el.name) && !['h3', 'h4'].includes(el.name))
+        if (outside) fail(`${at}.json ${p} holds <${outside.name}>; rich text is given as stored, its headings h3 and h4, whatever level they are drawn at (SC-023)`)
+      } else if (v && typeof v === 'object') for (const [k, x] of Object.entries(v)) visit(x, `${p}.${k}`)
+    }
+    visit(input.document, 'document')
+  }
   checkSiteAndMedia(c)
   c.anchor = null
   // A section nested in a view or a page is described by the case: document.listing (the archive's
@@ -998,6 +1009,15 @@ function checkMarkup(c) {
       return a && attr(a, 'data-step') ? attr(a, 'data-step') : a ? textOf(a) : '?'
     })
     if (want.join(' ') !== got.join(' ')) fail(`${at}.html: the pagination draws [${got.join(', ')}]; page ${pages.current} of ${pages.total} gives [${want.join(', ')}] (pagination.json)`)
+  }
+  // An archive's and a search's page addresses are their platform's routing, so their expected HTML
+  // writes each as the placeholder the runner compares (routedOf in normalise.mjs, SC-023); nowhere
+  // else is it one.
+  for (const a of every().filter((e) => e.name === 'a' && classesOf(e).includes('salt-pagination__link'))) {
+    const placeholder = attr(a, 'href') === '{{salt:page-href}}'
+    const routed = ['archive', 'search'].includes(c.section)
+    if (routed && !placeholder) fail(`${at}.html: the pagination link "${textOf(a)}" has href ${attr(a, 'href')}; the expected HTML of the ${c.section} view writes {{salt:page-href}} (SC-023)`)
+    if (!routed && placeholder) fail(`${at}.html: the pagination link "${textOf(a)}" has the placeholder {{salt:page-href}}, which only the archive and search views' expected HTML writes (SC-023)`)
   }
 
   // Display forms (section#display-forms, SC-016): the machine forms are fixed and the text is

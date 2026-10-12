@@ -118,7 +118,6 @@ let rows = []
 const LIMITS = ['maxLength', 'min', 'max', 'minRows', 'maxRows', 'hasMany']
 const allowedOf = (n) => (n.editor?.features ?? []).flatMap((f) =>
   f.key === 'toolbar' ? [] : f.key === 'heading' ? f.sizes.map((s) => `heading-${s.slice(1)}`) : [f.key])
-const typeOf = (n) => (n.type === 'radio' ? 'select' : n.type)
 const show = (v) => (v === undefined ? 'none' : JSON.stringify(v))
 
 // The contract field definitions beside the emitted ones, so a difference can find its notes.
@@ -221,7 +220,7 @@ function compareFields(section, emittedFields, nextFields, defs, prefix) {
 function compareOne(section, at, e, n, def, ctx) {
   const inQuery = def?.type === 'collection-query'
   const diffs = []
-  if (typeOf(e) !== typeOf(n)) diffs.push(['type', `type ${e.type}; salt-nextjs ${n.type}`])
+  if (e.type !== n.type) diffs.push(['type', `type ${e.type}; salt-nextjs ${n.type}`])
   if (e.options) {
     const mine = e.options.map((o) => o.value)
     const theirs = (n.options ?? []).map((o) => (typeof o === 'string' ? o : o.value))
@@ -337,11 +336,13 @@ async function main({ nextjs, check, suggest }) {
     '`emit/payload.mjs` generates from this contract with the field half salt-nextjs ships',
     `(@lightlysaltedhq/salt-nextjs ${nextjsVersion}, commit ${nextjsCommit}), section by section.`,
     '',
-    'Compared: field names, types, option values, defaults, required, limits, the rich-text allowed',
+    'Compared: field names, types (a select and a radio are two, SC-023), option values, defaults, required, limits, the rich-text allowed',
     'list, and conditions (by behaviour, over every combination of the siblings either side reads).',
     'Not compared: labels and descriptions, which salt-nextjs mostly leaves to Payload or words',
-    'differently and SC-003 says must match, so adopting the emitter changes them throughout; and what',
-    'stays native to Payload (enum names, admin components, hooks, validators, row-label components).',
+    'differently and SC-003 says must match, so adopting the emitter changes them throughout; enum type',
+    'names, which the emitter gives and its snapshot check compares, each former name recorded as',
+    '`formerlyEnum` (SC-023); and what stays native to Payload (admin components, hooks, validators,',
+    'row-label components).',
     '',
     '**Expected** means `round-trip-payload.expected.json` lists the difference exactly (section, field,',
     'kind and wording), with the contract note or ruling that accounts for it. **Unexpected** means it',

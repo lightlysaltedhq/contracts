@@ -16,8 +16,25 @@
 // anything type-checks.
 //
 // Pure data: no Payload import, and nothing read but the contract's own files. What the contract
-// leaves to the platform (admin components, hooks, validators, enum names beyond these) is the
-// consumer's to add; `custom.salt` says what each field was generated from so it can.
+// leaves to the platform is the consumer's to add; `custom.salt` says what each field was
+// generated from so it can. A validator is a function and drops out of the snapshot. The keys that
+// do reach it (admin components, hooks, initCollapsed, a radio's layout) are PLATFORM_ADDITIONS
+// below, the one list `checkPayloadSnapshot` leaves out of the comparison (SC-023); a key outside
+// it still fails.
+//
+// ── Conditions are not compared in 1.0.0 (SC-023) ────────────────────────────────────────────
+//
+// `admin.condition` is a function, so it is in neither the committed snapshot nor the regenerated
+// one. What `checkPayloadSnapshot` sees is the record: the clauses a field carries under
+// `custom.salt.condition`, compared like any other generated value, so a snapshot that drops,
+// adds or changes that record fails. What it does not see is the function. Whether a field has an
+// `admin.condition` at all, and what it does, are both invisible: a consumer that drops a
+// generated condition, adds one of its own to a field the contract shows always, or shows a field
+// at other times than the clauses say, passes in each case, with or without one of its additions
+// on the same field. (A field whose only admin content is a condition serialises as an empty
+// `admin`; the check reads an empty `admin` and an absent one as the same thing, on both sides.)
+// Whether a consumer's conditions behave as the contract's is therefore not part of conformance
+// to 1.0.0; a comparison may come in a later minor.
 //
 // Byte-stable: objects are built in the contract's order with a fixed key order, and nothing reads
 // the clock, the environment or the file system's listing order.
@@ -65,9 +82,26 @@ function sourcesFrom(options) {
   return Object.fromEntries(installed.map((s) => [s, { ...SOURCE_DEFAULTS[s], ...(given?.[s] ?? {}) }]))
 }
 
-function enumNameFor(ctx, name) {
+/**
+ * The vocabularies more than one select offers, each with the one Postgres type that holds it
+ * (salt-nextjs BD-035, SC-023): selects offering the same values in the same order share a type,
+ * so the columns of five sections are one `enum_grid_columns` and not five types alike. The name
+ * is fixed here, not taken from a field's path, so it does not change with the sections a site
+ * emits. The shared settings, a link's parts and a collection-query's parts are one type each
+ * already, named by their scope. The site's icons are the exception BD-035 makes: the options are
+ * the site's, not a vocabulary of the contract's, and each icon select keeps a type of its own.
+ */
+export const VOCABULARIES = {
+  enum_grid_columns: ['2', '3', '4'],
+  enum_button_style: ['primary', 'secondary', 'ghost'],
+  enum_alignment: ['left', 'centre'],
+  enum_media_side: ['left', 'right'],
+}
+
+function enumNameFor(ctx, name, values) {
   if (ctx.enumPrefix) return `${ctx.enumPrefix}_${snake(name)}`
-  return `enum_${[ctx.scope, ...ctx.path, name].map(snake).join('_')}`
+  const shared = values && Object.keys(VOCABULARIES).find((n) => VOCABULARIES[n].join('\0') === values.join('\0'))
+  return shared ?? `enum_${[ctx.scope, ...ctx.path, name].map(snake).join('_')}`
 }
 
 const defaultsOf = (fields) =>
@@ -129,7 +163,8 @@ function convertField(f, ctx) {
       }
       break
     case 'select': {
-      out.type = 'select'
+      // The contract says which selects are radios (the schema's control); its layout is the consumer's.
+      out.type = f.control === 'radio' ? 'radio' : 'select'
       out.label = f.label
       if (f.required) out.required = true
       let opts = f.options
@@ -140,7 +175,7 @@ function convertField(f, ctx) {
         salt.optionsFrom = 'icons'
         opts = options.icons
       }
-      out.enumName = enumNameFor(ctx, f.name)
+      out.enumName = enumNameFor(ctx, f.name, f.optionsFrom ? null : opts.map((o) => o.value))
       out.options = opts.map((o) => ({ label: o.label, value: o.value }))
       if (f.default !== undefined) out.defaultValue = f.default
       break
@@ -364,21 +399,75 @@ export function payloadSnapshot(options = {}) {
 const keyOf = (item) => (item && typeof item === 'object' ? item.slug ?? item.name ?? item.value : undefined)
 
 /**
+ * The keys a consumer may add to a field of a block (SC-023), each as its path from the field, and
+ * the only keys `checkPayloadSnapshot` leaves out of the comparison:
+ *
+ *   admin.components    Payload's admin components for the field: a list's row label, a notice
+ *                       beside an input. They change the admin screen and nothing that is stored.
+ *   admin.initCollapsed whether a list or group starts collapsed in the admin
+ *   admin.layout        a radio's layout
+ *   hooks               the field's hooks; functions, so only their slots reach a snapshot
+ *
+ * A path is left out whole, with everything under it, and only on a field: a block's own keys, an
+ * option and `custom.salt` are compared in full. Every other key of `admin` (its description, its
+ * step) is the contract's and still compares, so a listed key cannot carry a change to one. An
+ * `admin` holding nothing, with or without these keys taken out, compares as an absent one.
+ */
+export const PLATFORM_ADDITIONS = ['admin.components', 'admin.initCollapsed', 'admin.layout', 'hooks']
+
+const isRecord = (x) => Boolean(x) && typeof x === 'object' && !Array.isArray(x)
+
+// `obj` without what `keys` leads to; the same object when it has nothing there.
+function without(obj, [key, ...rest]) {
+  if (!isRecord(obj) || !(key in obj)) return obj
+  if (rest.length) {
+    const below = without(obj[key], rest)
+    return below === obj[key] ? obj : { ...obj, [key]: below }
+  }
+  const { [key]: gone, ...kept } = obj
+  return kept
+}
+
+// Fields as they are compared, at every depth: without the consumer's additions, and with an
+// `admin` that holds nothing read as an absent one. A field whose only admin content is a
+// condition serialises as `"admin": {}`, since the function drops out, so an empty admin says no
+// more than none. `empty` says which of the two every such field is given: none, for comparing
+// bytes, or an empty one, so that the diff names the key inside `admin` that differs.
+function comparable(fields, empty) {
+  if (!Array.isArray(fields)) return fields
+  return fields.map((field) => {
+    if (!isRecord(field)) return field
+    let own = PLATFORM_ADDITIONS.reduce((f, p) => without(f, p.split('.')), field)
+    if (isRecord(own.admin) && Object.keys(own.admin).length === 0) own = without(own, ['admin'])
+    if (empty && !('admin' in own)) own = { ...own, admin: {} }
+    return 'fields' in own ? { ...own, fields: comparable(own.fields, empty) } : own
+  })
+}
+const comparableBlocks = (blocks, empty = false) =>
+  (Array.isArray(blocks) ? blocks.map((b) => (isRecord(b) && 'fields' in b ? { ...b, fields: comparable(b.fields, empty) } : b)) : blocks)
+
+/**
  * Regenerate with `options` and compare with a committed snapshot (its text). `ok` is true only
- * when the two are byte-identical; `problems` names each difference by path, as
- * `blocks[hero].fields[heading] is in the snapshot and no longer generated`.
+ * when the two are byte-identical once the consumer's additions (PLATFORM_ADDITIONS, and nothing
+ * else) and any `admin` left holding nothing are taken out of the fields of both; `problems` names
+ * each difference by path, as `blocks[hero].fields[heading] is in the snapshot and no longer
+ * generated`. Conditions are not compared (SC-023; this file's header).
  */
 export function checkPayloadSnapshot(snapshot, options = {}) {
   const now = normaliseLineEndings(payloadSnapshot(options))
   snapshot = normaliseLineEndings(snapshot)
   if (now === snapshot) return { ok: true, problems: [] }
-  let was
-  try { was = JSON.parse(snapshot) } catch (e) { return { ok: false, problems: [`the snapshot is not JSON: ${e.message}`] } }
+  let parsed
+  try { parsed = JSON.parse(snapshot) } catch (e) { return { ok: false, problems: [`the snapshot is not JSON: ${e.message}`] } }
   const problems = []
-  diffSnapshots(was, JSON.parse(now), 'blocks', keyOf, problems)
-  // Same structure, different bytes: formatting, which a regenerated snapshot fixes.
-  if (!problems.length) problems.push('the snapshot differs from the generated text only in formatting; regenerate it')
-  return { ok: false, problems }
+  diffSnapshots(comparableBlocks(parsed, true), comparableBlocks(JSON.parse(now), true), 'blocks', keyOf, problems)
+  if (problems.length) return { ok: false, problems }
+  const was = comparableBlocks(parsed)
+  const generated = comparableBlocks(JSON.parse(now))
+  // Same structure: the bytes still have to agree, in the snapshot as committed (its formatting)
+  // and in what is compared (its key order). A regenerated snapshot fixes either.
+  if (serialisePayloadBlocks(parsed) === snapshot && serialisePayloadBlocks(was) === serialisePayloadBlocks(generated)) return { ok: true, problems: [] }
+  return { ok: false, problems: ['the snapshot differs from the generated text only in formatting; regenerate it'] }
 }
 
 // ── CLI ────────────────────────────────────────────────────────────────────────────────────────

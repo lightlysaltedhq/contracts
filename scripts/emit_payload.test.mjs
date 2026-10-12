@@ -12,7 +12,8 @@ import { fileURLToPath } from 'node:url'
 import Ajv2020 from 'ajv/dist/2020.js'
 
 import { hasVisibleText, loadContract } from '../salt-contract/emit/_contract.mjs'
-import { checkPayloadSnapshot, isFilled, payloadSnapshot, toPayloadBlocks } from '../salt-contract/emit/payload.mjs'
+import { acfSnapshot } from '../salt-contract/emit/acf.mjs'
+import { checkPayloadSnapshot, isFilled, payloadSnapshot, PLATFORM_ADDITIONS, toPayloadBlocks, VOCABULARIES } from '../salt-contract/emit/payload.mjs'
 
 const emitter = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'salt-contract', 'emit', 'payload.mjs')
 const icons = [{ value: 'star', label: 'Star' }, { value: 'check', label: 'Check' }]
@@ -64,6 +65,114 @@ test('the drift check passes an unchanged snapshot and fails a renamed field, na
   const changed = structuredClone(contract)
   changed.fields.hero.fields.find((f) => f.name === 'buttons').max = 3
   assert.deepEqual(checkPayloadSnapshot(snapshot, { icons, contract: changed }).problems, ['blocks[hero].fields[buttons].maxRows was 2, is now 3'])
+})
+
+// A snapshot of the emitter's blocks after `decorate` has changed them, as a consumer's would be.
+const decorated = (decorate) => {
+  const list = JSON.parse(payloadSnapshot({ icons }))
+  decorate((slug, dotted) => field(block(list, slug).fields, dotted), list)
+  return JSON.stringify(list, null, 2) + '\n'
+}
+
+test('SC-023: a consumer may add the listed keys to a field, at any depth, and the check still passes', () => {
+  assert.deepEqual(PLATFORM_ADDITIONS, ['admin.components', 'admin.initCollapsed', 'admin.layout', 'hooks'])
+  const snapshot = decorated((at) => {
+    // Beside a description the contract gives, on a nested field with no admin of its own, and on a setting.
+    Object.assign(at('hero', 'buttons').admin, { components: { RowLabel: { path: 'site/admin', exportName: 'RowLabel' } }, initCollapsed: true })
+    at('hero', 'image').admin.components = { afterInput: [{ path: 'site/admin', exportName: 'SizeNotice' }] }
+    // A radio's layout goes on a radio: the link's type is one.
+    assert.equal(at('hero', 'buttons.link.type').type, 'radio')
+    at('hero', 'buttons.link.type').admin = { layout: 'horizontal' }
+    at('hero', 'settings.anchorId').hooks = { beforeValidate: [null] }
+  })
+  assert.notEqual(snapshot, payloadSnapshot({ icons }))
+  assert.deepEqual(checkPayloadSnapshot(snapshot, { icons }), { ok: true, problems: [] })
+})
+
+test('SC-023: a key outside the list fails, beside a listed one or alone', () => {
+  const problemsOf = (decorate) => checkPayloadSnapshot(decorated(decorate), { icons }).problems
+  assert.deepEqual(problemsOf((at) => { Object.assign(at('hero', 'buttons').admin, { initCollapsed: true, readOnly: true }) }),
+    ['blocks[hero].fields[buttons].admin.readOnly is in the snapshot and no longer generated'])
+  assert.deepEqual(problemsOf((at) => { at('hero', 'heading').access = {} }),
+    ['blocks[hero].fields[heading].access is in the snapshot and no longer generated'])
+  // The keys are a field's: on the block, an option or the custom.salt record they compare.
+  assert.deepEqual(problemsOf((at, list) => { block(list, 'hero').hooks = {} }), ['blocks[hero].hooks is in the snapshot and no longer generated'])
+  assert.deepEqual(problemsOf((at) => { at('hero', 'variant').options[0].hooks = {} }),
+    ['blocks[hero].fields[variant].options[full-bleed].hooks is in the snapshot and no longer generated'])
+  assert.deepEqual(problemsOf((at) => { at('hero', 'settings.anchorId').custom.salt.hooks = {} }),
+    ['blocks[hero].fields[settings].fields[anchorId].custom.salt.hooks is in the snapshot and no longer generated'])
+})
+
+test('SC-023: a field whose only admin content is a condition takes the listed keys too', () => {
+  // The condition is a function, so the generated snapshot holds an empty admin for such a field.
+  const cards = field(block(JSON.parse(payloadSnapshot({ icons })), 'carousel').fields, 'cards')
+  assert.deepEqual(cards.admin, {})
+  const snapshot = decorated((at) => {
+    at('carousel', 'cards').admin = { components: { RowLabel: { path: 'site/admin', exportName: 'RowLabel' } }, initCollapsed: true }
+    at('carousel', 'cards').hooks = { beforeValidate: [null] }
+  })
+  assert.deepEqual(checkPayloadSnapshot(snapshot, { icons }), { ok: true, problems: [] })
+  // A difference inside admin there is reported at its own key, never at admin or at a listed key.
+  assert.deepEqual(checkPayloadSnapshot(decorated((at) => { at('carousel', 'cards').admin = { initCollapsed: true, readOnly: true, description: 'Ours.' } }), { icons }).problems, [
+    'blocks[carousel].fields[cards].admin.readOnly is in the snapshot and no longer generated',
+    'blocks[carousel].fields[cards].admin.description is in the snapshot and no longer generated',
+  ])
+  // The same on a field with no admin at all, and for a description the contract gives and the snapshot lacks.
+  assert.deepEqual(checkPayloadSnapshot(decorated((at) => {
+    at('hero', 'buttons.link.newTab').admin = { layout: 'horizontal', description: 'Ours.' }
+    delete at('hero', 'image').admin
+  }), { icons }).problems, [
+    'blocks[hero].fields[image].admin.description is generated and not in the snapshot',
+    'blocks[hero].fields[buttons].fields[link].fields[newTab].admin.description is in the snapshot and no longer generated',
+  ])
+})
+
+test('SC-023: whether a field has an admin condition is not seen, with or without a listed key beside it; its record is', () => {
+  // In a snapshot a condition is an admin with nothing in it: `conditioned` has one, `plain` has no admin.
+  const conditioned = ['carousel', 'cards']
+  const plain = ['hero', 'buttons.link.newTab']
+  assert.equal(field(block(JSON.parse(payloadSnapshot({ icons })), 'hero').fields, 'buttons.link.newTab').admin, undefined)
+  const cases = {
+    'a condition dropped': (at) => { delete at(...conditioned).admin },
+    'a condition dropped, a listed key beside it': (at) => { delete at(...conditioned).admin; at(...conditioned).hooks = {} },
+    'a condition kept, a listed key beside it': (at) => { at(...conditioned).admin = { initCollapsed: true } },
+    'a condition added': (at) => { at(...plain).admin = {} },
+    'a condition added, a listed key beside it': (at) => { at(...plain).admin = { components: { Field: { path: 'site/admin' } } } },
+  }
+  for (const [what, decorate] of Object.entries(cases)) assert.deepEqual(checkPayloadSnapshot(decorated(decorate), { icons }), { ok: true, problems: [] }, what)
+  // The clauses a field records are generated values, so dropping or changing them fails either way.
+  for (const beside of [false, true]) {
+    const { problems } = checkPayloadSnapshot(decorated((at) => {
+      delete at(...conditioned).custom.salt.condition
+      if (beside) at(...conditioned).admin = { initCollapsed: true }
+    }), { icons })
+    assert.deepEqual(problems, ['blocks[carousel].fields[cards].custom.salt.condition is generated and not in the snapshot'])
+  }
+})
+
+test('SC-023: a listed key cannot hide a change to a value the contract owns', () => {
+  const was = field(block(JSON.parse(payloadSnapshot({ icons })), 'hero').fields, 'image').admin.description
+  const { ok, problems } = checkPayloadSnapshot(decorated((at) => {
+    at('hero', 'image').admin = { components: { afterInput: [] }, description: 'Reworded on the site.' }
+    at('hero', 'buttons').admin.initCollapsed = true
+    at('hero', 'buttons').maxRows = 5
+    at('hero', 'settings.anchorId').hooks = { beforeValidate: [null] }
+    at('hero', 'settings.anchorId').custom.salt.format = 'url'
+  }), { icons })
+  assert.equal(ok, false)
+  assert.deepEqual(problems, [
+    `blocks[hero].fields[image].admin.description was "Reworded on the site.", is now ${JSON.stringify(was)}`,
+    'blocks[hero].fields[buttons].maxRows was 5, is now 2',
+    'blocks[hero].fields[settings].fields[anchorId].custom.salt.format was "url", is now "anchor"',
+  ])
+  // Without its additions the rest is still compared byte for byte: a moved key is formatting.
+  const moved = decorated((at) => {
+    const heading = at('hero', 'heading')
+    const { name, ...rest } = heading
+    for (const k of Object.keys(heading)) delete heading[k]
+    Object.assign(heading, rest, { name, hooks: {} })
+  })
+  assert.deepEqual(checkPayloadSnapshot(moved, { icons }).problems, ['the snapshot differs from the generated text only in formatting; regenerate it'])
 })
 
 test('the CLI exits 1 on drift and 0 when the snapshot matches', () => {
@@ -196,10 +305,13 @@ test('a link is the fixed group, its document pointing at linkTo, required parts
   const link = field(hero.fields, 'buttons.link')
   assert.equal(link.type, 'group')
   assert.deepEqual(link.fields.map((f) => [f.name, f.type, !!f.required]), [
-    ['label', 'text', true], ['type', 'select', false], ['document', 'relationship', true], ['url', 'text', true], ['newTab', 'checkbox', false],
+    ['label', 'text', true], ['type', 'radio', false], ['document', 'relationship', true], ['url', 'text', true], ['newTab', 'checkbox', false],
   ])
+  // The link's type is a radio (SC-023): the contract says so, and it stores what a select would.
   const type = field(link.fields, 'type')
-  assert.deepEqual([type.enumName, type.defaultValue], ['enum_link_type', 'internal'])
+  assert.deepEqual([type.enumName, type.defaultValue, type.options.map((o) => o.value)], ['enum_link_type', 'internal', ['internal', 'external']])
+  // No other select of the contract is one: a select not marked a radio stays a drop-down.
+  assert.deepEqual([...new Set(selectsOf(blocks()).filter(([, f]) => f.type === 'radio').map(([at]) => at.split('.').slice(-2).join('.')))], ['link.type', 'cta.type'])
   const document = field(link.fields, 'document')
   assert.deepEqual(document.relationTo, ['pages', 'posts'])
   assert.equal(shows(document, { type: 'internal' }), true)
@@ -217,7 +329,7 @@ test('a list maps to an array with its row label, item label and row limits', ()
   const features = field(block(blocks(), 'features').fields, 'items')
   assert.equal(features.custom.salt.rowLabel, 'title')
   // A select inside a row is named by its path, which stays inside Postgres's 63 characters.
-  assert.equal(field(block(blocks(), 'media-text').fields, 'rows.buttons.style').enumName, 'enum_media_text_rows_buttons_style')
+  assert.equal(field(block(blocks(), 'process').fields, 'steps.icon').enumName, 'enum_process_steps_icon')
 })
 
 test('icons come from the site, and a section that needs them refuses to build without them', () => {
@@ -281,12 +393,145 @@ test('shared settings take the section\'s defaults and omissions, in a group nam
   assert.ok(field(block(list, 'hero').fields, 'settings').fields.some((f) => f.name === 'firstPageOnly'))
 })
 
+test('SC-023: the anchor\'s description states its rule with no WordPress function and no file path', () => {
+  const { description } = field(block(blocks(), 'hero').fields, 'settings.anchorId').admin
+  assert.match(description, /lower-case letters, digits and single hyphens/)
+  assert.doesNotMatch(description, /sanitize_|[a-z]+_[a-z]+\(|\.(json|php|ts)\b|markup\/|#/)
+})
+
+test('SC-023: no description an editor is shown cites a decision, a file or a platform function, on either platform', () => {
+  const shown = []
+  const walk = (node, at) => {
+    if (Array.isArray(node)) { node.forEach((x, i) => walk(x, `${at}[${x?.slug ?? x?.name ?? i}]`)); return }
+    if (!node || typeof node !== 'object') return
+    for (const [key, value] of Object.entries(node)) {
+      if ((key === 'description' || key === 'instructions') && typeof value === 'string') shown.push([`${at}.${key}`, value])
+      else if (key !== 'custom' && key !== 'salt') walk(value, `${at}.${key}`)
+    }
+  }
+  const icons = JSON.parse(readFileSync(path.join(path.dirname(emitter), '..', 'contract', 'sections.json'), 'utf8')).icons.content.map((value) => ({ value, label: value }))
+  walk(JSON.parse(payloadSnapshot({ icons })), 'payload')
+  walk(JSON.parse(acfSnapshot({ icons })), 'acf')
+  assert.ok(shown.length > 100, `${shown.length} descriptions read`)
+  const refused = [
+    ['a decision id', /\b(SC|BD|ID|EP|D|FLEET)-?\d+\b/i],
+    ['a file path', /[\w-]+\.(json|php|tsx?|mjs|css|md)\b|\b(contract|markup|fields|schema|inc|src)\/[\w-]/],
+    ['a platform function', /\b[a-z]+(_[a-z]+)+\b|\b[a-zA-Z_]+\(/],
+    ['a markup rule reference', /\b[a-z-]+#[a-z-]+/],
+  ]
+  for (const [at, text] of shown) for (const [what, pattern] of refused) assert.doesNotMatch(text, pattern, `${at} cites ${what}`)
+  const decision = refused[0][1]
+  for (const id of ['SC-016', 'sc-016', 'BD-035', 'ID-3622', 'EP-66', 'ep-66']) assert.match(`As ${id} says.`, decision, id)
+  for (const plain of ['anchorId', 'Up to 24 items.', 'A 16:9 picture', 'Shown mid-2026 onwards.']) assert.doesNotMatch(plain, decision, plain)
+})
+
 test('every enum name fits Postgres\'s 63 characters', () => {
   const names = []
   const walk = (fields) => { for (const f of fields) { if (f.enumName) names.push(f.enumName); if (f.fields) walk(f.fields) } }
   for (const b of blocks()) walk(b.fields)
   assert.ok(names.length > 0)
   for (const n of names) assert.ok(n.length <= 63, n)
+})
+
+// Every select the blocks hold, as [path, field].
+const selectsOf = (list) => {
+  const out = []
+  const walk = (fields, at) => { for (const f of fields) { if (f.type === 'select' || f.type === 'radio') out.push([`${at}.${f.name}`, f]); if (f.fields) walk(f.fields, `${at}.${f.name}`) } }
+  for (const b of list) walk(b.fields, b.slug)
+  return out
+}
+const valuesOf = (f) => f.options.map((o) => o.value).join('|')
+
+test('SC-023: one Postgres type per vocabulary, and one vocabulary per type (BD-035)', () => {
+  const selects = selectsOf(blocks())
+  const names = new Map()
+  const vocabularies = new Map()
+  for (const [at, f] of selects) {
+    // One name, one list of values: Payload's Postgres adapter keeps the last list registered under a name.
+    assert.equal(names.get(f.enumName) ?? valuesOf(f), valuesOf(f), `${at}: ${f.enumName} already holds other values`)
+    names.set(f.enumName, valuesOf(f))
+    // The site's icons are BD-035's exception: the options are the site's, so each select keeps its own type.
+    if (f.custom?.salt?.optionsFrom === 'icons') continue
+    assert.equal(vocabularies.get(valuesOf(f)) ?? f.enumName, f.enumName, `${at}: the values ${valuesOf(f)} already have the type ${vocabularies.get(valuesOf(f))}; name the vocabulary in VOCABULARIES`)
+    vocabularies.set(valuesOf(f), f.enumName)
+  }
+  const named = (slug, dotted) => field(block(blocks(), slug).fields, dotted).enumName
+  for (const slug of ['features', 'stats', 'logos', 'gallery', 'collection-showcase']) assert.equal(named(slug, 'columns'), 'enum_grid_columns')
+  assert.deepEqual([named('hero', 'buttons.style'), named('call-to-action', 'buttons.style'), named('media-text', 'rows.buttons.style')], Array(3).fill('enum_button_style'))
+  assert.deepEqual([named('hero', 'alignment'), named('rich-text', 'alignment')], ['enum_alignment', 'enum_alignment'])
+  assert.deepEqual([named('hero', 'mediaSide'), named('media-text', 'rows.mediaSide')], ['enum_media_side', 'enum_media_side'])
+  // Every name in the list is used, and holds the values the list gives it.
+  for (const [name, values] of Object.entries(VOCABULARIES)) assert.equal(names.get(name), values.join('|'), name)
+  // The name is the vocabulary's, so it does not change with the sections a site emits.
+  assert.equal(field(block(blocks({ sections: ['logos'] }), 'logos').fields, 'columns').enumName, 'enum_grid_columns')
+})
+
+test('SC-023: each former enum name the contract records is on a select the emitter names otherwise', () => {
+  const contract = loadContract()
+  const emitted = new Map(selectsOf(blocks()))
+  let records = 0
+  const walk = (fields, at) => {
+    for (const f of fields) {
+      const here = `${at}.${f.name}`
+      const former = f.platforms?.nextjs?.formerlyEnum
+      if (former !== undefined) {
+        // A composite field records its parts by name; a select records its own.
+        const parts = typeof former === 'string' || Array.isArray(former) ? [[here, former]] : Object.entries(former).map(([part, was]) => [`${here}.${part}`, was])
+        for (const [target, was] of parts) {
+          const now = emitted.get(target)?.enumName
+          assert.ok(now, `${target} records a former enum name and is not a select the emitter generates`)
+          for (const name of [was].flat()) { assert.notEqual(name, now, `${target}: ${name} is the name it has now, so it is no rename`); records++ }
+        }
+      }
+      if (f.fields) walk(f.fields, here)
+    }
+  }
+  for (const [id, doc] of Object.entries(contract.fields)) walk(doc.fields, id)
+  // The shared settings are generated into every section; hero stands for them.
+  walk(contract.settings, 'hero.settings')
+  assert.equal(records, 17)
+  assert.equal(emitted.get('hero.settings.backgroundImage.fit').enumName, 'enum_section_background_image_fit')
+})
+
+test('a former enum name is recorded only for Salt for Next.js, on a select or a collection-query (review of #17, 7)', () => {
+  const schemaFile = path.join(path.dirname(emitter), '..', 'schema', 'field-definition.schema.json')
+  const validate = new Ajv2020({ strict: false }).compile(JSON.parse(readFileSync(schemaFile, 'utf8')))
+  const options = [{ value: 'a', label: 'A' }, { value: 'b', label: 'B' }]
+  const doc = (field) => ({ $schema: '../../schema/field-definition.schema.json', version: '0.1.0', section: 'probe', shared: { id: 'section-settings' }, fields: [field] })
+  const select = (platforms) => doc({ name: 'style', type: 'select', label: 'Style', options, platforms })
+  const query = (platforms) => doc({ name: 'query', type: 'collection-query', label: 'Query', source: 'faqs', platforms })
+  assert.equal(validate(select({ nextjs: { formerlyEnum: 'enum_old' } })), true)
+  assert.equal(validate(select({ nextjs: { formerlyEnum: ['enum_old', 'enum_older'] } })), true)
+  assert.equal(validate(query({ nextjs: { formerlyEnum: { mode: ['enum_old', 'enum_older'], order: 'enum_sort' } } })), true)
+  // Not WordPress's to record, though its other notes stand.
+  assert.equal(validate(select({ wordpress: { formerly: 'style_old' } })), true)
+  assert.equal(validate(select({ wordpress: { formerlyEnum: 'enum_old' } })), false)
+  assert.equal(validate(select({ nextjs: { formerlyEnum: 'enum_old' }, wordpress: { formerlyEnum: 'enum_old' } })), false)
+  // Not on a field with no enum type, and each kind in its own form.
+  assert.equal(validate(doc({ name: 'title', type: 'text', label: 'Title', platforms: { nextjs: { formerlyEnum: 'enum_old' } } })), false)
+  assert.equal(validate(doc({ name: 'on', type: 'boolean', label: 'On', platforms: { nextjs: { formerlyEnum: 'enum_old' } } })), false)
+  assert.equal(validate(select({ nextjs: { formerlyEnum: { mode: 'enum_old' } } })), false)
+  assert.equal(validate(query({ nextjs: { formerlyEnum: 'enum_old' } })), false)
+  assert.equal(validate(query({ nextjs: { formerlyEnum: { sortBy: 'enum_sort' } } })), false)
+})
+
+test('a radio needs a default or to be required, and options of the contract\'s own (re-review of #17, 2)', () => {
+  const schemaFile = path.join(path.dirname(emitter), '..', 'schema', 'field-definition.schema.json')
+  const validate = new Ajv2020({ strict: false }).compile(JSON.parse(readFileSync(schemaFile, 'utf8')))
+  const options = [{ value: 'a', label: 'A' }, { value: 'b', label: 'B' }]
+  const radio = (rest) => ({ $schema: '../../schema/field-definition.schema.json', version: '0.1.0', section: 'probe', shared: { id: 'section-settings' },
+    fields: [{ name: 'kind', type: 'select', control: 'radio', label: 'Kind', ...rest }] })
+  assert.equal(validate(radio({ options, default: 'a' })), true)
+  assert.equal(validate(radio({ options, required: true })), true)
+  // Payload's radio cannot be cleared, so one with nothing chosen and nothing required is refused.
+  assert.equal(validate(radio({ options })), false)
+  assert.equal(validate(radio({ options, required: false })), false)
+  assert.equal(validate(radio({ optionsFrom: 'icons' })), false)
+  assert.equal(validate(radio({ optionsFrom: 'icons', default: 'star' })), false)
+  assert.equal(validate(radio({ options, default: 'a', control: 'buttons' })), false)
+  // A select without the control is held to none of this.
+  const { control, ...select } = radio({ options }).fields[0]
+  assert.equal(validate({ ...radio({}), fields: [select] }), true)
 })
 
 test('R8: a stored null is no value, and only a never-set sibling takes its default', () => {

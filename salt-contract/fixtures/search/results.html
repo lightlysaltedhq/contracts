@@ -27,9 +27,9 @@
     </ul>
     <nav class="salt-pagination" aria-label="Search results pages">
       <ul class="salt-pagination__list" role="list">
-        <li><a class="salt-pagination__link" href="/search/?q=hedge" aria-label="Page 1" aria-current="page">1</a></li>
-        <li><a class="salt-pagination__link" href="/search/?q=hedge&amp;page=2" aria-label="Page 2">2</a></li>
-        <li><a class="salt-pagination__link" data-step="next" rel="next" href="/search/?q=hedge&amp;page=2">Next</a></li>
+        <li><a class="salt-pagination__link" href="{{salt:page-href}}" aria-label="Page 1" aria-current="page">1</a></li>
+        <li><a class="salt-pagination__link" href="{{salt:page-href}}" aria-label="Page 2">2</a></li>
+        <li><a class="salt-pagination__link" data-step="next" rel="next" href="{{salt:page-href}}">Next</a></li>
       </ul>
     </nav>
   </section>

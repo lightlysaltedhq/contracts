@@ -1,6 +1,6 @@
 {
   "$schema": "../../schema/field-definition.schema.json",
-  "version": "1.0.0-rc.1",
+  "version": "1.0.0-rc.2",
   "section": "hero",
   "shared": {
     "id": "section-settings"
@@ -99,6 +99,9 @@
         "equals": "split"
       },
       "platforms": {
+        "nextjs": {
+          "formerlyEnum": "enum_hero_media_side"
+        },
         "wordpress": {
           "owes": "the field"
         }
@@ -162,7 +165,12 @@
               "label": "Ghost"
             }
           ],
-          "default": "primary"
+          "default": "primary",
+          "platforms": {
+            "nextjs": {
+              "formerlyEnum": "enum_hero_button_style"
+            }
+          }
         }
       ],
       "platforms": {

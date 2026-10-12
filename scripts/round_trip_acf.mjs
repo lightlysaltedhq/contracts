@@ -113,8 +113,9 @@ function loadWordpress(wordpress) {
 
 let rows = []
 let keyRows = []
-const FAMILY = { radio: 'select', button_group: 'select' }
-const family = (t) => FAMILY[t] ?? t
+// The types that store what a select does; only what is compared beside the type reads them.
+const STORED_AS = { radio: 'select', button_group: 'select' }
+const stored = (t) => STORED_AS[t] ?? t
 const named = (fields) => (fields ?? []).filter((f) => f.name)
 const show = (v) => (v === undefined || v === '' ? 'none' : JSON.stringify(v))
 const wpNote = (def) => def?.platforms?.wordpress
@@ -264,8 +265,11 @@ function compareOne(section, at, e, n, def, ctx) {
   const values = wpNote(def)?.values
   const diffs = []
   // A url-format text stores the same string ACF's url field does; only ACF's validation differs.
-  const sameType = family(e.type) === family(n.type) || (e.salt?.format === 'url' && e.type === 'text' && n.type === 'url')
-  if (!sameType) diffs.push(['type', `type ${e.type}; salt-wordpress ${n.type}`])
+  const urlText = e.salt?.format === 'url' && e.type === 'text' && n.type === 'url'
+  // The widget is the contract's (SC-023): a select, a radio and a button group are three types.
+  // They store one kind of value, so the default and the limits beside it are still compared.
+  if (e.type !== n.type && !urlText) diffs.push(['type', `type ${e.type}; salt-wordpress ${n.type}`])
+  const sameType = stored(e.type) === stored(n.type) || urlText
   if (e.choices && n.choices) {
     const mine = Object.keys(e.choices)
     const theirs = Object.keys(n.choices)
@@ -397,8 +401,8 @@ async function main({ wordpress, check, suggest }) {
     `(salt ${wpVersion}, commit ${wpCommit}), section by section. salt-wordpress's field files were`,
     'loaded with `php` under its own test shims, as its bin/extract-slugs.php loads them, not parsed.',
     '',
-    'Compared: field names, types (select, radio and button_group count as one: the widget stays',
-    'native; a url-format text matches ACF url, which stores the same string), choices, defaults,',
+    'Compared: field names, types (a select, a radio and a button group are three: the contract says',
+    'which a field is, SC-023; a url-format text matches ACF url, which stores the same string), choices, defaults,',
     'required, limits, the post types and taxonomy a relation reads, and conditional logic (by',
     'behaviour, over every combination of the siblings either side reads).',
     'Not compared: labels and instructions, which salt-wordpress words differently and SC-003 says',

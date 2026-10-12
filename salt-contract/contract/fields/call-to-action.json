@@ -1,6 +1,6 @@
 {
   "$schema": "../../schema/field-definition.schema.json",
-  "version": "1.0.0-rc.1",
+  "version": "1.0.0-rc.2",
   "section": "call-to-action",
   "shared": {
     "id": "section-settings",
@@ -70,7 +70,12 @@
               "label": "Ghost"
             }
           ],
-          "default": "primary"
+          "default": "primary",
+          "platforms": {
+            "nextjs": {
+              "formerlyEnum": "enum_cta_button_style"
+            }
+          }
         }
       ],
       "platforms": {

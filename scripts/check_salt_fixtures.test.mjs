@@ -488,6 +488,60 @@ test('chrome: the chrome never holds priority media, and a view must say whether
 test('chrome: a case under the wrong kind key fails', () => {
   expectFail(['post'], (io) => io.json('post/full.json', (d) => { d.chrome = d.view; delete d.view }), /unknown key chrome/)
 })
+test('SC-023: the archive and search views\' expected HTML writes pagination addresses as the placeholder, and no other case does', () => {
+  expectFail(['archive'], (io) => io.html('archive/topic.html', 'data-step="next" rel="next" href="{{salt:page-href}}"', 'data-step="next" rel="next" href="/journal/topic/soil/page/2/"'),
+    /archive\/topic\.html: the pagination link "Next" has href \/journal\/topic\/soil\/page\/2\/; the expected HTML of the archive view writes \{\{salt:page-href\}\}/)
+  expectFail(['search'], (io) => io.html('search/results.html', 'data-step="next" rel="next" href="{{salt:page-href}}"', 'data-step="next" rel="next" href="/search/?q=hedge&amp;page=2"'),
+    /search\/results\.html: the pagination link "Next" has href \/search\/\?q=hedge&page=2; the expected HTML of the search view writes \{\{salt:page-href\}\}/)
+  expectFail(['listing'], (io) => io.html('listing/cards-with-pagination.html', 'href="/journal/page/3/" aria-label="Page 3"', 'href="{{salt:page-href}}" aria-label="Page 3"'),
+    /listing\/cards-with-pagination\.html: the pagination link "3" has the placeholder/)
+})
+for (const [view, name, first, second, other] of [
+  ['archive', 'topic', '/blog/topics/soil', '/blog/topics/soil?page=2', ['a card address changed', 'href="/journal/catching-rain/"', 'href="/blog/catching-rain"']],
+  ['search', 'results', '/?s=hedge', '/?s=hedge&amp;paged=2', ['a result address changed', 'href="/services/hedge-cutting/"', 'href="/service/hedge-cutting"']],
+]) {
+  test(`SC-023: routedOf hides the shape of a pagination address and nothing else of the ${view} view's pagination`, async () => {
+    const { routedOf, PLACEHOLDERS } = await import('../salt-contract/normalise.mjs')
+    const expected = readFileSync(path.join(pkg, 'fixtures', view, `${name}.html`), 'utf8')
+    const drawn = (html) => compare(routedOf(expected), routedOf(html)).equal
+    const own = (html) => html.replace(`href="${PLACEHOLDERS.pageHref}" aria-label="Page 1"`, `href="${first}" aria-label="Page 1"`).replaceAll(PLACEHOLDERS.pageHref, second)
+    assert.ok(expected.includes(PLACEHOLDERS.pageHref) && !own(expected).includes(PLACEHOLDERS.pageHref))
+    assert.ok(drawn(own(expected)), 'another URL shape is no difference')
+    // Without routedOf the same output differs, so only the cases the runner reads through it are spared.
+    assert.equal(compare(expected, own(expected)).equal, false)
+    const breaks = (what, from, to) => {
+      const html = own(expected)
+      assert.ok(html.includes(from), `${what}: the page holds ${from}`)
+      assert.equal(drawn(html.replace(from, to)), false, what)
+    }
+    breaks('a page link left out', `<li><a class="salt-pagination__link" href="${second}" aria-label="Page 2">2</a></li>`, '')
+    breaks('the current page unmarked', ' aria-current="page">1</a>', '>1</a>')
+    breaks('another page marked current', 'aria-label="Page 2">', 'aria-label="Page 2" aria-current="page">')
+    breaks('a label changed', 'aria-label="Page 2"', 'aria-label="2"')
+    breaks('the next link\'s words changed', '>Next</a>', '>Older</a>')
+    breaks('rel dropped', ' rel="next"', '')
+    breaks('a link with no address', ` href="${first}" aria-label="Page 1"`, ' aria-label="Page 1"')
+    breaks('a link with an empty address', `href="${first}" aria-label="Page 1"`, 'href="" aria-label="Page 1"')
+    breaks('a link whose address is white space', `href="${first}" aria-label="Page 1"`, 'href=" \t" aria-label="Page 1"')
+    breaks('a span where a link is drawn', `<a class="salt-pagination__link" href="${first}" aria-label="Page 1" aria-current="page">1</a>`, '<span class="salt-pagination__link" aria-current="page">1</span>')
+    // Any other link is not a pagination link, so its address still compares.
+    breaks(...other)
+  })
+}
+test('SC-023: the team showcase draws its items in the order its input gives them', () => {
+  const at = path.join(pkg, 'fixtures', 'collection-showcase', 'grid-team-contacts')
+  const input = JSON.parse(readFileSync(`${at}.json`, 'utf8'))
+  assert.equal(input.values.source, 'team')
+  assert.deepEqual(input.values.query, { mode: 'automatic', count: 3 })
+  const drawn = [...readFileSync(`${at}.html`, 'utf8').matchAll(/<h3>([^<]*)<\/h3>/g)].map((m) => m[1])
+  assert.deepEqual(drawn, input.collections.team.map((item) => item.title))
+  // Not alphabetical by name or by title, so an adapter that sorts either way fails the case.
+  assert.notDeepEqual(drawn, [...drawn].sort())
+})
+test('SC-023: a view\'s rich text is given as stored, so the level it is drawn at is refused in the input', () => {
+  expectFail(['service'], (io) => io.json('service/full.json', (d) => { d.document.intro = d.document.intro.replace(/h3>/g, 'h2>') }),
+    /service\/full\.json document\.intro holds <h2>; rich text is given as stored/)
+})
 test('chrome: a view with a second h1 fails, and so does an h1 in the chrome', () => {
   // Inside content the markup leaves open (a nested section's block, the drawer's panel), so the
   // heading rule itself is what fails.

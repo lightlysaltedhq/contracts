@@ -72,9 +72,11 @@ receives and the choices on offer.
 
 ## Status
 
-`1.0.0-rc.1` is the release candidate for `1.0.0`: private, never on the registry, held until at
-least one implementation has run `salt-conformance` against it, whose report names
-`1.0.0-rc.1` (SC-018, SC-020; `RELEASE-POLICY.md` section 5). `1.0.0` is the first release, staged
+`1.0.0-rc.2` is the release candidate for `1.0.0`: private, never on the registry, held until an
+implementation's run of `salt-conformance` against it conforms in full, in a report that names
+`1.0.0-rc.2` (SC-017, SC-018, SC-020, SC-022; `RELEASE-POLICY.md` section 5). It follows
+`1.0.0-rc.1`, whose first run raised eight questions about the contract itself; the owner's
+rulings on them (SC-023) changed contract files, which makes a new candidate and needs a new run. `1.0.0` is the first release, staged
 from CI by npm trusted publishing when the owner pushes the `salt-contract-v1.0.0` tag, and
 approved by the owner. See `RELEASE-POLICY.md` for what each part
 of a version means.
@@ -128,6 +130,38 @@ diff and migrate. Options that JSON can carry also work from the command line:
 `node emit/payload.mjs --check <snapshot> [--options <options.json>]` exits 1 on drift, and
 `--write <snapshot>` regenerates it. CRLF line endings are read as LF.
 
+**What a consumer may add.** A consumer decorates the generated fields for its own admin, and its
+snapshot is of the blocks it hands Payload, so those additions are in it. The check leaves out
+exactly the keys `PLATFORM_ADDITIONS` in `emit/payload.mjs` lists, and nothing else (SC-023):
+
+| Key of a field | What it is |
+| --- | --- |
+| `admin.components` | Payload's admin components for the field: a list's row label, a notice beside an input. |
+| `admin.initCollapsed` | Whether a list or group starts collapsed in the admin. |
+| `admin.layout` | A radio's layout. |
+| `hooks` | The field's hooks. |
+
+Each is left out whole, at any depth of a block's fields, and only on a field: a block's own keys,
+an option and `custom.salt` compare in full. Any other added key fails, and so does a change to a
+key the contract generates, whatever sits beside it: `admin.description` still compares on a field
+that also carries `admin.components`. An `admin` that holds nothing, before or after these keys
+are taken out, compares as an absent one on both sides. What is left is compared byte for byte. A
+validator is a function, so it never reaches a snapshot.
+
+**Conditions are not compared in 1.0.0** (SC-023). `admin.condition` is a function and drops out
+of both the committed and the regenerated snapshot.
+
+- *Seen:* the record. Each conditioned field carries its clauses under `custom.salt.condition`,
+  and that is a generated value like any other: a snapshot that drops, adds or changes it fails.
+- *Not seen:* the function. Whether a field has an `admin.condition` at all, and what it does,
+  are invisible. A consumer that drops a generated condition, adds one to a field the contract
+  always shows, or shows a field at other times than the clauses say, passes in each case, and
+  the result is the same with or without one of the keys above on that field. (A field whose only
+  admin content is a condition serialises as `"admin": {}`, which is why an empty `admin` and an
+  absent one are read alike.)
+
+A comparison of conditions may arrive in a later minor version.
+
 **Fitting the site's sources.** `planSections` in `emit/_contract.mjs` decides, for every emitter,
 which sections a site gets. A section that needs a source the site does not install is left out,
 or refused with the missing source and field named when `sections` lists it (`null` counts as not
@@ -149,6 +183,31 @@ the WordPress taxonomy; either way a source the contract gives categories with n
 is refused. On ACF the picker's `conditional_logic` names the layout's source select, one OR group
 per source with categories; ACF cannot hide one mode choice per source, so the mode field records
 the rule in `salt.modeRequires` for the site's save check.
+
+**Radios.** The contract says which selects are radios (SC-023): a select marked
+`"control": "radio"` in its field definition is a Payload `radio` and an ACF `radio`, offering and
+storing what a select would, and the snapshot checks compare the type. One field is marked today,
+the `type` of every link (internal or external), which is part of the link's fixed shape in
+`emit/_contract.mjs`. It is the only one: every other select, a collection-query's `mode` among
+them, is a drop-down, and a radio needs a default or to be required, since it cannot be cleared.
+A radio's layout stays the platform's: on Payload it is `admin.layout`, one of the keys a consumer
+may add. Where an implementation draws another widget today (Salt for Next.js a radio for a
+query's mode; Salt for WordPress a button group for a query's mode and for the gallery's and the
+showcase's columns), the field's `owes` says so and the round trips list the difference.
+
+**Enum names.** Every select carries the name of its Postgres enum type (`enumName`), and the
+snapshot check compares it. There is one type per vocabulary (SC-023, after Salt for Next.js's
+BD-035): selects that offer the same values in the same order share a type, named in
+`VOCABULARIES` in `emit/payload.mjs` (`enum_grid_columns`, `enum_button_style`, `enum_alignment`,
+`enum_media_side`), so the name does not change with the sections a site emits. The shared
+settings, a link's parts and a collection-query's parts are one type each, named by their scope
+(`enum_section_tone`, `enum_link_type`, `enum_query_mode`), and any other select is named by its
+section and path. The site's icons are the exception: the options are the site's, so each icon
+select keeps its own type. Where Salt for Next.js 0.11.0 gave a select's type another name, the
+field records it as `platforms.nextjs.formerlyEnum` (keyed by part for a collection-query; 12
+records carrying 17 former names), so a
+migration generated from the contract renames or folds every such type. A select that 0.11.0 left
+to Payload's derived name has no fixed former name to record; the site's own schema gives it.
 
 Faults in the contract's own shape are refused whatever the site installs: a malformed condition;
 a `sourceField` naming no sibling select, or one offering no source; and a collection-query that
@@ -276,7 +335,7 @@ option covered, and the normaliser sound.
 | `context` | For a chrome or view case: `priorityMedia` (a view: whether the plan grants it the priority image; the chrome never takes it), `locale`, `now` and `path` (the page's path, which sets `aria-current`). For a section, what the page plan decides for this band, describing a page that can exist: `index` (the plan's index, the section's position among the page's sections from 0, view-props/_shared.json, which also names an accordion group, `faq-<index>`), `track` (its `data-track`, `<section>-<n>` with n no more than `index` + 1, section#data-track), `headingLevel` (1 when no heading has rendered before the section, otherwise 2, section#single-h1), `headingRendered` (true when a heading rendered earlier on the page), `priorityMedia` (true for the first section, index 0, only, section#priority-media), and where they apply `collapseTop` (section#adjacent-collapse, never on the first section) `now` (an ISO 8601 time, for the locations' open-now status) and `locale` (a BCP 47 locale, `en-GB` in every case that draws a date, a time or a phone, which display as section#display-forms says). |
 | `media` | The images the values name, by id: `url` (the upload's address with `{width}` where each listed width goes), `width` and `height` (the upload's intrinsic size), `alt`, and where set `caption` and `focalPoint` (`{ x, y }` in per cent). Never `sizes` or `srcset`: those are the image slot's. |
 | `documents` | The pages internal links name, by id: `{ href, title }`. |
-| `collections` | The items of each source the section reads (`faqs`, `services`, `team` …), in the collection's usual order, each with a string `id`. |
+| `collections` | The items of each source the section reads (`faqs`, `services`, `team` …), each with a string `id`, already in the collection's stored order: an adapter passes them through as given and never sorts them, and a query in its default order draws them in that order (SC-023). How an implementation orders a collection on a real site is its own. |
 | `route` | What the route hands a listing: its cards and pagination. |
 | `site` | Site-wide data the markup reads, under declared keys only (the gate refuses any other): `labels` (the strings `labels.<name>` in the markup refers to), `arrow` (the site's arrow glyph), `name`, `home`, `organisation`, `acceptsEnquiries`, `contactForm`, `timezone`, `maps`, `collectionIndexes`, `logo` (`{ light, dark }`, media ids), `logoHeight` (the logo's drawn height in px, the logo slot's input; no other key names it), `header` (menu, phone, call to action, sticky), `footer` (tone, columns, text, socials, copyright, whether it shows the logo), `consent`, `themeToggle`, `displayPreferences`, `search` and `caseStudy` (the case study view's layout, which a site sets once for all its case studies: `{ media, header, headerTone, headerToneDark }`, where `media` is `flow` by default or `aside`, and `header` is `plain` by default or `band`, which draws the header as a toned section band and alone takes `headerTone` and the optional `headerToneDark`; Salt for Next.js sets these in code, and Salt for WordPress on an ACF options page, so editors can change them). A view's variant a site sets this way names its key in its markup (`variants[].site`), and every option its entry in `sections.json` offers needs a case. |
 | `document` | A view's document: the post, service, archive term or author, search query and results, as the view reads them. A section the view nests (the archive's listing) is `document.listing`: its `values` (the section's field values, shaped and checked as a section case's, with its settled anchor in `values.settings.anchorId`), `track` (its `data-track`), `index` (from 0, required, for `<section index>`; its track counts no more sections than come up to it) and, if given, `headingLevel`, which must agree with the derived level (2 in a view, under its h1). Its block is read against that section's own markup, its variant and conditions answered by its values, so its id, heading, spacing, data attributes and content are fixed by the case. |
@@ -291,7 +350,9 @@ Conventions, so that every case is deterministic:
   newTab }` with `document` a key of `documents`, and a collection query stores `{ mode, categories,
   items, order, count }`. Rich text is an HTML string using only the field's allowed elements: the
   fixtures' interchange form, which each platform's adapter turns into its own (Lexical, the
-  WordPress editor's HTML).
+  WordPress editor's HTML). A view's rich text (a post's `body`, a service's `intro`) is given the
+  same way (SC-023): its headings are the stored `h3` and `h4`, never the level the view draws
+  them at, so a stored `h3` under a view's `h1` is expected as `h2`.
 - **Images.** Each image declares its slot's default `sizes` for its section's band and the
   `srcset` the candidate rule gives for them, both from `contract/image-sizes.json` (SC-016),
   capped at the upload's intrinsic width (the record's `width`, listed itself when it is no
@@ -319,6 +380,16 @@ hidden `formToken` and `challengeToken` values as `{{salt:form-token}}` and
 `{{salt:challenge-question}}` (SC-016). Each is matched by element, class and name, so a field's
 type and every other attribute still compares. It never touches ids, which SC-012 makes deterministic. The gate proves
 that removing or changing any one attribute of any expected HTML changes its output.
+
+`normalise.mjs` also exports `routedOf(html)`, which the conformance runner applies to both sides
+of the archive and search views' cases before `normalise`, and to no other case (SC-023). It
+replaces the `href` of every `a.salt-pagination__link` that has one with `{{salt:page-href}}`, and
+those views' expected HTML writes that placeholder. Their page addresses are the platform's routing
+(SC-003), so their shape is not compared: `/journal/topic/soil/page/2/` and `/blog/topics/soil?page=2`
+both pass, as do `/search/?q=hedge&page=2` and `/?s=hedge&paged=2`. Everything else about the pagination is: which links are drawn and in what order, the
+gaps, each link's label, `rel`, `data-step` and `aria-current`, and that each link has an address
+at all (one with no `href`, or one empty or all white space, differs). The pagination a listing section draws is
+compared whole, addresses included: its `route` supplies them and the section draws what it is given.
 
 ### The adapter protocol
 
@@ -357,7 +428,9 @@ written in the implementation's own repository; the contract fixes only its inte
   record's `{width}` template (a custom loader on Next.js, an upload URL filter on WordPress), so
   the URLs compare and the widths are the platform's own.
 - Form delivery, routing and admin stay native (SC-003): where a case needs a route's data, the
-  case supplies it in `route`.
+  case supplies it in `route`. An archive or search view's adapter may draw the pagination addresses
+  the case gives or the ones its own routing builds, since the runner does not compare their shape
+  (SC-023; `routedOf`, above).
 
 ## Conformance
 
@@ -378,7 +451,9 @@ pins. For every section it ships it checks four things:
   than 200 fails that case, with its stderr (or the response body) in the report.
 - **Field parity.** The implementation's committed field snapshot is checked with the emitter's own
   `checkPayloadSnapshot` or `checkAcfSnapshot` (the drift checks above), using the implementation's
-  real options, and each problem is filed under its section. Every shipped section must be in the
+  real options, and each problem is filed under its section. On Payload the keys a consumer may
+  add to a field are left out and admin conditions are not compared (SC-023; "What a consumer may
+  add" and "Conditions are not compared in 1.0.0", above). Every shipped section must be in the
   snapshot ("not in the field snapshot" otherwise). A problem under a block or layout that is no
   contract section, or under a section declared not shipped, is about the whole snapshot and fails
   every shipped section; so does a section declared not shipped whose fields are in the snapshot,
@@ -404,7 +479,9 @@ The site chrome (`site-header`, `site-footer`), the page views with fixtures (`p
 `service`, `archive`, `search`, `not-found`; SC-018, and `case-study`; SC-021) and the page (`page`, compared through
 `pageOf`; SC-019) are run too, each reported as a file of its
 own under `files` in the JSON report and in its own table in the Markdown one. They have no fields,
-so each is held to the fixtures and class checks; the stylesheet pin is the run's. A run conforms
+so each is held to the fixtures and class checks; the stylesheet pin is the run's. The archive's
+and the search's cases are compared through `routedOf`, so the shape of their pagination addresses
+is not checked and the rest of their pagination is (SC-023). A run conforms
 only when every file it runs passes as well. `--sections` and `--not-shipped` take their ids like
 a section's, but the chrome, these six views and the page are required of every implementation
 (SC-018, SC-019, SC-021):
@@ -460,7 +537,7 @@ report).
 ```json
 {
   "format": "salt-conformance/1",
-  "contract": { "package": "@lightlysaltedhq/salt-contract", "version": "1.0.0-rc.1" },
+  "contract": { "package": "@lightlysaltedhq/salt-contract", "version": "1.0.0-rc.2" },
   "platform": "nextjs",
   "implementation": { "version": "0.4.0" },
   "adapter": { "kind": "command", "target": "node scripts/salt-adapter.mjs" },
@@ -469,7 +546,7 @@ report).
   "summary": { "pass": 15, "fail": 1, "incomplete": 0, "notShipped": 1 },
   "fields": { "platform": "payload", "snapshot": "…", "options": "…", "problems": [] },
   "problems": [],
-  "stylesheets": { "served": "…", "bundle": "styles/salt.css", "contract": "1.0.0-rc.1", "ok": true, "status": "identical" },
+  "stylesheets": { "served": "…", "bundle": "styles/salt.css", "contract": "1.0.0-rc.2", "ok": true, "status": "identical" },
   "sections": [
     {
       "id": "hero",
