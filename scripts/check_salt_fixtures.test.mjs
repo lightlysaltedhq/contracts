@@ -774,11 +774,35 @@ test('sc-024: the consent control is aria-disabled="true" everywhere but beside 
   // The drawer's state says nothing of this control.
   const drawer = copy(['site-footer'], (io) => io.json('site-footer/display-preferences.json', (d) => { d.state = { drawerOpen: true } }))
   try { assert.doesNotMatch(run(drawer).out, /aria-disabled/, run(drawer).out) } finally { rmSync(drawer, { recursive: true, force: true }) }
-  // The case's state decides, not its name: the same HTML with the state taken away is the server's.
-  expectFail(['site-footer'], (io) => io.json('site-footer/consent-panel-open.json', (d) => { delete d.state }), lacks)
-  expectFail(['site-footer'], (io) => io.json('site-footer/consent-panel-open.json', (d) => { d.state = { consentPanelOpen: false } }), lacks)
+  // The state decides, not the case's name: with the dialog and its state both gone, the control is the server's again.
+  const DIALOG = /\s*<dialog class="salt-consent-panel"[\s\S]*<\/dialog>/
+  expectFail(['site-footer'], (io) => {
+    io.json('site-footer/consent-panel-open.json', (d) => { delete d.state })
+    const rel = 'fixtures/site-footer/consent-panel-open.html'
+    const html = readFileSync(path.join(io.dir, rel), 'utf8')
+    assert.match(html, DIALOG)
+    io.write(rel, html.replace(DIALOG, ''))
+  }, lacks)
   expectFail(['site-footer'], (io) => io.html('site-footer/display-preferences.html', CONTROL, ' data-salt-consent-preferences="" aria-disabled="false">'), /<button\.salt-button> aria-disabled="false" is not "true"/)
   expectFail(['site-footer'], (io) => io.html('site-footer/display-preferences.html', CONTROL, ' data-salt-consent-preferences="" disabled>'), /<button\.salt-button> carries disabled, which the markup does not declare/)
+})
+test('sc-024: a panel is drawn open if and only if the case\'s state says so', () => {
+  const DIALOG = /\s*<dialog class="salt-(?:consent-panel|drawer)"[\s\S]*<\/dialog>/
+  const undrawn = (set, name) => (io) => {
+    const rel = `fixtures/${set}/${name}.html`
+    const html = readFileSync(path.join(io.dir, rel), 'utf8')
+    assert.match(html, DIALOG)
+    io.write(rel, html.replace(DIALOG, ''))
+  }
+  // The open dialog without its state, and with the state false.
+  expectFail(['site-footer'], (io) => io.json('site-footer/consent-panel-open.json', (d) => { delete d.state }), /consent-panel-open\.html: the consent panel is drawn, but the case's state does not say it is open \(state\.consentPanelOpen\)/)
+  expectFail(['site-footer'], (io) => io.json('site-footer/consent-panel-open.json', (d) => { d.state = { consentPanelOpen: false } }), /the consent panel is drawn, but the case's state does not say it is open/)
+  expectFail(['site-header'], (io) => io.json('site-header/drawer-open.json', (d) => { delete d.state }), /drawer-open\.html: the drawer is drawn, but the case's state does not say it is open \(state\.drawerOpen\)/)
+  // The state without the dialog.
+  expectFail(['site-footer'], undrawn('site-footer', 'consent-panel-open'), /consent-panel-open\.html: state\.consentPanelOpen says the consent panel is open, but it is not drawn/)
+  expectFail(['site-footer'], (io) => io.json('site-footer/display-preferences.json', (d) => { d.state = { consentPanelOpen: true } }), /display-preferences\.html: state\.consentPanelOpen says the consent panel is open, but it is not drawn/)
+  expectFail(['site-header'], undrawn('site-header', 'drawer-open'), /drawer-open\.html: state\.drawerOpen says the drawer is open, but it is not drawn/)
+  expectFail(['site-footer'], (io) => io.json('site-footer/display-preferences.json', (d) => { d.state = { drawerOpen: true } }), /display-preferences\.html: state\.drawerOpen says the drawer is open, but it is not drawn/)
 })
 test('sc-024: every state is documented, and the README\'s state row and the gate agree', () => {
   const readme = readFileSync(path.join(pkg, 'README.md'), 'utf8')

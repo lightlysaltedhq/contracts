@@ -978,6 +978,14 @@ function checkMarkup(c) {
   const every = () => [root, ...descendants(root)]
   c.parents = new Map()
   for (const el of [root, ...descendants(root)]) for (const child of elementsOf(el)) c.parents.set(child, el)
+  // A panel only a visitor opens is drawn, open, if and only if the case's state says so. Asked
+  // before the markup is matched, so a case that breaks it is told so first.
+  for (const [key, cls, what] of [['consentPanelOpen', 'salt-consent-panel', 'the consent panel'], ['drawerOpen', 'salt-drawer', 'the drawer']]) {
+    const isDrawn = every().some((e) => e.name === 'dialog' && classesOf(e).includes(cls))
+    const open = c.input.state?.[key] === true
+    if (isDrawn && !open) fail(`${at}.html: ${what} is drawn, but the case's state does not say it is open (state.${key})`)
+    if (!isDrawn && open) fail(`${at}.html: state.${key} says ${what} is open, but it is not drawn`)
+  }
   nestedCase = c.kind === 'section' || !c.nested ? null : c
   const { doc, spec, elements } = c.kind === 'section' ? wrapperSpec(c) : documentSpec(c)
   const m = matcher(c)
