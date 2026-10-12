@@ -269,6 +269,30 @@ test('a page is compared through pageOf: the platform\'s head and body scripts p
   }
 })
 
+test('an archive\'s pagination addresses are not compared, its structure is, and a listing section\'s still are (SC-023)', async () => {
+  const expected = readFileSync(path.join(pkg, 'fixtures', 'archive', 'topic.html'), 'utf8')
+  const routed = expected.replaceAll('{{salt:page-href}}', '/blog/topics/soil?page=2')
+  assert.notEqual(routed, expected)
+  const shape = brokenAdapter({
+    'archive/topic': { html: routed },
+    'listing/cards-with-pagination': { from: 'href="/journal/page/3/" aria-label', to: 'href="/journal?page=3" aria-label' },
+  })
+  const structure = brokenAdapter({ 'archive/topic': { html: routed.replace(' aria-current="page"', '') } })
+  try {
+    const r = await run(['--platform', 'broken', '--adapter', shape.command, ...withFields, ...withStyles])
+    assert.equal(r.code, 1, r.out)
+    assert.equal(r.report.files.find((f) => f.id === 'archive').status, 'pass')
+    const { name, expected: was, found } = failure(r.report, 'listing', 'cards-with-pagination')
+    assert.deepEqual([name, was, found], ['href', '/journal/page/3/', '/journal?page=3'])
+    const s = await run(['--platform', 'broken', '--adapter', structure.command, '--sections', 'hero,archive', '--partial'])
+    const archive = s.report.files.find((f) => f.id === 'archive')
+    assert.deepEqual(archive.fixtures.failures.map((f) => [f.case, f.difference, f.name, f.expected, f.found]), [['topic', 'attribute', 'aria-current', 'page', null]])
+  } finally {
+    rmSync(shape.dir, { recursive: true, force: true })
+    rmSync(structure.dir, { recursive: true, force: true })
+  }
+})
+
 test('--sections takes a chrome or view id, and a partial run runs only what it names', async () => {
   const r = await run(['--platform', 'reference', '--adapter', reference, ...withFields, ...withStyles, '--sections', 'hero,site-footer', '--partial'])
   assert.equal(r.code, 1, r.out)

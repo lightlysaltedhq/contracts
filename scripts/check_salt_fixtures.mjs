@@ -1010,6 +1010,13 @@ function checkMarkup(c) {
     })
     if (want.join(' ') !== got.join(' ')) fail(`${at}.html: the pagination draws [${got.join(', ')}]; page ${pages.current} of ${pages.total} gives [${want.join(', ')}] (pagination.json)`)
   }
+  // An archive's page addresses are its platform's routing, so its expected HTML writes each as the
+  // placeholder the runner compares (archiveOf in normalise.mjs, SC-023); nowhere else is it one.
+  for (const a of every().filter((e) => e.name === 'a' && classesOf(e).includes('salt-pagination__link'))) {
+    const placeholder = attr(a, 'href') === '{{salt:page-href}}'
+    if (c.section === 'archive' && !placeholder) fail(`${at}.html: the pagination link "${textOf(a)}" has href ${attr(a, 'href')}; an archive's expected HTML writes {{salt:page-href}} (SC-023)`)
+    if (c.section !== 'archive' && placeholder) fail(`${at}.html: the pagination link "${textOf(a)}" has the placeholder {{salt:page-href}}, which only an archive's expected HTML writes (SC-023)`)
+  }
 
   // Display forms (section#display-forms, SC-016): the machine forms are fixed and the text is
   // the locale's, so a case that draws a date, a time or a phone names its locale.

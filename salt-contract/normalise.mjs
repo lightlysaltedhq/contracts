@@ -37,6 +37,10 @@
 //    Each is matched by element, class, name or id, never by pattern, so a field's type, name or
 //    any other attribute still compares.
 //
+// 10. Not here, but in archiveOf below, which the conformance runner applies to an archive view's
+//    cases alone (SC-023): the address of each pagination link becomes {{salt:page-href}}, since
+//    the shape of an archive's page addresses is routing, which SC-003 leaves to each platform.
+//
 // Ids are not normalised: SC-012 makes every drawn id deterministic, so an id that differs is a
 // real difference. Input must close its elements (both platforms' serialisers do); no implied end
 // tags are inferred.
@@ -314,6 +318,7 @@ export const PLACEHOLDERS = {
   formToken: '{{salt:form-token}}',
   challengeToken: '{{salt:challenge-token}}',
   question: '{{salt:challenge-question}}',
+  pageHref: '{{salt:page-href}}',
 }
 const attrOf = (el, name) => el.attrs.find(([n]) => n === name)?.[1]
 const isContactForm = (el) => el.name === 'form' && hasClass(el, 'salt-contact__form')
@@ -390,4 +395,24 @@ export function compare(expected, actual) {
   const a = normalise(expected)
   const b = normalise(actual)
   return { equal: a === b, expected: a, actual: b }
+}
+
+/**
+ * An archive view as its fixtures compare it (SC-023): the href of every a.salt-pagination__link
+ * that has one becomes {{salt:page-href}}, which the expected HTML writes in its place. Routing is
+ * each platform's (SC-003), so the shape of a page's address is not compared; that each link is
+ * there and has an address, their order, their labels, the gaps, rel, data-step and aria-current
+ * all still are. A link with no href, or an empty one, is left as it is and differs. Returns HTML
+ * for normalise() or compare().
+ */
+export function archiveOf(html) {
+  const root = parse(String(html))
+  const mask = (el) => {
+    if (el.name === 'a' && hasClass(el, 'salt-pagination__link')) {
+      el.attrs = el.attrs.map(([n, v]) => (n === 'href' && v !== '' ? [n, PLACEHOLDERS.pageHref] : [n, v]))
+    }
+    for (const c of el.children) if (c.type === 'element') mask(c)
+  }
+  mask(root)
+  return serialise(root)
 }
