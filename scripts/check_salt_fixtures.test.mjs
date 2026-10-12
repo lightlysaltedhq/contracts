@@ -647,7 +647,20 @@ test('sc-021: the article is laid out aside exactly when the site says aside, an
   expectFail(['case-study'], (io) => io.html('case-study/aside.html', ASIDE_ARTICLE, '<article class="salt-case-study-view">'), /fixtures\/case-study\/aside\.html: .*<article\.salt-case-study-view> lacks data-media, which the markup requires when media aside/)
   expectFail(['case-study'], (io) => io.html('case-study/aside.html', ' style="--salt-case-study-view-aside-rows: 3; --salt-case-study-view-measure: 64rem"', ''), /<article\.salt-case-study-view> lacks style, which the markup requires when data-media is aside/)
   // Aside, but nothing to sit beside: the image stays in the flow.
-  expectFail(['case-study'], (io) => io.json('case-study/aside.json', (d) => { delete d.document.challenge; delete d.document.solution; delete d.document.gallery; delete d.document.externalUrl }), /<article\.salt-case-study-view> carries data-media, which the markup draws only when/)
+  expectFail(['case-study'], (io) => {
+    io.json('case-study/aside.json', (d) => { delete d.document.challenge; delete d.document.solution; delete d.document.gallery; delete d.document.externalUrl })
+    io.html('case-study/aside.html', ' style="--salt-case-study-view-aside-rows: 3; --salt-case-study-view-measure: 64rem"', '')
+  }, /<article\.salt-case-study-view> carries data-media, which the markup draws only when/)
+})
+test('sc-021: the aside\'s measure is a default band\'s 64rem and its rows the parts the view counts beside the image', () => {
+  const style = (rows, measure) => `style="--salt-case-study-view-aside-rows: ${rows}; --salt-case-study-view-measure: ${measure}"`
+  const swap = (rows, measure) => (io) => io.html('case-study/aside.html', style(3, '64rem'), style(rows, measure))
+  expectFail(['case-study'], swap(3, 'var(--container-5xl)'), /<article\.salt-case-study-view> style="--salt-case-study-view-aside-rows: 3; --salt-case-study-view-measure: var\(--container-5xl\)"/)
+  expectFail(['case-study'], swap(3, '80ch'), /<article\.salt-case-study-view> style="[^"]*measure: 80ch"/)
+  expectFail(['case-study'], swap(4, '64rem'), /<article\.salt-case-study-view> style="--salt-case-study-view-aside-rows: 4;/)
+  expectFail(['case-study'], swap('three', '64rem'), /<article\.salt-case-study-view> style="--salt-case-study-view-aside-rows: three;/)
+  // The count follows the document: one part fewer, one row fewer.
+  expectFail(['case-study'], (io) => io.json('case-study/aside.json', (d) => { delete d.document.externalUrl }), /<article\.salt-case-study-view> style="--salt-case-study-view-aside-rows: 3;/)
 })
 const BAND = 'case-study/band.html'
 const BAND_HEADER = '<header class="salt-section salt-case-study-view__header" data-tone="brand-tint" data-tone-dark="surface-inverse" data-spacing="md" data-width="default" style="--salt-section-space: var(--space-section-md)">'

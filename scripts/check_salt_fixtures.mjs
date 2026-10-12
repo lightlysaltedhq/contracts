@@ -514,12 +514,17 @@ const canonStyle = (v) => v.split(';').map((d) => d.trim()).filter(Boolean).map(
 
 // Placeholders the case fixes, from the wrapper's settled data (a section case, or a view's
 // nested section); any other <placeholder> matches any text. A chrome case, or a view nesting no
-// section, fixes none.
-const placeholders = (c) => (c.anchor == null ? {} : {
-  '<anchor>': c.anchor,
-  ...(c.index !== undefined ? { '<section index>': String(c.index) } : {}),
-  '<spacing>': effectiveSetting(c, 'spacing'),
-  '<strength>': c.settings?.backgroundImage?.scrimStrength ?? 'strong',
+// section, fixes none, except the case study view: its aside's rows are the parts the view counts
+// beside the image, and its measure a default band's, 64rem, since a fixture draws no site that
+// widened its bands (case-study.json).
+const placeholders = (c) => ({
+  ...(c.section === 'case-study' ? { '<n>': String(caseStudyBeside(c)), '<measure>': '64rem' } : {}),
+  ...(c.anchor == null ? {} : {
+    '<anchor>': c.anchor,
+    ...(c.index !== undefined ? { '<section index>': String(c.index) } : {}),
+    '<spacing>': effectiveSetting(c, 'spacing'),
+    '<strength>': c.settings?.backgroundImage?.scrimStrength ?? 'strong',
+  }),
 })
 
 function templateMatch(tpl, value, name, c) {
