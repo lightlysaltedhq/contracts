@@ -82,10 +82,10 @@ test, applied through section 2's table, where the stricter row wins.
   control is drawn `aria-disabled="true"` until script hydrates and not after:
   `markup/site-footer.json` declares the attribute its note already described, four footer fixtures
   and the four page fixtures expect it, and `consent-panel-open` does not, since only script
-  opens the panel. The gate reads the case's `state`: the attribute is refused in a state only
-  script brings about (`consentPanelOpen`, `drawerOpen`) and required everywhere else, a case
-  that knows only a scheme (`themeScheme`) included, which a platform may draw on the server. The
-  gate holds both kinds by name and fails when they and the README's `state` row disagree. An icon's `fill` and `stroke` are artwork,
+  opens the panel. The gate reads the case's `state`: the attribute is refused where
+  `consentPanelOpen` is true and required everywhere else. Each state says how the element it
+  concerns is drawn, so `drawerOpen` and `themeScheme` say nothing of this control. The gate
+  fails when the states it knows and the README's `state` row disagree. An icon's `fill` and `stroke` are artwork,
   like what is inside it (SC-007): the normaliser drops both from `svg.salt-icon`, so a filled
   mark passes against a stroked fixture, while the svg's every other attribute still compares and
   the gate still holds each of the two to the values `markup/icon.json` allows.

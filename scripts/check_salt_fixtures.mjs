@@ -258,21 +258,17 @@ function checkSiteAndMedia(c) {
 // what the page decides for it.
 const OTHER_INPUT_KEYS = ['$comment', 'chrome', 'view', 'page', 'summary', 'context', 'media', 'documents', 'collections', 'route', 'site', 'document', 'state']
 const OTHER_CONTEXT_KEYS = ['priorityMedia', 'locale', 'now', 'path']
-// The states a case may carry, as the README's `state` row documents them (checked below, so the
-// two cannot drift): those only script brings about, so the case is drawn after hydration, and
-// those a platform may know when it renders, so the case may still be the server's (SC-024).
-const SCRIPT_STATES = ['consentPanelOpen', 'drawerOpen']
-const RENDER_STATES = ['themeScheme']
-const scripted = (c) => SCRIPT_STATES.some((k) => Boolean(c.input.state?.[k]))
+// The states a case may carry, as the README's `state` row documents them (checked here, so the
+// two cannot drift). Each says how the element it concerns is drawn, and nothing of any other.
+const STATES = ['consentPanelOpen', 'drawerOpen', 'themeScheme']
 {
   const readme = path.join(dir, 'README.md')
   const row = existsSync(readme) ? readFileSync(readme, 'utf8').split('\n').find((l) => l.startsWith('| `state` |')) : undefined
   if (existsSync(readme) && row === undefined) fail('README.md: no `state` row in the fixtures\' input table')
   if (row !== undefined) {
     const documented = [...new Set([...row.matchAll(/`([a-z]+(?:[A-Z][a-z]*)+)`/g)].map((m) => m[1]))]
-    const known = [...SCRIPT_STATES, ...RENDER_STATES]
-    for (const k of documented) if (!known.includes(k)) fail(`README.md documents the state ${k}, which the gate classes neither as one only script brings about nor as one a platform may know when it renders`)
-    for (const k of known) if (!documented.includes(k)) fail(`README.md's \`state\` row does not document ${k}, a state the gate knows`)
+    for (const k of documented) if (!STATES.includes(k)) fail(`README.md documents the state ${k}, which the gate does not know`)
+    for (const k of STATES) if (!documented.includes(k)) fail(`README.md's \`state\` row does not document ${k}, a state the gate knows`)
   }
 }
 function checkOtherInput(c) {
@@ -289,7 +285,7 @@ function checkOtherInput(c) {
   if (ctx.locale !== undefined && !(typeof ctx.locale === 'string' && Intl.DateTimeFormat.supportedLocalesOf(ctx.locale).length)) fail(`${at}.json: context.locale must be a BCP 47 locale the platform knows, such as en-GB`)
   if (ctx.path !== undefined && !(typeof ctx.path === 'string' && ctx.path.startsWith('/'))) fail(`${at}.json: context.path is the page's path, starting with /`)
   if (input.state !== undefined && !isObject(input.state)) fail(`${at}.json: state is an object`)
-  for (const k of Object.keys(isObject(input.state) ? input.state : {})) if (!SCRIPT_STATES.includes(k) && !RENDER_STATES.includes(k)) fail(`${at}.json: state.${k} is not a documented state (${[...SCRIPT_STATES, ...RENDER_STATES].join(', ')})`)
+  for (const k of Object.keys(isObject(input.state) ? input.state : {})) if (!STATES.includes(k)) fail(`${at}.json: state.${k} is not a documented state (${STATES.join(', ')})`)
   if (input.state?.themeScheme !== undefined && !['light', 'dark'].includes(input.state.themeScheme)) fail(`${at}.json: state.themeScheme is light or dark, the scheme the platform knows when it renders`)
   // Rich text is given as stored in a view as in a section (SC-023): body headings are h3 and h4,
   // and the view's base level decides what each is drawn as.
@@ -677,9 +673,9 @@ const WHEN = {
   'site-footer:theme-toggle:aria-label': isButton,
   'site-footer:theme-toggle:aria-hidden': isSpan,
   'site-header:phone-icon:data-size': () => false,
-  // SC-024: the consent control is aria-disabled as the server draws it and not once script has
-  // run, which a state only script brings about shows. A known scheme does not.
-  'site-footer:consent-control:aria-disabled': (c) => !scripted(c),
+  // SC-024: the consent control is aria-disabled until script hydrates it, which the open consent
+  // panel alone shows. No other state says anything of this control.
+  'site-footer:consent-control:aria-disabled': (c) => c.input.state?.consentPanelOpen !== true,
   'search-form:input:value': (c) => filledText(c.input.document?.query),
   'site-footer:links:aria-label': (c, el) => !columnTitled(c, el),
   'site-footer:links:aria-labelledby': columnTitled,
