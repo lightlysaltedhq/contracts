@@ -43,13 +43,14 @@ export function slotOf(img, ancestors, outer, effective) {
   if (within('salt-related__list')) return { slot: 'card', band: true, columns: '3', fixedBand: 'full' }
   // The case study view (case-study-view.tsx): the featured image takes the aside slot on a default
   // band's measure when the article lays it beside its parts, and the content slot in the flow; a
-  // gallery image the content slot; a delivered service's card the unbanded card slot.
+  // gallery image the content slot; a delivered service's card the card slot in the full band at
+  // three columns, as the service view's related cards (SC-021).
   if (within('salt-case-study-view__media')) {
     const article = ancestors.find((a) => classesOf(a).includes('salt-case-study-view'))
     return article?.attrs.some(([n, v]) => n === 'data-media' && v === 'aside') ? { slot: 'aside', band: true, fixedBand: 'default' } : { slot: 'content', band: false }
   }
   if (within('salt-case-study-view__frame')) return { slot: 'content', band: false }
-  if (within('salt-case-study-view__services') && within('salt-showcase__media')) return { slot: 'card', band: false }
+  if (within('salt-case-study-view__services') && within('salt-showcase__media')) return { slot: 'card', band: true, columns: '3', fixedBand: 'full' }
   if (!within('salt-showcase__media')) return null
   if (section === 'collection-showcase') {
     const layout = effective('layout')
