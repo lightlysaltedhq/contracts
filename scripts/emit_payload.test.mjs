@@ -343,6 +343,12 @@ test('shared settings take the section\'s defaults and omissions, in a group nam
   assert.ok(field(block(list, 'hero').fields, 'settings').fields.some((f) => f.name === 'firstPageOnly'))
 })
 
+test('SC-023: the anchor\'s description states its rule with no WordPress function and no file path', () => {
+  const { description } = field(block(blocks(), 'hero').fields, 'settings.anchorId').admin
+  assert.match(description, /lower-case letters, digits and single hyphens/)
+  assert.doesNotMatch(description, /sanitize_|[a-z]+_[a-z]+\(|\.(json|php|ts)\b|markup\/|#/)
+})
+
 test('every enum name fits Postgres\'s 63 characters', () => {
   const names = []
   const walk = (fields) => { for (const f of fields) { if (f.enumName) names.push(f.enumName); if (f.fields) walk(f.fields) } }
