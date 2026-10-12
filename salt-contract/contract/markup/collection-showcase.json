@@ -483,6 +483,10 @@
     {
       "topic": "ruling",
       "text": "WordPress's testimonials slider becomes the carousel section with source testimonials, not a showcase layout."
+    },
+    {
+      "topic": "ruling",
+      "text": "Order (SC-023): a query in its automatic mode and default order draws the items in the collection's stored order, for team as for every other source. The contract names no sort. A fixture's collections give each source already in that order, and an adapter passes the items through as given, never sorting them; how an implementation orders a collection on a real site is its own."
     }
   ],
   "platforms": {

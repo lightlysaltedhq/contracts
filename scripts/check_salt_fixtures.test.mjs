@@ -488,6 +488,16 @@ test('chrome: the chrome never holds priority media, and a view must say whether
 test('chrome: a case under the wrong kind key fails', () => {
   expectFail(['post'], (io) => io.json('post/full.json', (d) => { d.chrome = d.view; delete d.view }), /unknown key chrome/)
 })
+test('SC-023: the team showcase draws its items in the order its input gives them', () => {
+  const at = path.join(pkg, 'fixtures', 'collection-showcase', 'grid-team-contacts')
+  const input = JSON.parse(readFileSync(`${at}.json`, 'utf8'))
+  assert.equal(input.values.source, 'team')
+  assert.deepEqual(input.values.query, { mode: 'automatic', count: 3 })
+  const drawn = [...readFileSync(`${at}.html`, 'utf8').matchAll(/<h3>([^<]*)<\/h3>/g)].map((m) => m[1])
+  assert.deepEqual(drawn, input.collections.team.map((item) => item.title))
+  // Not alphabetical by name or by title, so an adapter that sorts either way fails the case.
+  assert.notDeepEqual(drawn, [...drawn].sort())
+})
 test('SC-023: a view\'s rich text is given as stored, so the level it is drawn at is refused in the input', () => {
   expectFail(['service'], (io) => io.json('service/full.json', (d) => { d.document.intro = d.document.intro.replace(/h3>/g, 'h2>') }),
     /service\/full\.json document\.intro holds <h2>; rich text is given as stored/)
