@@ -297,7 +297,11 @@ test('an icon\'s fill and stroke are not compared, every other attribute of it i
   })
   try {
     const r = await run(['--platform', 'broken', '--adapter', adapter.command, '--sections', 'hero,site-footer', '--partial'])
+    assert.equal(r.code, 1, r.out)
     const footer = r.report.files.find((f) => f.id === 'site-footer')
+    // The filled mark is no failure: its case is among those that passed.
+    assert.equal(footer.fixtures.passed, footer.fixtures.total - 2)
+    assert.ok(!footer.fixtures.failures.some((f) => f.case === 'columns-socials-copyright'))
     assert.deepEqual(footer.fixtures.failures.map((f) => [f.case, f.difference, f.name, f.expected, f.found]), [
       ['display-preferences', 'attribute', 'data-icon', 'instagram', 'globe'],
       ['theme-toggle-button', 'attribute', 'stroke-width', null, '2'],

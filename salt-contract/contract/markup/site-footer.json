@@ -413,7 +413,7 @@
   },
   "script": {
     "kind": "progressive",
-    "withoutScript": "Footer links and text; the consent control is drawn disabled.",
+    "withoutScript": "Footer links and text; the consent control is drawn aria-disabled=\"true\".",
     "withScript": "The consent preferences dialog and the theme toggle."
   },
   "uses": [

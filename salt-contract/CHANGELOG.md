@@ -85,8 +85,10 @@ test, applied through section 2's table, where the stricter row wins.
   opens the panel. The gate reads the case's `state`: the attribute is refused where
   `consentPanelOpen` is true and required everywhere else. Each state says how the element it
   concerns is drawn, so `drawerOpen` and `themeScheme` say nothing of this control. The gate
-  draws each panel's dialog if and only if its state says it is open (`consentPanelOpen`,
-  `drawerOpen`), and fails when the states it knows and the README's `state` row disagree. An icon's `fill` and `stroke` are artwork,
+  requires each panel's dialog if and only if its state says it is open (`consentPanelOpen`,
+  `drawerOpen`). It refuses a `state` that is no object, a state key the README's `state` row
+  does not document and a panel's state that is not `true` or `false`, and fails when the states
+  it knows and that row disagree. An icon's `fill` and `stroke` are artwork,
   like what is inside it (SC-007): the normaliser drops both from `svg.salt-icon`, so a filled
   mark passes against a stroked fixture, while the svg's every other attribute still compares and
   the gate still holds each of the two to the values `markup/icon.json` allows.
