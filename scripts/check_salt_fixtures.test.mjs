@@ -488,6 +488,10 @@ test('chrome: the chrome never holds priority media, and a view must say whether
 test('chrome: a case under the wrong kind key fails', () => {
   expectFail(['post'], (io) => io.json('post/full.json', (d) => { d.chrome = d.view; delete d.view }), /unknown key chrome/)
 })
+test('SC-023: a view\'s rich text is given as stored, so the level it is drawn at is refused in the input', () => {
+  expectFail(['service'], (io) => io.json('service/full.json', (d) => { d.document.intro = d.document.intro.replace(/h3>/g, 'h2>') }),
+    /service\/full\.json document\.intro holds <h2>; rich text is given as stored/)
+})
 test('chrome: a view with a second h1 fails, and so does an h1 in the chrome', () => {
   // Inside content the markup leaves open (a nested section's block, the drawer's panel), so the
   // heading rule itself is what fails.

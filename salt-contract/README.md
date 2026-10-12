@@ -314,7 +314,9 @@ Conventions, so that every case is deterministic:
   newTab }` with `document` a key of `documents`, and a collection query stores `{ mode, categories,
   items, order, count }`. Rich text is an HTML string using only the field's allowed elements: the
   fixtures' interchange form, which each platform's adapter turns into its own (Lexical, the
-  WordPress editor's HTML).
+  WordPress editor's HTML). A view's rich text (a post's `body`, a service's `intro`) is given the
+  same way (SC-023): its headings are the stored `h3` and `h4`, never the level the view draws
+  them at, so a stored `h3` under a view's `h1` is expected as `h2`.
 - **Images.** Each image declares its slot's default `sizes` for its section's band and the
   `srcset` the candidate rule gives for them, both from `contract/image-sizes.json` (SC-016),
   capped at the upload's intrinsic width (the record's `width`, listed itself when it is no

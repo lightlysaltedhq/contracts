@@ -272,6 +272,17 @@ function checkOtherInput(c) {
   if (ctx.locale !== undefined && !(typeof ctx.locale === 'string' && Intl.DateTimeFormat.supportedLocalesOf(ctx.locale).length)) fail(`${at}.json: context.locale must be a BCP 47 locale the platform knows, such as en-GB`)
   if (ctx.path !== undefined && !(typeof ctx.path === 'string' && ctx.path.startsWith('/'))) fail(`${at}.json: context.path is the page's path, starting with /`)
   if (input.state?.themeScheme !== undefined && !['light', 'dark'].includes(input.state.themeScheme)) fail(`${at}.json: state.themeScheme is light or dark, the scheme the platform knows when it renders`)
+  // Rich text is given as stored in a view as in a section (SC-023): body headings are h3 and h4,
+  // and the view's base level decides what each is drawn as.
+  if (kind === 'view') {
+    const visit = (v, p) => {
+      if (typeof v === 'string') {
+        const outside = descendants(parse(v)).find((el) => /^h[1-6]$/.test(el.name) && !['h3', 'h4'].includes(el.name))
+        if (outside) fail(`${at}.json ${p} holds <${outside.name}>; rich text is given as stored, its headings h3 and h4, whatever level they are drawn at (SC-023)`)
+      } else if (v && typeof v === 'object') for (const [k, x] of Object.entries(v)) visit(x, `${p}.${k}`)
+    }
+    visit(input.document, 'document')
+  }
   checkSiteAndMedia(c)
   c.anchor = null
   // A section nested in a view or a page is described by the case: document.listing (the archive's
