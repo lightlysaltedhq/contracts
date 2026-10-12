@@ -4,7 +4,7 @@ Newest first. Dates are DD/MM/YYYY. What each part of a version means, and how a
 announced and migrated, is in `RELEASE-POLICY.md`. Decisions cited as `SC-nnn` are in Lightly
 Salted's decision log for Product Salt.
 
-## 1.0.0 (candidate `1.0.0-rc.1`, prepared 10/10/2026; not published, dated when tagged)
+## 1.0.0 (candidate `1.0.0-rc.2`, prepared 12/10/2026; not published, dated when tagged)
 
 **Semver call: MAJOR, the first release of the contract.** No earlier version was published, so no
 implementation conformed to one. Adopting it is still a migration for existing sites, because the
@@ -22,6 +22,21 @@ test, applied through section 2's table, where the stricter row wins.
   in one platform-neutral form, with each platform's former name and stored value (`formerly`) and
   what it must change (`owes`). The Payload and ACF emitters (`./emit/payload`, `./emit/acf`)
   generate each platform's half from them, byte-stable, with a drift check for the consumer.
+- What the Payload drift check leaves to the consumer (SC-023). `PLATFORM_ADDITIONS` in
+  `emit/payload.mjs` names the keys a consumer may add to a field: `admin.components`,
+  `admin.initCollapsed`, `admin.layout` and `hooks`. `checkPayloadSnapshot` leaves out exactly
+  those, on a field at any depth, and compares everything else byte for byte, so any other added
+  key and any change to a generated one still fails. Admin conditions are not compared in 1.0.0:
+  a condition is a function and is in neither snapshot, so the check reads only the clauses a
+  field records under `custom.salt.condition`. A comparison may arrive in a later minor.
+- Postgres enum types, one per vocabulary (SC-023, after Salt for Next.js's BD-035). Selects that
+  offer the same values share one type, named in `VOCABULARIES` in `emit/payload.mjs`:
+  `enum_grid_columns`, `enum_button_style`, `enum_alignment` and `enum_media_side`. The site's
+  icons keep one type per select. Where Salt for Next.js 0.11.0 named a select's type otherwise,
+  the field records the former name as `platforms.nextjs.formerlyEnum`, a new optional key of the
+  field schema's platform note, keyed by part for a collection-query.
+- The `settings.anchorId` description states the slug rule in plain words, with no WordPress
+  function name and no file path (SC-023). The rule itself is unchanged, in `markup/section.json`.
 - Markup (`./markup/*`): element order, `salt-*` classes, data attributes, ids, heading rules,
   zero states and priority media for every section, component and view, and the page skeleton.
 - The shared stylesheets (`./styles/*`): base, sections, primitives, blocks, chrome and views, and
@@ -36,6 +51,17 @@ test, applied through section 2's table, where the stricter row wins.
   header and footer, the post, service, case-study, archive, search and not-found views, and the
   page (SC-018, SC-019, SC-021); and the normaliser both sides are compared through
   (`./normalise`).
+- Three fixture conventions the first conformance run settled (SC-023). Rich text is given in its
+  stored form in a view as in a section: `service/full`'s intro holds the stored `h3`, drawn as
+  `h2`, and the gate refuses any other heading level in a view's document. A collection is drawn
+  in its stored order: a case's `collections` are already ordered, an adapter passes them through,
+  and the contract names no sort (`collection-showcase/grid-team-contacts`). An archive view's
+  pagination is compared without the shape of its addresses, which is routing and stays native
+  (SC-003): the runner reads both sides of an archive's cases through `archiveOf` in
+  `normalise.mjs`, which writes each pagination link's `href` as `{{salt:page-href}}`, as
+  `archive/topic`'s expected HTML does; which links are drawn, their order, labels, `rel`,
+  `data-step` and `aria-current` still compare. A listing section's and the search view's
+  pagination compare whole.
 - The case-study view has fixtures and is required of every implementation (SC-021).
   `fixtures/case-study/` holds four cases (`full`, `aside`, `band` and `minimal`), `case-study`
   joins `REQUIRED_FILES`, and a full conformance run refuses to declare it not shipped. The
@@ -72,7 +98,13 @@ moves from is recorded per item instead, and the platforms' releases carry the m
   changes is listed under `formerly` in `contract/sections.json` and `contract/fields/`, and each
   needs a slug-migration entry (FLEET07).
 - Salt for Next.js 0.11.0 sites: block slugs and option values that change are listed the same
-  way; the Payload migration renames stored blocks and values.
+  way; the Payload migration renames stored blocks and values. It renames the Postgres enum types
+  too (SC-023): each select whose type had another name records it as `formerlyEnum`. The types
+  that fold into one (the three button styles into `enum_button_style`, the two media sides into
+  `enum_media_side`) move their columns to the shared type; they are not a plain rename. A select
+  0.11.0 left to Payload's derived type name (the two alignments, the three icons, the showcase's
+  and the carousel's source) has no fixed former name to record, so the migration reads it from
+  the site's schema.
 - Both: render the contract's markup and serve `styles/salt.css` byte for byte, then run
   `salt-conformance` in CI. What each platform must change is its `owes` in the contract files.
 

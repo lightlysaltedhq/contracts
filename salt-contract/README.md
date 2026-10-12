@@ -72,9 +72,11 @@ receives and the choices on offer.
 
 ## Status
 
-`1.0.0-rc.1` is the release candidate for `1.0.0`: private, never on the registry, held until at
-least one implementation has run `salt-conformance` against it, whose report names
-`1.0.0-rc.1` (SC-018, SC-020; `RELEASE-POLICY.md` section 5). `1.0.0` is the first release, staged
+`1.0.0-rc.2` is the release candidate for `1.0.0`: private, never on the registry, held until an
+implementation's run of `salt-conformance` against it conforms in full, in a report that names
+`1.0.0-rc.2` (SC-017, SC-018, SC-020, SC-022; `RELEASE-POLICY.md` section 5). It follows
+`1.0.0-rc.1`, whose first run raised eight questions about the contract itself; the owner's
+rulings on them (SC-023) changed contract files, which makes a new candidate and needs a new run. `1.0.0` is the first release, staged
 from CI by npm trusted publishing when the owner pushes the `salt-contract-v1.0.0` tag, and
 approved by the owner. See `RELEASE-POLICY.md` for what each part
 of a version means.
@@ -514,7 +516,7 @@ report).
 ```json
 {
   "format": "salt-conformance/1",
-  "contract": { "package": "@lightlysaltedhq/salt-contract", "version": "1.0.0-rc.1" },
+  "contract": { "package": "@lightlysaltedhq/salt-contract", "version": "1.0.0-rc.2" },
   "platform": "nextjs",
   "implementation": { "version": "0.4.0" },
   "adapter": { "kind": "command", "target": "node scripts/salt-adapter.mjs" },
@@ -523,7 +525,7 @@ report).
   "summary": { "pass": 15, "fail": 1, "incomplete": 0, "notShipped": 1 },
   "fields": { "platform": "payload", "snapshot": "…", "options": "…", "problems": [] },
   "problems": [],
-  "stylesheets": { "served": "…", "bundle": "styles/salt.css", "contract": "1.0.0-rc.1", "ok": true, "status": "identical" },
+  "stylesheets": { "served": "…", "bundle": "styles/salt.css", "contract": "1.0.0-rc.2", "ok": true, "status": "identical" },
   "sections": [
     {
       "id": "hero",
