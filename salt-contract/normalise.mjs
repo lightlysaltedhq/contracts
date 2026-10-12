@@ -26,7 +26,9 @@
 // 7. Comments are dropped (React writes `<!-- -->` between adjacent text nodes), and the text
 //    either side of one joins up.
 // 8. Icon artwork. The children of svg.salt-icon are dropped: the glyph names are the contract and
-//    the artwork stays each platform's own (SC-007). The svg's own attributes still compare.
+//    the artwork stays each platform's own (SC-007). So are its fill and stroke, which say only
+//    whether a mark is filled or drawn in outline (SC-024). Every other attribute of the svg
+//    still compares, and fill and stroke compare on any other svg.
 //
 // 9. Per-request values in the contact form (SC-016), and only these, become declared
 //    placeholders: form.salt-contact__form's action ({{salt:form-action}}, platform-native under
@@ -219,7 +221,11 @@ function dropComments(el) {
 }
 
 function dropIconArtwork(el) {
-  if (el.name === 'svg' && hasClass(el, 'salt-icon')) { el.children = []; return }
+  if (el.name === 'svg' && hasClass(el, 'salt-icon')) {
+    el.children = []
+    el.attrs = el.attrs.filter(([n]) => n !== 'fill' && n !== 'stroke')
+    return
+  }
   for (const c of el.children) if (c.type === 'element') dropIconArtwork(c)
 }
 

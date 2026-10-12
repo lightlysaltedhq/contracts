@@ -372,8 +372,13 @@ platform: attribute order, class order, white space a browser does not draw (at 
 and between the children of a flex or grid container, a list `scripts/salt_normalise_containers.mjs`
 derives from `styles/`; between two inline elements in normal flow a run is one space and counts),
 boolean-attribute forms, character-reference forms, comments, the upload host in `src` and
-`srcset`, and the artwork inside `svg.salt-icon` (the glyph names are the contract, the artwork is
-each platform's, SC-007), and in the contact form, exactly four per-request values, which the
+`srcset`, and the artwork of `svg.salt-icon`: what is inside it, and its `fill` and `stroke`, so a
+filled mark and an outlined one agree (the glyph names are the contract, the artwork is each
+platform's; SC-007, SC-024). The svg's every other attribute compares, `stroke-width` and
+`stroke-linecap` included, which belong inside the artwork; `fill` and `stroke` compare on any
+other svg; and the fixtures gate still holds each to the two values `contract/markup/icon.json`
+allows. A framework's own attributes are not removed: `next/image`'s `data-nimg` and inline
+`color:transparent` differ (SC-024). In the contact form, exactly four per-request values, which the
 expected HTML writes as declared placeholders: the form's `action` as `{{salt:form-action}}`, the
 hidden `formToken` and `challengeToken` values as `{{salt:form-token}}` and
 `{{salt:challenge-token}}`, and the challenge question (its label's text) as

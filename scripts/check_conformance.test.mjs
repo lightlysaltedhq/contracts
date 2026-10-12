@@ -288,6 +288,25 @@ test('a framework\'s own attributes on an image fail the case: the runner masks 
   }
 })
 
+test('an icon\'s fill and stroke are not compared, every other attribute of it is (SC-024)', async () => {
+  const STROKED = 'aria-label="LinkedIn" fill="none" stroke="currentColor"'
+  const adapter = brokenAdapter({
+    'site-footer/columns-socials-copyright': { from: STROKED, to: 'aria-label="LinkedIn" fill="currentColor" stroke="none"' },
+    'site-footer/theme-toggle-button': { from: 'fill="none" stroke="currentColor"', to: 'fill="none" stroke="currentColor" stroke-width="2"' },
+    'site-footer/display-preferences': { from: 'data-icon="instagram"', to: 'data-icon="globe"' },
+  })
+  try {
+    const r = await run(['--platform', 'broken', '--adapter', adapter.command, '--sections', 'hero,site-footer', '--partial'])
+    const footer = r.report.files.find((f) => f.id === 'site-footer')
+    assert.deepEqual(footer.fixtures.failures.map((f) => [f.case, f.difference, f.name, f.expected, f.found]), [
+      ['display-preferences', 'attribute', 'data-icon', 'instagram', 'globe'],
+      ['theme-toggle-button', 'attribute', 'stroke-width', null, '2'],
+    ])
+  } finally {
+    rmSync(adapter.dir, { recursive: true, force: true })
+  }
+})
+
 test('an archive\'s and a search\'s pagination addresses are not compared, their structure is, and a listing section\'s still are (SC-023)', async () => {
   const fixture = (rel) => readFileSync(path.join(pkg, 'fixtures', rel), 'utf8')
   const archive = fixture('archive/topic.html').replaceAll('{{salt:page-href}}', '/blog/topics/soil?page=2')

@@ -26,8 +26,8 @@
 //    source (SC-007); at most one img is the priority image, which is never lazy, every other img
 //    is lazy, and the priority image is the one the plan and the markup's priorityMedia choose.
 // 4. THE NORMALISER (normalise.mjs). It is idempotent on every expected HTML, and removing or
-//    changing any one attribute of any element (outside icon artwork, which it drops by design)
-//    changes its output.
+//    changing any one attribute of any element (outside icon artwork, which it drops by design:
+//    what is inside an icon, and its fill and stroke) changes its output.
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
 import path from 'node:path'
 import { CHROME, REQUIRED_FILES, fileKind } from '../salt-contract/conformance.mjs'
@@ -1291,6 +1291,10 @@ const declaredMask = (el, name, insideForm) =>
   (name === 'action' && el.name === 'form' && classesOf(el).includes('salt-contact__form')) ||
   (insideForm && name === 'value' && el.name === 'input' && attr(el, 'type') === 'hidden' && ['formToken', 'challengeToken'].includes(attr(el, 'name')))
 
+// An icon's fill and stroke are artwork, dropped by design (SC-024); the markup check above still
+// holds each to the values icon.json allows. Held here as the form's masks are.
+const declaredArtwork = (el, name) => el.name === 'svg' && classesOf(el).includes('salt-icon') && (name === 'fill' || name === 'stroke')
+
 function checkNormaliser(c) {
   if (!c.renders) return
   const canonical = normalise(c.html)
@@ -1308,6 +1312,7 @@ function checkNormaliser(c) {
     for (let k = 0; k < el.attrs.length; k++) {
       const saved = el.attrs
       const [name, value] = saved[k]
+      if (declaredArtwork(el, name)) continue
       // The contact form's declared per-request values are masked by design (SC-016): another
       // value is no difference, but a missing or empty one is. The list is the contract's, held
       // here rather than asked of the normaliser, so a normaliser that masks more is caught.

@@ -945,6 +945,20 @@ test('normaliser: one that ignores attribute values fails the mutation check', (
     io.write('normalise.mjs', src.replace("if (name === 'src') return stripOrigin(value.trim())", "if (name === 'src' || name === 'alt') return name === 'alt' ? '' : stripOrigin(value.trim())"))
   }, /changing alt on <img\.salt-hero__image> does not change normalise's output/)
 })
+test('normaliser: an icon\'s fill and stroke are the only attributes of it left out of the mutation check (SC-024)', () => {
+  expectFail(['features'], (io) => {
+    const src = readFileSync(path.join(pkg, 'normalise.mjs'), 'utf8')
+    io.write('normalise.mjs', src.replace("n !== 'fill' && n !== 'stroke'", "n !== 'fill' && n !== 'stroke' && n !== 'data-size'"))
+  }, /removing data-size on <svg\.salt-icon> does not change normalise's output/)
+  // The gate still holds each to the two values icon.json allows, and requires both.
+  const ICON = 'features/many-items-linked.html'
+  expectFail(['features'], (io) => io.html(ICON, 'fill="none" stroke="currentColor"', 'fill="red" stroke="currentColor"'), /<svg\.salt-icon> fill="red" is not one of none, currentColor/)
+  expectFail(['features'], (io) => io.html(ICON, 'fill="none" stroke="currentColor"', 'fill="none" stroke="2"'), /<svg\.salt-icon> stroke="2" is not one of currentColor, none/)
+  expectFail(['features'], (io) => io.html(ICON, ' fill="none" stroke="currentColor"', ' fill="none"'), /<svg\.salt-icon> lacks stroke, which the markup requires/)
+  expectFail(['features'], (io) => io.html(ICON, ' fill="none" stroke="currentColor"', ' fill="none" stroke="currentColor" stroke-width="2"'), /<svg\.salt-icon> carries stroke-width, which the markup does not declare/)
+  const dir = copy(['features'], (io) => io.html(ICON, 'fill="none" stroke="currentColor"', 'fill="currentColor" stroke="none"'))
+  try { assert.doesNotMatch(run(dir).out, /fixtures\/features\//, run(dir).out) } finally { rmSync(dir, { recursive: true, force: true }) }
+})
 test('normaliser: one that is not idempotent fails', () => {
   expectFail(HERO, (io) => {
     const src = readFileSync(path.join(pkg, 'normalise.mjs'), 'utf8')
@@ -1042,6 +1056,29 @@ test('normalise: icon artwork does not count, the icon and its name do', () => {
   same('<svg class="salt-icon" data-icon="check"><path d="M1 2"/></svg>', '<svg class="salt-icon" data-icon="check"><path d="M9 9z"></path><path d="M0 0"></path></svg>')
   differ('<svg class="salt-icon" data-icon="check"></svg>', '<svg class="salt-icon" data-icon="star"></svg>')
   differ('<svg class="other"><path d="M1 2"/></svg>', '<svg class="other"><path d="M2 2"/></svg>')
+})
+test('normalise: an icon\'s fill and stroke are artwork, and nothing else on it is (SC-024)', () => {
+  const icon = (attrs) => `<svg ${Object.entries({ class: 'salt-icon', 'data-icon': 'linkedin', 'data-size': 'md', viewBox: '0 0 24 24', width: '24', height: '24',
+    focusable: 'false', role: 'img', 'aria-label': 'LinkedIn', fill: 'none', stroke: 'currentColor', ...attrs }).filter(([, v]) => v !== null).map(([n, v]) => `${n}="${v}"`).join(' ')}></svg>`
+  // A filled mark against the fixture's stroked one, in either direction, and with either left out.
+  same(icon({}), icon({ fill: 'currentColor', stroke: 'none' }))
+  same(icon({ fill: 'currentColor', stroke: 'none' }), icon({}))
+  same(icon({}), icon({ fill: null, stroke: null }))
+  // What the contract fixes on the svg still compares.
+  for (const [name, value] of Object.entries({ 'data-icon': 'globe', class: 'salt-icon salt-icon--brand', 'data-size': 'sm', role: 'presentation', 'aria-label': 'Linked In',
+    viewBox: '0 0 16 16', width: '16', height: '16', focusable: 'true' })) {
+    differ(icon({}), icon({ [name]: value }))
+    differ(icon({}), icon({ [name]: null }))
+  }
+  differ(icon({ role: null, 'aria-label': null, 'aria-hidden': 'true' }), icon({ role: null, 'aria-label': null, 'aria-hidden': 'false' }))
+  differ(icon({ role: null, 'aria-label': null, 'aria-hidden': 'true' }), icon({ role: null, 'aria-label': null }))
+  // So does any attribute the markup does not name: the rest of a stroke belongs inside the artwork.
+  for (const extra of ['stroke-width', 'stroke-linecap', 'stroke-linejoin', 'fill-rule', 'style']) differ(icon({}), icon({ [extra]: 'x' }))
+  // On an svg that is no icon, fill and stroke compare.
+  differ('<svg class="other" fill="none"></svg>', '<svg class="other" fill="currentColor"></svg>')
+  differ('<svg class="other" stroke="currentColor"></svg>', '<svg class="other" stroke="none"></svg>')
+  differ('<svg fill="none"></svg>', '<svg></svg>')
+  differ('<span class="salt-icon" fill="none"></span>', '<span class="salt-icon" fill="currentColor"></span>')
 })
 test('normalise: ids are compared as written (SC-012)', () => {
   differ('<h2 id="faq__heading">x</h2>', '<h2 id="faq-heading">x</h2>')
