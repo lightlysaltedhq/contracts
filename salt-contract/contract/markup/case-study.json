@@ -589,7 +589,7 @@
     "nextjs": {
       "owes": [
         "Name its four sections: the ids case-study__challenge-heading, case-study__solution-heading, case-study__gallery-heading and case-study__services-heading on their h2s, and aria-labelledby on each section (section#labelled-by, SC-012).",
-        "A delivered service's card image declares the card slot at three columns (contract/image-sizes.json), the grid it is drawn in: the full band in the flow, and the default band in the aside, where primitives.css confines the services to the measure; case-study-view.tsx passes the unbanded card slot, which is a carousel slide's."
+        "A delivered service's card image declares its slot from contract/image-sizes.json, at three columns, the grid it is drawn in: the card slot in the full band in the flow, and in the aside the aside-card slot, the default band from 64rem, where primitives.css confines the services to the measure, and the full band below it; case-study-view.tsx passes the unbanded card slot, which is a carousel slide's."
       ]
     }
   },

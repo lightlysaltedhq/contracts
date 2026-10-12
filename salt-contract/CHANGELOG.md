@@ -48,8 +48,9 @@ test, applied through section 2's table, where the stricter row wins.
   into a fixture's input, and the gate ties it to the HTML: `data-media`, the aside's row count
   and its measure (a rem length, 64rem for a default band) follow the input. The case-study
   image placements in `image-sizes.json` name their img by selector; a delivered service's card
-  takes the card slot at three columns, in the full band in the flow and the default band in the
-  aside. Salt for Next.js owes naming the view's four sections and that card slot; Salt for
+  takes the card slot at three columns in the full band in the flow, and in the aside the new
+  `aside-card` slot: the default band from 64rem, where the services keep to the measure, and the
+  full band below. Salt for Next.js owes naming the view's four sections and that card slot; Salt for
   WordPress owes the markup, and an ACF options page for the band and the aside layout.
 - The conformance runner (`./conformance`, bin `salt-conformance`): fixtures, field snapshots,
   class vocabulary and the served stylesheet, reported as `conformance.json` (format
