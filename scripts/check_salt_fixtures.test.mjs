@@ -516,6 +516,7 @@ test('SC-023: archiveOf hides the shape of a pagination address and nothing else
   breaks('rel dropped', ' rel="next"', '')
   breaks('a link with no address', ' href="/blog/topics/soil" aria-label="Page 1"', ' aria-label="Page 1"')
   breaks('a link with an empty address', 'href="/blog/topics/soil" aria-label="Page 1"', 'href="" aria-label="Page 1"')
+  breaks('a link whose address is white space', 'href="/blog/topics/soil" aria-label="Page 1"', 'href=" \t" aria-label="Page 1"')
   breaks('a span where a link is drawn', '<a class="salt-pagination__link" href="/blog/topics/soil" aria-label="Page 1" aria-current="page">1</a>', '<span class="salt-pagination__link" aria-current="page">1</span>')
   // A card's link is not a pagination link, so its address still compares.
   breaks('a card address changed', 'href="/journal/catching-rain/"', 'href="/blog/catching-rain"')

@@ -402,14 +402,14 @@ export function compare(expected, actual) {
  * that has one becomes {{salt:page-href}}, which the expected HTML writes in its place. Routing is
  * each platform's (SC-003), so the shape of a page's address is not compared; that each link is
  * there and has an address, their order, their labels, the gaps, rel, data-step and aria-current
- * all still are. A link with no href, or an empty one, is left as it is and differs. Returns HTML
+ * all still are. A link with no href, or one empty or all white space, is left as it is and differs. Returns HTML
  * for normalise() or compare().
  */
 export function archiveOf(html) {
   const root = parse(String(html))
   const mask = (el) => {
     if (el.name === 'a' && hasClass(el, 'salt-pagination__link')) {
-      el.attrs = el.attrs.map(([n, v]) => (n === 'href' && v !== '' ? [n, PLACEHOLDERS.pageHref] : [n, v]))
+      el.attrs = el.attrs.map(([n, v]) => (n === 'href' && v.trim() !== '' ? [n, PLACEHOLDERS.pageHref] : [n, v]))
     }
     for (const c of el.children) if (c.type === 'element') mask(c)
   }

@@ -376,7 +376,7 @@ expected HTML writes that placeholder. An archive's page addresses are its platf
 (SC-003), so their shape is not compared: `/journal/topic/soil/page/2/` and `/blog/topics/soil?page=2`
 both pass. Everything else about the pagination is: which links are drawn and in what order, the
 gaps, each link's label, `rel`, `data-step` and `aria-current`, and that each link has an address
-at all (one with no `href`, or an empty one, differs). The pagination a listing section or the
+at all (one with no `href`, or one empty or all white space, differs). The pagination a listing section or the
 search view draws is compared whole, addresses included.
 
 ### The adapter protocol
