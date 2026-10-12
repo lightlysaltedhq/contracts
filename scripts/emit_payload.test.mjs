@@ -456,6 +456,28 @@ test('SC-023: each former enum name the contract records is on a select the emit
   assert.equal(emitted.get('hero.settings.backgroundImage.fit').enumName, 'enum_section_background_image_fit')
 })
 
+test('a former enum name is recorded only for Salt for Next.js, on a select or a collection-query (review of #17, 7)', () => {
+  const schemaFile = path.join(path.dirname(emitter), '..', 'schema', 'field-definition.schema.json')
+  const validate = new Ajv2020({ strict: false }).compile(JSON.parse(readFileSync(schemaFile, 'utf8')))
+  const options = [{ value: 'a', label: 'A' }, { value: 'b', label: 'B' }]
+  const doc = (field) => ({ $schema: '../../schema/field-definition.schema.json', version: '0.1.0', section: 'probe', shared: { id: 'section-settings' }, fields: [field] })
+  const select = (platforms) => doc({ name: 'style', type: 'select', label: 'Style', options, platforms })
+  const query = (platforms) => doc({ name: 'query', type: 'collection-query', label: 'Query', source: 'faqs', platforms })
+  assert.equal(validate(select({ nextjs: { formerlyEnum: 'enum_old' } })), true)
+  assert.equal(validate(select({ nextjs: { formerlyEnum: ['enum_old', 'enum_older'] } })), true)
+  assert.equal(validate(query({ nextjs: { formerlyEnum: { mode: ['enum_old', 'enum_older'], order: 'enum_sort' } } })), true)
+  // Not WordPress's to record, though its other notes stand.
+  assert.equal(validate(select({ wordpress: { formerly: 'style_old' } })), true)
+  assert.equal(validate(select({ wordpress: { formerlyEnum: 'enum_old' } })), false)
+  assert.equal(validate(select({ nextjs: { formerlyEnum: 'enum_old' }, wordpress: { formerlyEnum: 'enum_old' } })), false)
+  // Not on a field with no enum type, and each kind in its own form.
+  assert.equal(validate(doc({ name: 'title', type: 'text', label: 'Title', platforms: { nextjs: { formerlyEnum: 'enum_old' } } })), false)
+  assert.equal(validate(doc({ name: 'on', type: 'boolean', label: 'On', platforms: { nextjs: { formerlyEnum: 'enum_old' } } })), false)
+  assert.equal(validate(select({ nextjs: { formerlyEnum: { mode: 'enum_old' } } })), false)
+  assert.equal(validate(query({ nextjs: { formerlyEnum: 'enum_old' } })), false)
+  assert.equal(validate(query({ nextjs: { formerlyEnum: { sortBy: 'enum_sort' } } })), false)
+})
+
 test('R8: a stored null is no value, and only a never-set sibling takes its default', () => {
   const bg = field(block(blocks(), 'hero').fields, 'settings.backgroundImage').fields
   const strength = field(bg, 'scrimStrength') // image filled, scrim equals true; scrim defaults to true
