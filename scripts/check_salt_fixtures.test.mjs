@@ -5,7 +5,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { execFileSync } from 'node:child_process'
-import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { cpSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -467,7 +467,7 @@ test('arrows: only a section\'s call to action takes the site\'s arrow', () => {
 const HEADER = 'site-header/menu-submenus-phone-cta-sticky'
 const SWAPS = 'site-header/light-and-dark-logo'
 test('chrome: the chrome and the views SC-018 names are required', () => {
-  expectFail(HERO, () => {}, /site-header has no fixtures \(fixtures\/site-header\/<case>\.json and \.html\), which SC-018 requires/)
+  expectFail(HERO, () => {}, /site-header has no fixtures \(fixtures\/site-header\/<case>\.json and \.html\), which SC-018 and SC-021 require/)
   expectFail(HERO, () => {}, /not-found has no fixtures/)
 })
 test('chrome: a chrome or view case passes its own checks', () => {
@@ -602,12 +602,38 @@ test('chrome: the gate requires exactly the runner\'s list of chrome and view fi
   const { REQUIRED_FILES } = await import('../salt-contract/conformance.mjs')
   const dir = copy(HERO)
   try {
-    const missing = [...run(dir).out.matchAll(/✗ ([a-z-]+) has no fixtures \(fixtures\/[a-z-]+\/<case>\.json and \.html\), which SC-018 requires/g)].map((m) => m[1])
+    const missing = [...run(dir).out.matchAll(/✗ ([a-z-]+) has no fixtures \(fixtures\/[a-z-]+\/<case>\.json and \.html\), which SC-018 and SC-021 require/g)].map((m) => m[1])
     assert.deepEqual(missing.sort(), [...REQUIRED_FILES].sort())
   } finally { rmSync(dir, { recursive: true, force: true }) }
   const src = readFileSync(script, 'utf8')
   assert.match(src, /import \{[^}]*\bREQUIRED_FILES\b[^}]*\} from '\.\.\/salt-contract\/conformance\.mjs'/, 'the gate imports the runner\'s list')
   assert.doesNotMatch(src, /\[[^\]]*'not-found'[^\]]*\]/, 'the gate keeps no list of its own')
+})
+
+// The case study view (SC-021).
+test('sc-021: the case study view is required: the package without its fixtures fails, naming it alone', () => {
+  const others = readdirSync(path.join(pkg, 'fixtures')).filter((s) => s !== 'case-study')
+  const dir = copy(others)
+  try {
+    const r = run(dir)
+    assert.notEqual(r.code, 0, r.out)
+    const missing = [...r.out.matchAll(/✗ ([a-z-]+) has no fixtures/g)].map((m) => m[1])
+    assert.deepEqual(missing, ['case-study'], r.out)
+  } finally { rmSync(dir, { recursive: true, force: true }) }
+})
+test('sc-021: the case study cases pass their own checks', () => {
+  const dir = copy(['case-study'])
+  try { assert.doesNotMatch(run(dir).out, /fixtures\/case-study\//, run(dir).out) } finally { rmSync(dir, { recursive: true, force: true }) }
+})
+test('sc-021: the featured image takes the aside slot in the aside layout and the content slot in the flow', () => {
+  expectFail(['case-study'], (io) => io.html('case-study/aside.html', 'sizes="(min-width: 64rem) 23.83rem, 100vw"', 'sizes="(min-width: 64rem) 60rem, 100vw"'),
+    /fixtures\/case-study\/aside\.html: <img> sizes="\(min-width: 64rem\) 60rem, 100vw"; its slot \(aside, band default\) gives "\(min-width: 64rem\) 23\.83rem, 100vw"/)
+  expectFail(['case-study'], (io) => io.html('case-study/full.html', '<article class="salt-case-study-view">', '<article class="salt-case-study-view" data-media="aside" style="--salt-case-study-view-aside-rows: 4; --salt-case-study-view-measure: var(--container-5xl)">'),
+    /fixtures\/case-study\/full\.html: <img> sizes="\(min-width: 64rem\) 60rem, 100vw"; its slot \(aside, band default\)/)
+})
+test('sc-021: the featured image is the priority image, and site.caseStudy is { media }, flow or aside', () => {
+  expectFail(['case-study'], (io) => io.html('case-study/full.html', 'fetchpriority="high" decoding="async"', 'loading="lazy" decoding="async"'), /fixtures\/case-study\/full\.html: the priority image must be in case-study's image/)
+  expectFail(['case-study'], (io) => io.json('case-study/aside.json', (d) => { d.site.caseStudy.media = 'side' }), /site\.caseStudy is \{ media \}, flow or aside/)
 })
 
 // SC-019's markup gaps, closed.

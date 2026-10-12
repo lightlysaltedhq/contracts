@@ -67,7 +67,7 @@ test('the reference adapter conforms: all four checks run and pass for every sec
   assert.deepEqual(bySection, { pass: r.report.sections.length, fail: 0, incomplete: 0, notShipped: 0 })
   // The chrome and every view with fixtures run too, each as a file of its own (SC-018).
   assert.deepEqual(files, { pass: r.report.files.length, fail: 0, notShipped: 0 })
-  assert.deepEqual(r.report.files.map((f) => f.id), ['site-header', 'site-footer', 'page', 'post', 'service', 'archive', 'search', 'not-found'])
+  assert.deepEqual(r.report.files.map((f) => f.id), ['site-header', 'site-footer', 'page', 'post', 'service', 'case-study', 'archive', 'search', 'not-found'])
   assert.equal(r.report.files.find((f) => f.id === 'page').kind, 'page')
   for (const f of r.report.files) assert.ok(f.status === 'pass' && f.fixtures.total > 0 && f.classes.status === 'pass', f.id)
   assert.match(r.out, /\| Chrome, views and page \| Kind \| Fixtures \| Classes \|/)
@@ -243,6 +243,12 @@ test('a full run cannot declare the chrome or an SC-018 view not shipped; a part
   assert.equal(partial.code, 1, partial.out)
   assert.deepEqual(partial.report.summary.files, { pass: partial.report.files.length - 1, fail: 0, notShipped: 1 })
   assert.match(partial.out, /Chrome, views and page: \d+ pass, 0 fail, 1 not shipped\./)
+})
+
+test('a full run cannot declare the case study view not shipped (SC-021)', async () => {
+  const full = await run(['--platform', 'reference', '--adapter', reference, ...withFields, ...withStyles, '--not-shipped', 'case-study'])
+  assert.equal(full.code, 2, full.out)
+  assert.match(full.out, /--not-shipped: case-study is required of every implementation/)
 })
 
 test('a page is compared through pageOf: the platform\'s head and body scripts pass, a dropped scriptless style fails (SC-019)', async () => {

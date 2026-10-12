@@ -65,7 +65,7 @@ const descendants = (el) => elementsOf(el).flatMap((c) => [c, ...descendants(c)]
 // ── Cases ─────────────────────────────────────────────────────────────────────────────────────
 // A fixture set is a section's, the site chrome's (the header and footer components) or a page
 // view's; its input names it under that kind's key (README, "Fixtures"). SC-018 requires the
-// chrome and these views before 1.0.0.
+// chrome and these views before 1.0.0, and SC-021 the case study view.
 // The chrome components and the required views are the runner's lists, so the gate and the
 // conformance run cannot disagree about what SC-018 requires.
 // A chrome, view or page file's kind is the runner's (fileKind), so the two read it alike.
@@ -1284,7 +1284,7 @@ for (const s of vocab.sections) {
   for (const c of mine.filter((x) => x.renders)) for (const k of Object.keys(used)) used[k].add(c.input.values?.settings?.[k] ?? (k === 'toneDark' ? undefined : effectiveSetting(c, k)))
 }
 for (const id of REQUIRED_FILES) {
-  if (!cases.some((c) => c.section === id && c.renders)) fail(`${id} has no fixtures (fixtures/${id}/<case>.json and .html), which SC-018 requires before 1.0.0`)
+  if (!cases.some((c) => c.section === id && c.renders)) fail(`${id} has no fixtures (fixtures/${id}/<case>.json and .html), which SC-018 and SC-021 require before 1.0.0`)
 }
 for (const f of settingsFile.fields.filter((x) => Object.keys(used).includes(x.name))) {
   for (const o of f.options) if (!used[f.name].has(o.value)) fail(`no case renders settings.${f.name} ${o.value}`)
