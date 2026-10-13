@@ -128,8 +128,11 @@ test, applied through section 2's table, where the stricter row wins.
   layout's query, which the ACF round trip records as one more difference (403). The priority
   image is the principal image of the first section on the page that has one, not of the first
   section only (SC-026): a page that opens with a text band gives `fetchpriority="high"` to the
-  first image below it. That is a rewording of `section#priority-media` alone, and no fixture
-  changes, since a case states its own priority context.
+  first image below it. That is a rewording of `section#priority-media`, and no fixture changes,
+  since a case states its own priority context. The fixtures gate still requires a case at index
+  0 to be granted the priority image, and no longer refuses a later section that holds it. No
+  fixture case yet shows a later section taking the slot, so a conforming run does not prove
+  SC-026.
 - The case-study view has fixtures and is required of every implementation (SC-021).
   `fixtures/case-study/` holds four cases (`full`, `aside`, `band` and `minimal`), `case-study`
   joins `REQUIRED_FILES`, and a full conformance run refuses to declare it not shipped. The
