@@ -72,13 +72,14 @@ receives and the choices on offer.
 
 ## Status
 
-`1.0.0-rc.4` is the release candidate for `1.0.0`: private, never on the registry, held until an
+`1.0.0-rc.5` is the release candidate for `1.0.0`: private, never on the registry, held until an
 implementation's run of `salt-conformance` against it conforms in full, in a report that names
-`1.0.0-rc.4` (SC-017, SC-018, SC-020, SC-022; `RELEASE-POLICY.md` section 5). It follows
+`1.0.0-rc.5` (SC-017, SC-018, SC-020, SC-022; `RELEASE-POLICY.md` section 5). It follows
 `1.0.0-rc.1`, whose first run raised eight questions about the contract itself, `1.0.0-rc.2`,
-whose run raised three more, and `1.0.0-rc.3`, against which bringing Salt for Next.js's core
-markup to the contract raised seven; the owner's rulings on them (SC-023, SC-024, SC-025) changed
-contract files, which each time makes a new candidate and needs a new run. `1.0.0` is the first release, staged
+whose run raised three more, `1.0.0-rc.3`, against which bringing Salt for Next.js's core
+markup to the contract raised seven, and `1.0.0-rc.4`, after which the owner ruled on the
+priority image and on team's categories; those rulings (SC-023, SC-024, SC-025, SC-026, SC-027)
+changed contract files, which each time makes a new candidate and needs a new run. `1.0.0` is the first release, staged
 from CI by npm trusted publishing when the owner pushes the `salt-contract-v1.0.0` tag, and
 approved by the owner. See `RELEASE-POLICY.md` for what each part
 of a version means.
@@ -544,7 +545,7 @@ report).
 ```json
 {
   "format": "salt-conformance/1",
-  "contract": { "package": "@lightlysaltedhq/salt-contract", "version": "1.0.0-rc.4" },
+  "contract": { "package": "@lightlysaltedhq/salt-contract", "version": "1.0.0-rc.5" },
   "platform": "nextjs",
   "implementation": { "version": "0.4.0" },
   "adapter": { "kind": "command", "target": "node scripts/salt-adapter.mjs" },
@@ -553,7 +554,7 @@ report).
   "summary": { "pass": 15, "fail": 1, "incomplete": 0, "notShipped": 1 },
   "fields": { "platform": "payload", "snapshot": "…", "options": "…", "problems": [] },
   "problems": [],
-  "stylesheets": { "served": "…", "bundle": "styles/salt.css", "contract": "1.0.0-rc.4", "ok": true, "status": "identical" },
+  "stylesheets": { "served": "…", "bundle": "styles/salt.css", "contract": "1.0.0-rc.5", "ok": true, "status": "identical" },
   "sections": [
     {
       "id": "hero",

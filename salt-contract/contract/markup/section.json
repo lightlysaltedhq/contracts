@@ -1,6 +1,6 @@
 {
   "$schema": "../../schema/markup.schema.json",
-  "version": "1.0.0-rc.4",
+  "version": "1.0.0-rc.5",
   "id": "section",
   "kind": "component",
   "summary": "The band every section renders inside, and the rules every section, component and view follows, stated once here and referenced elsewhere as section#<rule>.",
