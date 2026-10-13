@@ -158,8 +158,9 @@ questions and "left as work" notes here describe the draft at the time; 1.0.0 ab
   that field in every case. Markup: the header's span toggle carries no `type`; the theme toggle is a
   button, fixtured under `state.themeScheme`, or its empty `span[aria-hidden]` server form, in the
   header and the footer; the drawer and consent panel carry `open`; the search input keeps the
-  query; an untitled footer column's list takes the nav's name; the header logo is
-  `loading="eager"`, as it is above the fold; the header phone glyph carries no `data-size`; the
+  query; an untitled footer column's list takes the nav's name; the header logo of
+  the site's default scheme is `loading="eager"`, as it is above the fold, and the other scheme's
+  is lazy (SC-025); the header phone glyph carries no `data-size`; the
   service view's related cards declare the card slot for the full band, as no stylesheet gives a
   view's `main` a measure.
 - Fixtures for the site chrome and page views (SC-018): 20 cases for `site-header`, `site-footer`

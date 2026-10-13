@@ -1305,12 +1305,16 @@ function checkMarkup(c) {
   if (priority.length > 1) fail(`${at}.html: ${priority.length} images claim fetchpriority=high; at most one does (section#priority-media)`)
   for (const img of imgs) {
     const isPriority = priority.includes(img)
-    // The header logo is above the fold on every page: eager, never lazy (SC-019).
+    // The header logo is above the fold on every page, so the default scheme's is eager, never
+    // lazy (SC-019), and the other scheme's is lazy, so a page fetches no logo it hides (SC-025).
+    // No case names a site whose default scheme is dark, so the default here is light.
     let inHeader = false
     for (let p = c.parents.get(img); p; p = c.parents.get(p)) if (p.name === 'header' && classesOf(p).includes('salt-header')) inHeader = true
-    const loading = classesOf(img).includes('salt-logo__image') && inHeader ? 'eager' : 'lazy'
+    const headerLogo = classesOf(img).includes('salt-logo__image') && inHeader
+    const otherScheme = headerLogo && classesOf(img).includes('salt-logo__dark')
+    const loading = headerLogo && !otherScheme ? 'eager' : 'lazy'
     if (isPriority && hasAttr(img, 'loading')) fail(`${at}.html: the priority image carries loading; it is never lazy (SC-007)`)
-    if (!isPriority && attr(img, 'loading') !== loading) fail(`${at}.html: ${loading === 'eager' ? 'the header logo is above the fold, so it must be loading="eager" (SC-019)' : 'an img that is not the priority image must be loading="lazy" (section#priority-media)'}`)
+    if (!isPriority && attr(img, 'loading') !== loading) fail(`${at}.html: ${loading === 'eager' ? 'the header logo of the default scheme is above the fold, so it must be loading="eager" (SC-019)' : otherScheme ? 'the header logo of the scheme the page does not arrive in must be loading="lazy", so it is not fetched unshown (site-logo.json, SC-025)' : 'an img that is not the priority image must be loading="lazy" (section#priority-media)'}`)
   }
   const backgroundImg = bindings.get('background')?.[0]
   // A role, or the roles the first item may sit in (the carousel's track, list or lone card).

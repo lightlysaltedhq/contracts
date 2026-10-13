@@ -866,7 +866,12 @@ test('sc-019: the header logo loads eagerly, the footer\'s lazily', () => {
   expectFail(['site-header'], (io) => {
     const rel = 'fixtures/site-header/light-and-dark-logo.html'
     io.write(rel, readFileSync(path.join(io.dir, rel), 'utf8').replaceAll('loading="eager"', 'loading="lazy"'))
-  }, /the header logo is above the fold, so it must be loading="eager"/)
+  }, /the header logo of the default scheme is above the fold, so it must be loading="eager"/)
+  // SC-025: only the default scheme's logo is eager; the other scheme's is lazy.
+  expectFail(['site-header'], (io) => {
+    const rel = 'fixtures/site-header/light-and-dark-logo.html'
+    io.write(rel, readFileSync(path.join(io.dir, rel), 'utf8').replace(/(salt-logo__dark[^>]*)loading="lazy"/, '$1loading="eager"'))
+  }, /the header logo of the scheme the page does not arrive in must be loading="lazy"/)
   expectFail(['site-footer'], (io) => {
     const rel = 'fixtures/site-footer/single-flat-menu-inverse.html'
     io.write(rel, readFileSync(path.join(io.dir, rel), 'utf8').replace(/(salt-logo__image[^>]*)loading="lazy"/, '$1loading="eager"'))
