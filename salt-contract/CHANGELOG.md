@@ -297,10 +297,12 @@ questions and "left as work" notes here describe the draft at the time; 1.0.0 ab
     trimmed (SC-014), on save and again at render, so it never contains `__` and never meets a drawn
     id; an empty slug counts as no anchor. "We're hiring" gives `were-hiring`; 'Straße' gives
     `strase` on en_GB and `strasse` on de_DE; 'contact__form' gives `contact-form`. Anchors settle
-    in one pass in page order, as both platforms do (SC-013): an anchor equal to a landmark id
-    becomes `<anchor>-section`, an id already taken takes the next free `-2`, `-3`, and a section
-    with no anchor mints its id from its section id in the same pass. So `faq, main, faq, faq-2` and
-    an unanchored `pricing` render `faq, main-section, faq-2, faq-2-2, pricing`.
+    in two steps (SC-013, SC-025). The anchors editors typed come first, in page order: an anchor
+    equal to a landmark id becomes `<anchor>-section`, and an id already taken takes the next free
+    `-2`, `-3`. Each section with no anchor then mints its id from its section id, from what is
+    left. So `faq, main, faq, faq-2` and an unanchored `pricing` render
+    `faq, main-section, faq-2, faq-2-2, pricing`, and an unanchored `faq` section above a section
+    anchored `faq` renders `faq-2, faq`.
   - The post, service, archive and search view bodies are fixed as Salt for Next.js's example app
     writes them (`salt-post__*`, `salt-service__*`, `salt-related`, `salt-archive__*`,
     `salt-search__results`). The post's author is the shared `author-box` component, and Salt for
