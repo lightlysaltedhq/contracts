@@ -4,7 +4,7 @@ Newest first. Dates are DD/MM/YYYY. What each part of a version means, and how a
 announced and migrated, is in `RELEASE-POLICY.md`. Decisions cited as `SC-nnn` are in Lightly
 Salted's decision log for Product Salt.
 
-## 1.0.0 (candidate `1.0.0-rc.3`, prepared 12/10/2026; not published, dated when tagged)
+## 1.0.0 (candidate `1.0.0-rc.4`, prepared 13/10/2026; not published, dated when tagged)
 
 **Semver call: MAJOR, the first release of the contract.** No earlier version was published, so no
 implementation conformed to one. Adopting it is still a migration for existing sites, because the
@@ -92,6 +92,24 @@ test, applied through section 2's table, where the stricter row wins.
   like what is inside it (SC-007): the normaliser drops both from `svg.salt-icon`, so a filled
   mark passes against a stroked fixture, while the svg's every other attribute still compares and
   the gate still holds each of the two to the values `markup/icon.json` allows.
+- Seven rulings from bringing Salt for Next.js's core markup to `1.0.0-rc.3` (SC-025), six of
+  which change the contract. A section that draws no heading has body base 1, wherever it sits on
+  the page, so its body headings and card titles are `h2` and no rank is skipped
+  (`section#body-heading-base`); `rich-text/body-only-no-heading`, `carousel/inline-no-name-list`,
+  `carousel/inline-quote-label-inverse` and `pricing/one-plan-inverse` rise a level, and the gate
+  fails a body whose shallowest heading is not base + 1. A case study's result in a showcase is
+  one `stat` string, as the view props have it: `collection-showcase/featured-case-studies` no
+  longer splits it into a value and a suffix span. The contact form's challenge field and its two
+  tokens come from the form's own response to a send, never from the page as first drawn, so a
+  contact page can be cached: `contact/form-open` loses them, and `markup/contact-form.json` says
+  when they are drawn. An anchor an editor typed is settled before any id is minted
+  (`section#anchors`), so an unanchored section never takes an editor's name. The phone and email
+  links in the contact details and the link in the privacy line carry `salt-contact__link`, which
+  `styles/primitives.css` underlines in the band's own ink and gives the focus indicator (WCAG
+  1.4.1), so `styles/salt.css` changes and each implementation serves the new bytes. Of the
+  header's two logos only the default scheme's is `loading="eager"`; the other scheme's is lazy.
+  The other ruling changes no file: a team member's email, phone and social links are drawn
+  only when filled, as `markup/card.json` already says.
 - The case-study view has fixtures and is required of every implementation (SC-021).
   `fixtures/case-study/` holds four cases (`full`, `aside`, `band` and `minimal`), `case-study`
   joins `REQUIRED_FILES`, and a full conformance run refuses to declare it not shipped. The
