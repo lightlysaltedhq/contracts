@@ -362,6 +362,10 @@ test('gaps: a rank skipped under a section heading fails', () => {
     io.write(rel, readFileSync(path.join(io.dir, rel), 'utf8').replace(/<h3>/g, '<h4>').replace(/<\/h3>/g, '</h4>'))
   }, /the shallowest heading in the nested section posts's body is h4; its body base is 2, so it is h3/)
 })
+test('inputs: a case study\'s result split into a value and a suffix fails (SC-025)', () => {
+  expectFail(['collection-showcase'], (io) => io.json('collection-showcase/featured-case-studies.json', (d) => { d.collections['case-studies'][0].results[1] = { value: '3', suffix: ' years', label: 'To first full harvest' } }),
+    /collections\.case-studies\[0\]\.results\[1\] is a result: one stat string and a label, nothing else/)
+})
 test('gaps: a lone carousel card granted priority must take it', () => {
   expectFail(['carousel'], (io) => io.html('carousel/inline-one-card.html', ' fetchpriority="high"', ' loading="lazy"'), /the priority image must be in carousel's track,list,single/)
 })

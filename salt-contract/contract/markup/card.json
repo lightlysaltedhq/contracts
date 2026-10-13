@@ -231,7 +231,8 @@
           "component": "stat",
           "repeat": {
             "from": "results"
-          }
+          },
+          "note": "A result is one stat string (view-props/collection-showcase.json), drawn whole as the stat's value: no suffix span, which is the stats section's (SC-025)."
         }
       ]
     },

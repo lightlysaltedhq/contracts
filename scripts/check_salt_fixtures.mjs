@@ -250,6 +250,13 @@ function checkSiteAndMedia(c) {
   }
   for (const [source, items] of Object.entries(input.collections ?? {})) {
     if (!Array.isArray(items) || items.some((i) => !isObject(i) || typeof i.id !== 'string')) fail(`${at}.json collections.${source} must be a list of items with string ids`)
+    // A case study's result is one stat string and a label (view-props/collection-showcase.json,
+    // SC-025): never a value and a suffix, which is the stats section's shape.
+    for (const [i, item] of (Array.isArray(items) ? items : []).entries()) {
+      for (const [j, r] of (Array.isArray(item?.results) ? item.results : []).entries()) {
+        if (!isObject(r) || typeof r.stat !== 'string' || typeof r.label !== 'string' || Object.keys(r).some((k) => k !== 'stat' && k !== 'label')) fail(`${at}.json collections.${source}[${i}].results[${j}] is a result: one stat string and a label, nothing else (view-props/collection-showcase.json)`)
+      }
+    }
   }
 }
 
