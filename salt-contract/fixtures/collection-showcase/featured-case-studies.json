@@ -1,6 +1,6 @@
 {
   "section": "collection-showcase",
-  "$comment": "Three results, so the results list has no data-columns (it is \"2\" only for two or fewer). Stat values are written as plain text; a suffix is its own span; the contract draws no icon unless the stat has one. The view-all href comes from site.collectionIndexes (case-studies: /work/), a fixture convention.",
+  "$comment": "Three results, so the results list has no data-columns (it is \"2\" only for two or fewer). A result is one stat string (view-props/collection-showcase.json, as the case-study view has it), drawn whole as the stat's value, with no suffix span (SC-025); the contract draws no icon unless the stat has one. The view-all href comes from site.collectionIndexes (case-studies: /work/), a fixture convention.",
   "summary": "Case studies in the featured layout, two columns: the first item carries data-featured and its card lists three results as stats. A custom view-all label is used.",
   "values": {
     "heading": "Recent projects",
@@ -58,17 +58,15 @@
         "text": "Forty fruit trees brought back into production over three seasons.",
         "results": [
           {
-            "value": "40",
+            "stat": "40",
             "label": "Trees restored"
           },
           {
-            "value": "3",
-            "suffix": " years",
+            "stat": "3 years",
             "label": "To first full harvest"
           },
           {
-            "value": "85",
-            "suffix": "%",
+            "stat": "85%",
             "label": "More pollinators recorded"
           }
         ]

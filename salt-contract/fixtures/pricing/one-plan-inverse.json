@@ -1,6 +1,6 @@
 {
   "section": "pricing",
-  "summary": "One plan with price and period only (no features, no button), on the inverse tone and no heading.",
+  "summary": "One plan with price and period only (no features, no button), on the inverse tone and no heading, so the plan name is h2 (body base 1, section#body-heading-base).",
   "$comment": "Display choices not fixed by the contract: the visually hidden text is 'Not included', the included glyph is 'check' and the not-included glyph is 'close', the period is written as stored ('a month') after the price, and each feature's text follows its icon after one space, as a browser draws the line. Labels: site.labels.featured and site.labels.notIncluded.",
   "values": {
     "plans": [

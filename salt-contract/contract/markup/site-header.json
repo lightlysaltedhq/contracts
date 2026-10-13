@@ -1,6 +1,6 @@
 {
   "$schema": "../../schema/markup.schema.json",
-  "version": "1.0.0-rc.3",
+  "version": "1.0.0-rc.4",
   "id": "site-header",
   "kind": "component",
   "root": {
@@ -27,7 +27,7 @@
         {
           "role": "logo",
           "component": "site-logo",
-          "note": "Above the fold on every page, so its images load eagerly (site-logo.json, SC-019)."
+          "note": "Above the fold on every page, so the logo of the site's default scheme loads eagerly; the other scheme's is lazy (site-logo.json, SC-019, SC-025)."
         },
         {
           "role": "nav",

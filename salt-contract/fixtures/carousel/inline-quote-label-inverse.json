@@ -1,7 +1,7 @@
 {
   "section": "carousel",
-  "$comment": "Quote cards: the card's title is the person (a heading, one level below the section's), the role field is the meta line, text is the quote. The portrait is decorative (alt empty), as card.json says. The section draws no heading, so its context.headingLevel (2) is the level the heading would have had, and the person headings are 3.",
-  "summary": "Three inline quote cards with no heading: the carousel is named from the label field, and the wrapper is a div. On the inverse band. The first quote has a portrait.",
+  "$comment": "Quote cards: the card's title is the person (a heading at body base + 1), the role field is the meta line, text is the quote. The portrait is decorative (alt empty), as card.json says. The section draws no heading, so its body base is 1 whatever its context.headingLevel (2, the level a heading would have had), and the person headings are 2 (section#body-heading-base, SC-025).",
+  "summary": "Three inline quote cards with no heading: the carousel is named from the label field, the wrapper is a div and the card titles are h2 (body base 1, section#body-heading-base). On the inverse band. The first quote has a portrait.",
   "values": {
     "label": "Client quotes",
     "source": "inline",

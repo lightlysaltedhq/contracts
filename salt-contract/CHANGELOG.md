@@ -4,7 +4,7 @@ Newest first. Dates are DD/MM/YYYY. What each part of a version means, and how a
 announced and migrated, is in `RELEASE-POLICY.md`. Decisions cited as `SC-nnn` are in Lightly
 Salted's decision log for Product Salt.
 
-## 1.0.0 (candidate `1.0.0-rc.3`, prepared 12/10/2026; not published, dated when tagged)
+## 1.0.0 (candidate `1.0.0-rc.4`, prepared 13/10/2026; not published, dated when tagged)
 
 **Semver call: MAJOR, the first release of the contract.** No earlier version was published, so no
 implementation conformed to one. Adopting it is still a migration for existing sites, because the
@@ -92,6 +92,31 @@ test, applied through section 2's table, where the stricter row wins.
   like what is inside it (SC-007): the normaliser drops both from `svg.salt-icon`, so a filled
   mark passes against a stroked fixture, while the svg's every other attribute still compares and
   the gate still holds each of the two to the values `markup/icon.json` allows.
+- Seven rulings from bringing Salt for Next.js's core markup to `1.0.0-rc.3` (SC-025), six of
+  which change the contract. A section that draws no heading has body base 1, wherever it sits on
+  the page, so its body headings and card titles are `h2` and no rank is skipped
+  (`section#body-heading-base`); `rich-text/body-only-no-heading`, `carousel/inline-no-name-list`,
+  `carousel/inline-quote-label-inverse` and `pricing/one-plan-inverse`, four fixtures, rise a
+  level. `markup/pricing.json` declares `headingBeforeOwn`, as every section that can draw a
+  heading with none of its own does, which is what puts the page's `h1` first. The gate fails a
+  body whose first heading is not base + 1, a title that is not base + 1, a rank skipped on the
+  way down a rich-text body, and a section that draws headings with none of its own and no
+  `headingBeforeOwn`. A case study's result in a showcase is
+  one `stat` string, as the view props have it: `collection-showcase/featured-case-studies` no
+  longer splits it into a value and a suffix span. The contact form's challenge field and its two
+  tokens come from the form's own response to a send, never from the page as first drawn, so a
+  contact page can be cached: `contact/form-open` loses them, `markup/contact-form.json` says
+  when they are drawn, and without script the endpoint answers in its own response and never by
+  redirecting back to the page. An anchor an editor typed is settled before any id is minted
+  (`section#anchors`), so an unanchored section never takes an editor's name, and a minted id is
+  numbered over the stored layout, counting sections that draw nothing, so it does not move when
+  one above it empties or fills. The phone and email
+  links in the contact details and the link in the privacy line carry `salt-contact__link`, which
+  `styles/primitives.css` underlines in the band's own ink and gives the focus indicator (WCAG
+  1.4.1), so `styles/salt.css` changes and each implementation serves the new bytes. Of the
+  header's two logos only the default scheme's is `loading="eager"`; the other scheme's is lazy.
+  The other ruling changes no file: a team member's email, phone and social links are drawn
+  only when filled, as `markup/card.json` already says.
 - The case-study view has fixtures and is required of every implementation (SC-021).
   `fixtures/case-study/` holds four cases (`full`, `aside`, `band` and `minimal`), `case-study`
   joins `REQUIRED_FILES`, and a full conformance run refuses to declare it not shipped. The
@@ -158,8 +183,9 @@ questions and "left as work" notes here describe the draft at the time; 1.0.0 ab
   that field in every case. Markup: the header's span toggle carries no `type`; the theme toggle is a
   button, fixtured under `state.themeScheme`, or its empty `span[aria-hidden]` server form, in the
   header and the footer; the drawer and consent panel carry `open`; the search input keeps the
-  query; an untitled footer column's list takes the nav's name; the header logo is
-  `loading="eager"`, as it is above the fold; the header phone glyph carries no `data-size`; the
+  query; an untitled footer column's list takes the nav's name; the header logo of
+  the site's default scheme is `loading="eager"`, as it is above the fold, and the other scheme's
+  is lazy (SC-025); the header phone glyph carries no `data-size`; the
   service view's related cards declare the card slot for the full band, as no stylesheet gives a
   view's `main` a measure.
 - Fixtures for the site chrome and page views (SC-018): 20 cases for `site-header`, `site-footer`
@@ -297,10 +323,14 @@ questions and "left as work" notes here describe the draft at the time; 1.0.0 ab
     trimmed (SC-014), on save and again at render, so it never contains `__` and never meets a drawn
     id; an empty slug counts as no anchor. "We're hiring" gives `were-hiring`; 'Straße' gives
     `strase` on en_GB and `strasse` on de_DE; 'contact__form' gives `contact-form`. Anchors settle
-    in one pass in page order, as both platforms do (SC-013): an anchor equal to a landmark id
-    becomes `<anchor>-section`, an id already taken takes the next free `-2`, `-3`, and a section
-    with no anchor mints its id from its section id in the same pass. So `faq, main, faq, faq-2` and
-    an unanchored `pricing` render `faq, main-section, faq-2, faq-2-2, pricing`.
+    in two steps (SC-013, SC-025). The anchors editors typed come first, in page order: an anchor
+    equal to a landmark id becomes `<anchor>-section`, and an id already taken takes the next free
+    `-2`, `-3`. Each section with no anchor then mints its id from its section id, from what is
+    left. So `faq, main, faq, faq-2` and an unanchored `pricing` render
+    `faq, main-section, faq-2, faq-2-2, pricing`, and an unanchored `faq` section above a section
+    anchored `faq` renders `faq-2, faq`. A minted id's number counts every unanchored section of
+    its section id in the stored layout, drawn or not: of two unanchored `faq` sections, the
+    first with no items, the one drawn is `faq-2`.
   - The post, service, archive and search view bodies are fixed as Salt for Next.js's example app
     writes them (`salt-post__*`, `salt-service__*`, `salt-related`, `salt-archive__*`,
     `salt-search__results`). The post's author is the shared `author-box` component, and Salt for

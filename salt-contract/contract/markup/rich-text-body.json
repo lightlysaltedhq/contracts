@@ -1,6 +1,6 @@
 {
   "$schema": "../../schema/markup.schema.json",
-  "version": "1.0.0-rc.3",
+  "version": "1.0.0-rc.4",
   "id": "rich-text-body",
   "kind": "component",
   "root": {
@@ -26,7 +26,7 @@
       "repeat": {
         "from": "body nodes"
       },
-      "note": "Allowed inline: a (href; http, https, mailto, tel, or an internal link), strong, em, code, br. Headings rank from the base level (section#body-heading-base); a heading outside the allowed set renders as p. A body heading is never h1: at base level 1 the first heading tag renders as h2 (base + 1)."
+      "note": "Allowed inline: a (href; http, https, mailto, tel, or an internal link), strong, em, code, br. Headings rank from the base level (section#body-heading-base); a heading outside the allowed set renders as p. A body heading is never h1: at base level 1, which is a view's body or a section that draws no heading, the first heading tag renders as h2 (base + 1)."
     }
   ],
   "headings": {

@@ -1,7 +1,7 @@
 {
-  "$comment": "Per-request values are the normaliser's declared placeholders (README, \"Fixtures\"): {{salt:form-action}}, {{salt:form-token}}, {{salt:challenge-token}} and {{salt:challenge-question}}. route.form carries the request's state; site.contactForm the site's form settings.",
+  "$comment": "The one per-request value here is the normaliser's declared placeholder {{salt:form-action}} (README, \"Fixtures\"). route.form carries the request's state; site.contactForm the site's form settings.",
   "section": "contact",
-  "summary": "The form as a visitor first meets it: name, email, an optional phone, two enquiry types, the message, the arithmetic challenge, the honeypot, the privacy line and an empty status. The site shows its phone and email above it.",
+  "summary": "The form as a visitor first meets it: name, email, an optional phone, two enquiry types, the message, the honeypot, the privacy line and an empty status. It carries no challenge and no token: they come from the form's own response, never this page, which may be cached (SC-025). The site shows its phone and email above it.",
   "values": {
     "heading": "Start a project",
     "intro": "Tell us about your garden and what you would like from it.",
@@ -22,7 +22,7 @@
   "route": {
     "path": "/contact/",
     "form": {
-      "challenge": true,
+      "challenge": false,
       "state": "open"
     }
   },

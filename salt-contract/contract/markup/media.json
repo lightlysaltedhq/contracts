@@ -1,6 +1,6 @@
 {
   "$schema": "../../schema/markup.schema.json",
-  "version": "1.0.0-rc.3",
+  "version": "1.0.0-rc.4",
   "id": "media",
   "kind": "component",
   "root": {
@@ -27,7 +27,7 @@
           "eager"
         ],
         "when": "not priority",
-        "note": "lazy, but eager on the header logo, which is above the fold (site-logo.json, SC-019). Never on the priority image, which is eager by default."
+        "note": "lazy, but eager on the header logo of the site's default scheme, which is above the fold; the other scheme's header logo is lazy (site-logo.json, SC-019, SC-025). Never on the priority image, which is eager by default."
       },
       "fetchpriority": {
         "value": "high",

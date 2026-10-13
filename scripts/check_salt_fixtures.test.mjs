@@ -342,8 +342,97 @@ test('gaps: a name on the accordion\'s own div fails; it belongs on each details
 test('gaps: an aria-label on the tab set\'s generic div fails; it belongs on the radiogroup', () => {
   expectFail(['tabs'], (io) => io.html('tabs/many-tabbed.html', '<div class="salt-tabs" data-tabbed>', '<div class="salt-tabs" data-tabbed aria-label="Services">'), /<div\.salt-tabs> carries aria-label, which the markup does not declare/)
 })
-test('gaps: a body h2 under a level-2 section heading fails, at base 1 it is right', () => {
-  expectFail(['rich-text'], (io) => io.html('rich-text/body-only-no-heading.html', '<h3>Our approach</h3>', '<h2>Our approach</h2>'), /ranks at or above the section heading's level 2/)
+// SC-025: a section that draws no heading has body base 1, wherever it sits on the page, so its
+// body headings and card titles rise a level and no rank is skipped.
+test('gaps: body headings kept a level down in a section that draws no heading fail (SC-025)', () => {
+  expectFail(['rich-text'], (io) => { io.html('rich-text/body-only-no-heading.html', '<h3>Materials</h3>', '<h4>Materials</h4>'); io.html('rich-text/body-only-no-heading.html', '<h2>Our approach</h2>', '<h3>Our approach</h3>') },
+    /body-only-no-heading\.html: the first heading in the body is h3; in a section that draws no heading the body base is 1, so it is h2 \(section#body-heading-base\)/)
+  expectFail(['carousel'], (io) => {
+    const rel = 'fixtures/carousel/inline-no-name-list.html'
+    io.write(rel, readFileSync(path.join(io.dir, rel), 'utf8').replace(/<h2/g, '<h3').replace(/<\/h2>/g, '</h3>'))
+  }, /inline-no-name-list\.html: the first heading in the body is h3; .* it is h2/)
+})
+test('gaps: a rank skipped under a section heading fails', () => {
+  expectFail(['features'], (io) => {
+    const rel = 'fixtures/features/many-items-linked.html'
+    io.write(rel, readFileSync(path.join(io.dir, rel), 'utf8').replace(/<h3>/g, '<h4>').replace(/<\/h3>/g, '</h4>'))
+  }, /the first heading in the body is h4; under the section heading at 2 it is h3 \(section#body-heading-base\)/)
+  expectFail(['archive'], (io) => {
+    const rel = 'fixtures/archive/topic.html'
+    io.write(rel, readFileSync(path.join(io.dir, rel), 'utf8').replace(/<h3>/g, '<h4>').replace(/<\/h3>/g, '</h4>'))
+  }, /the first heading in the nested section posts's body is h4; under the section heading at 2 it is h3/)
+})
+test('inputs: a case study\'s result split into a value and a suffix fails (SC-025)', () => {
+  expectFail(['collection-showcase'], (io) => io.json('collection-showcase/featured-case-studies.json', (d) => { d.collections['case-studies'][0].results[1] = { value: '3', suffix: ' years', label: 'To first full harvest' } }),
+    /collections\.case-studies\[0\]\.results\[1\] is a result: one stat string and a label, nothing else/)
+})
+test('contact: the form as first drawn carries no challenge or token; a response draws them when issued (SC-025)', () => {
+  const FIELD = '        <div class="salt-contact__field">\n          <label class="salt-contact__label" for="enquire__challenge">{{salt:challenge-question}}</label>\n          <input class="salt-contact__input salt-contact__input--short" id="enquire__challenge" name="challengeAnswer" type="text" inputmode="numeric" autocomplete="off" required aria-describedby="enquire__status">\n        </div>\n'
+  const CHALLENGE_TOKEN = '        <input type="hidden" name="challengeToken" value="{{salt:challenge-token}}">\n'
+  const FORM_TOKEN = '        <input type="hidden" name="formToken" value="{{salt:form-token}}">\n'
+  const TRAP = '        <div class="salt-sr-only salt-contact__trap"'
+  const restore = (io) => io.html('contact/form-open.html', TRAP, `${FIELD}${CHALLENGE_TOKEN}${FORM_TOKEN}${TRAP}`)
+  const open = /form-open: the form as first drawn \(route\.form\.state open\) carries no challenge and no token/
+  const together = /form-invalid\.html: the challenge field and its two tokens \(challengeToken, formToken\) are drawn together, once each, or not at all/
+  expectFail(['contact'], (io) => io.json('contact/form-open.json', (d) => { d.route.form.challenge = true }), open)
+  expectFail(['contact'], restore, open)
+  expectFail(['contact'], (io) => io.json('contact/form-invalid.json', (d) => { d.route.form.challenge = false }), /form-invalid\.html: the challenge and its tokens are drawn when the response issued them/)
+  // The seven ways review of #19 walked past the first version of this check.
+  // 1. The old open form, with the case no longer saying how the form is drawn.
+  expectFail(['contact'], (io) => { restore(io); io.json('contact/form-open.json', (d) => { delete d.route.form }) }, /form-open\.json: the case draws the contact form, so route\.form must say how/)
+  // 2 and 3. No state, or one the contract does not know.
+  expectFail(['contact'], (io) => { restore(io); io.json('contact/form-open.json', (d) => { delete d.route.form.state; d.route.form.challenge = true }) }, /form-open\.json: route\.form\.state is undefined; it is one of open, invalid, sent/)
+  expectFail(['contact'], (io) => { restore(io); io.json('contact/form-open.json', (d) => { d.route.form.state = 'first'; d.route.form.challenge = true }) }, /form-open\.json: route\.form\.state is "first"; it is one of open, invalid, sent/)
+  // 4 to 6. The three are drawn together or not at all.
+  expectFail(['contact'], (io) => io.html('contact/form-invalid.html', FIELD, ''), together)
+  expectFail(['contact'], (io) => { io.html('contact/form-invalid.html', CHALLENGE_TOKEN, ''); io.html('contact/form-invalid.html', FORM_TOKEN, '') }, together)
+  expectFail(['contact'], (io) => io.html('contact/form-invalid.html', FORM_TOKEN, ''), together)
+  // 7. Whether the response issued them is always said.
+  expectFail(['contact'], (io) => io.json('contact/form-invalid.json', (d) => { delete d.route.form.challenge }), /form-invalid\.json: route\.form\.challenge must be true or false/)
+})
+test('rules: a rank skipped on the way down a body fails, and a title is base + 1 (review of #19, 3)', () => {
+  expectFail(['rich-text'], (io) => io.html('rich-text/body-only-no-heading.html', '<h3>Materials</h3>', '<h4>Materials</h4>'), /body-only-no-heading\.html: <h4> in the body follows h2, so a rank is skipped \(section#body-heading-base\)/)
+  expectFail(['features'], (io) => {
+    const rel = 'fixtures/features/many-items-linked.html'
+    io.write(rel, readFileSync(path.join(io.dir, rel), 'utf8').replace('<h3><a class="salt-card__link" href="https://example.com/seo">', '<h5><a class="salt-card__link" href="https://example.com/seo">').replace('Search that works<span class="salt-arrow" aria-hidden="true">&#x2060;→</span></a></h3>', 'Search that works<span class="salt-arrow" aria-hidden="true">&#x2060;→</span></a></h5>'))
+  }, /many-items-linked\.html: <h5> in the body is a title the section draws, so it is h3, body base \+ 1/)
+})
+test('rules: a section that draws headings with none of its own declares headingBeforeOwn (review of #19, 4)', () => {
+  expectFail(['pricing'], (io) => {
+    const rel = 'contract/markup/pricing.json'
+    const doc = JSON.parse(readFileSync(path.join(io.dir, rel), 'utf8'))
+    delete doc.headings.headingBeforeOwn
+    io.write(rel, JSON.stringify(doc, null, 2) + '\n')
+  }, /one-plan-inverse\.html: the body draws headings with no section heading, but contract\/markup\/pricing\.json declares no headings\.headingBeforeOwn/)
+})
+// A view's listing with no heading of its own: a div, and its card titles at h2 (body base 1).
+const headingless = (io) => {
+  io.json('archive/topic.json', (d) => { delete d.document.listing.values.heading })
+  const rel = 'fixtures/archive/topic.html'
+  const text = readFileSync(path.join(io.dir, rel), 'utf8')
+  const close = text.lastIndexOf('</section>')
+  io.write(rel, (text.slice(0, close) + '</div>' + text.slice(close + '</section>'.length))
+    .replace('<section class="salt-section" id="posts" aria-labelledby="posts__heading"', '<div class="salt-section" id="posts"')
+    .replace('        <h2 id="posts__heading">Latest posts</h2>\n', ''))
+}
+test('rules: a nested section that draws no heading has body base 1 too (review of #19, 6)', () => {
+  expectFail(['archive'], headingless, /topic\.html: the first heading in the nested section posts's body is h3; in a section that draws no heading the body base is 1, so it is h2/)
+  const dir = copy(['archive'], (io) => {
+    headingless(io)
+    const rel = 'fixtures/archive/topic.html'
+    io.write(rel, readFileSync(path.join(io.dir, rel), 'utf8').replace(/<h3>/g, '<h2>').replace(/<\/h3>/g, '</h2>'))
+  })
+  try {
+    const r = run(dir)
+    assert.ok(!/body-heading-base/.test(r.out), r.out)
+  } finally { rmSync(dir, { recursive: true, force: true }) }
+})
+test('markup: a suffix span inside a result fails (review of #19, 8)', () => {
+  expectFail(['collection-showcase'], (io) => io.html('collection-showcase/featured-case-studies.html', '<p class="salt-stat__value">3 years</p>', '<p class="salt-stat__value">3<span class="salt-stat__suffix"> years</span></p>'), /featured-case-studies\.html: <span\.salt-stat__suffix> splits a result; a result is one stat string/)
+})
+test('contact: a link in the details or the privacy line without its class fails (SC-025)', () => {
+  expectFail(['contact'], (io) => io.html('contact/form-open.html', '<a class="salt-contact__link" href="/privacy/">', '<a href="/privacy/">'), /form-open\.html: .*salt-contact__link/)
+  expectFail(['contact'], (io) => io.html('contact/closed-with-details.html', '<a class="salt-contact__link" href="mailto:', '<a href="mailto:'), /closed-with-details\.html: .*salt-contact__link/)
 })
 test('gaps: a lone carousel card granted priority must take it', () => {
   expectFail(['carousel'], (io) => io.html('carousel/inline-one-card.html', ' fetchpriority="high"', ' loading="lazy"'), /the priority image must be in carousel's track,list,single/)
@@ -455,7 +544,7 @@ test('form: a normaliser that masks an empty token fails the mutation proof', ()
   }, /emptying value on <input> does not change normalise's output/)
 })
 test('display: a phone written with an extension in brackets draws no link', () => {
-  expectFail(['contact'], (io) => io.html('contact/closed-with-details.html', '<a href="tel:01174960123">0117 496 0123</a>', '<a href="tel:0117496012323">0117 496 0123 (23)</a>'), /section#display-forms gives no link/)
+  expectFail(['contact'], (io) => io.html('contact/closed-with-details.html', '<a class="salt-contact__link" href="tel:01174960123">0117 496 0123</a>', '<a class="salt-contact__link" href="tel:0117496012323">0117 496 0123 (23)</a>'), /section#display-forms gives no link/)
 })
 test('arrows: only a section\'s call to action takes the site\'s arrow', () => {
   expectFail(['pricing'], (io) => {
@@ -583,7 +672,7 @@ test('chrome: a nested section\'s card titles rank below its heading (review of 
   expectFail(['archive'], (io) => {
     const rel = 'fixtures/archive/topic.html'
     io.write(rel, readFileSync(path.join(io.dir, rel), 'utf8').replace(/<h3>/g, '<h2>').replace(/<\/h3>/g, '</h2>'))
-  }, /<h2> in the nested section posts ranks at or above its heading's level 2/)
+  }, /<h2> in the nested section posts's body ranks at or above the section heading's level 2/)
 })
 
 test('images: a related service card takes the grid\'s card slot, three columns in the full band (review of #13, 5; SC-019)', async () => {
@@ -834,7 +923,12 @@ test('sc-019: the header logo loads eagerly, the footer\'s lazily', () => {
   expectFail(['site-header'], (io) => {
     const rel = 'fixtures/site-header/light-and-dark-logo.html'
     io.write(rel, readFileSync(path.join(io.dir, rel), 'utf8').replaceAll('loading="eager"', 'loading="lazy"'))
-  }, /the header logo is above the fold, so it must be loading="eager"/)
+  }, /the header logo of the default scheme is above the fold, so it must be loading="eager"/)
+  // SC-025: only the default scheme's logo is eager; the other scheme's is lazy.
+  expectFail(['site-header'], (io) => {
+    const rel = 'fixtures/site-header/light-and-dark-logo.html'
+    io.write(rel, readFileSync(path.join(io.dir, rel), 'utf8').replace(/(salt-logo__dark[^>]*)loading="lazy"/, '$1loading="eager"'))
+  }, /the header logo of the scheme the page does not arrive in must be loading="lazy"/)
   expectFail(['site-footer'], (io) => {
     const rel = 'fixtures/site-footer/single-flat-menu-inverse.html'
     io.write(rel, readFileSync(path.join(io.dir, rel), 'utf8').replace(/(salt-logo__image[^>]*)loading="lazy"/, '$1loading="eager"'))
