@@ -139,7 +139,8 @@
         "salt-contact__field"
       ],
       "optional": true,
-      "when": "the anti-spam credentials were issued. When a captcha provider is configured, the provider's widget is native, and this challenge is drawn inside a noscript element",
+      "when": "the anti-spam credentials were issued, which is only in the form's own response to a send (SC-025). When a captcha provider is configured, the provider's widget is native, and this challenge is drawn inside a noscript element",
+      "note": "Never in the page as first drawn: that page may be cached and served to every visitor, and a challenge in it would be shared by all of them. The form's endpoint draws the challenge and the two tokens when it redraws the form in answer to a send, minted for that response alone.",
       "children": [
         {
           "role": "challenge-label",
@@ -203,7 +204,7 @@
         "max": 2
       },
       "optional": true,
-      "when": "the anti-spam credentials were issued (with the challenge)"
+      "when": "the anti-spam credentials were issued (with the challenge, in the form's own response to a send, SC-025)"
     },
     {
       "role": "trap",
@@ -332,7 +333,7 @@
   ],
   "script": {
     "kind": "progressive",
-    "withoutScript": "A native POST to the platform's endpoint that redirects back with the status.",
+    "withoutScript": "A native POST to the platform's endpoint that redirects back with the status. The page holds no credentials (SC-025), so the endpoint's own response to a send is what draws the challenge and the tokens.",
     "withScript": "Submits in place, fetches the anti-spam credentials (with a captcha provider, it sends the token the native widget produced), fills the status region and moves focus to it."
   },
   "uses": [
@@ -370,7 +371,11 @@
     },
     {
       "topic": "ruling",
-      "text": "The form shows a privacy line when a privacy page is set (SC-006). When a captcha provider is configured, its widget is native and the arithmetic challenge is drawn inside noscript, so a visitor without JavaScript can still send the form: the challenge's credentials exist when the page is drawn, and a correct answer is accepted in place of a provider token. How each platform issues and checks them is native form delivery (SC-003). SC-006 accepts that the arithmetic path stays open beside a captcha. Without a provider the challenge is drawn as it is."
+      "text": "The form shows a privacy line when a privacy page is set (SC-006). When a captcha provider is configured, its widget is native and the arithmetic challenge is drawn inside noscript, so a visitor without JavaScript can still send the form: a correct answer is accepted in place of a provider token. How each platform issues and checks them is native form delivery (SC-003). SC-006 accepts that the arithmetic path stays open beside a captcha. Without a provider the challenge is drawn as it is."
+    },
+    {
+      "topic": "ruling",
+      "text": "The challenge field and its two tokens come from the form's own response, never from a cached page (SC-025). The form as a visitor first meets it carries none of the three, so a contact page can be cached. They are drawn when the form's endpoint redraws the form in answer to a send (after one that failed, or was refused for want of them, and after one that arrived where the platform redraws the form then), minted for that response alone. With script, the credentials are fetched and never drawn. In the fixtures, route.form.state open draws none; the invalid and sent states are responses and draw them when route.form.challenge says they were issued."
     },
     {
       "topic": "ruling",

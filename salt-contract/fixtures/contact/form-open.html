@@ -33,12 +33,6 @@
           <label class="salt-contact__label" for="enquire__message">Your message</label>
           <textarea class="salt-contact__input" id="enquire__message" name="message" rows="6" required></textarea>
         </div>
-        <div class="salt-contact__field">
-          <label class="salt-contact__label" for="enquire__challenge">{{salt:challenge-question}}</label>
-          <input class="salt-contact__input salt-contact__input--short" id="enquire__challenge" name="challengeAnswer" type="text" inputmode="numeric" autocomplete="off" required aria-describedby="enquire__status">
-        </div>
-        <input type="hidden" name="challengeToken" value="{{salt:challenge-token}}">
-        <input type="hidden" name="formToken" value="{{salt:form-token}}">
         <div class="salt-sr-only salt-contact__trap" aria-hidden="true">
           <label for="enquire__website">Leave this field empty</label>
           <input id="enquire__website" name="website" type="text" tabindex="-1" autocomplete="off">

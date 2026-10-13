@@ -1197,6 +1197,14 @@ function checkMarkup(c) {
       }
     }
 
+    // The contact form's challenge and its two tokens come from the form's own response to a
+    // send, never from the page as first drawn, which may be cached (contact-form.json, SC-025).
+    const form = c.section === 'contact' ? input.route?.form : undefined
+    if (isObject(form)) {
+      const drawn = all.filter((el) => ['challengeAnswer', 'challengeToken', 'formToken'].includes(attr(el, 'name')))
+      if (form.state === 'open' && (form.challenge === true || drawn.length)) fail(`${at}: the form as first drawn (route.form.state open) carries no challenge and no token: they come from the form's own response, never a page that may be cached (contact-form.json, SC-025)`)
+      else if (form.state !== 'open' && (form.challenge === true) !== (drawn.length > 0)) fail(`${at}.html: the challenge and its tokens are drawn when the response issued them (route.form.challenge), and only then (contact-form.json)`)
+    }
 
   } else {
     // A view has one h1, its title (section#single-h1); every other heading ranks below it. The

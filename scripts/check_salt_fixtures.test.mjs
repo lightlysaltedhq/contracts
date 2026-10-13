@@ -366,6 +366,13 @@ test('inputs: a case study\'s result split into a value and a suffix fails (SC-0
   expectFail(['collection-showcase'], (io) => io.json('collection-showcase/featured-case-studies.json', (d) => { d.collections['case-studies'][0].results[1] = { value: '3', suffix: ' years', label: 'To first full harvest' } }),
     /collections\.case-studies\[0\]\.results\[1\] is a result: one stat string and a label, nothing else/)
 })
+test('contact: the form as first drawn carries no challenge or token; a response draws them when issued (SC-025)', () => {
+  const tokens = '        <input type="hidden" name="challengeToken" value="{{salt:challenge-token}}">\n        <input type="hidden" name="formToken" value="{{salt:form-token}}">\n'
+  const open = /form-open: the form as first drawn \(route\.form\.state open\) carries no challenge and no token/
+  expectFail(['contact'], (io) => io.json('contact/form-open.json', (d) => { d.route.form.challenge = true }), open)
+  expectFail(['contact'], (io) => io.html('contact/form-open.html', '        <div class="salt-sr-only salt-contact__trap"', `${tokens}        <div class="salt-sr-only salt-contact__trap"`), open)
+  expectFail(['contact'], (io) => io.json('contact/form-invalid.json', (d) => { d.route.form.challenge = false }), /form-invalid\.html: the challenge and its tokens are drawn when the response issued them/)
+})
 test('gaps: a lone carousel card granted priority must take it', () => {
   expectFail(['carousel'], (io) => io.html('carousel/inline-one-card.html', ' fetchpriority="high"', ' loading="lazy"'), /the priority image must be in carousel's track,list,single/)
 })
