@@ -336,7 +336,7 @@
   ],
   "script": {
     "kind": "progressive",
-    "withoutScript": "A native POST to the platform's endpoint that redirects back with the status. The page holds no credentials (SC-025), so the endpoint's own response to a send is what draws the challenge and the tokens.",
+    "withoutScript": "A native POST to the platform's endpoint, which answers in its own response and never by redirecting back to the page, since the page may be cached and holds no status and no credentials (SC-025). A send that is refused, for want of credentials as a first post always is, or for a field that failed, is answered with the form drawn again: what was sent, each error, the status, and a fresh challenge and tokens (contact/form-invalid). A send that arrived is answered with the form drawn again, empty, with its status (contact/form-sent), or with a confirmation the endpoint draws or redirects to. The hidden returnTo names the page the form is on, so the response can link or return to it.",
     "withScript": "Submits in place, fetches the anti-spam credentials (with a captcha provider, it sends the token the native widget produced), fills the status region and moves focus to it."
   },
   "uses": [
