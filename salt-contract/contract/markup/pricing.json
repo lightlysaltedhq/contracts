@@ -196,6 +196,7 @@
       "section#single-h1",
       "section#labelled-by"
     ],
+    "headingBeforeOwn": "no heading of its own and there are plans (plan names are headings)",
     "children": "plan names at body base + 1"
   },
   "zeroState": "No plan with a name.",

@@ -96,14 +96,21 @@ test, applied through section 2's table, where the stricter row wins.
   which change the contract. A section that draws no heading has body base 1, wherever it sits on
   the page, so its body headings and card titles are `h2` and no rank is skipped
   (`section#body-heading-base`); `rich-text/body-only-no-heading`, `carousel/inline-no-name-list`,
-  `carousel/inline-quote-label-inverse` and `pricing/one-plan-inverse` rise a level, and the gate
-  fails a body whose shallowest heading is not base + 1. A case study's result in a showcase is
+  `carousel/inline-quote-label-inverse` and `pricing/one-plan-inverse`, four fixtures, rise a
+  level. `markup/pricing.json` declares `headingBeforeOwn`, as every section that can draw a
+  heading with none of its own does, which is what puts the page's `h1` first. The gate fails a
+  body whose first heading is not base + 1, a title that is not base + 1, a rank skipped on the
+  way down a rich-text body, and a section that draws headings with none of its own and no
+  `headingBeforeOwn`. A case study's result in a showcase is
   one `stat` string, as the view props have it: `collection-showcase/featured-case-studies` no
   longer splits it into a value and a suffix span. The contact form's challenge field and its two
   tokens come from the form's own response to a send, never from the page as first drawn, so a
-  contact page can be cached: `contact/form-open` loses them, and `markup/contact-form.json` says
-  when they are drawn. An anchor an editor typed is settled before any id is minted
-  (`section#anchors`), so an unanchored section never takes an editor's name. The phone and email
+  contact page can be cached: `contact/form-open` loses them, `markup/contact-form.json` says
+  when they are drawn, and without script the endpoint answers in its own response and never by
+  redirecting back to the page. An anchor an editor typed is settled before any id is minted
+  (`section#anchors`), so an unanchored section never takes an editor's name, and a minted id is
+  numbered over the stored layout, counting sections that draw nothing, so it does not move when
+  one above it empties or fills. The phone and email
   links in the contact details and the link in the privacy line carry `salt-contact__link`, which
   `styles/primitives.css` underlines in the band's own ink and gives the focus indicator (WCAG
   1.4.1), so `styles/salt.css` changes and each implementation serves the new bytes. Of the
@@ -321,7 +328,9 @@ questions and "left as work" notes here describe the draft at the time; 1.0.0 ab
     `-2`, `-3`. Each section with no anchor then mints its id from its section id, from what is
     left. So `faq, main, faq, faq-2` and an unanchored `pricing` render
     `faq, main-section, faq-2, faq-2-2, pricing`, and an unanchored `faq` section above a section
-    anchored `faq` renders `faq-2, faq`.
+    anchored `faq` renders `faq-2, faq`. A minted id's number counts every unanchored section of
+    its section id in the stored layout, drawn or not: of two unanchored `faq` sections, the
+    first with no items, the one drawn is `faq-2`.
   - The post, service, archive and search view bodies are fixed as Salt for Next.js's example app
     writes them (`salt-post__*`, `salt-service__*`, `salt-related`, `salt-archive__*`,
     `salt-search__results`). The post's author is the shared `author-box` component, and Salt for
