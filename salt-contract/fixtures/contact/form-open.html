@@ -5,8 +5,8 @@
       <p class="salt-intro">Tell us about your garden and what you would like from it.</p>
       <div class="salt-contact__details">
         <p class="salt-contact__organisation">Hedgerow &amp; Co Gardens</p>
-        <p><a href="tel:01174960123">0117 496 0123</a></p>
-        <p><a href="mailto:hello@hedgerow.example">hello@hedgerow.example</a></p>
+        <p><a class="salt-contact__link" href="tel:01174960123">0117 496 0123</a></p>
+        <p><a class="salt-contact__link" href="mailto:hello@hedgerow.example">hello@hedgerow.example</a></p>
       </div>
       <p class="salt-intro">We reply within two working days.</p>
       <form class="salt-contact__form" id="enquire__form" method="post" action="{{salt:form-action}}" novalidate>
@@ -38,7 +38,7 @@
           <input id="enquire__website" name="website" type="text" tabindex="-1" autocomplete="off">
         </div>
         <input type="hidden" name="returnTo" value="/contact/">
-        <p class="salt-contact__privacy">We use your details only to reply. Read our <a href="/privacy/">privacy notice</a>.</p>
+        <p class="salt-contact__privacy">We use your details only to reply. Read our <a class="salt-contact__link" href="/privacy/">privacy notice</a>.</p>
         <div class="salt-contact__actions">
           <button class="salt-button salt-contact__submit" type="submit" data-style="primary">Send enquiry</button>
         </div>

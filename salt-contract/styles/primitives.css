@@ -168,6 +168,8 @@ body {
 /* The contact form's fields (WP7 unit 7). A text field matches `:focus-visible` on a click as well
    as a key, which is the browser's rule for anything that takes typing and is what a field wants. */
 .salt-contact__input:focus-visible,
+/* The links in the contact details and the form's privacy line (SC-025). */
+.salt-contact__link:focus-visible,
 /* Three that drew the browser's own ring until BD-167: an editor's link in rich text, a linked
    logo, and the carousel track when it is a tab stop because its slides hold nothing focusable.
    The rich-text link is named through its container because the renderer gives it no class of
@@ -232,7 +234,7 @@ body {
    `.salt-section`, so this rule can never match one — but the contract reads the flat-tone
    list and requires the image composition to cover every control in it, and weakening that to
    allow an exception is how a card link quietly drops back to the one-pole indicator. */
-.salt-section[data-media] :is(.salt-button, .salt-card__link, .salt-accordion__summary, .salt-tabs__panel, .salt-showcase__link, .salt-pagination__link, .salt-search__input, .salt-share__link, .salt-copy-link__button, .salt-consent-panel__checkbox, .salt-logo, .salt-nav__link, .salt-nav__sublink, .salt-nav__toggle, .salt-header__burger, .salt-drawer__close, .salt-theme-toggle, .salt-header__phone, .salt-footer__link, .salt-footer__social-link, .salt-contact__input, .salt-rich-text :where(a), .salt-case-study-view__back-link, .salt-logos__frame, .salt-carousel__track, .salt-contact__status):focus-visible,
+.salt-section[data-media] :is(.salt-button, .salt-card__link, .salt-accordion__summary, .salt-tabs__panel, .salt-showcase__link, .salt-pagination__link, .salt-search__input, .salt-share__link, .salt-copy-link__button, .salt-consent-panel__checkbox, .salt-logo, .salt-nav__link, .salt-nav__sublink, .salt-nav__toggle, .salt-header__burger, .salt-drawer__close, .salt-theme-toggle, .salt-header__phone, .salt-footer__link, .salt-footer__social-link, .salt-contact__input, .salt-contact__link, .salt-rich-text :where(a), .salt-case-study-view__back-link, .salt-logos__frame, .salt-carousel__track, .salt-contact__status):focus-visible,
 /* The tab, in the same rule rather than a second one. The contract reads a rule at a time and
    asks that it cover every control the flat-tone list names, so a tab in its own rule would be
    a rule that covers one control and fails, and the flat-tone list names `.salt-tabs__input`. */
@@ -1683,6 +1685,19 @@ textarea.salt-contact__input {
 
 .salt-contact__status[data-tone='problem'] {
   font-weight: var(--weight-semibold);
+}
+
+/*
+ * The links in the contact details and the privacy line (SC-025). The band's own ink with an
+ * underline, as an index entry's link takes: the line is what says "link", never a colour alone
+ * (WCAG 1.4.1), and the ink is the pairing the band's text already clears on every tone and in
+ * both themes. Declared, not inherited, so a page with no reset still draws the band's ink and
+ * never the browser's link colour.
+ */
+.salt-contact__link {
+  color: var(--salt-section-ink, var(--color-ink));
+  text-decoration-line: underline;
+  text-underline-offset: 0.15em;
 }
 
 /*

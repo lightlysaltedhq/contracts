@@ -373,6 +373,10 @@ test('contact: the form as first drawn carries no challenge or token; a response
   expectFail(['contact'], (io) => io.html('contact/form-open.html', '        <div class="salt-sr-only salt-contact__trap"', `${tokens}        <div class="salt-sr-only salt-contact__trap"`), open)
   expectFail(['contact'], (io) => io.json('contact/form-invalid.json', (d) => { d.route.form.challenge = false }), /form-invalid\.html: the challenge and its tokens are drawn when the response issued them/)
 })
+test('contact: a link in the details or the privacy line without its class fails (SC-025)', () => {
+  expectFail(['contact'], (io) => io.html('contact/form-open.html', '<a class="salt-contact__link" href="/privacy/">', '<a href="/privacy/">'), /form-open\.html: .*salt-contact__link/)
+  expectFail(['contact'], (io) => io.html('contact/closed-with-details.html', '<a class="salt-contact__link" href="mailto:', '<a href="mailto:'), /closed-with-details\.html: .*salt-contact__link/)
+})
 test('gaps: a lone carousel card granted priority must take it', () => {
   expectFail(['carousel'], (io) => io.html('carousel/inline-one-card.html', ' fetchpriority="high"', ' loading="lazy"'), /the priority image must be in carousel's track,list,single/)
 })
@@ -483,7 +487,7 @@ test('form: a normaliser that masks an empty token fails the mutation proof', ()
   }, /emptying value on <input> does not change normalise's output/)
 })
 test('display: a phone written with an extension in brackets draws no link', () => {
-  expectFail(['contact'], (io) => io.html('contact/closed-with-details.html', '<a href="tel:01174960123">0117 496 0123</a>', '<a href="tel:0117496012323">0117 496 0123 (23)</a>'), /section#display-forms gives no link/)
+  expectFail(['contact'], (io) => io.html('contact/closed-with-details.html', '<a class="salt-contact__link" href="tel:01174960123">0117 496 0123</a>', '<a class="salt-contact__link" href="tel:0117496012323">0117 496 0123 (23)</a>'), /section#display-forms gives no link/)
 })
 test('arrows: only a section\'s call to action takes the site\'s arrow', () => {
   expectFail(['pricing'], (io) => {

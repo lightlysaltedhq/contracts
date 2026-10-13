@@ -261,13 +261,16 @@
         {
           "role": "privacy-link",
           "element": "a",
+          "classes": [
+            "salt-contact__link"
+          ],
           "attributes": {
             "href": "from:privacy page url"
           },
           "text": "from:labels.privacy"
         }
       ],
-      "note": "The sentence around the link comes from labels.privacyLine."
+      "note": "The sentence around the link comes from labels.privacyLine. The link carries salt-contact__link, as the contact details' links do, so it is underlined and not told from the sentence by colour alone (SC-025, WCAG 1.4.1)."
     },
     {
       "role": "actions",
@@ -364,7 +367,7 @@
   "notes": [
     {
       "topic": "stylesheet-owes",
-      "text": "The privacy line, from WordPress (SC-006); no rule yet.",
+      "text": "The privacy line, from WordPress (SC-006); no rule yet for the line itself. Its link is styled (salt-contact__link, SC-025).",
       "classes": [
         "salt-contact__privacy"
       ]
