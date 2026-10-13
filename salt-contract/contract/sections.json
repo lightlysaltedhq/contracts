@@ -445,7 +445,7 @@
           "id": "team",
           "label": "Team",
           "linked": false,
-          "categories": true
+          "categories": false
         }
       ],
       "platforms": {
@@ -543,7 +543,7 @@
           "id": "team",
           "label": "Team",
           "linked": false,
-          "categories": true
+          "categories": false
         }
       ],
       "platforms": {

@@ -862,18 +862,23 @@ test('Q4: an empty flag value is refused, so an unset variable never runs as no 
 test('SC-010: by-category is offered from the contract\'s categories, not from a platform slug', async () => {
   const { categorisedSources, categorySources } = await import('../salt-contract/emit/_contract.mjs')
   const contract = loadContract()
-  assert.deepEqual([...categorisedSources(contract)].sort(), ['case-studies', 'faqs', 'locations', 'posts', 'services', 'team'])
+  assert.deepEqual([...categorisedSources(contract)].sort(), ['case-studies', 'faqs', 'locations', 'posts', 'services'])
   const select = { name: 'source', type: 'select', label: 'Show', options: ['inline', 'testimonials', 'posts'].map((value) => ({ value, label: value })) }
   assert.deepEqual(categorySources({ sourceField: 'source' }, [select], categorisedSources(contract)), ['posts'])
   assert.deepEqual(categorySources({ source: 'testimonials' }, [], categorisedSources(contract)), [])
 
   // A fixed source with categories offers by-category; one without does not.
-  const query = (source) => field(toPayloadBlocks({ contract: { ...contract, ...probe([{ name: 'query', type: 'collection-query', label: 'Q', source }]), sections: [...probe([]).sections, ...contract.sections] }, sections: ['probe'] })[0].fields, 'query')
-  const team = query('team')
-  assert.deepEqual(team.fields[0].options.map((o) => o.value), ['automatic', 'by-category', 'manual'])
-  assert.equal(field(team.fields, 'categories').relationTo, 'departments')
+  const query = (source, sources) => field(toPayloadBlocks({ contract: { ...contract, ...probe([{ name: 'query', type: 'collection-query', label: 'Q', source }]), sections: [...probe([]).sections, ...contract.sections] }, sections: ['probe'], sources })[0].fields, 'query')
+  const services = query('services')
+  assert.deepEqual(services.fields[0].options.map((o) => o.value), ['automatic', 'by-category', 'manual'])
+  assert.equal(field(services.fields, 'categories').relationTo, 'service-categories')
   const testimonials = query('testimonials')
   assert.deepEqual(testimonials.fields.map((f) => f.name), ['mode', 'items', 'order', 'count'])
+  // Team has no categories (SC-027): automatic and manual only, whatever taxonomy a site names.
+  for (const team of [query('team'), query('team', { team: { taxonomy: 'departments' } })]) {
+    assert.deepEqual(team.fields.map((f) => f.name), ['mode', 'items', 'order', 'count'])
+    assert.deepEqual(team.fields[0].options.map((o) => o.value), ['automatic', 'manual'])
+  }
   assert.throws(() => toPayloadBlocks({ contract, sections: ['locations'], sources: { locations: { taxonomy: null } } }),
     /sources\.locations\.taxonomy: the contract gives locations categories \(SC-010\); name the collection that holds them/)
 })

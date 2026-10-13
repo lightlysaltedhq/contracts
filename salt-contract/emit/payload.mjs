@@ -48,14 +48,15 @@ import { allowedFor, categorisedSources, categorySources, clauseHolds, clauses, 
  * Each source's Payload collection and category taxonomy, as Salt for Next.js names them by
  * default. A site that renames a module passes `sources`. Whether a source has categories is the
  * contract's (SC-010, categorisedSources); `taxonomy` only names the collection holding them, and
- * team's `departments` and locations' `areas` are the names Salt for Next.js owes.
+ * locations' `areas` is the name Salt for Next.js owes. Team has no categories (SC-027), like
+ * testimonials, so it names none.
  */
 export const SOURCE_DEFAULTS = {
   services: { collection: 'services', taxonomy: 'service-categories' },
   'case-studies': { collection: 'case-studies', taxonomy: 'case-study-types' },
   testimonials: { collection: 'testimonials', taxonomy: null },
   posts: { collection: 'posts', taxonomy: 'topics' },
-  team: { collection: 'users', taxonomy: 'departments' },
+  team: { collection: 'users', taxonomy: null },
   faqs: { collection: 'faqs', taxonomy: 'faq-categories' },
   locations: { collection: 'locations', taxonomy: 'areas' },
 }

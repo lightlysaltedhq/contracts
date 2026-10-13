@@ -35,14 +35,15 @@ import { allowedFor, categorisedSources, categorySources, clauses, collectionQue
 /**
  * Each source's post type and category taxonomy, as Salt for WordPress registers them by default.
  * A site that renames a module passes `sources`. Whether a source has categories is the contract's
- * (SC-010, categorisedSources); `taxonomy` only names the taxonomy holding them.
+ * (SC-010, categorisedSources); `taxonomy` only names the taxonomy holding them. Team has no
+ * categories (SC-027), like testimonials, so it names none.
  */
 export const SOURCE_DEFAULTS = {
   services: { postType: 'service', taxonomy: 'service_category' },
   'case-studies': { postType: 'work', taxonomy: 'work_type' },
   testimonials: { postType: 'testimonial', taxonomy: null },
   posts: { postType: 'post', taxonomy: 'category' },
-  team: { postType: 'team_member', taxonomy: 'department' },
+  team: { postType: 'team_member', taxonomy: null },
   faqs: { postType: 'faq', taxonomy: 'faq_category' },
   locations: { postType: 'location', taxonomy: 'location_area' },
 }
