@@ -268,6 +268,8 @@ const OTHER_CONTEXT_KEYS = ['priorityMedia', 'locale', 'now', 'path']
 // The states a case may carry, as the README's `state` row documents them (checked here, so the
 // two cannot drift). Each says how the element it concerns is drawn, and nothing of any other.
 const STATES = ['consentPanelOpen', 'drawerOpen', 'themeScheme']
+// How a case draws the contact form: as a visitor first meets it, or in the form's own response.
+const FORM_STATES = ['open', 'invalid', 'sent']
 {
   const readme = path.join(dir, 'README.md')
   const row = existsSync(readme) ? readFileSync(readme, 'utf8').split('\n').find((l) => l.startsWith('| `state` |')) : undefined
@@ -971,6 +973,40 @@ const LANDMARK_ON = {
 
 const HEADING = /^h([1-6])$/
 
+// A section's body headings (section#body-heading-base, SC-025). `base` is the section heading's
+// level, or 1 when the section draws none. A title the section draws itself (a card's, a step's, a
+// group's, a later row's, a plan's) is base + 1. A heading in a rich-text body counts down from
+// the heading above its body, and no rank is skipped on the way down: h2 then h4 fails.
+function checkBody(c, where, what, base, body, hasOwn, doc) {
+  const inRichText = (h) => {
+    for (let p = c.parents.get(h); p; p = c.parents.get(p)) if (classesOf(p).includes('salt-rich-text')) return p
+    return null
+  }
+  const under = hasOwn ? `under the section heading at ${base}` : 'in a section that draws no heading the body base is 1, so'
+  let title = base
+  let previous = base
+  let container = null
+  let first = true
+  for (const h of body) {
+    const level = Number(h.name[1])
+    const rich = inRichText(h)
+    if (level <= base) fail(`${where}: ${describe(h)} in ${what} ranks at or above ${hasOwn ? `the section heading's level ${base}` : 'h1, the body base of a section that draws no heading'} (section#body-heading-base)`)
+    else if (first && level !== base + 1) fail(`${where}: the first heading in ${what} is h${level}; ${under} it is h${base + 1} (section#body-heading-base)`)
+    else if (!rich && level !== base + 1) fail(`${where}: ${describe(h)} in ${what} is a title the section draws, so it is h${base + 1}, body base + 1 (section#body-heading-base)`)
+    else if (rich) {
+      // Each rich-text body starts again from the heading above it.
+      if (rich !== container) previous = title
+      if (level > previous + 1) fail(`${where}: ${describe(h)} in ${what} follows h${previous}, so a rank is skipped (section#body-heading-base)`)
+    }
+    if (rich) { container = rich; previous = level } else { title = level; container = null }
+    first = false
+  }
+  // A section that draws headings with none of its own says so, which is what puts the page's h1
+  // before them (section#single-h1).
+  const declared = doc?.headings?.headingBeforeOwn
+  if (!hasOwn && body.length && doc && (typeof declared !== 'string' || /^never\b/.test(declared))) fail(`${where}: ${what} draws headings with no section heading, but contract/markup/${doc.id}.json declares no headings.headingBeforeOwn for it, so nothing puts the page's h1 first (section#body-heading-base)`)
+}
+
 function checkMarkup(c) {
   const { at, input, anchor } = c
   const tree = parse(c.html)
@@ -1155,6 +1191,27 @@ function checkMarkup(c) {
   const all = [root, ...descendants(root)]
   const ctx = input.context
   const ids = new Map()
+  // The contact form's challenge and its two tokens come from the form's own response to a send,
+  // never from the page as first drawn, which may be cached (contact-form.json, SC-025). This holds
+  // for every case that draws the form, whatever kind it is, and the case must say which it is.
+  if (all.some((el) => el.name === 'form' && classesOf(el).includes('salt-contact__form'))) {
+    const form = input.route?.form
+    const named = (name) => all.filter((el) => attr(el, 'name') === name).length
+    const drawn = [named('challengeAnswer'), named('challengeToken'), named('formToken')]
+    const whole = drawn.every((n) => n === 1)
+    if (!isObject(form)) fail(`${at}.json: the case draws the contact form, so route.form must say how: its state and whether the response issued a challenge (contact-form.json)`)
+    else if (!FORM_STATES.includes(form.state)) fail(`${at}.json: route.form.state is ${JSON.stringify(form.state)}; it is one of ${FORM_STATES.join(', ')}`)
+    else if (typeof form.challenge !== 'boolean') fail(`${at}.json: route.form.challenge must be true or false: whether the response issued the challenge and its tokens`)
+    else if (!whole && drawn.some((n) => n > 0)) fail(`${at}.html: the challenge field and its two tokens (challengeToken, formToken) are drawn together, once each, or not at all (contact-form.json)`)
+    else if (form.state === 'open' && (form.challenge || whole)) fail(`${at}: the form as first drawn (route.form.state open) carries no challenge and no token: they come from the form's own response, never a page that may be cached (contact-form.json, SC-025)`)
+    else if (form.challenge !== whole) fail(`${at}.html: the challenge and its tokens are drawn when the response issued them (route.form.challenge), and only then (contact-form.json)`)
+  }
+  // A result is one stat string, so the stat it draws has no suffix span (card.json, SC-025).
+  for (const el of all.filter((e) => classesOf(e).includes('salt-stat__suffix'))) {
+    for (let p = c.parents.get(el); p; p = c.parents.get(p)) {
+      if (['salt-showcase__results', 'salt-case-study-view__results'].some((k) => classesOf(p).includes(k))) fail(`${at}.html: ${describe(el)} splits a result; a result is one stat string, drawn whole as the stat's value (card.json, SC-025)`)
+    }
+  }
   if (c.kind === 'section') {
     // Headings (section#labelled-by, section#heading-level, section#body-heading-base).
     const headingId = `${anchor}__heading`
@@ -1171,15 +1228,8 @@ function checkMarkup(c) {
         fail(`${at}.html: the ${doc.headings.role} heading carries no id ${headingId}`)
       }
     }
-    // The body base is the section heading's level, or 1 when the section draws none (SC-025): so
-    // the shallowest heading in a body is base + 1, and no rank is skipped.
-    const base = naming.length ? ctx.headingLevel : 1
-    const body = headings.filter((h) => !naming.includes(h))
-    for (const h of body) {
-      if (Number(h.name[1]) <= base) fail(`${at}.html: ${describe(h)} ranks at or above ${naming.length ? `the section heading's level ${base}` : 'h1, the body base of a section that draws no heading'} (section#body-heading-base)`)
-    }
-    const shallowest = Math.min(...body.map((h) => Number(h.name[1])))
-    if (body.length && shallowest > base + 1) fail(`${at}.html: the shallowest heading in the body is h${shallowest}; ${naming.length ? `under the section heading at ${base}` : 'in a section that draws no heading the body base is 1, so'} it is h${base + 1} (section#body-heading-base)`)
+    // The body base is the section heading's level, or 1 when the section draws none (SC-025).
+    checkBody(c, `${at}.html`, 'the body', naming.length ? ctx.headingLevel : 1, headings.filter((h) => !naming.includes(h)), naming.length > 0, doc)
     if (headings.filter((h) => h.name === 'h1').length > (naming[0]?.name === 'h1' ? 1 : 0)) fail(`${at}.html: an h1 that is not the section heading claiming it (section#single-h1)`)
 
     // Ids (SC-012).
@@ -1195,15 +1245,6 @@ function checkMarkup(c) {
       for (const name of ['aria-labelledby', 'aria-describedby', 'aria-controls', 'for']) {
         for (const ref of (attr(el, name) ?? '').split(/\s+/).filter(Boolean)) if (!ids.has(ref)) fail(`${at}.html: ${describe(el)} ${name} points at ${ref}, which is not drawn`)
       }
-    }
-
-    // The contact form's challenge and its two tokens come from the form's own response to a
-    // send, never from the page as first drawn, which may be cached (contact-form.json, SC-025).
-    const form = c.section === 'contact' ? input.route?.form : undefined
-    if (isObject(form)) {
-      const drawn = all.filter((el) => ['challengeAnswer', 'challengeToken', 'formToken'].includes(attr(el, 'name')))
-      if (form.state === 'open' && (form.challenge === true || drawn.length)) fail(`${at}: the form as first drawn (route.form.state open) carries no challenge and no token: they come from the form's own response, never a page that may be cached (contact-form.json, SC-025)`)
-      else if (form.state !== 'open' && (form.challenge === true) !== (drawn.length > 0)) fail(`${at}.html: the challenge and its tokens are drawn when the response issued them (route.form.challenge), and only then (contact-form.json)`)
     }
 
   } else {
@@ -1224,12 +1265,7 @@ function checkMarkup(c) {
       const level = c.nested?.headingLevel ?? (c.kind === 'page' ? 1 : 2)
       const base = own ? Number(own.name[1]) : 1
       if (own && base !== level) fail(`${at}.html: the nested section ${attr(nested, 'id')}'s heading is ${own.name}; the plan gives it h${level} (section#heading-level)`)
-      const body = inside.filter((h) => h !== own)
-      for (const h of body) {
-        if (Number(h.name[1]) <= base) fail(`${at}.html: ${describe(h)} in the nested section ${attr(nested, 'id')} ranks at or above ${own ? `its heading's level ${base}` : 'h1, the body base of a section that draws no heading'} (section#body-heading-base)`)
-      }
-      const shallowest = Math.min(...body.map((h) => Number(h.name[1])))
-      if (body.length && shallowest > base + 1) fail(`${at}.html: the shallowest heading in the nested section ${attr(nested, 'id')}'s body is h${shallowest}; its body base is ${base}, so it is h${base + 1} (section#body-heading-base)`)
+      checkBody(c, `${at}.html`, `the nested section ${attr(nested, 'id')}'s body`, base, inside.filter((h) => h !== own), Boolean(own), c.nested ? markup.get(c.nested.section) : undefined)
     }
     // Ids (SC-012): a landmark id, a nested section's anchor, or <owner>__<part> with the owner a
     // vocabulary id or one of those anchors.
