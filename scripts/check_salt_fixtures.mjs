@@ -1164,10 +1164,15 @@ function checkMarkup(c) {
         fail(`${at}.html: the ${doc.headings.role} heading carries no id ${headingId}`)
       }
     }
-    for (const h of headings) {
-      if (naming.includes(h)) continue
-      if (Number(h.name[1]) <= ctx.headingLevel) fail(`${at}.html: ${describe(h)} ranks at or above the section heading's level ${ctx.headingLevel} (section#body-heading-base)`)
+    // The body base is the section heading's level, or 1 when the section draws none (SC-025): so
+    // the shallowest heading in a body is base + 1, and no rank is skipped.
+    const base = naming.length ? ctx.headingLevel : 1
+    const body = headings.filter((h) => !naming.includes(h))
+    for (const h of body) {
+      if (Number(h.name[1]) <= base) fail(`${at}.html: ${describe(h)} ranks at or above ${naming.length ? `the section heading's level ${base}` : 'h1, the body base of a section that draws no heading'} (section#body-heading-base)`)
     }
+    const shallowest = Math.min(...body.map((h) => Number(h.name[1])))
+    if (body.length && shallowest > base + 1) fail(`${at}.html: the shallowest heading in the body is h${shallowest}; ${naming.length ? `under the section heading at ${base}` : 'in a section that draws no heading the body base is 1, so'} it is h${base + 1} (section#body-heading-base)`)
     if (headings.filter((h) => h.name === 'h1').length > (naming[0]?.name === 'h1' ? 1 : 0)) fail(`${at}.html: an h1 that is not the section heading claiming it (section#single-h1)`)
 
     // Ids (SC-012).
@@ -1202,11 +1207,14 @@ function checkMarkup(c) {
       const own = inside.find((el) => attr(el, 'id') === `${attr(nested, 'id')}__heading`)
       // In a view the nested heading is h2, under the view's h1; on a page it is the plan's level.
       const level = c.nested?.headingLevel ?? (c.kind === 'page' ? 1 : 2)
-      const base = own ? Number(own.name[1]) : level
+      const base = own ? Number(own.name[1]) : 1
       if (own && base !== level) fail(`${at}.html: the nested section ${attr(nested, 'id')}'s heading is ${own.name}; the plan gives it h${level} (section#heading-level)`)
-      for (const h of inside) {
-        if (h !== own && Number(h.name[1]) <= base) fail(`${at}.html: ${describe(h)} in the nested section ${attr(nested, 'id')} ranks at or above its heading's level ${base} (section#body-heading-base)`)
+      const body = inside.filter((h) => h !== own)
+      for (const h of body) {
+        if (Number(h.name[1]) <= base) fail(`${at}.html: ${describe(h)} in the nested section ${attr(nested, 'id')} ranks at or above ${own ? `its heading's level ${base}` : 'h1, the body base of a section that draws no heading'} (section#body-heading-base)`)
       }
+      const shallowest = Math.min(...body.map((h) => Number(h.name[1])))
+      if (body.length && shallowest > base + 1) fail(`${at}.html: the shallowest heading in the nested section ${attr(nested, 'id')}'s body is h${shallowest}; its body base is ${base}, so it is h${base + 1} (section#body-heading-base)`)
     }
     // Ids (SC-012): a landmark id, a nested section's anchor, or <owner>__<part> with the owner a
     // vocabulary id or one of those anchors.

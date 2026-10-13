@@ -342,8 +342,25 @@ test('gaps: a name on the accordion\'s own div fails; it belongs on each details
 test('gaps: an aria-label on the tab set\'s generic div fails; it belongs on the radiogroup', () => {
   expectFail(['tabs'], (io) => io.html('tabs/many-tabbed.html', '<div class="salt-tabs" data-tabbed>', '<div class="salt-tabs" data-tabbed aria-label="Services">'), /<div\.salt-tabs> carries aria-label, which the markup does not declare/)
 })
-test('gaps: a body h2 under a level-2 section heading fails, at base 1 it is right', () => {
-  expectFail(['rich-text'], (io) => io.html('rich-text/body-only-no-heading.html', '<h3>Our approach</h3>', '<h2>Our approach</h2>'), /ranks at or above the section heading's level 2/)
+// SC-025: a section that draws no heading has body base 1, wherever it sits on the page, so its
+// body headings and card titles rise a level and no rank is skipped.
+test('gaps: body headings kept a level down in a section that draws no heading fail (SC-025)', () => {
+  expectFail(['rich-text'], (io) => { io.html('rich-text/body-only-no-heading.html', '<h3>Materials</h3>', '<h4>Materials</h4>'); io.html('rich-text/body-only-no-heading.html', '<h2>Our approach</h2>', '<h3>Our approach</h3>') },
+    /body-only-no-heading\.html: the shallowest heading in the body is h3; in a section that draws no heading the body base is 1, so it is h2 \(section#body-heading-base\)/)
+  expectFail(['carousel'], (io) => {
+    const rel = 'fixtures/carousel/inline-no-name-list.html'
+    io.write(rel, readFileSync(path.join(io.dir, rel), 'utf8').replace(/<h2/g, '<h3').replace(/<\/h2>/g, '</h3>'))
+  }, /inline-no-name-list\.html: the shallowest heading in the body is h3; .* it is h2/)
+})
+test('gaps: a rank skipped under a section heading fails', () => {
+  expectFail(['features'], (io) => {
+    const rel = 'fixtures/features/many-items-linked.html'
+    io.write(rel, readFileSync(path.join(io.dir, rel), 'utf8').replace(/<h3>/g, '<h4>').replace(/<\/h3>/g, '</h4>'))
+  }, /the shallowest heading in the body is h4; under the section heading at 2 it is h3 \(section#body-heading-base\)/)
+  expectFail(['archive'], (io) => {
+    const rel = 'fixtures/archive/topic.html'
+    io.write(rel, readFileSync(path.join(io.dir, rel), 'utf8').replace(/<h3>/g, '<h4>').replace(/<\/h3>/g, '</h4>'))
+  }, /the shallowest heading in the nested section posts's body is h4; its body base is 2, so it is h3/)
 })
 test('gaps: a lone carousel card granted priority must take it', () => {
   expectFail(['carousel'], (io) => io.html('carousel/inline-one-card.html', ' fetchpriority="high"', ' loading="lazy"'), /the priority image must be in carousel's track,list,single/)

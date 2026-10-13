@@ -121,7 +121,7 @@
       "section#labelled-by"
     ],
     "headingBeforeOwn": "no heading of its own and there are cards",
-    "children": "card titles at body base + 1"
+    "children": "card titles at body base + 1: h2 when the section draws no heading (section#body-heading-base)"
   },
   "zeroState": "The source is not installed or no card survives.",
   "priorityMedia": {

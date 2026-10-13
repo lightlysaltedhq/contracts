@@ -39,7 +39,7 @@
         {
           "name": "bodyBaseLevel",
           "kind": "integer",
-          "description": "The level a body's own headings count from (section#body-heading-base): the section heading's level, or the level it would have had.",
+          "description": "The level a body's own headings count from (section#body-heading-base): the section heading's level when the section draws one, otherwise 1 (SC-025).",
           "from": "plan"
         },
         {

@@ -1,6 +1,6 @@
 {
   "section": "carousel",
-  "summary": "Two inline cards with neither a heading nor a label: nothing names a carousel, so they are drawn as the plain grid list. The wrapper is a div. Spacing none.",
+  "summary": "Two inline cards with neither a heading nor a label: nothing names a carousel, so they are drawn as the plain grid list. The wrapper is a div, and the card titles are h2 (body base 1, section#body-heading-base). Spacing none.",
   "values": {
     "source": "inline",
     "cardStyle": "generic",

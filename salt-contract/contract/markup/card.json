@@ -62,7 +62,7 @@
           "note": "The one stretched link per card, wrapping the title."
         }
       ],
-      "note": "Level given by the section: body base + 1."
+      "note": "Level given by the section: body base + 1, so h2 in a section that draws no heading (section#body-heading-base)."
     },
     {
       "role": "meta",

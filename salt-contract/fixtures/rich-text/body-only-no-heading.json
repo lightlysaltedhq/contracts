@@ -1,6 +1,6 @@
 {
   "section": "rich-text",
-  "summary": "Body only, no eyebrow or heading, so the wrapper is a div. Not first on the page (headingLevel 2): the stored h3 and h4 render as h3 and h4 (base + 1 and base + 2).",
+  "summary": "Body only, no eyebrow or heading, so the wrapper is a div. Not first on the page (headingLevel 2), and it draws no heading, so the body base is 1 (section#body-heading-base): the stored h3 and h4 render as h2 and h3 (base + 1 and base + 2), and no rank is skipped.",
   "values": {
     "body": "<h3>Our approach</h3><p>We design for how you live outdoors.</p><h4>Materials</h4><p>Local stone and peat-free compost wherever we can.</p>",
     "settings": {
