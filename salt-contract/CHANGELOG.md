@@ -381,14 +381,16 @@ questions and "left as work" notes here describe the draft at the time; 1.0.0 ab
 - The sections schema drops `openQuestions`.
 - Locations' open-now rule states one order, hours carried past midnight included.
 - Each collection source in `contract/sections.json` states whether it has a category taxonomy
-  (`categories`, SC-010): services, case studies, posts, FAQs and locations do; testimonials and
-  team (SC-027) do not. The sections schema requires it of every source with items, and the gate refuses a
+  (`categories`, SC-010): services, case studies, posts, team, FAQs and locations do; testimonials
+  do not. The sections schema requires it of every source with items, and the gate refuses a
   source that answers two ways or a source a collection-query can read with no answer. Both
   emitters read it (`categorisedSources` and `categorySources` in `emit/_contract.mjs`): a
   collection-query offers its by-category mode and categories picker only for a source with
   categories, and with a source select the picker shows only while the select holds one. Salt for
-  Next.js owes a location-area taxonomy with its locations section. The Payload emitter names
-  locations' taxonomy `areas` by default; a site names its own through `sources`.
+  Next.js owes a location-area taxonomy with its locations section; its team categories were
+  already owed (SC-006). The Payload emitter names team's and locations' taxonomies `departments`
+  and `areas` by default; a site names its own through `sources`. SC-027 later withdraws team's
+  categories, and with them the `departments` default.
 - The collection-showcase and carousel queries' Salt for WordPress notes owe an
   `acf/validate_value` check refusing by-category for a source without categories, and an admin
   check of the categories field's conditional logic (SC-010); the ACF emitter records the rule as
