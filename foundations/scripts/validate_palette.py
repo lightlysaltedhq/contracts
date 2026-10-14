@@ -301,11 +301,41 @@ def check_categorical(colors, surface, labels, args):
 # neighbours (a waffle puts any two parts side by side), and has no chroma floor, because a part
 # may legitimately be a grey. A pale part that falls under the mark floor is legal only if it is
 # drawn with an edge, and then the EDGE is what is measured against the surface.
+#
+# DISTINCT COLOURS, MEASURED. Lightness and ΔE alone would pass four greys, which are not distinct
+# colours. So hue is measured too: at most one part may be achromatic (OKLCH chroma under
+# ACHROMATIC_C, where a mark's hue stops being nameable at chart size), and every pair of chromatic
+# parts must sit at least --min-hue-deg apart on the hue circle. 30° is the default because it is
+# the narrowest step at which two hues of the same lightness band get different everyday names
+# (orange from amber, blue from teal); a narrower pair reads as one hue in two strengths.
 # ══════════════════════════════════════════════════════════════════════════════
+ACHROMATIC_C = 0.04
+
+
+def _hue_gap(a, b):
+    d = abs(a - b) % 360
+    return min(d, 360 - d)
+
 def check_composition(colors, surface, labels, args):
     R = Report()
     Ls = [hex_to_oklch(c)[0] for c in colors]
     pairs = _pairs(len(colors), 'all')
+
+    lch = [hex_to_oklch(c) for c in colors]
+    grey = [lb for lb, (_, C, _) in zip(labels, lch) if C < ACHROMATIC_C]
+    R.add('at most one achromatic part', len(grey) <= 1,
+          [f'achromatic below C {ACHROMATIC_C}: ' + (', '.join(grey) if grey else 'none'),
+           'Two greys are one colour in two strengths, not two distinct parts.'],
+          worst=len(grey))
+    chromatic = [i for i, (_, C, _) in enumerate(lch) if C >= ACHROMATIC_C]
+    gaps = {(i, j): _hue_gap(lch[i][2], lch[j][2])
+            for i, j in itertools.combinations(chromatic, 2)}
+    if gaps:
+        w = min(gaps, key=gaps.get)
+        R.add('hue separation, chromatic pairs', gaps[w] >= args.min_hue_deg,
+              [f'floor {args.min_hue_deg}°, worst {gaps[w]:.1f}° '
+               f'({labels[w[0]]} | {labels[w[1]]})'],
+              worst=round(gaps[w], 1))
 
     dl = {(i, j): abs(Ls[i] - Ls[j]) for i, j in pairs}
     w = min(dl, key=dl.get)
@@ -330,9 +360,6 @@ def check_composition(colors, surface, labels, args):
               worst=round(dd[w], 2), enforced=enforced)
 
     edged = set(args.edged or [])
-    unknown = edged - set(labels)
-    if unknown:
-        raise SystemExit(f'--edged names {", ".join(sorted(unknown))}, which is not a label')
     ratios = {lb: contrast_ratio(c, surface) for lb, c in zip(labels, colors)}
     bare = {lb: r for lb, r in ratios.items() if lb not in edged}
     low = [(lb, round(r, 2)) for lb, r in bare.items() if r < args.min_contrast]
@@ -479,6 +506,11 @@ def main(argv=None):
                    help='parts drawn with an edge; their mark floor is carried by --edge')
     m.add_argument('--edge', default=None, metavar='HEX',
                    help='the edge colour drawn round the --edged parts')
+    m.add_argument('--min-hue-deg', type=float, default=30.0,
+                   help='hue angle every pair of chromatic parts must clear (default 30)')
+    # Every deficiency is ENFORCED here by default: a part's identity is its colour, and the set
+    # has no structural blue-and-green pair to excuse a tritan collapse.
+    m.set_defaults(cvd=','.join(SIMULATED))
 
     o = sub.add_parser('ordinal', help='a ramp that encodes ORDER (which band)')
     common(o)
@@ -499,6 +531,9 @@ def main(argv=None):
     labels = args.labels or [str(i + 1) for i in range(len(colors))]
     if len(labels) != len(colors):
         p.error(f'{len(labels)} labels for {len(colors)} colours')
+    if len(set(labels)) != len(labels):
+        p.error('--labels repeats a label; every slot needs its own, or two slots are measured '
+                'as one')
     if len(colors) < 2:
         p.error('at least two colours are needed to measure a separation')
 
@@ -515,6 +550,12 @@ def main(argv=None):
 
     if args.mode == 'composition' and args.edged and not args.edge:
         p.error('--edged needs --edge: an edged part is measured by its edge')
+    if args.mode == 'composition' and args.edge and not args.edged:
+        p.error('--edge needs --edged: an edge measured round no part proves nothing')
+    if args.mode == 'composition' and args.edged:
+        unknown = set(args.edged) - set(labels)
+        if unknown:
+            p.error(f'--edged names {", ".join(sorted(unknown))}, which is not a label')
     if args.mode == 'composition' and args.edge and not args.edge.startswith('#'):
         args.edge = '#' + args.edge
     if args.mode == 'categorical':

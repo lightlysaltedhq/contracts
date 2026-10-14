@@ -258,6 +258,17 @@ def main():
     check('an additional seed with no seed raises', additional_seed_without_seed,
           want_error='needs a')
 
+    def part_key(key, value):
+        def fn():
+            p = minimal_preset()
+            p['extended'] = {'chartPart': {key: value}}
+            build(preset=p, emit_adapter=False)
+        return fn
+    check('a chartPart key outside 1-5 raises', part_key('6', 'var(--color-neutral-500)'),
+          want_error='part number')
+    check('a literal chartPart value raises',
+          part_key('1', minimal_preset()['roles']['primary']['seed']), want_error='var()')
+
     # Finding: an injected adapter value containing */ closes the comment early and lands live
     # declarations in a file whose whole promise is that it declares no values.
     def injection():

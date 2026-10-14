@@ -806,14 +806,29 @@ def build_tokens(preset, identity, scales, provenance=None, docs=None, typograph
                             '(Tier 2). An ordinal fill for touching strips and stacked columns, '
                             'ALWAYS with an identifying legend; never a categorical series '
                             'colour, never a standalone mark.')
-    for n in sorted(ext.get('chartPart', {}), key=lambda x: int(x)):
-        total = len(ext['chartPart'])
-        add_ext(f'color.chart.part.{n}', ext['chartPart'][n],
+    # Parts are numbered 1-5 like the vocabulary, and each must be a var() reference: the family
+    # exists so a part is retuned by moving one seed, and a literal value is a part no seed moves.
+    parts = {k: v for k, v in ext.get('chartPart', {}).items() if not str(k).startswith('$')}
+    for n in parts:
+        if not re.fullmatch(r'[1-5]', str(n)):
+            raise ValueError(f"extended.chartPart key {n!r} is not a part number. The vocabulary "
+                             'names chart-part-1 to chart-part-5, so the keys are "1" to "5".')
+        for mode_value in _mode_pair(parts[n]):
+            if mode_value is not None and not re.fullmatch(r'var\(--[a-z][a-z0-9-]*\)',
+                                                            str(mode_value)):
+                raise ValueError(f'extended.chartPart.{n} is {mode_value!r}. A part is one var() '
+                                 'reference to a ramp rung or role, so that one seed retunes it; '
+                                 'a literal colour is a part nothing moves.')
+    for n in sorted(parts, key=lambda x: int(x)):
+        total = len(parts)
+        add_ext(f'color.chart.part.{n}', parts[n],
                 description=f'Composition part {n} of {total} (Tier 2). One unordered part of a '
-                            'whole (a divided bar, a waffle): a distinct hue AND a distinct '
-                            'lightness from every other part, so the set separates all-pairs in '
-                            'greyscale and under simulated deficiency. ALWAYS directly labelled or '
-                            'legended; never a series identity and never a rank.')
+                            'whole (a divided bar, a waffle), ALWAYS directly labelled or '
+                            'legended; never a series identity and never a rank. Measured by '
+                            'validate_palette.py composition: at most one achromatic part, '
+                            'chromatic parts a stated hue angle apart, every pair a stated '
+                            'lightness step apart and separated under normal vision and simulated '
+                            'deficiency.')
     if 'chartNeutral' in ext:
         add_ext('color.chart.neutral', ext['chartNeutral'],
                 description='De-emphasised comparison SERIES (competitors, "lost", inactive). '

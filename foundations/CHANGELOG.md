@@ -78,10 +78,19 @@ vector, rule or export changes for an implementation that emits none of it.
   are spread in lightness on purpose, so every pair separates without its hue. The emitter numbers
   the family by what a preset declares.
 - **`validate_palette.py composition`**, the instrument for that family: a pairwise lightness floor
-  (`--min-pair-dl`, default 0.06), all-pairs separation under normal vision and all three simulated
-  deficiencies at the categorical floors, mark contrast against the surface, and no chroma floor,
-  because a part may be a grey. A part below the mark floor is legal only when drawn with an edge:
-  name it in `--edged` and give the edge colour in `--edge`, and the edge is measured instead.
+  (`--min-pair-dl`, default 0.06); all-pairs ΔE under normal vision and simulated deutan, protan
+  and tritan at the categorical floors, all three enforced by default; at most one achromatic part
+  (chroma under 0.04) and every pair of chromatic parts at least `--min-hue-deg` apart (default
+  30°); mark contrast against the surface, with no chroma floor because a part may be a grey. A
+  part below the mark floor is legal only when drawn with an edge: name it in `--edged` and give the
+  edge colour in `--edge`, and the edge is measured instead. Either flag without the other is
+  refused, and so, in every mode, is a repeated `--labels` entry, which would let two parts share
+  one contrast verdict.
+- **`chartPart` is checked by the emitter**: keys are `"1"` to `"5"`, and each value must be a
+  `var()` reference, so a part is always retuned by moving one seed.
+- **`scripts/selftest_palette.py`**, the palette instrument's refusals as tests, run by
+  `npm run foundations`.
+- The categorical `$honesty` note says what `additionalSeeds` changes about the three-hue limit.
 
 ## 3.0.1 — 08/10/2026
 
