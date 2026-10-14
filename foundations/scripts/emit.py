@@ -514,6 +514,35 @@ def build_tokens(preset, identity, scales, provenance=None, docs=None, typograph
                   note='Gamut-mapped OKLCH ladder — @lightlysaltedhq/design-foundations/derivation, '
                        'proven against its frozen vectors.')
 
+    # ══════════ ADDITIONAL SEEDS — optional named ramps, derived by the same rules ══════════
+    # A brand of three seeds yields three hues. An implementation that needs a fourth working hue
+    # (a categorical set for parts of a whole, say) names it here and gets a ramp derived exactly
+    # as the role ramps are, so one seed value moves every rung. Without this the only way to add
+    # a hue was a hand-typed hex in an extended role, which no seed moves and no ladder explains.
+    # The name becomes --color-<name>-<step>, so it is checked like a dark-surface ramp's name.
+    ds_name_for_seeds = _dark_surface(preset)[0]
+    for name, spec in preset.get('additionalSeeds', {}).items():
+        if name.startswith('$'):
+            continue
+        name = _checked_ramp_name(name)
+        if name == ds_name_for_seeds:
+            raise ValueError(f'additional seed {name!r} has the same name as the dark-surface '
+                             'ramp, and both would emit --color-' + name + '-<step>.')
+        seed = spec.get('seed') if isinstance(spec, dict) else None
+        if not seed:
+            raise ValueError(f"preset['additionalSeeds'][{name!r}] needs a 'seed'.")
+        T.add(f'color.{name}.base', 'color', seed, f'--color-{name}-base', PSRC, group='role',
+              exactSeed=True, role=name,
+              description=f'Verbatim {name} seed (exact hex, never laddered). An additional seed: '
+                          'a ramp no contract role reads directly, for extended roles to reference.')
+        ramp = derive_ramp(seed)
+        for step in RAMP_STEPS:
+            T.add(f'color.{name}.{step}', 'color', ramp[step], f'--color-{name}-{step}', PSRC,
+                  group='role', role=name,
+                  derived={'from': f'color.{name}.base', 'fn': 'salt_derive_ramp', 'space': 'oklch'},
+                  note='Gamut-mapped OKLCH ladder — @lightlysaltedhq/design-foundations/derivation, '
+                       'proven against its frozen vectors.')
+
     # ══════════ NEUTRAL RAMP — hand-authored, length is the preset's business ══════════
     for step, value in preset['neutral'].items():
         T.add(f'color.neutral.{step}', 'color', value, f'--color-neutral-{step}', prov['neutral'],
@@ -777,6 +806,14 @@ def build_tokens(preset, identity, scales, provenance=None, docs=None, typograph
                             '(Tier 2). An ordinal fill for touching strips and stacked columns, '
                             'ALWAYS with an identifying legend; never a categorical series '
                             'colour, never a standalone mark.')
+    for n in sorted(ext.get('chartPart', {}), key=lambda x: int(x)):
+        total = len(ext['chartPart'])
+        add_ext(f'color.chart.part.{n}', ext['chartPart'][n],
+                description=f'Composition part {n} of {total} (Tier 2). One unordered part of a '
+                            'whole (a divided bar, a waffle): a distinct hue AND a distinct '
+                            'lightness from every other part, so the set separates all-pairs in '
+                            'greyscale and under simulated deficiency. ALWAYS directly labelled or '
+                            'legended; never a series identity and never a rank.')
     if 'chartNeutral' in ext:
         add_ext('color.chart.neutral', ext['chartNeutral'],
                 description='De-emphasised comparison SERIES (competitors, "lost", inactive). '
@@ -1616,6 +1653,9 @@ The preset is the palette, and this module holds none of it.
 
   roles         {primary: {seed}, secondary?: {seed}, accent?: {seed}}
                 secondary falls back to primary, accent to secondary. One seed is a brand.
+  additionalSeeds {name: {seed}} — optional further ramps, derived by the same rules, emitted as
+                --color-<name>-base and --color-<name>-<step>. No contract role reads them;
+                extended roles reference their rungs.
   neutral       {step: value} — hand-authored. Any length; the contract mandates none.
   darkSurface   {name, steps} — optional hand-authored dark-surface ramp. `name` becomes
                 --color-<name>-<step>, so it is your word for your ramp. (Legacy: a bare `navy`
@@ -1642,7 +1682,8 @@ The preset is the palette, and this module holds none of it.
                     surface.inverse, so emit.py refuses one. strong.inverse carries a measurement
                     obligation, so give it a value a gate can resolve.
                 statusCompanions {subtle: pct, border: pct, glow: {status: pct}}
-                chart {"1".."5"}  chartBand {"1".."5"}  chartNeutral  chartInactive
+                chart {"1".."5"}  chartBand {"1".."5"}  chartPart {"1".."5"}
+                chartNeutral  chartInactive
                 shadow {sm,md,lg}
                 brand {active, fill}   onBrandFill
                 onDark {ink, ink-muted, highlight, border, wash, wash-hover, deep, deep-raised}

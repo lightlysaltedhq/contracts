@@ -59,6 +59,30 @@ design-system repository. After 3.0.0 the contract moved to the public repositor
   metadata and gates. A fixture change is a patch only if no implementation that passed before
   can fail after it; if it could, it is a major.
 
+## 3.1.0 — 14/10/2026
+
+A **minor**: everything here is optional and binds nothing until an implementation uses it. No
+vector, rule or export changes for an implementation that emits none of it.
+
+### Added
+
+- **`additionalSeeds` in a preset.** `{name: {seed}}`, each derived into an 11-step ramp by the
+  same derivation as the role seeds and emitted as `--color-<name>-base` and
+  `--color-<name>-<step>`. No contract role reads these ramps; extended roles reference their
+  rungs. Until now a hue beyond the three role seeds could only be a hand-typed value in an
+  extended role, which no seed moves. A name is checked like a dark-surface ramp's name: a CSS
+  identifier fragment, not a role the vocabulary owns, and not the dark-surface ramp's own name.
+- **The `chart-part-1` to `chart-part-5` roles** (`chartPart` in a preset, `color.chart.part.<n>`,
+  `--color-chart-part-<n>`): unordered parts of one whole drawn touching, such as a divided bar or a
+  waffle. The categorical slots sit at one lightness so no series reads as more important; parts
+  are spread in lightness on purpose, so every pair separates without its hue. The emitter numbers
+  the family by what a preset declares.
+- **`validate_palette.py composition`**, the instrument for that family: a pairwise lightness floor
+  (`--min-pair-dl`, default 0.06), all-pairs separation under normal vision and all three simulated
+  deficiencies at the categorical floors, mark contrast against the surface, and no chroma floor,
+  because a part may be a grey. A part below the mark floor is legal only when drawn with an edge:
+  name it in `--edged` and give the edge colour in `--edge`, and the edge is measured instead.
+
 ## 3.0.1 — 08/10/2026
 
 - **The package's source moved to the public repository `lightlysaltedhq/contracts`**, as this
