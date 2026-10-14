@@ -305,9 +305,9 @@ def check_categorical(colors, surface, labels, args):
 # DISTINCT COLOURS, MEASURED. Lightness and ΔE alone would pass four greys, which are not distinct
 # colours. So hue is measured too: at most one part may be achromatic (OKLCH chroma under
 # ACHROMATIC_C, where a mark's hue stops being nameable at chart size), and every pair of chromatic
-# parts must sit at least --min-hue-deg apart on the hue circle. 30° is the default because it is
-# the narrowest step at which two hues of the same lightness band get different everyday names
-# (orange from amber, blue from teal); a narrower pair reads as one hue in two strengths.
+# parts must sit at least --min-hue-deg apart on the hue circle (OKLCH hue angle, the shorter way
+# round). 30° is a default, not a perceptual result: it is the gap this mode measures, set wide
+# enough that two parts cannot be one hue at two lightnesses. Set your own and say why.
 # ══════════════════════════════════════════════════════════════════════════════
 ACHROMATIC_C = 0.04
 
@@ -472,7 +472,8 @@ def main(argv=None):
                         help='names for the slots, for readable output')
         sp.add_argument('--cvd', default=','.join(DEFAULT_ENFORCED),
                         help='which deficiencies are ENFORCED (default: '
-                             f'{",".join(DEFAULT_ENFORCED)}). All of {"/".join(SIMULATED)} are '
+                             f'{",".join(DEFAULT_ENFORCED)}; in composition mode, all of '
+                             f'{",".join(SIMULATED)}). All of {"/".join(SIMULATED)} are '
                              'simulated and reported on every run regardless; this flag only '
                              'decides which can fail it. May not be empty — there is no way to '
                              'stop a measurement being taken.')

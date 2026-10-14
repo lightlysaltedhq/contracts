@@ -25,13 +25,13 @@ fails = []
 
 
 def run(argv):
-    """(exit code, report or None). argparse refusals exit 2 with no report."""
-    buf = io.StringIO()
+    """(exit code, report or stderr text). argparse refusals exit 2 and write to stderr."""
+    buf, err = io.StringIO(), io.StringIO()
     try:
-        with contextlib.redirect_stdout(buf), contextlib.redirect_stderr(io.StringIO()):
+        with contextlib.redirect_stdout(buf), contextlib.redirect_stderr(err):
             code = validate_palette.main(argv + ['--json'])
     except SystemExit as e:
-        return e.code, None
+        return e.code, err.getvalue()
     return code, json.loads(buf.getvalue())
 
 
@@ -40,10 +40,11 @@ def comp(colors, labels=LABELS, extra=()):
             '--edged', 'b', '--edge', EDGE, *extra]
 
 
-def expect(name, argv, failed_check=None, usage=False):
+def expect(name, argv, failed_check=None, usage=None):
+    """usage: a substring the argparse refusal must carry, so the RIGHT refusal is proved."""
     code, report = run(argv)
-    if usage:
-        ok = code == 2 and report is None
+    if usage is not None:
+        ok = code == 2 and isinstance(report, str) and usage in report
     elif failed_check is None:
         ok = code == 0
     else:
@@ -56,16 +57,18 @@ def expect(name, argv, failed_check=None, usage=False):
 def main():
     print('palette instrument self-test\n')
     expect('control: a distinct, spread, edged set passes', comp(GOOD))
-    expect('a repeated label is refused', comp(GOOD, labels=['a', 'b', 'c', 'c']), usage=True)
+    expect('a repeated label is refused', comp(GOOD, labels=['a', 'b', 'c', 'c']), usage='repeats a label')
     expect('a repeated label cannot hide a pale part', [
         'composition', '--colors', oklch_to_hex(0.96, 0.01, 80), *GOOD[1:], '--surface', SURFACE,
-        '--labels', 'x', 'x', 'y', 'z'], usage=True)
+        '--labels', 'x', 'x', 'y', 'z'], usage='repeats a label')
     expect('--edge without --edged is refused', [
-        'composition', '--colors', *GOOD, '--surface', SURFACE, '--edge', EDGE], usage=True)
+        'composition', '--colors', *GOOD, '--surface', SURFACE, '--edge', EDGE],
+           usage='--edge needs --edged')
     expect('--edged without --edge is refused', [
         'composition', '--colors', *GOOD, '--surface', SURFACE, '--labels', *LABELS,
-        '--edged', 'b'], usage=True)
-    expect('--edged naming no label is refused', comp(GOOD, extra=['--edged', 'q']), usage=True)
+        '--edged', 'b'], usage='--edged needs --edge')
+    expect('--edged naming no label is refused', comp(GOOD, extra=['--edged', 'q']),
+           usage='which is not a label')
     greys = [oklch_to_hex(L, 0.01, 250) for L in (0.30, 0.80, 0.55, 0.42)]
     expect('four greys are refused as one colour', comp(greys), 'at most one achromatic part')
     near = [GOOD[0], oklch_to_hex(0.80, 0.08, 55), GOOD[2], GOOD[3]]
