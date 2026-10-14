@@ -4,7 +4,7 @@ Newest first. Dates are DD/MM/YYYY. What each part of a version means, and how a
 announced and migrated, is in `RELEASE-POLICY.md`. Decisions cited as `SC-nnn` are in Lightly
 Salted's decision log for Product Salt.
 
-## 1.0.0 (candidate `1.0.0-rc.4`, prepared 13/10/2026; not published, dated when tagged)
+## 1.0.0 (candidate `1.0.0-rc.5`, prepared 13/10/2026; not published, dated when tagged)
 
 **Semver call: MAJOR, the first release of the contract.** No earlier version was published, so no
 implementation conformed to one. Adopting it is still a migration for existing sites, because the
@@ -117,6 +117,22 @@ test, applied through section 2's table, where the stricter row wins.
   header's two logos only the default scheme's is `loading="eager"`; the other scheme's is lazy.
   The other ruling changes no file: a team member's email, phone and social links are drawn
   only when filled, as `markup/card.json` already says.
+- Two rulings change the contract after `1.0.0-rc.4` (SC-026, SC-027). The team source has no
+  categories, on either platform (SC-027): `contract/sections.json` gives team `categories` false
+  in the collection-showcase and the carousel, so a team query offers the automatic and manual
+  modes only, with no categories picker, as testimonials do. Both emitters follow from that
+  answer, and `SOURCE_DEFAULTS` names no taxonomy for team (`departments` on Payload and
+  `department` on ACF are gone); a taxonomy a site names for team gives it no by-category mode.
+  Salt for Next.js no longer owes a team taxonomy: a member's job title and department stay free
+  text. Salt for WordPress owes dropping by-category and the department picker from its team
+  layout's query, which the ACF round trip records as one more difference (403). The priority
+  image is the principal image of the first section on the page that has one, not of the first
+  section only (SC-026): a page that opens with a text band gives `fetchpriority="high"` to the
+  first image below it. That is a rewording of `section#priority-media`, and no fixture changes,
+  since a case states its own priority context. The fixtures gate still requires a case at index
+  0 to be granted the priority image, and no longer refuses a later section that holds it. No
+  fixture case yet shows a later section taking the slot, so a conforming run does not prove
+  SC-026.
 - The case-study view has fixtures and is required of every implementation (SC-021).
   `fixtures/case-study/` holds four cases (`full`, `aside`, `band` and `minimal`), `case-study`
   joins `REQUIRED_FILES`, and a full conformance run refuses to declare it not shipped. The
@@ -373,7 +389,8 @@ questions and "left as work" notes here describe the draft at the time; 1.0.0 ab
   categories, and with a source select the picker shows only while the select holds one. Salt for
   Next.js owes a location-area taxonomy with its locations section; its team categories were
   already owed (SC-006). The Payload emitter names team's and locations' taxonomies `departments`
-  and `areas` by default; a site names its own through `sources`.
+  and `areas` by default; a site names its own through `sources`. SC-027 later withdraws team's
+  categories, and with them the `departments` default.
 - The collection-showcase and carousel queries' Salt for WordPress notes owe an
   `acf/validate_value` check refusing by-category for a source without categories, and an admin
   check of the categories field's conditional logic (SC-010); the ACF emitter records the rule as
@@ -451,8 +468,8 @@ questions and "left as work" notes here describe the draft at the time; 1.0.0 ab
   platforms. A section anchor that is one of the ids main, content, header, footer, nav,
   site-navigation, search or skip-link, an id the page itself uses, or a repeat takes a numeric
   suffix. The divider draws above the section; a full-bleed hero sets its words over the
-  section's background image; the collection-showcase source has no default; team members carry
-  categories on both. In the markup, a quote card names its person with a heading; team cards
+  section's background image; the collection-showcase source has no default. Team members were
+  to carry categories on both; SC-027 withdraws that. In the markup, a quote card names its person with a heading; team cards
   carry optional email, phone and social links; the consent banner is drawn only when an
   integration needs consent; share links are same-tab text links; a single flat footer menu is
   one untitled column; the header carries `data-sticky` and its main navigation the id

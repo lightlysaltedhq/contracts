@@ -559,9 +559,14 @@ test('SC-010: by-category is offered from the contract\'s categories, not from a
     contract: { ...contract, ...probe([{ name: 'query', type: 'collection-query', label: 'Q', source }]), sections: [...probe([]).sections, ...contract.sections] },
     sections: ['probe'], sources,
   })[0].fields[0].layouts[0].sub_fields, 'query')
-  const team = query('team')
-  assert.deepEqual(Object.keys(team.sub_fields[0].choices), ['automatic', 'by-category', 'manual'])
-  assert.equal(field(team.sub_fields, 'categories').taxonomy, 'department')
+  const services = query('services')
+  assert.deepEqual(Object.keys(services.sub_fields[0].choices), ['automatic', 'by-category', 'manual'])
+  assert.equal(field(services.sub_fields, 'categories').taxonomy, 'service_category')
+  // Team has no categories (SC-027): automatic and manual only, whatever taxonomy a site names.
+  for (const team of [query('team'), query('team', { team: { taxonomy: 'department' } })]) {
+    assert.deepEqual(team.sub_fields.map((f) => f.name), ['mode', 'items', 'order', 'count'])
+    assert.deepEqual(Object.keys(team.sub_fields[0].choices), ['automatic', 'manual'])
+  }
   // A taxonomy a site gives testimonials does not give them categories.
   const testimonials = query('testimonials', { testimonials: { taxonomy: 'mood' } })
   assert.deepEqual(testimonials.sub_fields.map((f) => f.name), ['mode', 'items', 'order', 'count'])

@@ -356,9 +356,10 @@ function checkOtherInput(c) {
     c.anchor = settings?.anchorId
     c.track = nested.track
     c.index = nested.index
-    // A page's section is planned as any: the first (index 0) holds the priority image.
-    if (kind === 'page' && Number.isInteger(nested.index) && typeof ctx.priorityMedia === 'boolean' && ctx.priorityMedia !== (nested.index === 0)) {
-      fail(`${at}.json: context.priorityMedia is ${ctx.priorityMedia}, but the page's section is ${nested.index === 0 ? 'its first (index 0), which the plan grants the priority image' : `number ${nested.index}, which never holds it`} (section#priority-media)`)
+    // A page's section is planned as any: the first (index 0) is granted the priority image. A
+    // later one may hold it too, when none before it has a principal image (SC-026).
+    if (kind === 'page' && nested.index === 0 && ctx.priorityMedia === false) {
+      fail(`${at}.json: context.priorityMedia is false, but the page's section is its first (index 0), which the plan grants the priority image (section#priority-media)`)
     }
   }
   return true
@@ -387,8 +388,10 @@ function checkInput(c) {
   if (Number.isInteger(ctx.headingLevel) && ctx.headingLevel !== level) {
     fail(`${at}.json: context.headingLevel ${ctx.headingLevel} cannot be: ${ctx.headingRendered ? 'a heading rendered earlier, so this one is 2' : 'no heading rendered earlier (context.headingRendered), so this section claims the h1'} (section#single-h1)`)
   }
-  if (typeof ctx.priorityMedia === 'boolean' && Number.isInteger(ctx.index) && ctx.priorityMedia !== (ctx.index === 0)) {
-    fail(`${at}.json: context.priorityMedia is ${ctx.priorityMedia} for section ${ctx.index}; the plan grants it to the first section (index 0) only (section#priority-media)`)
+  // The priority image is the first section's that has one (SC-026): the plan grants it to the
+  // first section (index 0), and a later section may hold it when none before it has an image.
+  if (ctx.priorityMedia === false && ctx.index === 0) {
+    fail(`${at}.json: context.priorityMedia is false for section 0; the plan grants the priority image to the first section (index 0), and to a later one only when none before it has a principal image (section#priority-media, SC-026)`)
   }
   if (ctx.locale !== undefined && !(typeof ctx.locale === 'string' && Intl.DateTimeFormat.supportedLocalesOf(ctx.locale).length)) fail(`${at}.json: context.locale must be a BCP 47 locale the platform knows, such as en-GB`)
   if (ctx.collapseTop === true && ctx.index === 0) fail(`${at}.json: context.collapseTop needs a section before it (section#adjacent-collapse)`)

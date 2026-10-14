@@ -72,13 +72,14 @@ receives and the choices on offer.
 
 ## Status
 
-`1.0.0-rc.4` is the release candidate for `1.0.0`: private, never on the registry, held until an
+`1.0.0-rc.5` is the release candidate for `1.0.0`: private, never on the registry, held until an
 implementation's run of `salt-conformance` against it conforms in full, in a report that names
-`1.0.0-rc.4` (SC-017, SC-018, SC-020, SC-022; `RELEASE-POLICY.md` section 5). It follows
+`1.0.0-rc.5` (SC-017, SC-018, SC-020, SC-022; `RELEASE-POLICY.md` section 5). It follows
 `1.0.0-rc.1`, whose first run raised eight questions about the contract itself, `1.0.0-rc.2`,
-whose run raised three more, and `1.0.0-rc.3`, against which bringing Salt for Next.js's core
-markup to the contract raised seven; the owner's rulings on them (SC-023, SC-024, SC-025) changed
-contract files, which each time makes a new candidate and needs a new run. `1.0.0` is the first release, staged
+whose run raised three more, `1.0.0-rc.3`, against which bringing Salt for Next.js's core
+markup to the contract raised seven, and `1.0.0-rc.4`, after which the owner ruled on the
+priority image and on team's categories; those rulings (SC-023, SC-024, SC-025, SC-026, SC-027)
+changed contract files, which each time makes a new candidate and needs a new run. `1.0.0` is the first release, staged
 from CI by npm trusted publishing when the owner pushes the `salt-contract-v1.0.0` tag, and
 approved by the owner. See `RELEASE-POLICY.md` for what each part
 of a version means.
@@ -334,7 +335,7 @@ option covered, and the normaliser sound.
 | `section`, `chrome`, `view` or `page` | Which kind the case is, holding its id, the same as the directory: a section, a chrome component (`site-header`, `site-footer`), a view (`post`, `service`, `case-study`, `archive`, `search`, `not-found`) or the page (`page`). A chrome, view or page case has no `values` (no fields file describes them): it reads `site`, `document`, `route` and `state`. A page's one section is `document.sections`, shaped as `document.listing` below with its `section` id; its heading level is derived (1: a page's one section is its first and claims the h1, so no fallback heading is drawn beside its heading), and a `headingLevel`, if given, must agree; the page's priority image is that section's, by its own markup's rule. |
 | `summary` | What the case shows, in a sentence or two. |
 | `values` | The section's stored field values, named and shaped as `contract/fields/<section>.json` says, with the shared settings under `settings`. A field left out takes its default. |
-| `context` | For a chrome or view case: `priorityMedia` (a view: whether the plan grants it the priority image; the chrome never takes it), `locale`, `now` and `path` (the page's path, which sets `aria-current`). For a section, what the page plan decides for this band, describing a page that can exist: `index` (the plan's index, the section's position among the page's sections from 0, view-props/_shared.json, which also names an accordion group, `faq-<index>`), `track` (its `data-track`, `<section>-<n>` with n no more than `index` + 1, section#data-track), `headingLevel` (1 when no heading has rendered before the section, otherwise 2, section#single-h1), `headingRendered` (true when a heading rendered earlier on the page), `priorityMedia` (true for the first section, index 0, only, section#priority-media), and where they apply `collapseTop` (section#adjacent-collapse, never on the first section) `now` (an ISO 8601 time, for the locations' open-now status) and `locale` (a BCP 47 locale, `en-GB` in every case that draws a date, a time or a phone, which display as section#display-forms says). |
+| `context` | For a chrome or view case: `priorityMedia` (a view: whether the plan grants it the priority image; the chrome never takes it), `locale`, `now` and `path` (the page's path, which sets `aria-current`). For a section, what the page plan decides for this band, describing a page that can exist: `index` (the plan's index, the section's position among the page's sections from 0, view-props/_shared.json, which also names an accordion group, `faq-<index>`), `track` (its `data-track`, `<section>-<n>` with n no more than `index` + 1, section#data-track), `headingLevel` (1 when no heading has rendered before the section, otherwise 2, section#single-h1), `headingRendered` (true when a heading rendered earlier on the page), `priorityMedia` (true for the section the plan grants the priority image, the first on the page that has a principal image; a case at index 0 is always granted it, and a later one may be, section#priority-media, SC-026), and where they apply `collapseTop` (section#adjacent-collapse, never on the first section) `now` (an ISO 8601 time, for the locations' open-now status) and `locale` (a BCP 47 locale, `en-GB` in every case that draws a date, a time or a phone, which display as section#display-forms says). |
 | `media` | The images the values name, by id: `url` (the upload's address with `{width}` where each listed width goes), `width` and `height` (the upload's intrinsic size), `alt`, and where set `caption` and `focalPoint` (`{ x, y }` in per cent). Never `sizes` or `srcset`: those are the image slot's. |
 | `documents` | The pages internal links name, by id: `{ href, title }`. |
 | `collections` | The items of each source the section reads (`faqs`, `services`, `team` …), each with a string `id`, already in the collection's stored order: an adapter passes them through as given and never sorts them, and a query in its default order draws them in that order (SC-023). How an implementation orders a collection on a real site is its own. |
@@ -544,7 +545,7 @@ report).
 ```json
 {
   "format": "salt-conformance/1",
-  "contract": { "package": "@lightlysaltedhq/salt-contract", "version": "1.0.0-rc.4" },
+  "contract": { "package": "@lightlysaltedhq/salt-contract", "version": "1.0.0-rc.5" },
   "platform": "nextjs",
   "implementation": { "version": "0.4.0" },
   "adapter": { "kind": "command", "target": "node scripts/salt-adapter.mjs" },
@@ -553,7 +554,7 @@ report).
   "summary": { "pass": 15, "fail": 1, "incomplete": 0, "notShipped": 1 },
   "fields": { "platform": "payload", "snapshot": "…", "options": "…", "problems": [] },
   "problems": [],
-  "stylesheets": { "served": "…", "bundle": "styles/salt.css", "contract": "1.0.0-rc.4", "ok": true, "status": "identical" },
+  "stylesheets": { "served": "…", "bundle": "styles/salt.css", "contract": "1.0.0-rc.5", "ok": true, "status": "identical" },
   "sections": [
     {
       "id": "hero",

@@ -1,6 +1,6 @@
 {
   "$schema": "../../schema/markup.schema.json",
-  "version": "1.0.0-rc.4",
+  "version": "1.0.0-rc.5",
   "id": "call-to-action",
   "kind": "section",
   "tier": "core",

@@ -1,6 +1,6 @@
 {
   "$schema": "../../schema/field-definition.schema.json",
-  "version": "1.0.0-rc.4",
+  "version": "1.0.0-rc.5",
   "section": "carousel",
   "shared": {
     "id": "section-settings"
@@ -212,7 +212,7 @@
             ],
             "order": "enum_content_query_sort_by"
           },
-          "owes": "one query group read against the chosen source in place of one group per source; a team category taxonomy, so by-category is offered for team as on WordPress (SC-006); a select for the query's mode, which is a radio today (SC-023)",
+          "owes": "one query group read against the chosen source in place of one group per source; a select for the query's mode, which is a radio today (SC-023)",
           "note": "Stored as {mode, terms, items, sortBy, limit}; terms becomes categories, sortBy becomes order, limit becomes count."
         },
         "wordpress": {

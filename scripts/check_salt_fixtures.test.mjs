@@ -147,8 +147,21 @@ test('inputs: an h2 with no heading rendered before it fails (section#single-h1)
 test('inputs: an h1 after a heading has rendered fails', () => {
   expectFail(HERO, (io) => io.json(`${SPLIT}.json`, (d) => { d.context.headingRendered = true }), /a heading rendered earlier, so this one is 2/)
 })
-test('inputs: priority media for a later section fails', () => {
-  expectFail(HERO, (io) => io.json('hero/split-image-right-later.json', (d) => { d.context.priorityMedia = true }), /the plan grants it to the first section \(index 0\) only/)
+test('inputs: no priority media for the first section fails (section#priority-media)', () => {
+  expectFail(HERO, (io) => io.json(`${SPLIT}.json`, (d) => { d.context.priorityMedia = false }), /context\.priorityMedia is false for section 0; the plan grants the priority image to the first section \(index 0\), and to a later one only when none before it has a principal image/)
+})
+test('inputs: a later section may hold the priority image, as the first that has one (SC-026)', () => {
+  const dir = copy(HERO, (io) => {
+    io.json('hero/split-image-right-later.json', (d) => { d.context.priorityMedia = true })
+    io.html('hero/split-image-right-later.html', ' loading="lazy" decoding="async"', ' fetchpriority="high" decoding="async"')
+  })
+  try {
+    assert.doesNotMatch(run(dir).out, /fixtures\/hero\/|section hero:/)
+  } finally {
+    rmSync(dir, { recursive: true, force: true })
+  }
+  // The context alone is not enough: the image must then carry the priority.
+  expectFail(HERO, (io) => io.json('hero/split-image-right-later.json', (d) => { d.context.priorityMedia = true }), /the priority image must be in hero's image \(section#priority-media\)/)
 })
 test('inputs: a context with no index fails', () => {
   expectFail(HERO, (io) => io.json(`${SPLIT}.json`, (d) => { delete d.context.index }), /context\.index, the plan's index/)
