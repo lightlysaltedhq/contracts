@@ -3,6 +3,7 @@
 
     python3 scripts/validate_palette.py categorical --colors C1 C2 C3 --surface S
     python3 scripts/validate_palette.py ordinal     --colors B1 B2 B3 B4 B5 --surface S
+    python3 scripts/validate_palette.py composition --colors P1 P2 P3 P4 --surface S
 
     exit 0 = every ENFORCED check passed · 1 = at least one failed · 2 = bad usage
 
@@ -291,6 +292,92 @@ def check_categorical(colors, surface, labels, args):
 
 
 # ══════════════════════════════════════════════════════════════════════════════
+# COMPOSITION — unordered parts of one whole, drawn touching (which part)
+#
+# The categorical check asks every slot to sit at ONE lightness, so that no series reads as more
+# important. Parts of a whole invert that: they are spread in lightness on purpose, so that every
+# pair still separates when hue is lost (greyscale, print, a deficiency). So this mode replaces the
+# lightness spread CEILING with a pairwise lightness FLOOR, measures every pair rather than
+# neighbours (a waffle puts any two parts side by side), and has no chroma floor, because a part
+# may legitimately be a grey. A pale part that falls under the mark floor is legal only if it is
+# drawn with an edge, and then the EDGE is what is measured against the surface.
+#
+# DISTINCT COLOURS, MEASURED. Lightness and ΔE alone would pass four greys, which are not distinct
+# colours. So hue is measured too: at most one part may be achromatic (OKLCH chroma under
+# ACHROMATIC_C, where a mark's hue stops being nameable at chart size), and every pair of chromatic
+# parts must sit at least --min-hue-deg apart on the hue circle (OKLCH hue angle, the shorter way
+# round). 30° is a default, not a perceptual result: it is the gap this mode measures, set wide
+# enough that two parts cannot be one hue at two lightnesses. Set your own and say why.
+# ══════════════════════════════════════════════════════════════════════════════
+ACHROMATIC_C = 0.04
+
+
+def _hue_gap(a, b):
+    d = abs(a - b) % 360
+    return min(d, 360 - d)
+
+def check_composition(colors, surface, labels, args):
+    R = Report()
+    Ls = [hex_to_oklch(c)[0] for c in colors]
+    pairs = _pairs(len(colors), 'all')
+
+    lch = [hex_to_oklch(c) for c in colors]
+    grey = [lb for lb, (_, C, _) in zip(labels, lch) if C < ACHROMATIC_C]
+    R.add('at most one achromatic part', len(grey) <= 1,
+          [f'achromatic below C {ACHROMATIC_C}: ' + (', '.join(grey) if grey else 'none'),
+           'Two greys are one colour in two strengths, not two distinct parts.'],
+          worst=len(grey))
+    chromatic = [i for i, (_, C, _) in enumerate(lch) if C >= ACHROMATIC_C]
+    gaps = {(i, j): _hue_gap(lch[i][2], lch[j][2])
+            for i, j in itertools.combinations(chromatic, 2)}
+    if gaps:
+        w = min(gaps, key=gaps.get)
+        R.add('hue separation, chromatic pairs', gaps[w] >= args.min_hue_deg,
+              [f'floor {args.min_hue_deg}°, worst {gaps[w]:.1f}° '
+               f'({labels[w[0]]} | {labels[w[1]]})'],
+              worst=round(gaps[w], 1))
+
+    dl = {(i, j): abs(Ls[i] - Ls[j]) for i, j in pairs}
+    w = min(dl, key=dl.get)
+    R.add('pairwise lightness step', dl[w] >= args.min_pair_dl,
+          [f'floor {args.min_pair_dl}, worst {dl[w]:.4f} ({labels[w[0]]} | {labels[w[1]]})',
+           'Parts of a whole must separate with the hue taken away, so every pair needs a '
+           'lightness step of its own.'],
+          worst=round(dl[w], 4))
+
+    d = {(i, j): delta_e(colors[i], colors[j]) for i, j in pairs}
+    w = min(d, key=d.get)
+    R.add('separation, normal vision (all pairs)', d[w] >= args.min_de,
+          [f'floor {args.min_de}, worst {d[w]:.1f} ({labels[w[0]]} | {labels[w[1]]})'],
+          worst=round(d[w], 2))
+    for kind in SIMULATED:
+        floor, enforced = _cvd_floor(kind, args)
+        sim = [simulate(c, kind) for c in colors]
+        dd = {(i, j): delta_e(sim[i], sim[j]) for i, j in pairs}
+        w = min(dd, key=dd.get)
+        R.add(f'separation, {kind} (all pairs)', dd[w] >= floor,
+              [f'floor {floor}, worst {dd[w]:.1f} ({labels[w[0]]} | {labels[w[1]]})'],
+              worst=round(dd[w], 2), enforced=enforced)
+
+    edged = set(args.edged or [])
+    ratios = {lb: contrast_ratio(c, surface) for lb, c in zip(labels, colors)}
+    bare = {lb: r for lb, r in ratios.items() if lb not in edged}
+    low = [(lb, round(r, 2)) for lb, r in bare.items() if r < args.min_contrast]
+    R.add('mark contrast vs surface', not low,
+          [f'floor {args.min_contrast}:1 for every part drawn without an edge'] +
+          ([f'edged (measured by their edge below): ' +
+            ', '.join(f'{lb} {ratios[lb]:.2f}:1' for lb in sorted(edged))] if edged else []) +
+          (['under: ' + ', '.join(f'{lb} {r}:1' for lb, r in low)] if low else []),
+          worst=round(min(bare.values()), 2) if bare else None)
+    if edged:
+        er = contrast_ratio(args.edge, surface)
+        R.add('edge contrast vs surface', er >= args.min_contrast,
+              [f'edge {args.edge}: {er:.2f}:1 against a floor of {args.min_contrast}:1'],
+              worst=round(er, 2))
+    return R
+
+
+# ══════════════════════════════════════════════════════════════════════════════
 # ORDINAL — a ramp that encodes ORDER (which band)
 # ══════════════════════════════════════════════════════════════════════════════
 def check_ordinal(colors, surface, labels, args):
@@ -385,7 +472,8 @@ def main(argv=None):
                         help='names for the slots, for readable output')
         sp.add_argument('--cvd', default=','.join(DEFAULT_ENFORCED),
                         help='which deficiencies are ENFORCED (default: '
-                             f'{",".join(DEFAULT_ENFORCED)}). All of {"/".join(SIMULATED)} are '
+                             f'{",".join(DEFAULT_ENFORCED)}; in composition mode, all of '
+                             f'{",".join(SIMULATED)}). All of {"/".join(SIMULATED)} are '
                              'simulated and reported on every run regardless; this flag only '
                              'decides which can fail it. May not be empty — there is no way to '
                              'stop a measurement being taken.')
@@ -411,6 +499,20 @@ def main(argv=None):
     c.add_argument('--chroma-floor', type=float, default=CHROMA_FLOOR,
                    help=f'OKLCH chroma floor (default {CHROMA_FLOOR}). {CHROMA_FLOOR_NOTE}')
 
+    m = sub.add_parser('composition', help='unordered PARTS of one whole (which part)')
+    common(m)
+    m.add_argument('--min-pair-dl', type=float, default=0.06,
+                   help='OKLCH lightness step every pair of parts must clear')
+    m.add_argument('--edged', nargs='+', default=None, metavar='LABEL',
+                   help='parts drawn with an edge; their mark floor is carried by --edge')
+    m.add_argument('--edge', default=None, metavar='HEX',
+                   help='the edge colour drawn round the --edged parts')
+    m.add_argument('--min-hue-deg', type=float, default=30.0,
+                   help='hue angle every pair of chromatic parts must clear (default 30)')
+    # Every deficiency is ENFORCED here by default: a part's identity is its colour, and the set
+    # has no structural blue-and-green pair to excuse a tritan collapse.
+    m.set_defaults(cvd=','.join(SIMULATED))
+
     o = sub.add_parser('ordinal', help='a ramp that encodes ORDER (which band)')
     common(o)
     o.add_argument('--min-dl', type=float, default=0.06)
@@ -421,15 +523,18 @@ def main(argv=None):
 
     args = p.parse_args(argv)
     if args.min_de is None:
-        args.min_de = 15.0 if args.mode == 'categorical' else 6.0
+        args.min_de = 6.0 if args.mode == 'ordinal' else 15.0
     if args.min_cvd_de is None:
-        args.min_cvd_de = 10.0 if args.mode == 'categorical' else 6.0
+        args.min_cvd_de = 6.0 if args.mode == 'ordinal' else 10.0
 
     colors = [c if c.startswith('#') else '#' + c for c in args.colors]
     surface = args.surface if args.surface.startswith('#') else '#' + args.surface
     labels = args.labels or [str(i + 1) for i in range(len(colors))]
     if len(labels) != len(colors):
         p.error(f'{len(labels)} labels for {len(colors)} colours')
+    if len(set(labels)) != len(labels):
+        p.error('--labels repeats a label; every slot needs its own, or two slots are measured '
+                'as one')
     if len(colors) < 2:
         p.error('at least two colours are needed to measure a separation')
 
@@ -444,9 +549,22 @@ def main(argv=None):
             p.error(f'unknown deficiency {k!r} — known: {", ".join(SIMULATED)}')
     args.enforced = enforced
 
+    if args.mode == 'composition' and args.edged and not args.edge:
+        p.error('--edged needs --edge: an edged part is measured by its edge')
+    if args.mode == 'composition' and args.edge and not args.edged:
+        p.error('--edge needs --edged: an edge measured round no part proves nothing')
+    if args.mode == 'composition' and args.edged:
+        unknown = set(args.edged) - set(labels)
+        if unknown:
+            p.error(f'--edged names {", ".join(sorted(unknown))}, which is not a label')
+    if args.mode == 'composition' and args.edge and not args.edge.startswith('#'):
+        args.edge = '#' + args.edge
     if args.mode == 'categorical':
         R = check_categorical(colors, surface, labels, args)
         head = f'CATEGORICAL — {len(colors)} slots, {args.pairs} pairs'
+    elif args.mode == 'composition':
+        R = check_composition(colors, surface, labels, args)
+        head = f'COMPOSITION — {len(colors)} parts, all pairs'
     else:
         R = check_ordinal(colors, surface, labels, args)
         head = f'ORDINAL — {len(colors)} bands'

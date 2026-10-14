@@ -223,6 +223,52 @@ def main():
         build(preset=p, emit_adapter=False)
     check('ramp name must be a CSS identifier', bad_ident, want_error='identifier')
 
+    # An additional seed derives a whole ramp by the same rules as a role seed, and an extended
+    # role can reference its rungs: one seed value then moves every rung and every role on it.
+    def additional_seed_ramp():
+        p = minimal_preset()
+        seed = p['roles']['primary']['seed']
+        p['additionalSeeds'] = {'ochre': {'seed': seed}}
+        p['extended'] = {'chartPart': {'1': {'light': 'var(--color-ochre-300)',
+                                             'dark': 'var(--color-ochre-100)'},
+                                       '2': 'var(--color-neutral-500)'}}
+        T = build_tokens(p, IDENT, MINIMAL_SCALES)
+        for step in (50, 300, 950):
+            assert T[f'color.ochre.{step}']['$value'] == T[f'color.primary.{step}']['$value'], step
+        assert T['color.ochre.base']['$value'] == seed
+        part = T['color.chart.part.1']
+        assert part['$value'] == 'var(--color-ochre-300)', part
+        assert part['modes']['dark'] == 'var(--color-ochre-100)', part
+        assert 'part 1 of 2' in part['description'].lower(), part['description']
+        build(preset=p, emit_adapter=False)
+    check('an additional seed derives a ramp that an extended role can reference',
+          additional_seed_ramp)
+
+    def additional_seed_reserved():
+        p = minimal_preset()
+        p['additionalSeeds'] = {'accent': {'seed': p['roles']['primary']['seed']}}
+        build(preset=p, emit_adapter=False)
+    check('an additional seed named after a role raises', additional_seed_reserved,
+          want_error='collides')
+
+    def additional_seed_without_seed():
+        p = minimal_preset()
+        p['additionalSeeds'] = {'ochre': {}}
+        build(preset=p, emit_adapter=False)
+    check('an additional seed with no seed raises', additional_seed_without_seed,
+          want_error='needs a')
+
+    def part_key(key, value):
+        def fn():
+            p = minimal_preset()
+            p['extended'] = {'chartPart': {key: value}}
+            build(preset=p, emit_adapter=False)
+        return fn
+    check('a chartPart key outside 1-5 raises', part_key('6', 'var(--color-neutral-500)'),
+          want_error='part number')
+    check('a literal chartPart value raises',
+          part_key('1', minimal_preset()['roles']['primary']['seed']), want_error='var()')
+
     # Finding: an injected adapter value containing */ closes the comment early and lands live
     # declarations in a file whose whole promise is that it declares no values.
     def injection():
