@@ -427,7 +427,7 @@
     },
     {
       "topic": "stylesheet-owes",
-      "text": "Team contact and social links (SC-006); no rules in the shared stylesheets yet for the lists or the social links. The email and phone links are styled (salt-showcase__contact-link, SC-028). On a linked card they sit under its stretched a.salt-card__link, so the rules must lift them above it (position relative and a higher z-index) or they open the card's page instead.",
+      "text": "Team contact and social links (SC-006). Still owed for all of them: on a linked card they sit under its stretched a.salt-card__link, so a rule must lift them above it (position: relative and a higher z-index) or they open the card's page instead; no rule does yet. The lists and the social links have no rules at all. The email and phone links have only their colour, underline and focus indicator (salt-showcase__contact-link, SC-028), which is not the lift.",
       "classes": [
         "salt-showcase__contact",
         "salt-showcase__socials",
