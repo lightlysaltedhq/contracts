@@ -137,7 +137,9 @@ test, applied through section 2's table, where the stricter row wins.
   burger's three bars (`markup/site-header.json`'s `drawer-close`), which `styles/chrome.css`
   already turned into the cross at rest and animated from bars as the drawer opens; it had been
   drawn empty, so the rules had nothing to move. No stylesheet changes for it, and
-  `site-header/drawer-open` draws the bars. A team member's email and phone links on a card carry
+  `site-header/drawer-open` draws the bars. The normaliser drops the children of `svg.salt-icon`,
+  since artwork is each platform's own (SC-007), so a conforming run does not prove the bars; the
+  markup file and the stylesheet name them. A team member's email and phone links on a card carry
   `salt-showcase__contact-link` (`markup/card.json`, where they were owed), which
   `styles/blocks.css` underlines in the band's own ink as `salt-contact__link` is (SC-025), and
   which both focus indicator lists in `styles/primitives.css` and `section#focus-ring` name. The

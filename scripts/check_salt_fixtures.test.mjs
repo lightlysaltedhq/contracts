@@ -451,7 +451,7 @@ test('team: a card\'s email or phone link without its class fails (SC-028)', () 
   expectFail(['collection-showcase'], (io) => io.html('collection-showcase/grid-team-contacts.html', '<li><a class="salt-showcase__contact-link" href="mailto:rosa@', '<li><a href="mailto:rosa@'), /grid-team-contacts\.html: .*salt-showcase__contact-link/)
   expectFail(['collection-showcase'], (io) => io.html('collection-showcase/grid-team-contacts.html', '<li><a class="salt-showcase__contact-link" href="tel:01174960123">', '<li><a href="tel:01174960123">'), /grid-team-contacts\.html: .*salt-showcase__contact-link/)
 })
-test('sc-028: the drawer\'s close button without the burger\'s bars fails', () => {
+test('sc-028: the drawer\'s close button with no morph svg fails', () => {
   expectFail(['site-header'], (io) => io.html('site-header/drawer-open.html', `<button class="salt-drawer__close" type="button" aria-label="Close menu">
         <svg class="salt-icon salt-menu-morph" data-icon="menu" aria-hidden="true">
           <path class="salt-menu-morph__bar"></path>
