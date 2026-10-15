@@ -130,6 +130,9 @@
             {
               "role": "email-link",
               "element": "a",
+              "classes": [
+                "salt-showcase__contact-link"
+              ],
               "attributes": {
                 "href": "from:mailto"
               },
@@ -146,6 +149,9 @@
             {
               "role": "phone-link",
               "element": "a",
+              "classes": [
+                "salt-showcase__contact-link"
+              ],
               "attributes": {
                 "href": "from:tel"
               },
@@ -421,7 +427,7 @@
     },
     {
       "topic": "stylesheet-owes",
-      "text": "Team contact and social links (SC-006); no rules in the shared stylesheets yet. On a linked card they sit under its stretched a.salt-card__link, so the rules must lift them above it (position relative and a higher z-index) or they open the card's page instead.",
+      "text": "Team contact and social links (SC-006); no rules in the shared stylesheets yet for the lists or the social links. The email and phone links are styled (salt-showcase__contact-link, SC-028). On a linked card they sit under its stretched a.salt-card__link, so the rules must lift them above it (position relative and a higher z-index) or they open the card's page instead.",
       "classes": [
         "salt-showcase__contact",
         "salt-showcase__socials",
@@ -435,6 +441,10 @@
     {
       "topic": "ruling",
       "text": "Team cards carry optional email, phone and social links, each drawn only when filled (SC-006). They sit inside the card beside its stretched link, so the stylesheet lifts them above it."
+    },
+    {
+      "topic": "ruling",
+      "text": "A team member's email and phone links carry salt-showcase__contact-link, which the shared stylesheet underlines in the band's own ink, as the contact section's salt-contact__link (SC-028, after SC-025): a link is told from the words around it by its line, never by colour alone (WCAG 1.4.1). The social links keep salt-showcase__social-link."
     },
     {
       "topic": "ruling",
