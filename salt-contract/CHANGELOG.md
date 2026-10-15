@@ -4,7 +4,7 @@ Newest first. Dates are DD/MM/YYYY. What each part of a version means, and how a
 announced and migrated, is in `RELEASE-POLICY.md`. Decisions cited as `SC-nnn` are in Lightly
 Salted's decision log for Product Salt.
 
-## 1.0.0 (candidate `1.0.0-rc.5`, prepared 13/10/2026; not published, dated when tagged)
+## 1.0.0 (candidate `1.0.0-rc.6`, prepared 15/10/2026; not published, dated when tagged)
 
 **Semver call: MAJOR, the first release of the contract.** No earlier version was published, so no
 implementation conformed to one. Adopting it is still a migration for existing sites, because the
@@ -133,6 +133,17 @@ test, applied through section 2's table, where the stricter row wins.
   0 to be granted the priority image, and no longer refuses a later section that holds it. No
   fixture case yet shows a later section taking the slot, so a conforming run does not prove
   SC-026.
+- Two rulings change the contract after `1.0.0-rc.5` (SC-028). The drawer's close button draws the
+  burger's three bars (`markup/site-header.json`'s `drawer-close`), which `styles/chrome.css`
+  already turned into the cross at rest and animated from bars as the drawer opens; it had been
+  drawn empty, so the rules had nothing to move. No stylesheet changes for it, and
+  `site-header/drawer-open` draws the bars. A team member's email and phone links on a card carry
+  `salt-showcase__contact-link` (`markup/card.json`, where they were owed), which
+  `styles/blocks.css` underlines in the band's own ink as `salt-contact__link` is (SC-025), and
+  which both focus indicator lists in `styles/primitives.css` and `section#focus-ring` name. The
+  social links keep `salt-showcase__social-link`. `collection-showcase/grid-team-contacts` draws
+  the class. `styles/salt.css` changes, so each implementation serves the new bytes: 45,331
+  bytes, SHA-256 `4f3bca26398e6153aa0eda8ad09e048bc48a1a63feb56606dd718d2098f907ec`.
 - The case-study view has fixtures and is required of every implementation (SC-021).
   `fixtures/case-study/` holds four cases (`full`, `aside`, `band` and `minimal`), `case-study`
   joins `REQUIRED_FILES`, and a full conformance run refuses to declare it not shipped. The

@@ -1,6 +1,6 @@
 {
   "$schema": "../../schema/markup.schema.json",
-  "version": "1.0.0-rc.5",
+  "version": "1.0.0-rc.6",
   "id": "case-study",
   "kind": "view",
   "summary": "A case study, drawn by core's case-study view.",
