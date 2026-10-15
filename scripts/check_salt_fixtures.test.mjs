@@ -447,6 +447,15 @@ test('contact: a link in the details or the privacy line without its class fails
   expectFail(['contact'], (io) => io.html('contact/form-open.html', '<a class="salt-contact__link" href="/privacy/">', '<a href="/privacy/">'), /form-open\.html: .*salt-contact__link/)
   expectFail(['contact'], (io) => io.html('contact/closed-with-details.html', '<a class="salt-contact__link" href="mailto:', '<a href="mailto:'), /closed-with-details\.html: .*salt-contact__link/)
 })
+test('sc-028: the drawer\'s close button without the burger\'s bars fails', () => {
+  expectFail(['site-header'], (io) => io.html('site-header/drawer-open.html', `<button class="salt-drawer__close" type="button" aria-label="Close menu">
+        <svg class="salt-icon salt-menu-morph" data-icon="menu" aria-hidden="true">
+          <path class="salt-menu-morph__bar"></path>
+          <path class="salt-menu-morph__bar"></path>
+          <path class="salt-menu-morph__bar"></path>
+        </svg>
+      </button>`, '<button class="salt-drawer__close" type="button" aria-label="Close menu"></button>'), /drawer-open\.html: .*the markup requires drawer-close here, found <button\.salt-drawer__close>/)
+})
 test('gaps: a lone carousel card granted priority must take it', () => {
   expectFail(['carousel'], (io) => io.html('carousel/inline-one-card.html', ' fetchpriority="high"', ' loading="lazy"'), /the priority image must be in carousel's track,list,single/)
 })

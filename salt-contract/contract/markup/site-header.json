@@ -373,7 +373,35 @@
               "attributes": {
                 "type": "button",
                 "aria-label": "from:labels.closeMenu"
-              }
+              },
+              "children": [
+                {
+                  "role": "close-morph",
+                  "element": "svg",
+                  "classes": [
+                    "salt-icon",
+                    "salt-menu-morph"
+                  ],
+                  "attributes": {
+                    "data-icon": "menu",
+                    "aria-hidden": "true"
+                  },
+                  "children": [
+                    {
+                      "role": "bar",
+                      "element": "path",
+                      "classes": [
+                        "salt-menu-morph__bar"
+                      ],
+                      "repeat": {
+                        "from": "three bars",
+                        "max": 3
+                      }
+                    }
+                  ]
+                }
+              ],
+              "note": "The burger's three bars, which the shared stylesheet turns into the cross at rest and animates from bars as the drawer opens (SC-028). The close button sits on the burger's box, so the two read as one control."
             },
             {
               "role": "drawer-panel",
@@ -457,7 +485,7 @@
     {
       "class": "salt-menu-morph",
       "role": "menu-morph",
-      "reason": "The burger glyph whose bars animate to a cross; the rules select its bars (salt-menu-morph__bar)."
+      "reason": "The glyph the burger and the drawer's close button both draw, whose bars animate between bars and a cross; the rules select its bars (salt-menu-morph__bar)."
     }
   ],
   "notes": [
