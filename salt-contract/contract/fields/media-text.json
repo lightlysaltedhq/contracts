@@ -1,6 +1,6 @@
 {
   "$schema": "../../schema/field-definition.schema.json",
-  "version": "1.0.0-rc.5",
+  "version": "1.0.0-rc.6",
   "section": "media-text",
   "shared": {
     "id": "section-settings"

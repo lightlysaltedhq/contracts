@@ -447,6 +447,19 @@ test('contact: a link in the details or the privacy line without its class fails
   expectFail(['contact'], (io) => io.html('contact/form-open.html', '<a class="salt-contact__link" href="/privacy/">', '<a href="/privacy/">'), /form-open\.html: .*salt-contact__link/)
   expectFail(['contact'], (io) => io.html('contact/closed-with-details.html', '<a class="salt-contact__link" href="mailto:', '<a href="mailto:'), /closed-with-details\.html: .*salt-contact__link/)
 })
+test('team: a card\'s email or phone link without its class fails (SC-028)', () => {
+  expectFail(['collection-showcase'], (io) => io.html('collection-showcase/grid-team-contacts.html', '<li><a class="salt-showcase__contact-link" href="mailto:rosa@', '<li><a href="mailto:rosa@'), /grid-team-contacts\.html: .*salt-showcase__contact-link/)
+  expectFail(['collection-showcase'], (io) => io.html('collection-showcase/grid-team-contacts.html', '<li><a class="salt-showcase__contact-link" href="tel:01174960123">', '<li><a href="tel:01174960123">'), /grid-team-contacts\.html: .*salt-showcase__contact-link/)
+})
+test('sc-028: the drawer\'s close button with no morph svg fails', () => {
+  expectFail(['site-header'], (io) => io.html('site-header/drawer-open.html', `<button class="salt-drawer__close" type="button" aria-label="Close menu">
+        <svg class="salt-icon salt-menu-morph" data-icon="menu" aria-hidden="true">
+          <path class="salt-menu-morph__bar"></path>
+          <path class="salt-menu-morph__bar"></path>
+          <path class="salt-menu-morph__bar"></path>
+        </svg>
+      </button>`, '<button class="salt-drawer__close" type="button" aria-label="Close menu"></button>'), /drawer-open\.html: .*the markup requires drawer-close here, found <button\.salt-drawer__close>/)
+})
 test('gaps: a lone carousel card granted priority must take it', () => {
   expectFail(['carousel'], (io) => io.html('carousel/inline-one-card.html', ' fetchpriority="high"', ' loading="lazy"'), /the priority image must be in carousel's track,list,single/)
 })
