@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "socials.schema.json",
+  "title": "Which address means which social network",
+  "description": "contract/socials.json: each network a social link's url may name, with its hosts and an example address for each. The network ids are view-props/_shared.json's profile.network values.",
+  "type": "object",
+  "required": [
+    "$schema",
+    "version",
+    "rule",
+    "networks"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string"
+    },
+    "$comment": {
+      "type": "string"
+    },
+    "rule": {
+      "type": "string",
+      "minLength": 1
+    },
+    "networks": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "hosts"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9]*$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "hosts": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": [
+                "host",
+                "example"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "host": {
+                  "type": "string",
+                  "pattern": "^[a-z0-9-]+(\\.[a-z0-9-]+)+$"
+                },
+                "example": {
+                  "type": "string",
+                  "pattern": "^https://"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "platforms": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "nextjs": {
+          "$ref": "#/$defs/note"
+        },
+        "wordpress": {
+          "$ref": "#/$defs/note"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "note": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": false,
+      "properties": {
+        "owes": {
+          "type": "string",
+          "minLength": 1
+        },
+        "note": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

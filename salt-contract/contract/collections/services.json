@@ -1,0 +1,237 @@
+{
+  "$schema": "../../schema/field-definition.schema.json",
+  "version": "1.0.0-rc.6",
+  "$comment": "A service's stored fields, by the founder's rulings of 18/11/2026 on the ID-3944 field names. The address (slug) and the editor's order are each platform's own (SC-003). The view's document (fixtures/service) is these fields as the service view receives them, with relatedServices resolved to cards for display (related).",
+  "collection": "services",
+  "label": "Service",
+  "fields": [
+    {
+      "name": "title",
+      "type": "text",
+      "label": "Name",
+      "required": true,
+      "maxLength": 120,
+      "platforms": {
+        "nextjs": {
+          "formerly": "title",
+          "owes": "the 120-character limit"
+        },
+        "wordpress": {
+          "native": "title",
+          "formerly": "post_title"
+        }
+      }
+    },
+    {
+      "name": "topics",
+      "type": "topics",
+      "label": "Topics",
+      "many": true,
+      "platforms": {
+        "nextjs": {
+          "formerly": "categories",
+          "owes": "topics in place of categories"
+        },
+        "wordpress": {
+          "native": "categories",
+          "formerly": "the service_category taxonomy",
+          "owes": "the taxonomy box labelled Topics, with no parent control"
+        }
+      }
+    },
+    {
+      "name": "summary",
+      "type": "textarea",
+      "label": "Summary",
+      "maxLength": 300,
+      "description": "One or two sentences, shown on cards wherever the item is listed.",
+      "platforms": {
+        "nextjs": {
+          "formerly": "summary"
+        },
+        "wordpress": {
+          "native": "excerpt",
+          "formerly": "summary (an ACF textarea with no limit)",
+          "owes": "the summary stored in the excerpt, with a check on save for its 300 characters"
+        }
+      }
+    },
+    {
+      "name": "icon",
+      "type": "select",
+      "label": "Icon",
+      "optionsFrom": "icons",
+      "description": "Optional. Drawn on the service's card when it has no image.",
+      "platforms": {
+        "nextjs": {
+          "formerly": "icon"
+        },
+        "wordpress": {
+          "formerly": "icon (free text)",
+          "owes": "a select of the icon names in place of free text"
+        }
+      }
+    },
+    {
+      "name": "intro",
+      "type": "rich-text",
+      "label": "Introduction",
+      "allowed": [
+        "paragraph",
+        "bold",
+        "italic",
+        "link",
+        "unordered-list",
+        "ordered-list"
+      ],
+      "description": "The opening of the service page.",
+      "platforms": {
+        "nextjs": {
+          "owes": "the field in core; sites add their own today"
+        },
+        "wordpress": {
+          "native": "body",
+          "formerly": "post_content",
+          "owes": "the restricted list: paragraphs, bold, italic, links and lists"
+        }
+      }
+    },
+    {
+      "name": "featuredImage",
+      "type": "image",
+      "label": "Featured image",
+      "platforms": {
+        "nextjs": {
+          "owes": "the field in core, in place of the upload field a site names (imageField)"
+        },
+        "wordpress": {
+          "native": "featured-image",
+          "formerly": "the featured image, which no card reads",
+          "owes": "reading it on the service's card"
+        }
+      }
+    },
+    {
+      "name": "benefits",
+      "type": "list",
+      "label": "Benefits",
+      "itemLabel": "Benefit",
+      "rowLabel": "text",
+      "min": 1,
+      "max": 12,
+      "description": "Optional. When given, one to 12.",
+      "fields": [
+        {
+          "name": "text",
+          "type": "text",
+          "label": "Benefit",
+          "required": true,
+          "platforms": {
+            "nextjs": {
+              "formerly": "text"
+            },
+            "wordpress": {
+              "formerly": "benefit",
+              "owes": "the name text in place of benefit, required"
+            }
+          }
+        }
+      ],
+      "platforms": {
+        "nextjs": {
+          "formerly": "benefits",
+          "owes": "the list's limits"
+        },
+        "wordpress": {
+          "formerly": "benefits",
+          "owes": "the list's limits"
+        }
+      }
+    },
+    {
+      "name": "priceFrom",
+      "type": "text",
+      "label": "Price from",
+      "description": "Optional. As it should read, such as £500 or POA.",
+      "platforms": {
+        "nextjs": {
+          "formerly": "priceFrom"
+        },
+        "wordpress": {
+          "formerly": "price_from (a number)",
+          "owes": "text named priceFrom in place of a number"
+        }
+      }
+    },
+    {
+      "name": "relatedServices",
+      "type": "relationship",
+      "label": "Related services",
+      "to": "services",
+      "many": true,
+      "max": 6,
+      "description": "Optional. Up to six other services, never this one.",
+      "platforms": {
+        "nextjs": {
+          "formerly": "relatedServices",
+          "owes": "the limit of six"
+        },
+        "wordpress": {
+          "formerly": "related_services",
+          "owes": "the name relatedServices, the limit of six, and refusing the service itself"
+        }
+      }
+    },
+    {
+      "name": "cta",
+      "type": "link",
+      "label": "Call to action",
+      "description": "Optional. The page's main button.",
+      "platforms": {
+        "nextjs": {
+          "formerly": "cta"
+        },
+        "wordpress": {
+          "formerly": "cta (an ACF link)",
+          "owes": "the contract's link shape in place of ACF's link, so an internal link holds the document it points at"
+        }
+      }
+    }
+  ],
+  "dropped": [
+    {
+      "formerly": {
+        "wordpress": "headline"
+      },
+      "note": "An H1 different from the title; no view reads it, and the title is the page's one name."
+    }
+  ],
+  "display": {
+    "$comment": "Derived from Salt for Next.js's READ_CARD (blocks/collection-showcase/module.ts) and Salt for WordPress's inc/sections/services.php, with the rc.7 names.",
+    "as": "card",
+    "status": "draft",
+    "parts": {
+      "title": {
+        "from": "title"
+      },
+      "href": {
+        "note": "The service's own page. Routing is each platform's own."
+      },
+      "image": {
+        "from": "featuredImage",
+        "note": "Salt for Next.js reads a field the site names today; Salt for WordPress draws no card image today."
+      },
+      "icon": {
+        "from": "icon",
+        "note": "Drawn only when the card has no image."
+      },
+      "text": {
+        "from": "summary"
+      },
+      "tags": {
+        "from": "topics",
+        "note": "When the section shows tags. Each topic's title."
+      }
+    }
+  }
+}

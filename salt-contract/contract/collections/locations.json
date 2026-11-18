@@ -1,0 +1,294 @@
+{
+  "$schema": "../../schema/field-definition.schema.json",
+  "version": "1.0.0-rc.6",
+  "$comment": "A location's stored fields, by the founder's rulings of 18/11/2026 on the ID-3944 field names: the address shape (contract/collections/_address.json), shared with the company address; lat from -90 to 90 and lng from -180 to 180; a map zoom of 14 by default, whole numbers from 1 to 20; opening hours as rows of day, open, close and appointment, times stored as HH:MM. Salt for Next.js has no locations collection yet (contract/sections.json, locations), so every Salt for Next.js note here is owed with it. Locations have no page of their own.",
+  "collection": "locations",
+  "label": "Location",
+  "fields": [
+    {
+      "name": "title",
+      "type": "text",
+      "label": "Name",
+      "required": true,
+      "maxLength": 120,
+      "platforms": {
+        "nextjs": {
+          "owes": "the collection, with this field"
+        },
+        "wordpress": {
+          "native": "title",
+          "formerly": "post_title"
+        }
+      }
+    },
+    {
+      "name": "topics",
+      "type": "topics",
+      "label": "Topics",
+      "many": true,
+      "platforms": {
+        "nextjs": {
+          "owes": "the collection, with this field (its taxonomy collection is areas)"
+        },
+        "wordpress": {
+          "native": "categories",
+          "formerly": "the location_area taxonomy",
+          "owes": "the taxonomy box labelled Topics, with no parent control"
+        }
+      }
+    },
+    {
+      "name": "address",
+      "type": "group",
+      "label": "Address",
+      "shape": "address",
+      "platforms": {
+        "nextjs": {
+          "owes": "the collection, with this field"
+        },
+        "wordpress": {
+          "formerly": "address",
+          "owes": "the address shape's names: street, locality, region, postalCode, country"
+        }
+      }
+    },
+    {
+      "name": "lat",
+      "type": "number",
+      "label": "Latitude",
+      "min": -90,
+      "max": 90,
+      "description": "Optional, with the longitude. Where the map's pin sits.",
+      "platforms": {
+        "nextjs": {
+          "owes": "the collection, with this field"
+        },
+        "wordpress": {
+          "formerly": "geo (text, latitude and longitude separated by a comma)",
+          "owes": "two numbers, lat and lng, in place of geo"
+        }
+      }
+    },
+    {
+      "name": "lng",
+      "type": "number",
+      "label": "Longitude",
+      "min": -180,
+      "max": 180,
+      "description": "Optional, with the latitude.",
+      "platforms": {
+        "nextjs": {
+          "owes": "the collection, with this field"
+        },
+        "wordpress": {
+          "formerly": "geo (text, latitude and longitude separated by a comma)",
+          "owes": "two numbers, lat and lng, in place of geo"
+        }
+      }
+    },
+    {
+      "name": "zoom",
+      "type": "number",
+      "label": "Map zoom",
+      "default": 14,
+      "min": 1,
+      "max": 20,
+      "step": 1,
+      "description": "How close the map starts, from 1 (the world) to 20 (a building).",
+      "platforms": {
+        "nextjs": {
+          "owes": "the collection, with this field"
+        },
+        "wordpress": {
+          "owes": "the field; the map component falls back to 14 today"
+        }
+      }
+    },
+    {
+      "name": "phone",
+      "type": "text",
+      "label": "Phone",
+      "description": "Optional.",
+      "platforms": {
+        "nextjs": {
+          "owes": "the collection, with this field"
+        },
+        "wordpress": {
+          "formerly": "phone"
+        }
+      }
+    },
+    {
+      "name": "email",
+      "type": "text",
+      "format": "email",
+      "label": "Email",
+      "description": "Optional.",
+      "platforms": {
+        "nextjs": {
+          "owes": "the collection, with this field"
+        },
+        "wordpress": {
+          "formerly": "email (an ACF email field)",
+          "owes": "a text field with the email format in place of ACF's email field"
+        }
+      }
+    },
+    {
+      "name": "hours",
+      "type": "list",
+      "label": "Opening hours",
+      "itemLabel": "Row",
+      "rowLabel": "day",
+      "max": 14,
+      "description": "Optional. Up to 14 rows; give a day two rows for a break at lunch.",
+      "fields": [
+        {
+          "name": "day",
+          "type": "select",
+          "label": "Day",
+          "required": true,
+          "options": [
+            {
+              "value": "monday",
+              "label": "Monday"
+            },
+            {
+              "value": "tuesday",
+              "label": "Tuesday"
+            },
+            {
+              "value": "wednesday",
+              "label": "Wednesday"
+            },
+            {
+              "value": "thursday",
+              "label": "Thursday"
+            },
+            {
+              "value": "friday",
+              "label": "Friday"
+            },
+            {
+              "value": "saturday",
+              "label": "Saturday"
+            },
+            {
+              "value": "sunday",
+              "label": "Sunday"
+            }
+          ],
+          "default": "monday",
+          "platforms": {
+            "wordpress": {
+              "formerly": "day"
+            }
+          }
+        },
+        {
+          "name": "open",
+          "type": "time",
+          "label": "Opens",
+          "condition": {
+            "field": "appointment",
+            "equals": false
+          },
+          "platforms": {
+            "wordpress": {
+              "formerly": "open (time picker, H:i)"
+            }
+          }
+        },
+        {
+          "name": "close",
+          "type": "time",
+          "label": "Closes",
+          "condition": {
+            "field": "appointment",
+            "equals": false
+          },
+          "platforms": {
+            "wordpress": {
+              "formerly": "close (time picker, H:i)"
+            }
+          }
+        },
+        {
+          "name": "appointment",
+          "type": "boolean",
+          "label": "By appointment only",
+          "default": false,
+          "platforms": {
+            "wordpress": {
+              "formerly": "appointment_only"
+            }
+          }
+        }
+      ],
+      "platforms": {
+        "nextjs": {
+          "owes": "the collection, with this field"
+        },
+        "wordpress": {
+          "formerly": "opening_hours",
+          "owes": "the name hours, appointment in place of appointment_only, and at most 14 rows"
+        }
+      }
+    }
+  ],
+  "dropped": [
+    {
+      "formerly": {
+        "wordpress": "the featured image"
+      },
+      "note": "Unread: no view draws a location's image."
+    }
+  ],
+  "display": {
+    "$comment": "Derived from Salt for WordPress's inc/sections/locations.php (Salt for Next.js has no locations section yet), with the rc.7 names. markup/locations.json draws the office.",
+    "as": "office",
+    "status": "draft",
+    "parts": {
+      "title": {
+        "from": "title"
+      },
+      "address": {
+        "from": [
+          "address.street",
+          "address.locality",
+          "address.region",
+          "address.postalCode",
+          "address.country"
+        ],
+        "note": "One line each, the street's two lines as two, empty parts left out."
+      },
+      "phone": {
+        "from": "phone"
+      },
+      "phoneHref": {
+        "from": "phone",
+        "note": "The tel: address, only when the phone normalises to one."
+      },
+      "email": {
+        "from": "email"
+      },
+      "hours": {
+        "from": "hours",
+        "note": "Rows in stored order; an appointment row has no open or close."
+      },
+      "status": {
+        "note": "Worked out at render from hours in the site's time zone; never stored."
+      },
+      "coordinates": {
+        "from": [
+          "lat",
+          "lng"
+        ],
+        "note": "Only when both are set; null otherwise. The map starts at zoom."
+      },
+      "directionsHref": {
+        "note": "Derived from the address by each platform; never stored."
+      }
+    }
+  }
+}

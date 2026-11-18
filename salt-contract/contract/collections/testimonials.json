@@ -1,0 +1,151 @@
+{
+  "$schema": "../../schema/field-definition.schema.json",
+  "version": "1.0.0-rc.6",
+  "$comment": "A testimonial's stored fields, by the founder's rulings of 18/11/2026 on the ID-3944 field names. The person is name, not author, so it does not clash with a post's author. The quote card draws the photo only, with no fallback to a logo; the company logo and the service a testimonial is about are dropped until something draws them. Testimonials have no topics (contract/sections.json) and no page of their own.",
+  "collection": "testimonials",
+  "label": "Testimonial",
+  "fields": [
+    {
+      "name": "name",
+      "type": "text",
+      "label": "Name",
+      "required": true,
+      "maxLength": 120,
+      "description": "Who said it.",
+      "platforms": {
+        "nextjs": {
+          "formerly": "author",
+          "owes": "name in place of author, with the 120-character limit"
+        },
+        "wordpress": {
+          "native": "title",
+          "formerly": "post_title"
+        }
+      }
+    },
+    {
+      "name": "quote",
+      "type": "textarea",
+      "label": "Quote",
+      "required": true,
+      "platforms": {
+        "nextjs": {
+          "formerly": "quote"
+        },
+        "wordpress": {
+          "formerly": "quote"
+        }
+      }
+    },
+    {
+      "name": "role",
+      "type": "text",
+      "label": "Role",
+      "maxLength": 80,
+      "description": "Optional. Shown beside the company.",
+      "platforms": {
+        "nextjs": {
+          "formerly": "role",
+          "owes": "the 80-character limit"
+        },
+        "wordpress": {
+          "formerly": "role",
+          "owes": "the 80-character limit"
+        }
+      }
+    },
+    {
+      "name": "company",
+      "type": "text",
+      "label": "Company",
+      "description": "Optional.",
+      "platforms": {
+        "nextjs": {
+          "formerly": "company"
+        },
+        "wordpress": {
+          "formerly": "company"
+        }
+      }
+    },
+    {
+      "name": "photo",
+      "type": "image",
+      "label": "Photo",
+      "description": "Optional. A photo of the person, shown small beside the quote.",
+      "platforms": {
+        "nextjs": {
+          "formerly": "photo"
+        },
+        "wordpress": {
+          "native": "featured-image",
+          "formerly": "the featured image, which no card reads",
+          "owes": "drawing it on the quote card, in place of the logo"
+        }
+      }
+    },
+    {
+      "name": "rating",
+      "type": "number",
+      "label": "Rating",
+      "min": 1,
+      "max": 5,
+      "step": 0.5,
+      "description": "Optional. From 1 to 5 stars, in half stars.",
+      "platforms": {
+        "nextjs": {
+          "formerly": "rating",
+          "owes": "the half step"
+        },
+        "wordpress": {
+          "formerly": "rating (whole stars)",
+          "owes": "the half step, and a card that draws a half star"
+        }
+      }
+    }
+  ],
+  "dropped": [
+    {
+      "formerly": {
+        "nextjs": "companyLogo",
+        "wordpress": "logo"
+      },
+      "note": "The quote card draws the photo only. Dropped until something draws a logo; Salt for Next.js deprecates its field."
+    },
+    {
+      "formerly": {
+        "nextjs": "service",
+        "wordpress": "service"
+      },
+      "note": "Nothing a visitor sees reads it. Dropped until something draws it; Salt for Next.js deprecates its field."
+    }
+  ],
+  "display": {
+    "$comment": "Derived from Salt for Next.js's READ_CARD and Salt for WordPress's inc/sections/testimonials.php, with the rc.7 names. A testimonial is drawn in the quote style (markup/card.json).",
+    "as": "card",
+    "status": "draft",
+    "parts": {
+      "title": {
+        "from": "name",
+        "note": "The person, drawn as the quote card's heading."
+      },
+      "image": {
+        "from": "photo",
+        "note": "The photo only, never a logo."
+      },
+      "meta": {
+        "from": [
+          "role",
+          "company"
+        ],
+        "join": ", "
+      },
+      "text": {
+        "from": "quote"
+      },
+      "rating": {
+        "from": "rating"
+      }
+    }
+  }
+}

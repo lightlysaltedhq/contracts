@@ -1,0 +1,79 @@
+{
+  "$schema": "../../schema/field-definition.schema.json",
+  "version": "1.0.0-rc.6",
+  "$comment": "An FAQ's stored fields, by the founder's rulings of 18/11/2026 on the ID-3944 field names. FAQs have no page of their own; the editor's order is each platform's own.",
+  "collection": "faqs",
+  "label": "FAQ",
+  "fields": [
+    {
+      "name": "question",
+      "type": "text",
+      "label": "Question",
+      "required": true,
+      "maxLength": 120,
+      "platforms": {
+        "nextjs": {
+          "formerly": "question",
+          "owes": "the 120-character limit"
+        },
+        "wordpress": {
+          "native": "title",
+          "formerly": "post_title"
+        }
+      }
+    },
+    {
+      "name": "answer",
+      "type": "rich-text",
+      "label": "Answer",
+      "required": true,
+      "allowed": [
+        "paragraph",
+        "bold",
+        "italic",
+        "link",
+        "unordered-list",
+        "ordered-list"
+      ],
+      "platforms": {
+        "nextjs": {
+          "formerly": "answer"
+        },
+        "wordpress": {
+          "formerly": "answer (full toolbar)",
+          "owes": "the restricted list: paragraphs, bold, italic, links and lists"
+        }
+      }
+    },
+    {
+      "name": "topics",
+      "type": "topics",
+      "label": "Topics",
+      "many": true,
+      "platforms": {
+        "nextjs": {
+          "formerly": "categories",
+          "owes": "topics in place of categories"
+        },
+        "wordpress": {
+          "native": "categories",
+          "formerly": "the faq_category taxonomy",
+          "owes": "the taxonomy box labelled Topics, with no parent control"
+        }
+      }
+    }
+  ],
+  "display": {
+    "$comment": "Derived from Salt for Next.js's FAQ module and Salt for WordPress's inc/sections/faq.php, with the rc.7 names.",
+    "as": "faq-item",
+    "status": "draft",
+    "parts": {
+      "question": {
+        "from": "question"
+      },
+      "answer": {
+        "from": "answer"
+      }
+    }
+  }
+}

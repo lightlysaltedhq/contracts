@@ -1,0 +1,178 @@
+{
+  "$schema": "../../schema/field-definition.schema.json",
+  "version": "1.0.0-rc.6",
+  "$comment": "A post's stored fields, by the founder's rulings of 18/11/2026 (posts, topics and people). A post is stored as sections (layout) on both platforms; a section that is prose alone draws as the post's prose, and every other section as a band (markup/post.json, sections in a post). Video is in the ruled starting list but has no section yet (ID-3951); it joins layout's sections when it exists. Tables are parked for their own PRD. The view's document (fixtures/post) is these fields as the post view receives them: its date derived from publishedAt in the site's time zone, its category from primaryTopic, its topics and author resolved, its layout's sections as stored.",
+  "collection": "posts",
+  "label": "Post",
+  "fields": [
+    {
+      "name": "title",
+      "type": "text",
+      "label": "Title",
+      "required": true,
+      "maxLength": 120,
+      "platforms": {
+        "nextjs": {
+          "formerly": "title",
+          "owes": "the 120-character limit"
+        },
+        "wordpress": {
+          "native": "title",
+          "formerly": "post_title"
+        }
+      }
+    },
+    {
+      "name": "author",
+      "type": "relationship",
+      "label": "Author",
+      "to": "team",
+      "description": "Optional. The team member credited with the post, who needs no account.",
+      "platforms": {
+        "nextjs": {
+          "formerly": "author (a relationship to users)",
+          "owes": "a relationship to the team collection, each post repointed to a team member"
+        },
+        "wordpress": {
+          "formerly": "post_author (a user)",
+          "owes": "the credited author as a field of the theme's own, and the author archive built by team member"
+        }
+      }
+    },
+    {
+      "name": "topics",
+      "type": "topics",
+      "label": "Topics",
+      "many": true,
+      "platforms": {
+        "nextjs": {
+          "formerly": "topics"
+        },
+        "wordpress": {
+          "native": "categories",
+          "formerly": "the category taxonomy",
+          "owes": "the taxonomy box labelled Topics, with no parent control"
+        }
+      }
+    },
+    {
+      "name": "primaryTopic",
+      "type": "topics",
+      "label": "Primary topic",
+      "description": "Optional. One of the post's topics, shown above its title.",
+      "platforms": {
+        "nextjs": {
+          "owes": "the field"
+        },
+        "wordpress": {
+          "owes": "the field, of the theme's own beside the Topics box: WordPress has no primary category"
+        }
+      }
+    },
+    {
+      "name": "summary",
+      "type": "textarea",
+      "label": "Summary",
+      "maxLength": 300,
+      "description": "One or two sentences, shown on cards wherever the item is listed.",
+      "platforms": {
+        "nextjs": {
+          "formerly": "excerpt",
+          "owes": "summary in place of excerpt"
+        },
+        "wordpress": {
+          "native": "excerpt",
+          "formerly": "the excerpt (no limit)",
+          "owes": "a check on save for the excerpt's 300 characters"
+        }
+      }
+    },
+    {
+      "name": "featuredImage",
+      "type": "image",
+      "label": "Featured image",
+      "platforms": {
+        "nextjs": {
+          "formerly": "featuredImage"
+        },
+        "wordpress": {
+          "native": "featured-image",
+          "formerly": "the featured image"
+        }
+      }
+    },
+    {
+      "name": "publishedAt",
+      "type": "date-time",
+      "label": "Published",
+      "description": "The moment the post is published. Its date is shown in the site's time zone.",
+      "platforms": {
+        "nextjs": {
+          "owes": "the field, back-filled from createdAt, and ordering posts by it in place of createdAt"
+        },
+        "wordpress": {
+          "native": "date",
+          "formerly": "post_date"
+        }
+      }
+    },
+    {
+      "name": "layout",
+      "type": "sections",
+      "label": "Body",
+      "sections": [
+        "rich-text",
+        "media-text",
+        "gallery",
+        "call-to-action",
+        "faq"
+      ],
+      "description": "The post, section by section. A single image is a gallery of one.",
+      "platforms": {
+        "nextjs": {
+          "formerly": "layout",
+          "owes": "the five sections only"
+        },
+        "wordpress": {
+          "formerly": "post_content (the classic editor)",
+          "owes": "the section builder on posts, stored as layout, in place of the classic editor"
+        }
+      }
+    }
+  ],
+  "dropped": [
+    {
+      "formerly": {
+        "wordpress": "the post_tag taxonomy (the Tags box)"
+      },
+      "note": "Tags are drawn from topics; the Tags box is removed from posts."
+    }
+  ],
+  "display": {
+    "$comment": "Derived from Salt for Next.js's READ_CARD and Salt for WordPress's inc/sections/blog-teaser.php, with the rc.7 names.",
+    "as": "card",
+    "status": "draft",
+    "parts": {
+      "title": {
+        "from": "title"
+      },
+      "href": {
+        "note": "The post's own page. Routing is each platform's own."
+      },
+      "image": {
+        "from": "featuredImage"
+      },
+      "text": {
+        "from": "summary"
+      },
+      "date": {
+        "from": "publishedAt",
+        "note": "The date in the site's time zone, as YYYY-MM-DD. Salt for Next.js reads createdAt today."
+      },
+      "tags": {
+        "from": "topics",
+        "note": "When the section shows tags. Each topic's title; Uncategorised is never drawn."
+      }
+    }
+  }
+}

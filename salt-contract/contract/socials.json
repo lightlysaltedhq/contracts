@@ -1,0 +1,167 @@
+{
+  "$schema": "../schema/socials.schema.json",
+  "version": "1.0.0-rc.6",
+  "$comment": "Which address means which social network (the founder's ruling of 18/11/2026, condition 25): a social link is stored as { name, url } (contract/collections/_person.json, socials) and its network, the glyph a card draws (view-props/_shared.json, profile.network), is derived from the url here. Taken from Salt for Next.js's SOCIAL_HOSTS (core src/icons/registry.ts), which is the wider of the two platforms' tables: Salt for WordPress's salt_chrome_social_hosts() (inc/services/chrome.php) lacks fb.com, fb.me, lnkd.in, pinterest.co.uk, pin.it, reddit, whatsapp, t.co, youtu.be and bsky.social, and owes them.",
+  "rule": "Read the url's host, lower-cased, with one leading www. removed. It names a network when it equals one of that network's hosts or ends with a dot and one of them (a subdomain); never by a substring, so notlinkedin.com and linkedin.com.example name none. An address with no host, or whose host matches none, names no network: the card draws the link's name as text. Networks are tried in this file's order and the first match wins; no host appears twice.",
+  "networks": [
+    {
+      "id": "bluesky",
+      "name": "Bluesky",
+      "hosts": [
+        {
+          "host": "bsky.app",
+          "example": "https://bsky.app/profile/hollinfarm.bsky.social"
+        },
+        {
+          "host": "bsky.social",
+          "example": "https://hollinfarm.bsky.social"
+        }
+      ]
+    },
+    {
+      "id": "facebook",
+      "name": "Facebook",
+      "hosts": [
+        {
+          "host": "facebook.com",
+          "example": "https://www.facebook.com/hollinfarm"
+        },
+        {
+          "host": "fb.com",
+          "example": "https://fb.com/hollinfarm"
+        },
+        {
+          "host": "fb.me",
+          "example": "https://fb.me/hollinfarm"
+        }
+      ]
+    },
+    {
+      "id": "github",
+      "name": "GitHub",
+      "hosts": [
+        {
+          "host": "github.com",
+          "example": "https://github.com/hollinfarm"
+        }
+      ]
+    },
+    {
+      "id": "instagram",
+      "name": "Instagram",
+      "hosts": [
+        {
+          "host": "instagram.com",
+          "example": "https://www.instagram.com/hollinfarm/"
+        }
+      ]
+    },
+    {
+      "id": "linkedin",
+      "name": "LinkedIn",
+      "hosts": [
+        {
+          "host": "linkedin.com",
+          "example": "https://www.linkedin.com/in/priya-shah"
+        },
+        {
+          "host": "lnkd.in",
+          "example": "https://lnkd.in/abc123"
+        }
+      ]
+    },
+    {
+      "id": "pinterest",
+      "name": "Pinterest",
+      "hosts": [
+        {
+          "host": "pinterest.com",
+          "example": "https://www.pinterest.com/hollinfarm/"
+        },
+        {
+          "host": "pinterest.co.uk",
+          "example": "https://uk.pinterest.co.uk/hollinfarm/"
+        },
+        {
+          "host": "pin.it",
+          "example": "https://pin.it/abc123"
+        }
+      ]
+    },
+    {
+      "id": "reddit",
+      "name": "Reddit",
+      "hosts": [
+        {
+          "host": "reddit.com",
+          "example": "https://www.reddit.com/user/hollinfarm"
+        },
+        {
+          "host": "redd.it",
+          "example": "https://redd.it/abc123"
+        }
+      ]
+    },
+    {
+      "id": "tiktok",
+      "name": "TikTok",
+      "hosts": [
+        {
+          "host": "tiktok.com",
+          "example": "https://www.tiktok.com/@hollinfarm"
+        }
+      ]
+    },
+    {
+      "id": "whatsapp",
+      "name": "WhatsApp",
+      "hosts": [
+        {
+          "host": "whatsapp.com",
+          "example": "https://www.whatsapp.com/channel/abc123"
+        },
+        {
+          "host": "wa.me",
+          "example": "https://wa.me/447700900000"
+        }
+      ]
+    },
+    {
+      "id": "x",
+      "name": "X",
+      "hosts": [
+        {
+          "host": "x.com",
+          "example": "https://x.com/hollinfarm"
+        },
+        {
+          "host": "twitter.com",
+          "example": "https://twitter.com/hollinfarm"
+        },
+        {
+          "host": "t.co",
+          "example": "https://t.co/abc123"
+        }
+      ]
+    },
+    {
+      "id": "youtube",
+      "name": "YouTube",
+      "hosts": [
+        {
+          "host": "youtube.com",
+          "example": "https://www.youtube.com/@hollinfarm"
+        },
+        {
+          "host": "youtu.be",
+          "example": "https://youtu.be/abc123"
+        }
+      ]
+    }
+  ],
+  "platforms": {
+    "wordpress": {
+      "owes": "the hosts its table lacks (fb.com, fb.me, lnkd.in, pinterest.co.uk, pin.it, reddit.com, redd.it, whatsapp.com, wa.me, t.co, youtu.be, bsky.social), and reading the team socials' network from the url in place of the platform select"
+    }
+  }
+}

@@ -15,9 +15,11 @@ const packageDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '.
 const readJson = (file) => JSON.parse(readFileSync(file, 'utf8'))
 
 /**
- * The contract as one object: { version, sections, settings, fields }. `sections` is
- * contract/sections.json's list in its own order; `settings` the shared settings file's fields;
- * `fields` a map of section id to its fields file. `dir` is the package directory, for tests.
+ * The contract as one object: { version, sections, settings, fields, collections, shapes }.
+ * `sections` is contract/sections.json's list in its own order; `settings` the shared settings
+ * file's fields; `fields` a map of section id to its fields file; `collections` a map of source id
+ * to its collection file (contract/collections/<source>.json) and `shapes` a map of shape id to its
+ * shape file (contract/collections/_<shape>.json). `dir` is the package directory, for tests.
  */
 export function loadContract(dir = packageDir) {
   const vocab = readJson(path.join(dir, 'contract', 'sections.json'))
@@ -28,12 +30,48 @@ export function loadContract(dir = packageDir) {
     const doc = readJson(path.join(fieldsDir, name))
     fields[doc.section] = doc
   }
+  const collectionsDir = path.join(dir, 'contract', 'collections')
+  const collections = {}
+  const shapes = {}
+  for (const name of readdirSync(collectionsDir).filter((f) => f.endsWith('.json')).sort()) {
+    const doc = readJson(path.join(collectionsDir, name))
+    if (doc.shape) shapes[doc.shape] = doc
+    else collections[doc.collection] = doc
+  }
   return {
     version: vocab.version,
     sections: vocab.sections,
     settings: readJson(path.join(fieldsDir, '_section-settings.json')).fields,
     fields,
+    collections,
+    shapes,
   }
+}
+
+// A field list with every group that takes a shape given that shape's fields, at any depth.
+function withShapes(contract, fields, at) {
+  return fields.map((f) => {
+    if (f.type === 'group' && f.shape) {
+      const shape = contract.shapes?.[f.shape]
+      if (!shape) throw new Error(`${at}.${f.name}: the contract has no shape ${f.shape}`)
+      const { shape: _, ...rest } = f
+      return { ...rest, fields: withShapes(contract, shape.fields, `${at}.${f.name}`) }
+    }
+    return f.fields ? { ...f, fields: withShapes(contract, f.fields, `${at}.${f.name}`) } : f
+  })
+}
+
+/**
+ * A collection's fields as a record stores them: the person shape's first when the file names it
+ * (shared), then its own, with each group that takes a shape given the shape's fields. Returns
+ * { collection, fields }: the collection file and that list.
+ */
+export function resolveCollection(contract, source) {
+  const doc = contract.collections?.[source]
+  if (!doc) throw new Error(`the contract has no collection ${source}`)
+  const shared = doc.shared ? contract.shapes?.[doc.shared.id]?.fields : []
+  if (!shared) throw new Error(`collection ${source} carries the shape ${doc.shared.id}, which the contract does not have`)
+  return { collection: doc, fields: withShapes(contract, [...shared, ...(doc.fields ?? [])], source) }
 }
 
 /**
@@ -426,7 +464,7 @@ export function collectionQueryShape({ modes, max = COLLECTION_QUERY_MAX, hasCat
   ]
 }
 
-const HEADING_KINDS = { h2: 'heading-2', h3: 'heading-3', h4: 'heading-4' }
+const HEADING_KINDS = { h2: 'heading-2', h3: 'heading-3', h4: 'heading-4', h5: 'heading-5', h6: 'heading-6' }
 
 /**
  * A rich text field's allowed list narrowed to the heading levels a site offers (['h3', 'h4']).

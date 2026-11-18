@@ -91,7 +91,7 @@ for (const abs of contractFiles) {
     fails.push(`${file} $schema must be a relative path to a file in schema/, not ${doc.$schema}`); continue
   }
   const schemaAbs = path.resolve(path.dirname(abs), doc.$schema)
-  const family = file.startsWith('contract/fields/') ? 'schema/field-definition.schema.json'
+  const family = file.startsWith('contract/fields/') || file.startsWith('contract/collections/') ? 'schema/field-definition.schema.json'
     : file.startsWith('contract/markup/') ? 'schema/markup.schema.json' : null
   if (family && rel(schemaAbs) !== family) { fails.push(`${file} must validate against ${family}, not ${doc.$schema}`); continue }
   const validate = schemas.get(schemaAbs)
@@ -375,6 +375,87 @@ if (vocab && (vocab.sections ?? []).every((x) => x && typeof x === 'object')) {
       }
     }
   }
+
+  // Collections (ID-3944): contract/collections holds one file per item source, named by its id,
+  // and one per shape, named _<shape>. Within each, the section files' field checks apply to the
+  // record's fields (the person shape's first when it carries it, a group's shape expanded); a
+  // relationship points at a source; topics only on a source sections.json gives categories
+  // (SC-010); a post's sections are sections; and the card mapping (display) names props of the
+  // view-props type it fills and fields the record stores.
+  // The socials host table (contract/socials.json): its networks are exactly the profile's network
+  // values, in their order, and no host names two networks.
+  const socials = read('contract/socials.json')
+  if (socials) {
+    const want = (read('contract/view-props/_shared.json')?.types?.profile?.props ?? []).find((p) => p.name === 'network')?.values ?? []
+    const got = (socials.networks ?? []).map((n) => n.id)
+    if (got.join(',') !== want.join(',')) fails.push(`contract/socials.json names the networks ${got.join(', ')}; view-props/_shared.json profile.network offers ${want.join(', ')}`)
+    const seen = new Set()
+    for (const n of socials.networks ?? []) {
+      for (const h of n.hosts ?? []) {
+        if (seen.has(h.host)) fails.push(`contract/socials.json lists the host ${h.host} twice`)
+        seen.add(h.host)
+        let host = ''
+        try { host = new URL(h.example).hostname.toLowerCase().replace(/^www\./, '') } catch { /* reported below */ }
+        if (host !== h.host && !host.endsWith(`.${h.host}`)) fails.push(`contract/socials.json: the example ${h.example} is not an address on ${h.host}`)
+      }
+    }
+  }
+  const shapeFiles = new Map()
+  const collectionFiles = new Map()
+  for (const abs of walk('contract/collections', (p) => p.endsWith('.json'))) {
+    const name = path.basename(abs, '.json')
+    const doc = read(rel(abs))
+    if (!doc) continue
+    if (name.startsWith('_')) {
+      if (doc.shape !== name.slice(1)) fails.push(`${rel(abs)} declares shape ${doc.shape}; its file name says ${name.slice(1)}`)
+      else shapeFiles.set(doc.shape, doc)
+    } else if (doc.collection !== name) fails.push(`${rel(abs)} declares collection ${doc.collection}; its file name says ${name}`)
+    else collectionFiles.set(name, doc)
+  }
+  // Once the contract has collections, every item source has one (a package without the directory
+  // predates them).
+  if (has('contract/collections')) for (const id of itemSources) if (!collectionFiles.has(id)) fails.push(`source ${id} has no contract/collections/${id}.json`)
+  const expand = (owner, fields) => (fields ?? []).map((f) => {
+    if (f?.type === 'group' && f.shape) {
+      const shape = shapeFiles.get(f.shape)
+      if (!shape) { fails.push(`${owner}.${f.name} takes the shape ${f.shape}, which has no contract/collections/_${f.shape}.json`); return { ...f, fields: [] } }
+      return { ...f, fields: expand(`${owner}.${f.name}`, shape.fields) }
+    }
+    return f?.fields ? { ...f, fields: expand(`${owner}.${f.name}`, f.fields) } : f
+  })
+  const VIEW_TYPES = { card: ['_shared', 'card'], 'faq-item': ['faq', 'faq-item'], office: ['locations', 'office'] }
+  const recordChecks = (owner, source, fields) => {
+    for (const f of fields ?? []) {
+      if (f.type === 'relationship' && !itemSources.has(f.to)) fails.push(`${owner}.${f.name} points at ${f.to}, which is not an item source`)
+      if (f.type === 'topics' && categoriesOf.get(source)?.value !== true) fails.push(`${owner}.${f.name} is topics, but sections.json gives ${source} no categories (SC-010)`)
+      if (f.type === 'sections') for (const id of f.sections ?? []) if (!sectionIds.has(id)) fails.push(`${owner}.${f.name} offers ${id}, which is not a section in sections.json`)
+      if (f.fields) recordChecks(`${owner}.${f.name}`, source, f.fields)
+    }
+  }
+  for (const [shape, doc] of shapeFiles) checkFields(`_${shape}`, expand(`_${shape}`, doc.fields))
+  for (const [source, doc] of collectionFiles) {
+    if (doc.shared && !shapeFiles.has(doc.shared.id)) fails.push(`${source} carries the shape ${doc.shared.id}, which has no contract/collections/_${doc.shared.id}.json`)
+    const fields = expand(source, [...(doc.shared ? shapeFiles.get(doc.shared.id)?.fields ?? [] : []), ...(doc.fields ?? [])])
+    checkFields(source, fields)
+    recordChecks(source, source, fields)
+    const display = doc.display
+    if (!display) continue
+    const [file, type] = VIEW_TYPES[display.as] ?? []
+    const props = new Set((read(`contract/view-props/${file}.json`)?.types?.[type]?.props ?? []).map((p) => p.name))
+    const stored = (pathText) => {
+      let level = fields
+      for (const part of pathText.split('.')) {
+        const f = (level ?? []).find((x) => x.name === part)
+        if (!f) return false
+        level = f.fields
+      }
+      return true
+    }
+    for (const [part, how] of Object.entries(display.parts ?? {})) {
+      if (!props.has(part)) fails.push(`${source} display.parts.${part} is not a prop of view-props ${file}.json ${type}`)
+      for (const from of [how.from ?? []].flat()) if (!stored(from)) fails.push(`${source} display.parts.${part} reads ${from}, which ${source} does not store`)
+    }
+  }
 }
 
 // ── 3 ─────────────────────────────────────────────────────────────────────────────────────────
@@ -523,6 +604,10 @@ if (statSync(dir).isDirectory()) {
     const escaped = pkg.version.replace(/\./g, '\\.')
     if (!new RegExp(`^## ${escaped} \\((0[1-9]|[12][0-9]|3[01])/(0[1-9]|1[0-2])/[0-9]{4}\\)$`).test(top)) {
       fails.push(`CHANGELOG.md's newest heading must be "## ${pkg.version} (DD/MM/YYYY)" for a release, not "${top}"`)
+    }
+    // A card mapping still awaiting the founder's approval never ships in a release (ID-3944).
+    for (const abs of walk('contract/collections', (p) => p.endsWith('.json'))) {
+      if (read(rel(abs))?.display?.status === 'draft') fails.push(`${rel(abs)}'s card mapping (display) is still a draft; a release ships only approved ones`)
     }
     for (const f of packed.filter((x) => /\.(md|json|mjs|css)$/.test(x))) {
       const hit = /\b[0-9]+\.[0-9]+\.[0-9]+-rc\.[0-9]+\b/.exec(readFileSync(path.join(dir, f), 'utf8'))

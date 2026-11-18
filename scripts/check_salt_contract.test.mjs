@@ -657,3 +657,51 @@ test('a dated release with no candidate strings passes (SC-020)', () => {
   const dir = makePackage(release('## 1.0.0 (11/10/2026)'))
   try { const r = run(dir); assert.equal(r.code, 0, r.out) } finally { rmSync(dir, { recursive: true, force: true }) }
 })
+
+// ── Collections (ID-3944): one file per item source, checked like a section's fields ─────────
+function collectionsRun(edit) {
+  return crossRun((f) => {
+    f['schema/field-definition.schema.json'].$defs = { source: { enum: ['services', 'team'] } }
+    f['contract/sections.json'].sections[0].sources = [{ id: 'services', label: 'Services', linked: true, categories: true }, { id: 'team', label: 'Team', linked: false, categories: false }]
+    f['contract/view-props/_shared.json'] = { $schema: '../../schema/field-definition.schema.json', version: '0.1.0', types: { card: { props: [{ name: 'title' }, { name: 'text' }] } } }
+    const doc = (collection, fields, display) => ({ $schema: '../../schema/field-definition.schema.json', version: '0.1.0', collection, label: collection, fields, ...(display ? { display } : {}) })
+    f['contract/collections/services.json'] = doc('services', [
+      { name: 'title', type: 'text', label: 'Name' },
+      { name: 'summary', type: 'textarea', label: 'Summary' },
+      { name: 'topics', type: 'topics', label: 'Topics', many: true },
+      { name: 'related', type: 'relationship', label: 'Related', to: 'services', many: true },
+    ], { as: 'card', status: 'draft', parts: { title: { from: 'title' }, text: { from: 'summary' } } })
+    f['contract/collections/team.json'] = doc('team', [{ name: 'name', type: 'text', label: 'Name' }])
+    edit?.(f)
+  })
+}
+test('collections: a consistent set passes', () => {
+  const r = collectionsRun()
+  assert.equal(r.code, 0, r.out)
+})
+test('collections: once the contract has collections, an item source with no file fails', () => {
+  const r = collectionsRun((f) => { delete f['contract/collections/team.json'] })
+  assert.equal(r.code, 1); assert.match(r.out, /source team has no contract\/collections\/team\.json/)
+})
+test('collections: a file whose name and collection disagree fails', () => {
+  const r = collectionsRun((f) => { f['contract/collections/team.json'].collection = 'services' })
+  assert.equal(r.code, 1); assert.match(r.out, /contract\/collections\/team\.json declares collection services; its file name says team/)
+})
+test('collections: topics on a source with no categories fails (SC-010)', () => {
+  const r = collectionsRun((f) => { f['contract/collections/team.json'].fields.push({ name: 'topics', type: 'topics', label: 'Topics' }) })
+  assert.equal(r.code, 1); assert.match(r.out, /team\.topics is topics, but sections\.json gives team no categories/)
+})
+test('collections: a relationship to something that is not an item source fails', () => {
+  const r = collectionsRun((f) => { f['contract/collections/services.json'].fields[3].to = 'pages' })
+  assert.equal(r.code, 1); assert.match(r.out, /services\.related points at pages, which is not an item source/)
+})
+test('collections: a card mapping that reads a field the record does not store, or fills no prop, fails', () => {
+  const renamed = collectionsRun((f) => { f['contract/collections/services.json'].fields[1].name = 'excerpt' })
+  assert.equal(renamed.code, 1); assert.match(renamed.out, /services display\.parts\.text reads summary, which services does not store/)
+  const noProp = collectionsRun((f) => { f['contract/collections/services.json'].display.parts.blurb = { from: 'summary' } })
+  assert.equal(noProp.code, 1); assert.match(noProp.out, /services display\.parts\.blurb is not a prop of view-props _shared\.json card/)
+})
+test('collections: two fields of one name fail, as in a section', () => {
+  const r = collectionsRun((f) => { f['contract/collections/services.json'].fields.push({ name: 'title', type: 'text', label: 'Again' }) })
+  assert.equal(r.code, 1); assert.match(r.out, /services has two fields named title/)
+})

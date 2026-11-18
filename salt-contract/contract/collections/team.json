@@ -1,0 +1,66 @@
+{
+  "$schema": "../../schema/field-definition.schema.json",
+  "version": "1.0.0-rc.6",
+  "$comment": "A team member's stored fields: the person shape (contract/collections/_person.json), flat. A team member is a record with no login, separate from login accounts, and anyone on the team can be credited as a post's author without an account (the founder's rulings of 18/11/2026). Salt for WordPress keeps its team_member post type. Team has no topics (SC-027) and no page of its own. The editor's order is each platform's own.",
+  "collection": "team",
+  "label": "Team member",
+  "shared": {
+    "id": "person"
+  },
+  "dropped": [
+    {
+      "formerly": {
+        "wordpress": "post_content (the full biography)"
+      },
+      "note": "No page reads it; team members have no page of their own."
+    },
+    {
+      "formerly": {
+        "nextjs": "profile.department",
+        "wordpress": "the department taxonomy"
+      },
+      "note": "Unread, and team has no categories (SC-027). Salt for Next.js may keep it as a site extra."
+    },
+    {
+      "formerly": {
+        "wordpress": "the Gravatar fallback for an author's photo"
+      },
+      "note": "A remote fallback image is output Salt for Next.js cannot match; the author box draws a photo only when there is one."
+    }
+  ],
+  "display": {
+    "$comment": "Derived from Salt for Next.js's READ_CARD and Salt for WordPress's inc/sections/team.php, with the rc.7 names. Salt for Next.js's core card draws no contact links today; markup/card.json draws them when filled (SC-006).",
+    "as": "card",
+    "status": "draft",
+    "parts": {
+      "title": {
+        "from": "name"
+      },
+      "image": {
+        "from": "photo"
+      },
+      "meta": {
+        "from": "role"
+      },
+      "text": {
+        "from": "bio"
+      },
+      "email": {
+        "from": "email",
+        "note": "Drawn as a mailto: link when filled."
+      },
+      "phone": {
+        "from": "phone",
+        "note": "As entered, the link's text."
+      },
+      "phoneHref": {
+        "from": "phone",
+        "note": "The tel: address, only when the phone normalises to one."
+      },
+      "profiles": {
+        "from": "socials",
+        "note": "Each row in order: name names the link, url is its address, and the network is derived from the address (contract/socials.json)."
+      }
+    }
+  }
+}
