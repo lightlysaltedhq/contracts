@@ -257,15 +257,18 @@ into the Flexible Content layout Salt for WordPress registers in its page sectio
 of its own, `group_salt_collection_<source>`, located on the source's post type (`SOURCE_DEFAULTS`,
 or `sources`). A collection field WordPress stores in its own place (the title, body, excerpt,
 featured image, categories or date: `platforms.wordpress.native`) is not generated; the group names
-it under `salt.native`, and a target it carries under `salt.targets`. Under the limits rule
-(ID-3968, `RELEASE-POLICY.md` section 2) a text's `maxLength` is not ACF's `maxlength`, which cuts
-typing: it is recorded under the field's `salt.maxLength`, for the site's count while typing and
-its check on publish. A number's range and a list's, a gallery's or a relationship's size are
-still ACF's own `min` and `max`, which ACF checks when a post is published and not on a draft
-save. Its editor will not add a row or an image past a repeater's or a gallery's `max`, though,
-and an options page or a term screen checks them on every save; whether that holds under the rule
-is pending the founder. `RULED_LIMITS` in `emit/acf.mjs` names the kinds of limit recorded under
-`salt`, not which limits stay limits: the field files say that (a `target` in place of a
+it under `salt.native`, and a target it carries under `salt.targets`.
+
+**Limits on WordPress.** Every limit is ACF's own setting (`maxlength`, `min`, `max`). ACF checks
+each when a post is published or a published post is updated, with a message, and not on a draft
+save; it counts a length in code points with a CRLF as one. Under the limits rule (ID-3968,
+`RELEASE-POLICY.md` section 2) Salt for WordPress owes one thing more: a field's input draws no
+`maxlength` attribute, stripped at render (in `acf/prepare_field`, whose copy is only the one
+drawn: validation reloads the field, setting and all), because the browser's attribute cuts pasted
+text and stops typing with no message. ACF's editor also will not add a row, an image or an item
+past a repeater's, a gallery's or a relationship's `max`, with a message, and an options page or a
+term screen checks every save; whether those hold under the rule is pending the founder. Which
+limits stay limits and which become targets is the field files' to say (a `target` in place of a
 `maxLength` or `max`), and the emitter follows them.
 A field's `target` (ID-3969), which nothing refuses, is under `salt.target`. A post's `layout` is a Flexible Content field of the sections a post may
 use. Each layout carries a Settings tab before its `settings` group, which stores nothing and

@@ -199,7 +199,8 @@ test, applied through section 2's table, where the stricter row wins.
   ID-3970). Each is part of the first major, so the semver call stays MAJOR. On its own, by
   `RELEASE-POLICY.md` section 1's test, the limits rule would be MAJOR: until now the contract did
   not say how a limit is held, and from this candidate an implementation that refuses a draft
-  over a limit, or cuts what an editor wrote (ACF's `maxlength` does), no longer conforms, so
+  over a limit, or cuts what an editor wrote (the browser's `maxlength` attribute on ACF's input
+  does), no longer conforms, so
   verdicts change. The `target` keyword is additive, a new optional schema keyword (MINOR), and the
   targets it sets change no verdict, since nothing refuses a target. The service example's change
   is PATCH: an implementation that drew the old case correctly draws the new one.
@@ -212,20 +213,21 @@ test, applied through section 2's table, where the stricter row wins.
     either refused with a message to whoever sent it or stored and flagged until fixed. A length
     the design only prefers is a target, shown to the editor and never refused.* Lengths count
     Unicode code points, with a CRLF line break counting as one, and the fixtures gate now counts
-    so. No limit's number changes. `emit/acf.mjs` no longer gives a text ACF's `maxlength`, which
-    cuts typing: the limit is recorded under the field's `salt.maxLength`, for the site's count
-    and its check on publish, so the ACF snapshot changes for every text with a limit. A number's
-    range and a list's, gallery's or relationship's size stay ACF's own `min` and `max`, which ACF
-    checks when a post is published and not on a draft save; where ACF departs from the rule with
-    them (its editor will not add a row or an image past a repeater's or a gallery's `max`, and an
-    options page or a term screen checks them on every save) is pending (below). `RULED_LIMITS` in
-    `emit/acf.mjs` says where the emitter records each kind of limit, not which limits stay
-    limits: that is the field files' to say, and the emitter follows them. The Payload emitter is unchanged and gives each limit as Payload's
+    so. No limit's number changes, and both emitters' output for limits is as at rc.7. On
+    WordPress every limit stays ACF's own setting, which an ACF Pro 6.8.11 probe showed ACF checks
+    with a message on publish and on updating a published post, not on a draft save, counting a
+    length in code points with a CRLF as one; with the setting removed nothing checked a length at
+    all. Salt for WordPress owes one thing more: a field's input draws no `maxlength` attribute
+    (stripped at render, in `acf/prepare_field`), as the browser's attribute cuts pasted text and
+    stops typing with no message. Where ACF departs from the rule otherwise (its editor will not
+    add a row, an image or an item past a repeater's, a gallery's or a relationship's `max`, and an
+    options page or a term screen checks every save) is pending (below). The rule also means a
+    stored value may be over its limit (a draft, a write stored and flagged), so whatever draws it,
+    a preview among them, draws it without failing and without cutting what is stored. The Payload emitter is unchanged and gives each limit as Payload's
     own setting. Under the rule Salt for Next.js owes counting a length in code points with a CRLF
     as one, where Payload's `maxLength` counts UTF-16 units (an emoji two, a CRLF two), and never
     refusing a draft, where Payload skips validation on a draft only with `versions.drafts` on;
-    how it meets them is its own. The ACF round trip compares a limit by its value, wherever the
-    emitter records it.
+    how it meets them is its own.
   - **Targets** (ID-3969). A text, textarea, list, gallery or relationship may carry `target`, a
     number the design only prefers: shown to the editor beside the count and never refused. ACF
     records it under the field's `salt.target`, or under its group's `salt.targets` for a field
@@ -259,9 +261,18 @@ test, applied through section 2's table, where the stricter row wins.
       collection-query's count cannot become a target with a one-line change; softening any of
       them needs the schema to take a target there first.
     - Whether ACF's own `min` and `max` may hold a number's range and a list's, gallery's or
-      relationship's size, given that its editor will not add a row or an image past a repeater's
-      or a gallery's `max`, and that an options page or a term screen checks them on every save. If
-      not, `RULED_LIMITS` moves them under `salt`.
+      relationship's size, given that its editor will not add a row, an image or an item past a
+      repeater's, a gallery's or a relationship's `max` (with a message), and that an options page
+      or a term screen checks them on every save. Taking them off ACF's settings would also drop
+      ACF's check on publish, as the probe showed for a length.
+    - On WordPress the REST API refuses an over-long write (400), even as a draft, and counts with
+      plain `mb_strlen`, a CRLF as two, which does not match the counting rule. The ruling says a
+      write outside the editor is stored and flagged, so WordPress must lift that refusal: is that a
+      statement the contract makes, or Salt for WordPress's implementation detail?
+    - With JavaScript off, a failed update on WordPress drops every ACF field silently while
+      WordPress says *Post updated*. Accept it as a known limitation, or require a message?
+    - How a value over its limit is drawn: as stored, or clamped by the stylesheet. The rule says
+      only that it is drawn without failing and nothing stored is cut.
     - Whether a Payload site must run with drafts (`versions.drafts`) so that no draft is refused,
       or may meet the rule another way.
     - For an FAQ, a testimonial, a team member and a location, which have no page of their own and
