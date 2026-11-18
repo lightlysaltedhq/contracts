@@ -169,8 +169,9 @@ test, applied through section 2's table, where the stricter row wins.
     `platforms.wordpress.native`.
   - **The schema** gains the types `topics`, `date-time`, `time` and `sections`, the text format
     `email`, a textarea's `maxLines`, a group's `shape`, and a collection's `display`: which
-    stored field fills each part of its card, FAQ item or office. Every `display` is `draft`
-    until the owner approves it, and the package gate refuses a release that ships a draft.
+    stored field fills each part of its card, FAQ item or office. The package gate refuses a
+    release that ships a `draft` display; the owner approved every collection's mapping on
+    18/11/2026, so each is `approved`.
   - **The socials host table** (`./socials`, `contract/socials.json`): which host means which
     network, with an example address for each, from Salt for Next.js's table; Salt for
     WordPress owes the hosts its own lacks.

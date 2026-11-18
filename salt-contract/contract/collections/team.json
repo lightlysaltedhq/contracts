@@ -31,7 +31,7 @@
   "display": {
     "$comment": "Derived from Salt for Next.js's READ_CARD and Salt for WordPress's inc/sections/team.php, with the rc.7 names. Salt for Next.js's core card draws no contact links today; markup/card.json draws them when filled (SC-006).",
     "as": "card",
-    "status": "draft",
+    "status": "approved",
     "parts": {
       "title": {
         "from": "name"

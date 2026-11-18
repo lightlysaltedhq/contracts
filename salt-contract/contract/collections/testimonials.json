@@ -123,7 +123,7 @@
   "display": {
     "$comment": "Derived from Salt for Next.js's READ_CARD and Salt for WordPress's inc/sections/testimonials.php, with the rc.7 names. A testimonial is drawn in the quote style (markup/card.json).",
     "as": "card",
-    "status": "draft",
+    "status": "approved",
     "parts": {
       "title": {
         "from": "name",

@@ -247,7 +247,7 @@
   "display": {
     "$comment": "Derived from Salt for WordPress's inc/sections/locations.php (Salt for Next.js has no locations section yet), with the rc.7 names. markup/locations.json draws the office.",
     "as": "office",
-    "status": "draft",
+    "status": "approved",
     "parts": {
       "title": {
         "from": "title"
