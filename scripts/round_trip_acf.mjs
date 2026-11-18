@@ -14,9 +14,7 @@
 // captured groups as JSON. Nothing in salt-wordpress is written to.
 //
 // Compared per field: name, type, choices (values and order), default, required, limits
-// (maxlength, min, max, step; each limit's value, read from salt where the contract's output
-// records it under the limits rule, ID-3968, RULED_LIMITS in emit/acf.mjs, and not where it sits), the post types and taxonomy a
-// relation reads, and conditional
+// (maxlength, min, max, step), the post types and taxonomy a relation reads, and conditional
 // logic. Conditional logic is compared by behaviour: both sides are ACF rules, evaluated as ACF
 // does over every combination of the siblings either side reads, with each contract value
 // translated to the one salt-wordpress stores. Labels and instructions are not compared; see the
@@ -292,7 +290,7 @@ function compareOne(section, at, e, n, def, ctx) {
   }
   if (!!e.required !== !!n.required) diffs.push(['required', `required ${!!e.required}; salt-wordpress ${!!n.required}`])
   if (sameType) {
-    for (const k of ['maxlength', 'min', 'max', 'step']) if (show(limitOf(e, k)) !== show(n[k])) diffs.push(['limit', `${k} ${show(limitOf(e, k))}; salt-wordpress ${show(n[k])}`])
+    for (const k of ['maxlength', 'min', 'max', 'step']) if (show(e[k]) !== show(n[k])) diffs.push(['limit', `${k} ${show(e[k])}; salt-wordpress ${show(n[k])}`])
     for (const k of ['post_type', 'taxonomy']) if (show(e[k]) !== show(n[k])) diffs.push(['relation', `${k} ${show(e[k])}; salt-wordpress ${show(n[k])}`])
   }
   const cond = compareConditions(e, n, ctx)
@@ -303,14 +301,6 @@ function compareOne(section, at, e, n, def, ctx) {
     const entries = e.sub_fields.map((c) => ({ e: c, def: childDefs.find((d) => d.name === c.name), at: c.name, siblings: e.sub_fields }))
     compareLevel(section, entries, n.sub_fields, `${at}.`, def)
   }
-}
-
-// A limit of the contract's field: under the limits rule (ID-3968) the emitter records it under
-// salt (salt.maxLength, salt.min, salt.max) rather than as ACF's setting; step is no limit.
-export function limitOf(e, k) {
-  if (k === 'step') return e.step
-  const own = e.salt?.[k === 'maxlength' ? 'maxLength' : k]
-  return own !== undefined ? own : e[k]
 }
 
 // salt-wordpress stores a query as six fields on the layout; the query's note covers its parts,
@@ -419,9 +409,6 @@ async function main({ wordpress, check, suggest }) {
     'which a field is, SC-023; a url-format text matches ACF url, which stores the same string), choices, defaults,',
     'required, limits, the post types and taxonomy a relation reads, and conditional logic (by',
     'behaviour, over every combination of the siblings either side reads).',
-    'A limit is compared by its value, wherever it sits: under the limits rule (ID-3968) the',
-    'contract\'s output records a text\'s maxLength under the field\'s `salt`, never as ACF\'s maxlength,',
-    'where salt-wordpress sets ACF\'s own today; the rule, not each field, records what that owes.',
     'Not compared: labels and instructions, which salt-wordpress words differently and SC-003 says',
     'must match, so adopting the emitter changes them throughout; and what stays native to ACF',
     '(return formats, wrapper widths, tabs, toolbars, row layouts).',

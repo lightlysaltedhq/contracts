@@ -19,9 +19,8 @@
 // `field_salt_{section}_{path}`, each part snake_cased (`field_salt_media_text_rows_media_side`).
 // Shared settings sit in a group named `settings` on every layout, as the contract stores them.
 // Each field records what it was generated from under `salt` (rich text's allowed list, a text
-// format, a text's maxLength and any target, a list's row label, a link's or query's shape); ACF
-// keeps unknown keys on a field, so the consumer's renderer, sanitiser, count and check on publish
-// can read them.
+// format, any target, a list's row label, a link's or query's shape); ACF keeps unknown keys on a
+// field, so the consumer's renderer, sanitiser and count can read them.
 //
 // Pure data: no WordPress, and nothing read but the contract's own files.
 //
@@ -55,22 +54,12 @@ const CONTAINER_KEY = 'field_salt_sections_container'
 
 // The limits rule (ID-3968, the founder's ruling of 18/11/2026): a limit never stops a draft from
 // saving and never cuts what an editor wrote; the editor sees the count as they type and the limit
-// is checked when content is published. ACF's maxlength cuts typing, so a text's maxLength is
-// recorded under the field's `salt` (salt.maxLength) for the site's count and its check on
-// publish, never as ACF's setting.
-//
-// RULED_LIMITS names the kinds of limit this emitter records under salt rather than as ACF's own
-// setting: where a limit sits on WordPress, not whether it is one. Which limits stay limits and
-// which become targets is the contract's field files' to say (maxLength or max renamed to target),
-// and the emitter follows them with no change here. A number's range (min, max, the
-// collection-query's count among them) and the size of a list, a gallery or a relationship (min,
-// max) stay ACF's own settings. ACF validates them only when a post is published, not on a draft
-// save. Where ACF departs from the rule is elsewhere: its editor will not add a row or an image
-// past a repeater's or a gallery's max, and an options page or a term screen, which has no draft,
-// validates them on every save. Whether that moves 'range' and 'size' into this set is pending the
-// founder (rc.8).
-export const RULED_LIMITS = new Set(['length'])
-
+// is checked when content is published. Every limit is emitted as ACF's own setting (maxlength,
+// min, max), which ACF checks when a post is published or a published post is updated, and not
+// on a draft save; ACF counts a length in code points with a CRLF as one. What WordPress owes
+// beyond that is the site's, not this emitter's: its field's input draws no maxlength attribute
+// (stripped at render, in acf/prepare_field, which leaves the setting for ACF's check), so the
+// browser cuts nothing (the contract's README, Generating ACF field groups).
 const snake = (s) => s.replace(/([a-z0-9])([A-Z])/g, '$1_$2').replace(/-/g, '_').toLowerCase()
 
 // ── Conditions ─────────────────────────────────────────────────────────────────────────────────
@@ -142,12 +131,6 @@ function convertField(f, ctx) {
     if (list.length) out.conditional_logic = conditionalLogic(list, ctx.keyOf)
   }
   if (f.deprecated) salt.deprecated = f.deprecated
-  // A limit of a kind in RULED_LIMITS goes under salt; any other is ACF's own setting.
-  const limit = (kind, key, value, acfKey = key) => {
-    if (value === undefined) return
-    if (RULED_LIMITS.has(kind)) salt[key] = value
-    else out[acfKey] = value
-  }
   // A target is never refused, so it is never an ACF setting (ID-3969).
   if (f.target !== undefined) salt.target = f.target
   const below = { ...ctx, path: [...ctx.path, f.name] }
@@ -158,13 +141,13 @@ function convertField(f, ctx) {
       // mailto: and tel: the schema allows. salt.format tells the site's sanitiser to check it.
       typed('text')
       if (f.default !== undefined) out.default_value = f.default
-      limit('length', 'maxLength', f.maxLength, 'maxlength')
+      if (f.maxLength !== undefined) out.maxlength = f.maxLength
       if (f.format) salt.format = f.format
       break
     case 'textarea':
       typed('textarea')
       if (f.default !== undefined) out.default_value = f.default
-      limit('length', 'maxLength', f.maxLength, 'maxlength')
+      if (f.maxLength !== undefined) out.maxlength = f.maxLength
       if (f.maxLines !== undefined) {
         out.rows = f.maxLines
         salt.maxLines = f.maxLines
@@ -186,8 +169,8 @@ function convertField(f, ctx) {
       typed(f.many ? 'gallery' : 'image')
       out.return_format = 'id'
       if (f.many) {
-        limit('size', 'min', f.min)
-        limit('size', 'max', f.max)
+        if (f.min !== undefined) out.min = f.min
+        if (f.max !== undefined) out.max = f.max
       }
       break
     case 'select': {
@@ -215,15 +198,15 @@ function convertField(f, ctx) {
     case 'number':
       typed('number')
       if (f.default !== undefined) out.default_value = f.default
-      limit('range', 'min', f.min)
-      limit('range', 'max', f.max)
+      if (f.min !== undefined) out.min = f.min
+      if (f.max !== undefined) out.max = f.max
       if (f.step !== undefined) out.step = f.step
       break
     case 'list': {
       typed('repeater')
       out.layout = 'block'
-      limit('size', 'min', f.min)
-      limit('size', 'max', f.max)
+      if (f.min !== undefined) out.min = f.min
+      if (f.max !== undefined) out.max = f.max
       if (f.itemLabel) {
         // Lower-cased into the sentence, unless it is an acronym (FAQ), which stays as given.
         const word = /^.[A-Z]/.test(f.itemLabel) ? f.itemLabel : f.itemLabel.charAt(0).toLowerCase() + f.itemLabel.slice(1)
@@ -259,8 +242,8 @@ function convertField(f, ctx) {
       if (!f.many && !f.required) out.allow_null = 1
       if (f.many) {
         out.filters = ['search']
-        limit('size', 'min', f.min)
-        limit('size', 'max', f.max)
+        if (f.min !== undefined) out.min = f.min
+        if (f.max !== undefined) out.max = f.max
       }
       break
     }

@@ -160,9 +160,9 @@ test('text, textarea, select, boolean, number and group map to their ACF types',
     { name: 'count', type: 'number', label: 'Count', min: 1, max: 9, step: 1, default: 3 },
     { name: 'box', type: 'group', label: 'Box', fields: [{ name: 'inner', type: 'text', label: 'Inner' }] },
   ])
-  assert.deepEqual(title, { key: 'field_salt_probe_title', label: 'Title', name: 'title', type: 'text', instructions: 'Help.', required: 1, default_value: 'Hi', salt: { maxLength: 80 } })
+  assert.deepEqual(title, { key: 'field_salt_probe_title', label: 'Title', name: 'title', type: 'text', instructions: 'Help.', required: 1, default_value: 'Hi', maxlength: 80 })
   assert.deepEqual([address.type, address.salt], ['text', { format: 'url' }])
-  assert.deepEqual([intro.type, intro.maxlength, intro.salt], ['textarea', undefined, { maxLength: 300 }])
+  assert.deepEqual([intro.type, intro.maxlength], ['textarea', 300])
   assert.deepEqual([style.type, style.choices, style.default_value, style.allow_null], ['select', { a: 'A', b: 'B' }, 'b', undefined])
   assert.equal(pick.allow_null, 1)
   assert.deepEqual([on.type, on.ui, on.default_value], ['true_false', 1, 1])
@@ -686,20 +686,12 @@ test('ID-3944: every layout carries a Settings tab, storing nothing, straight be
   assert.ok(acfSlugRegistry(groups).fields.group_salt_collection_case_studies.includes('externalUrl'))
 })
 
-test('ID-3968: a text\'s maxLength is never ACF\'s maxlength, which cuts typing, but is under salt', () => {
+test('ID-3968: every limit is ACF\'s own setting, which ACF checks on publish and not on a draft save', () => {
   const groups = toAcfFieldGroups({ icons })
-  const cut = []
-  const walk = (fields) => {
-    for (const f of fields ?? []) {
-      if ('maxlength' in f) cut.push(f.key)
-      walk(f.sub_fields)
-      for (const l of f.layouts ?? []) walk(l.sub_fields)
-    }
-  }
-  for (const g of groups) walk(g.fields)
-  assert.deepEqual(cut, [])
-  assert.equal(field(layout(layoutsOf(), 'features').sub_fields, 'intro').salt.maxLength, 300)
-  assert.deepEqual(field(groupOf(groups, 'team').fields, 'role').salt, { maxLength: 80 })
+  const role = field(groupOf(groups, 'team').fields, 'role')
+  assert.deepEqual([role.maxlength, role.salt], [80, undefined])
+  assert.equal(field(layout(layoutsOf(), 'features').sub_fields, 'intro').maxlength, 300)
+  assert.equal(field(groupOf(groups, 'services').fields, 'benefits').max, 12)
 })
 
 test('ID-3969: a target is under salt, never an ACF setting', () => {
@@ -710,7 +702,7 @@ test('ID-3969: a target is under salt, never an ACF setting', () => {
     { name: 'photos', type: 'image', label: 'Photos', many: true, target: 12 },
     { name: 'people', type: 'relationship', label: 'People', to: 'team', many: true, target: 4 },
   ], { sources: { team: {} } })
-  assert.deepEqual(plain, { key: 'field_salt_probe_plain', label: 'Plain', name: 'plain', type: 'text', salt: { target: 60, maxLength: 120 } })
+  assert.deepEqual(plain, { key: 'field_salt_probe_plain', label: 'Plain', name: 'plain', type: 'text', maxlength: 120, salt: { target: 60 } })
   assert.deepEqual([long.maxlength, long.salt], [undefined, { target: 200 }])
   assert.deepEqual([rows.max, rows.salt.target, photos.max, photos.salt], [undefined, 6, undefined, { target: 12 }])
   assert.deepEqual([people.type, people.max, people.salt], ['relationship', undefined, { target: 4, to: 'team' }])

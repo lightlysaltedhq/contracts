@@ -9,9 +9,6 @@ Compared: field names, types (a select, a radio and a button group are three: th
 which a field is, SC-023; a url-format text matches ACF url, which stores the same string), choices, defaults,
 required, limits, the post types and taxonomy a relation reads, and conditional logic (by
 behaviour, over every combination of the siblings either side reads).
-A limit is compared by its value, wherever it sits: under the limits rule (ID-3968) the
-contract's output records a text's maxLength under the field's `salt`, never as ACF's maxlength,
-where salt-wordpress sets ACF's own today; the rule, not each field, records what that owes.
 Not compared: labels and instructions, which salt-wordpress words differently and SC-003 says
 must match, so adopting the emitter changes them throughout; and what stays native to ACF
 (return formats, wrapper widths, tabs, toolbars, row layouts).
