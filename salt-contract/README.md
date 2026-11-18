@@ -10,6 +10,11 @@ as a WordPress parent theme. This package is the one thing both implementations 
 - platform-neutral **field definitions** (`schema/field-definition.schema.json`,
   `contract/fields/<section>.json`), from which each implementation generates its editor fields
   (Payload blocks, ACF field groups);
+- the **collection fields** (`contract/collections/<source>.json`, with the shared shapes
+  `_person`, `_address` and `_topic`): what an editor stores for a service, a case study, a
+  testimonial, a post, a team member, an FAQ and a location, in the same form, with which stored
+  field fills each part of the record's card (its `display`, for the owner's approval), and the
+  socials host table (`contract/socials.json`);
 - the **markup contract** (`contract/markup/<section>.json`): element order, the `salt-*` class
   vocabulary, data attributes and heading rules;
 - the one shared set of **stylesheets** (`styles/`), reaching colour only through custom
@@ -72,15 +77,16 @@ receives and the choices on offer.
 
 ## Status
 
-`1.0.0-rc.6` is the release candidate for `1.0.0`: private, never on the registry, held until an
+`1.0.0-rc.7` is the release candidate for `1.0.0`: private, never on the registry, held until an
 implementation's run of `salt-conformance` against it conforms in full, in a report that names
-`1.0.0-rc.6` (SC-017, SC-018, SC-020, SC-022; `RELEASE-POLICY.md` section 5). It follows
+`1.0.0-rc.7` (SC-017, SC-018, SC-020, SC-022; `RELEASE-POLICY.md` section 5). It follows
 `1.0.0-rc.1`, whose first run raised eight questions about the contract itself, `1.0.0-rc.2`,
 whose run raised three more, `1.0.0-rc.3`, against which bringing Salt for Next.js's core
 markup to the contract raised seven, `1.0.0-rc.4`, after which the owner ruled on the
-priority image and on team's categories, and `1.0.0-rc.5`, after which the owner ruled on the
-drawer's close button and on a team card's links; those rulings (SC-023, SC-024, SC-025, SC-026,
-SC-027, SC-028)
+priority image and on team's categories, `1.0.0-rc.5`, after which the owner ruled on the
+drawer's close button and on a team card's links, and `1.0.0-rc.6`, after which the owner ruled
+on the collections' field names, a post's sections and rich text's heading levels (18/11/2026);
+those rulings (SC-023, SC-024, SC-025, SC-026, SC-027, SC-028, and the rulings of 18/11/2026)
 changed contract files, which each time makes a new candidate and needs a new run. `1.0.0` is the first release, staged
 from CI by npm trusted publishing when the owner pushes the `salt-contract-v1.0.0` tag, and
 approved by the owner. See `RELEASE-POLICY.md` for what each part
@@ -115,6 +121,13 @@ const blocks = toPayloadBlocks({
   sections: ['hero', 'rich-text'],    // which sections, in order (every one the sources can carry)
 })
 ```
+
+**Collections.** `toPayloadCollections(options)` gives each installed source's collection fields
+(`contract/collections`), `[{ slug, custom: { salt: { collection } }, fields }]`, for the consumer
+to spread into its own collection config beside what stays native (the slug field, access,
+versions, admin). It takes the same options, plus `collections`, the source ids to emit. A post's
+`layout` holds the blocks of the sections a post may use. `payloadCollectionsSnapshot` and
+`checkPayloadCollectionsSnapshot` are its snapshot and drift check, compared as the blocks are.
 
 Conditions are functions, so the blocks are not JSON. Each field also records what it was
 generated from under `custom.salt` (its condition clauses, rich text's allowed list, a text
@@ -228,9 +241,14 @@ lists it, with the note that accounts for it.
 
 `emit/acf.mjs` (`@lightlysaltedhq/salt-contract/emit/acf`) turns each section's field definitions
 into the Flexible Content layout Salt for WordPress registers in its page sections field group
-(`group_salt_sections`). The contract defines no other groups yet, so that is the only one; the
-custom post types' groups stay in salt-wordpress until the contract defines their fields. Like the
-Payload emitter it is a pure data transform, reading only this package's files.
+(`group_salt_sections`), and each collection source's fields (`contract/collections`) into a group
+of its own, `group_salt_collection_<source>`, located on the source's post type (`SOURCE_DEFAULTS`,
+or `sources`). A collection field WordPress stores in its own place (the title, body, excerpt,
+featured image, categories or date: `platforms.wordpress.native`) is not generated; the group names
+it under `salt.native`. A post's `layout` is a Flexible Content field of the sections a post may
+use. Each layout carries a Settings tab before its `settings` group, which stores nothing and
+puts the shared settings on a tab of their own. Like the Payload emitter it is a pure data
+transform, reading only this package's files.
 
 ```js
 import { toAcfFieldGroups, checkAcfSnapshot, acfSnapshot } from '@lightlysaltedhq/salt-contract/emit/acf'
@@ -242,6 +260,7 @@ const groups = toAcfFieldGroups({
   sources: { services: {}, posts: {} }, // the sources the site has, with any renamed post types or taxonomies
   postTypes: ['page'],                // where the sections group shows (['page'])
   sections: ['hero', 'rich-text'],    // which sections, in order (every section in sections.json)
+  collections: ['services', 'posts'], // which collection groups (every installed source); [] for none
 })
 ```
 
@@ -547,7 +566,7 @@ report).
 ```json
 {
   "format": "salt-conformance/1",
-  "contract": { "package": "@lightlysaltedhq/salt-contract", "version": "1.0.0-rc.6" },
+  "contract": { "package": "@lightlysaltedhq/salt-contract", "version": "1.0.0-rc.7" },
   "platform": "nextjs",
   "implementation": { "version": "0.4.0" },
   "adapter": { "kind": "command", "target": "node scripts/salt-adapter.mjs" },
@@ -556,7 +575,7 @@ report).
   "summary": { "pass": 15, "fail": 1, "incomplete": 0, "notShipped": 1 },
   "fields": { "platform": "payload", "snapshot": "…", "options": "…", "problems": [] },
   "problems": [],
-  "stylesheets": { "served": "…", "bundle": "styles/salt.css", "contract": "1.0.0-rc.6", "ok": true, "status": "identical" },
+  "stylesheets": { "served": "…", "bundle": "styles/salt.css", "contract": "1.0.0-rc.7", "ok": true, "status": "identical" },
   "sections": [
     {
       "id": "hero",

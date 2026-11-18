@@ -4,7 +4,7 @@ Newest first. Dates are DD/MM/YYYY. What each part of a version means, and how a
 announced and migrated, is in `RELEASE-POLICY.md`. Decisions cited as `SC-nnn` are in Lightly
 Salted's decision log for Product Salt.
 
-## 1.0.0 (candidate `1.0.0-rc.6`, prepared 15/10/2026; not published, dated when tagged)
+## 1.0.0 (candidate `1.0.0-rc.7`, prepared 18/11/2026; not published, dated when tagged)
 
 **Semver call: MAJOR, the first release of the contract.** No earlier version was published, so no
 implementation conformed to one. Adopting it is still a migration for existing sites, because the
@@ -61,7 +61,7 @@ test, applied through section 2's table, where the stricter row wins.
   (`./view-props/*`); the replaced-logic format (`./schema/replaced-logic`).
 - Image sizes (`./image-sizes`): each slot's `sizes` per band and column count, the candidate
   widths, and the srcset capped at the upload's intrinsic width (SC-016).
-- Fixtures (`./fixtures/*`): 110 cases with their expected HTML, for the 17 sections, the site
+- Fixtures (`./fixtures/*`): 116 cases with their expected HTML, for the 17 sections, the site
   header and footer, the post, service, case-study, archive, search and not-found views, and the
   page (SC-018, SC-019, SC-021); and the normaliser both sides are compared through
   (`./normalise`).
@@ -146,6 +146,54 @@ test, applied through section 2's table, where the stricter row wins.
   social links keep `salt-showcase__social-link`. `collection-showcase/grid-team-contacts` draws
   the class. `styles/salt.css` changes, so each implementation serves the new bytes: 45,331
   bytes, SHA-256 `4f3bca26398e6153aa0eda8ad09e048bc48a1a63feb56606dd718d2098f907ec`.
+- The owner's rulings of 18/11/2026 change the contract after `1.0.0-rc.6` (ID-3944, ID-3949,
+  ID-3950; recorded with the decision log's next SC numbers when the log is written up). Each is
+  part of the first major, so the semver call stays MAJOR; on its own, by `RELEASE-POLICY.md`
+  section 2, each would be MAJOR too: new required fields and limits (ID-3944), a changed heading
+  rule (ID-3950) and changed post markup (ID-3949).
+  - **Collection fields** (`./collections/*`, `contract/collections/`): one file per item source
+    (services, case-studies, testimonials, posts, team, faqs, locations) and three shared shapes
+    (`_person`, `_address`, `_topic`), validated by the field-definition schema, which now
+    describes a section, a collection or a shape. The names and limits are the rulings': flat
+    person fields (`name`, `role` 80, `bio` 600, `photo`, `email`, `phone`, `socials` 0 to 10 as
+    `{ name, url }`); a post's `author` a relationship to team; a post's `layout` limited to
+    rich-text, media-text, gallery, call-to-action and faq (video waits for ID-3951);
+    `publishedAt` a date and time; `topics` the one stored category name, with a post's
+    `primaryTopic` and a topic's `description`; `summary` of 300 characters everywhere; the
+    Next.js address names (`street` up to two lines, `locality`, `region`, `postalCode`,
+    `country`); `lat` -90 to 90, `lng` -180 to 180, `zoom` 1 to 20 defaulting to 14; ratings 1 to
+    5 in half stars; opening hours stored HH:MM; titles 120 characters; the ruled list sizes.
+    `companyLogo`, the testimonial's `service` and the six unread extras are dropped (each file's
+    `dropped`). Every field records each platform's `formerly` and `owes`; a field WordPress keeps
+    in its own place (title, body, excerpt, featured image, categories, date) says so in
+    `platforms.wordpress.native`.
+  - **The schema** gains the types `topics`, `date-time`, `time` and `sections`, the text format
+    `email`, a textarea's `maxLines`, a group's `shape`, and a collection's `display`: which
+    stored field fills each part of its card, FAQ item or office. Every `display` is `draft`
+    until the owner approves it, and the package gate refuses a release that ships a draft.
+  - **The socials host table** (`./socials`, `contract/socials.json`): which host means which
+    network, with an example address for each, from Salt for Next.js's table; Salt for
+    WordPress owes the hosts its own lacks.
+  - **Emitters.** `emit/acf.mjs` adds a group per installed collection, located on its post type,
+    generating no field for what WordPress stores natively (named under `salt.native`), and a
+    Settings tab, storing nothing, before every layout's `settings` group. `emit/payload.mjs`
+    adds `toPayloadCollections`, `payloadCollectionsSnapshot` and
+    `checkPayloadCollectionsSnapshot`. The page blocks' and layouts' output is otherwise
+    unchanged, apart from rich text's headings.
+  - **Headings 2 to 6** (ID-3950): rich text's `body` allows `heading-2` to `heading-6`, and
+    `section#body-heading-base` says how a stored level draws: the highest-ranked heading in a
+    body at base + 1, the others keeping their distance, a skipped rank closed up, nothing below
+    h6. A body storing only h3 and h4 draws as before. A view's document may now hold h2 to h6.
+    Two rich-text fixtures show it.
+  - **Sections in a post** (ID-3949): `section#sections-in-a-post` and `markup/post.json` say how
+    a post's layout draws. A rich-text section that is prose alone draws bare in the article; every
+    other section draws as a band, as on a page, with the shared `width` setting and its heading at
+    h2 under the post's h1. Four fixtures (`post/band-*`) show a band of each other allowed
+    section after prose, a single image as a gallery of one among them.
+  - The service, case-study and post fixtures' comments point at the collection files in place
+    of describing the documents. `scripts/round_trip_acf.mjs` matches a layout by its contract id
+    as well as its former names, which salt-wordpress now ships; both round-trip reports are
+    regenerated.
 - The case-study view has fixtures and is required of every implementation (SC-021).
   `fixtures/case-study/` holds four cases (`full`, `aside`, `band` and `minimal`), `case-study`
   joins `REQUIRED_FILES`, and a full conformance run refuses to declare it not shipped. The
