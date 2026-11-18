@@ -172,6 +172,15 @@ test('inputs: rich text with an element its field does not allow fails', () => {
 test('inputs: a text over its maxLength fails', () => {
   expectFail(['features'], (io) => io.json('features/many-items-linked.json', (d) => { d.values.intro = 'x'.repeat(301) }), /values\.intro is 301 characters; maxLength is 300/)
 })
+test('ID-3968: a length counts code points, a CRLF as one', () => {
+  // 300 characters: 298 astral ones (596 UTF-16 units), a CRLF and an x.
+  const at = (intro) => {
+    const dir = copy(['features'], (io) => io.json('features/many-items-linked.json', (d) => { d.values.intro = intro }))
+    try { return run(dir).out } finally { rmSync(dir, { recursive: true, force: true }) }
+  }
+  assert.doesNotMatch(at('🌱'.repeat(298) + '\r\n' + 'x'), /maxLength/)
+  assert.match(at('🌱'.repeat(299) + '\r\n' + 'x'), /values\.intro is 301 characters; maxLength is 300/)
+})
 
 // ── 3. Markup ─────────────────────────────────────────────────────────────────────────────────
 const markupFails = (from, to, pattern) => expectFail(HERO, (io) => io.html(`${SPLIT}.html`, from, to), pattern)

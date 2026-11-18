@@ -19,8 +19,9 @@
 // `field_salt_{section}_{path}`, each part snake_cased (`field_salt_media_text_rows_media_side`).
 // Shared settings sit in a group named `settings` on every layout, as the contract stores them.
 // Each field records what it was generated from under `salt` (rich text's allowed list, a text
-// format, a list's row label, a link's or query's shape); ACF keeps unknown keys on a field, so the
-// consumer's renderer and sanitiser can read them.
+// format, a text's maxLength and any target, a list's row label, a link's or query's shape); ACF
+// keeps unknown keys on a field, so the consumer's renderer, sanitiser, count and check on publish
+// can read them.
 //
 // Pure data: no WordPress, and nothing read but the contract's own files.
 //
@@ -51,6 +52,16 @@ export const SOURCE_DEFAULTS = {
 export const SECTIONS_GROUP_KEY = 'group_salt_sections'
 // The container's key predates the contract; changing it would orphan every stored page's sections.
 const CONTAINER_KEY = 'field_salt_sections_container'
+
+// The limits rule (ID-3968, the founder's ruling of 18/11/2026): a limit never stops a draft from
+// saving and never cuts what an editor wrote; the editor sees the count as they type and the limit
+// is checked when content is published. ACF's maxlength cuts typing, so a text's maxLength is
+// recorded under the field's `salt` (salt.maxLength) for the site's count and its check on
+// publish, never as ACF's setting. A number's range (min, max, the collection-query's count among
+// them) and the size of a list, a gallery or a relationship (min, max) stay ACF's own settings,
+// which refuse a save, until the founder rules which limits stay limits and which become targets
+// (rc.8's open question); adding 'range' or 'size' to this set moves them under salt as well.
+export const RULED_LIMITS = new Set(['length'])
 
 const snake = (s) => s.replace(/([a-z0-9])([A-Z])/g, '$1_$2').replace(/-/g, '_').toLowerCase()
 
@@ -123,6 +134,14 @@ function convertField(f, ctx) {
     if (list.length) out.conditional_logic = conditionalLogic(list, ctx.keyOf)
   }
   if (f.deprecated) salt.deprecated = f.deprecated
+  // A limit of a kind in RULED_LIMITS goes under salt; any other is ACF's own setting.
+  const limit = (kind, key, value, acfKey = key) => {
+    if (value === undefined) return
+    if (RULED_LIMITS.has(kind)) salt[key] = value
+    else out[acfKey] = value
+  }
+  // A target is never refused, so it is never an ACF setting (ID-3969).
+  if (f.target !== undefined) salt.target = f.target
   const below = { ...ctx, path: [...ctx.path, f.name] }
 
   switch (f.type) {
@@ -131,13 +150,13 @@ function convertField(f, ctx) {
       // mailto: and tel: the schema allows. salt.format tells the site's sanitiser to check it.
       typed('text')
       if (f.default !== undefined) out.default_value = f.default
-      if (f.maxLength !== undefined) out.maxlength = f.maxLength
+      limit('length', 'maxLength', f.maxLength, 'maxlength')
       if (f.format) salt.format = f.format
       break
     case 'textarea':
       typed('textarea')
       if (f.default !== undefined) out.default_value = f.default
-      if (f.maxLength !== undefined) out.maxlength = f.maxLength
+      limit('length', 'maxLength', f.maxLength, 'maxlength')
       if (f.maxLines !== undefined) {
         out.rows = f.maxLines
         salt.maxLines = f.maxLines
@@ -159,8 +178,8 @@ function convertField(f, ctx) {
       typed(f.many ? 'gallery' : 'image')
       out.return_format = 'id'
       if (f.many) {
-        if (f.min !== undefined) out.min = f.min
-        if (f.max !== undefined) out.max = f.max
+        limit('size', 'min', f.min)
+        limit('size', 'max', f.max)
       }
       break
     case 'select': {
@@ -188,15 +207,15 @@ function convertField(f, ctx) {
     case 'number':
       typed('number')
       if (f.default !== undefined) out.default_value = f.default
-      if (f.min !== undefined) out.min = f.min
-      if (f.max !== undefined) out.max = f.max
+      limit('range', 'min', f.min)
+      limit('range', 'max', f.max)
       if (f.step !== undefined) out.step = f.step
       break
     case 'list': {
       typed('repeater')
       out.layout = 'block'
-      if (f.min !== undefined) out.min = f.min
-      if (f.max !== undefined) out.max = f.max
+      limit('size', 'min', f.min)
+      limit('size', 'max', f.max)
       if (f.itemLabel) {
         // Lower-cased into the sentence, unless it is an acronym (FAQ), which stays as given.
         const word = /^.[A-Z]/.test(f.itemLabel) ? f.itemLabel : f.itemLabel.charAt(0).toLowerCase() + f.itemLabel.slice(1)
@@ -232,8 +251,8 @@ function convertField(f, ctx) {
       if (!f.many && !f.required) out.allow_null = 1
       if (f.many) {
         out.filters = ['search']
-        if (f.min !== undefined) out.min = f.min
-        if (f.max !== undefined) out.max = f.max
+        limit('size', 'min', f.min)
+        limit('size', 'max', f.max)
       }
       break
     }
@@ -386,22 +405,29 @@ function plannedFor(ctx, ids) {
 }
 
 // The group of one collection's fields, located on its post type. A field WordPress stores in its
-// own place (platforms.wordpress.native) is left out and recorded under salt.native; a field whose
+// own place (platforms.wordpress.native) is left out and recorded under salt.native, and its target,
+// if it has one, under salt.targets, as no ACF field carries it (ID-3969); a field whose
 // relationship points at a source the site does not install is left out and recorded under
 // salt.leftOut, as the site has nothing to point it at.
 function collectionGroup(contract, source, sources, base) {
   const { collection, fields } = resolveCollection(contract, source)
   const native = {}
+  const targets = {}
   const leftOut = []
   const kept = fields.filter((f) => {
     const place = f.platforms?.wordpress?.native
-    if (place) { native[f.name] = place; return false }
+    if (place) {
+      native[f.name] = place
+      if (f.target !== undefined) targets[f.name] = f.target
+      return false
+    }
     if (f.type === 'relationship' && !(f.to in sources)) { leftOut.push(`${f.name} (the source ${f.to})`); return false }
     return true
   })
   const scope = `collection_${source}`
   const salt = { collection: source }
   if (Object.keys(native).length) salt.native = native
+  if (Object.keys(targets).length) salt.targets = targets
   if (leftOut.length) salt.leftOut = leftOut
   return {
     key: `group_salt_${snake(scope)}`,

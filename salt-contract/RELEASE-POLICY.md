@@ -16,6 +16,7 @@ The test for every change below is the same: could an implementation that confor
 | Field ids and types | Rename, removal, retype; a new required field; an optional field becoming required | New optional field with a default | Help text, editor labels |
 | Field choices | Removing or renaming a choice value; changing the default | New choice appended | Choice label text |
 | Field limits (length, count, ranges) | Tightening a limit; adding a limit that did not exist | Loosening a limit | None |
+| Field targets (`target`) | None | None | Changing a target; adding or removing one |
 | Element order in markup | Any change | None | None |
 | Classes (`salt-*` vocabulary) | Rename or removal of a class; moving a class to another element | New class | None |
 | Data attributes | Rename, removal, or a changed value vocabulary | New optional attribute | None |
@@ -26,6 +27,12 @@ The test for every change below is the same: could an implementation that confor
 | Schema (`schema/field-definition.schema.json`) | Tightening it so a valid field file becomes invalid, or removing a keyword | Loosening it, or a new optional keyword | Description text |
 
 Two rules come straight from the WP policy. Markup structure change is MAJOR, and the fixture diff in the PR is the semver evidence, as the snapshot diff is there (WP policy, FLEET01). Adding an optional argument with a default is MINOR, which is why a new optional view prop is MINOR and a retyped one is MAJOR. Where a change fits two rows, the stricter applies.
+
+Every limit is held by one rule, the limits rule (ID-3968, the founder's ruling of 18/11/2026), which applies to each limit the *Field limits* row covers:
+
+> A limit never stops a draft from saving and never cuts what an editor wrote: the editor sees the count as they type, the limit is checked when content is published, and a write that cannot show an editor the message is either refused with a message to whoever sent it or stored and flagged until fixed. A length the design only prefers is a target, shown to the editor and never refused.
+
+Lengths count Unicode code points, with a CRLF line break counting as one. The numbers are each field's own and the table above governs them; the rule is how a platform holds them, so an implementation that refuses a draft over a limit, or cuts what an editor wrote, does not conform. A target (`target`, ID-3969) is never refused, on a draft save or on publish, so no implementation's verdict turns on it: changing a target is PATCH, and so is adding or removing one.
 
 ## 3. Deprecation
 

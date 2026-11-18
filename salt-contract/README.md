@@ -227,6 +227,13 @@ records carrying 17 former names), so a
 migration generated from the contract renames or folds every such type. A select that 0.11.0 left
 to Payload's derived name has no fixed former name to record; the site's own schema gives it.
 
+**Limits and targets.** Payload's own limits (`maxLength`, `min`, `max`, `minRows`, `maxRows`)
+stay Payload settings: Payload checks them when a document is published and not when a draft is
+saved, and refuses an over-long publish through the API with a message, as the limits rule
+(ID-3968, `RELEASE-POLICY.md` section 2) asks. A field's `target` (ID-3969), which is never
+refused, is no Payload setting: it is recorded under `custom.salt.target` for the count the site
+shows while the editor types.
+
 Faults in the contract's own shape are refused whatever the site installs: a malformed condition;
 a `sourceField` naming no sibling select, or one offering no source; and a collection-query that
 reads its source from a select anywhere but the section's top level (in a list, a group or the
@@ -245,7 +252,12 @@ into the Flexible Content layout Salt for WordPress registers in its page sectio
 of its own, `group_salt_collection_<source>`, located on the source's post type (`SOURCE_DEFAULTS`,
 or `sources`). A collection field WordPress stores in its own place (the title, body, excerpt,
 featured image, categories or date: `platforms.wordpress.native`) is not generated; the group names
-it under `salt.native`. A post's `layout` is a Flexible Content field of the sections a post may
+it under `salt.native`, and a target it carries under `salt.targets`. Under the limits rule
+(ID-3968, `RELEASE-POLICY.md` section 2) a text's `maxLength` is not ACF's `maxlength`, which cuts
+typing: it is recorded under the field's `salt.maxLength`, for the site's count while typing and
+its check on publish. A number's range and a list's, a gallery's or a relationship's size are
+still ACF's own `min` and `max` (`RULED_LIMITS` in `emit/acf.mjs` names what moves under `salt`).
+A field's `target` (ID-3969), which nothing refuses, is under `salt.target`. A post's `layout` is a Flexible Content field of the sections a post may
 use. Each layout carries a Settings tab before its `settings` group, which stores nothing and
 puts the shared settings on a tab of their own. Like the Payload emitter it is a pure data
 transform, reading only this package's files.

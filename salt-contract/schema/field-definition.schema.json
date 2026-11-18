@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "field-definition.schema.json",
   "title": "A Salt section's or collection's editor fields, defined once for both platforms",
-  "description": "One file per section in contract/fields/<section id>.json, plus contract/fields/_section-settings.json for the wrapper settings every section carries; and one file per collection source in contract/collections/<source id>.json (the fields of a service, a case study, a post and the rest, as an editor stores them), plus contract/collections/_<shape>.json for a shape more than one record carries (person, address, topic). A file describes a section ('section'), a collection ('collection') or a shape ('shape'), exactly one. Salt for Next.js generates Payload fields from these files and Salt for WordPress generates ACF fields from them, a section's as a block or a layout and a collection's as the fields of its documents (SC-003: names, types, choices, limits and descriptions must match). Neither platform is the reference (SC-001): where they disagreed, each file records the canonical definition and, under platforms.<platform>, what that platform called it before and what it owes.\n\nFIELD TYPES are limited to what both Payload and ACF Pro can express, and the list is closed: a type outside it is refused. text (Payload text; ACF text, with salt.format url or email for the sanitiser when it has a format, as ACF's url field refuses the mailto and tel addresses the url format allows; email is a format of text, as url is). textarea. rich-text (Payload Lexical; ACF wysiwyg), with an allowed list of element kinds. image (Payload upload; ACF image, or gallery when many). link (a fixed shape: label, type internal|external, document, url, newTab; Payload group; ACF group or link; its type is a radio). select (Payload select; ACF select. With control radio, a radio on both: the contract says which selects are radios, the stored value is the same, and a radio's layout stays native). boolean (Payload checkbox; ACF true_false). number. list (Payload array; ACF repeater). group (both group). relationship (Payload relationship; ACF relationship or post_object) to a source id from contract/sections.json. collection-query (the shared 'pick items from a source' control, below). topics (the record's own collection's topics, its category terms: Payload relationship to the source's taxonomy collection; ACF taxonomy). date-time (a moment, stored as an ISO 8601 date and time in UTC and drawn in the site's time zone: Payload date with the day-and-time picker; ACF date_time_picker). time (a time of day, stored as HH:MM on the 24-hour clock: ACF time_picker returning H:i; Payload has no picker that stores a time alone, so a text field the site draws with its own time picker). sections (a list of sections from contract/sections.json, each stored as on a page: Payload blocks; ACF flexible_content), used by a collection only.\n\nNAMES are canonical ids, camelCase ASCII, unique among siblings, and stable: renaming one is a MAJOR (RELEASE-POLICY.md section 2). Option values are lower-case kebab ids. Empty-string option values are not allowed; a 'nothing chosen' choice gets a word (auto, focal-point, default).\n\nCONDITIONS show a field only when a SIBLING field (same object: section, row or group) equals a value, is one of several values, or is filled (filled: true) or empty (filled: false) (SC-006). equals and in name only a select or a boolean; filled may name a sibling of any type but group, list, collection-query and link (an ACF group on WordPress), which ACF conditional logic cannot target; the gate enforces this, as a schema cannot see a sibling's type. An array of clauses means all must hold. No other expression form exists: no paths, no parent or root data. Where a platform used one, the field carries no condition, its description says when it applies, and the platform's note records the dropped condition.\n\nNATIVE STORAGE. On Salt for WordPress a collection field stored in WordPress's own place for it (the post title, the body, the excerpt, the featured image, the categories, the date, or a term's own description) says so in platforms.wordpress.native; the ACF emitter generates no ACF field for it and records where it lives.\n\nSHARED SETTINGS. Every section file names the shared wrapper settings in 'shared'; they live in contract/fields/_section-settings.json and are stored in a group named 'settings' on each section. A section may change a shared field's default ('defaults') or leave a shared field out ('omit'). The settings file itself has section id 'section-settings' and must not carry 'shared' (the if/then at the end of this schema); no section in contract/sections.json may take that id. A collection file may name the person shape the same way ('shared': { 'id': 'person' }); its fields are carried flat, at the top of the record, before the collection's own.\n\nCOLLECTION-QUERY stores one object of this fixed shape. mode: automatic (the collection's usual order) | by-category | manual; default automatic. categories: terms from the source's own category taxonomy, many, shown when mode is by-category, and only offered for a source that has categories. items: hand-picked items of the source, many, in the order picked, shown when mode is manual. order: default (the collection's usual order) | newest | title (A to Z), shown unless mode is manual. count: whole number from 0 to 'max' (default 24), 0 meaning the section's default for that source, shown unless mode is manual. 'source' fixes the source; 'sourceField' names a sibling select whose value picks it.\n\nGATE JOBS JSON Schema cannot do here, for a later script: sibling names unique; a condition's field names an existing sibling; a select default is one of its options; rowLabel names a child field; every source id exists in contract/sections.json; every variant in sections.json appears as a select with the same values; a filled clause names no group, list, collection-query or link.",
+  "description": "One file per section in contract/fields/<section id>.json, plus contract/fields/_section-settings.json for the wrapper settings every section carries; and one file per collection source in contract/collections/<source id>.json (the fields of a service, a case study, a post and the rest, as an editor stores them), plus contract/collections/_<shape>.json for a shape more than one record carries (person, address, topic). A file describes a section ('section'), a collection ('collection') or a shape ('shape'), exactly one. Salt for Next.js generates Payload fields from these files and Salt for WordPress generates ACF fields from them, a section's as a block or a layout and a collection's as the fields of its documents (SC-003: names, types, choices, limits and descriptions must match). Neither platform is the reference (SC-001): where they disagreed, each file records the canonical definition and, under platforms.<platform>, what that platform called it before and what it owes.\n\nFIELD TYPES are limited to what both Payload and ACF Pro can express, and the list is closed: a type outside it is refused. text (Payload text; ACF text, with salt.format url or email for the sanitiser when it has a format, as ACF's url field refuses the mailto and tel addresses the url format allows; email is a format of text, as url is). textarea. rich-text (Payload Lexical; ACF wysiwyg), with an allowed list of element kinds. image (Payload upload; ACF image, or gallery when many). link (a fixed shape: label, type internal|external, document, url, newTab; Payload group; ACF group or link; its type is a radio). select (Payload select; ACF select. With control radio, a radio on both: the contract says which selects are radios, the stored value is the same, and a radio's layout stays native). boolean (Payload checkbox; ACF true_false). number. list (Payload array; ACF repeater). group (both group). relationship (Payload relationship; ACF relationship or post_object) to a source id from contract/sections.json. collection-query (the shared 'pick items from a source' control, below). topics (the record's own collection's topics, its category terms: Payload relationship to the source's taxonomy collection; ACF taxonomy). date-time (a moment, stored as an ISO 8601 date and time in UTC and drawn in the site's time zone: Payload date with the day-and-time picker; ACF date_time_picker). time (a time of day, stored as HH:MM on the 24-hour clock: ACF time_picker returning H:i; Payload has no picker that stores a time alone, so a text field the site draws with its own time picker). sections (a list of sections from contract/sections.json, each stored as on a page: Payload blocks; ACF flexible_content), used by a collection only.\n\nNAMES are canonical ids, camelCase ASCII, unique among siblings, and stable: renaming one is a MAJOR (RELEASE-POLICY.md section 2). Option values are lower-case kebab ids. Empty-string option values are not allowed; a 'nothing chosen' choice gets a word (auto, focal-point, default).\n\nCONDITIONS show a field only when a SIBLING field (same object: section, row or group) equals a value, is one of several values, or is filled (filled: true) or empty (filled: false) (SC-006). equals and in name only a select or a boolean; filled may name a sibling of any type but group, list, collection-query and link (an ACF group on WordPress), which ACF conditional logic cannot target; the gate enforces this, as a schema cannot see a sibling's type. An array of clauses means all must hold. No other expression form exists: no paths, no parent or root data. Where a platform used one, the field carries no condition, its description says when it applies, and the platform's note records the dropped condition.\n\nNATIVE STORAGE. On Salt for WordPress a collection field stored in WordPress's own place for it (the post title, the body, the excerpt, the featured image, the categories, the date, or a term's own description) says so in platforms.wordpress.native; the ACF emitter generates no ACF field for it and records where it lives.\n\nSHARED SETTINGS. Every section file names the shared wrapper settings in 'shared'; they live in contract/fields/_section-settings.json and are stored in a group named 'settings' on each section. A section may change a shared field's default ('defaults') or leave a shared field out ('omit'). The settings file itself has section id 'section-settings' and must not carry 'shared' (the if/then at the end of this schema); no section in contract/sections.json may take that id. A collection file may name the person shape the same way ('shared': { 'id': 'person' }); its fields are carried flat, at the top of the record, before the collection's own.\n\nCOLLECTION-QUERY stores one object of this fixed shape. mode: automatic (the collection's usual order) | by-category | manual; default automatic. categories: terms from the source's own category taxonomy, many, shown when mode is by-category, and only offered for a source that has categories. items: hand-picked items of the source, many, in the order picked, shown when mode is manual. order: default (the collection's usual order) | newest | title (A to Z), shown unless mode is manual. count: whole number from 0 to 'max' (default 24), 0 meaning the section's default for that source, shown unless mode is manual. 'source' fixes the source; 'sourceField' names a sibling select whose value picks it.\n\nTHE LIMITS RULE (ID-3968, the founder's ruling of 18/11/2026) governs every limit a field carries (maxLength, maxLines, min, max). A limit never stops a draft from saving and never cuts what an editor wrote: the editor sees the count as they type, the limit is checked when content is published, and a write that cannot show an editor the message is either refused with a message to whoever sent it or stored and flagged until fixed. A length the design only prefers is a target, shown to the editor and never refused. Lengths count Unicode code points, with a CRLF line break counting as one. The numbers are each field's own; the rule says how a platform holds them, so a platform that refuses a draft over a limit, or cuts the text, does not conform. A field that keeps a limit names it with maxLength, min or max; one whose number is only preferred names it with target in its place (below).\n\nGATE JOBS JSON Schema cannot do here, for a later script: sibling names unique; a condition's field names an existing sibling; a select default is one of its options; rowLabel names a child field; every source id exists in contract/sections.json; every variant in sections.json appears as a select with the same values; a filled clause names no group, list, collection-query or link.",
   "type": "object",
   "required": [
     "$schema",
@@ -768,7 +768,13 @@
           "type": "string"
         },
         "maxLength": {
+          "description": "The most characters the text may hold. A limit, held by the limits rule (above): a draft outside it still saves, nothing an editor wrote is cut, and it is checked when the content is published. The editor sees the count as they type. Counted in Unicode code points, a CRLF line break as one. ACF records it under salt.maxLength, never as ACF's maxlength, which cuts typing; Payload keeps its maxLength, which it checks when a document is published and not when a draft is saved.",
           "$ref": "#/$defs/count"
+        },
+        "target": {
+          "description": "A number the design only prefers, in place of a limit or beside one (ID-3969, the founder's ruling of 18/11/2026): for a text, the most characters, counted as maxLength is; for a list, a gallery or a relationship, the most items. It is shown to the editor beside the count and never refused, on a draft save or on publish. A collection's title, name or question carries a target of 60, measured with the site name joined as the page's <title> draws it, so a longer site name leaves less room. ACF records a target under the field's salt.target, or, for a field WordPress stores in its own place (every collection title, name and question), under its group's salt.targets by the field's name; Payload under custom.salt.target. Neither is a setting that refuses anything. Turning a limit into a target is renaming maxLength or max to target; changing a target is a PATCH (RELEASE-POLICY.md section 2).",
+          "type": "integer",
+          "minimum": 1
         },
         "format": {
           "description": "email: an email address (one @, a domain with a dot, no spaces), checked on save; on WordPress an ACF text field carrying salt.format 'email' and on Payload a text field carrying custom.salt.format 'email', as the url format is. url: an absolute address (http, https, mailto or tel); on WordPress an ACF text field carrying salt.format 'url', which the sanitiser reads. anchor: slugified on save by WordPress's sanitize_title under the site's locale, then every run of underscores or %xx octets turned into one hyphen, repeated hyphens collapsed and hyphens trimmed (SC-014), so it is lower-case letters, digits and single hyphens and never contains __; an empty slug is no anchor; only the slug is stored. At render ids settle in one pass in page order: a landmark clash becomes <anchor>-section, and an id already taken takes the next free -2, -3 (SC-013); ids the system draws are <owner>__<part> and never meet one (markup/section#anchors, SC-012).",
@@ -788,10 +794,16 @@
           "type": "string"
         },
         "maxLength": {
+          "description": "The most characters the text may hold. A limit, held by the limits rule (above): a draft outside it still saves, nothing an editor wrote is cut, and it is checked when the content is published. The editor sees the count as they type. Counted in Unicode code points, a CRLF line break as one. ACF records it under salt.maxLength, never as ACF's maxlength, which cuts typing; Payload keeps its maxLength, which it checks when a document is published and not when a draft is saved.",
           "$ref": "#/$defs/count"
         },
+        "target": {
+          "description": "A number the design only prefers, in place of a limit or beside one (ID-3969, the founder's ruling of 18/11/2026): for a text, the most characters, counted as maxLength is; for a list, a gallery or a relationship, the most items. It is shown to the editor beside the count and never refused, on a draft save or on publish. A collection's title, name or question carries a target of 60, measured with the site name joined as the page's <title> draws it, so a longer site name leaves less room. ACF records a target under the field's salt.target, or, for a field WordPress stores in its own place (every collection title, name and question), under its group's salt.targets by the field's name; Payload under custom.salt.target. Neither is a setting that refuses anything. Turning a limit into a target is renaming maxLength or max to target; changing a target is a PATCH (RELEASE-POLICY.md section 2).",
+          "type": "integer",
+          "minimum": 1
+        },
         "maxLines": {
-          "description": "The most lines the text may hold, checked on save (a street address, two). The emitters record it for each platform's check: ACF also sizes the box to it.",
+          "description": "The most lines the text may hold (a street address, two). A limit, held by the limits rule (above): a draft outside it still saves, nothing an editor wrote is cut, and it is checked when the content is published. The emitters record it for each platform's check: ACF also sizes the box to it.",
           "type": "integer",
           "minimum": 1
         }
@@ -838,10 +850,17 @@
           "type": "boolean"
         },
         "min": {
+          "description": "The fewest images. A limit, held by the limits rule (above): a draft outside it still saves, nothing an editor wrote is cut, and it is checked when the content is published.",
           "$ref": "#/$defs/count"
         },
         "max": {
+          "description": "The most images. A limit, held by the limits rule (above): a draft outside it still saves, nothing an editor wrote is cut, and it is checked when the content is published.",
           "$ref": "#/$defs/count"
+        },
+        "target": {
+          "description": "A number the design only prefers, in place of a limit or beside one (ID-3969, the founder's ruling of 18/11/2026): for a text, the most characters, counted as maxLength is; for a list, a gallery or a relationship, the most items. It is shown to the editor beside the count and never refused, on a draft save or on publish. A collection's title, name or question carries a target of 60, measured with the site name joined as the page's <title> draws it, so a longer site name leaves less room. ACF records a target under the field's salt.target, or, for a field WordPress stores in its own place (every collection title, name and question), under its group's salt.targets by the field's name; Payload under custom.salt.target. Neither is a setting that refuses anything. Turning a limit into a target is renaming maxLength or max to target; changing a target is a PATCH (RELEASE-POLICY.md section 2).",
+          "type": "integer",
+          "minimum": 1
         }
       },
       "dependentRequired": {
@@ -849,6 +868,9 @@
           "many"
         ],
         "max": [
+          "many"
+        ],
+        "target": [
           "many"
         ]
       },
@@ -936,9 +958,11 @@
           "type": "number"
         },
         "min": {
+          "description": "The lowest value. A limit, held by the limits rule (above): a draft outside it still saves, nothing an editor wrote is cut, and it is checked when the content is published.",
           "type": "number"
         },
         "max": {
+          "description": "The highest value. A limit, held by the limits rule (above): a draft outside it still saves, nothing an editor wrote is cut, and it is checked when the content is published.",
           "type": "number"
         },
         "step": {
@@ -958,10 +982,17 @@
           "$ref": "#/$defs/fields"
         },
         "min": {
+          "description": "The fewest rows. A limit, held by the limits rule (above): a draft outside it still saves, nothing an editor wrote is cut, and it is checked when the content is published.",
           "$ref": "#/$defs/count"
         },
         "max": {
+          "description": "The most rows. A limit, held by the limits rule (above): a draft outside it still saves, nothing an editor wrote is cut, and it is checked when the content is published.",
           "$ref": "#/$defs/count"
+        },
+        "target": {
+          "description": "A number the design only prefers, in place of a limit or beside one (ID-3969, the founder's ruling of 18/11/2026): for a text, the most characters, counted as maxLength is; for a list, a gallery or a relationship, the most items. It is shown to the editor beside the count and never refused, on a draft save or on publish. A collection's title, name or question carries a target of 60, measured with the site name joined as the page's <title> draws it, so a longer site name leaves less room. ACF records a target under the field's salt.target, or, for a field WordPress stores in its own place (every collection title, name and question), under its group's salt.targets by the field's name; Payload under custom.salt.target. Neither is a setting that refuses anything. Turning a limit into a target is renaming maxLength or max to target; changing a target is a PATCH (RELEASE-POLICY.md section 2).",
+          "type": "integer",
+          "minimum": 1
         },
         "rowLabel": {
           "description": "The child field whose value names each row in the editor; for a link child, its label.",
@@ -1014,13 +1045,25 @@
           "type": "boolean"
         },
         "min": {
+          "description": "The fewest items chosen. A limit, held by the limits rule (above): a draft outside it still saves, nothing an editor wrote is cut, and it is checked when the content is published.",
           "$ref": "#/$defs/count"
         },
         "max": {
+          "description": "The most items chosen. A limit, held by the limits rule (above): a draft outside it still saves, nothing an editor wrote is cut, and it is checked when the content is published.",
           "$ref": "#/$defs/count"
+        },
+        "target": {
+          "description": "A number the design only prefers, in place of a limit or beside one (ID-3969, the founder's ruling of 18/11/2026): for a text, the most characters, counted as maxLength is; for a list, a gallery or a relationship, the most items. It is shown to the editor beside the count and never refused, on a draft save or on publish. A collection's title, name or question carries a target of 60, measured with the site name joined as the page's <title> draws it, so a longer site name leaves less room. ACF records a target under the field's salt.target, or, for a field WordPress stores in its own place (every collection title, name and question), under its group's salt.targets by the field's name; Payload under custom.salt.target. Neither is a setting that refuses anything. Turning a limit into a target is renaming maxLength or max to target; changing a target is a PATCH (RELEASE-POLICY.md section 2).",
+          "type": "integer",
+          "minimum": 1
         }
       },
-      "unevaluatedProperties": false
+      "unevaluatedProperties": false,
+      "dependentRequired": {
+        "target": [
+          "many"
+        ]
+      }
     },
     "collectionQueryField": {
       "$ref": "#/$defs/common",
@@ -1046,7 +1089,7 @@
           }
         },
         "max": {
-          "description": "The highest count an editor may set. Default 24.",
+          "description": "The highest count an editor may set. Default 24. The count is a number, and its range a limit held by the limits rule (above).",
           "type": "integer",
           "minimum": 1
         }

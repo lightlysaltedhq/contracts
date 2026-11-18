@@ -126,6 +126,8 @@ function convertField(f, ctx) {
     admin.condition = conditionFor(list, ctx.defaults)
   }
   if (f.deprecated) salt.deprecated = f.deprecated
+  // A target is never refused, so it is no Payload setting, only the count's to show (ID-3969).
+  if (f.target !== undefined) salt.target = f.target
   const below = { ...ctx, path: [...ctx.path, f.name] }
 
   switch (f.type) {

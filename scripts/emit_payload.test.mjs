@@ -951,3 +951,8 @@ test('ID-3944: a renamed collection field fails the collections drift check, nam
   rich.admin = { ...rich.admin, components: { Field: 'x' } }
   assert.deepEqual(checkPayloadCollectionsSnapshot(JSON.stringify(decorated, null, 2) + '\n', { icons, contract }), { ok: true, problems: [] })
 })
+
+test('ID-3969: a target is under custom.salt, never a Payload setting, so nothing refuses it', () => {
+  const [rows] = toPayloadBlocks({ contract: probe([{ name: 'rows', type: 'list', label: 'Rows', target: 6, fields: [{ name: 'text', type: 'text', label: 'Text' }] }]) })[0].fields
+  assert.deepEqual([rows.maxRows, rows.custom.salt.target], [undefined, 6])
+})
