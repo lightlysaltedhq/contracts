@@ -231,9 +231,11 @@ test, applied through section 2's table, where the stricter row wins.
     records it under the field's `salt.target`, or under its group's `salt.targets` for a field
     WordPress stores in its own place; Payload under `custom.salt.target`. Neither is a setting
     that refuses anything. Turning a limit into a target is renaming `maxLength` or `max` to
-    `target` in the field's file. Every collection's title, name and question has a target of 60,
-    measured with the site name joined as the page's `<title>` draws it, and both platforms owe a
-    count beside it as the editor types. The summaries' *check on save* now reads as the rule has
+    `target` in the field's file. A service's, a case study's and a post's title has a target of 60,
+    measured with the site name joined as the page's `<title>` draws it: the whole `<title>` should
+    be at most 60 characters. An FAQ's question, a testimonial's and a team member's name and a
+    location's title carry 60 too, though they have no page of their own (pending, below). Both
+    platforms owe a count beside it as the editor types. The summaries' *check on save* now reads as the rule has
     it: a count as the editor types, no draft save refused and nothing cut. `RELEASE-POLICY.md`
     makes changing a target PATCH.
   - **The service example** (ID-3970). `service/full`'s intro allows no headings, so it is two
@@ -253,7 +255,9 @@ test, applied through section 2's table, where the stricter row wins.
     editor will not add a row or an image past a repeater's or a gallery's `max` and that an
     options page or a term screen checks them on every save; if not, `RULED_LIMITS` moves them
     under `salt`. Whether a Payload site must run with drafts (`versions.drafts`) so that no draft
-    is refused, or may meet the rule another way.
+    is refused, or may meet the rule another way. For an FAQ, a testimonial, a team member and a
+    location, which have no page of their own and so no `<title>`: should the target of 60 measure
+    the field alone, or should they have no target? Each carries 60 until it is ruled.
 - The case-study view has fixtures and is required of every implementation (SC-021).
   `fixtures/case-study/` holds four cases (`full`, `aside`, `band` and `minimal`), `case-study`
   joins `REQUIRED_FILES`, and a full conformance run refuses to declare it not shipped. The
