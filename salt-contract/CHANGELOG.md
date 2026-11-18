@@ -235,8 +235,8 @@ test, applied through section 2's table, where the stricter row wins.
     measured with the site name joined as the page's `<title>` draws it: the whole `<title>` should
     be at most 60 characters. An FAQ's question, a testimonial's and a team member's name and a
     location's title carry 60 too, though they have no page of their own (pending, below). Both
-    platforms owe a count beside it as the editor types. The summaries' *check on save* now reads as the rule has
-    it: a count as the editor types, no draft save refused and nothing cut. `RELEASE-POLICY.md`
+    platforms owe a count beside it as the editor types. The summaries' *check on save* now reads *held as the
+    limits rule says*, which holds whichever limits stay limits. `RELEASE-POLICY.md`
     makes changing a target's number PATCH; whether adding or removing a target is PATCH or MINOR
     is pending (below).
   - **The service example** (ID-3970). `service/full`'s intro allows no headings, so it is two

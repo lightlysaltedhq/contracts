@@ -85,7 +85,7 @@
         "wordpress": {
           "native": "excerpt",
           "formerly": "the excerpt (no limit)",
-          "owes": "the excerpt's 300 characters counted as the editor types, with no draft save refused and nothing cut over them (the limits rule)"
+          "owes": "the excerpt's 300 characters held as the limits rule says"
         }
       }
     },

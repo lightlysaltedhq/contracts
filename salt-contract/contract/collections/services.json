@@ -55,7 +55,7 @@
         "wordpress": {
           "native": "excerpt",
           "formerly": "summary (an ACF textarea with no limit)",
-          "owes": "the summary stored in the excerpt, its 300 characters counted as the editor types, with no draft save refused and nothing cut over them (the limits rule)"
+          "owes": "the summary stored in the excerpt, with its 300 characters held as the limits rule says"
         }
       }
     },
