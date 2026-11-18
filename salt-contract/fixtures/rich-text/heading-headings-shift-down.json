@@ -1,0 +1,18 @@
+{
+  "section": "rich-text",
+  "summary": "A heading at h2, so the body base is 2 (section#body-heading-base). The body stores h2, h3, h4 and h6 (ID-3950): the highest-ranked, h2, draws at base + 1 (h3), h3 and h4 keep their distance (h4, h5), and h6, which would draw below h6 and skips a rank, draws h6.",
+  "values": {
+    "heading": "Planting notes",
+    "body": "<h2>Spring</h2><p>Sow hardy annuals.</p><h3>Under glass</h3><p>Start tomatoes in March.</p><h4>Heat</h4><p>A heated mat helps.</p><h6>Night frost</h6><p>Fleece the trays.</p>",
+    "settings": {
+      "anchorId": "planting-notes"
+    }
+  },
+  "context": {
+    "headingLevel": 2,
+    "headingRendered": true,
+    "priorityMedia": false,
+    "track": "rich-text-1",
+    "index": 1
+  }
+}

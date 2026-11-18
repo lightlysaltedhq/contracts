@@ -96,7 +96,7 @@ if (existsSync(fixturesDir)) {
 // characters go.
 const filledText = (v) => typeof v === 'string' && v.replace(/[\s​-‍⁠﻿]/g, '') !== ''
 const RICH_TAGS = { paragraph: ['p'], bold: ['strong', 'b'], italic: ['em', 'i'], code: ['code'], link: ['a'],
-  'unordered-list': ['ul', 'li'], 'ordered-list': ['ol', 'li'], blockquote: ['blockquote'], 'heading-3': ['h3'], 'heading-4': ['h4'] }
+  'unordered-list': ['ul', 'li'], 'ordered-list': ['ol', 'li'], blockquote: ['blockquote'], 'heading-2': ['h2'], 'heading-3': ['h3'], 'heading-4': ['h4'], 'heading-5': ['h5'], 'heading-6': ['h6'] }
 const SLUG = /^[a-z0-9]+(-[a-z0-9]+)*$/
 
 function filled(field, v) {
@@ -298,13 +298,13 @@ function checkOtherInput(c) {
   for (const k of Object.keys(isObject(input.state) ? input.state : {})) if (!STATES.includes(k)) fail(`${at}.json: state.${k} is not a documented state (${STATES.join(', ')})`)
   for (const k of ['consentPanelOpen', 'drawerOpen']) if (isObject(input.state) && k in input.state && typeof input.state[k] !== 'boolean') fail(`${at}.json: state.${k} is true or false; it is ${JSON.stringify(input.state[k])}`)
   if (input.state?.themeScheme !== undefined && !['light', 'dark'].includes(input.state.themeScheme)) fail(`${at}.json: state.themeScheme is light or dark, the scheme the platform knows when it renders`)
-  // Rich text is given as stored in a view as in a section (SC-023): body headings are h3 and h4,
-  // and the view's base level decides what each is drawn as.
+  // Rich text is given as stored in a view as in a section (SC-023): body headings are h2 to h6 at
+  // most (ID-3950), and the view's base level decides what each is drawn as.
   if (kind === 'view') {
     const visit = (v, p) => {
       if (typeof v === 'string') {
-        const outside = descendants(parse(v)).find((el) => /^h[1-6]$/.test(el.name) && !['h3', 'h4'].includes(el.name))
-        if (outside) fail(`${at}.json ${p} holds <${outside.name}>; rich text is given as stored, its headings h3 and h4, whatever level they are drawn at (SC-023)`)
+        const outside = descendants(parse(v)).find((el) => el.name === 'h1')
+        if (outside) fail(`${at}.json ${p} holds <${outside.name}>; rich text is given as stored, its headings h2 to h6, whatever level they are drawn at (SC-023)`)
       } else if (v && typeof v === 'object') for (const [k, x] of Object.entries(v)) visit(x, `${p}.${k}`)
     }
     visit(input.document, 'document')

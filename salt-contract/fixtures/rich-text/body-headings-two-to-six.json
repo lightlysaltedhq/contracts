@@ -1,0 +1,17 @@
+{
+  "section": "rich-text",
+  "summary": "Body only, no heading, so the body base is 1 (section#body-heading-base). The body stores every heading level an editor may choose, h2 to h6 (ID-3950): the highest-ranked, h2, draws at base + 1, and the others keep their distance, so they draw h2 to h6.",
+  "values": {
+    "body": "<h2>Planning a border</h2><p>Start with the soil and the light.</p><h3>Soil</h3><p>Dig in compost each autumn.</p><h4>Clay</h4><p>Add grit as well.</p><h5>Heavy clay</h5><p>Raise the beds.</p><h6>Waterlogged ground</h6><p>Plant for the wet.</p>",
+    "settings": {
+      "anchorId": "border"
+    }
+  },
+  "context": {
+    "headingLevel": 2,
+    "headingRendered": true,
+    "priorityMedia": false,
+    "track": "rich-text-1",
+    "index": 1
+  }
+}

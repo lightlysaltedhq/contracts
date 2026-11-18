@@ -1,0 +1,63 @@
+{
+  "$comment": "The document is a post (contract/collections/posts.json) as the post view receives it: title, href, date (from publishedAt, in the site's time zone), readingMinutes, author resolved, and its layout split as section#sections-in-a-post draws it: body is the rich-text section that is prose alone, and sections[0] is the one section of the layout that draws as a band, with its field values as stored and its plan (track, index). One band per case, as the fixtures gate nests one section; post/band-* together use each section a post allows. The prose comes first in the layout.",
+  "view": "post",
+  "summary": "A post whose layout is prose and then a call to action: the prose draws bare in the article at base 1, and the call to action draws as a band after it, its heading h2 under the post's h1 (section#sections-in-a-post).",
+  "context": {
+    "priorityMedia": true,
+    "locale": "en-GB",
+    "path": "/journal/open-day/"
+  },
+  "site": {
+    "name": "Hollin Farm",
+    "timezone": "Europe/London",
+    "labels": {
+      "breadcrumb": "Breadcrumb",
+      "byline": "By",
+      "readTime": "{n} min read",
+      "adjacent": "More posts",
+      "newer": "Newer",
+      "older": "Older"
+    },
+    "arrow": "→"
+  },
+  "documents": {
+    "contact": {
+      "href": "/contact/",
+      "title": "Contact"
+    }
+  },
+  "document": {
+    "title": "Open day on the farm",
+    "href": "/journal/open-day/",
+    "date": "2026-04-20",
+    "readingMinutes": 1,
+    "author": {
+      "name": "Tom Barlow"
+    },
+    "body": "<p>We open the gates on Saturday 9 May. Walk the beds, meet the team and take home a tray of seedlings.</p>",
+    "sections": [
+      {
+        "section": "call-to-action",
+        "values": {
+          "heading": "Book your place",
+          "body": "<p>Places are free, but we need numbers for the tea.</p>",
+          "buttons": [
+            {
+              "link": {
+                "label": "Book a place",
+                "type": "internal",
+                "document": "contact"
+              },
+              "style": "primary"
+            }
+          ],
+          "settings": {
+            "anchorId": "book"
+          }
+        },
+        "track": "call-to-action-1",
+        "index": 1
+      }
+    ]
+  }
+}

@@ -169,7 +169,16 @@
         {
           "role": "body",
           "component": "rich-text-body",
-          "note": "Base level 1: body headings start at h2."
+          "optional": true,
+          "when": "the post has prose: a rich-text section in its layout that is prose alone",
+          "note": "Base level 1: body headings start at h2. Each rich-text section that is prose alone (no eyebrow, no heading, the default alignment and untouched settings) draws as this bare body, straight in the article, with no section around it (section#sections-in-a-post)."
+        },
+        {
+          "role": "band",
+          "component": "section",
+          "optional": true,
+          "when": "the post has a section in its layout that is not prose alone",
+          "note": "Every other section of the post's layout draws as a band, as on a page, in stored order among the prose (section#sections-in-a-post). Its heading is h2, under the post's h1."
         },
         {
           "role": "footer",
@@ -311,12 +320,15 @@
     "rich-text-body",
     "media",
     "share-links",
-    "author-box"
+    "author-box",
+    "section"
   ],
   "ruleRefs": [
     "section#landmarks",
     "section#single-h1",
-    "section#display-forms"
+    "section#display-forms",
+    "section#sections-in-a-post",
+    "section#body-heading-base"
   ],
   "notes": [
     {

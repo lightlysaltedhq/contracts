@@ -655,8 +655,8 @@ test('SC-023: the team showcase draws its items in the order its input gives the
   assert.notDeepEqual(drawn, [...drawn].sort())
 })
 test('SC-023: a view\'s rich text is given as stored, so the level it is drawn at is refused in the input', () => {
-  expectFail(['service'], (io) => io.json('service/full.json', (d) => { d.document.intro = d.document.intro.replace(/h3>/g, 'h2>') }),
-    /service\/full\.json document\.intro holds <h2>; rich text is given as stored/)
+  expectFail(['service'], (io) => io.json('service/full.json', (d) => { d.document.intro = d.document.intro.replace(/h3>/g, 'h1>') }),
+    /service\/full\.json document\.intro holds <h1>; rich text is given as stored, its headings h2 to h6/)
 })
 test('chrome: a view with a second h1 fails, and so does an h1 in the chrome', () => {
   // Inside content the markup leaves open (a nested section's block, the drawer's panel), so the
