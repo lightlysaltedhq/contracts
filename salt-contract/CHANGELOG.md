@@ -4,7 +4,7 @@ Newest first. Dates are DD/MM/YYYY. What each part of a version means, and how a
 announced and migrated, is in `RELEASE-POLICY.md`. Decisions cited as `SC-nnn` are in Lightly
 Salted's decision log for Product Salt.
 
-## 1.0.0 (candidate `1.0.0-rc.7`, prepared 18/11/2026; not published, dated when tagged)
+## 1.0.0 (candidate `1.0.0-rc.8`, prepared 18/11/2026; not published, dated when tagged)
 
 **Semver call: MAJOR, the first release of the contract.** No earlier version was published, so no
 implementation conformed to one. Adopting it is still a migration for existing sites, because the
@@ -66,7 +66,7 @@ test, applied through section 2's table, where the stricter row wins.
   page (SC-018, SC-019, SC-021); and the normaliser both sides are compared through
   (`./normalise`).
 - Three fixture conventions the first conformance run settled (SC-023). Rich text is given in its
-  stored form in a view as in a section: `service/full`'s intro holds the stored `h3`, drawn as
+  stored form in a view as in a section: `post/full`'s body holds the stored `h3`, drawn as
   `h2`, and the gate refuses any other heading level in a view's document. A collection is drawn
   in its stored order: a case's `collections` are already ordered, an adapter passes them through,
   and the contract names no sort (`collection-showcase/grid-team-contacts`). The archive and search
@@ -195,6 +195,52 @@ test, applied through section 2's table, where the stricter row wins.
     of describing the documents. `scripts/round_trip_acf.mjs` matches a layout by its contract id
     as well as its former names, which salt-wordpress now ships; both round-trip reports are
     regenerated.
+- The founder's rulings of 18/11/2026 change the contract after `1.0.0-rc.7` (ID-3968, ID-3969,
+  ID-3970). Each is part of the first major, so the semver call stays MAJOR. On its own, by
+  `RELEASE-POLICY.md` section 1's test, the limits rule would be MAJOR: until now the contract did
+  not say how a limit is held, and from this candidate an implementation that refuses a draft
+  over a limit, or cuts what an editor wrote (ACF's `maxlength` does), no longer conforms, so
+  verdicts change. The `target` keyword is additive, a new optional schema keyword (MINOR), and the
+  targets it sets change no verdict, since nothing refuses a target. The service example's change
+  is PATCH: an implementation that drew the old case correctly draws the new one.
+  - **The limits rule** (ID-3968). The field schema states it in its own words and in the
+    description of every limit keyword (`maxLength`, `maxLines`, a number's `min` and `max`, a
+    list's, a gallery's and a relationship's `min` and `max`, a collection-query's count), and
+    `RELEASE-POLICY.md` section 2 states it under the table: *A limit never stops a draft from
+    saving and never cuts what an editor wrote: the editor sees the count as they type, the limit
+    is checked when content is published, and a write that cannot show an editor the message is
+    either refused with a message to whoever sent it or stored and flagged until fixed. A length
+    the design only prefers is a target, shown to the editor and never refused.* Lengths count
+    Unicode code points, with a CRLF line break counting as one, and the fixtures gate now counts
+    so. No limit's number changes. `emit/acf.mjs` no longer gives a text ACF's `maxlength`, which
+    cuts typing: the limit is recorded under the field's `salt.maxLength`, for the site's count
+    and its check on publish, so the ACF snapshot changes for every text with a limit. A number's
+    range and a list's, gallery's or relationship's size stay ACF's own `min` and `max` until the
+    founder rules which limits stay limits (below); `RULED_LIMITS` in `emit/acf.mjs` moves them
+    under `salt` in one line. The Payload emitter is unchanged: Payload checks its own limits when
+    a document is published, not when a draft is saved, and refuses an over-long publish through
+    the API with a message. The ACF round trip compares a limit by its value, wherever the
+    emitter records it.
+  - **Targets** (ID-3969). A text, textarea, list, gallery or relationship may carry `target`, a
+    number the design only prefers: shown to the editor beside the count and never refused. ACF
+    records it under the field's `salt.target`, or under its group's `salt.targets` for a field
+    WordPress stores in its own place; Payload under `custom.salt.target`. Neither is a setting
+    that refuses anything. Turning a limit into a target is renaming `maxLength` or `max` to
+    `target` in the field's file. Every collection's title, name and question has a target of 60,
+    measured with the site name joined as the page's `<title>` draws it, and both platforms owe a
+    count beside it as the editor types. The summaries' *check on save* now reads as the rule has
+    it: a count as the editor types, no draft save refused and nothing cut. `RELEASE-POLICY.md`
+    makes changing a target PATCH.
+  - **The service example** (ID-3970). `service/full`'s intro allows no headings, so it is two
+    paragraphs: the stored `<h3>How it works</h3>` and the `h2` it drew are gone from the case
+    and its HTML, and the note in `markup/service.json` and the case's comments no longer speak of
+    a stored `h3`. The intro's allowed list is unchanged.
+  - **Pending the founder's review, not ruled.** Which limits stay limits and which become targets
+    (perhaps only those whose breach would break the front end stay limits): until it is ruled no
+    field's limit becomes a target and no owes assumes either answer. And a draft clause in the
+    showcase's `viewAll` view prop (`contract/view-props/collection-showcase.json`): each platform
+    builds the address its native way, but a collection's view-all link points at that
+    collection's own index (archive) page.
 - The case-study view has fixtures and is required of every implementation (SC-021).
   `fixtures/case-study/` holds four cases (`full`, `aside`, `band` and `minimal`), `case-study`
   joins `REQUIRED_FILES`, and a full conformance run refuses to declare it not shipped. The

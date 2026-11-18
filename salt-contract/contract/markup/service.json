@@ -1,6 +1,6 @@
 {
   "$schema": "../../schema/markup.schema.json",
-  "version": "1.0.0-rc.7",
+  "version": "1.0.0-rc.8",
   "id": "service",
   "kind": "view",
   "summary": "A service page.",

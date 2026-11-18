@@ -1,6 +1,6 @@
 {
   "$schema": "../../schema/field-definition.schema.json",
-  "version": "1.0.0-rc.7",
+  "version": "1.0.0-rc.8",
   "$comment": "A team member's stored fields: the person shape (contract/collections/_person.json), flat. A team member is a record with no login, separate from login accounts, and anyone on the team can be credited as a post's author without an account (the founder's rulings of 18/11/2026). Salt for WordPress keeps its team_member post type. Team has no topics (SC-027) and no page of its own. The editor's order is each platform's own.",
   "collection": "team",
   "label": "Team member",

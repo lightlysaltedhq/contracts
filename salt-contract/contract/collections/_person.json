@@ -1,6 +1,6 @@
 {
   "$schema": "../../schema/field-definition.schema.json",
-  "version": "1.0.0-rc.7",
+  "version": "1.0.0-rc.8",
   "$comment": "A person: a team member, a record with no login (team members and login accounts are separate, by the founder's ruling of 18/11/2026). The fields are flat. contract/collections/team.json carries them, and a post's author is a relationship to team, so the author box reads the same record: the person and the author are one shape. Limits by the ruling of 18/11/2026 (question 3): a name 120 characters, a role 80, a bio 600, socials 0 to 10. The public email is the team member's own field, never a login address.",
   "shape": "person",
   "fields": [
