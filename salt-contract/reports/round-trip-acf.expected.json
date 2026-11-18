@@ -43,38 +43,10 @@
   },
   {
     "section": "hero",
-    "path": "settings.spacing",
-    "kind": "name",
-    "difference": "stored as section_spacing",
-    "evidence": "formerly: section_spacing"
-  },
-  {
-    "section": "hero",
-    "path": "settings.tone",
-    "kind": "name",
-    "difference": "stored as section_background",
-    "evidence": "formerly: section_background"
-  },
-  {
-    "section": "hero",
-    "path": "settings.tone",
-    "kind": "values",
-    "difference": "choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse",
-    "evidence": "values: {\"inverse\":\"surface-inverse\"}"
-  },
-  {
-    "section": "hero",
     "path": "settings.toneDark",
     "kind": "missing",
     "difference": "not in salt-wordpress",
     "evidence": "owes: the field; dark mode is a token inversion today, with no per-section choice"
-  },
-  {
-    "section": "hero",
-    "path": "settings.width",
-    "kind": "name",
-    "difference": "stored as section_container",
-    "evidence": "formerly: section_container"
   },
   {
     "section": "hero",
@@ -85,115 +57,10 @@
   },
   {
     "section": "hero",
-    "path": "settings.anchorId",
-    "kind": "name",
-    "difference": "stored as section_anchor",
-    "evidence": "formerly: section_anchor"
-  },
-  {
-    "section": "hero",
     "path": "settings.firstPageOnly",
     "kind": "missing",
     "difference": "not in salt-wordpress",
     "evidence": "owes: the field, with the listing section that paginates"
-  },
-  {
-    "section": "hero",
-    "path": "settings.divider",
-    "kind": "name",
-    "difference": "stored as section_divider",
-    "evidence": "formerly: section_divider"
-  },
-  {
-    "section": "rich-text (rich_text)",
-    "path": "(layout name)",
-    "kind": "name",
-    "difference": "name rich-text; salt-wordpress rich_text",
-    "evidence": "sections.json formerly: rich_text"
-  },
-  {
-    "section": "rich-text (rich_text)",
-    "path": "eyebrow",
-    "kind": "missing",
-    "difference": "not in salt-wordpress",
-    "evidence": "owes: the field on rich_text; intro already has it"
-  },
-  {
-    "section": "rich-text (rich_text)",
-    "path": "body",
-    "kind": "name",
-    "difference": "stored as content",
-    "evidence": "formerly: content"
-  },
-  {
-    "section": "rich-text (rich_text)",
-    "path": "alignment",
-    "kind": "missing",
-    "difference": "not in salt-wordpress",
-    "evidence": "owes: the field on rich_text, and the value centre in place of center on intro"
-  },
-  {
-    "section": "rich-text (rich_text)",
-    "path": "settings.spacing",
-    "kind": "name",
-    "difference": "stored as section_spacing",
-    "evidence": "formerly: section_spacing"
-  },
-  {
-    "section": "rich-text (rich_text)",
-    "path": "settings.tone",
-    "kind": "name",
-    "difference": "stored as section_background",
-    "evidence": "formerly: section_background"
-  },
-  {
-    "section": "rich-text (rich_text)",
-    "path": "settings.tone",
-    "kind": "values",
-    "difference": "choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse",
-    "evidence": "values: {\"inverse\":\"surface-inverse\"}"
-  },
-  {
-    "section": "rich-text (rich_text)",
-    "path": "settings.toneDark",
-    "kind": "missing",
-    "difference": "not in salt-wordpress",
-    "evidence": "owes: the field; dark mode is a token inversion today, with no per-section choice"
-  },
-  {
-    "section": "rich-text (rich_text)",
-    "path": "settings.width",
-    "kind": "name",
-    "difference": "stored as section_container",
-    "evidence": "formerly: section_container"
-  },
-  {
-    "section": "rich-text (rich_text)",
-    "path": "settings.backgroundImage",
-    "kind": "missing",
-    "difference": "not in salt-wordpress",
-    "evidence": "owes: the background image and its four settings"
-  },
-  {
-    "section": "rich-text (rich_text)",
-    "path": "settings.anchorId",
-    "kind": "name",
-    "difference": "stored as section_anchor",
-    "evidence": "formerly: section_anchor"
-  },
-  {
-    "section": "rich-text (rich_text)",
-    "path": "settings.firstPageOnly",
-    "kind": "missing",
-    "difference": "not in salt-wordpress",
-    "evidence": "owes: the field, with the listing section that paginates"
-  },
-  {
-    "section": "rich-text (rich_text)",
-    "path": "settings.divider",
-    "kind": "name",
-    "difference": "stored as section_divider",
-    "evidence": "formerly: section_divider"
   },
   {
     "section": "rich-text (intro)",
@@ -225,38 +92,10 @@
   },
   {
     "section": "rich-text (intro)",
-    "path": "settings.spacing",
-    "kind": "name",
-    "difference": "stored as section_spacing",
-    "evidence": "formerly: section_spacing"
-  },
-  {
-    "section": "rich-text (intro)",
-    "path": "settings.tone",
-    "kind": "name",
-    "difference": "stored as section_background",
-    "evidence": "formerly: section_background"
-  },
-  {
-    "section": "rich-text (intro)",
-    "path": "settings.tone",
-    "kind": "values",
-    "difference": "choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse",
-    "evidence": "values: {\"inverse\":\"surface-inverse\"}"
-  },
-  {
-    "section": "rich-text (intro)",
     "path": "settings.toneDark",
     "kind": "missing",
     "difference": "not in salt-wordpress",
     "evidence": "owes: the field; dark mode is a token inversion today, with no per-section choice"
-  },
-  {
-    "section": "rich-text (intro)",
-    "path": "settings.width",
-    "kind": "name",
-    "difference": "stored as section_container",
-    "evidence": "formerly: section_container"
   },
   {
     "section": "rich-text (intro)",
@@ -267,38 +106,10 @@
   },
   {
     "section": "rich-text (intro)",
-    "path": "settings.anchorId",
-    "kind": "name",
-    "difference": "stored as section_anchor",
-    "evidence": "formerly: section_anchor"
-  },
-  {
-    "section": "rich-text (intro)",
     "path": "settings.firstPageOnly",
     "kind": "missing",
     "difference": "not in salt-wordpress",
     "evidence": "owes: the field, with the listing section that paginates"
-  },
-  {
-    "section": "rich-text (intro)",
-    "path": "settings.divider",
-    "kind": "name",
-    "difference": "stored as section_divider",
-    "evidence": "formerly: section_divider"
-  },
-  {
-    "section": "call-to-action",
-    "path": "(layout name)",
-    "kind": "name",
-    "difference": "name call-to-action; salt-wordpress cta",
-    "evidence": "sections.json formerly: cta"
-  },
-  {
-    "section": "call-to-action",
-    "path": "body",
-    "kind": "name",
-    "difference": "stored as text",
-    "evidence": "formerly: text"
   },
   {
     "section": "call-to-action",
@@ -330,38 +141,10 @@
   },
   {
     "section": "call-to-action",
-    "path": "settings.spacing",
-    "kind": "name",
-    "difference": "stored as section_spacing",
-    "evidence": "formerly: section_spacing"
-  },
-  {
-    "section": "call-to-action",
-    "path": "settings.tone",
-    "kind": "name",
-    "difference": "stored as section_background",
-    "evidence": "formerly: section_background"
-  },
-  {
-    "section": "call-to-action",
-    "path": "settings.tone",
-    "kind": "values",
-    "difference": "choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse",
-    "evidence": "values: {\"inverse\":\"surface-inverse\"}"
-  },
-  {
-    "section": "call-to-action",
     "path": "settings.toneDark",
     "kind": "missing",
     "difference": "not in salt-wordpress",
     "evidence": "owes: the field; dark mode is a token inversion today, with no per-section choice"
-  },
-  {
-    "section": "call-to-action",
-    "path": "settings.width",
-    "kind": "name",
-    "difference": "stored as section_container",
-    "evidence": "formerly: section_container"
   },
   {
     "section": "call-to-action",
@@ -372,38 +155,10 @@
   },
   {
     "section": "call-to-action",
-    "path": "settings.anchorId",
-    "kind": "name",
-    "difference": "stored as section_anchor",
-    "evidence": "formerly: section_anchor"
-  },
-  {
-    "section": "call-to-action",
     "path": "settings.firstPageOnly",
     "kind": "missing",
     "difference": "not in salt-wordpress",
     "evidence": "owes: the field, with the listing section that paginates"
-  },
-  {
-    "section": "call-to-action",
-    "path": "settings.divider",
-    "kind": "name",
-    "difference": "stored as section_divider",
-    "evidence": "formerly: section_divider"
-  },
-  {
-    "section": "media-text",
-    "path": "(layout name)",
-    "kind": "name",
-    "difference": "name media-text; salt-wordpress media_text",
-    "evidence": "sections.json formerly: media_text"
-  },
-  {
-    "section": "media-text",
-    "path": "rows.mediaSide",
-    "kind": "name",
-    "difference": "stored as media_side",
-    "evidence": "formerly: media_side"
   },
   {
     "section": "media-text",
@@ -421,38 +176,10 @@
   },
   {
     "section": "media-text",
-    "path": "settings.spacing",
-    "kind": "name",
-    "difference": "stored as section_spacing",
-    "evidence": "formerly: section_spacing"
-  },
-  {
-    "section": "media-text",
-    "path": "settings.tone",
-    "kind": "name",
-    "difference": "stored as section_background",
-    "evidence": "formerly: section_background"
-  },
-  {
-    "section": "media-text",
-    "path": "settings.tone",
-    "kind": "values",
-    "difference": "choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse",
-    "evidence": "values: {\"inverse\":\"surface-inverse\"}"
-  },
-  {
-    "section": "media-text",
     "path": "settings.toneDark",
     "kind": "missing",
     "difference": "not in salt-wordpress",
     "evidence": "owes: the field; dark mode is a token inversion today, with no per-section choice"
-  },
-  {
-    "section": "media-text",
-    "path": "settings.width",
-    "kind": "name",
-    "difference": "stored as section_container",
-    "evidence": "formerly: section_container"
   },
   {
     "section": "media-text",
@@ -463,24 +190,10 @@
   },
   {
     "section": "media-text",
-    "path": "settings.anchorId",
-    "kind": "name",
-    "difference": "stored as section_anchor",
-    "evidence": "formerly: section_anchor"
-  },
-  {
-    "section": "media-text",
     "path": "settings.firstPageOnly",
     "kind": "missing",
     "difference": "not in salt-wordpress",
     "evidence": "owes: the field, with the listing section that paginates"
-  },
-  {
-    "section": "media-text",
-    "path": "settings.divider",
-    "kind": "name",
-    "difference": "stored as section_divider",
-    "evidence": "formerly: section_divider"
   },
   {
     "section": "features",
@@ -506,37 +219,9 @@
   {
     "section": "features",
     "path": "items.url",
-    "kind": "name",
-    "difference": "stored as link",
-    "evidence": "formerly: link"
-  },
-  {
-    "section": "features",
-    "path": "items.url",
     "kind": "type",
     "difference": "type text; salt-wordpress link",
     "evidence": "owes: a plain address in place of a link field, whose title and target were already ignored"
-  },
-  {
-    "section": "features",
-    "path": "settings.spacing",
-    "kind": "name",
-    "difference": "stored as section_spacing",
-    "evidence": "formerly: section_spacing"
-  },
-  {
-    "section": "features",
-    "path": "settings.tone",
-    "kind": "name",
-    "difference": "stored as section_background",
-    "evidence": "formerly: section_background"
-  },
-  {
-    "section": "features",
-    "path": "settings.tone",
-    "kind": "values",
-    "difference": "choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse",
-    "evidence": "values: {\"inverse\":\"surface-inverse\"}"
   },
   {
     "section": "features",
@@ -547,13 +232,6 @@
   },
   {
     "section": "features",
-    "path": "settings.width",
-    "kind": "name",
-    "difference": "stored as section_container",
-    "evidence": "formerly: section_container"
-  },
-  {
-    "section": "features",
     "path": "settings.backgroundImage",
     "kind": "missing",
     "difference": "not in salt-wordpress",
@@ -561,24 +239,10 @@
   },
   {
     "section": "features",
-    "path": "settings.anchorId",
-    "kind": "name",
-    "difference": "stored as section_anchor",
-    "evidence": "formerly: section_anchor"
-  },
-  {
-    "section": "features",
     "path": "settings.firstPageOnly",
     "kind": "missing",
     "difference": "not in salt-wordpress",
     "evidence": "owes: the field, with the listing section that paginates"
-  },
-  {
-    "section": "features",
-    "path": "settings.divider",
-    "kind": "name",
-    "difference": "stored as section_divider",
-    "evidence": "formerly: section_divider"
   },
   {
     "section": "stats",
@@ -596,45 +260,10 @@
   },
   {
     "section": "stats",
-    "path": "items.value",
-    "kind": "name",
-    "difference": "stored as number",
-    "evidence": "formerly: number"
-  },
-  {
-    "section": "stats",
-    "path": "settings.spacing",
-    "kind": "name",
-    "difference": "stored as section_spacing",
-    "evidence": "formerly: section_spacing"
-  },
-  {
-    "section": "stats",
-    "path": "settings.tone",
-    "kind": "name",
-    "difference": "stored as section_background",
-    "evidence": "formerly: section_background"
-  },
-  {
-    "section": "stats",
-    "path": "settings.tone",
-    "kind": "values",
-    "difference": "choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse",
-    "evidence": "values: {\"inverse\":\"surface-inverse\"}"
-  },
-  {
-    "section": "stats",
     "path": "settings.toneDark",
     "kind": "missing",
     "difference": "not in salt-wordpress",
     "evidence": "owes: the field; dark mode is a token inversion today, with no per-section choice"
-  },
-  {
-    "section": "stats",
-    "path": "settings.width",
-    "kind": "name",
-    "difference": "stored as section_container",
-    "evidence": "formerly: section_container"
   },
   {
     "section": "stats",
@@ -645,24 +274,10 @@
   },
   {
     "section": "stats",
-    "path": "settings.anchorId",
-    "kind": "name",
-    "difference": "stored as section_anchor",
-    "evidence": "formerly: section_anchor"
-  },
-  {
-    "section": "stats",
     "path": "settings.firstPageOnly",
     "kind": "missing",
     "difference": "not in salt-wordpress",
     "evidence": "owes: the field, with the listing section that paginates"
-  },
-  {
-    "section": "stats",
-    "path": "settings.divider",
-    "kind": "name",
-    "difference": "stored as section_divider",
-    "evidence": "formerly: section_divider"
   },
   {
     "section": "logos",
@@ -680,45 +295,10 @@
   },
   {
     "section": "logos",
-    "path": "items",
-    "kind": "name",
-    "difference": "stored as logos",
-    "evidence": "formerly: logos"
-  },
-  {
-    "section": "logos",
-    "path": "settings.spacing",
-    "kind": "name",
-    "difference": "stored as section_spacing",
-    "evidence": "formerly: section_spacing"
-  },
-  {
-    "section": "logos",
-    "path": "settings.tone",
-    "kind": "name",
-    "difference": "stored as section_background",
-    "evidence": "formerly: section_background"
-  },
-  {
-    "section": "logos",
-    "path": "settings.tone",
-    "kind": "values",
-    "difference": "choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse",
-    "evidence": "values: {\"inverse\":\"surface-inverse\"}"
-  },
-  {
-    "section": "logos",
     "path": "settings.toneDark",
     "kind": "missing",
     "difference": "not in salt-wordpress",
     "evidence": "owes: the field; dark mode is a token inversion today, with no per-section choice"
-  },
-  {
-    "section": "logos",
-    "path": "settings.width",
-    "kind": "name",
-    "difference": "stored as section_container",
-    "evidence": "formerly: section_container"
   },
   {
     "section": "logos",
@@ -729,24 +309,10 @@
   },
   {
     "section": "logos",
-    "path": "settings.anchorId",
-    "kind": "name",
-    "difference": "stored as section_anchor",
-    "evidence": "formerly: section_anchor"
-  },
-  {
-    "section": "logos",
     "path": "settings.firstPageOnly",
     "kind": "missing",
     "difference": "not in salt-wordpress",
     "evidence": "owes: the field, with the listing section that paginates"
-  },
-  {
-    "section": "logos",
-    "path": "settings.divider",
-    "kind": "name",
-    "difference": "stored as section_divider",
-    "evidence": "formerly: section_divider"
   },
   {
     "section": "gallery",
@@ -792,38 +358,10 @@
   },
   {
     "section": "gallery",
-    "path": "settings.spacing",
-    "kind": "name",
-    "difference": "stored as section_spacing",
-    "evidence": "formerly: section_spacing"
-  },
-  {
-    "section": "gallery",
-    "path": "settings.tone",
-    "kind": "name",
-    "difference": "stored as section_background",
-    "evidence": "formerly: section_background"
-  },
-  {
-    "section": "gallery",
-    "path": "settings.tone",
-    "kind": "values",
-    "difference": "choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse",
-    "evidence": "values: {\"inverse\":\"surface-inverse\"}"
-  },
-  {
-    "section": "gallery",
     "path": "settings.toneDark",
     "kind": "missing",
     "difference": "not in salt-wordpress",
     "evidence": "owes: the field; dark mode is a token inversion today, with no per-section choice"
-  },
-  {
-    "section": "gallery",
-    "path": "settings.width",
-    "kind": "name",
-    "difference": "stored as section_container",
-    "evidence": "formerly: section_container"
   },
   {
     "section": "gallery",
@@ -834,24 +372,10 @@
   },
   {
     "section": "gallery",
-    "path": "settings.anchorId",
-    "kind": "name",
-    "difference": "stored as section_anchor",
-    "evidence": "formerly: section_anchor"
-  },
-  {
-    "section": "gallery",
     "path": "settings.firstPageOnly",
     "kind": "missing",
     "difference": "not in salt-wordpress",
     "evidence": "owes: the field, with the listing section that paginates"
-  },
-  {
-    "section": "gallery",
-    "path": "settings.divider",
-    "kind": "name",
-    "difference": "stored as section_divider",
-    "evidence": "formerly: section_divider"
   },
   {
     "section": "process",
@@ -883,45 +407,10 @@
   },
   {
     "section": "process",
-    "path": "structuredData",
-    "kind": "name",
-    "difference": "stored as schema_toggle",
-    "evidence": "formerly: schema_toggle"
-  },
-  {
-    "section": "process",
-    "path": "settings.spacing",
-    "kind": "name",
-    "difference": "stored as section_spacing",
-    "evidence": "formerly: section_spacing"
-  },
-  {
-    "section": "process",
-    "path": "settings.tone",
-    "kind": "name",
-    "difference": "stored as section_background",
-    "evidence": "formerly: section_background"
-  },
-  {
-    "section": "process",
-    "path": "settings.tone",
-    "kind": "values",
-    "difference": "choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse",
-    "evidence": "values: {\"inverse\":\"surface-inverse\"}"
-  },
-  {
-    "section": "process",
     "path": "settings.toneDark",
     "kind": "missing",
     "difference": "not in salt-wordpress",
     "evidence": "owes: the field; dark mode is a token inversion today, with no per-section choice"
-  },
-  {
-    "section": "process",
-    "path": "settings.width",
-    "kind": "name",
-    "difference": "stored as section_container",
-    "evidence": "formerly: section_container"
   },
   {
     "section": "process",
@@ -932,24 +421,10 @@
   },
   {
     "section": "process",
-    "path": "settings.anchorId",
-    "kind": "name",
-    "difference": "stored as section_anchor",
-    "evidence": "formerly: section_anchor"
-  },
-  {
-    "section": "process",
     "path": "settings.firstPageOnly",
     "kind": "missing",
     "difference": "not in salt-wordpress",
     "evidence": "owes: the field, with the listing section that paginates"
-  },
-  {
-    "section": "process",
-    "path": "settings.divider",
-    "kind": "name",
-    "difference": "stored as section_divider",
-    "evidence": "formerly: section_divider"
   },
   {
     "section": "faq",
@@ -1023,45 +498,10 @@
   },
   {
     "section": "faq",
-    "path": "structuredData",
-    "kind": "name",
-    "difference": "stored as schema_toggle",
-    "evidence": "formerly: schema_toggle"
-  },
-  {
-    "section": "faq",
-    "path": "settings.spacing",
-    "kind": "name",
-    "difference": "stored as section_spacing",
-    "evidence": "formerly: section_spacing"
-  },
-  {
-    "section": "faq",
-    "path": "settings.tone",
-    "kind": "name",
-    "difference": "stored as section_background",
-    "evidence": "formerly: section_background"
-  },
-  {
-    "section": "faq",
-    "path": "settings.tone",
-    "kind": "values",
-    "difference": "choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse",
-    "evidence": "values: {\"inverse\":\"surface-inverse\"}"
-  },
-  {
-    "section": "faq",
     "path": "settings.toneDark",
     "kind": "missing",
     "difference": "not in salt-wordpress",
     "evidence": "owes: the field; dark mode is a token inversion today, with no per-section choice"
-  },
-  {
-    "section": "faq",
-    "path": "settings.width",
-    "kind": "name",
-    "difference": "stored as section_container",
-    "evidence": "formerly: section_container"
   },
   {
     "section": "faq",
@@ -1072,24 +512,10 @@
   },
   {
     "section": "faq",
-    "path": "settings.anchorId",
-    "kind": "name",
-    "difference": "stored as section_anchor",
-    "evidence": "formerly: section_anchor"
-  },
-  {
-    "section": "faq",
     "path": "settings.firstPageOnly",
     "kind": "missing",
     "difference": "not in salt-wordpress",
     "evidence": "owes: the field, with the listing section that paginates"
-  },
-  {
-    "section": "faq",
-    "path": "settings.divider",
-    "kind": "name",
-    "difference": "stored as section_divider",
-    "evidence": "formerly: section_divider"
   },
   {
     "section": "collection-showcase (services)",
@@ -1247,38 +673,10 @@
   },
   {
     "section": "collection-showcase (services)",
-    "path": "settings.spacing",
-    "kind": "name",
-    "difference": "stored as section_spacing",
-    "evidence": "formerly: section_spacing"
-  },
-  {
-    "section": "collection-showcase (services)",
-    "path": "settings.tone",
-    "kind": "name",
-    "difference": "stored as section_background",
-    "evidence": "formerly: section_background"
-  },
-  {
-    "section": "collection-showcase (services)",
-    "path": "settings.tone",
-    "kind": "values",
-    "difference": "choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse",
-    "evidence": "values: {\"inverse\":\"surface-inverse\"}"
-  },
-  {
-    "section": "collection-showcase (services)",
     "path": "settings.toneDark",
     "kind": "missing",
     "difference": "not in salt-wordpress",
     "evidence": "owes: the field; dark mode is a token inversion today, with no per-section choice"
-  },
-  {
-    "section": "collection-showcase (services)",
-    "path": "settings.width",
-    "kind": "name",
-    "difference": "stored as section_container",
-    "evidence": "formerly: section_container"
   },
   {
     "section": "collection-showcase (services)",
@@ -1289,24 +687,10 @@
   },
   {
     "section": "collection-showcase (services)",
-    "path": "settings.anchorId",
-    "kind": "name",
-    "difference": "stored as section_anchor",
-    "evidence": "formerly: section_anchor"
-  },
-  {
-    "section": "collection-showcase (services)",
     "path": "settings.firstPageOnly",
     "kind": "missing",
     "difference": "not in salt-wordpress",
     "evidence": "owes: the field, with the listing section that paginates"
-  },
-  {
-    "section": "collection-showcase (services)",
-    "path": "settings.divider",
-    "kind": "name",
-    "difference": "stored as section_divider",
-    "evidence": "formerly: section_divider"
   },
   {
     "section": "collection-showcase (work)",
@@ -1464,38 +848,10 @@
   },
   {
     "section": "collection-showcase (work)",
-    "path": "settings.spacing",
-    "kind": "name",
-    "difference": "stored as section_spacing",
-    "evidence": "formerly: section_spacing"
-  },
-  {
-    "section": "collection-showcase (work)",
-    "path": "settings.tone",
-    "kind": "name",
-    "difference": "stored as section_background",
-    "evidence": "formerly: section_background"
-  },
-  {
-    "section": "collection-showcase (work)",
-    "path": "settings.tone",
-    "kind": "values",
-    "difference": "choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse",
-    "evidence": "values: {\"inverse\":\"surface-inverse\"}"
-  },
-  {
-    "section": "collection-showcase (work)",
     "path": "settings.toneDark",
     "kind": "missing",
     "difference": "not in salt-wordpress",
     "evidence": "owes: the field; dark mode is a token inversion today, with no per-section choice"
-  },
-  {
-    "section": "collection-showcase (work)",
-    "path": "settings.width",
-    "kind": "name",
-    "difference": "stored as section_container",
-    "evidence": "formerly: section_container"
   },
   {
     "section": "collection-showcase (work)",
@@ -1506,24 +862,10 @@
   },
   {
     "section": "collection-showcase (work)",
-    "path": "settings.anchorId",
-    "kind": "name",
-    "difference": "stored as section_anchor",
-    "evidence": "formerly: section_anchor"
-  },
-  {
-    "section": "collection-showcase (work)",
     "path": "settings.firstPageOnly",
     "kind": "missing",
     "difference": "not in salt-wordpress",
     "evidence": "owes: the field, with the listing section that paginates"
-  },
-  {
-    "section": "collection-showcase (work)",
-    "path": "settings.divider",
-    "kind": "name",
-    "difference": "stored as section_divider",
-    "evidence": "formerly: section_divider"
   },
   {
     "section": "collection-showcase (team)",
@@ -1660,38 +1002,10 @@
   },
   {
     "section": "collection-showcase (team)",
-    "path": "settings.spacing",
-    "kind": "name",
-    "difference": "stored as section_spacing",
-    "evidence": "formerly: section_spacing"
-  },
-  {
-    "section": "collection-showcase (team)",
-    "path": "settings.tone",
-    "kind": "name",
-    "difference": "stored as section_background",
-    "evidence": "formerly: section_background"
-  },
-  {
-    "section": "collection-showcase (team)",
-    "path": "settings.tone",
-    "kind": "values",
-    "difference": "choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse",
-    "evidence": "values: {\"inverse\":\"surface-inverse\"}"
-  },
-  {
-    "section": "collection-showcase (team)",
     "path": "settings.toneDark",
     "kind": "missing",
     "difference": "not in salt-wordpress",
     "evidence": "owes: the field; dark mode is a token inversion today, with no per-section choice"
-  },
-  {
-    "section": "collection-showcase (team)",
-    "path": "settings.width",
-    "kind": "name",
-    "difference": "stored as section_container",
-    "evidence": "formerly: section_container"
   },
   {
     "section": "collection-showcase (team)",
@@ -1702,24 +1016,10 @@
   },
   {
     "section": "collection-showcase (team)",
-    "path": "settings.anchorId",
-    "kind": "name",
-    "difference": "stored as section_anchor",
-    "evidence": "formerly: section_anchor"
-  },
-  {
-    "section": "collection-showcase (team)",
     "path": "settings.firstPageOnly",
     "kind": "missing",
     "difference": "not in salt-wordpress",
     "evidence": "owes: the field, with the listing section that paginates"
-  },
-  {
-    "section": "collection-showcase (team)",
-    "path": "settings.divider",
-    "kind": "name",
-    "difference": "stored as section_divider",
-    "evidence": "formerly: section_divider"
   },
   {
     "section": "collection-showcase (testimonials)",
@@ -1856,38 +1156,10 @@
   },
   {
     "section": "collection-showcase (testimonials)",
-    "path": "settings.spacing",
-    "kind": "name",
-    "difference": "stored as section_spacing",
-    "evidence": "formerly: section_spacing"
-  },
-  {
-    "section": "collection-showcase (testimonials)",
-    "path": "settings.tone",
-    "kind": "name",
-    "difference": "stored as section_background",
-    "evidence": "formerly: section_background"
-  },
-  {
-    "section": "collection-showcase (testimonials)",
-    "path": "settings.tone",
-    "kind": "values",
-    "difference": "choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse",
-    "evidence": "values: {\"inverse\":\"surface-inverse\"}"
-  },
-  {
-    "section": "collection-showcase (testimonials)",
     "path": "settings.toneDark",
     "kind": "missing",
     "difference": "not in salt-wordpress",
     "evidence": "owes: the field; dark mode is a token inversion today, with no per-section choice"
-  },
-  {
-    "section": "collection-showcase (testimonials)",
-    "path": "settings.width",
-    "kind": "name",
-    "difference": "stored as section_container",
-    "evidence": "formerly: section_container"
   },
   {
     "section": "collection-showcase (testimonials)",
@@ -1898,24 +1170,10 @@
   },
   {
     "section": "collection-showcase (testimonials)",
-    "path": "settings.anchorId",
-    "kind": "name",
-    "difference": "stored as section_anchor",
-    "evidence": "formerly: section_anchor"
-  },
-  {
-    "section": "collection-showcase (testimonials)",
     "path": "settings.firstPageOnly",
     "kind": "missing",
     "difference": "not in salt-wordpress",
     "evidence": "owes: the field, with the listing section that paginates"
-  },
-  {
-    "section": "collection-showcase (testimonials)",
-    "path": "settings.divider",
-    "kind": "name",
-    "difference": "stored as section_divider",
-    "evidence": "formerly: section_divider"
   },
   {
     "section": "collection-showcase (blog_teaser)",
@@ -2073,38 +1331,10 @@
   },
   {
     "section": "collection-showcase (blog_teaser)",
-    "path": "settings.spacing",
-    "kind": "name",
-    "difference": "stored as section_spacing",
-    "evidence": "formerly: section_spacing"
-  },
-  {
-    "section": "collection-showcase (blog_teaser)",
-    "path": "settings.tone",
-    "kind": "name",
-    "difference": "stored as section_background",
-    "evidence": "formerly: section_background"
-  },
-  {
-    "section": "collection-showcase (blog_teaser)",
-    "path": "settings.tone",
-    "kind": "values",
-    "difference": "choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse",
-    "evidence": "values: {\"inverse\":\"surface-inverse\"}"
-  },
-  {
-    "section": "collection-showcase (blog_teaser)",
     "path": "settings.toneDark",
     "kind": "missing",
     "difference": "not in salt-wordpress",
     "evidence": "owes: the field; dark mode is a token inversion today, with no per-section choice"
-  },
-  {
-    "section": "collection-showcase (blog_teaser)",
-    "path": "settings.width",
-    "kind": "name",
-    "difference": "stored as section_container",
-    "evidence": "formerly: section_container"
   },
   {
     "section": "collection-showcase (blog_teaser)",
@@ -2115,24 +1345,10 @@
   },
   {
     "section": "collection-showcase (blog_teaser)",
-    "path": "settings.anchorId",
-    "kind": "name",
-    "difference": "stored as section_anchor",
-    "evidence": "formerly: section_anchor"
-  },
-  {
-    "section": "collection-showcase (blog_teaser)",
     "path": "settings.firstPageOnly",
     "kind": "missing",
     "difference": "not in salt-wordpress",
     "evidence": "owes: the field, with the listing section that paginates"
-  },
-  {
-    "section": "collection-showcase (blog_teaser)",
-    "path": "settings.divider",
-    "kind": "name",
-    "difference": "stored as section_divider",
-    "evidence": "formerly: section_divider"
   },
   {
     "section": "carousel (scroll_carousel)",
@@ -2185,38 +1401,10 @@
   },
   {
     "section": "carousel (scroll_carousel)",
-    "path": "settings.spacing",
-    "kind": "name",
-    "difference": "stored as section_spacing",
-    "evidence": "formerly: section_spacing"
-  },
-  {
-    "section": "carousel (scroll_carousel)",
-    "path": "settings.tone",
-    "kind": "name",
-    "difference": "stored as section_background",
-    "evidence": "formerly: section_background"
-  },
-  {
-    "section": "carousel (scroll_carousel)",
-    "path": "settings.tone",
-    "kind": "values",
-    "difference": "choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse",
-    "evidence": "values: {\"inverse\":\"surface-inverse\"}"
-  },
-  {
-    "section": "carousel (scroll_carousel)",
     "path": "settings.toneDark",
     "kind": "missing",
     "difference": "not in salt-wordpress",
     "evidence": "owes: the field; dark mode is a token inversion today, with no per-section choice"
-  },
-  {
-    "section": "carousel (scroll_carousel)",
-    "path": "settings.width",
-    "kind": "name",
-    "difference": "stored as section_container",
-    "evidence": "formerly: section_container"
   },
   {
     "section": "carousel (scroll_carousel)",
@@ -2227,24 +1415,10 @@
   },
   {
     "section": "carousel (scroll_carousel)",
-    "path": "settings.anchorId",
-    "kind": "name",
-    "difference": "stored as section_anchor",
-    "evidence": "formerly: section_anchor"
-  },
-  {
-    "section": "carousel (scroll_carousel)",
     "path": "settings.firstPageOnly",
     "kind": "missing",
     "difference": "not in salt-wordpress",
     "evidence": "owes: the field, with the listing section that paginates"
-  },
-  {
-    "section": "carousel (scroll_carousel)",
-    "path": "settings.divider",
-    "kind": "name",
-    "difference": "stored as section_divider",
-    "evidence": "formerly: section_divider"
   },
   {
     "section": "carousel (testimonials)",
@@ -2353,38 +1527,10 @@
   },
   {
     "section": "carousel (testimonials)",
-    "path": "settings.spacing",
-    "kind": "name",
-    "difference": "stored as section_spacing",
-    "evidence": "formerly: section_spacing"
-  },
-  {
-    "section": "carousel (testimonials)",
-    "path": "settings.tone",
-    "kind": "name",
-    "difference": "stored as section_background",
-    "evidence": "formerly: section_background"
-  },
-  {
-    "section": "carousel (testimonials)",
-    "path": "settings.tone",
-    "kind": "values",
-    "difference": "choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse",
-    "evidence": "values: {\"inverse\":\"surface-inverse\"}"
-  },
-  {
-    "section": "carousel (testimonials)",
     "path": "settings.toneDark",
     "kind": "missing",
     "difference": "not in salt-wordpress",
     "evidence": "owes: the field; dark mode is a token inversion today, with no per-section choice"
-  },
-  {
-    "section": "carousel (testimonials)",
-    "path": "settings.width",
-    "kind": "name",
-    "difference": "stored as section_container",
-    "evidence": "formerly: section_container"
   },
   {
     "section": "carousel (testimonials)",
@@ -2395,24 +1541,10 @@
   },
   {
     "section": "carousel (testimonials)",
-    "path": "settings.anchorId",
-    "kind": "name",
-    "difference": "stored as section_anchor",
-    "evidence": "formerly: section_anchor"
-  },
-  {
-    "section": "carousel (testimonials)",
     "path": "settings.firstPageOnly",
     "kind": "missing",
     "difference": "not in salt-wordpress",
     "evidence": "owes: the field, with the listing section that paginates"
-  },
-  {
-    "section": "carousel (testimonials)",
-    "path": "settings.divider",
-    "kind": "name",
-    "difference": "stored as section_divider",
-    "evidence": "formerly: section_divider"
   },
   {
     "section": "carousel (testimonials)",
@@ -2424,65 +1556,9 @@
   {
     "section": "contact",
     "path": "intro",
-    "kind": "name",
-    "difference": "stored as text",
-    "evidence": "formerly: text"
-  },
-  {
-    "section": "contact",
-    "path": "intro",
     "kind": "limit",
     "difference": "maxlength 300; salt-wordpress none",
     "evidence": "owes: the 300-character limit"
-  },
-  {
-    "section": "contact",
-    "path": "showPhone",
-    "kind": "name",
-    "difference": "stored as show_phone",
-    "evidence": "formerly: show_phone"
-  },
-  {
-    "section": "contact",
-    "path": "showEmail",
-    "kind": "name",
-    "difference": "stored as show_email",
-    "evidence": "formerly: show_email"
-  },
-  {
-    "section": "contact",
-    "path": "showAddress",
-    "kind": "name",
-    "difference": "stored as show_address",
-    "evidence": "formerly: show_address"
-  },
-  {
-    "section": "contact",
-    "path": "formIntro",
-    "kind": "name",
-    "difference": "stored as form_intro",
-    "evidence": "formerly: form_intro"
-  },
-  {
-    "section": "contact",
-    "path": "settings.spacing",
-    "kind": "name",
-    "difference": "stored as section_spacing",
-    "evidence": "formerly: section_spacing"
-  },
-  {
-    "section": "contact",
-    "path": "settings.tone",
-    "kind": "name",
-    "difference": "stored as section_background",
-    "evidence": "formerly: section_background"
-  },
-  {
-    "section": "contact",
-    "path": "settings.tone",
-    "kind": "values",
-    "difference": "choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse",
-    "evidence": "values: {\"inverse\":\"surface-inverse\"}"
   },
   {
     "section": "contact",
@@ -2493,13 +1569,6 @@
   },
   {
     "section": "contact",
-    "path": "settings.width",
-    "kind": "name",
-    "difference": "stored as section_container",
-    "evidence": "formerly: section_container"
-  },
-  {
-    "section": "contact",
     "path": "settings.backgroundImage",
     "kind": "missing",
     "difference": "not in salt-wordpress",
@@ -2507,24 +1576,10 @@
   },
   {
     "section": "contact",
-    "path": "settings.anchorId",
-    "kind": "name",
-    "difference": "stored as section_anchor",
-    "evidence": "formerly: section_anchor"
-  },
-  {
-    "section": "contact",
     "path": "settings.firstPageOnly",
     "kind": "missing",
     "difference": "not in salt-wordpress",
     "evidence": "owes: the field, with the listing section that paginates"
-  },
-  {
-    "section": "contact",
-    "path": "settings.divider",
-    "kind": "name",
-    "difference": "stored as section_divider",
-    "evidence": "formerly: section_divider"
   },
   {
     "section": "locations",
@@ -2591,38 +1646,10 @@
   },
   {
     "section": "locations",
-    "path": "settings.spacing",
-    "kind": "name",
-    "difference": "stored as section_spacing",
-    "evidence": "formerly: section_spacing"
-  },
-  {
-    "section": "locations",
-    "path": "settings.tone",
-    "kind": "name",
-    "difference": "stored as section_background",
-    "evidence": "formerly: section_background"
-  },
-  {
-    "section": "locations",
-    "path": "settings.tone",
-    "kind": "values",
-    "difference": "choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse",
-    "evidence": "values: {\"inverse\":\"surface-inverse\"}"
-  },
-  {
-    "section": "locations",
     "path": "settings.toneDark",
     "kind": "missing",
     "difference": "not in salt-wordpress",
     "evidence": "owes: the field; dark mode is a token inversion today, with no per-section choice"
-  },
-  {
-    "section": "locations",
-    "path": "settings.width",
-    "kind": "name",
-    "difference": "stored as section_container",
-    "evidence": "formerly: section_container"
   },
   {
     "section": "locations",
@@ -2633,24 +1660,10 @@
   },
   {
     "section": "locations",
-    "path": "settings.anchorId",
-    "kind": "name",
-    "difference": "stored as section_anchor",
-    "evidence": "formerly: section_anchor"
-  },
-  {
-    "section": "locations",
     "path": "settings.firstPageOnly",
     "kind": "missing",
     "difference": "not in salt-wordpress",
     "evidence": "owes: the field, with the listing section that paginates"
-  },
-  {
-    "section": "locations",
-    "path": "settings.divider",
-    "kind": "name",
-    "difference": "stored as section_divider",
-    "evidence": "formerly: section_divider"
   },
   {
     "section": "pricing",
@@ -2675,38 +1688,10 @@
   },
   {
     "section": "pricing",
-    "path": "settings.spacing",
-    "kind": "name",
-    "difference": "stored as section_spacing",
-    "evidence": "formerly: section_spacing"
-  },
-  {
-    "section": "pricing",
-    "path": "settings.tone",
-    "kind": "name",
-    "difference": "stored as section_background",
-    "evidence": "formerly: section_background"
-  },
-  {
-    "section": "pricing",
-    "path": "settings.tone",
-    "kind": "values",
-    "difference": "choices surface, surface-alt, brand-tint, surface-inverse; salt-wordpress surface, surface-alt, brand-tint, inverse",
-    "evidence": "values: {\"inverse\":\"surface-inverse\"}"
-  },
-  {
-    "section": "pricing",
     "path": "settings.toneDark",
     "kind": "missing",
     "difference": "not in salt-wordpress",
     "evidence": "owes: the field; dark mode is a token inversion today, with no per-section choice"
-  },
-  {
-    "section": "pricing",
-    "path": "settings.width",
-    "kind": "name",
-    "difference": "stored as section_container",
-    "evidence": "formerly: section_container"
   },
   {
     "section": "pricing",
@@ -2717,24 +1702,10 @@
   },
   {
     "section": "pricing",
-    "path": "settings.anchorId",
-    "kind": "name",
-    "difference": "stored as section_anchor",
-    "evidence": "formerly: section_anchor"
-  },
-  {
-    "section": "pricing",
     "path": "settings.firstPageOnly",
     "kind": "missing",
     "difference": "not in salt-wordpress",
     "evidence": "owes: the field, with the listing section that paginates"
-  },
-  {
-    "section": "pricing",
-    "path": "settings.divider",
-    "kind": "name",
-    "difference": "stored as section_divider",
-    "evidence": "formerly: section_divider"
   },
   {
     "section": "gallery",
@@ -2819,5 +1790,40 @@
     "kind": "type",
     "difference": "type select; salt-wordpress button_group",
     "evidence": "owes: one query group in place of six layout fields; a select for the query's mode, which is a button group today (SC-023)"
+  },
+  {
+    "section": "rich-text (rich-text)",
+    "path": "eyebrow",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field on rich_text; intro already has it"
+  },
+  {
+    "section": "rich-text (rich-text)",
+    "path": "alignment",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field on rich_text, and the value centre in place of center on intro"
+  },
+  {
+    "section": "rich-text (rich-text)",
+    "path": "settings.toneDark",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field; dark mode is a token inversion today, with no per-section choice"
+  },
+  {
+    "section": "rich-text (rich-text)",
+    "path": "settings.backgroundImage",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the background image and its four settings"
+  },
+  {
+    "section": "rich-text (rich-text)",
+    "path": "settings.firstPageOnly",
+    "kind": "missing",
+    "difference": "not in salt-wordpress",
+    "evidence": "owes: the field, with the listing section that paginates"
   }
 ]

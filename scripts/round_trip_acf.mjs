@@ -345,7 +345,9 @@ async function main({ wordpress, check, suggest }) {
     const id = layout.name
     const s = contract.sections.find((x) => x.id === id)
     const formerly = s.platforms?.wordpress?.formerly ?? []
-    const names = formerly.length ? formerly.map((f) => f.name) : [id]
+    // A layout salt-wordpress has moved to the contract's id is matched by that id, beside any
+    // former name it still ships; matching only former names once there were any missed it.
+    const names = [...new Set([id, ...formerly.map((f) => f.name)])]
     const theirs = names.map((n) => wpLayouts.find((l) => l.name === n)).filter(Boolean)
     if (!theirs.length) {
       const w = s.platforms?.wordpress
@@ -374,7 +376,9 @@ async function main({ wordpress, check, suggest }) {
       // The settings group's fields are stored on the layout itself today, so they are matched there.
       const settingsGroup = layout.sub_fields.find((f) => f.name === 'settings')
       const entries = [
-        ...layout.sub_fields.filter((f) => f !== settingsGroup && applies(fields.find((d) => d.name === f.name))).map((f) => ({ e: f, def: fields.find((d) => d.name === f.name), at: f.name, siblings: layout.sub_fields })),
+        // The Settings tab stores nothing, so it has no name to compare; salt-wordpress's tabs are
+        // left out the same way (named()).
+        ...layout.sub_fields.filter((f) => f !== settingsGroup && f.type !== 'tab' && applies(fields.find((d) => d.name === f.name))).map((f) => ({ e: f, def: fields.find((d) => d.name === f.name), at: f.name, siblings: layout.sub_fields })),
         ...(settingsGroup?.sub_fields ?? []).map((f) => ({ e: f, def: settings.find((d) => d.name === f.name), at: `settings.${f.name}`, siblings: settingsGroup.sub_fields })),
       ]
       compareLevel(label, entries, wl.sub_fields, '', undefined, fixed)
@@ -430,7 +434,7 @@ async function main({ wordpress, check, suggest }) {
     '',
     `salt-wordpress layouts no contract section claims: ${unmatched.length ? unmatched.join(', ') : 'none'}.`,
     '',
-    `Field groups not compared, because the contract defines no fields for them: ${otherGroups.join(', ')}.`,
+    `Field groups not compared, because this report compares the page sections only (a collection's fields record what each platform stored before under formerly and owes in contract/collections): ${otherGroups.join(', ')}.`,
     '',
   ]
   if (unexpected.length) {
