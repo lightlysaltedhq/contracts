@@ -220,9 +220,11 @@ test, applied through section 2's table, where the stricter row wins.
     them (its editor will not add a row or an image past a repeater's or a gallery's `max`, and an
     options page or a term screen checks them on every save) is pending (below). `RULED_LIMITS` in
     `emit/acf.mjs` says where the emitter records each kind of limit, not which limits stay
-    limits: that is the field files' to say, and the emitter follows them. The Payload emitter is unchanged: Payload checks its own limits when
-    a document is published, not when a draft is saved, and refuses an over-long publish through
-    the API with a message. The ACF round trip compares a limit by its value, wherever the
+    limits: that is the field files' to say, and the emitter follows them. The Payload emitter is unchanged and gives each limit as Payload's
+    own setting. Under the rule Salt for Next.js owes counting a length in code points with a CRLF
+    as one, where Payload's `maxLength` counts UTF-16 units (an emoji two, a CRLF two), and never
+    refusing a draft, where Payload skips validation on a draft only with `versions.drafts` on;
+    how it meets them is its own. The ACF round trip compares a limit by its value, wherever the
     emitter records it.
   - **Targets** (ID-3969). A text, textarea, list, gallery or relationship may carry `target`, a
     number the design only prefers: shown to the editor beside the count and never refused. ACF
@@ -250,7 +252,8 @@ test, applied through section 2's table, where the stricter row wins.
     `max` may hold a number's range and a list's, gallery's or relationship's size, given that its
     editor will not add a row or an image past a repeater's or a gallery's `max` and that an
     options page or a term screen checks them on every save; if not, `RULED_LIMITS` moves them
-    under `salt`.
+    under `salt`. Whether a Payload site must run with drafts (`versions.drafts`) so that no draft
+    is refused, or may meet the rule another way.
 - The case-study view has fixtures and is required of every implementation (SC-021).
   `fixtures/case-study/` holds four cases (`full`, `aside`, `band` and `minimal`), `case-study`
   joins `REQUIRED_FILES`, and a full conformance run refuses to declare it not shipped. The

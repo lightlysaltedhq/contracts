@@ -229,10 +229,13 @@ records carrying 17 former names), so a
 migration generated from the contract renames or folds every such type. A select that 0.11.0 left
 to Payload's derived name has no fixed former name to record; the site's own schema gives it.
 
-**Limits and targets.** Payload's own limits (`maxLength`, `min`, `max`, `minRows`, `maxRows`)
-stay Payload settings: Payload checks them when a document is published and not when a draft is
-saved, and refuses an over-long publish through the API with a message, as the limits rule
-(ID-3968, `RELEASE-POLICY.md` section 2) asks. A field's `target` (ID-3969), which is never
+**Limits and targets.** The emitter gives each limit as Payload's own setting (`maxLength`,
+`min`, `max`, `minRows`, `maxRows`). Under the limits rule (ID-3968, `RELEASE-POLICY.md` section
+2) Salt for Next.js owes two things those settings do not do alone: a length counted in Unicode
+code points with a CRLF as one, where Payload's `maxLength` counts UTF-16 units (an emoji two, a
+CRLF two); and no draft refused, where Payload skips validation on a draft only on a collection
+with `versions.drafts` on. How it meets them is its own; whether a Payload site must run with
+drafts is pending the founder. A field's `target` (ID-3969), which is never
 refused, is no Payload setting: it is recorded under `custom.salt.target` for the count the site
 shows while the editor types.
 

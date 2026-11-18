@@ -768,7 +768,7 @@
           "type": "string"
         },
         "maxLength": {
-          "description": "The most characters the text may hold. A limit, held by the limits rule (above): a draft outside it still saves, nothing an editor wrote is cut, and it is checked when the content is published. The editor sees the count as they type. Counted in Unicode code points, a CRLF line break as one. ACF records it under salt.maxLength, never as ACF's maxlength, which cuts typing; Payload keeps its maxLength, which it checks when a document is published and not when a draft is saved.",
+          "description": "The most characters the text may hold. A limit, held by the limits rule (above): a draft outside it still saves, nothing an editor wrote is cut, and it is checked when the content is published. The editor sees the count as they type. Counted in Unicode code points, a CRLF line break as one. ACF records it under salt.maxLength, never as ACF's maxlength, which cuts typing. The Payload emitter gives it as Payload's maxLength, which counts UTF-16 units (an emoji two, a CRLF two) and skips a draft only on a collection with versions.drafts on, so Salt for Next.js owes counting it in code points with a CRLF as one and never refusing a draft; how it meets that is its own.",
           "$ref": "#/$defs/count"
         },
         "target": {
@@ -794,7 +794,7 @@
           "type": "string"
         },
         "maxLength": {
-          "description": "The most characters the text may hold. A limit, held by the limits rule (above): a draft outside it still saves, nothing an editor wrote is cut, and it is checked when the content is published. The editor sees the count as they type. Counted in Unicode code points, a CRLF line break as one. ACF records it under salt.maxLength, never as ACF's maxlength, which cuts typing; Payload keeps its maxLength, which it checks when a document is published and not when a draft is saved.",
+          "description": "The most characters the text may hold. A limit, held by the limits rule (above): a draft outside it still saves, nothing an editor wrote is cut, and it is checked when the content is published. The editor sees the count as they type. Counted in Unicode code points, a CRLF line break as one. ACF records it under salt.maxLength, never as ACF's maxlength, which cuts typing. The Payload emitter gives it as Payload's maxLength, which counts UTF-16 units (an emoji two, a CRLF two) and skips a draft only on a collection with versions.drafts on, so Salt for Next.js owes counting it in code points with a CRLF as one and never refusing a draft; how it meets that is its own.",
           "$ref": "#/$defs/count"
         },
         "target": {
