@@ -249,22 +249,26 @@ test, applied through section 2's table, where the stricter row wins.
     native way; a collection's view-all link points at that collection's own index (archive) page;
     and a collection with no index page draws no link. A description of a view prop, so no
     verdict changes.
-  - **Pending the founder's review, not ruled.** Which limits stay limits and which become targets
-    (perhaps only those whose breach would break the front end stay limits): until it is ruled no
-    field's limit becomes a target and no owes assumes either answer. Whether ACF's own `min` and
-    `max` may hold a number's range and a list's, gallery's or relationship's size, given that its
-    editor will not add a row or an image past a repeater's or a gallery's `max` and that an
-    options page or a term screen checks them on every save; if not, `RULED_LIMITS` moves them
-    under `salt`. Whether a Payload site must run with drafts (`versions.drafts`) so that no draft
-    is refused, or may meet the rule another way. For an FAQ, a testimonial, a team member and a
-    location, which have no page of their own and so no `<title>`: should the target of 60 measure
-    the field alone, or should they have no target? Each carries 60 until it is ruled. And, so the
-    classification is ruled knowingly: the schema takes `target` only in place of a maximum (a
-    text's or a textarea's `maxLength`, or the `max` of a list, a gallery or a relationship), so
-    minimums, a number's range (`lat`, `lng`, `zoom`, `rating`), `maxLines` (a location's `street`)
-    and a collection-query's count cannot become a target with a one-line change; softening any of
-    them needs the schema to take a target there first. And whether adding a target beside a
-    limit, or removing one, is PATCH or MINOR (`RELEASE-POLICY.md` section 2).
+  - **Pending the founder's review, not ruled.**
+    - Which limits stay limits and which become targets (perhaps only those whose breach would
+      break the front end). Until it is ruled no field's limit becomes a target and no owes assumes
+      either answer.
+    - So that is ruled knowingly: the schema takes `target` only in place of a maximum (a text's or
+      a textarea's `maxLength`, or the `max` of a list, a gallery or a relationship). Minimums, a
+      number's range (`lat`, `lng`, `zoom`, `rating`), `maxLines` (a location's `street`) and a
+      collection-query's count cannot become a target with a one-line change; softening any of
+      them needs the schema to take a target there first.
+    - Whether ACF's own `min` and `max` may hold a number's range and a list's, gallery's or
+      relationship's size, given that its editor will not add a row or an image past a repeater's
+      or a gallery's `max`, and that an options page or a term screen checks them on every save. If
+      not, `RULED_LIMITS` moves them under `salt`.
+    - Whether a Payload site must run with drafts (`versions.drafts`) so that no draft is refused,
+      or may meet the rule another way.
+    - For an FAQ, a testimonial, a team member and a location, which have no page of their own and
+      so no `<title>`: should the target of 60 measure the field alone, or should they have no
+      target? Each carries 60 until it is ruled.
+    - Whether adding a target beside a limit, or removing one, is PATCH or MINOR
+      (`RELEASE-POLICY.md` section 2).
 - The case-study view has fixtures and is required of every implementation (SC-021).
   `fixtures/case-study/` holds four cases (`full`, `aside`, `band` and `minimal`), `case-study`
   joins `REQUIRED_FILES`, and a full conformance run refuses to declare it not shipped. The
