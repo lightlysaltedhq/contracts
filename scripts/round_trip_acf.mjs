@@ -307,7 +307,7 @@ function compareOne(section, at, e, n, def, ctx) {
 
 // A limit of the contract's field: under the limits rule (ID-3968) the emitter records it under
 // salt (salt.maxLength, salt.min, salt.max) rather than as ACF's setting; step is no limit.
-function limitOf(e, k) {
+export function limitOf(e, k) {
   if (k === 'step') return e.step
   const own = e.salt?.[k === 'maxlength' ? 'maxLength' : k]
   return own !== undefined ? own : e[k]

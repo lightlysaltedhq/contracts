@@ -953,8 +953,16 @@ test('ID-3944: a renamed collection field fails the collections drift check, nam
 })
 
 test('ID-3969: a target is under custom.salt, never a Payload setting, so nothing refuses it', () => {
-  const [rows] = toPayloadBlocks({ contract: probe([{ name: 'rows', type: 'list', label: 'Rows', target: 6, fields: [{ name: 'text', type: 'text', label: 'Text' }] }]) })[0].fields
+  const [title, rows, photos, people] = toPayloadBlocks({ mediaSlug: 'assets', contract: probe([
+    { name: 'title', type: 'text', label: 'Title', maxLength: 120, target: 60 },
+    { name: 'rows', type: 'list', label: 'Rows', target: 6, fields: [{ name: 'text', type: 'text', label: 'Text' }] },
+    { name: 'photos', type: 'image', label: 'Photos', many: true, target: 12 },
+    { name: 'people', type: 'relationship', label: 'People', to: 'team', many: true, target: 4 },
+  ]) })[0].fields
+  assert.deepEqual(title, { name: 'title', type: 'text', label: 'Title', maxLength: 120, custom: { salt: { target: 60 } } })
   assert.deepEqual([rows.maxRows, rows.custom.salt.target], [undefined, 6])
+  assert.deepEqual(photos, { name: 'photos', type: 'upload', label: 'Photos', relationTo: 'assets', hasMany: true, custom: { salt: { target: 12 } } })
+  assert.deepEqual([people.type, people.maxRows, people.custom.salt], ['relationship', undefined, { target: 4, to: 'team' }])
 })
 
 test('ID-3969: every collection title, name and question has a target of 60 under custom.salt, beside its limit', () => {

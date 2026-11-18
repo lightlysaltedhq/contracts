@@ -703,15 +703,17 @@ test('ID-3968: a text\'s maxLength is never ACF\'s maxlength, which cuts typing,
 })
 
 test('ID-3969: a target is under salt, never an ACF setting', () => {
-  const [plain, long, rows, photos] = probed([
+  const [plain, long, rows, photos, people] = probed([
     { name: 'plain', type: 'text', label: 'Plain', maxLength: 120, target: 60 },
     { name: 'long', type: 'textarea', label: 'Long', target: 200 },
     { name: 'rows', type: 'list', label: 'Rows', target: 6, fields: [{ name: 'text', type: 'text', label: 'Text' }] },
     { name: 'photos', type: 'image', label: 'Photos', many: true, target: 12 },
-  ])
+    { name: 'people', type: 'relationship', label: 'People', to: 'team', many: true, target: 4 },
+  ], { sources: { team: {} } })
   assert.deepEqual(plain, { key: 'field_salt_probe_plain', label: 'Plain', name: 'plain', type: 'text', salt: { target: 60, maxLength: 120 } })
   assert.deepEqual([long.maxlength, long.salt], [undefined, { target: 200 }])
   assert.deepEqual([rows.max, rows.salt.target, photos.max, photos.salt], [undefined, 6, undefined, { target: 12 }])
+  assert.deepEqual([people.type, people.max, people.salt], ['relationship', undefined, { target: 4, to: 'team' }])
 })
 
 test('ID-3969: every collection title, name and question has a target of 60, under its group\'s salt.targets', () => {

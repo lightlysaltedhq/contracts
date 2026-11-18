@@ -8,7 +8,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import { classify } from './_round_trip.mjs'
-import { parseArguments } from './round_trip_acf.mjs'
+import { limitOf, parseArguments } from './round_trip_acf.mjs'
 
 test('R10: flags may come anywhere; the checkout is a path or SALT_WORDPRESS_DIR, never a guess', () => {
   const dir = mkdtempSync(path.join(tmpdir(), 'salt-wordpress-'))
@@ -58,4 +58,15 @@ test('S7: a committed report checked out with CRLF line endings is still current
   const text = '# ACF round trip\n\na | b\n'
   assert.equal(reportIsCurrent(text.replace(/\n/g, '\r\n'), text), true)
   assert.equal(reportIsCurrent(text.replace('a', 'c'), text), false)
+})
+
+test('ID-3968: a limit is read by its value, from salt where the emitter records it, else from ACF\'s setting', () => {
+  assert.equal(limitOf({ salt: { maxLength: 300 } }, 'maxlength'), 300)
+  assert.equal(limitOf({ maxlength: 80 }, 'maxlength'), 80)
+  assert.equal(limitOf({ salt: { min: 0, max: 24 } }, 'max'), 24)
+  assert.equal(limitOf({ min: 1, max: 6 }, 'min'), 1)
+  // salt wins where both are given; step is no limit and is read where it sits.
+  assert.equal(limitOf({ max: 2, salt: { max: 3 } }, 'max'), 3)
+  assert.equal(limitOf({ step: 0.5, salt: { step: 9 } }, 'step'), 0.5)
+  assert.equal(limitOf({ salt: { target: 60 } }, 'maxlength'), undefined)
 })
