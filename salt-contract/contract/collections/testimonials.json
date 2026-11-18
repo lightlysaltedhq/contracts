@@ -11,15 +11,17 @@
       "label": "Name",
       "required": true,
       "maxLength": 120,
+      "target": 60,
       "description": "Who said it.",
       "platforms": {
         "nextjs": {
           "formerly": "author",
-          "owes": "name in place of author, with the 120-character limit"
+          "owes": "name in place of author, with the 120-character limit; a count as the editor types, beside the target of 60, which is never refused"
         },
         "wordpress": {
           "native": "title",
-          "formerly": "post_title"
+          "formerly": "post_title",
+          "owes": "a count as the editor types, beside the target of 60, which is never refused"
         }
       }
     },

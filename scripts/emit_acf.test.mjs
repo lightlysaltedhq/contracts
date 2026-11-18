@@ -713,3 +713,12 @@ test('ID-3969: a target is under salt, never an ACF setting', () => {
   assert.deepEqual([long.maxlength, long.salt], [undefined, { target: 200 }])
   assert.deepEqual([rows.max, rows.salt.target, photos.max, photos.salt], [undefined, 6, undefined, { target: 12 }])
 })
+
+test('ID-3969: every collection title, name and question has a target of 60, under its group\'s salt.targets', () => {
+  const groups = toAcfFieldGroups({ icons })
+  const titles = { services: 'title', 'case-studies': 'title', posts: 'title', locations: 'title', faqs: 'question', testimonials: 'name', team: 'name' }
+  for (const [source, name] of Object.entries(titles)) {
+    const group = groupOf(groups, source)
+    assert.deepEqual([group.salt.native[name], group.salt.targets], ['title', { [name]: 60 }], source)
+  }
+})

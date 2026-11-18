@@ -956,3 +956,12 @@ test('ID-3969: a target is under custom.salt, never a Payload setting, so nothin
   const [rows] = toPayloadBlocks({ contract: probe([{ name: 'rows', type: 'list', label: 'Rows', target: 6, fields: [{ name: 'text', type: 'text', label: 'Text' }] }]) })[0].fields
   assert.deepEqual([rows.maxRows, rows.custom.salt.target], [undefined, 6])
 })
+
+test('ID-3969: every collection title, name and question has a target of 60 under custom.salt, beside its limit', () => {
+  const list = toPayloadCollections({ icons, richTextEditor: editor })
+  const titles = { services: 'title', 'case-studies': 'title', posts: 'title', locations: 'title', faqs: 'question', testimonials: 'name', team: 'name' }
+  for (const [source, name] of Object.entries(titles)) {
+    const f = field(collection(list, source).fields, name)
+    assert.deepEqual([f.maxLength, f.custom.salt.target], [120, 60], source)
+  }
+})

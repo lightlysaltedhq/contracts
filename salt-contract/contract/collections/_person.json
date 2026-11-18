@@ -10,14 +10,16 @@
       "label": "Name",
       "required": true,
       "maxLength": 120,
+      "target": 60,
       "platforms": {
         "nextjs": {
           "formerly": "users.name",
-          "owes": "a team collection separate from login accounts, whose records hold these fields (users holds the team today)"
+          "owes": "a team collection separate from login accounts, whose records hold these fields (users holds the team today); a count as the editor types, beside the target of 60, which is never refused"
         },
         "wordpress": {
           "native": "title",
-          "formerly": "post_title"
+          "formerly": "post_title",
+          "owes": "a count as the editor types, beside the target of 60, which is never refused"
         }
       }
     },

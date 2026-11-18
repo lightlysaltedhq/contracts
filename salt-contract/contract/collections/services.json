@@ -11,14 +11,16 @@
       "label": "Name",
       "required": true,
       "maxLength": 120,
+      "target": 60,
       "platforms": {
         "nextjs": {
           "formerly": "title",
-          "owes": "the 120-character limit"
+          "owes": "the 120-character limit; a count as the editor types, beside the target of 60, which is never refused"
         },
         "wordpress": {
           "native": "title",
-          "formerly": "post_title"
+          "formerly": "post_title",
+          "owes": "a count as the editor types, beside the target of 60, which is never refused"
         }
       }
     },
@@ -47,12 +49,13 @@
       "description": "One or two sentences, shown on cards wherever the item is listed.",
       "platforms": {
         "nextjs": {
-          "formerly": "summary"
+          "formerly": "summary",
+          "owes": "a count of its 300 characters as the editor types"
         },
         "wordpress": {
           "native": "excerpt",
           "formerly": "summary (an ACF textarea with no limit)",
-          "owes": "the summary stored in the excerpt, with a check on save for its 300 characters"
+          "owes": "the summary stored in the excerpt, its 300 characters counted as the editor types, with no draft save refused and nothing cut over them (the limits rule)"
         }
       }
     },
