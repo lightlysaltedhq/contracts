@@ -1,14 +1,12 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "field-definition.schema.json",
-  "title": "A Salt section's editor fields, defined once for both platforms",
-  "description": "One file per section in contract/fields/<section id>.json, plus contract/fields/_section-settings.json for the wrapper settings every section carries. Salt for Next.js generates Payload fields from these files and Salt for WordPress generates ACF fields from them (SC-003: names, types, choices, limits and descriptions must match). Neither platform is the reference (SC-001): where they disagreed, each file records the canonical definition and, under platforms.<platform>, what that platform called it before and what it owes.\n\nFIELD TYPES are limited to what both Payload and ACF Pro can express, and the list is closed: a type outside it is refused. text (Payload text; ACF text, with salt.format url for the sanitiser when format is url, as ACF's url field refuses the mailto and tel addresses the format allows). textarea. rich-text (Payload Lexical; ACF wysiwyg), with an allowed list of element kinds. image (Payload upload; ACF image, or gallery when many). link (a fixed shape: label, type internal|external, document, url, newTab; Payload group; ACF group or link; its type is a radio). select (Payload select; ACF select. With control radio, a radio on both: the contract says which selects are radios, the stored value is the same, and a radio's layout stays native). boolean (Payload checkbox; ACF true_false). number. list (Payload array; ACF repeater). group (both group). relationship (Payload relationship; ACF relationship or post_object) to a source id from contract/sections.json. collection-query (the shared 'pick items from a source' control, below).\n\nNAMES are canonical ids, camelCase ASCII, unique among siblings, and stable: renaming one is a MAJOR (RELEASE-POLICY.md section 2). Option values are lower-case kebab ids. Empty-string option values are not allowed; a 'nothing chosen' choice gets a word (auto, focal-point, default).\n\nCONDITIONS show a field only when a SIBLING field (same object: section, row or group) equals a value, is one of several values, or is filled (filled: true) or empty (filled: false) (SC-006). equals and in name only a select or a boolean; filled may name a sibling of any type but group, list, collection-query and link (an ACF group on WordPress), which ACF conditional logic cannot target; the gate enforces this, as a schema cannot see a sibling's type. An array of clauses means all must hold. No other expression form exists: no paths, no parent or root data. Where a platform used one, the field carries no condition, its description says when it applies, and the platform's note records the dropped condition.\n\nSHARED SETTINGS. Every section file names the shared wrapper settings in 'shared'; they live in contract/fields/_section-settings.json and are stored in a group named 'settings' on each section. A section may change a shared field's default ('defaults') or leave a shared field out ('omit'). The settings file itself has section id 'section-settings' and must not carry 'shared' (the if/then at the end of this schema); no section in contract/sections.json may take that id.\n\nCOLLECTION-QUERY stores one object of this fixed shape. mode: automatic (the collection's usual order) | by-category | manual; default automatic. categories: terms from the source's own category taxonomy, many, shown when mode is by-category, and only offered for a source that has categories. items: hand-picked items of the source, many, in the order picked, shown when mode is manual. order: default (the collection's usual order) | newest | title (A to Z), shown unless mode is manual. count: whole number from 0 to 'max' (default 24), 0 meaning the section's default for that source, shown unless mode is manual. 'source' fixes the source; 'sourceField' names a sibling select whose value picks it.\n\nGATE JOBS JSON Schema cannot do here, for a later script: sibling names unique; a condition's field names an existing sibling; a select default is one of its options; rowLabel names a child field; every source id exists in contract/sections.json; every variant in sections.json appears as a select with the same values; a filled clause names no group, list, collection-query or link.",
+  "title": "A Salt section's or collection's editor fields, defined once for both platforms",
+  "description": "One file per section in contract/fields/<section id>.json, plus contract/fields/_section-settings.json for the wrapper settings every section carries; and one file per collection source in contract/collections/<source id>.json (the fields of a service, a case study, a post and the rest, as an editor stores them), plus contract/collections/_<shape>.json for a shape more than one record carries (person, address, topic). A file describes a section ('section'), a collection ('collection') or a shape ('shape'), exactly one. Salt for Next.js generates Payload fields from these files and Salt for WordPress generates ACF fields from them, a section's as a block or a layout and a collection's as the fields of its documents (SC-003: names, types, choices, limits and descriptions must match). Neither platform is the reference (SC-001): where they disagreed, each file records the canonical definition and, under platforms.<platform>, what that platform called it before and what it owes.\n\nFIELD TYPES are limited to what both Payload and ACF Pro can express, and the list is closed: a type outside it is refused. text (Payload text; ACF text, with salt.format url or email for the sanitiser when it has a format, as ACF's url field refuses the mailto and tel addresses the url format allows; email is a format of text, as url is). textarea. rich-text (Payload Lexical; ACF wysiwyg), with an allowed list of element kinds. image (Payload upload; ACF image, or gallery when many). link (a fixed shape: label, type internal|external, document, url, newTab; Payload group; ACF group or link; its type is a radio). select (Payload select; ACF select. With control radio, a radio on both: the contract says which selects are radios, the stored value is the same, and a radio's layout stays native). boolean (Payload checkbox; ACF true_false). number. list (Payload array; ACF repeater). group (both group). relationship (Payload relationship; ACF relationship or post_object) to a source id from contract/sections.json. collection-query (the shared 'pick items from a source' control, below). topics (the record's own collection's topics, its category terms: Payload relationship to the source's taxonomy collection; ACF taxonomy). date-time (a moment, stored as an ISO 8601 date and time in UTC and drawn in the site's time zone: Payload date with the day-and-time picker; ACF date_time_picker). time (a time of day, stored as HH:MM on the 24-hour clock: ACF time_picker returning H:i; Payload has no picker that stores a time alone, so a text field the site draws with its own time picker). sections (a list of sections from contract/sections.json, each stored as on a page: Payload blocks; ACF flexible_content), used by a collection only.\n\nNAMES are canonical ids, camelCase ASCII, unique among siblings, and stable: renaming one is a MAJOR (RELEASE-POLICY.md section 2). Option values are lower-case kebab ids. Empty-string option values are not allowed; a 'nothing chosen' choice gets a word (auto, focal-point, default).\n\nCONDITIONS show a field only when a SIBLING field (same object: section, row or group) equals a value, is one of several values, or is filled (filled: true) or empty (filled: false) (SC-006). equals and in name only a select or a boolean; filled may name a sibling of any type but group, list, collection-query and link (an ACF group on WordPress), which ACF conditional logic cannot target; the gate enforces this, as a schema cannot see a sibling's type. An array of clauses means all must hold. No other expression form exists: no paths, no parent or root data. Where a platform used one, the field carries no condition, its description says when it applies, and the platform's note records the dropped condition.\n\nNATIVE STORAGE. On Salt for WordPress a collection field stored in WordPress's own place for it (the post title, the body, the excerpt, the featured image, the categories, the date, or a term's own description) says so in platforms.wordpress.native; the ACF emitter generates no ACF field for it and records where it lives.\n\nSHARED SETTINGS. Every section file names the shared wrapper settings in 'shared'; they live in contract/fields/_section-settings.json and are stored in a group named 'settings' on each section. A section may change a shared field's default ('defaults') or leave a shared field out ('omit'). The settings file itself has section id 'section-settings' and must not carry 'shared' (the if/then at the end of this schema); no section in contract/sections.json may take that id. A collection file may name the person shape the same way ('shared': { 'id': 'person' }); its fields are carried flat, at the top of the record, before the collection's own.\n\nCOLLECTION-QUERY stores one object of this fixed shape. mode: automatic (the collection's usual order) | by-category | manual; default automatic. categories: terms from the source's own category taxonomy, many, shown when mode is by-category, and only offered for a source that has categories. items: hand-picked items of the source, many, in the order picked, shown when mode is manual. order: default (the collection's usual order) | newest | title (A to Z), shown unless mode is manual. count: whole number from 0 to 'max' (default 24), 0 meaning the section's default for that source, shown unless mode is manual. 'source' fixes the source; 'sourceField' names a sibling select whose value picks it.\n\nGATE JOBS JSON Schema cannot do here, for a later script: sibling names unique; a condition's field names an existing sibling; a select default is one of its options; rowLabel names a child field; every source id exists in contract/sections.json; every variant in sections.json appears as a select with the same values; a filled clause names no group, list, collection-query or link.",
   "type": "object",
   "required": [
     "$schema",
-    "version",
-    "section",
-    "fields"
+    "version"
   ],
   "additionalProperties": false,
   "properties": {
@@ -22,11 +20,27 @@
       "type": "string"
     },
     "section": {
-      "description": "The section id from contract/sections.json, or 'section-settings' for the shared wrapper settings file.",
+      "description": "The section id from contract/sections.json, or 'section-settings' for the shared wrapper settings file. A file names a section, a collection or a shape, exactly one.",
       "$ref": "#/$defs/id"
     },
+    "collection": {
+      "description": "The collection source id (contract/sections.json sources, the schema's $defs.source) whose records these fields describe. The file is contract/collections/<source id>.json.",
+      "$ref": "#/$defs/source"
+    },
+    "shape": {
+      "description": "A shape more than one record carries: person (a team member, whom a post credits as its author), address (a location's and the company's), topic (a collection's category term). The file is contract/collections/_<shape>.json.",
+      "enum": [
+        "person",
+        "address",
+        "topic"
+      ]
+    },
+    "label": {
+      "description": "A collection's name for one record, singular: the title of its field group on WordPress.",
+      "$ref": "#/$defs/text"
+    },
     "shared": {
-      "description": "The shared settings this section carries, stored in a group named 'settings'.",
+      "description": "The shared fields this file carries: a section's shared settings (section-settings), stored in a group named 'settings'; or, on a collection, the person shape (person), carried flat at the top of the record.",
       "type": "object",
       "required": [
         "id"
@@ -34,7 +48,10 @@
       "additionalProperties": false,
       "properties": {
         "id": {
-          "const": "section-settings"
+          "enum": [
+            "section-settings",
+            "person"
+          ]
         },
         "defaults": {
           "description": "Shared field name to this section's default for it.",
@@ -62,26 +79,41 @@
     },
     "fields": {
       "$ref": "#/$defs/fields"
-    }
-  },
-  "if": {
-    "properties": {
-      "section": {
-        "const": "section-settings"
+    },
+    "dropped": {
+      "description": "On a collection: what a platform stores today that the contract drops, each with the platform's former name and why. A platform owes removing it, or migrating its content where the note says where.",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "formerly",
+          "note"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "formerly": {
+            "type": "object",
+            "minProperties": 1,
+            "additionalProperties": false,
+            "properties": {
+              "nextjs": {
+                "$ref": "#/$defs/text"
+              },
+              "wordpress": {
+                "$ref": "#/$defs/text"
+              }
+            }
+          },
+          "note": {
+            "$ref": "#/$defs/text"
+          }
+        }
       }
+    },
+    "display": {
+      "$ref": "#/$defs/display"
     }
-  },
-  "then": {
-    "not": {
-      "required": [
-        "shared"
-      ]
-    }
-  },
-  "else": {
-    "required": [
-      "shared"
-    ]
   },
   "$defs": {
     "id": {
@@ -268,6 +300,18 @@
         },
         "note": {
           "$ref": "#/$defs/text"
+        },
+        "native": {
+          "description": "Salt for WordPress only, on a collection's field: the field is stored in WordPress's own place for it, not in an ACF field (the ruling of 18/11/2026 on native storage). title: the post title. body: the post content. excerpt: the post excerpt. featured-image: the featured image. categories: the post type's category taxonomy, in WordPress's own box. date: the post date. description: a term's own description. The ACF emitter generates no field for it and records it under the group's salt.native.",
+          "enum": [
+            "title",
+            "body",
+            "excerpt",
+            "featured-image",
+            "categories",
+            "date",
+            "description"
+          ]
         }
       }
     },
@@ -318,7 +362,10 @@
           "additionalProperties": false,
           "properties": {
             "nextjs": {
-              "$ref": "#/$defs/platformNote"
+              "$ref": "#/$defs/platformNote",
+              "properties": {
+                "native": false
+              }
             },
             "wordpress": {
               "$ref": "#/$defs/platformNote",
@@ -351,7 +398,11 @@
             "list",
             "group",
             "relationship",
-            "collection-query"
+            "collection-query",
+            "topics",
+            "date-time",
+            "time",
+            "sections"
           ]
         }
       },
@@ -498,6 +549,54 @@
           },
           "then": {
             "$ref": "#/$defs/collectionQueryField"
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "topics"
+              }
+            }
+          },
+          "then": {
+            "$ref": "#/$defs/topicsField"
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "date-time"
+              }
+            }
+          },
+          "then": {
+            "$ref": "#/$defs/dateTimeField"
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "time"
+              }
+            }
+          },
+          "then": {
+            "$ref": "#/$defs/timeField"
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "sections"
+              }
+            }
+          },
+          "then": {
+            "$ref": "#/$defs/sectionsField"
           }
         },
         {
@@ -672,9 +771,10 @@
           "$ref": "#/$defs/count"
         },
         "format": {
-          "description": "url: an absolute address (http, https, mailto or tel); on WordPress an ACF text field carrying salt.format 'url', which the sanitiser reads. anchor: slugified on save by WordPress's sanitize_title under the site's locale, then every run of underscores or %xx octets turned into one hyphen, repeated hyphens collapsed and hyphens trimmed (SC-014), so it is lower-case letters, digits and single hyphens and never contains __; an empty slug is no anchor; only the slug is stored. At render ids settle in one pass in page order: a landmark clash becomes <anchor>-section, and an id already taken takes the next free -2, -3 (SC-013); ids the system draws are <owner>__<part> and never meet one (markup/section#anchors, SC-012).",
+          "description": "email: an email address (one @, a domain with a dot, no spaces), checked on save; on WordPress an ACF text field carrying salt.format 'email' and on Payload a text field carrying custom.salt.format 'email', as the url format is. url: an absolute address (http, https, mailto or tel); on WordPress an ACF text field carrying salt.format 'url', which the sanitiser reads. anchor: slugified on save by WordPress's sanitize_title under the site's locale, then every run of underscores or %xx octets turned into one hyphen, repeated hyphens collapsed and hyphens trimmed (SC-014), so it is lower-case letters, digits and single hyphens and never contains __; an empty slug is no anchor; only the slug is stored. At render ids settle in one pass in page order: a landmark clash becomes <anchor>-section, and an id already taken takes the next free -2, -3 (SC-013); ids the system draws are <owner>__<part> and never meet one (markup/section#anchors, SC-012).",
           "enum": [
             "url",
+            "email",
             "anchor"
           ]
         }
@@ -689,6 +789,11 @@
         },
         "maxLength": {
           "$ref": "#/$defs/count"
+        },
+        "maxLines": {
+          "description": "The most lines the text may hold, checked on save (a street address, two). The emitters record it for each platform's check: ACF also sizes the box to it.",
+          "type": "integer",
+          "minimum": 1
         }
       },
       "unevaluatedProperties": false
@@ -700,7 +805,7 @@
       ],
       "properties": {
         "allowed": {
-          "description": "The element kinds an editor may use; both platforms strip anything else. Links allow http, https, mailto and tel.",
+          "description": "The element kinds an editor may use; both platforms strip anything else. Links allow http, https, mailto and tel. Headings are stored at the level the editor chose, from heading-2 to heading-6, and drawn relative to the heading above the body (markup/section#body-heading-base): the highest-ranked heading in a body draws at base + 1 and the others keep their distance below it.",
           "type": "array",
           "minItems": 1,
           "uniqueItems": true,
@@ -714,8 +819,11 @@
               "unordered-list",
               "ordered-list",
               "blockquote",
+              "heading-2",
               "heading-3",
-              "heading-4"
+              "heading-4",
+              "heading-5",
+              "heading-6"
             ]
           }
         }
@@ -868,15 +976,30 @@
     },
     "groupField": {
       "$ref": "#/$defs/common",
-      "required": [
-        "fields"
-      ],
       "properties": {
         "fields": {
           "$ref": "#/$defs/fields"
+        },
+        "shape": {
+          "description": "The shape whose fields the group holds (contract/collections/_<shape>.json), in place of fields of its own: address, on a location.",
+          "enum": [
+            "address"
+          ]
         }
       },
-      "unevaluatedProperties": false
+      "unevaluatedProperties": false,
+      "oneOf": [
+        {
+          "required": [
+            "fields"
+          ]
+        },
+        {
+          "required": [
+            "shape"
+          ]
+        }
+      ]
     },
     "relationshipField": {
       "$ref": "#/$defs/common",
@@ -941,6 +1064,266 @@
         }
       ],
       "unevaluatedProperties": false
+    },
+    "topicsField": {
+      "description": "The record's own collection's topics, its category terms (one stored name, topics, for every collection; each collection keeps its own list). Only a source with categories (contract/sections.json) has topics. Payload: a relationship to the source's taxonomy collection. ACF: a taxonomy field on the source's taxonomy, which saves nothing to the post's own terms.",
+      "$ref": "#/$defs/common",
+      "properties": {
+        "many": {
+          "type": "boolean"
+        }
+      },
+      "unevaluatedProperties": false
+    },
+    "dateTimeField": {
+      "description": "A moment, stored as an ISO 8601 date and time in UTC; a view derives the date it draws in the site's time zone. Each platform draws its own picker: Payload date (day and time), ACF date_time_picker.",
+      "$ref": "#/$defs/common",
+      "unevaluatedProperties": false
+    },
+    "timeField": {
+      "description": "A time of day, stored as HH:MM on the 24-hour clock (09:00, 17:30). ACF draws its time_picker and returns H:i. Payload has no picker that stores a time alone (its date field stores a whole moment), so the field is text the site draws with a time picker of its own (an admin component), and both platforms refuse any other form on save.",
+      "$ref": "#/$defs/common",
+      "unevaluatedProperties": false
+    },
+    "sectionsField": {
+      "description": "A record's body as a list of sections, each stored as on a page (a post's layout). Payload: a blocks field holding those sections' blocks. ACF: a flexible_content field with a layout for each. Used by a collection only.",
+      "$ref": "#/$defs/common",
+      "required": [
+        "sections"
+      ],
+      "properties": {
+        "sections": {
+          "description": "The section ids from contract/sections.json an editor may add, in the order offered.",
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/id"
+          }
+        }
+      },
+      "unevaluatedProperties": false
+    },
+    "display": {
+      "description": "On a collection: which stored field fills each part of what the record is drawn as in a section (a card, an FAQ item, an office), for the founder's approval. 'as' names the view-props type (contract/view-props/_shared.json card, faq.json item, locations.json office); each part names a prop of it. A part is filled from one stored field, from several joined, or derived by logic the note describes; a prop the record never fills is left out, and is null.",
+      "type": "object",
+      "required": [
+        "as",
+        "status",
+        "parts"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "$comment": {
+          "type": "string"
+        },
+        "as": {
+          "enum": [
+            "card",
+            "faq-item",
+            "office"
+          ]
+        },
+        "status": {
+          "description": "draft: proposed, not yet approved by the founder. approved: the founder has approved it.",
+          "enum": [
+            "draft",
+            "approved"
+          ]
+        },
+        "parts": {
+          "type": "object",
+          "minProperties": 1,
+          "propertyNames": {
+            "$ref": "#/$defs/name"
+          },
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "from": {
+                "description": "The stored field, or fields in order, that fill the part; a path into a group or a list row is dotted (address.street).",
+                "oneOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[a-z][a-zA-Z0-9]*(\\.[a-z][a-zA-Z0-9]*)*$"
+                  },
+                  {
+                    "type": "array",
+                    "minItems": 2,
+                    "uniqueItems": true,
+                    "items": {
+                      "type": "string",
+                      "pattern": "^[a-z][a-zA-Z0-9]*(\\.[a-z][a-zA-Z0-9]*)*$"
+                    }
+                  }
+                ]
+              },
+              "join": {
+                "description": "What joins several fields' values, empty ones left out.",
+                "type": "string"
+              },
+              "note": {
+                "$ref": "#/$defs/text"
+              }
+            },
+            "anyOf": [
+              {
+                "required": [
+                  "from"
+                ]
+              },
+              {
+                "required": [
+                  "note"
+                ]
+              }
+            ]
+          }
+        }
+      }
     }
-  }
+  },
+  "oneOf": [
+    {
+      "required": [
+        "section"
+      ]
+    },
+    {
+      "required": [
+        "collection"
+      ]
+    },
+    {
+      "required": [
+        "shape"
+      ]
+    }
+  ],
+  "allOf": [
+    {
+      "description": "The settings file carries no shared settings; every other section file names them.",
+      "if": {
+        "required": [
+          "section"
+        ],
+        "properties": {
+          "section": {
+            "const": "section-settings"
+          }
+        }
+      },
+      "then": {
+        "not": {
+          "required": [
+            "shared"
+          ]
+        }
+      }
+    },
+    {
+      "if": {
+        "required": [
+          "section"
+        ],
+        "properties": {
+          "section": {
+            "not": {
+              "const": "section-settings"
+            }
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "shared",
+          "fields"
+        ],
+        "properties": {
+          "shared": {
+            "properties": {
+              "id": {
+                "const": "section-settings"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "required": [
+          "section"
+        ]
+      },
+      "then": {
+        "required": [
+          "fields"
+        ],
+        "properties": {
+          "label": false,
+          "dropped": false,
+          "display": false
+        }
+      }
+    },
+    {
+      "description": "A collection names its record and has fields of its own, the person shape's, or both.",
+      "if": {
+        "required": [
+          "collection"
+        ]
+      },
+      "then": {
+        "required": [
+          "label"
+        ],
+        "anyOf": [
+          {
+            "required": [
+              "fields"
+            ]
+          },
+          {
+            "required": [
+              "shared"
+            ]
+          }
+        ],
+        "properties": {
+          "shared": {
+            "required": [
+              "id"
+            ],
+            "properties": {
+              "id": {
+                "const": "person"
+              },
+              "defaults": false,
+              "omit": false
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "required": [
+          "shape"
+        ]
+      },
+      "then": {
+        "required": [
+          "fields"
+        ],
+        "properties": {
+          "shared": false,
+          "label": false,
+          "dropped": false,
+          "display": false
+        }
+      }
+    }
+  ]
 }

@@ -13,7 +13,8 @@ import Ajv2020 from 'ajv/dist/2020.js'
 
 import { hasVisibleText, loadContract } from '../salt-contract/emit/_contract.mjs'
 import { acfSnapshot } from '../salt-contract/emit/acf.mjs'
-import { checkPayloadSnapshot, isFilled, payloadSnapshot, PLATFORM_ADDITIONS, toPayloadBlocks, VOCABULARIES } from '../salt-contract/emit/payload.mjs'
+import { checkPayloadCollectionsSnapshot, checkPayloadSnapshot, isFilled, payloadCollectionsSnapshot, payloadSnapshot, PLATFORM_ADDITIONS, toPayloadBlocks,
+  toPayloadCollections, VOCABULARIES } from '../salt-contract/emit/payload.mjs'
 
 const emitter = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'salt-contract', 'emit', 'payload.mjs')
 const icons = [{ value: 'star', label: 'Star' }, { value: 'check', label: 'Check' }]
@@ -908,4 +909,45 @@ test('SC-010: with a source select, by-category is offered and valid only for a 
   // A fixed source has no select to follow, so its mode needs neither.
   const faq = field(field(block(blocks(), 'faq').fields, 'query').fields, 'mode')
   assert.ok(!faq.filterOptions && !faq.validate)
+})
+
+// ── Collections (ID-3944) ───────────────────────────────────────────────────────────────────────
+
+const collection = (list, source) => list.find((c) => c.custom.salt.collection === source)
+
+test('ID-3944: each collection\'s fields, byte-stable, for the site\'s collection slugs', () => {
+  const a = payloadCollectionsSnapshot({ icons })
+  assert.equal(payloadCollectionsSnapshot({ icons }), a)
+  const list = toPayloadCollections({ icons, richTextEditor: editor })
+  assert.deepEqual(list.map((c) => c.slug), ['services', 'case-studies', 'testimonials', 'posts', 'users', 'faqs', 'locations'])
+  const posts = collection(list, 'posts')
+  assert.deepEqual(posts.fields.map((f) => [f.name, f.type]), [['title', 'text'], ['author', 'relationship'], ['topics', 'relationship'], ['primaryTopic', 'relationship'],
+    ['summary', 'textarea'], ['featuredImage', 'upload'], ['publishedAt', 'date'], ['layout', 'blocks']])
+  assert.deepEqual([field(posts.fields, 'topics').relationTo, field(posts.fields, 'topics').hasMany, field(posts.fields, 'primaryTopic').hasMany], ['topics', true, undefined])
+  assert.deepEqual(field(posts.fields, 'publishedAt').admin.date, { pickerAppearance: 'dayAndTime' })
+  assert.deepEqual(field(posts.fields, 'layout').blocks.map((b) => b.slug), ['rich-text', 'media-text', 'gallery', 'call-to-action', 'faq'])
+  // The person shape is flat on a team member, before nothing of its own.
+  assert.deepEqual(collection(list, 'team').fields.map((f) => f.name), ['name', 'role', 'bio', 'photo', 'email', 'phone', 'socials'])
+  const hours = field(collection(list, 'locations').fields, 'hours.open')
+  assert.deepEqual([hours.type, hours.custom.salt.format], ['text', 'time'])
+  // A source a site lacks has no collection, and a relationship to one is left out and named.
+  const alone = toPayloadCollections({ icons, richTextEditor: editor, sources: { posts: {} } })
+  assert.deepEqual([alone.map((c) => c.slug), alone[0].custom.salt.leftOut], [['posts'], ['author (the source team)']])
+})
+
+test('ID-3944: a renamed collection field fails the collections drift check, naming both names', () => {
+  const contract = loadContract()
+  const snapshot = payloadCollectionsSnapshot({ icons, contract })
+  assert.deepEqual(checkPayloadCollectionsSnapshot(snapshot, { icons, contract }), { ok: true, problems: [] })
+  const renamed = structuredClone(contract)
+  renamed.collections.services.fields.find((f) => f.name === 'priceFrom').name = 'price'
+  const { ok, problems } = checkPayloadCollectionsSnapshot(snapshot, { icons, contract: renamed })
+  assert.equal(ok, false)
+  assert.ok(problems.includes('collections[services].fields[priceFrom] is in the snapshot and no longer generated'), problems.join('\n'))
+  assert.ok(problems.includes('collections[services].fields[price] is generated and not in the snapshot'), problems.join('\n'))
+  // A consumer's additions inside a post's section blocks are left out, as on a page's.
+  const decorated = JSON.parse(snapshot)
+  const rich = collection(decorated, 'posts').fields.find((f) => f.name === 'layout').blocks[0].fields[0]
+  rich.admin = { ...rich.admin, components: { Field: 'x' } }
+  assert.deepEqual(checkPayloadCollectionsSnapshot(JSON.stringify(decorated, null, 2) + '\n', { icons, contract }), { ok: true, problems: [] })
 })

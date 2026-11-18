@@ -1,0 +1,80 @@
+{
+  "$schema": "../../schema/field-definition.schema.json",
+  "version": "1.0.0-rc.7",
+  "$comment": "A postal address, one shape for a location's address and the company's (the founder's rulings of 18/11/2026, change 27 and question 1): Salt for Next.js's company address names, with the street allowed two lines. The company address lives in each platform's company settings (Salt for Next.js's company global, Salt for WordPress's company options), which no emitter generates; each owes this shape there too. The parts feed schema.org's PostalAddress.",
+  "shape": "address",
+  "fields": [
+    {
+      "name": "street",
+      "type": "textarea",
+      "label": "Street address",
+      "maxLines": 2,
+      "description": "Up to two lines: the building and the street.",
+      "platforms": {
+        "nextjs": {
+          "formerly": "address.street (company global, one line)",
+          "owes": "the second line, and the shape on a locations collection when it is built"
+        },
+        "wordpress": {
+          "formerly": [
+            "line1",
+            "line2"
+          ],
+          "owes": "line1 and line2 folded into street, one line each"
+        }
+      }
+    },
+    {
+      "name": "locality",
+      "type": "text",
+      "label": "Town or city",
+      "platforms": {
+        "nextjs": {
+          "formerly": "address.locality (company global)"
+        },
+        "wordpress": {
+          "formerly": "city"
+        }
+      }
+    },
+    {
+      "name": "region",
+      "type": "text",
+      "label": "County or region",
+      "platforms": {
+        "nextjs": {
+          "formerly": "address.region (company global)"
+        },
+        "wordpress": {
+          "formerly": "region"
+        }
+      }
+    },
+    {
+      "name": "postalCode",
+      "type": "text",
+      "label": "Postcode",
+      "platforms": {
+        "nextjs": {
+          "formerly": "address.postalCode (company global)"
+        },
+        "wordpress": {
+          "formerly": "postcode"
+        }
+      }
+    },
+    {
+      "name": "country",
+      "type": "text",
+      "label": "Country",
+      "platforms": {
+        "nextjs": {
+          "formerly": "address.country (company global)"
+        },
+        "wordpress": {
+          "formerly": "country"
+        }
+      }
+    }
+  ]
+}

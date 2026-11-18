@@ -232,7 +232,9 @@ test('icons come from the site, and a section that needs them refuses to build w
   const icon = field(layout(layoutsOf(), 'features').sub_fields, 'items.icon')
   assert.deepEqual([icon.choices, icon.salt.optionsFrom], [{ star: 'Star', check: 'Check' }, 'icons'])
   assert.throws(() => toAcfFieldGroups({ sections: ['features'] }), /pass icons/)
-  assert.doesNotThrow(() => toAcfFieldGroups({ sections: ['hero'] }))
+  assert.doesNotThrow(() => toAcfFieldGroups({ sections: ['hero'], collections: [] }))
+  // A service's icon is the site's too, so the services group needs them as the features section does.
+  assert.throws(() => toAcfFieldGroups({ sections: ['hero'] }), /collection_services\.icon offers the site's icons/)
 })
 
 test('a collection-query with a fixed source is the fixed group against its post type and taxonomy', () => {
@@ -425,7 +427,8 @@ test('Payload and ACF leave out and keep the same sections, and offer the same s
     for (const b of payload) {
       const l = layout(acf, b.slug)
       // The same top-level fields survive withinSources, and a source select offers the same values.
-      assert.deepEqual(l.sub_fields.map((f) => f.name), b.fields.map((f) => f.name), `${at} ${b.slug}`)
+      // The Settings tab is ACF's alone and stores nothing, so it has no name to compare.
+      assert.deepEqual(l.sub_fields.filter((f) => f.type !== 'tab').map((f) => f.name), b.fields.map((f) => f.name), `${at} ${b.slug}`)
       const select = b.fields.find((f) => f.name === 'source')
       if (select) assert.deepEqual(Object.keys(field(l.sub_fields, 'source').choices), select.options.map((o) => o.value), `${at} ${b.slug}.source`)
       // The same by-category offering (SC-010): the same modes, a categories picker on both or
@@ -557,7 +560,7 @@ test('SC-010: by-category is offered from the contract\'s categories, not from a
   const contract = loadContract()
   const query = (source, sources) => field(toAcfFieldGroups({
     contract: { ...contract, ...probe([{ name: 'query', type: 'collection-query', label: 'Q', source }]), sections: [...probe([]).sections, ...contract.sections] },
-    sections: ['probe'], sources,
+    sections: ['probe'], sources, collections: [],
   })[0].fields[0].layouts[0].sub_fields, 'query')
   const services = query('services')
   assert.deepEqual(Object.keys(services.sub_fields[0].choices), ['automatic', 'by-category', 'manual'])
@@ -608,4 +611,77 @@ test('SC-010 (modeAllowed): the mode records that by-category needs a source wit
     assert.match(owes, /acf\/validate_value/, id)
     assert.match(owes, /conditional logic/, id)
   }
+})
+
+// ── Collections (ID-3944) ───────────────────────────────────────────────────────────────────────
+
+const groupOf = (groups, source) => groups.find((g) => g.salt?.collection === source)
+
+test('ID-3944: each collection is a group on its post type; what WordPress stores natively is named, not generated', () => {
+  const groups = toAcfFieldGroups({ icons })
+  assert.deepEqual(groups.map((g) => g.key), ['group_salt_sections', 'group_salt_collection_services', 'group_salt_collection_case_studies',
+    'group_salt_collection_testimonials', 'group_salt_collection_posts', 'group_salt_collection_team', 'group_salt_collection_faqs', 'group_salt_collection_locations'])
+  const posts = groupOf(groups, 'posts')
+  assert.deepEqual(posts.location, [[{ param: 'post_type', operator: '==', value: 'post' }]])
+  assert.deepEqual(posts.salt.native, { title: 'title', topics: 'categories', summary: 'excerpt', featuredImage: 'featured-image', publishedAt: 'date' })
+  assert.deepEqual(posts.fields.map((f) => [f.name, f.type]), [['author', 'post_object'], ['primaryTopic', 'taxonomy'], ['layout', 'flexible_content']])
+  assert.deepEqual(field(posts.fields, 'author').post_type, ['team_member'])
+  assert.equal(field(posts.fields, 'primaryTopic').taxonomy, 'category')
+  // A post's sections are the five ruled, each with its own keys so none clashes with a page's.
+  const layout = field(posts.fields, 'layout')
+  assert.deepEqual(layout.layouts.map((l) => [l.name, l.key]), ['rich-text', 'media-text', 'gallery', 'call-to-action', 'faq'].map((id) => [id, `layout_salt_collection_posts_layout_${id.replace(/-/g, '_')}`]))
+  // The service intro is the page body, and the team member's name and photo are the title and image.
+  assert.equal(groupOf(groups, 'services').salt.native.intro, 'body')
+  assert.deepEqual(groupOf(groups, 'team').fields.map((f) => f.name), ['role', 'bio', 'email', 'phone', 'socials'])
+  // A site's renamed module moves the group, and a source it lacks has no group.
+  const renamed = toAcfFieldGroups({ icons, sources: { posts: { postType: 'article' }, team: {} } })
+  assert.deepEqual(renamed.map((g) => g.key), ['group_salt_sections', 'group_salt_collection_posts', 'group_salt_collection_team'])
+  assert.deepEqual(groupOf(renamed, 'posts').location[0][0].value, 'article')
+  // Without team, a post's author has nothing to point at, so it is left out and named.
+  const alone = groupOf(toAcfFieldGroups({ icons, sources: { posts: {} } }), 'posts')
+  assert.deepEqual([alone.fields.map((f) => f.name), alone.salt.leftOut], [['primaryTopic', 'layout'], ['author (the source team)']])
+})
+
+test('ID-3944: the ruled types and limits reach ACF', () => {
+  const groups = toAcfFieldGroups({ icons })
+  const locations = groupOf(groups, 'locations').fields
+  assert.deepEqual(['lat', 'lng', 'zoom'].map((n) => { const f = field(locations, n); return [f.min, f.max, f.default_value] }), [[-90, 90, undefined], [-180, 180, undefined], [1, 20, 14]])
+  assert.deepEqual(field(locations, 'address').sub_fields.map((f) => f.name), ['street', 'locality', 'region', 'postalCode', 'country'])
+  assert.deepEqual([field(locations, 'address.street').rows, field(locations, 'address.street').salt], [2, { maxLines: 2 }])
+  assert.deepEqual(['open', 'close'].map((n) => [field(locations, `hours.${n}`).type, field(locations, `hours.${n}`).return_format]), [['time_picker', 'H:i'], ['time_picker', 'H:i']])
+  assert.deepEqual(field(locations, 'email').salt, { format: 'email' })
+  const rating = field(groupOf(groups, 'testimonials').fields, 'rating')
+  assert.deepEqual([rating.min, rating.max, rating.step], [1, 5, 0.5])
+  const socials = field(groupOf(groups, 'team').fields, 'socials')
+  assert.deepEqual([socials.max, socials.sub_fields.map((f) => f.name)], [10, ['name', 'url']])
+})
+
+test('ID-3944: a renamed collection field fails the drift check, naming both names', () => {
+  const contract = loadContract()
+  const snapshot = acfSnapshot({ icons, contract })
+  const renamed = structuredClone(contract)
+  renamed.collections['case-studies'].fields.find((f) => f.name === 'externalUrl').name = 'liveUrl'
+  const { ok, problems } = checkAcfSnapshot(snapshot, { icons, contract: renamed })
+  assert.equal(ok, false)
+  const at = 'groups[group_salt_collection_case_studies].fields'
+  assert.ok(problems.includes(`${at}[externalUrl] is in the snapshot and no longer generated`), problems.join('\n'))
+  assert.ok(problems.includes(`${at}[liveUrl] is generated and not in the snapshot`), problems.join('\n'))
+  // A field in a shape (the person) drifts in the collection that carries it.
+  const person = structuredClone(contract)
+  person.shapes.person.fields.find((f) => f.name === 'bio').name = 'shortBio'
+  assert.ok(checkAcfSnapshot(snapshot, { icons, contract: person }).problems.includes('groups[group_salt_collection_team].fields[bio] is in the snapshot and no longer generated'))
+})
+
+test('ID-3944: every layout carries a Settings tab, storing nothing, straight before its settings group', () => {
+  const groups = toAcfFieldGroups({ icons })
+  const all = [...groups[0].fields[0].layouts, ...field(groupOf(groups, 'posts').fields, 'layout').layouts]
+  for (const l of all) {
+    const at = l.sub_fields.findIndex((f) => f.name === 'settings')
+    assert.ok(at > 0, l.key)
+    assert.deepEqual(l.sub_fields[at - 1], { key: l.sub_fields[at].key.replace(/_settings$/, '_settings_tab'), label: 'Settings', name: '', type: 'tab', placement: 'top', endpoint: 0 }, l.key)
+    assert.equal(l.sub_fields.filter((f) => f.type === 'tab').length, 1, l.key)
+  }
+  // The tab has no name, so the slug registry holds no empty name for it.
+  assert.ok(!acfSlugRegistry(groups).fields.group_salt_sections.includes(''))
+  assert.ok(acfSlugRegistry(groups).fields.group_salt_collection_case_studies.includes('externalUrl'))
 })

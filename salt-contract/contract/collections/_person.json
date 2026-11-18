@@ -1,0 +1,161 @@
+{
+  "$schema": "../../schema/field-definition.schema.json",
+  "version": "1.0.0-rc.7",
+  "$comment": "A person: a team member, a record with no login (team members and login accounts are separate, by the founder's ruling of 18/11/2026). The fields are flat. contract/collections/team.json carries them, and a post's author is a relationship to team, so the author box reads the same record: the person and the author are one shape. Limits by the ruling of 18/11/2026 (question 3): a name 120 characters, a role 80, a bio 600, socials 0 to 10. The public email is the team member's own field, never a login address.",
+  "shape": "person",
+  "fields": [
+    {
+      "name": "name",
+      "type": "text",
+      "label": "Name",
+      "required": true,
+      "maxLength": 120,
+      "platforms": {
+        "nextjs": {
+          "formerly": "users.name",
+          "owes": "a team collection separate from login accounts, whose records hold these fields (users holds the team today)"
+        },
+        "wordpress": {
+          "native": "title",
+          "formerly": "post_title"
+        }
+      }
+    },
+    {
+      "name": "role",
+      "type": "text",
+      "label": "Job title",
+      "maxLength": 80,
+      "description": "Shown beneath the name.",
+      "platforms": {
+        "nextjs": {
+          "formerly": "profile.roleTitle",
+          "owes": "role at the top of the record in place of profile.roleTitle"
+        },
+        "wordpress": {
+          "formerly": "role",
+          "owes": "the 80-character limit, and the field for an author too: the author box reads the credited team member's role"
+        }
+      }
+    },
+    {
+      "name": "bio",
+      "type": "textarea",
+      "label": "Short biography",
+      "maxLength": 600,
+      "description": "A few sentences, shown on the team card and in the author box.",
+      "platforms": {
+        "nextjs": {
+          "formerly": "profile.bio",
+          "owes": "bio at the top of the record, with the 600-character limit"
+        },
+        "wordpress": {
+          "formerly": "short_bio",
+          "owes": "the name bio and the 600-character limit; the author box reads it in place of the user's description"
+        }
+      }
+    },
+    {
+      "name": "photo",
+      "type": "image",
+      "label": "Photo",
+      "platforms": {
+        "nextjs": {
+          "formerly": "profile.photo",
+          "owes": "photo at the top of the record"
+        },
+        "wordpress": {
+          "native": "featured-image",
+          "formerly": "the featured image (team); profile_photo on a user (author)",
+          "owes": "the author box drawing the credited team member's featured image, with no Gravatar fallback"
+        }
+      }
+    },
+    {
+      "name": "email",
+      "type": "text",
+      "format": "email",
+      "label": "Public email",
+      "description": "Optional. Shown on the team card. Leave it empty to keep the address off the site.",
+      "platforms": {
+        "nextjs": {
+          "owes": "the field on the team record; the open salt-nextjs pull request 273 puts profile.email on login accounts and needs reworking onto the team collection"
+        },
+        "wordpress": {
+          "formerly": "email (an ACF email field)",
+          "owes": "a text field with the email format in place of ACF's email field"
+        }
+      }
+    },
+    {
+      "name": "phone",
+      "type": "text",
+      "label": "Phone",
+      "description": "Optional. Shown on the team card as a link when it reads as a phone number.",
+      "platforms": {
+        "nextjs": {
+          "formerly": "profile.phone",
+          "owes": "phone at the top of the record"
+        },
+        "wordpress": {
+          "formerly": "phone"
+        }
+      }
+    },
+    {
+      "name": "socials",
+      "type": "list",
+      "label": "Social profiles",
+      "itemLabel": "Profile",
+      "rowLabel": "name",
+      "max": 10,
+      "description": "Up to 10. The network is worked out from the address, so a known one draws its own icon.",
+      "fields": [
+        {
+          "name": "name",
+          "type": "text",
+          "label": "Name",
+          "required": true,
+          "description": "What the link is called, such as LinkedIn.",
+          "platforms": {
+            "nextjs": {
+              "formerly": "profile.socials.label",
+              "owes": "name in place of label"
+            },
+            "wordpress": {
+              "formerly": "platform (a select of nine networks and other)",
+              "owes": "a text name in place of the platform select; the network is derived from the address (contract/socials.json)"
+            }
+          }
+        },
+        {
+          "name": "url",
+          "type": "text",
+          "format": "url",
+          "label": "Address",
+          "required": true,
+          "platforms": {
+            "nextjs": {
+              "formerly": "profile.socials.url",
+              "owes": "the url format's check on save"
+            },
+            "wordpress": {
+              "formerly": "url (an ACF url field)",
+              "owes": "a text field with the url format, required"
+            }
+          }
+        }
+      ],
+      "platforms": {
+        "nextjs": {
+          "formerly": "profile.socials",
+          "owes": "socials at the top of the record, rows of { name, url }, at most 10"
+        },
+        "wordpress": {
+          "formerly": "socials",
+          "owes": "rows of { name, url }, at most 10"
+        }
+      }
+    }
+  ]
+}

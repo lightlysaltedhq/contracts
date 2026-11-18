@@ -1,0 +1,69 @@
+{
+  "$comment": "The document is a post (contract/collections/posts.json) as the post view receives it: title, href, date (from publishedAt, in the site's time zone), readingMinutes, author resolved, and its layout split as section#sections-in-a-post draws it: body is the rich-text section that is prose alone, and sections[0] is the one section of the layout that draws as a band, with its field values as stored and its plan (track, index). One band per case, as the fixtures gate nests one section; post/band-* together use each section a post allows. The prose comes first in the layout.",
+  "view": "post",
+  "summary": "A post whose layout is prose and then a single image, which is a gallery of one (no image section exists): the gallery draws as a band with its own heading at h2. The featured image holds the priority image, so the gallery's is lazy (section#sections-in-a-post).",
+  "context": {
+    "priorityMedia": true,
+    "locale": "en-GB",
+    "path": "/journal/orchard-spring/"
+  },
+  "site": {
+    "name": "Hollin Farm",
+    "timezone": "Europe/London",
+    "labels": {
+      "breadcrumb": "Breadcrumb",
+      "byline": "By",
+      "readTime": "{n} min read",
+      "adjacent": "More posts",
+      "newer": "Newer",
+      "older": "Older",
+      "slide": "Slide"
+    },
+    "arrow": "→"
+  },
+  "document": {
+    "title": "The orchard in spring",
+    "href": "/journal/orchard-spring/",
+    "date": "2026-04-02",
+    "readingMinutes": 2,
+    "author": {
+      "name": "Tom Barlow"
+    },
+    "featuredImage": "feature",
+    "body": "<p>The young trees are in blossom a fortnight early this year.</p>",
+    "sections": [
+      {
+        "section": "gallery",
+        "values": {
+          "heading": "The orchard",
+          "layout": "grid",
+          "columns": "3",
+          "captions": true,
+          "images": [
+            "orchard"
+          ],
+          "settings": {
+            "anchorId": "gallery-one"
+          }
+        },
+        "track": "gallery-1",
+        "index": 1
+      }
+    ]
+  },
+  "media": {
+    "feature": {
+      "url": "https://uploads.example/feeding-your-soil-{width}.jpg",
+      "width": 1600,
+      "height": 1067,
+      "alt": "Hands holding a handful of dark compost over a vegetable bed"
+    },
+    "orchard": {
+      "url": "https://uploads.example/orchard-{width}.jpg",
+      "width": 1600,
+      "height": 1200,
+      "alt": "Young apple trees in a small orchard",
+      "caption": "A new orchard in its first spring"
+    }
+  }
+}

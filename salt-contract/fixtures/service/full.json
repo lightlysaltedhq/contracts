@@ -1,5 +1,5 @@
 {
-  "$comment": "document shape: { title, summary, intro (rich-text string, stored h3 renders h2 at base 1), benefits: [string], priceFrom (display value), cta: { label, type, document, newTab }, related: [card items resolved for display, with image media ids] }. The view takes labels benefits, price and relatedServices from site.labels. The service view has no priority image.",
+  "$comment": "document: a service's fields as contract/collections/services.json defines them, as the service view receives them. Stored as defined: title, summary, intro (rich text, stored h3 renders h2 at base 1), priceFrom, cta (the contract's link). Resolved for the view: benefits is each row's text, in order; related is relatedServices resolved to cards for display, with image media ids (the card mapping in services.json). The view takes labels benefits, price and relatedServices from site.labels. The service view has no priority image.",
   "view": "service",
   "summary": "A service page with every part set: title, summary, an introduction whose stored h3 renders h2, benefits, a price, a primary call to action without an arrow, and two related service cards.",
   "context": {

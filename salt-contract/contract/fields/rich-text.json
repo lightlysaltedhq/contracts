@@ -1,6 +1,6 @@
 {
   "$schema": "../../schema/field-definition.schema.json",
-  "version": "1.0.0-rc.6",
+  "version": "1.0.0-rc.7",
   "section": "rich-text",
   "shared": {
     "id": "section-settings"
@@ -36,16 +36,21 @@
         "unordered-list",
         "ordered-list",
         "blockquote",
+        "heading-2",
         "heading-3",
-        "heading-4"
+        "heading-4",
+        "heading-5",
+        "heading-6"
       ],
       "platforms": {
         "nextjs": {
-          "formerly": "body"
+          "formerly": "body",
+          "owes": "headings 2, 5 and 6 in the editor, beside 3 and 4"
         },
         "wordpress": {
           "formerly": "content",
-          "note": "The allow-list also passes line breaks."
+          "note": "The allow-list also passes line breaks.",
+          "owes": "headings 2, 5 and 6 in the allow-list, beside 3 and 4"
         }
       }
     },

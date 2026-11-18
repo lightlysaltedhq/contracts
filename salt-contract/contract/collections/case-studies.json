@@ -1,0 +1,324 @@
+{
+  "$schema": "../../schema/field-definition.schema.json",
+  "version": "1.0.0-rc.7",
+  "$comment": "A case study's stored fields, by the founder's rulings of 18/11/2026 on the ID-3944 field names. A case study is fixed fields: it has no page body. The address (slug) and the editor's order are each platform's own (SC-003). The view's document (fixtures/case-study) is these fields as the case-study view receives them, with services resolved to cards for display.",
+  "collection": "case-studies",
+  "label": "Case study",
+  "fields": [
+    {
+      "name": "title",
+      "type": "text",
+      "label": "Title",
+      "required": true,
+      "maxLength": 120,
+      "platforms": {
+        "nextjs": {
+          "formerly": "title",
+          "owes": "the 120-character limit"
+        },
+        "wordpress": {
+          "native": "title",
+          "formerly": "post_title"
+        }
+      }
+    },
+    {
+      "name": "topics",
+      "type": "topics",
+      "label": "Topics",
+      "many": true,
+      "platforms": {
+        "nextjs": {
+          "formerly": "types",
+          "owes": "topics in place of types"
+        },
+        "wordpress": {
+          "native": "categories",
+          "formerly": "the work_type taxonomy",
+          "owes": "the taxonomy box labelled Topics, with no parent control"
+        }
+      }
+    },
+    {
+      "name": "client",
+      "type": "text",
+      "label": "Client",
+      "description": "Optional. Shown on the card and beneath the title.",
+      "platforms": {
+        "nextjs": {
+          "formerly": "client"
+        },
+        "wordpress": {
+          "formerly": "client"
+        }
+      }
+    },
+    {
+      "name": "summary",
+      "type": "textarea",
+      "label": "Summary",
+      "maxLength": 300,
+      "description": "One or two sentences, shown on cards wherever the item is listed.",
+      "platforms": {
+        "nextjs": {
+          "formerly": "summary"
+        },
+        "wordpress": {
+          "native": "excerpt",
+          "formerly": "summary (an ACF textarea with no limit)",
+          "owes": "the summary stored in the excerpt, with a check on save for its 300 characters"
+        }
+      }
+    },
+    {
+      "name": "featuredImage",
+      "type": "image",
+      "label": "Featured image",
+      "platforms": {
+        "nextjs": {
+          "formerly": "featuredImage"
+        },
+        "wordpress": {
+          "native": "featured-image",
+          "formerly": "the featured image"
+        }
+      }
+    },
+    {
+      "name": "gallery",
+      "type": "image",
+      "label": "Gallery",
+      "many": true,
+      "min": 1,
+      "max": 24,
+      "description": "Optional. When given, one to 24 images.",
+      "platforms": {
+        "nextjs": {
+          "formerly": "gallery",
+          "owes": "the limits"
+        },
+        "wordpress": {
+          "formerly": "gallery",
+          "owes": "the limits"
+        }
+      }
+    },
+    {
+      "name": "challenge",
+      "type": "rich-text",
+      "label": "The challenge",
+      "allowed": [
+        "paragraph",
+        "bold",
+        "italic",
+        "link",
+        "unordered-list",
+        "ordered-list",
+        "heading-3",
+        "heading-4"
+      ],
+      "platforms": {
+        "nextjs": {
+          "formerly": "challenge"
+        },
+        "wordpress": {
+          "formerly": "challenge (full toolbar)",
+          "owes": "the restricted list: paragraphs, bold, italic, links, lists, and headings 3 and 4"
+        }
+      }
+    },
+    {
+      "name": "solution",
+      "type": "rich-text",
+      "label": "What we did",
+      "allowed": [
+        "paragraph",
+        "bold",
+        "italic",
+        "link",
+        "unordered-list",
+        "ordered-list",
+        "heading-3",
+        "heading-4"
+      ],
+      "platforms": {
+        "nextjs": {
+          "formerly": "solution"
+        },
+        "wordpress": {
+          "formerly": "solution (full toolbar)",
+          "owes": "the restricted list: paragraphs, bold, italic, links, lists, and headings 3 and 4"
+        }
+      }
+    },
+    {
+      "name": "results",
+      "type": "list",
+      "label": "Results",
+      "itemLabel": "Result",
+      "rowLabel": "label",
+      "min": 1,
+      "max": 6,
+      "description": "Optional. When given, one to six, each a figure and what it measures.",
+      "fields": [
+        {
+          "name": "stat",
+          "type": "text",
+          "label": "Figure",
+          "required": true,
+          "description": "Such as 40% or 3x.",
+          "platforms": {
+            "nextjs": {
+              "formerly": "stat"
+            },
+            "wordpress": {
+              "formerly": "stat",
+              "owes": "required"
+            }
+          }
+        },
+        {
+          "name": "label",
+          "type": "text",
+          "label": "What it measures",
+          "required": true,
+          "platforms": {
+            "nextjs": {
+              "formerly": "label"
+            },
+            "wordpress": {
+              "formerly": "label",
+              "owes": "required"
+            }
+          }
+        }
+      ],
+      "platforms": {
+        "nextjs": {
+          "formerly": "results",
+          "owes": "the list's limits"
+        },
+        "wordpress": {
+          "formerly": "results",
+          "owes": "the list's limits"
+        }
+      }
+    },
+    {
+      "name": "details",
+      "type": "list",
+      "label": "Project details",
+      "itemLabel": "Detail",
+      "rowLabel": "label",
+      "max": 12,
+      "description": "Optional. Up to 12, such as Location: Cumbria.",
+      "fields": [
+        {
+          "name": "label",
+          "type": "text",
+          "label": "Label",
+          "required": true,
+          "platforms": {
+            "nextjs": {
+              "formerly": "label"
+            }
+          }
+        },
+        {
+          "name": "value",
+          "type": "text",
+          "label": "Value",
+          "required": true,
+          "platforms": {
+            "nextjs": {
+              "formerly": "value"
+            }
+          }
+        }
+      ],
+      "platforms": {
+        "nextjs": {
+          "formerly": "details",
+          "owes": "the limit of 12"
+        },
+        "wordpress": {
+          "owes": "the field"
+        }
+      }
+    },
+    {
+      "name": "externalUrl",
+      "type": "text",
+      "format": "url",
+      "label": "Live site",
+      "description": "Optional. The address of the finished site, opened in a new tab.",
+      "platforms": {
+        "nextjs": {
+          "formerly": "externalUrl",
+          "owes": "the url format's check on save"
+        },
+        "wordpress": {
+          "formerly": "live_url (an ACF url field)",
+          "owes": "a text field with the url format, named externalUrl"
+        }
+      }
+    },
+    {
+      "name": "services",
+      "type": "relationship",
+      "label": "Services delivered",
+      "to": "services",
+      "many": true,
+      "description": "Optional.",
+      "platforms": {
+        "nextjs": {
+          "formerly": "services",
+          "note": "Contributed by the services module."
+        },
+        "wordpress": {
+          "formerly": "services"
+        }
+      }
+    }
+  ],
+  "dropped": [
+    {
+      "formerly": {
+        "wordpress": "post_content (the page body)"
+      },
+      "note": "No view reads it: a case study is fixed fields. Any content migrates into solution; the summary in the excerpt keeps site search reading more than the title."
+    },
+    {
+      "formerly": {
+        "wordpress": "the industry taxonomy"
+      },
+      "note": "Unread, and a collection has one list of topics."
+    }
+  ],
+  "display": {
+    "$comment": "Derived from Salt for Next.js's READ_CARD and Salt for WordPress's inc/sections/work.php, with the rc.7 names. A featured showcase's lead card also draws the case study's results (view-props/collection-showcase.json results), from results.",
+    "as": "card",
+    "status": "approved",
+    "parts": {
+      "title": {
+        "from": "title"
+      },
+      "href": {
+        "note": "The case study's own page. Routing is each platform's own."
+      },
+      "image": {
+        "from": "featuredImage"
+      },
+      "meta": {
+        "from": "client"
+      },
+      "text": {
+        "from": "summary"
+      },
+      "tags": {
+        "from": "topics",
+        "note": "When the section shows tags. Each topic's title."
+      }
+    }
+  }
+}

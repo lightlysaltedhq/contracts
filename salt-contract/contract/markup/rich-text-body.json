@@ -1,6 +1,6 @@
 {
   "$schema": "../../schema/markup.schema.json",
-  "version": "1.0.0-rc.6",
+  "version": "1.0.0-rc.7",
   "id": "rich-text-body",
   "kind": "component",
   "root": {
@@ -26,13 +26,13 @@
       "repeat": {
         "from": "body nodes"
       },
-      "note": "Allowed inline: a (href; http, https, mailto, tel, or an internal link), strong, em, code, br. Headings rank from the base level (section#body-heading-base); a heading outside the allowed set renders as p. A body heading is never h1: at base level 1, which is a view's body or a section that draws no heading, the first heading tag renders as h2 (base + 1)."
+      "note": "Allowed inline: a (href; http, https, mailto, tel, or an internal link), strong, em, code, br. Headings rank from the base level (section#body-heading-base); a heading outside the allowed set renders as p. A body heading is never h1: at base level 1, which is a view's body or a section that draws no heading, the highest-ranked heading stored renders as h2 (base + 1). An editor stores h2 to h6 where the field allows them."
     }
   ],
   "headings": {
     "provides": "never",
     "level": "given",
-    "children": "base + 1 for the first heading tag, base + 2 for the second",
+    "children": "base + 1 for the highest-ranked heading stored in the body; each other heading keeps its distance below it, at most one rank below the heading drawn before it and never below h6 (section#body-heading-base)",
     "rules": [
       "section#body-heading-base"
     ]
@@ -47,7 +47,7 @@
   "notes": [
     {
       "topic": "ruling",
-      "text": "Headings inside a body are relative to the section, not the absolute h3 and h4 WordPress's allow-list permits."
+      "text": "Headings inside a body are relative to the section, not the absolute levels an editor stores (h2 to h6 where the field allows them)."
     }
   ],
   "platforms": {
@@ -65,7 +65,7 @@
         }
       ],
       "owes": [
-        "Wrap every body in div.salt-rich-text; map stored h3 and h4 to the base-relative levels."
+        "Wrap every body in div.salt-rich-text; map stored h2 to h6 to the base-relative levels (section#body-heading-base)."
       ]
     }
   }
