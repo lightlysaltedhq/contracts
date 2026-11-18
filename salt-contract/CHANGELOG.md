@@ -235,12 +235,15 @@ test, applied through section 2's table, where the stricter row wins.
     paragraphs: the stored `<h3>How it works</h3>` and the `h2` it drew are gone from the case
     and its HTML, and the note in `markup/service.json` and the case's comments no longer speak of
     a stored `h3`. The intro's allowed list is unchanged.
+  - **View-all addresses** (the founder's ruling of 18/11/2026: left to the platform, by the same
+    principle on both). The showcase's `viewAll` view prop
+    (`contract/view-props/collection-showcase.json`) says so: each platform builds the address its
+    native way; a collection's view-all link points at that collection's own index (archive) page;
+    and a collection with no index page draws no link. A description of a view prop, so no
+    verdict changes.
   - **Pending the founder's review, not ruled.** Which limits stay limits and which become targets
     (perhaps only those whose breach would break the front end stay limits): until it is ruled no
-    field's limit becomes a target and no owes assumes either answer. And a draft clause in the
-    showcase's `viewAll` view prop (`contract/view-props/collection-showcase.json`): each platform
-    builds the address its native way, but a collection's view-all link points at that
-    collection's own index (archive) page.
+    field's limit becomes a target and no owes assumes either answer.
 - The case-study view has fixtures and is required of every implementation (SC-021).
   `fixtures/case-study/` holds four cases (`full`, `aside`, `band` and `minimal`), `case-study`
   joins `REQUIRED_FILES`, and a full conformance run refuses to declare it not shipped. The

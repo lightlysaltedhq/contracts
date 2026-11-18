@@ -92,7 +92,7 @@
       "nullable": true,
       "from": "logic",
       "field": "viewAll",
-      "description": "The link to the source's archive, when it is on and the archive exists; its label is viewAllLabel or the site's default. Draft clause, pending the founder's review (rc.8): each platform builds the address its native way, but both follow one principle: a collection's view-all link points at that collection's own index (archive) page."
+      "description": "The link to the source's archive, when it is on and the archive exists; its label is viewAllLabel or the site's default. By the founder's ruling of 18/11/2026, the address is left to each platform but follows one principle on both: each platform builds it its native way; a collection's view-all link points at that collection's own index (archive) page; and a collection with no index page draws no link."
     }
   ],
   "types": {
