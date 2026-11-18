@@ -30,7 +30,7 @@
 import { readFileSync, writeFileSync } from 'node:fs'
 
 import { allowedFor, categorisedSources, categorySources, clauses, collectionQueryShape, diffSnapshots, isMainModule, LINK_SHAPE, loadContract,
-  normaliseLineEndings, parseEmitterArguments, planSections, sourceValues, SOURCES } from './_contract.mjs'
+  normaliseLineEndings, parseEmitterArguments, planSections, resolveCollection, sourceValues, SOURCES } from './_contract.mjs'
 
 /**
  * Each source's post type and category taxonomy, as Salt for WordPress registers them by default.
@@ -138,6 +138,10 @@ function convertField(f, ctx) {
       typed('textarea')
       if (f.default !== undefined) out.default_value = f.default
       if (f.maxLength !== undefined) out.maxlength = f.maxLength
+      if (f.maxLines !== undefined) {
+        out.rows = f.maxLines
+        salt.maxLines = f.maxLines
+      }
       break
     case 'rich-text': {
       typed('wysiwyg')
@@ -253,6 +257,42 @@ function convertField(f, ctx) {
       out.layout = 'block'
       Object.assign(salt, collectionQuery(f, out, below))
       break
+    case 'topics': {
+      // The record's own source's category taxonomy, as an ACF taxonomy field that saves nothing to
+      // the post's terms: the post's topics are WordPress's own box (native), so this is a field
+      // such as the primary topic, read beside them.
+      const taxonomy = ctx.sources[ctx.collection]?.taxonomy
+      if (!taxonomy) throw new Error(`${at}: sources.${ctx.collection}.taxonomy: the contract gives ${ctx.collection} topics; name the taxonomy that holds them`)
+      typed('taxonomy')
+      out.taxonomy = taxonomy
+      out.field_type = f.many ? 'multi_select' : 'select'
+      out.return_format = 'id'
+      out.add_term = 0
+      out.save_terms = 0
+      out.load_terms = 0
+      if (!f.many && !f.required) out.allow_null = 1
+      salt.topicsOf = ctx.collection
+      break
+    }
+    case 'date-time':
+      // Stored in UTC; the site's time zone is applied when the date is drawn.
+      typed('date_time_picker')
+      out.display_format = 'd/m/Y H:i'
+      out.return_format = 'Y-m-d H:i:s'
+      out.first_day = 1
+      break
+    case 'time':
+      typed('time_picker')
+      out.display_format = 'H:i'
+      out.return_format = 'H:i'
+      break
+    case 'sections': {
+      typed('flexible_content')
+      out.button_label = 'Add section'
+      out.layouts = sectionLayouts(plannedFor(ctx, f.sections), { ...below, scope: `${ctx.scope}_${f.name}`, path: [] })
+      salt.sections = f.sections
+      break
+    }
     default:
       throw new Error(`${at}: no ACF mapping for field type ${f.type}`)
   }
@@ -314,24 +354,73 @@ function collectionQuery(f, out, ctx) {
 
 // ── Field groups ───────────────────────────────────────────────────────────────────────────────
 
+// A layout per planned section, keyed under `scope`, with the shared settings in a group named
+// settings after a Settings tab. The tab stores nothing: it only puts the settings on a tab of
+// their own in the editor, as Salt for WordPress's Advanced tab does today.
+function sectionLayouts(planned, ctx) {
+  return planned.map(({ id, section, fields, settings }) => {
+    const base = { ...ctx, scope: ctx.scope ? `${ctx.scope}_${id}` : id, path: [] }
+    const shared = settings.length ? [{ name: 'settings', type: 'group', label: 'Section settings', fields: settings }] : []
+    const sub = convertFields([...fields, ...shared], base)
+    if (shared.length) {
+      const tab = { key: keyFor(base, 'settings_tab'), label: 'Settings', name: '', type: 'tab', placement: 'top', endpoint: 0 }
+      if (base.keys.has(tab.key)) throw new Error(`${base.scope}: key ${tab.key} is already taken by ${base.keys.get(tab.key)}`)
+      base.keys.set(tab.key, `${base.scope} settings tab`)
+      sub.splice(sub.length - 1, 0, tab)
+    }
+    return {
+      key: ctx.scope ? `layout_salt_${snake(base.scope)}` : `layout_salt_${snake(id)}`,
+      name: id,
+      label: section.label,
+      display: 'block',
+      sub_fields: sub,
+    }
+  })
+}
+
+// The sections a collection's sections field offers that the site can carry, planned as the page
+// group's are; one whose sources the site lacks (an FAQ without faqs) is left out.
+function plannedFor(ctx, ids) {
+  const installed = new Set(Object.keys(ctx.sources))
+  return ids.flatMap((id) => planSections(ctx.contract, { installed }).sections.filter((p) => p.id === id))
+}
+
+// The group of one collection's fields, located on its post type. A field WordPress stores in its
+// own place (platforms.wordpress.native) is left out and recorded under salt.native; a field whose
+// relationship points at a source the site does not install is left out and recorded under
+// salt.leftOut, as the site has nothing to point it at.
+function collectionGroup(contract, source, sources, base) {
+  const { collection, fields } = resolveCollection(contract, source)
+  const native = {}
+  const leftOut = []
+  const kept = fields.filter((f) => {
+    const place = f.platforms?.wordpress?.native
+    if (place) { native[f.name] = place; return false }
+    if (f.type === 'relationship' && !(f.to in sources)) { leftOut.push(`${f.name} (the source ${f.to})`); return false }
+    return true
+  })
+  const scope = `collection_${source}`
+  const salt = { collection: source }
+  if (Object.keys(native).length) salt.native = native
+  if (leftOut.length) salt.leftOut = leftOut
+  return {
+    key: `group_salt_${snake(scope)}`,
+    title: collection.label,
+    fields: convertFields(kept, { ...base, scope, path: [], collection: source }),
+    location: [[{ param: 'post_type', operator: '==', value: sources[source].postType }]],
+    salt,
+  }
+}
+
 function build(options) {
   const contract = options.contract ?? loadContract()
   const sources = sourcesFrom(options)
   const plan = planSections(contract, { installed: new Set(Object.keys(sources)), sections: options.sections })
   const categorised = categorisedSources(contract)
   const keys = new Map()
-  const layouts = plan.sections.map(({ id, section, fields, settings }) => {
-    const base = { options, sources, categorised, keys, scope: id, path: [] }
-    const shared = settings.length ? [{ name: 'settings', type: 'group', label: 'Section settings', fields: settings }] : []
-    return {
-      key: `layout_salt_${snake(id)}`,
-      name: id,
-      label: section.label,
-      display: 'block',
-      sub_fields: convertFields([...fields, ...shared], base),
-    }
-  })
-  return [{
+  const base = { options, sources, categorised, keys }
+  const layouts = sectionLayouts(plan.sections, { ...base, scope: '' })
+  const groups = [{
     key: SECTIONS_GROUP_KEY,
     title: 'Page sections',
     fields: [{
@@ -344,11 +433,20 @@ function build(options) {
     }],
     location: (options.postTypes ?? ['page']).map((value) => [{ param: 'post_type', operator: '==', value }]),
   }]
+  // A collection's sections (a post's layout) are those the site can carry, whichever sections
+  // the page group was asked for.
+  const wanted = options.collections ?? SOURCES
+  const emitted = SOURCES.filter((s) => wanted.includes(s) && s in sources && contract.collections?.[s])
+  for (const source of emitted) groups.push(collectionGroup(contract, source, sources, { ...base, contract }))
+  return groups
 }
 
 /**
- * Every ACF field group the contract defines, in ACF JSON's shape. Today that is one: the page
- * sections group, a Flexible Content field with a layout per section.
+ * Every ACF field group the contract defines, in ACF JSON's shape: the page sections group, a
+ * Flexible Content field with a layout per section, then one group per installed collection
+ * source, in the contract's source order, located on that source's post type. A collection group
+ * holds the fields WordPress has no place of its own for; the rest (the title, body, excerpt,
+ * featured image, categories and date) are WordPress's, named under the group's salt.native.
  *
  * options:
  *   linkTo     post types an internal link may point at (['page'])
@@ -357,9 +455,12 @@ function build(options) {
  *   icons      the site's icon registry, [{ value, label }]; required when a section uses it
  *   sources    { [source id]: { postType?, taxonomy? } } for the sources the site has; all of
  *              them, with SOURCE_DEFAULTS' slugs, when left out
- *   postTypes  where the sections group shows (['page'])
+ *   postTypes  where the sections group shows (['page']); a collection's group shows on its own
+ *              post type (sources)
  *   sections   the section ids to emit, in this order; one the site's sources cannot carry
  *              throws. Left out: every section in sections.json the sources can carry
+ *   collections the source ids whose collection groups to emit, of those the site installs;
+ *              left out, every installed source. [] emits the page sections group alone
  *   contract   a loaded contract (loadContract()), for tests
  */
 export function toAcfFieldGroups(options = {}) {

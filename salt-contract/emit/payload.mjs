@@ -42,7 +42,7 @@ import { readFileSync, writeFileSync } from 'node:fs'
 
 import { allowedFor, categorisedSources, categorySources, clauseHolds, clauses, collectionQueryShape, diffSnapshots, hasVisibleText,
   isFilled, isMainModule, LINK_SHAPE, loadContract, modeAllowed, normaliseLineEndings, parseEmitterArguments, planSections,
-  siblingValue, sourceValues, SOURCES } from './_contract.mjs'
+  resolveCollection, siblingValue, sourceValues, SOURCES } from './_contract.mjs'
 
 /**
  * Each source's Payload collection and category taxonomy, as Salt for Next.js names them by
@@ -137,6 +137,7 @@ function convertField(f, ctx) {
       if (f.maxLength !== undefined) out.maxLength = f.maxLength
       if (f.default !== undefined) out.defaultValue = f.default
       if (f.format) salt.format = f.format
+      if (f.maxLines !== undefined) salt.maxLines = f.maxLines
       break
     case 'rich-text': {
       out.type = 'richText'
@@ -251,6 +252,41 @@ function convertField(f, ctx) {
       out.label = f.label
       Object.assign(salt, collectionQuery(f, out, below))
       break
+    case 'topics': {
+      // The record's own source's topics: a relationship to its taxonomy collection.
+      const taxonomy = ctx.sources[ctx.collection]?.taxonomy
+      if (!taxonomy) throw new Error(`${ctx.scope}.${f.name}: sources.${ctx.collection}.taxonomy: the contract gives ${ctx.collection} topics; name the collection that holds them`)
+      out.type = 'relationship'
+      out.label = f.label
+      out.relationTo = taxonomy
+      if (f.required) out.required = true
+      if (f.many) out.hasMany = true
+      salt.topicsOf = ctx.collection
+      break
+    }
+    case 'date-time':
+      // Stored in UTC; the site's time zone is applied when the date is drawn.
+      out.type = 'date'
+      out.label = f.label
+      if (f.required) out.required = true
+      admin.date = { pickerAppearance: 'dayAndTime' }
+      break
+    case 'time':
+      // Payload has no picker that stores a time of day alone, so the contract's HH:MM is text;
+      // the consumer adds its time picker (admin.components) and a validator.
+      out.type = 'text'
+      out.label = f.label
+      if (f.required) out.required = true
+      salt.format = 'time'
+      break
+    case 'sections': {
+      out.type = 'blocks'
+      out.label = f.label
+      if (f.required) out.required = true
+      out.blocks = sectionBlocks(ctx, f.sections)
+      salt.sections = f.sections
+      break
+    }
     default:
       throw new Error(`${ctx.scope}.${f.name}: no Payload mapping for field type ${f.type}`)
   }
@@ -339,20 +375,16 @@ function collectionQuery(f, out, ctx) {
 
 // ── Blocks ─────────────────────────────────────────────────────────────────────────────────────
 
-function build(options, snapshot) {
-  const contract = options.contract ?? loadContract()
-  const sources = sourcesFrom(options)
-  const plan = planSections(contract, { installed: new Set(Object.keys(sources)), sections: options.sections })
-  const categorised = categorisedSources(contract)
-  return plan.sections.map(({ id, section, fields, settings }) => {
-    const base = { options, snapshot, sources, categorised, scope: id, path: [] }
-    const out = convertFields(fields, base)
+function blocksOf(planned, base) {
+  return planned.map(({ id, section, fields, settings }) => {
+    const own = { ...base, scope: id, path: [] }
+    const out = convertFields(fields, own)
     if (settings.length) {
       out.push({
         name: 'settings',
         type: 'group',
         label: 'Section settings',
-        fields: convertFields(settings, { ...base, scope: 'section' }),
+        fields: convertFields(settings, { ...own, scope: 'section' }),
       })
     }
     return {
@@ -360,6 +392,46 @@ function build(options, snapshot) {
       interfaceName: `${pascal(id)}Block`,
       labels: { singular: section.label, plural: section.label },
       fields: out,
+    }
+  })
+}
+
+// The blocks of a collection's sections field: those of its sections the site can carry, as the
+// page's blocks are built; one whose sources the site lacks (an FAQ without faqs) is left out.
+function sectionBlocks(ctx, ids) {
+  const installed = new Set(Object.keys(ctx.sources))
+  const planned = planSections(ctx.contract, { installed }).sections
+  return blocksOf(ids.flatMap((id) => planned.filter((p) => p.id === id)), ctx)
+}
+
+function build(options, snapshot) {
+  const contract = options.contract ?? loadContract()
+  const sources = sourcesFrom(options)
+  const plan = planSections(contract, { installed: new Set(Object.keys(sources)), sections: options.sections })
+  const categorised = categorisedSources(contract)
+  return blocksOf(plan.sections, { options, snapshot, sources, categorised, contract })
+}
+
+// Each installed source's collection fields: { slug, custom.salt.collection, fields }. A field
+// whose relationship points at a source the site does not install is left out and named under
+// custom.salt.leftOut, as Payload refuses a relationship to a collection it does not have.
+function buildCollections(options, snapshot) {
+  const contract = options.contract ?? loadContract()
+  const sources = sourcesFrom(options)
+  const categorised = categorisedSources(contract)
+  const wanted = options.collections ?? SOURCES
+  return SOURCES.filter((s) => wanted.includes(s) && s in sources && contract.collections?.[s]).map((source) => {
+    const { fields } = resolveCollection(contract, source)
+    const leftOut = []
+    const kept = fields.filter((f) => {
+      if (f.type === 'relationship' && !(f.to in sources)) { leftOut.push(`${f.name} (the source ${f.to})`); return false }
+      return true
+    })
+    const base = { options, snapshot, sources, categorised, contract, scope: `collection_${snake(source)}`, path: [], collection: source }
+    return {
+      slug: sources[source].collection,
+      custom: { salt: { collection: source, ...(leftOut.length ? { leftOut } : {}) } },
+      fields: convertFields(kept, base),
     }
   })
 }
@@ -393,6 +465,24 @@ export function serialisePayloadBlocks(blocks) {
 /** The snapshot of the blocks these options give. Needs no richTextEditor. */
 export function payloadSnapshot(options = {}) {
   return serialisePayloadBlocks(build(options, true))
+}
+
+/**
+ * Each collection source's fields, as the documents of the site's Payload collection store them:
+ * [{ slug, custom: { salt: { collection } }, fields }], one per installed source in the contract's
+ * source order, `slug` its collection (SOURCE_DEFAULTS, or options.sources). The consumer spreads
+ * `fields` into its own collection config, beside what stays native (its slug field, access,
+ * versions, admin). Takes toPayloadBlocks' options, and `collections`: the source ids to emit, of
+ * those installed (every installed source when left out). A post's sections field holds the
+ * blocks toPayloadBlocks would give for those sections.
+ */
+export function toPayloadCollections(options = {}) {
+  return buildCollections(options, false)
+}
+
+/** The collections' snapshot, as payloadSnapshot is the blocks'. Needs no richTextEditor. */
+export function payloadCollectionsSnapshot(options = {}) {
+  return serialisePayloadBlocks(buildCollections(options, true))
 }
 
 // ── Drift ──────────────────────────────────────────────────────────────────────────────────────
@@ -441,6 +531,8 @@ function comparable(fields, empty) {
     let own = PLATFORM_ADDITIONS.reduce((f, p) => without(f, p.split('.')), field)
     if (isRecord(own.admin) && Object.keys(own.admin).length === 0) own = without(own, ['admin'])
     if (empty && !('admin' in own)) own = { ...own, admin: {} }
+    // A sections field (a post's layout) holds blocks, whose fields are compared as a block's are.
+    if (Array.isArray(own.blocks)) own = { ...own, blocks: comparableBlocks(own.blocks, empty) }
     return 'fields' in own ? { ...own, fields: comparable(own.fields, empty) } : own
   })
 }
@@ -455,20 +547,32 @@ const comparableBlocks = (blocks, empty = false) =>
  * generated`. Conditions are not compared (SC-023; this file's header).
  */
 export function checkPayloadSnapshot(snapshot, options = {}) {
-  const now = normaliseLineEndings(payloadSnapshot(options))
+  return checkAgainst(payloadSnapshot(options), snapshot, 'blocks')
+}
+
+function checkAgainst(generated, snapshot, at) {
+  const now = normaliseLineEndings(generated)
   snapshot = normaliseLineEndings(snapshot)
   if (now === snapshot) return { ok: true, problems: [] }
   let parsed
   try { parsed = JSON.parse(snapshot) } catch (e) { return { ok: false, problems: [`the snapshot is not JSON: ${e.message}`] } }
   const problems = []
-  diffSnapshots(comparableBlocks(parsed, true), comparableBlocks(JSON.parse(now), true), 'blocks', keyOf, problems)
+  diffSnapshots(comparableBlocks(parsed, true), comparableBlocks(JSON.parse(now), true), at, keyOf, problems)
   if (problems.length) return { ok: false, problems }
   const was = comparableBlocks(parsed)
-  const generated = comparableBlocks(JSON.parse(now))
+  const regenerated = comparableBlocks(JSON.parse(now))
   // Same structure: the bytes still have to agree, in the snapshot as committed (its formatting)
   // and in what is compared (its key order). A regenerated snapshot fixes either.
-  if (serialisePayloadBlocks(parsed) === snapshot && serialisePayloadBlocks(was) === serialisePayloadBlocks(generated)) return { ok: true, problems: [] }
+  if (serialisePayloadBlocks(parsed) === snapshot && serialisePayloadBlocks(was) === serialisePayloadBlocks(regenerated)) return { ok: true, problems: [] }
   return { ok: false, problems: ['the snapshot differs from the generated text only in formatting; regenerate it'] }
+}
+
+/**
+ * checkPayloadSnapshot for the collections' snapshot (payloadCollectionsSnapshot): the same
+ * comparison, the same PLATFORM_ADDITIONS left out, problems named by path from `collections`.
+ */
+export function checkPayloadCollectionsSnapshot(snapshot, options = {}) {
+  return checkAgainst(payloadCollectionsSnapshot(options), snapshot, 'collections')
 }
 
 // ── CLI ────────────────────────────────────────────────────────────────────────────────────────
