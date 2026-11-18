@@ -215,9 +215,12 @@ test, applied through section 2's table, where the stricter row wins.
     so. No limit's number changes. `emit/acf.mjs` no longer gives a text ACF's `maxlength`, which
     cuts typing: the limit is recorded under the field's `salt.maxLength`, for the site's count
     and its check on publish, so the ACF snapshot changes for every text with a limit. A number's
-    range and a list's, gallery's or relationship's size stay ACF's own `min` and `max` until the
-    founder rules which limits stay limits (below); `RULED_LIMITS` in `emit/acf.mjs` moves them
-    under `salt` in one line. The Payload emitter is unchanged: Payload checks its own limits when
+    range and a list's, gallery's or relationship's size stay ACF's own `min` and `max`, which ACF
+    checks when a post is published and not on a draft save; where ACF departs from the rule with
+    them (its editor will not add a row or an image past a repeater's or a gallery's `max`, and an
+    options page or a term screen checks them on every save) is pending (below). `RULED_LIMITS` in
+    `emit/acf.mjs` says where the emitter records each kind of limit, not which limits stay
+    limits: that is the field files' to say, and the emitter follows them. The Payload emitter is unchanged: Payload checks its own limits when
     a document is published, not when a draft is saved, and refuses an over-long publish through
     the API with a message. The ACF round trip compares a limit by its value, wherever the
     emitter records it.
@@ -243,7 +246,11 @@ test, applied through section 2's table, where the stricter row wins.
     verdict changes.
   - **Pending the founder's review, not ruled.** Which limits stay limits and which become targets
     (perhaps only those whose breach would break the front end stay limits): until it is ruled no
-    field's limit becomes a target and no owes assumes either answer.
+    field's limit becomes a target and no owes assumes either answer. Whether ACF's own `min` and
+    `max` may hold a number's range and a list's, gallery's or relationship's size, given that its
+    editor will not add a row or an image past a repeater's or a gallery's `max` and that an
+    options page or a term screen checks them on every save; if not, `RULED_LIMITS` moves them
+    under `salt`.
 - The case-study view has fixtures and is required of every implementation (SC-021).
   `fixtures/case-study/` holds four cases (`full`, `aside`, `band` and `minimal`), `case-study`
   joins `REQUIRED_FILES`, and a full conformance run refuses to declare it not shipped. The

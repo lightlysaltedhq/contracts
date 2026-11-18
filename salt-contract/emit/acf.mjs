@@ -57,10 +57,18 @@ const CONTAINER_KEY = 'field_salt_sections_container'
 // saving and never cuts what an editor wrote; the editor sees the count as they type and the limit
 // is checked when content is published. ACF's maxlength cuts typing, so a text's maxLength is
 // recorded under the field's `salt` (salt.maxLength) for the site's count and its check on
-// publish, never as ACF's setting. A number's range (min, max, the collection-query's count among
-// them) and the size of a list, a gallery or a relationship (min, max) stay ACF's own settings,
-// which refuse a save, until the founder rules which limits stay limits and which become targets
-// (rc.8's open question); adding 'range' or 'size' to this set moves them under salt as well.
+// publish, never as ACF's setting.
+//
+// RULED_LIMITS names the kinds of limit this emitter records under salt rather than as ACF's own
+// setting: where a limit sits on WordPress, not whether it is one. Which limits stay limits and
+// which become targets is the contract's field files' to say (maxLength or max renamed to target),
+// and the emitter follows them with no change here. A number's range (min, max, the
+// collection-query's count among them) and the size of a list, a gallery or a relationship (min,
+// max) stay ACF's own settings. ACF validates them only when a post is published, not on a draft
+// save. Where ACF departs from the rule is elsewhere: its editor will not add a row or an image
+// past a repeater's or a gallery's max, and an options page or a term screen, which has no draft,
+// validates them on every save. Whether that moves 'range' and 'size' into this set is pending the
+// founder (rc.8).
 export const RULED_LIMITS = new Set(['length'])
 
 const snake = (s) => s.replace(/([a-z0-9])([A-Z])/g, '$1_$2').replace(/-/g, '_').toLowerCase()

@@ -258,7 +258,12 @@ it under `salt.native`, and a target it carries under `salt.targets`. Under the 
 (ID-3968, `RELEASE-POLICY.md` section 2) a text's `maxLength` is not ACF's `maxlength`, which cuts
 typing: it is recorded under the field's `salt.maxLength`, for the site's count while typing and
 its check on publish. A number's range and a list's, a gallery's or a relationship's size are
-still ACF's own `min` and `max` (`RULED_LIMITS` in `emit/acf.mjs` names what moves under `salt`).
+still ACF's own `min` and `max`, which ACF checks when a post is published and not on a draft
+save. Its editor will not add a row or an image past a repeater's or a gallery's `max`, though,
+and an options page or a term screen checks them on every save; whether that holds under the rule
+is pending the founder. `RULED_LIMITS` in `emit/acf.mjs` names the kinds of limit recorded under
+`salt`, not which limits stay limits: the field files say that (a `target` in place of a
+`maxLength` or `max`), and the emitter follows them.
 A field's `target` (ID-3969), which nothing refuses, is under `salt.target`. A post's `layout` is a Flexible Content field of the sections a post may
 use. Each layout carries a Settings tab before its `settings` group, which stores nothing and
 puts the shared settings on a tab of their own. Like the Payload emitter it is a pure data
