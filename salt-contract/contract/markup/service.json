@@ -56,7 +56,7 @@
             {
               "role": "intro-body",
               "component": "rich-text-body",
-              "note": "Base level 1: an editor's first heading is h2, level with the benefits heading."
+              "note": "Paragraphs, lists and links only: the introduction's allowed list holds no headings (contract/collections/services.json), so it draws none."
             }
           ]
         },
