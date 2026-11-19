@@ -229,15 +229,15 @@ records carrying 17 former names), so a
 migration generated from the contract renames or folds every such type. A select that 0.11.0 left
 to Payload's derived name has no fixed former name to record; the site's own schema gives it.
 
-**Limits and targets.** The emitter gives each limit as Payload's own setting (`maxLength`,
-`min`, `max`, `minRows`, `maxRows`). Under the limits rule (ID-3968, `RELEASE-POLICY.md` section
-2) Salt for Next.js owes two things those settings do not do alone: a length counted in Unicode
-code points with a CRLF as one, where Payload's `maxLength` counts UTF-16 units (an emoji two, a
-CRLF two); and no draft refused, where Payload skips validation on a draft only on a collection
-with `versions.drafts` on. How it meets them is its own; whether a Payload site must run with
-drafts is pending the founder. A field's `target` (ID-3969), which is never
-refused, is no Payload setting: it is recorded under `custom.salt.target` for the count the site
-shows while the editor types.
+**Limits and targets.** The emitter gives each limit as Payload's own setting (`min`, `max`,
+`minRows`, `maxRows`; `maxLength` were one given), and a `target` (ID-3969) under
+`custom.salt.target`, which is no Payload setting, so nothing refuses it. Under the limits rule
+(ID-3968, `RELEASE-POLICY.md` section 2) Salt for Next.js owes: a draft always saves, by whatever
+means (Payload skips validation on a draft only with `versions.drafts` on); every count it shows
+counts Unicode code points with a CRLF as one (Payload's own `maxLength` counts UTF-16 units); a
+count beside every target, which for a title (`[60, 120]`) notes a title past about 60 and more
+strongly one past 120, neither blocking; a write from outside the editor that breaks a limit is
+refused with a message, as Payload's own settings do, and one over a target saves.
 
 Faults in the contract's own shape are refused whatever the site installs: a malformed condition;
 a `sourceField` naming no sibling select, or one offering no source; and a collection-query that
@@ -259,18 +259,20 @@ or `sources`). A collection field WordPress stores in its own place (the title, 
 featured image, categories or date: `platforms.wordpress.native`) is not generated; the group names
 it under `salt.native`, and a target it carries under `salt.targets`.
 
-**Limits on WordPress.** Every limit is ACF's own setting (`maxlength`, `min`, `max`). ACF checks
-each when a post is published or a published post is updated, with a message, and not on a draft
-save; it counts a length in code points with a CRLF as one. Under the limits rule (ID-3968,
-`RELEASE-POLICY.md` section 2) Salt for WordPress owes one thing more: a field's input draws no
-`maxlength` attribute, stripped at render (in `acf/prepare_field`, whose copy is only the one
-drawn: validation reloads the field, setting and all), because the browser's attribute cuts pasted
-text and stops typing with no message. ACF's editor also will not add a row, an image or an item
-past a repeater's, a gallery's or a relationship's `max`, with a message, and an options page or a
-term screen checks every save; whether those hold under the rule is pending the founder. Which
-limits stay limits and which become targets is the field files' to say (a `target` in place of a
-`maxLength` or `max`), and the emitter follows them.
-A field's `target` (ID-3969), which nothing refuses, is under `salt.target`. A post's `layout` is a Flexible Content field of the sections a post may
+**Limits on WordPress.** Every text length and list size is a target (the founder's ruling of
+19/11/2026), recorded under the field's `salt.target`, or the group's `salt.targets` for the title
+and summary WordPress stores in its own place. A target is no ACF setting, so its input draws no
+length attribute and nothing checks it. The remaining limits are numbers and caps held by ACF's
+own settings (`min`, `max`): ACF checks them with a message when a post is published or a
+published post is updated, not on a draft save, and its editor will not add a row past a list's
+`max`, with a message, which the rule allows. Under the limits rule (ID-3968, `RELEASE-POLICY.md`
+section 2) Salt for WordPress owes: a count beside every target, as Salt for Next.js does; a draft
+always saving, an options page and a term screen included; a write from outside the editor (the
+REST API, an import) that breaks a limit refused with a message, and one over a target saved,
+however WordPress gets there (lifting its REST schema's own refusal is WordPress's detail); and the
+checks that are not limits (formats, times, one featured plan, half steps) made on publish. A
+known gap, accepted by the founder on 19/11/2026: with JavaScript off, a failed update drops
+every ACF field silently while WordPress says the post was updated. A post's `layout` is a Flexible Content field of the sections a post may
 use. Each layout carries a Settings tab before its `settings` group, which stores nothing and
 puts the shared settings on a tab of their own. Like the Payload emitter it is a pure data
 transform, reading only this package's files.

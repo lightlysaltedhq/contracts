@@ -52,14 +52,12 @@ export const SECTIONS_GROUP_KEY = 'group_salt_sections'
 // The container's key predates the contract; changing it would orphan every stored page's sections.
 const CONTAINER_KEY = 'field_salt_sections_container'
 
-// The limits rule (ID-3968, the founder's ruling of 18/11/2026): a limit never stops a draft from
-// saving and never cuts what an editor wrote; the editor sees the count as they type and the limit
-// is checked when content is published. Every limit is emitted as ACF's own setting (maxlength,
-// min, max), which ACF checks when a post is published or a published post is updated, and not
-// on a draft save; ACF counts a length in code points with a CRLF as one. What WordPress owes
-// beyond that is the site's, not this emitter's: its field's input draws no maxlength attribute
-// (stripped at render, in acf/prepare_field, which leaves the setting for ACF's check), so the
-// browser cuts nothing (the contract's README, Generating ACF field groups).
+// The limits rule (ID-3968, the founder's rulings of 18/11/2026 and 19/11/2026): a limit never
+// stops a draft from saving and never cuts what an editor wrote, and is checked when content is
+// published; a target is never refused at all. A limit is emitted as ACF's own setting (min, max,
+// maxlength were one given), which ACF checks with a message when a post is published or a
+// published post is updated, and not on a draft save. A target is no ACF setting: it is recorded
+// under salt, so its input draws no length attribute and nothing checks it.
 const snake = (s) => s.replace(/([a-z0-9])([A-Z])/g, '$1_$2').replace(/-/g, '_').toLowerCase()
 
 // ── Conditions ─────────────────────────────────────────────────────────────────────────────────

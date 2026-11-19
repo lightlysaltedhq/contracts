@@ -195,91 +195,86 @@ test, applied through section 2's table, where the stricter row wins.
     of describing the documents. `scripts/round_trip_acf.mjs` matches a layout by its contract id
     as well as its former names, which salt-wordpress now ships; both round-trip reports are
     regenerated.
-- The founder's rulings of 18/11/2026 change the contract after `1.0.0-rc.7` (ID-3968, ID-3969,
-  ID-3970). Each is part of the first major, so the semver call stays MAJOR. On its own, by
-  `RELEASE-POLICY.md` section 1's test, the limits rule would be MAJOR: until now the contract did
-  not say how a limit is held, and from this candidate an implementation that refuses a draft
-  over a limit, or cuts what an editor wrote (the browser's `maxlength` attribute on ACF's input
-  does), no longer conforms, so
-  verdicts change. The `target` keyword is additive, a new optional schema keyword (MINOR), and the
-  targets it sets change no verdict, since nothing refuses a target. The service example's change
-  is PATCH: an implementation that drew the old case correctly draws the new one.
-  - **The limits rule** (ID-3968). The field schema states it in its own words and in the
-    description of every limit keyword (`maxLength`, `maxLines`, a number's `min` and `max`, a
-    list's, a gallery's and a relationship's `min` and `max`, a collection-query's count), and
-    `RELEASE-POLICY.md` section 2 states it under the table: *A limit never stops a draft from
-    saving and never cuts what an editor wrote: the editor sees the count as they type, the limit
-    is checked when content is published, and a write that cannot show an editor the message is
-    either refused with a message to whoever sent it or stored and flagged until fixed. A length
-    the design only prefers is a target, shown to the editor and never refused.* Lengths count
-    Unicode code points, with a CRLF line break counting as one, and the fixtures gate now counts
-    so. No limit's number changes, and both emitters' output for limits is as at rc.7. On
-    WordPress every limit stays ACF's own setting, which an ACF Pro 6.8.11 probe showed ACF checks
-    with a message on publish and on updating a published post, not on a draft save, counting a
-    length in code points with a CRLF as one; with the setting removed nothing checked a length at
-    all. Salt for WordPress owes one thing more: a field's input draws no `maxlength` attribute
-    (stripped at render, in `acf/prepare_field`), as the browser's attribute cuts pasted text and
-    stops typing with no message. Where ACF departs from the rule otherwise (its editor will not
-    add a row, an image or an item past a repeater's, a gallery's or a relationship's `max`, and an
-    options page or a term screen checks every save) is pending (below). The rule also means a
-    stored value may be over its limit (a draft, a write stored and flagged), so whatever draws it,
-    a preview among them, draws it without failing and without cutting what is stored. The Payload emitter is unchanged and gives each limit as Payload's
-    own setting. Under the rule Salt for Next.js owes counting a length in code points with a CRLF
-    as one, where Payload's `maxLength` counts UTF-16 units (an emoji two, a CRLF two), and never
-    refusing a draft, where Payload skips validation on a draft only with `versions.drafts` on;
-    how it meets them is its own.
-  - **Targets** (ID-3969). A text, textarea, list, gallery or relationship may carry `target`, a
-    number the design only prefers: shown to the editor beside the count and never refused. ACF
-    records it under the field's `salt.target`, or under its group's `salt.targets` for a field
-    WordPress stores in its own place; Payload under `custom.salt.target`. Neither is a setting
-    that refuses anything. Turning a limit into a target is renaming `maxLength` or `max` to
-    `target` in the field's file, one line, which loosens the limit (MINOR). A service's, a case study's and a post's title has a target of 60,
-    measured with the site name joined as the page's `<title>` draws it: the whole `<title>` should
-    be at most 60 characters. An FAQ's question, a testimonial's and a team member's name and a
-    location's title carry 60 too, though they have no page of their own (pending, below). Both
-    platforms owe a count beside it as the editor types. The summaries' *check on save* now reads *held as the
-    limits rule says*, which holds whichever limits stay limits. `RELEASE-POLICY.md`
-    makes changing a target's number PATCH; whether adding or removing a target is PATCH or MINOR
-    is pending (below).
-  - **The service example** (ID-3970). `service/full`'s intro allows no headings, so it is two
-    paragraphs: the stored `<h3>How it works</h3>` and the `h2` it drew are gone from the case
-    and its HTML, and the note in `markup/service.json` and the case's comments no longer speak of
-    a stored `h3`. The intro's allowed list is unchanged.
+- The founder's rulings of 18/11/2026 and 19/11/2026 change the contract after `1.0.0-rc.7`
+  (ID-3968, ID-3969, ID-3970). Each is part of the first major, so the semver call stays MAJOR. On
+  its own, by `RELEASE-POLICY.md` section 1's test, the limits rule would be MAJOR: until now the
+  contract did not say how a limit is held, and from this candidate an implementation that refuses
+  a draft, cuts what an editor wrote (as the browser's `maxlength` attribute on ACF's input does)
+  or refuses text over its target no longer conforms. Turning a limit into a target loosens it,
+  and adding the `target` keyword is a new optional schema keyword: each MINOR on its own. The
+  service example's change is PATCH: an implementation that drew the old case correctly draws the
+  new one.
+  - **The limits rule** (ID-3968; 18/11/2026, amended 19/11/2026). The field schema states it in
+    its own words and in every limit keyword's description, and `RELEASE-POLICY.md` section 2
+    states it: *A limit never stops a draft from saving and never cuts what an editor wrote: the
+    editor sees it as they edit, and it is checked when content is published. A write from outside
+    the editor (the API, an import, code) that breaks a limit is refused with a message to whoever
+    sent it. A length or a number the design only prefers is a target, shown to the editor with a
+    count and never refused, by the editor or by any other write. A value over its target or its
+    limit is always drawn in full, never cut off or clamped.* As accepted on 18/11/2026 a write
+    that could not show an editor the message was refused or stored and flagged; on 19/11/2026 the
+    founder ruled that such a write breaking a limit is refused with a message and one over a
+    target saves, so nothing is left stored and flagged and the rule no longer says it. The rulings
+    of 19/11/2026 also say: a list at its maximum may refuse to add a row, with a message; every
+    length and target counts Unicode code points, a CRLF as one (the fixtures gate counts so);
+    checks that are not limits (email and url formats, the time field, pricing's one featured plan,
+    a rating's half steps) follow the same rule, a draft always saving and publishing checked, and
+    the schema, `pricing.json` and the url owes now say *on publish* in place of *on save*; a value
+    over its target or limit is drawn in full; and this editor behaviour counts towards
+    conformance, checked by each platform's own tests, not by `salt-conformance`.
+  - **Which numbers stay limits** (the founder's ruling of 19/11/2026: *target only for all
+    platforms*, except what a page breaks without). These stay checked limits, unchanged: the tabs'
+    8, the buttons' 2 (the call-to-action's, the hero's and a media-text row's), a rating's 1 to 5,
+    a location's `lat` (-90 to 90) and `lng` (-180 to 180), and its map `zoom` (1 to 20). These
+    stay as they were, with no soft version: a street's two lines (`maxLines`), a rating's half
+    steps from 1, the minimum of one on a list that has one (a service's benefits, a case study's
+    results and gallery), and a collection-query's count, 0 to 24. Every other number is now a
+    target, its `maxLength` or `max` renamed to `target` and its number unchanged:
+    every section's `intro` (300: carousel, collection-showcase, contact, faq, features, gallery,
+    listing, logos, process, stats, tabs); a service's `title`, `summary` (300), `benefits` (12)
+    and `relatedServices` (6); a case study's `title`, `summary` (300), `gallery` (24), `results`
+    (6) and `details` (12); a post's `title` and `summary` (300); an FAQ's `question` (120); a
+    location's `title` (120) and `hours` (14); a testimonial's `name` (120) and `role` (80); a
+    person's (a team member's) `name` (120), `role` (80), `bio` (600) and `socials` (10); and a
+    topic's `title` (120). The help text of the list fields that said *up to* now says *aim for no
+    more than*. No field carries a `maxLength` any longer.
+  - **Targets** (ID-3969; 18/11/2026 and 19/11/2026). A text, textarea, list, gallery or
+    relationship may carry `target`: one number, or an ascending pair `[hint, target]`, the gate
+    refusing a pair whose hint is not the lower. It is shown with a count and never refused. A
+    title whose record has a page of its own (a service, a case study, a post) carries `[60, 120]`:
+    the count notes a title past about 60, measured with the site name joined as the page's
+    `<title>` draws it, and more strongly one past 120, and neither blocks. An FAQ's question, a
+    testimonial's and a team member's name, a location's title and a topic's name show the 120
+    only (19/11/2026). ACF records a target under the field's `salt.target`, and the title's and
+    summary's that WordPress stores in its own place under the group's `salt.targets`
+    (19/11/2026); Payload under `custom.salt.target`. Neither is a setting that refuses anything,
+    so a target draws no length attribute on either platform. `RELEASE-POLICY.md`: changing a
+    target's numbers is PATCH; adding or removing one, or turning a limit into one, is MINOR
+    (19/11/2026).
+  - **What each platform owes.** Salt for WordPress: a count beside every target; a draft always
+    saving, on an options page and a term screen too; an outside write (REST, import) that breaks
+    a limit refused with a message and one over a target saved (lifting WordPress's own REST
+    refusal is its detail, 19/11/2026); the remaining limits held by ACF's own `min` and `max`,
+    which ACF checks on publish; and the other checks made on publish. With JavaScript off, a
+    failed update drops ACF's fields silently: a known gap the founder accepted on 19/11/2026.
+    Salt for Next.js: a draft always saves, by whatever means (19/11/2026); every count in code
+    points with a CRLF as one, where Payload's `maxLength` counts UTF-16 units; the title's two
+    notes; an outside write that breaks a limit refused with a message, and one over a target
+    saved. Each section intro owes its 300 as a target in place of Payload's `maxLength`, which
+    the Payload round trip now lists (11 expected differences).
+  - **The service example** (ID-3970, 18/11/2026). `service/full`'s intro allows no headings, so
+    it is two paragraphs: the stored `<h3>How it works</h3>` and the `h2` it drew are gone from the
+    case and its HTML, and the note in `markup/service.json` and the case's comments no longer
+    speak of a stored `h3`. The intro's allowed list is unchanged.
   - **View-all addresses** (the founder's ruling of 18/11/2026: left to the platform, by the same
     principle on both). The showcase's `viewAll` view prop
     (`contract/view-props/collection-showcase.json`) says so: each platform builds the address its
     native way; a collection's view-all link points at that collection's own index (archive) page;
     and a collection with no index page draws no link. A description of a view prop, so no
     verdict changes.
-  - **Pending the founder's review, not ruled.**
-    - Which limits stay limits and which become targets (perhaps only those whose breach would
-      break the front end). Until it is ruled no field's limit becomes a target and no owes assumes
-      either answer.
-    - So that is ruled knowingly: the schema takes `target` only in place of a maximum (a text's or
-      a textarea's `maxLength`, or the `max` of a list, a gallery or a relationship). Minimums, a
-      number's range (`lat`, `lng`, `zoom`, `rating`), `maxLines` (a location's `street`) and a
-      collection-query's count cannot become a target with a one-line change; softening any of
-      them needs the schema to take a target there first.
-    - Whether ACF's own `min` and `max` may hold a number's range and a list's, gallery's or
-      relationship's size, given that its editor will not add a row, an image or an item past a
-      repeater's, a gallery's or a relationship's `max` (with a message), and that an options page
-      or a term screen checks them on every save. Taking them off ACF's settings would also drop
-      ACF's check on publish, as the probe showed for a length.
-    - On WordPress the REST API refuses an over-long write (400), even as a draft, and counts with
-      plain `mb_strlen`, a CRLF as two, which does not match the counting rule. The ruling says a
-      write outside the editor is stored and flagged, so WordPress must lift that refusal: is that a
-      statement the contract makes, or Salt for WordPress's implementation detail?
-    - With JavaScript off, a failed update on WordPress drops every ACF field silently while
-      WordPress says *Post updated*. Accept it as a known limitation, or require a message?
-    - How a value over its limit is drawn: as stored, or clamped by the stylesheet. The rule says
-      only that it is drawn without failing and nothing stored is cut.
-    - Whether a Payload site must run with drafts (`versions.drafts`) so that no draft is refused,
-      or may meet the rule another way.
-    - For an FAQ, a testimonial, a team member and a location, which have no page of their own and
-      so no `<title>`: should the target of 60 measure the field alone, or should they have no
-      target? Each carries 60 until it is ruled.
-    - Whether adding a target beside a limit, or removing one, is PATCH or MINOR
-      (`RELEASE-POLICY.md` section 2).
+  - Both emitters' output for a limit is as at rc.7. An ACF Pro 6.8.11 probe showed that ACF's own
+    setting is what checks a limit on publish: with it removed nothing checked at all. Nothing is
+    pending: the founder answered every open question on 19/11/2026.
 - The case-study view has fixtures and is required of every implementation (SC-021).
   `fixtures/case-study/` holds four cases (`full`, `aside`, `band` and `minimal`), `case-study`
   joins `REQUIRED_FILES`, and a full conformance run refuses to declare it not shipped. The
