@@ -324,7 +324,7 @@
       "type": "boolean",
       "label": "Link to the full list",
       "default": true,
-      "description": "Shown only where the collection has an index page. Sections never paginate.",
+      "description": "Shown only where the collection has an index page; team has none. Sections never paginate.",
       "platforms": {
         "wordpress": {
           "formerly": "view_all",

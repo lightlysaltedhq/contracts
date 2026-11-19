@@ -1,7 +1,7 @@
 {
   "$schema": "../../schema/field-definition.schema.json",
   "version": "1.0.0-rc.8",
-  "$comment": "A person: a team member, a record with no login (team members and login accounts are separate, by the founder's ruling of 18/11/2026). The fields are flat. contract/collections/team.json carries them, and a post's author is a relationship to team, so the author box reads the same record: the person and the author are one shape. Numbers by the ruling of 18/11/2026 (question 3): a name 120 characters, a role 80, a bio 600, socials 0 to 10; by the ruling of 19/11/2026 each is a target, shown with a count and never refused. The public email is the team member's own field, never a login address.",
+  "$comment": "A person: a team member, a record with no login (team members and login accounts are separate, by the founder's ruling of 18/11/2026). The fields are flat. contract/collections/team.json carries them, and a post's author is a relationship to team, so the author box reads the same record: the person and the author are one shape. Numbers by the ruling of 18/11/2026 (question 3): a name 120 characters, a role 80, a bio 600, socials 0 to 10; by the ruling of 19/11/2026 each is a target, shown with a count and never refused, and the name, as the title of the member's own page, carries [60, 120] as other titles with a page of their own do. The public email is the team member's own field, never a login address.",
   "shape": "person",
   "fields": [
     {
@@ -9,16 +9,19 @@
       "type": "text",
       "label": "Name",
       "required": true,
-      "target": 120,
+      "target": [
+        60,
+        120
+      ],
       "platforms": {
         "nextjs": {
           "formerly": "users.name",
-          "owes": "a team collection separate from login accounts, whose records hold these fields (users holds the team today); a target of 120 characters, shown with a count and never refused"
+          "owes": "a team collection separate from login accounts, whose records hold these fields (users holds the team today); a count as the editor types that notes a title past about 60 characters and notes more strongly one past 120, never refused"
         },
         "wordpress": {
           "native": "title",
           "formerly": "post_title",
-          "owes": "a target of 120 characters, shown with a count and never refused"
+          "owes": "a count as the editor types that notes a title past about 60 characters and notes more strongly one past 120, never refused"
         }
       }
     },

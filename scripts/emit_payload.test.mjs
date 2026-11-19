@@ -967,7 +967,7 @@ test('ID-3969: a target is under custom.salt, never a Payload setting, so nothin
 
 test('ID-3969: every collection title, name and question has its target under custom.salt and no maxLength', () => {
   const list = toPayloadCollections({ icons, richTextEditor: editor })
-  const titles = { services: [60, 120], 'case-studies': [60, 120], posts: [60, 120], locations: 120, faqs: 120, testimonials: 120, team: 120 }
+  const titles = { services: [60, 120], 'case-studies': [60, 120], posts: [60, 120], locations: 120, faqs: 120, testimonials: 120, team: [60, 120] }
   const names = { faqs: 'question', testimonials: 'name', team: 'name' }
   for (const [source, target] of Object.entries(titles)) {
     const f = field(collection(list, source).fields, names[source] ?? 'title')

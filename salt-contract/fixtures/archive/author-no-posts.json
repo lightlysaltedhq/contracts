@@ -1,0 +1,48 @@
+{
+  "$comment": "As archive/author, for a team member with no posts (the founder's ruling of 19/11/2026): the author's page is still the member's own page and draws the profile, and nothing is drawn where the posts list would be, no heading and no empty message. document.listing is absent, as no section is drawn; route.cards is empty.",
+  "view": "archive",
+  "summary": "A team member's own page when they have written no posts: the name as h1 and the profile, and nothing where the listing would be.",
+  "context": {
+    "priorityMedia": false,
+    "locale": "en-GB",
+    "path": "/journal/author/sam-okafor/"
+  },
+  "site": {
+    "arrow": "→",
+    "labels": {
+      "nav": "Pagination",
+      "previous": "Previous",
+      "next": "Next",
+      "page": "Page",
+      "empty": "There are no posts to show yet.",
+      "social": "Social profiles"
+    }
+  },
+  "document": {
+    "kind": "author",
+    "title": "Sam Okafor",
+    "href": "/journal/author/sam-okafor/",
+    "strapline": "Nursery manager",
+    "biography": "Sam grows the perennials we plant, from seed and from cuttings.",
+    "photo": "sam",
+    "email": "sam@example.com"
+  },
+  "media": {
+    "sam": {
+      "url": "https://uploads.example/sam-okafor-{width}.jpg",
+      "width": 400,
+      "height": 400,
+      "alt": "Sam Okafor potting on seedlings"
+    }
+  },
+  "route": {
+    "cards": [],
+    "pagination": {
+      "current": 1,
+      "total": 1,
+      "hrefs": {
+        "1": "/journal/author/sam-okafor/"
+      }
+    }
+  }
+}

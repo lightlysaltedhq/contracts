@@ -37,7 +37,7 @@
         "salt-archive__profile"
       ],
       "optional": true,
-      "when": "an author's archive, on its first page, with a photograph, strapline or biography",
+      "when": "an author's page, which is a team member's own page (the founder's ruling of 19/11/2026), on its first page, with any of its details: a photo, a role, a bio, an email, a phone that normalises to a tel: link, or social profiles",
       "children": [
         {
           "role": "portrait",
@@ -46,7 +46,7 @@
             "salt-archive__portrait"
           ],
           "optional": true,
-          "when": "the photograph resolves",
+          "when": "the photo resolves",
           "children": [
             {
               "role": "portrait-image",
@@ -61,9 +61,9 @@
           "classes": [
             "salt-archive__strapline"
           ],
-          "text": "from:author strapline",
+          "text": "from:the member's role",
           "optional": true,
-          "when": "strapline is set"
+          "when": "the role is set"
         },
         {
           "role": "bio",
@@ -71,16 +71,125 @@
           "classes": [
             "salt-archive__bio"
           ],
-          "text": "from:author biography",
+          "text": "from:the member's bio",
           "optional": true,
-          "when": "biography is set"
+          "when": "the bio is set"
+        },
+        {
+          "role": "contact",
+          "element": "ul",
+          "classes": [
+            "salt-showcase__contact"
+          ],
+          "attributes": {
+            "role": "list"
+          },
+          "optional": true,
+          "when": "the member has an email, or a phone that normalises to a tel: link",
+          "children": [
+            {
+              "role": "contact-email",
+              "element": "li",
+              "optional": true,
+              "when": "email is set",
+              "children": [
+                {
+                  "role": "email-link",
+                  "element": "a",
+                  "classes": [
+                    "salt-showcase__contact-link"
+                  ],
+                  "attributes": {
+                    "href": "from:mailto"
+                  },
+                  "text": "from:email"
+                }
+              ]
+            },
+            {
+              "role": "contact-phone",
+              "element": "li",
+              "optional": true,
+              "when": "phone normalises to a tel: link",
+              "children": [
+                {
+                  "role": "phone-link",
+                  "element": "a",
+                  "classes": [
+                    "salt-showcase__contact-link"
+                  ],
+                  "attributes": {
+                    "href": "from:tel"
+                  },
+                  "text": "from:phone"
+                }
+              ]
+            }
+          ],
+          "note": "As the team card draws it (card.json contact), with its classes."
+        },
+        {
+          "role": "socials",
+          "element": "ul",
+          "classes": [
+            "salt-showcase__socials"
+          ],
+          "attributes": {
+            "role": "list",
+            "aria-label": "from:labels.social"
+          },
+          "optional": true,
+          "when": "the member has social profiles",
+          "children": [
+            {
+              "role": "social-item",
+              "element": "li",
+              "repeat": {
+                "from": "profiles"
+              },
+              "children": [
+                {
+                  "role": "social-link",
+                  "element": "a",
+                  "classes": [
+                    "salt-showcase__social-link"
+                  ],
+                  "attributes": {
+                    "href": "from:profile url"
+                  },
+                  "children": [
+                    {
+                      "role": "social-icon",
+                      "component": "icon",
+                      "attributes": {
+                        "role": "img",
+                        "aria-label": "from:profile name"
+                      },
+                      "optional": true,
+                      "when": "a glyph exists for the profile"
+                    },
+                    {
+                      "role": "social-name",
+                      "element": "span",
+                      "text": "from:profile name",
+                      "optional": true,
+                      "when": "no glyph exists for the profile"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "note": "As the team card draws it (card.json socials), with its classes; the network is derived from each address (contract/socials.json)."
         }
       ]
     },
     {
       "role": "listing",
       "component": "section",
-      "note": "The listing section (listing.json), with its card list and pagination; its heading, if any, is h2."
+      "note": "The listing section (listing.json), with its card list and pagination; its heading, if any, is h2.",
+      "optional": true,
+      "when": "always, except on an author's page whose member has no posts, where nothing is drawn in its place: no heading and no empty message (the founder's ruling of 19/11/2026). A topic's archive with no posts draws the listing's own empty state."
     }
   ],
   "headings": {
@@ -99,7 +208,8 @@
     "section",
     "pagination",
     "card",
-    "media"
+    "media",
+    "icon"
   ],
   "ruleRefs": [
     "section#landmarks",
@@ -108,7 +218,7 @@
   "notes": [
     {
       "topic": "ruling",
-      "text": "The view body is the markup Salt for Next.js's example app writes (apps/example/src/site/blog-views.tsx, ArchiveView), in its order: the title, then an author's profile with its salt-archive__* classes, then the listing (SC-007). A topic has no profile, and later pages draw none."
+      "text": "The view body is the markup Salt for Next.js's example app writes (apps/example/src/site/blog-views.tsx, ArchiveView), in its order: the title, then an author's profile with its salt-archive__* classes, then the listing (SC-007). A topic has no profile, and later pages draw none. An author's page is each published team member's own public page (the founder's ruling of 19/11/2026): its profile draws the member's role as the strapline, bio, photo, and email, phone and social links as the team card draws them, each only when it is set; its address is each platform's own routing (SC-003)."
     },
     {
       "topic": "stylesheet-owes",

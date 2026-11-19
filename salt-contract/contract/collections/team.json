@@ -1,7 +1,7 @@
 {
   "$schema": "../../schema/field-definition.schema.json",
   "version": "1.0.0-rc.8",
-  "$comment": "A team member's stored fields: the person shape (contract/collections/_person.json), flat. A team member is a record with no login, separate from login accounts, and anyone on the team can be credited as a post's author without an account (the founder's rulings of 18/11/2026). Salt for WordPress keeps its team_member post type. Team has no topics (SC-027) and no page of its own. The editor's order is each platform's own.",
+  "$comment": "A team member's stored fields: the person shape (contract/collections/_person.json), flat. A team member is a record with no login, separate from login accounts, and anyone on the team can be credited as a post's author without an account (the founder's rulings of 18/11/2026). Salt for WordPress keeps its team_member post type. Team has no topics (SC-027). Every published team member has a public page of their own (the founder's ruling of 19/11/2026): the author page (contract/markup/archive.json), which draws the member's role, bio, photo, email, phone and social links, and the member's posts when there are any; its address is each platform's own routing (SC-003). No page lists the whole team: team has no index page, so a section of team draws no view-all link. The editor's order is each platform's own.",
   "collection": "team",
   "label": "Team member",
   "shared": {
@@ -12,7 +12,7 @@
       "formerly": {
         "wordpress": "post_content (the full biography)"
       },
-      "note": "No page reads it; team members have no page of their own."
+      "note": "The member's own page reads the bio field (contract/collections/_person.json), not the post content, which stays dropped (the founder's ruling of 19/11/2026)."
     },
     {
       "formerly": {

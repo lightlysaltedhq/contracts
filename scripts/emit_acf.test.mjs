@@ -723,8 +723,10 @@ test('ID-3969: WordPress\'s native title and summary carry their targets under t
     const group = groupOf(groups, source)
     assert.deepEqual([group.salt.native.title, group.salt.native.summary, group.salt.targets], ['title', 'excerpt', { title: [60, 120], summary: 300 }], source)
   }
+  // A team member's page is their own too (19/11/2026), and has no summary.
+  assert.deepEqual(groupOf(groups, 'team').salt.targets, { name: [60, 120] })
   // No page of its own: the 120 only.
-  const titles = { locations: 'title', faqs: 'question', testimonials: 'name', team: 'name' }
+  const titles = { locations: 'title', faqs: 'question', testimonials: 'name' }
   for (const [source, name] of Object.entries(titles)) {
     const group = groupOf(groups, source)
     assert.deepEqual([group.salt.native[name], group.salt.targets], ['title', { [name]: 120 }], source)
