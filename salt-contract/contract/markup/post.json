@@ -206,7 +206,7 @@
                   "role": "tag",
                   "element": "li",
                   "repeat": {
-                    "from": "topics that head an archive, in the editor's order"
+                    "from": "topics that head an archive: the primary topic first, then the rest A to Z by title (the founder's ruling of 19/11/2026)"
                   },
                   "children": [
                     {

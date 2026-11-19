@@ -359,7 +359,7 @@
                   ]
                 }
               ],
-              "note": "One group per term, in term order, each a heading and its index list.",
+              "note": "One group per term, in term order, each a heading and its index list. An entry under two or more terms is listed under each of them (the founder's ruling of 19/11/2026).",
               "optional": true,
               "when": "the index is grouped and an entry has a term"
             },
