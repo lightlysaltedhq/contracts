@@ -344,8 +344,9 @@ test('icons come from the site, and a section that needs them refuses to build w
 test('a relationship points at its source\'s collection, renamed by the site if it says so', () => {
   const fields = [{ name: 'people', type: 'relationship', label: 'People', to: 'team', many: true, max: 4 }]
   assert.deepEqual(toPayloadBlocks({ contract: probe(fields) })[0].fields[0],
-    { name: 'people', type: 'relationship', label: 'People', relationTo: 'users', hasMany: true, maxRows: 4, custom: { salt: { to: 'team' } } })
-  assert.equal(toPayloadBlocks({ contract: probe(fields), sources: { team: { collection: 'staff' } } })[0].fields[0].relationTo, 'staff')
+    { name: 'people', type: 'relationship', label: 'People', relationTo: 'users', filterOptions: { showOnWebsite: { equals: true } }, hasMany: true, maxRows: 4, custom: { salt: { to: 'team' } } })
+  assert.equal(toPayloadBlocks({ contract: probe(fields), usersSlug: 'accounts', sources: { team: {} } })[0].fields[0].relationTo, 'accounts')
+  assert.throws(() => toPayloadBlocks({ contract: probe(fields), sources: { team: { collection: 'staff' } } }), /must be the native users collection/)
 })
 
 test('a collection-query with a fixed source is the fixed group against that collection', () => {
@@ -828,7 +829,8 @@ test('X2-X5: a source select and its query belong at the section\'s top level, f
   // At the top level the pickers filter by the block's own source select.
   const items = field(field(toPayloadBlocks({ contract: probe(pair(['posts', 'team'])) })[0].fields, 'query').fields, 'items')
   assert.deepEqual(items.relationTo, ['posts', 'users'])
-  assert.equal(items.filterOptions({ relationTo: 'users', blockData: { source: 'team' } }), true)
+  assert.deepEqual(items.filterOptions({ relationTo: 'users', blockData: { source: 'team' } }), { showOnWebsite: { equals: true } })
+  assert.deepEqual(items.filterOptions({ relationTo: 'users' }), { showOnWebsite: { equals: true } })
   assert.equal(items.filterOptions({ relationTo: 'posts', blockData: { source: 'team' } }), false)
   // The shipped contract has no such shape: it plans cleanly with every source installed.
   const plan = planSections(loadContract())
@@ -926,13 +928,18 @@ test('ID-3944: each collection\'s fields, byte-stable, for the site\'s collectio
   assert.deepEqual([field(posts.fields, 'topics').relationTo, field(posts.fields, 'topics').hasMany, field(posts.fields, 'primaryTopic').hasMany], ['topics', true, undefined])
   assert.deepEqual(field(posts.fields, 'publishedAt').admin.date, { pickerAppearance: 'dayAndTime' })
   assert.deepEqual(field(posts.fields, 'layout').blocks.map((b) => b.slug), ['rich-text', 'media-text', 'gallery', 'call-to-action', 'faq'])
-  // The person shape is flat on a team member, before nothing of its own.
-  assert.deepEqual(collection(list, 'team').fields.map((f) => f.name), ['name', 'role', 'bio', 'photo', 'email', 'phone', 'socials'])
+  const team = collection(list, 'team')
+  assert.deepEqual(team.fields.map((f) => f.name), ['name', 'role', 'bio', 'photo', 'publicEmail', 'phone', 'socials', 'showOnWebsite', 'slug'])
+  assert.equal(field(team.fields, team.custom.salt.userTick).defaultValue, false)
+  assert.equal(field(team.fields, 'publicEmail').required, undefined)
+  assert.deepEqual([field(posts.fields, 'author').relationTo, field(posts.fields, 'author').filterOptions], ['users', undefined])
   const hours = field(collection(list, 'locations').fields, 'hours.open')
   assert.deepEqual([hours.type, hours.custom.salt.format], ['text', 'time'])
-  // A source a site lacks has no collection, and a relationship to one is left out and named.
+  // Credit remains a native-user relationship even without the logical team source.
   const alone = toPayloadCollections({ icons, richTextEditor: editor, sources: { posts: {} } })
-  assert.deepEqual([alone.map((c) => c.slug), alone[0].custom.salt.leftOut], [['posts'], ['author (the source team)']])
+  assert.deepEqual([alone.map((c) => c.slug), field(alone[0].fields, 'author').relationTo, alone[0].custom.salt.leftOut], [['posts'], 'users', undefined])
+  const [renamed] = toPayloadCollections({ icons, richTextEditor: editor, usersSlug: 'accounts', sources: { posts: {} } })
+  assert.equal(field(renamed.fields, 'author').relationTo, 'accounts')
 })
 
 test('ID-3944: a renamed collection field fails the collections drift check, naming both names', () => {

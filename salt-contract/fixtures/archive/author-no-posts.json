@@ -5,7 +5,7 @@
   "context": {
     "priorityMedia": false,
     "locale": "en-GB",
-    "path": "/journal/author/sam-okafor/"
+    "path": "/team/sam-okafor/"
   },
   "site": {
     "arrow": "→",
@@ -21,7 +21,7 @@
   "document": {
     "kind": "author",
     "title": "Sam Okafor",
-    "href": "/journal/author/sam-okafor/",
+    "href": "/team/sam-okafor/",
     "strapline": "Nursery manager",
     "biography": "Sam grows the perennials we plant, from seed and from cuttings.",
     "photo": "sam",
@@ -41,7 +41,7 @@
       "current": 1,
       "total": 1,
       "hrefs": {
-        "1": "/journal/author/sam-okafor/"
+        "1": "/team/sam-okafor/"
       }
     }
   }

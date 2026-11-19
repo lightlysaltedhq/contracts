@@ -5,7 +5,7 @@
   "context": {
     "priorityMedia": false,
     "locale": "en-GB",
-    "path": "/journal/author/priya-shah/"
+    "path": "/team/priya-shah/"
   },
   "site": {
     "arrow": "→",
@@ -21,7 +21,7 @@
   "document": {
     "kind": "author",
     "title": "Priya Shah",
-    "href": "/journal/author/priya-shah/",
+    "href": "/team/priya-shah/",
     "strapline": "Head gardener at Hollin Farm",
     "biography": "Priya has run the kitchen garden at Hollin Farm for eleven years and writes about soil, water and patience.",
     "photo": "priya",
@@ -88,7 +88,7 @@
       "current": 1,
       "total": 1,
       "hrefs": {
-        "1": "/journal/author/priya-shah/"
+        "1": "/team/priya-shah/"
       }
     }
   }

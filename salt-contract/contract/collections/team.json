@@ -1,12 +1,27 @@
 {
   "$schema": "../../schema/field-definition.schema.json",
   "version": "1.0.0-rc.8",
-  "$comment": "A team member's stored fields: the person shape (contract/collections/_person.json), flat. A team member is a record with no login, separate from login accounts, and anyone on the team can be credited as a post's author without an account (the founder's rulings of 18/11/2026). Salt for WordPress keeps its team_member post type. Team has no topics (SC-027). Every published team member has a public page of their own (the founder's ruling of 19/11/2026): the author page (contract/markup/archive.json), which draws the member's role, bio, photo, email, phone and social links, and the member's posts when there are any; its address is each platform's own routing (SC-003). No page lists the whole team: team has no index page, so a section of team draws no view-all link. The editor's order is each platform's own.",
+  "$comment": "Team is a logical source: on both platforms it selects native users with showOnWebsite ticked, never a separate post type or collection. Apply that filter to every team query and manual selection, not to post credit. A ticked user needs no admin access. Editors may manage public profiles, but that permission must not let them create or manage accounts, roles, credentials or security fields. Ticking the box grants no account permissions. The public page at /team/{slug}/ reads the person fields and the member's posts, if any. Team has no topics (SC-027), no collection index page and no view-all link. The editor's order is each platform's own.",
   "collection": "team",
   "label": "Team member",
   "shared": {
     "id": "person"
   },
+  "fields": [
+    {
+      "name": "showOnWebsite",
+      "type": "boolean",
+      "label": "Team member",
+      "default": false,
+      "description": "Include this user in team selections and give them a public profile. This neither grants admin access nor changes post credit."
+    },
+    {
+      "name": "slug",
+      "type": "text",
+      "label": "Public profile slug",
+      "description": "The unique public slug for /team/{slug}/. A ticked user needs one. It is independent of the login and stays the same when the display name changes."
+    }
+  ],
   "dropped": [
     {
       "formerly": {
@@ -36,6 +51,10 @@
       "title": {
         "from": "name"
       },
+      "href": {
+        "from": "slug",
+        "note": "The member's own page at /team/{slug}/, using the stable public slug."
+      },
       "image": {
         "from": "photo"
       },
@@ -46,7 +65,7 @@
         "from": "bio"
       },
       "email": {
-        "from": "email",
+        "from": "publicEmail",
         "note": "Drawn as a mailto: link when filled."
       },
       "phone": {

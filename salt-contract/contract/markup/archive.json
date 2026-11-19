@@ -218,7 +218,7 @@
   "notes": [
     {
       "topic": "ruling",
-      "text": "The view body is the markup Salt for Next.js's example app writes (apps/example/src/site/blog-views.tsx, ArchiveView), in its order: the title, then an author's profile with its salt-archive__* classes, then the listing (SC-007). A topic has no profile, and later pages draw none. An author's page is each published team member's own public page (the founder's ruling of 19/11/2026): its profile draws the member's role as the strapline, bio, photo, and email, phone and social links as the team card draws them, each only when it is set; its address is each platform's own routing (SC-003)."
+      "text": "A topic has no profile, and later pages draw none. A user marked as a team member has one public profile at /team/{slug}/, whether or not they have written posts. The title comes first, then role as strapline, bio, photo and public contact links when filled, then any authored posts. The profile self-canonicalises; only its canonical URL appears in the sitemap. Team cards, bylines and author boxes link directly there. Existing author addresses for that profile permanently redirect there (301); they never serve duplicate content. An unticked author is credited as text and has no public profile (19/11/2026)."
     },
     {
       "topic": "stylesheet-owes",

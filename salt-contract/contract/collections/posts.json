@@ -30,16 +30,14 @@
       "name": "author",
       "type": "relationship",
       "label": "Author",
-      "to": "team",
-      "description": "Optional. The team member credited with the post, who needs no account.",
+      "to": "users",
+      "description": "Optional. Credit the native user independently of the team tick. Removing the tick never removes the credit.",
       "platforms": {
         "nextjs": {
-          "formerly": "author (a relationship to users)",
-          "owes": "a relationship to the team collection, each post repointed to a team member"
+          "formerly": "author (a relationship to users)"
         },
         "wordpress": {
-          "formerly": "post_author (a user)",
-          "owes": "the credited author as a field of the theme's own, and the author archive built by team member"
+          "native": "post_author"
         }
       }
     },

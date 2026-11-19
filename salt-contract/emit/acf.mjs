@@ -30,7 +30,7 @@
 import { readFileSync, writeFileSync } from 'node:fs'
 
 import { allowedFor, categorisedSources, categorySources, clauses, collectionQueryShape, diffSnapshots, isMainModule, LINK_SHAPE, loadContract,
-  normaliseLineEndings, parseEmitterArguments, planSections, resolveCollection, sourceValues, SOURCES } from './_contract.mjs'
+  normaliseLineEndings, parseEmitterArguments, planSections, resolveCollection, sourceValues, SOURCES, TEAM_TICK } from './_contract.mjs'
 
 /**
  * Each source's post type and category taxonomy, as Salt for WordPress registers them by default.
@@ -43,7 +43,7 @@ export const SOURCE_DEFAULTS = {
   'case-studies': { postType: 'work', taxonomy: 'work_type' },
   testimonials: { postType: 'testimonial', taxonomy: null },
   posts: { postType: 'post', taxonomy: 'category' },
-  team: { postType: 'team_member', taxonomy: null },
+  team: { taxonomy: null }, // A filtered set of users, not a post type.
   faqs: { postType: 'faq', taxonomy: 'faq_category' },
   locations: { postType: 'location', taxonomy: 'location_area' },
 }
@@ -227,6 +227,18 @@ function convertField(f, ctx) {
       out.sub_fields = convertFields(f.fields, below)
       break
     case 'relationship': {
+      if (f.to === 'team' || f.to === 'users') {
+        typed('user')
+        out.return_format = 'id'
+        out.multiple = f.many ? 1 : 0
+        out.allow_null = f.required ? 0 : 1
+        salt.to = f.to
+        if (f.to === 'team') salt.userTick = TEAM_TICK // Apply to the user query, not a role filter.
+        // ACF's user field has no min/max settings; the adapter checks these on publish.
+        if (f.min !== undefined) salt.min = f.min
+        if (f.max !== undefined) salt.max = f.max
+        break
+      }
       typed(f.many ? 'relationship' : 'post_object')
       // A link's document and a collection-query's parts have no `to`; their callers set it.
       if (f.to) {
@@ -327,7 +339,9 @@ function collectionQuery(f, out, ctx) {
     if (!taxonomy) throw new Error(`sources.${s}.taxonomy: the contract gives ${s} categories (SC-010); name the taxonomy that holds them`)
     return taxonomy
   }))]
-  const postTypes = [...new Set(offered.map((s) => ctx.sources[s].postType))]
+  const postSources = Object.fromEntries(offered.filter((s) => s !== 'team').map((s) => [s, ctx.sources[s].postType]))
+  const postTypes = [...new Set(Object.values(postSources))]
+  if (offered.includes('team')) salt.userTick = TEAM_TICK
   if (f.modes) salt.modes = f.modes
   if (f.max !== undefined) salt.max = f.max
   const shape = collectionQueryShape({ modes: f.modes, max: f.max, hasCategories: withCategories.length > 0 })
@@ -341,7 +355,14 @@ function collectionQuery(f, out, ctx) {
     // records which sources by-category needs, for the site's acf/validate_value check (the
     // query's WordPress owes).
     if (field.name === 'mode' && f.sourceField && 'by-category' in field.choices) return retyped(field, {}, { modeRequires: { 'by-category': withCategories } })
-    if (field.name === 'items') return retyped(field, { type: 'relationship', post_type: postTypes, filters: ['search'], return_format: 'id' })
+    if (field.name === 'items') {
+      if (!offered.includes('team')) return retyped(field, { type: 'relationship', post_type: postTypes, filters: ['search'], return_format: 'id' })
+      const { filters, ...picker } = field // A post relationship's filters do not apply to users.
+      if (!postTypes.length) return retyped(picker, { type: 'user', multiple: 1, return_format: 'id' }, { userTick: TEAM_TICK })
+      // ACF cannot mix posts and users in a relationship. Populate this single ordered ID picker
+      // from the selected source; a team ID is a ticked user, never a post with the same ID.
+      return retyped(picker, { type: 'select', multiple: 1, ui: 1, ajax: 1, choices: {}, return_format: 'value' }, { sourceField: f.sourceField, postSources, userTick: TEAM_TICK })
+    }
     if (field.name !== 'categories') return field
     // With a source select the field shows only while the select, on the layout above this group,
     // holds a source with categories: one OR group per such source, added to each mode group. ACF
@@ -393,7 +414,7 @@ function plannedFor(ctx, ids) {
   return ids.flatMap((id) => planSections(ctx.contract, { installed }).sections.filter((p) => p.id === id))
 }
 
-// The group of one collection's fields, located on its post type. A field WordPress stores in its
+// The group of one collection's fields, located on the user edit form for team, otherwise its post type. A field WordPress stores in its
 // own place (platforms.wordpress.native) is left out and recorded under salt.native, and its target,
 // if it has one, under salt.targets, as no ACF field carries it (ID-3969); a field whose
 // relationship points at a source the site does not install is left out and recorded under
@@ -410,11 +431,12 @@ function collectionGroup(contract, source, sources, base) {
       if (f.target !== undefined) targets[f.name] = f.target
       return false
     }
-    if (f.type === 'relationship' && !(f.to in sources)) { leftOut.push(`${f.name} (the source ${f.to})`); return false }
+    if (f.type === 'relationship' && f.to !== 'users' && !(f.to in sources)) { leftOut.push(`${f.name} (the source ${f.to})`); return false }
     return true
   })
   const scope = `collection_${source}`
   const salt = { collection: source }
+  if (source === 'team') salt.userTick = TEAM_TICK
   if (Object.keys(native).length) salt.native = native
   if (Object.keys(targets).length) salt.targets = targets
   if (leftOut.length) salt.leftOut = leftOut
@@ -422,7 +444,7 @@ function collectionGroup(contract, source, sources, base) {
     key: `group_salt_${snake(scope)}`,
     title: collection.label,
     fields: convertFields(kept, { ...base, scope, path: [], collection: source }),
-    location: [[{ param: 'post_type', operator: '==', value: sources[source].postType }]],
+    location: [[source === 'team' ? { param: 'user_form', operator: '==', value: 'edit' } : { param: 'post_type', operator: '==', value: sources[source].postType }]],
     salt,
   }
 }
@@ -459,7 +481,7 @@ function build(options) {
 /**
  * Every ACF field group the contract defines, in ACF JSON's shape: the page sections group, a
  * Flexible Content field with a layout per section, then one group per installed collection
- * source, in the contract's source order, located on that source's post type. A collection group
+ * source, in the contract's source order, located on its post type or, for team, the user edit form. A collection group
  * holds the fields WordPress has no place of its own for; the rest (the title, body, excerpt,
  * featured image, categories and date) are WordPress's, named under the group's salt.native.
  *
@@ -471,7 +493,7 @@ function build(options) {
  *   sources    { [source id]: { postType?, taxonomy? } } for the sources the site has; all of
  *              them, with SOURCE_DEFAULTS' slugs, when left out
  *   postTypes  where the sections group shows (['page']); a collection's group shows on its own
- *              post type (sources)
+ *              post type (sources), except team on the user edit form
  *   sections   the section ids to emit, in this order; one the site's sources cannot carry
  *              throws. Left out: every section in sections.json the sources can carry
  *   collections the source ids whose collection groups to emit, of those the site installs;

@@ -444,7 +444,7 @@
         {
           "id": "team",
           "label": "Team",
-          "linked": false,
+          "linked": true,
           "categories": false
         }
       ],
@@ -542,7 +542,7 @@
         {
           "id": "team",
           "label": "Team",
-          "linked": false,
+          "linked": true,
           "categories": false
         }
       ],

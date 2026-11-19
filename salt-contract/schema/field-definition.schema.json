@@ -28,7 +28,7 @@
       "$ref": "#/$defs/source"
     },
     "shape": {
-      "description": "A shape more than one record carries: person (a team member, whom a post credits as its author), address (a location's and the company's), topic (a collection's category term). The file is contract/collections/_<shape>.json.",
+      "description": "A shape more than one record carries: person (a native user's public profile fields), address (a location's and the company's), topic (a collection's category term). The file is contract/collections/_<shape>.json.",
       "enum": [
         "person",
         "address",
@@ -302,7 +302,7 @@
           "$ref": "#/$defs/text"
         },
         "native": {
-          "description": "Salt for WordPress only, on a collection's field: the field is stored in WordPress's own place for it, not in an ACF field (the ruling of 18/11/2026 on native storage). title: the post title. body: the post content. excerpt: the post excerpt. featured-image: the featured image. categories: the post type's category taxonomy, in WordPress's own box. date: the post date. description: a term's own description. The ACF emitter generates no field for it and records it under the group's salt.native.",
+          "description": "Salt for WordPress only, on a collection's field: the field is stored in WordPress's own place for it, not in an ACF field (the ruling of 18/11/2026 on native storage). title: the post title. body: the post content. excerpt: the post excerpt. featured-image: the featured image. categories: the post type's category taxonomy, in WordPress's own box. date: the post date. description: a term's own description. display_name: the user's display name. post_author: the credited user's ID, independent of team membership. The ACF emitter generates no field for it and records it under the group's salt.native.",
           "enum": [
             "title",
             "body",
@@ -310,7 +310,9 @@
             "featured-image",
             "categories",
             "date",
-            "description"
+            "description",
+            "display_name",
+            "post_author"
           ]
         }
       }
@@ -1091,7 +1093,8 @@
       ],
       "properties": {
         "to": {
-          "$ref": "#/$defs/source"
+          "description": "An item source, or users for a relationship to native users regardless of their team tick. Users is not a collection-query source.",
+          "anyOf": [{ "$ref": "#/$defs/source" }, { "const": "users" }]
         },
         "many": {
           "type": "boolean"

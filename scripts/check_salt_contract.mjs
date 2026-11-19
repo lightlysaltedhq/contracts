@@ -428,7 +428,7 @@ if (vocab && (vocab.sections ?? []).every((x) => x && typeof x === 'object')) {
   const VIEW_TYPES = { card: ['_shared', 'card'], 'faq-item': ['faq', 'faq-item'], office: ['locations', 'office'] }
   const recordChecks = (owner, source, fields) => {
     for (const f of fields ?? []) {
-      if (f.type === 'relationship' && !itemSources.has(f.to)) fails.push(`${owner}.${f.name} points at ${f.to}, which is not an item source`)
+      if (f.type === 'relationship' && f.to !== 'users' && !itemSources.has(f.to)) fails.push(`${owner}.${f.name} points at ${f.to}, which is not an item source`)
       if (f.type === 'topics' && categoriesOf.get(source)?.value !== true) fails.push(`${owner}.${f.name} is topics, but sections.json gives ${source} no categories (SC-010)`)
       if (f.type === 'sections') for (const id of f.sections ?? []) if (!sectionIds.has(id)) fails.push(`${owner}.${f.name} offers ${id}, which is not a section in sections.json`)
       if (f.fields) recordChecks(`${owner}.${f.name}`, source, f.fields)

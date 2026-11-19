@@ -275,9 +275,12 @@ test, applied through section 2's table, where the stricter row wins.
   - Both emitters' output for a limit is as at rc.7. An ACF Pro 6.8.11 probe showed that ACF's own
     setting is what checks a limit on publish: with it removed nothing checked at all. The
     founder answered every question on limits and targets on 19/11/2026.
-  - **Team members' pages** (the founder's rulings of 19/11/2026, A to E). Every published team
-    member has a public page of their own: the contract's author page (`markup/archive.json`),
-    restated as the member's own page, its address each platform's routing (SC-003);
+  - **Team members' pages** (19/11/2026). A team tick on the existing user makes their profile
+    public. Posts credit users independently of the tick. Editors can maintain public profiles
+    without managing accounts or roles; the public contact email never falls back to login email.
+    A team member needs no admin access. Both platforms use one address, `/team/{slug}/`;
+    bylines, author boxes and team cards link directly there, and existing public author URLs
+    for that person redirect permanently (301). The public slug survives a display-name change.
     `team.json` no longer says team has no page, and the dropped `post_content`'s note says the
     page reads the `bio` field. The page's profile draws the role as the strapline, the bio, the
     photo, and the email, phone and social links as the team card draws them (`card.json`'s
@@ -294,14 +297,8 @@ test, applied through section 2's table, where the stricter row wins.
     source, as its condition already says, so `carousel.json` is unchanged. By-category with a
     category that does not belong to the chosen source is refused on publish, with a message
     (both platforms' query owes in `carousel.json` and `collection-showcase.json`).
-  - **Pending the founder, not ruled.** Two consequences of team members having pages. Team stays
-    `linked: false` in `sections.json` until they are ruled, which keeps both as today:
-    - Should a team card's name link to the member's page, as other collections' cards link to
-      theirs? Recommended: yes. It means team `linked: true` in `sections.json`.
-    - The showcase offers the index layout only for a collection whose items have their own pages,
-      which team now meets: should it offer index for team? Recommended: yes, as it follows from
-      the stated rule; it too needs team `linked: true`, and until then the layout's note and the
-      source disagree.
+  - Team is a linked source for showcase and carousel. The Index layout can list members'
+    individual pages; this neither creates a whole-team archive nor adds a view-all link.
 - The case-study view has fixtures and is required of every implementation (SC-021).
   `fixtures/case-study/` holds four cases (`full`, `aside`, `band` and `minimal`), `case-study`
   joins `REQUIRED_FILES`, and a full conformance run refuses to declare it not shipped. The
@@ -653,4 +650,3 @@ questions and "left as work" notes here describe the draft at the time; 1.0.0 ab
   a condition names a sibling field, a filled condition names no group, list,
   collection-query or link, and sibling names are unique. The carousel's variant field is
   `cardStyle`, as the fields file names it.
-

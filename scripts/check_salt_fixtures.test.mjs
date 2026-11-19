@@ -672,8 +672,10 @@ test('SC-023: the team showcase draws its items in the order its input gives the
   const input = JSON.parse(readFileSync(`${at}.json`, 'utf8'))
   assert.equal(input.values.source, 'team')
   assert.deepEqual(input.values.query, { mode: 'automatic', count: 3 })
-  const drawn = [...readFileSync(`${at}.html`, 'utf8').matchAll(/<h3>([^<]*)<\/h3>/g)].map((m) => m[1])
+  const links = [...readFileSync(`${at}.html`, 'utf8').matchAll(/<h3><a class="salt-card__link" href="([^"]+)">([^<]+)/g)]
+  const drawn = links.map((m) => m[2])
   assert.deepEqual(drawn, input.collections.team.map((item) => item.title))
+  assert.deepEqual(links.map((m) => m[1]), input.collections.team.map((item) => item.href))
   // Not alphabetical by name or by title, so an adapter that sorts either way fails the case.
   assert.notDeepEqual(drawn, [...drawn].sort())
 })

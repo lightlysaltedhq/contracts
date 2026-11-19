@@ -35,7 +35,14 @@ Lightly Salted product follows) and holds no brand values of its own.
 Decided by the owner on 08/10/2026 (`SC-003` in the decision log): **visitor output** (HTML,
 classes, data attributes, stylesheets, accessibility behaviour) and **editor fields** (names,
 types, choices, limits, descriptions). Admin screens, logins, form delivery and routing stay
-native to each CMS.
+native to each CMS. Public team profiles are a routing exception on both platforms:
+`/team/{slug}/` is the one public URL. The slug is a stable public identifier independent
+of the login and does not change when the display name changes. Team cards, bylines and
+author boxes link directly there. The page has a self-referencing canonical; only its
+canonical URL goes in the sitemap. Existing public author URLs for the same profile return
+a permanent (301) redirect directly to it. Do not create aliases where none existed.
+Only a user marked as a team member has a public profile; an unticked author retains
+their credit as plain text. Each platform tests its HTTP redirects, canonical and sitemap.
 
 ## The customisation ladder
 
@@ -255,7 +262,7 @@ lists it, with the note that accounts for it.
 into the Flexible Content layout Salt for WordPress registers in its page sections field group
 (`group_salt_sections`), and each collection source's fields (`contract/collections`) into a group
 of its own, `group_salt_collection_<source>`, located on the source's post type (`SOURCE_DEFAULTS`,
-or `sources`). A collection field WordPress stores in its own place (the title, body, excerpt,
+or `sources`), except for team: its fields belong on existing users. A collection field WordPress stores in its own place (the title, body, excerpt,
 featured image, categories or date: `platforms.wordpress.native`) is not generated; the group names
 it under `salt.native`, and a target it carries under `salt.targets`.
 
