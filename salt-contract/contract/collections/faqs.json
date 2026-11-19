@@ -10,17 +10,16 @@
       "type": "text",
       "label": "Question",
       "required": true,
-      "maxLength": 120,
-      "target": 60,
+      "target": 120,
       "platforms": {
         "nextjs": {
           "formerly": "question",
-          "owes": "the 120-character limit; a count as the editor types, beside the target of 60, which is never refused"
+          "owes": "a target of 120 characters, shown with a count and never refused"
         },
         "wordpress": {
           "native": "title",
           "formerly": "post_title",
-          "owes": "a count as the editor types, beside the target of 60, which is never refused"
+          "owes": "a target of 120 characters, shown with a count and never refused"
         }
       }
     },

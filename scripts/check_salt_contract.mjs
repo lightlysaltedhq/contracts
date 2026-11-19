@@ -293,6 +293,8 @@ if (vocab && (vocab.sections ?? []).every((x) => x && typeof x === 'object')) {
         fails.push(`${owner}.${f.name} defaults to icon ${f.default}, which is not a content icon in sections.json`)
       }
       if (typeof f.min === 'number' && typeof f.max === 'number' && f.min > f.max) fails.push(`${owner}.${f.name} min ${f.min} exceeds max ${f.max}`)
+      // A target pair is [hint, target], the hint the lower (ID-3969, the ruling of 19/11/2026).
+      if (Array.isArray(f.target) && !(f.target[0] < f.target[1])) fails.push(`${owner}.${f.name} target [${f.target.join(', ')}] is not an ascending [hint, target] pair`)
       if (f.rowLabel && !(f.fields ?? []).some((c) => c.name === f.rowLabel)) {
         fails.push(`${owner}.${f.name} rowLabel names ${f.rowLabel}, which is not one of its fields`)
       }

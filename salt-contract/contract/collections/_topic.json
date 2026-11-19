@@ -9,15 +9,16 @@
       "type": "text",
       "label": "Name",
       "required": true,
-      "maxLength": 120,
+      "target": 120,
       "platforms": {
         "nextjs": {
-          "formerly": "title"
+          "formerly": "title",
+          "owes": "a target of 120 characters, shown with a count and never refused"
         },
         "wordpress": {
           "native": "title",
           "formerly": "the term's name",
-          "owes": "the parent control removed from each taxonomy, so topics stay flat"
+          "owes": "the parent control removed from each taxonomy, so topics stay flat; a target of 120 characters, shown with a count and never refused"
         }
       }
     },

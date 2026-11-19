@@ -169,13 +169,27 @@ test('inputs: a context with no index fails', () => {
 test('inputs: rich text with an element its field does not allow fails', () => {
   expectFail(['rich-text'], (io) => io.json('rich-text/left-eyebrow-heading-body.json', (d) => { d.values.body += '<table><tr><td>x</td></tr></table>' }), /values\.body uses <table>/)
 })
+// No field carries a maxLength since the ruling of 19/11/2026 (every text length is a target), so
+// these give the features intro its old limit of 300 back, in the copy only.
+const withIntroLimit = (io) => {
+  const at = path.join(io.dir, 'contract', 'fields', 'features.json')
+  const doc = JSON.parse(readFileSync(at, 'utf8'))
+  const intro = doc.fields.find((f) => f.name === 'intro')
+  delete intro.target
+  intro.maxLength = 300
+  writeFileSync(at, JSON.stringify(doc, null, 2) + '\n')
+}
 test('inputs: a text over its maxLength fails', () => {
-  expectFail(['features'], (io) => io.json('features/many-items-linked.json', (d) => { d.values.intro = 'x'.repeat(301) }), /values\.intro is 301 characters; maxLength is 300/)
+  expectFail(['features'], (io) => { withIntroLimit(io); io.json('features/many-items-linked.json', (d) => { d.values.intro = 'x'.repeat(301) }) }, /values\.intro is 301 characters; maxLength is 300/)
+})
+test('ID-3969: a text over its target is no fault', () => {
+  const dir = copy(['features'], (io) => io.json('features/many-items-linked.json', (d) => { d.values.intro = 'x'.repeat(301) }))
+  try { assert.doesNotMatch(run(dir).out, /values\.intro/) } finally { rmSync(dir, { recursive: true, force: true }) }
 })
 test('ID-3968: a length counts code points, a CRLF as one', () => {
   // 300 characters: 298 astral ones (596 UTF-16 units), a CRLF and an x.
   const at = (intro) => {
-    const dir = copy(['features'], (io) => io.json('features/many-items-linked.json', (d) => { d.values.intro = intro }))
+    const dir = copy(['features'], (io) => { withIntroLimit(io); io.json('features/many-items-linked.json', (d) => { d.values.intro = intro }) })
     try { return run(dir).out } finally { rmSync(dir, { recursive: true, force: true }) }
   }
   assert.doesNotMatch(at('🌱'.repeat(298) + '\r\n' + 'x'), /maxLength/)

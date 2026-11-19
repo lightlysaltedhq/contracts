@@ -26,7 +26,7 @@ with that source chosen, so fields the contract hides for it are left out.
 
 ## Summary
 
-261 differences: 261 expected, 0 unexpected; 0 listed, not found.
+260 differences: 260 expected, 0 unexpected; 0 listed, not found.
 
 | Section | Compared |
 | --- | --- |
@@ -300,7 +300,6 @@ Field groups not compared, because this report compares the page sections only (
 | carousel (testimonials) | `settings.backgroundImage` | missing | not in salt-wordpress | owes: the background image and its four settings |
 | carousel (testimonials) | `settings.firstPageOnly` | missing | not in salt-wordpress | owes: the field, with the listing section that paginates |
 | carousel (testimonials) | `layout` | extra | in salt-wordpress, not in the contract | sections.json formerly: testimonials |
-| contact | `intro` | limit | maxlength 300; salt-wordpress none | owes: the 300-character limit |
 | contact | `settings.toneDark` | missing | not in salt-wordpress | owes: the field; dark mode is a token inversion today, with no per-section choice |
 | contact | `settings.backgroundImage` | missing | not in salt-wordpress | owes: the background image and its four settings |
 | contact | `settings.firstPageOnly` | missing | not in salt-wordpress | owes: the field, with the listing section that paginates |

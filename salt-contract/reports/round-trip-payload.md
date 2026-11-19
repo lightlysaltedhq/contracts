@@ -19,7 +19,7 @@ longer occurs.
 
 ## Summary
 
-12 differences: 3 expected, 9 unexpected; 0 listed, not found.
+23 differences: 14 expected, 9 unexpected; 0 listed, not found.
 
 | Section | Compared |
 | --- | --- |
@@ -61,4 +61,15 @@ longer occurs.
 | --- | --- | --- | --- | --- |
 | rich-text | `body` | allowed | allows paragraph, bold, italic, code, link, unordered-list, ordered-list, blockquote, heading-2, heading-3, heading-4, heading-5, heading-6; salt-nextjs paragraph, bold, italic, code, link, unordered-list, ordered-list, blockquote, heading-3, heading-4 | owes: headings 2, 5 and 6 in the editor, beside 3 and 4 |
 | media-text | `rows.mediaSide` | condition | salt-nextjs decides it from the parent block, which a contract condition cannot read | note: Hidden when the section's mode is alternating, a condition on the parent that the contract cannot express; the description says it instead. |
+| features | `intro` | limit | maxLength none; salt-nextjs 300 | owes: a target of 300 characters in place of its maxLength of 300, shown with a count and never refused (the ruling of 19/11/2026) |
+| stats | `intro` | limit | maxLength none; salt-nextjs 300 | owes: a target of 300 characters in place of its maxLength of 300, shown with a count and never refused (the ruling of 19/11/2026) |
+| logos | `intro` | limit | maxLength none; salt-nextjs 300 | owes: a target of 300 characters in place of its maxLength of 300, shown with a count and never refused (the ruling of 19/11/2026) |
+| gallery | `intro` | limit | maxLength none; salt-nextjs 300 | owes: a target of 300 characters in place of its maxLength of 300, shown with a count and never refused (the ruling of 19/11/2026) |
+| process | `intro` | limit | maxLength none; salt-nextjs 300 | owes: a target of 300 characters in place of its maxLength of 300, shown with a count and never refused (the ruling of 19/11/2026) |
+| faq | `intro` | limit | maxLength none; salt-nextjs 300 | owes: a target of 300 characters in place of its maxLength of 300, shown with a count and never refused (the ruling of 19/11/2026) |
+| tabs | `intro` | limit | maxLength none; salt-nextjs 300 | owes: a target of 300 characters in place of its maxLength of 300, shown with a count and never refused (the ruling of 19/11/2026) |
+| collection-showcase | `intro` | limit | maxLength none; salt-nextjs 300 | owes: a target of 300 characters in place of its maxLength of 300, shown with a count and never refused (the ruling of 19/11/2026) |
+| carousel | `intro` | limit | maxLength none; salt-nextjs 300 | owes: a target of 300 characters in place of its maxLength of 300, shown with a count and never refused (the ruling of 19/11/2026) |
 | carousel | `cards.role` | condition | salt-nextjs decides it from the parent block, which a contract condition cannot read | note: Shown only when the card style is quote, a condition on the parent that the contract cannot express. |
+| listing | `intro` | limit | maxLength none; salt-nextjs 300 | owes: a target of 300 characters in place of its maxLength of 300, shown with a count and never refused (the ruling of 19/11/2026) |
+| contact | `intro` | limit | maxLength none; salt-nextjs 300 | owes: a target of 300 characters in place of its maxLength of 300, shown with a count and never refused (the ruling of 19/11/2026) |

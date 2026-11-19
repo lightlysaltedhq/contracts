@@ -10,17 +10,19 @@
       "type": "text",
       "label": "Title",
       "required": true,
-      "maxLength": 120,
-      "target": 60,
+      "target": [
+        60,
+        120
+      ],
       "platforms": {
         "nextjs": {
           "formerly": "title",
-          "owes": "the 120-character limit; a count as the editor types, beside the target of 60, which is never refused"
+          "owes": "a count as the editor types that notes a title past about 60 characters and notes more strongly one past 120, never refused"
         },
         "wordpress": {
           "native": "title",
           "formerly": "post_title",
-          "owes": "a count as the editor types, beside the target of 60, which is never refused"
+          "owes": "a count as the editor types that notes a title past about 60 characters and notes more strongly one past 120, never refused"
         }
       }
     },
@@ -75,17 +77,17 @@
       "name": "summary",
       "type": "textarea",
       "label": "Summary",
-      "maxLength": 300,
+      "target": 300,
       "description": "One or two sentences, shown on cards wherever the item is listed.",
       "platforms": {
         "nextjs": {
           "formerly": "excerpt",
-          "owes": "summary in place of excerpt; a count of its 300 characters as the editor types"
+          "owes": "summary in place of excerpt; a target of 300 characters, shown with a count and never refused"
         },
         "wordpress": {
           "native": "excerpt",
           "formerly": "the excerpt (no limit)",
-          "owes": "the excerpt's 300 characters held as the limits rule says"
+          "owes": "the excerpt's a target of 300 characters, shown with a count and never refused"
         }
       }
     },

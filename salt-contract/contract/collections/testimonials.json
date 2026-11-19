@@ -10,18 +10,17 @@
       "type": "text",
       "label": "Name",
       "required": true,
-      "maxLength": 120,
-      "target": 60,
+      "target": 120,
       "description": "Who said it.",
       "platforms": {
         "nextjs": {
           "formerly": "author",
-          "owes": "name in place of author, with the 120-character limit; a count as the editor types, beside the target of 60, which is never refused"
+          "owes": "name in place of author, a target of 120 characters, shown with a count and never refused"
         },
         "wordpress": {
           "native": "title",
           "formerly": "post_title",
-          "owes": "a count as the editor types, beside the target of 60, which is never refused"
+          "owes": "a target of 120 characters, shown with a count and never refused"
         }
       }
     },
@@ -43,16 +42,16 @@
       "name": "role",
       "type": "text",
       "label": "Role",
-      "maxLength": 80,
+      "target": 80,
       "description": "Optional. Shown beside the company.",
       "platforms": {
         "nextjs": {
           "formerly": "role",
-          "owes": "the 80-character limit"
+          "owes": "a target of 80 characters, shown with a count and never refused"
         },
         "wordpress": {
           "formerly": "role",
-          "owes": "the 80-character limit"
+          "owes": "a target of 80 characters, shown with a count and never refused"
         }
       }
     },

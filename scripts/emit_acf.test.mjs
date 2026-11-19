@@ -653,7 +653,7 @@ test('ID-3944: the ruled types and limits reach ACF', () => {
   const rating = field(groupOf(groups, 'testimonials').fields, 'rating')
   assert.deepEqual([rating.min, rating.max, rating.step], [1, 5, 0.5])
   const socials = field(groupOf(groups, 'team').fields, 'socials')
-  assert.deepEqual([socials.max, socials.sub_fields.map((f) => f.name)], [10, ['name', 'url']])
+  assert.deepEqual([socials.max, socials.salt.target, socials.sub_fields.map((f) => f.name)], [undefined, 10, ['name', 'url']])
 })
 
 test('ID-3944: a renamed collection field fails the drift check, naming both names', () => {
@@ -686,12 +686,20 @@ test('ID-3944: every layout carries a Settings tab, storing nothing, straight be
   assert.ok(acfSlugRegistry(groups).fields.group_salt_collection_case_studies.includes('externalUrl'))
 })
 
-test('ID-3968: every limit is ACF\'s own setting, which ACF checks on publish and not on a draft save', () => {
+test('ID-3968: a limit is ACF\'s own setting; by the ruling of 19/11/2026 the text lengths and list sizes are targets', () => {
   const groups = toAcfFieldGroups({ icons })
+  // Limits a page breaks without stay ACF's own, checked on publish.
+  assert.equal(field(layout(layoutsOf(), 'tabs').sub_fields, 'tabs').max, 8)
+  assert.equal(field(layout(layoutsOf(), 'call-to-action').sub_fields, 'buttons').max, 2)
+  // Targets draw no length attribute and nothing refuses them.
   const role = field(groupOf(groups, 'team').fields, 'role')
-  assert.deepEqual([role.maxlength, role.salt], [80, undefined])
-  assert.equal(field(layout(layoutsOf(), 'features').sub_fields, 'intro').maxlength, 300)
-  assert.equal(field(groupOf(groups, 'services').fields, 'benefits').max, 12)
+  assert.deepEqual([role.maxlength, role.salt], [undefined, { target: 80 }])
+  const intro = field(layout(layoutsOf(), 'features').sub_fields, 'intro')
+  assert.deepEqual([intro.maxlength, intro.salt], [undefined, { target: 300 }])
+  const benefits = field(groupOf(groups, 'services').fields, 'benefits')
+  assert.deepEqual([benefits.min, benefits.max, benefits.salt.target], [1, undefined, 12])
+  const walk = (fields) => (fields ?? []).flatMap((f) => [...('maxlength' in f ? [f.key] : []), ...walk(f.sub_fields), ...(f.layouts ?? []).flatMap((l) => walk(l.sub_fields))])
+  assert.deepEqual(groups.flatMap((g) => walk(g.fields)), [])
 })
 
 test('ID-3969: a target is under salt, never an ACF setting', () => {
@@ -708,11 +716,17 @@ test('ID-3969: a target is under salt, never an ACF setting', () => {
   assert.deepEqual([people.type, people.max, people.salt], ['relationship', undefined, { target: 4, to: 'team' }])
 })
 
-test('ID-3969: every collection title, name and question has a target of 60, under its group\'s salt.targets', () => {
+test('ID-3969: WordPress\'s native title and summary carry their targets under the group\'s salt.targets', () => {
   const groups = toAcfFieldGroups({ icons })
-  const titles = { services: 'title', 'case-studies': 'title', posts: 'title', locations: 'title', faqs: 'question', testimonials: 'name', team: 'name' }
+  // A record with a page of its own: a hint of 60 and a target of 120, and its summary's 300.
+  for (const source of ['services', 'case-studies', 'posts']) {
+    const group = groupOf(groups, source)
+    assert.deepEqual([group.salt.native.title, group.salt.native.summary, group.salt.targets], ['title', 'excerpt', { title: [60, 120], summary: 300 }], source)
+  }
+  // No page of its own: the 120 only.
+  const titles = { locations: 'title', faqs: 'question', testimonials: 'name', team: 'name' }
   for (const [source, name] of Object.entries(titles)) {
     const group = groupOf(groups, source)
-    assert.deepEqual([group.salt.native[name], group.salt.targets], ['title', { [name]: 60 }], source)
+    assert.deepEqual([group.salt.native[name], group.salt.targets], ['title', { [name]: 120 }], source)
   }
 })

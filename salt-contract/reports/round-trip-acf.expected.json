@@ -1555,13 +1555,6 @@
   },
   {
     "section": "contact",
-    "path": "intro",
-    "kind": "limit",
-    "difference": "maxlength 300; salt-wordpress none",
-    "evidence": "owes: the 300-character limit"
-  },
-  {
-    "section": "contact",
     "path": "settings.toneDark",
     "kind": "missing",
     "difference": "not in salt-wordpress",

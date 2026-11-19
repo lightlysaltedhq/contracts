@@ -10,16 +10,15 @@
       "type": "text",
       "label": "Name",
       "required": true,
-      "maxLength": 120,
-      "target": 60,
+      "target": 120,
       "platforms": {
         "nextjs": {
-          "owes": "the collection, with this field; a count as the editor types, beside the target of 60, which is never refused"
+          "owes": "the collection, with this field; a target of 120 characters, shown with a count and never refused"
         },
         "wordpress": {
           "native": "title",
           "formerly": "post_title",
-          "owes": "a count as the editor types, beside the target of 60, which is never refused"
+          "owes": "a target of 120 characters, shown with a count and never refused"
         }
       }
     },
@@ -142,8 +141,8 @@
       "label": "Opening hours",
       "itemLabel": "Row",
       "rowLabel": "day",
-      "max": 14,
-      "description": "Optional. Up to 14 rows; give a day two rows for a break at lunch.",
+      "target": 14,
+      "description": "Optional. Give a day two rows for a break at lunch; aim for no more than 14 rows.",
       "fields": [
         {
           "name": "day",
@@ -233,7 +232,7 @@
         },
         "wordpress": {
           "formerly": "opening_hours",
-          "owes": "the name hours, appointment in place of appointment_only, and at most 14 rows"
+          "owes": "the name hours, appointment in place of appointment_only, and a target of 14 rows, shown with a count and never refused"
         }
       }
     }

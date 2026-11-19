@@ -965,11 +965,16 @@ test('ID-3969: a target is under custom.salt, never a Payload setting, so nothin
   assert.deepEqual([people.type, people.maxRows, people.custom.salt], ['relationship', undefined, { target: 4, to: 'team' }])
 })
 
-test('ID-3969: every collection title, name and question has a target of 60 under custom.salt, beside its limit', () => {
+test('ID-3969: every collection title, name and question has its target under custom.salt and no maxLength', () => {
   const list = toPayloadCollections({ icons, richTextEditor: editor })
-  const titles = { services: 'title', 'case-studies': 'title', posts: 'title', locations: 'title', faqs: 'question', testimonials: 'name', team: 'name' }
-  for (const [source, name] of Object.entries(titles)) {
-    const f = field(collection(list, source).fields, name)
-    assert.deepEqual([f.maxLength, f.custom.salt.target], [120, 60], source)
+  const titles = { services: [60, 120], 'case-studies': [60, 120], posts: [60, 120], locations: 120, faqs: 120, testimonials: 120, team: 120 }
+  const names = { faqs: 'question', testimonials: 'name', team: 'name' }
+  for (const [source, target] of Object.entries(titles)) {
+    const f = field(collection(list, source).fields, names[source] ?? 'title')
+    assert.deepEqual([f.maxLength, f.custom.salt.target], [undefined, target], source)
   }
+  const summary = field(collection(list, 'services').fields, 'summary')
+  assert.deepEqual([summary.maxLength, summary.custom.salt.target], [undefined, 300])
+  // A limit a page breaks without stays Payload's own.
+  assert.equal(field(block(blocks(), 'tabs').fields, 'tabs').maxRows, 8)
 })

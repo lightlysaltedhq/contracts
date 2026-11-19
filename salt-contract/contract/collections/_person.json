@@ -1,7 +1,7 @@
 {
   "$schema": "../../schema/field-definition.schema.json",
   "version": "1.0.0-rc.8",
-  "$comment": "A person: a team member, a record with no login (team members and login accounts are separate, by the founder's ruling of 18/11/2026). The fields are flat. contract/collections/team.json carries them, and a post's author is a relationship to team, so the author box reads the same record: the person and the author are one shape. Limits by the ruling of 18/11/2026 (question 3): a name 120 characters, a role 80, a bio 600, socials 0 to 10. The public email is the team member's own field, never a login address.",
+  "$comment": "A person: a team member, a record with no login (team members and login accounts are separate, by the founder's ruling of 18/11/2026). The fields are flat. contract/collections/team.json carries them, and a post's author is a relationship to team, so the author box reads the same record: the person and the author are one shape. Numbers by the ruling of 18/11/2026 (question 3): a name 120 characters, a role 80, a bio 600, socials 0 to 10; by the ruling of 19/11/2026 each is a target, shown with a count and never refused. The public email is the team member's own field, never a login address.",
   "shape": "person",
   "fields": [
     {
@@ -9,17 +9,16 @@
       "type": "text",
       "label": "Name",
       "required": true,
-      "maxLength": 120,
-      "target": 60,
+      "target": 120,
       "platforms": {
         "nextjs": {
           "formerly": "users.name",
-          "owes": "a team collection separate from login accounts, whose records hold these fields (users holds the team today); a count as the editor types, beside the target of 60, which is never refused"
+          "owes": "a team collection separate from login accounts, whose records hold these fields (users holds the team today); a target of 120 characters, shown with a count and never refused"
         },
         "wordpress": {
           "native": "title",
           "formerly": "post_title",
-          "owes": "a count as the editor types, beside the target of 60, which is never refused"
+          "owes": "a target of 120 characters, shown with a count and never refused"
         }
       }
     },
@@ -27,16 +26,16 @@
       "name": "role",
       "type": "text",
       "label": "Job title",
-      "maxLength": 80,
+      "target": 80,
       "description": "Shown beneath the name.",
       "platforms": {
         "nextjs": {
           "formerly": "profile.roleTitle",
-          "owes": "role at the top of the record in place of profile.roleTitle"
+          "owes": "role at the top of the record in place of profile.roleTitle, with a target of 80 characters, shown with a count and never refused"
         },
         "wordpress": {
           "formerly": "role",
-          "owes": "the 80-character limit, and the field for an author too: the author box reads the credited team member's role"
+          "owes": "a target of 80 characters, shown with a count and never refused, and the field for an author too: the author box reads the credited team member's role"
         }
       }
     },
@@ -44,16 +43,16 @@
       "name": "bio",
       "type": "textarea",
       "label": "Short biography",
-      "maxLength": 600,
+      "target": 600,
       "description": "A few sentences, shown on the team card and in the author box.",
       "platforms": {
         "nextjs": {
           "formerly": "profile.bio",
-          "owes": "bio at the top of the record, with the 600-character limit"
+          "owes": "bio at the top of the record, with a target of 600 characters, shown with a count and never refused"
         },
         "wordpress": {
           "formerly": "short_bio",
-          "owes": "the name bio and the 600-character limit; the author box reads it in place of the user's description"
+          "owes": "the name bio and a target of 600 characters, shown with a count and never refused; the author box reads it in place of the user's description"
         }
       }
     },
@@ -110,8 +109,8 @@
       "label": "Social profiles",
       "itemLabel": "Profile",
       "rowLabel": "name",
-      "max": 10,
-      "description": "Up to 10. The network is worked out from the address, so a known one draws its own icon.",
+      "target": 10,
+      "description": "Aim for no more than 10. The network is worked out from the address, so a known one draws its own icon.",
       "fields": [
         {
           "name": "name",
@@ -139,7 +138,7 @@
           "platforms": {
             "nextjs": {
               "formerly": "profile.socials.url",
-              "owes": "the url format's check on save"
+              "owes": "the url format's check on publish, a draft still saving"
             },
             "wordpress": {
               "formerly": "url (an ACF url field)",
@@ -151,11 +150,11 @@
       "platforms": {
         "nextjs": {
           "formerly": "profile.socials",
-          "owes": "socials at the top of the record, rows of { name, url }, at most 10"
+          "owes": "socials at the top of the record, rows of { name, url }, with a target of 10, shown with a count and never refused"
         },
         "wordpress": {
           "formerly": "socials",
-          "owes": "rows of { name, url }, at most 10"
+          "owes": "rows of { name, url }, with a target of 10, shown with a count and never refused"
         }
       }
     }
