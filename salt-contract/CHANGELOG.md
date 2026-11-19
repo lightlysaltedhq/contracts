@@ -61,7 +61,7 @@ test, applied through section 2's table, where the stricter row wins.
   (`./view-props/*`); the replaced-logic format (`./schema/replaced-logic`).
 - Image sizes (`./image-sizes`): each slot's `sizes` per band and column count, the candidate
   widths, and the srcset capped at the upload's intrinsic width (SC-016).
-- Fixtures (`./fixtures/*`): 116 cases with their expected HTML, for the 17 sections, the site
+- Fixtures (`./fixtures/*`): 117 cases with their expected HTML, for the 17 sections, the site
   header and footer, the post, service, case-study, archive, search and not-found views, and the
   page (SC-018, SC-019, SC-021); and the normaliser both sides are compared through
   (`./normalise`).
@@ -273,8 +273,35 @@ test, applied through section 2's table, where the stricter row wins.
     and a collection with no index page draws no link. A description of a view prop, so no
     verdict changes.
   - Both emitters' output for a limit is as at rc.7. An ACF Pro 6.8.11 probe showed that ACF's own
-    setting is what checks a limit on publish: with it removed nothing checked at all. Nothing is
-    pending: the founder answered every open question on 19/11/2026.
+    setting is what checks a limit on publish: with it removed nothing checked at all. The
+    founder answered every question on limits and targets on 19/11/2026.
+  - **Team members' pages** (the founder's rulings of 19/11/2026, A to E). Every published team
+    member has a public page of their own: the contract's author page (`markup/archive.json`),
+    restated as the member's own page, its address each platform's routing (SC-003);
+    `team.json` no longer says team has no page, and the dropped `post_content`'s note says the
+    page reads the `bio` field. The page's profile draws the role as the strapline, the bio, the
+    photo, and the email, phone and social links as the team card draws them (`card.json`'s
+    `contact` and `socials`, with their classes), each only when set; `archive/author` draws them.
+    A member with no posts draws nothing where the listing would be, no heading and no empty
+    message, on the author page only: the new case `archive/author-no-posts`. A team member's
+    name carries `[60, 120]`, as the other titles of a page of their own do. No page lists the
+    whole team: team has no index page, so a team section draws no view-all link (the `viewAll`
+    field's help and view prop say so).
+  - **Other rulings of 19/11/2026.** A post's topics are drawn with the primary topic first, then
+    the rest A to Z by title (`markup/post.json`, `posts.json`), which is `post/full`'s order
+    already. On a grouped index an entry under two or more topics is listed under each
+    (`markup/collection-showcase.json`). The carousel's card style is shown only for the inline
+    source, as its condition already says, so `carousel.json` is unchanged. By-category with a
+    category that does not belong to the chosen source is refused on publish, with a message
+    (both platforms' query owes in `carousel.json` and `collection-showcase.json`).
+  - **Pending the founder, not ruled.** Two consequences of team members having pages. Team stays
+    `linked: false` in `sections.json` until they are ruled, which keeps both as today:
+    - Should a team card's name link to the member's page, as other collections' cards link to
+      theirs? Recommended: yes. It means team `linked: true` in `sections.json`.
+    - The showcase offers the index layout only for a collection whose items have their own pages,
+      which team now meets: should it offer index for team? Recommended: yes, as it follows from
+      the stated rule; it too needs team `linked: true`, and until then the layout's note and the
+      source disagree.
 - The case-study view has fixtures and is required of every implementation (SC-021).
   `fixtures/case-study/` holds four cases (`full`, `aside`, `band` and `minimal`), `case-study`
   joins `REQUIRED_FILES`, and a full conformance run refuses to declare it not shipped. The
