@@ -95,25 +95,25 @@ Field groups not compared, because this report compares the page sections only (
 | media-text | `settings.toneDark` | missing | not in salt-wordpress | owes: the field; dark mode is a token inversion today, with no per-section choice |
 | media-text | `settings.backgroundImage` | missing | not in salt-wordpress | owes: the background image and its four settings |
 | media-text | `settings.firstPageOnly` | missing | not in salt-wordpress | owes: the field, with the listing section that paginates |
-| features | `intro` | missing | not in salt-wordpress | owes: the field |
+| features | `intro` | missing | not in salt-wordpress | owes: the field, with a target of 300 characters, shown with a count and never refused |
 | features | `items.icon` | type | type select; salt-wordpress text | owes: a select of the site's icons in place of a text field holding an icon name |
 | features | `items.text` | type | type wysiwyg; salt-wordpress textarea | owes: rich text in place of a textarea; a stored plain text migrates as one paragraph |
 | features | `items.url` | type | type text; salt-wordpress link | owes: a plain address in place of a link field, whose title and target were already ignored |
 | features | `settings.toneDark` | missing | not in salt-wordpress | owes: the field; dark mode is a token inversion today, with no per-section choice |
 | features | `settings.backgroundImage` | missing | not in salt-wordpress | owes: the background image and its four settings |
 | features | `settings.firstPageOnly` | missing | not in salt-wordpress | owes: the field, with the listing section that paginates |
-| stats | `intro` | missing | not in salt-wordpress | owes: the field |
+| stats | `intro` | missing | not in salt-wordpress | owes: the field, with a target of 300 characters, shown with a count and never refused |
 | stats | `items.icon` | missing | not in salt-wordpress | owes: the field |
 | stats | `settings.toneDark` | missing | not in salt-wordpress | owes: the field; dark mode is a token inversion today, with no per-section choice |
 | stats | `settings.backgroundImage` | missing | not in salt-wordpress | owes: the background image and its four settings |
 | stats | `settings.firstPageOnly` | missing | not in salt-wordpress | owes: the field, with the listing section that paginates |
-| logos | `intro` | missing | not in salt-wordpress | owes: the field |
+| logos | `intro` | missing | not in salt-wordpress | owes: the field, with a target of 300 characters, shown with a count and never refused |
 | logos | `columns` | missing | not in salt-wordpress | owes: the field; the strip lays itself out today |
 | logos | `settings.toneDark` | missing | not in salt-wordpress | owes: the field; dark mode is a token inversion today, with no per-section choice |
 | logos | `settings.backgroundImage` | missing | not in salt-wordpress | owes: the background image and its four settings |
 | logos | `settings.firstPageOnly` | missing | not in salt-wordpress | owes: the field, with the listing section that paginates |
 | gallery | `heading` | missing | not in salt-wordpress | owes: the field; the gallery has no heading today |
-| gallery | `intro` | missing | not in salt-wordpress | owes: the field |
+| gallery | `intro` | missing | not in salt-wordpress | owes: the field, with a target of 300 characters, shown with a count and never refused |
 | gallery | `columns` | type | type select; salt-wordpress button_group | owes: storing the strings 2, 3 and 4; the default is stored as the integer 3 today; a select, where the columns are a button group today (SC-023) |
 | gallery | `columns` | default | default "3"; salt-wordpress 3 | owes: storing the strings 2, 3 and 4; the default is stored as the integer 3 today; a select, where the columns are a button group today (SC-023) |
 | gallery | `columns` | condition | condition differs (1 of 3 cases), e.g. {"layout":"carousel"}: contract hides, salt-wordpress shows | note: Shown for every layout, with the instruction that only grid and masonry use it. |
@@ -122,14 +122,14 @@ Field groups not compared, because this report compares the page sections only (
 | gallery | `settings.toneDark` | missing | not in salt-wordpress | owes: the field; dark mode is a token inversion today, with no per-section choice |
 | gallery | `settings.backgroundImage` | missing | not in salt-wordpress | owes: the background image and its four settings |
 | gallery | `settings.firstPageOnly` | missing | not in salt-wordpress | owes: the field, with the listing section that paginates |
-| process | `intro` | missing | not in salt-wordpress | owes: the field |
+| process | `intro` | missing | not in salt-wordpress | owes: the field, with a target of 300 characters, shown with a count and never refused |
 | process | `steps.icon` | type | type select; salt-wordpress text | owes: a select of the site's icons in place of a text field holding an icon name |
 | process | `steps.image` | missing | not in salt-wordpress | owes: the field |
 | process | `steps.cta` | missing | not in salt-wordpress | owes: the field |
 | process | `settings.toneDark` | missing | not in salt-wordpress | owes: the field; dark mode is a token inversion today, with no per-section choice |
 | process | `settings.backgroundImage` | missing | not in salt-wordpress | owes: the background image and its four settings |
 | process | `settings.firstPageOnly` | missing | not in salt-wordpress | owes: the field, with the listing section that paginates |
-| faq | `intro` | missing | not in salt-wordpress | owes: the field |
+| faq | `intro` | missing | not in salt-wordpress | owes: the field, with a target of 300 characters, shown with a count and never refused |
 | faq | `query` | name | stored as source, manual, taxonomy_terms, orderby, order, count | formerly: source, manual, taxonomy_terms, orderby, order, count |
 | faq | `query.mode` | type | type select; salt-wordpress button_group | owes: one query group in place of six layout fields; a select for the query's mode, which is a button group today (SC-023) |
 | faq | `query.mode` | values | choices automatic, by-category, manual; salt-wordpress default, taxonomy, manual | values: {"default":"automatic","taxonomy":"by-category","manual":"manual"} |
@@ -144,7 +144,7 @@ Field groups not compared, because this report compares the page sections only (
 | faq | `settings.backgroundImage` | missing | not in salt-wordpress | owes: the background image and its four settings |
 | faq | `settings.firstPageOnly` | missing | not in salt-wordpress | owes: the field, with the listing section that paginates |
 | collection-showcase (services) | `(layout name)` | name | name collection-showcase; salt-wordpress services | sections.json formerly: services |
-| collection-showcase (services) | `intro` | missing | not in salt-wordpress | owes: the field |
+| collection-showcase (services) | `intro` | missing | not in salt-wordpress | owes: the field, with a target of 300 characters, shown with a count and never refused |
 | collection-showcase (services) | `source` | missing | not in salt-wordpress | owes: one section with a source select in place of five layouts; the former layout slug gives the source |
 | collection-showcase (services) | `layout` | options | choices grid, list, featured, accordion, index; salt-wordpress grid, list, featured | owes: the accordion and index layouts, and the field on work, team and blog_teaser; services has grid, list and featured; testimonials grid becomes source testimonials with layout grid |
 | collection-showcase (services) | `columns` | condition | condition differs (3 of 5 cases), e.g. {"layout":"list"}: contract hides, salt-wordpress shows; {"layout":"accordion"}: contract hides, salt-wordpress shows | owes: one select with the strings 2, 3 and 4 on every source; work and blog_teaser offer 2 and 3 with an integer default 3, team uses bare-numeral labels, testimonials has none; a select, where the columns are a button group today (SC-023) |
@@ -170,7 +170,7 @@ Field groups not compared, because this report compares the page sections only (
 | collection-showcase (services) | `settings.backgroundImage` | missing | not in salt-wordpress | owes: the background image and its four settings |
 | collection-showcase (services) | `settings.firstPageOnly` | missing | not in salt-wordpress | owes: the field, with the listing section that paginates |
 | collection-showcase (work) | `(layout name)` | name | name collection-showcase; salt-wordpress work | sections.json formerly: work |
-| collection-showcase (work) | `intro` | missing | not in salt-wordpress | owes: the field |
+| collection-showcase (work) | `intro` | missing | not in salt-wordpress | owes: the field, with a target of 300 characters, shown with a count and never refused |
 | collection-showcase (work) | `source` | missing | not in salt-wordpress | owes: one section with a source select in place of five layouts; the former layout slug gives the source |
 | collection-showcase (work) | `layout` | missing | not in salt-wordpress | owes: the accordion and index layouts, and the field on work, team and blog_teaser; services has grid, list and featured; testimonials grid becomes source testimonials with layout grid |
 | collection-showcase (work) | `columns` | type | type select; salt-wordpress button_group | owes: one select with the strings 2, 3 and 4 on every source; work and blog_teaser offer 2 and 3 with an integer default 3, team uses bare-numeral labels, testimonials has none; a select, where the columns are a button group today (SC-023) |
@@ -197,7 +197,7 @@ Field groups not compared, because this report compares the page sections only (
 | collection-showcase (work) | `settings.backgroundImage` | missing | not in salt-wordpress | owes: the background image and its four settings |
 | collection-showcase (work) | `settings.firstPageOnly` | missing | not in salt-wordpress | owes: the field, with the listing section that paginates |
 | collection-showcase (team) | `(layout name)` | name | name collection-showcase; salt-wordpress team | sections.json formerly: team |
-| collection-showcase (team) | `intro` | missing | not in salt-wordpress | owes: the field |
+| collection-showcase (team) | `intro` | missing | not in salt-wordpress | owes: the field, with a target of 300 characters, shown with a count and never refused |
 | collection-showcase (team) | `source` | missing | not in salt-wordpress | owes: one section with a source select in place of five layouts; the former layout slug gives the source |
 | collection-showcase (team) | `layout` | missing | not in salt-wordpress | owes: the accordion and index layouts, and the field on work, team and blog_teaser; services has grid, list and featured; testimonials grid becomes source testimonials with layout grid |
 | collection-showcase (team) | `columns` | type | type select; salt-wordpress button_group | owes: one select with the strings 2, 3 and 4 on every source; work and blog_teaser offer 2 and 3 with an integer default 3, team uses bare-numeral labels, testimonials has none; a select, where the columns are a button group today (SC-023) |
@@ -221,7 +221,7 @@ Field groups not compared, because this report compares the page sections only (
 | collection-showcase (team) | `settings.backgroundImage` | missing | not in salt-wordpress | owes: the background image and its four settings |
 | collection-showcase (team) | `settings.firstPageOnly` | missing | not in salt-wordpress | owes: the field, with the listing section that paginates |
 | collection-showcase (testimonials) | `(layout name)` | name | name collection-showcase; salt-wordpress testimonials | sections.json formerly: testimonials |
-| collection-showcase (testimonials) | `intro` | missing | not in salt-wordpress | owes: the field |
+| collection-showcase (testimonials) | `intro` | missing | not in salt-wordpress | owes: the field, with a target of 300 characters, shown with a count and never refused |
 | collection-showcase (testimonials) | `source` | missing | not in salt-wordpress | owes: one section with a source select in place of five layouts; the former layout slug gives the source |
 | collection-showcase (testimonials) | `layout` | options | choices grid, list, featured, accordion, index; salt-wordpress grid, slider | owes: the accordion and index layouts, and the field on work, team and blog_teaser; services has grid, list and featured; testimonials grid becomes source testimonials with layout grid |
 | collection-showcase (testimonials) | `columns` | missing | not in salt-wordpress | owes: one select with the strings 2, 3 and 4 on every source; work and blog_teaser offer 2 and 3 with an integer default 3, team uses bare-numeral labels, testimonials has none; a select, where the columns are a button group today (SC-023) |
@@ -244,7 +244,7 @@ Field groups not compared, because this report compares the page sections only (
 | collection-showcase (testimonials) | `settings.backgroundImage` | missing | not in salt-wordpress | owes: the background image and its four settings |
 | collection-showcase (testimonials) | `settings.firstPageOnly` | missing | not in salt-wordpress | owes: the field, with the listing section that paginates |
 | collection-showcase (blog_teaser) | `(layout name)` | name | name collection-showcase; salt-wordpress blog_teaser | sections.json formerly: blog_teaser |
-| collection-showcase (blog_teaser) | `intro` | missing | not in salt-wordpress | owes: the field |
+| collection-showcase (blog_teaser) | `intro` | missing | not in salt-wordpress | owes: the field, with a target of 300 characters, shown with a count and never refused |
 | collection-showcase (blog_teaser) | `source` | missing | not in salt-wordpress | owes: one section with a source select in place of five layouts; the former layout slug gives the source |
 | collection-showcase (blog_teaser) | `layout` | missing | not in salt-wordpress | owes: the accordion and index layouts, and the field on work, team and blog_teaser; services has grid, list and featured; testimonials grid becomes source testimonials with layout grid |
 | collection-showcase (blog_teaser) | `columns` | type | type select; salt-wordpress button_group | owes: one select with the strings 2, 3 and 4 on every source; work and blog_teaser offer 2 and 3 with an integer default 3, team uses bare-numeral labels, testimonials has none; a select, where the columns are a button group today (SC-023) |
@@ -271,7 +271,7 @@ Field groups not compared, because this report compares the page sections only (
 | collection-showcase (blog_teaser) | `settings.backgroundImage` | missing | not in salt-wordpress | owes: the background image and its four settings |
 | collection-showcase (blog_teaser) | `settings.firstPageOnly` | missing | not in salt-wordpress | owes: the field, with the listing section that paginates |
 | carousel (scroll_carousel) | `(layout name)` | name | name carousel; salt-wordpress scroll_carousel | sections.json formerly: scroll_carousel |
-| carousel (scroll_carousel) | `intro` | missing | not in salt-wordpress | owes: the field |
+| carousel (scroll_carousel) | `intro` | missing | not in salt-wordpress | owes: the field, with a target of 300 characters, shown with a count and never refused |
 | carousel (scroll_carousel) | `label` | missing | not in salt-wordpress | owes: the field; the track is named Carousel when there is no heading today |
 | carousel (scroll_carousel) | `source` | missing | not in salt-wordpress | owes: the source select: scroll_carousel becomes source inline, a testimonials layout set to slider becomes source testimonials; the other collections are new |
 | carousel (scroll_carousel) | `cardStyle` | name | stored as card_type | formerly: card_type |
@@ -281,7 +281,7 @@ Field groups not compared, because this report compares the page sections only (
 | carousel (scroll_carousel) | `settings.backgroundImage` | missing | not in salt-wordpress | owes: the background image and its four settings |
 | carousel (scroll_carousel) | `settings.firstPageOnly` | missing | not in salt-wordpress | owes: the field, with the listing section that paginates |
 | carousel (testimonials) | `(layout name)` | name | name carousel; salt-wordpress testimonials | sections.json formerly: testimonials |
-| carousel (testimonials) | `intro` | missing | not in salt-wordpress | owes: the field |
+| carousel (testimonials) | `intro` | missing | not in salt-wordpress | owes: the field, with a target of 300 characters, shown with a count and never refused |
 | carousel (testimonials) | `label` | missing | not in salt-wordpress | owes: the field; the track is named Carousel when there is no heading today |
 | carousel (testimonials) | `source` | missing | not in salt-wordpress | owes: the source select: scroll_carousel becomes source inline, a testimonials layout set to slider becomes source testimonials; the other collections are new |
 | carousel (testimonials) | `query` | name | stored as source, manual, orderby, order, count | formerly: source, manual, orderby, order, count |

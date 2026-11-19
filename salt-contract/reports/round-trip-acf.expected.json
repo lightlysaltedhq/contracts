@@ -200,7 +200,7 @@
     "path": "intro",
     "kind": "missing",
     "difference": "not in salt-wordpress",
-    "evidence": "owes: the field"
+    "evidence": "owes: the field, with a target of 300 characters, shown with a count and never refused"
   },
   {
     "section": "features",
@@ -249,7 +249,7 @@
     "path": "intro",
     "kind": "missing",
     "difference": "not in salt-wordpress",
-    "evidence": "owes: the field"
+    "evidence": "owes: the field, with a target of 300 characters, shown with a count and never refused"
   },
   {
     "section": "stats",
@@ -284,7 +284,7 @@
     "path": "intro",
     "kind": "missing",
     "difference": "not in salt-wordpress",
-    "evidence": "owes: the field"
+    "evidence": "owes: the field, with a target of 300 characters, shown with a count and never refused"
   },
   {
     "section": "logos",
@@ -326,7 +326,7 @@
     "path": "intro",
     "kind": "missing",
     "difference": "not in salt-wordpress",
-    "evidence": "owes: the field"
+    "evidence": "owes: the field, with a target of 300 characters, shown with a count and never refused"
   },
   {
     "section": "gallery",
@@ -382,7 +382,7 @@
     "path": "intro",
     "kind": "missing",
     "difference": "not in salt-wordpress",
-    "evidence": "owes: the field"
+    "evidence": "owes: the field, with a target of 300 characters, shown with a count and never refused"
   },
   {
     "section": "process",
@@ -431,7 +431,7 @@
     "path": "intro",
     "kind": "missing",
     "difference": "not in salt-wordpress",
-    "evidence": "owes: the field"
+    "evidence": "owes: the field, with a target of 300 characters, shown with a count and never refused"
   },
   {
     "section": "faq",
@@ -529,7 +529,7 @@
     "path": "intro",
     "kind": "missing",
     "difference": "not in salt-wordpress",
-    "evidence": "owes: the field"
+    "evidence": "owes: the field, with a target of 300 characters, shown with a count and never refused"
   },
   {
     "section": "collection-showcase (services)",
@@ -704,7 +704,7 @@
     "path": "intro",
     "kind": "missing",
     "difference": "not in salt-wordpress",
-    "evidence": "owes: the field"
+    "evidence": "owes: the field, with a target of 300 characters, shown with a count and never refused"
   },
   {
     "section": "collection-showcase (work)",
@@ -879,7 +879,7 @@
     "path": "intro",
     "kind": "missing",
     "difference": "not in salt-wordpress",
-    "evidence": "owes: the field"
+    "evidence": "owes: the field, with a target of 300 characters, shown with a count and never refused"
   },
   {
     "section": "collection-showcase (team)",
@@ -1033,7 +1033,7 @@
     "path": "intro",
     "kind": "missing",
     "difference": "not in salt-wordpress",
-    "evidence": "owes: the field"
+    "evidence": "owes: the field, with a target of 300 characters, shown with a count and never refused"
   },
   {
     "section": "collection-showcase (testimonials)",
@@ -1187,7 +1187,7 @@
     "path": "intro",
     "kind": "missing",
     "difference": "not in salt-wordpress",
-    "evidence": "owes: the field"
+    "evidence": "owes: the field, with a target of 300 characters, shown with a count and never refused"
   },
   {
     "section": "collection-showcase (blog_teaser)",
@@ -1362,7 +1362,7 @@
     "path": "intro",
     "kind": "missing",
     "difference": "not in salt-wordpress",
-    "evidence": "owes: the field"
+    "evidence": "owes: the field, with a target of 300 characters, shown with a count and never refused"
   },
   {
     "section": "carousel (scroll_carousel)",
@@ -1432,7 +1432,7 @@
     "path": "intro",
     "kind": "missing",
     "difference": "not in salt-wordpress",
-    "evidence": "owes: the field"
+    "evidence": "owes: the field, with a target of 300 characters, shown with a count and never refused"
   },
   {
     "section": "carousel (testimonials)",
