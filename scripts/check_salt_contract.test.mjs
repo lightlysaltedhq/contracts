@@ -249,6 +249,7 @@ crossFail('a condition value that is not an option of its select', (f) => { f['c
 crossFail('a field conditioned on itself', (f) => { f['contract/fields/hero.json'].fields[1].condition = { field: 'image', equals: 'x' } }, /hero\.image is conditioned on itself/)
 crossFail('duplicate option values', (f) => { f['contract/fields/hero.json'].fields[0].options.push({ value: 'b', label: 'B again' }) }, /hero\.variant offers b twice/)
 crossFail('a list whose min exceeds its max', (f) => { f['contract/fields/hero.json'].fields.push({ name: 'rows', type: 'list', min: 5, max: 2, fields: [{ name: 'title', type: 'text' }] }) }, /hero\.rows min 5 exceeds max 2/)
+crossFail('a target pair whose hint is not below its target', (f) => { f['contract/fields/hero.json'].fields.push({ name: 'line', type: 'text', target: [120, 60] }) }, /hero\.line target \[120, 60\] is not an ascending \[hint, target\] pair/)
 crossFail('a rowLabel naming no child', (f) => { f['contract/fields/hero.json'].fields.push({ name: 'rows', type: 'list', rowLabel: 'nope', fields: [{ name: 'title', type: 'text' }] }) }, /hero\.rows rowLabel names nope, which is not one of its fields/)
 crossFail('shared.omit naming no shared field', (f) => {
   f['contract/fields/_section-settings.json'] = { $schema: '../../schema/field-definition.schema.json', version: '0.1.0', section: 'section-settings', fields: [{ name: 'tone', type: 'text' }] }

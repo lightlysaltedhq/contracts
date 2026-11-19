@@ -1,6 +1,6 @@
 {
   "$schema": "../../schema/field-definition.schema.json",
-  "version": "1.0.0-rc.7",
+  "version": "1.0.0-rc.8",
   "$comment": "A service's stored fields, by the founder's rulings of 18/11/2026 on the ID-3944 field names. The address (slug) and the editor's order are each platform's own (SC-003). The view's document (fixtures/service) is these fields as the service view receives them, with relatedServices resolved to cards for display (related).",
   "collection": "services",
   "label": "Service",
@@ -10,15 +10,19 @@
       "type": "text",
       "label": "Name",
       "required": true,
-      "maxLength": 120,
+      "target": [
+        60,
+        120
+      ],
       "platforms": {
         "nextjs": {
           "formerly": "title",
-          "owes": "the 120-character limit"
+          "owes": "a count as the editor types that notes a title past about 60 characters and notes more strongly one past 120, never refused"
         },
         "wordpress": {
           "native": "title",
-          "formerly": "post_title"
+          "formerly": "post_title",
+          "owes": "a count as the editor types that notes a title past about 60 characters and notes more strongly one past 120, never refused"
         }
       }
     },
@@ -43,16 +47,17 @@
       "name": "summary",
       "type": "textarea",
       "label": "Summary",
-      "maxLength": 300,
+      "target": 300,
       "description": "One or two sentences, shown on cards wherever the item is listed.",
       "platforms": {
         "nextjs": {
-          "formerly": "summary"
+          "formerly": "summary",
+          "owes": "a target of 300 characters, shown with a count and never refused"
         },
         "wordpress": {
           "native": "excerpt",
           "formerly": "summary (an ACF textarea with no limit)",
-          "owes": "the summary stored in the excerpt, with a check on save for its 300 characters"
+          "owes": "the summary stored in the excerpt, with a target of 300 characters, shown with a count and never refused"
         }
       }
     },
@@ -118,8 +123,8 @@
       "itemLabel": "Benefit",
       "rowLabel": "text",
       "min": 1,
-      "max": 12,
-      "description": "Optional. When given, one to 12.",
+      "target": 12,
+      "description": "Optional. When given, at least one; aim for no more than 12.",
       "fields": [
         {
           "name": "text",
@@ -140,11 +145,11 @@
       "platforms": {
         "nextjs": {
           "formerly": "benefits",
-          "owes": "the list's limits"
+          "owes": "the minimum of one, and a target of 12, shown with a count and never refused"
         },
         "wordpress": {
           "formerly": "benefits",
-          "owes": "the list's limits"
+          "owes": "the minimum of one, and a target of 12, shown with a count and never refused"
         }
       }
     },
@@ -169,16 +174,16 @@
       "label": "Related services",
       "to": "services",
       "many": true,
-      "max": 6,
-      "description": "Optional. Up to six other services, never this one.",
+      "target": 6,
+      "description": "Optional. Other services, never this one; aim for no more than six.",
       "platforms": {
         "nextjs": {
           "formerly": "relatedServices",
-          "owes": "the limit of six"
+          "owes": "a target of six, shown with a count and never refused"
         },
         "wordpress": {
           "formerly": "related_services",
-          "owes": "the name relatedServices, the limit of six, and refusing the service itself"
+          "owes": "the name relatedServices, a target of six, shown with a count and never refused, and refusing the service itself"
         }
       }
     },

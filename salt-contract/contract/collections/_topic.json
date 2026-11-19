@@ -1,6 +1,6 @@
 {
   "$schema": "../../schema/field-definition.schema.json",
-  "version": "1.0.0-rc.7",
+  "version": "1.0.0-rc.8",
   "$comment": "A topic: one of a collection's category terms. Every collection that has categories (contract/sections.json) stores its terms as topics and keeps its own list (the founder's ruling of 18/11/2026, question 5). Topics are flat: no parent. The archive draws a topic's description (markup/archive.json). On WordPress a topic is a term of the source's taxonomy (SOURCE_DEFAULTS in emit/acf.mjs), so both fields are native and no ACF field is generated; WordPress's default category (Uncategorised) is never drawn as a topic.",
   "shape": "topic",
   "fields": [
@@ -9,15 +9,16 @@
       "type": "text",
       "label": "Name",
       "required": true,
-      "maxLength": 120,
+      "target": 120,
       "platforms": {
         "nextjs": {
-          "formerly": "title"
+          "formerly": "title",
+          "owes": "a target of 120 characters, shown with a count and never refused"
         },
         "wordpress": {
           "native": "title",
           "formerly": "the term's name",
-          "owes": "the parent control removed from each taxonomy, so topics stay flat"
+          "owes": "the parent control removed from each taxonomy, so topics stay flat; a target of 120 characters, shown with a count and never refused"
         }
       }
     },

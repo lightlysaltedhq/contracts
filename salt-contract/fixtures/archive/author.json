@@ -1,11 +1,11 @@
 {
-  "$comment": "As archive/topic. document { kind: \"author\", title, href, strapline, biography, photo (media id) } is this case's own shape. First page, so the profile is drawn: portrait (thumb, lazy, in div.salt-archive__portrait), strapline, biography. Two cards, one page: no pagination (route.pagination.total is 1). The listing keeps three-column card sizes (the section's grid is three columns whatever the count).",
+  "$comment": "As archive/topic. document { kind: \"author\", title, href, strapline (the member's role), biography (the member's bio), photo (media id), email, phone, socials ([{ name, url, icon }], as a team card's) } is this case's own shape: an author's page is the team member's own page. First page, so the profile is drawn: portrait (thumb, lazy, in div.salt-archive__portrait), strapline, biography, then the contact and social links as the team card draws them. The phone follows section#display-forms. Two cards, one page: no pagination (route.pagination.total is 1). The listing keeps three-column card sizes (the section's grid is three columns whatever the count).",
   "view": "archive",
-  "summary": "An author's archive on its first page: the author as h1, the profile with portrait, strapline and biography, then the listing section with two cards and no pagination.",
+  "summary": "An author's page, the team member's own, on its first page: the name as h1, the profile with portrait, role, bio, email, phone and a social link, then the listing section with two cards and no pagination.",
   "context": {
     "priorityMedia": false,
     "locale": "en-GB",
-    "path": "/journal/author/priya-shah/"
+    "path": "/team/priya-shah/"
   },
   "site": {
     "arrow": "→",
@@ -14,16 +14,26 @@
       "previous": "Previous",
       "next": "Next",
       "page": "Page",
-      "empty": "There are no posts to show yet."
+      "empty": "There are no posts to show yet.",
+      "social": "Social profiles"
     }
   },
   "document": {
     "kind": "author",
     "title": "Priya Shah",
-    "href": "/journal/author/priya-shah/",
+    "href": "/team/priya-shah/",
     "strapline": "Head gardener at Hollin Farm",
     "biography": "Priya has run the kitchen garden at Hollin Farm for eleven years and writes about soil, water and patience.",
     "photo": "priya",
+    "email": "priya@example.com",
+    "phone": "0117 496 0130",
+    "socials": [
+      {
+        "name": "Instagram",
+        "url": "https://www.instagram.com/priya.grows",
+        "icon": "instagram"
+      }
+    ],
     "listing": {
       "values": {
         "heading": "Latest posts",
@@ -78,7 +88,7 @@
       "current": 1,
       "total": 1,
       "hrefs": {
-        "1": "/journal/author/priya-shah/"
+        "1": "/team/priya-shah/"
       }
     }
   }

@@ -1,6 +1,6 @@
 {
   "$schema": "../../schema/field-definition.schema.json",
-  "version": "1.0.0-rc.7",
+  "version": "1.0.0-rc.8",
   "section": "pricing",
   "shared": {
     "id": "section-settings"
@@ -91,13 +91,13 @@
           "type": "boolean",
           "label": "Feature this plan",
           "default": false,
-          "description": "One plan only. Saving a second featured plan is refused.",
+          "description": "One plan only. A second featured plan cannot be published; a draft with one still saves.",
           "platforms": {
             "nextjs": {
               "note": "Refused on publish, not on a draft save."
             },
             "wordpress": {
-              "owes": "refusing a second featured plan on save; today the extra is demoted when the page is drawn"
+              "owes": "refusing a second featured plan on publish, a draft still saving; today the extra is demoted when the page is drawn"
             }
           }
         }

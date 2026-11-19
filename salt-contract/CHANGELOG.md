@@ -4,7 +4,7 @@ Newest first. Dates are DD/MM/YYYY. What each part of a version means, and how a
 announced and migrated, is in `RELEASE-POLICY.md`. Decisions cited as `SC-nnn` are in Lightly
 Salted's decision log for Product Salt.
 
-## 1.0.0 (candidate `1.0.0-rc.7`, prepared 18/11/2026; not published, dated when tagged)
+## 1.0.0 (candidate `1.0.0-rc.8`, prepared 18/11/2026; not published, dated when tagged)
 
 **Semver call: MAJOR, the first release of the contract.** No earlier version was published, so no
 implementation conformed to one. Adopting it is still a migration for existing sites, because the
@@ -61,12 +61,12 @@ test, applied through section 2's table, where the stricter row wins.
   (`./view-props/*`); the replaced-logic format (`./schema/replaced-logic`).
 - Image sizes (`./image-sizes`): each slot's `sizes` per band and column count, the candidate
   widths, and the srcset capped at the upload's intrinsic width (SC-016).
-- Fixtures (`./fixtures/*`): 116 cases with their expected HTML, for the 17 sections, the site
+- Fixtures (`./fixtures/*`): 117 cases with their expected HTML, for the 17 sections, the site
   header and footer, the post, service, case-study, archive, search and not-found views, and the
   page (SC-018, SC-019, SC-021); and the normaliser both sides are compared through
   (`./normalise`).
 - Three fixture conventions the first conformance run settled (SC-023). Rich text is given in its
-  stored form in a view as in a section: `service/full`'s intro holds the stored `h3`, drawn as
+  stored form in a view as in a section: `post/full`'s body holds the stored `h3`, drawn as
   `h2`, and the gate refuses any other heading level in a view's document. A collection is drawn
   in its stored order: a case's `collections` are already ordered, an adapter passes them through,
   and the contract names no sort (`collection-showcase/grid-team-contacts`). The archive and search
@@ -195,6 +195,110 @@ test, applied through section 2's table, where the stricter row wins.
     of describing the documents. `scripts/round_trip_acf.mjs` matches a layout by its contract id
     as well as its former names, which salt-wordpress now ships; both round-trip reports are
     regenerated.
+- The founder's rulings of 18/11/2026 and 19/11/2026 change the contract after `1.0.0-rc.7`
+  (ID-3968, ID-3969, ID-3970). Each is part of the first major, so the semver call stays MAJOR. On
+  its own, by `RELEASE-POLICY.md` section 1's test, the limits rule would be MAJOR: until now the
+  contract did not say how a limit is held, and from this candidate an implementation that refuses
+  a draft, cuts what an editor wrote (as the browser's `maxlength` attribute on ACF's input does)
+  or refuses text over its target no longer conforms. Turning a limit into a target loosens it,
+  and adding the `target` keyword is a new optional schema keyword: each MINOR on its own. The
+  service example's change is PATCH: an implementation that drew the old case correctly draws the
+  new one.
+  - **The limits rule** (ID-3968; 18/11/2026, amended 19/11/2026). The field schema states it in
+    its own words and in every limit keyword's description, and `RELEASE-POLICY.md` section 2
+    states it: *A limit never stops a draft from saving and never cuts what an editor wrote: the
+    editor sees it as they edit, and it is checked when content is published. A write from outside
+    the editor (the API, an import, code) that breaks a limit is refused with a message to whoever
+    sent it. A length or a number the design only prefers is a target, shown to the editor with a
+    count and never refused, by the editor or by any other write. A value over its target or its
+    limit is always drawn in full, never cut off or clamped.* As accepted on 18/11/2026 a write
+    that could not show an editor the message was refused or stored and flagged; on 19/11/2026 the
+    founder ruled that such a write breaking a limit is refused with a message and one over a
+    target saves, so nothing is left stored and flagged and the rule no longer says it. The rulings
+    of 19/11/2026 also say: a list at its maximum may refuse to add a row, with a message; every
+    length and target counts Unicode code points, a CRLF as one (the fixtures gate counts so);
+    checks that are not limits (email and url formats, the time field, pricing's one featured plan,
+    a rating's half steps) follow the same rule, a draft always saving and publishing checked, and
+    the schema, `pricing.json` and the url owes now say *on publish* in place of *on save*; a value
+    over its target or limit is drawn in full; and this editor behaviour counts towards
+    conformance, checked by each platform's own tests, not by `salt-conformance`.
+  - **Which numbers stay limits** (the founder's ruling of 19/11/2026: *target only for all
+    platforms*, except what a page breaks without). These stay checked limits, unchanged: the tabs'
+    8, the buttons' 2 (the call-to-action's, the hero's and a media-text row's), a rating's 1 to 5,
+    a location's `lat` (-90 to 90) and `lng` (-180 to 180), and its map `zoom` (1 to 20). These
+    stay as they were, with no soft version: a street's two lines (`maxLines`), a rating's half
+    steps from 1, the minimum of one on a list that has one (a service's benefits, a case study's
+    results and gallery), and a collection-query's count, 0 to 24. Every other number is now a
+    target, its `maxLength` or `max` renamed to `target` and its number unchanged:
+    every section's `intro` (300: carousel, collection-showcase, contact, faq, features, gallery,
+    listing, logos, process, stats, tabs); a service's `title`, `summary` (300), `benefits` (12)
+    and `relatedServices` (6); a case study's `title`, `summary` (300), `gallery` (24), `results`
+    (6) and `details` (12); a post's `title` and `summary` (300); an FAQ's `question` (120); a
+    location's `title` (120) and `hours` (14); a testimonial's `name` (120) and `role` (80); a
+    person's (a team member's) `name` (120), `role` (80), `bio` (600) and `socials` (10); and a
+    topic's `title` (120). The help text of the list fields that said *up to* now says *aim for no
+    more than*. No field carries a `maxLength` any longer.
+  - **Targets** (ID-3969; 18/11/2026 and 19/11/2026). A text, textarea, list, gallery or
+    relationship may carry `target`: one number, or an ascending pair `[hint, target]`, the gate
+    refusing a pair whose hint is not the lower. It is shown with a count and never refused. A
+    title whose record has a page of its own (a service, a case study, a post) carries `[60, 120]`:
+    the count notes a title past about 60, measured with the site name joined as the page's
+    `<title>` draws it, and more strongly one past 120, and neither blocks. An FAQ's question, a
+    testimonial's and a team member's name, a location's title and a topic's name show the 120
+    only (19/11/2026). ACF records a target under the field's `salt.target`, and the title's and
+    summary's that WordPress stores in its own place under the group's `salt.targets`
+    (19/11/2026); Payload under `custom.salt.target`. Neither is a setting that refuses anything,
+    so a target draws no length attribute on either platform. `RELEASE-POLICY.md`: changing a
+    target's numbers is PATCH; adding or removing one, or turning a limit into one, is MINOR
+    (19/11/2026).
+  - **What each platform owes.** Salt for WordPress: a count beside every target; a draft always
+    saving, on an options page and a term screen too; an outside write (REST, import) that breaks
+    a limit refused with a message and one over a target saved (lifting WordPress's own REST
+    refusal is its detail, 19/11/2026); the remaining limits held by ACF's own `min` and `max`,
+    which ACF checks on publish; and the other checks made on publish. With JavaScript off, a
+    failed update drops ACF's fields silently: a known gap the founder accepted on 19/11/2026.
+    Salt for Next.js: a draft always saves, by whatever means (19/11/2026); every count in code
+    points with a CRLF as one, where Payload's `maxLength` counts UTF-16 units; the title's two
+    notes; an outside write that breaks a limit refused with a message, and one over a target
+    saved. Each section intro owes its 300 as a target in place of Payload's `maxLength`, which
+    the Payload round trip now lists (11 expected differences).
+  - **The service example** (ID-3970, 18/11/2026). `service/full`'s intro allows no headings, so
+    it is two paragraphs: the stored `<h3>How it works</h3>` and the `h2` it drew are gone from the
+    case and its HTML, and the note in `markup/service.json` and the case's comments no longer
+    speak of a stored `h3`. The intro's allowed list is unchanged.
+  - **View-all addresses** (the founder's ruling of 18/11/2026: left to the platform, by the same
+    principle on both). The showcase's `viewAll` view prop
+    (`contract/view-props/collection-showcase.json`) says so: each platform builds the address its
+    native way; a collection's view-all link points at that collection's own index (archive) page;
+    and a collection with no index page draws no link. A description of a view prop, so no
+    verdict changes.
+  - Both emitters' output for a limit is as at rc.7. An ACF Pro 6.8.11 probe showed that ACF's own
+    setting is what checks a limit on publish: with it removed nothing checked at all. The
+    founder answered every question on limits and targets on 19/11/2026.
+  - **Team members' pages** (19/11/2026). A team tick on the existing user makes their profile
+    public. Posts credit users independently of the tick. Editors can maintain public profiles
+    without managing accounts or roles; the public contact email never falls back to login email.
+    A team member needs no admin access. Both platforms use one address, `/team/{slug}/`;
+    bylines, author boxes and team cards link directly there, and existing public author URLs
+    for that person redirect permanently (301). The public slug survives a display-name change.
+    `team.json` no longer says team has no page, and the dropped `post_content`'s note says the
+    page reads the `bio` field. The page's profile draws the role as the strapline, the bio, the
+    photo, and the email, phone and social links as the team card draws them (`card.json`'s
+    `contact` and `socials`, with their classes), each only when set; `archive/author` draws them.
+    A member with no posts draws nothing where the listing would be, no heading and no empty
+    message, on the author page only: the new case `archive/author-no-posts`. A team member's
+    name carries `[60, 120]`, as the other titles of a page of their own do. No page lists the
+    whole team: team has no index page, so a team section draws no view-all link (the `viewAll`
+    field's help and view prop say so).
+  - **Other rulings of 19/11/2026.** A post's topics are drawn with the primary topic first, then
+    the rest A to Z by title (`markup/post.json`, `posts.json`), which is `post/full`'s order
+    already. On a grouped index an entry under two or more topics is listed under each
+    (`markup/collection-showcase.json`). The carousel's card style is shown only for the inline
+    source, as its condition already says, so `carousel.json` is unchanged. By-category with a
+    category that does not belong to the chosen source is refused on publish, with a message
+    (both platforms' query owes in `carousel.json` and `collection-showcase.json`).
+  - Team is a linked source for showcase and carousel. The Index layout can list members'
+    individual pages; this neither creates a whole-team archive nor adds a view-all link.
 - The case-study view has fixtures and is required of every implementation (SC-021).
   `fixtures/case-study/` holds four cases (`full`, `aside`, `band` and `minimal`), `case-study`
   joins `REQUIRED_FILES`, and a full conformance run refuses to declare it not shipped. The
@@ -546,4 +650,3 @@ questions and "left as work" notes here describe the draft at the time; 1.0.0 ab
   a condition names a sibling field, a filled condition names no group, list,
   collection-query or link, and sibling names are unique. The carousel's variant field is
   `cardStyle`, as the fields file names it.
-

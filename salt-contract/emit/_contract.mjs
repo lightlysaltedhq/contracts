@@ -212,6 +212,8 @@ export function checkedClauses(condition, where) {
 
 /** Source ids that hold items (field-definition schema, $defs.source). */
 export const SOURCES = ['services', 'case-studies', 'testimonials', 'posts', 'team', 'faqs', 'locations']
+// Team is a filtered view of native users. Post authorship deliberately does not use this filter.
+export const TEAM_TICK = 'showOnWebsite'
 
 /** The source ids among a select's options, in its order; [] for no select. */
 export const sourceValues = (select) => (select?.options ?? []).map((o) => o.value).filter((v) => SOURCES.includes(v))
@@ -318,7 +320,7 @@ export function unmetSources(fields, installed, at, unfitted = fields) {
   const selects = sourceSelectsOf(unfitted)
   return fields.flatMap((f) => {
     const where = `${at}.${f.name}`
-    const need = f.type === 'collection-query' ? f.source : f.type === 'relationship' ? f.to : undefined
+    const need = f.type === 'collection-query' ? f.source : f.type === 'relationship' && f.to !== 'users' ? f.to : undefined
     const own = need && !installed.has(need) ? [`the source ${need} (${where})`] : []
     if (selects.has(f.name) && f.options.length === 0) {
       own.push(`one of the sources ${sourceValues(unfitted.find((u) => u.name === f.name)).join(', ')} (${where})`)

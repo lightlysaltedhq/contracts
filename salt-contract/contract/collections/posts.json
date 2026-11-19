@@ -1,7 +1,7 @@
 {
   "$schema": "../../schema/field-definition.schema.json",
-  "version": "1.0.0-rc.7",
-  "$comment": "A post's stored fields, by the founder's rulings of 18/11/2026 (posts, topics and people). A post is stored as sections (layout) on both platforms; a section that is prose alone draws as the post's prose, and every other section as a band (markup/post.json, sections in a post). Video is in the ruled starting list but has no section yet (ID-3951); it joins layout's sections when it exists. Tables are parked for their own PRD. The view's document (fixtures/post) is these fields as the post view receives them: its date derived from publishedAt in the site's time zone, its category from primaryTopic, its topics and author resolved, its layout's sections as stored.",
+  "version": "1.0.0-rc.8",
+  "$comment": "A post's stored fields, by the founder's rulings of 18/11/2026 (posts, topics and people). A post is stored as sections (layout) on both platforms; a section that is prose alone draws as the post's prose, and every other section as a band (markup/post.json, sections in a post). Video is in the ruled starting list but has no section yet (ID-3951); it joins layout's sections when it exists. Tables are parked for their own PRD. The view's document (fixtures/post) is these fields as the post view receives them: its date derived from publishedAt in the site's time zone, its category from primaryTopic, its topics and author resolved, the topics drawn with the primary topic first and the rest A to Z by title, not in the order they were picked (the founder's ruling of 19/11/2026), its layout's sections as stored.",
   "collection": "posts",
   "label": "Post",
   "fields": [
@@ -10,15 +10,19 @@
       "type": "text",
       "label": "Title",
       "required": true,
-      "maxLength": 120,
+      "target": [
+        60,
+        120
+      ],
       "platforms": {
         "nextjs": {
           "formerly": "title",
-          "owes": "the 120-character limit"
+          "owes": "a count as the editor types that notes a title past about 60 characters and notes more strongly one past 120, never refused"
         },
         "wordpress": {
           "native": "title",
-          "formerly": "post_title"
+          "formerly": "post_title",
+          "owes": "a count as the editor types that notes a title past about 60 characters and notes more strongly one past 120, never refused"
         }
       }
     },
@@ -26,16 +30,14 @@
       "name": "author",
       "type": "relationship",
       "label": "Author",
-      "to": "team",
-      "description": "Optional. The team member credited with the post, who needs no account.",
+      "to": "users",
+      "description": "Optional. Credit the native user independently of the team tick. Removing the tick never removes the credit.",
       "platforms": {
         "nextjs": {
-          "formerly": "author (a relationship to users)",
-          "owes": "a relationship to the team collection, each post repointed to a team member"
+          "formerly": "author (a relationship to users)"
         },
         "wordpress": {
-          "formerly": "post_author (a user)",
-          "owes": "the credited author as a field of the theme's own, and the author archive built by team member"
+          "native": "post_author"
         }
       }
     },
@@ -73,17 +75,17 @@
       "name": "summary",
       "type": "textarea",
       "label": "Summary",
-      "maxLength": 300,
+      "target": 300,
       "description": "One or two sentences, shown on cards wherever the item is listed.",
       "platforms": {
         "nextjs": {
           "formerly": "excerpt",
-          "owes": "summary in place of excerpt"
+          "owes": "summary in place of excerpt; a target of 300 characters, shown with a count and never refused"
         },
         "wordpress": {
           "native": "excerpt",
           "formerly": "the excerpt (no limit)",
-          "owes": "a check on save for the excerpt's 300 characters"
+          "owes": "the excerpt's a target of 300 characters, shown with a count and never refused"
         }
       }
     },

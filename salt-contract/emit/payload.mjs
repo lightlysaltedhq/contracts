@@ -42,7 +42,7 @@ import { readFileSync, writeFileSync } from 'node:fs'
 
 import { allowedFor, categorisedSources, categorySources, clauseHolds, clauses, collectionQueryShape, diffSnapshots, hasVisibleText,
   isFilled, isMainModule, LINK_SHAPE, loadContract, modeAllowed, normaliseLineEndings, parseEmitterArguments, planSections,
-  resolveCollection, siblingValue, sourceValues, SOURCES } from './_contract.mjs'
+  resolveCollection, siblingValue, sourceValues, SOURCES, TEAM_TICK } from './_contract.mjs'
 
 /**
  * Each source's Payload collection and category taxonomy, as Salt for Next.js names them by
@@ -80,7 +80,13 @@ const conditionFor = (list, defaults) => (_data, siblingData) => clausesHold(lis
 function sourcesFrom(options) {
   const given = options.sources
   const installed = given ? SOURCES.filter((s) => s in given) : SOURCES
-  return Object.fromEntries(installed.map((s) => [s, { ...SOURCE_DEFAULTS[s], ...(given?.[s] ?? {}) }]))
+  const sources = Object.fromEntries(installed.map((s) => [s, { ...SOURCE_DEFAULTS[s], ...(given?.[s] ?? {}) }]))
+  if (sources.team) {
+    const auth = options.usersSlug ?? SOURCE_DEFAULTS.team.collection
+    if (given?.team?.collection && given.team.collection !== auth) throw new Error('sources.team.collection must be the native users collection (usersSlug)')
+    sources.team.collection = auth
+  }
+  return sources
 }
 
 /**
@@ -126,6 +132,8 @@ function convertField(f, ctx) {
     admin.condition = conditionFor(list, ctx.defaults)
   }
   if (f.deprecated) salt.deprecated = f.deprecated
+  // A target is never refused, so it is no Payload setting, only the count's to show (ID-3969).
+  if (f.target !== undefined) salt.target = f.target
   const below = { ...ctx, path: [...ctx.path, f.name] }
 
   switch (f.type) {
@@ -221,7 +229,8 @@ function convertField(f, ctx) {
       out.label = f.label
       // A link's document and a collection-query's parts have no `to`; their callers set it.
       if (f.to) {
-        out.relationTo = ctx.sources[f.to].collection
+        out.relationTo = f.to === 'users' ? options.usersSlug ?? SOURCE_DEFAULTS.team.collection : ctx.sources[f.to].collection
+        if (f.to === 'team') out.filterOptions = { [TEAM_TICK]: { equals: true } }
         salt.to = f.to
       } else if (ctx.link) {
         out.relationTo = [...(options.linkTo ?? ['pages'])]
@@ -307,6 +316,7 @@ function collectionQuery(f, out, ctx) {
     salt.sourceField = f.sourceField
   }
   const collections = offered.map((s) => ctx.sources[s].collection)
+  if (offered.includes('team')) salt.userTick = TEAM_TICK
   const withCategories = categorySources(f, ctx.siblings, ctx.categorised)
   const taxonomies = withCategories.map((s) => {
     const taxonomy = ctx.sources[s].taxonomy
@@ -346,6 +356,9 @@ function collectionQuery(f, out, ctx) {
     if (field.name !== 'categories' && field.name !== 'items') return field
     const targets = field.name === 'categories' ? taxonomies : collections
     const relation = { ...field, relationTo: targets.length === 1 ? targets[0] : targets }
+    const includesTeam = field.name === 'items' && offered.includes('team')
+    const teamFilter = { [TEAM_TICK]: { equals: true } }
+    if (includesTeam && targets.length === 1) relation.filterOptions = teamFilter
     if (field.name === 'categories' && f.sourceField) {
       // The picker shows only while the block's source select holds a source with categories
       // (SC-010). That select is on the block, a level above this group; Payload passes the block
@@ -365,7 +378,8 @@ function collectionQuery(f, out, ctx) {
       const pick = (source) => (field.name === 'categories' ? ctx.sources[source]?.taxonomy : ctx.sources[source]?.collection)
       relation.filterOptions = ({ relationTo, blockData }) => {
         const chosen = blockData?.[f.sourceField]
-        return chosen === undefined || chosen === null || relationTo === pick(chosen)
+        if (chosen !== undefined && chosen !== null && relationTo !== pick(chosen)) return false
+        return includesTeam && relationTo === ctx.sources.team.collection ? teamFilter : true
       }
     }
     return relation
@@ -424,13 +438,13 @@ function buildCollections(options, snapshot) {
     const { fields } = resolveCollection(contract, source)
     const leftOut = []
     const kept = fields.filter((f) => {
-      if (f.type === 'relationship' && !(f.to in sources)) { leftOut.push(`${f.name} (the source ${f.to})`); return false }
+      if (f.type === 'relationship' && f.to !== 'users' && !(f.to in sources)) { leftOut.push(`${f.name} (the source ${f.to})`); return false }
       return true
     })
     const base = { options, snapshot, sources, categorised, contract, scope: `collection_${snake(source)}`, path: [], collection: source }
     return {
       slug: sources[source].collection,
-      custom: { salt: { collection: source, ...(leftOut.length ? { leftOut } : {}) } },
+      custom: { salt: { collection: source, ...(source === 'team' ? { userTick: TEAM_TICK } : {}), ...(leftOut.length ? { leftOut } : {}) } },
       fields: convertFields(kept, base),
     }
   })
@@ -441,6 +455,7 @@ function buildCollections(options, snapshot) {
  *
  * options:
  *   mediaSlug       the upload collection behind every image field ('media')
+ *   usersSlug       the native auth collection for post credit and the logical team source ('users')
  *   linkTo          collections an internal link may point at (['pages'])
  *   headings        the body heading levels a site offers, as ['h3', 'h4']; narrows each rich
  *                   text field that allows headings, and may not add one the contract refuses
@@ -470,9 +485,10 @@ export function payloadSnapshot(options = {}) {
 /**
  * Each collection source's fields, as the documents of the site's Payload collection store them:
  * [{ slug, custom: { salt: { collection } }, fields }], one per installed source in the contract's
- * source order, `slug` its collection (SOURCE_DEFAULTS, or options.sources). The consumer spreads
- * `fields` into its own collection config, beside what stays native (its slug field, access,
- * versions, admin). Takes toPayloadBlocks' options, and `collections`: the source ids to emit, of
+ * source order, `slug` its collection (SOURCE_DEFAULTS, or options.sources). Merge the fields
+ * into the existing collection config. For team this is the auth collection: retain its access,
+ * slug hooks and security fields, never registering a second collection or duplicate fields.
+ * Takes toPayloadBlocks' options, and `collections`: the source ids to emit, of
  * those installed (every installed source when left out). A post's sections field holds the
  * blocks toPayloadBlocks would give for those sections.
  */

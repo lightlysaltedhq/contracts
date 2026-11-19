@@ -219,13 +219,13 @@ test('a list is a repeater that collapses to its row label, with its limits', ()
   assert.ok(items.sub_fields.some((f) => f.key === items.collapsed))
 })
 
-test('a relationship is a post object, or a relationship when many, of its source\'s post type', () => {
+test('a post picker targets its post type; a team picker targets ticked users, not a post type', () => {
   const [one, people] = probed([
     { name: 'lead', type: 'relationship', label: 'Lead', to: 'services', required: true },
     { name: 'people', type: 'relationship', label: 'People', to: 'team', many: true, max: 4 },
   ], { sources: { services: {}, team: { postType: 'staff' } } })
   assert.deepEqual([one.type, one.post_type, one.salt], ['post_object', ['service'], { to: 'services' }])
-  assert.deepEqual([people.type, people.post_type, people.max, people.filters], ['relationship', ['staff'], 4, ['search']])
+  assert.deepEqual([people.type, people.post_type, people.multiple, people.salt], ['user', undefined, 1, { to: 'team', userTick: 'showOnWebsite', max: 4 }])
 })
 
 test('icons come from the site, and a section that needs them refuses to build without them', () => {
@@ -569,7 +569,10 @@ test('SC-010: by-category is offered from the contract\'s categories, not from a
   for (const team of [query('team'), query('team', { team: { taxonomy: 'department' } })]) {
     assert.deepEqual(team.sub_fields.map((f) => f.name), ['mode', 'items', 'order', 'count'])
     assert.deepEqual(Object.keys(team.sub_fields[0].choices), ['automatic', 'manual'])
+    assert.deepEqual([field(team.sub_fields, 'items').type, team.salt.userTick], ['user', 'showOnWebsite'])
   }
+  const mixed = field(layout(layoutsOf({ sources: { posts: {}, team: {} } }), 'collection-showcase').sub_fields, 'query.items')
+  assert.deepEqual([mixed.type, mixed.post_type, mixed.salt.postSources, mixed.salt.userTick], ['select', undefined, { posts: 'post' }, 'showOnWebsite'])
   // A taxonomy a site gives testimonials does not give them categories.
   const testimonials = query('testimonials', { testimonials: { taxonomy: 'mood' } })
   assert.deepEqual(testimonials.sub_fields.map((f) => f.name), ['mode', 'items', 'order', 'count'])
@@ -617,29 +620,32 @@ test('SC-010 (modeAllowed): the mode records that by-category needs a source wit
 
 const groupOf = (groups, source) => groups.find((g) => g.salt?.collection === source)
 
-test('ID-3944: each collection is a group on its post type; what WordPress stores natively is named, not generated', () => {
+test('ID-3944: each group targets its native record; WordPress-native fields are named, not duplicated', () => {
   const groups = toAcfFieldGroups({ icons })
   assert.deepEqual(groups.map((g) => g.key), ['group_salt_sections', 'group_salt_collection_services', 'group_salt_collection_case_studies',
     'group_salt_collection_testimonials', 'group_salt_collection_posts', 'group_salt_collection_team', 'group_salt_collection_faqs', 'group_salt_collection_locations'])
   const posts = groupOf(groups, 'posts')
   assert.deepEqual(posts.location, [[{ param: 'post_type', operator: '==', value: 'post' }]])
-  assert.deepEqual(posts.salt.native, { title: 'title', topics: 'categories', summary: 'excerpt', featuredImage: 'featured-image', publishedAt: 'date' })
-  assert.deepEqual(posts.fields.map((f) => [f.name, f.type]), [['author', 'post_object'], ['primaryTopic', 'taxonomy'], ['layout', 'flexible_content']])
-  assert.deepEqual(field(posts.fields, 'author').post_type, ['team_member'])
+  assert.deepEqual(posts.salt.native, { title: 'title', author: 'post_author', topics: 'categories', summary: 'excerpt', featuredImage: 'featured-image', publishedAt: 'date' })
+  assert.deepEqual(posts.fields.map((f) => [f.name, f.type]), [['primaryTopic', 'taxonomy'], ['layout', 'flexible_content']])
   assert.equal(field(posts.fields, 'primaryTopic').taxonomy, 'category')
   // A post's sections are the five ruled, each with its own keys so none clashes with a page's.
   const layout = field(posts.fields, 'layout')
   assert.deepEqual(layout.layouts.map((l) => [l.name, l.key]), ['rich-text', 'media-text', 'gallery', 'call-to-action', 'faq'].map((id) => [id, `layout_salt_collection_posts_layout_${id.replace(/-/g, '_')}`]))
-  // The service intro is the page body, and the team member's name and photo are the title and image.
+  // A public profile extends a user, not a post or an account-management form.
   assert.equal(groupOf(groups, 'services').salt.native.intro, 'body')
-  assert.deepEqual(groupOf(groups, 'team').fields.map((f) => f.name), ['role', 'bio', 'email', 'phone', 'socials'])
+  const team = groupOf(groups, 'team')
+  assert.deepEqual(team.location, [[{ param: 'user_form', operator: '==', value: 'edit' }]])
+  assert.deepEqual(team.salt.native, { name: 'display_name' })
+  assert.deepEqual(team.fields.map((f) => f.name), ['role', 'bio', 'photo', 'publicEmail', 'phone', 'socials', 'showOnWebsite', 'slug'])
+  assert.equal(field(team.fields, team.salt.userTick).default_value, 0)
   // A site's renamed module moves the group, and a source it lacks has no group.
   const renamed = toAcfFieldGroups({ icons, sources: { posts: { postType: 'article' }, team: {} } })
   assert.deepEqual(renamed.map((g) => g.key), ['group_salt_sections', 'group_salt_collection_posts', 'group_salt_collection_team'])
   assert.deepEqual(groupOf(renamed, 'posts').location[0][0].value, 'article')
-  // Without team, a post's author has nothing to point at, so it is left out and named.
+  // Credit is independent of whether team is offered as a source.
   const alone = groupOf(toAcfFieldGroups({ icons, sources: { posts: {} } }), 'posts')
-  assert.deepEqual([alone.fields.map((f) => f.name), alone.salt.leftOut], [['primaryTopic', 'layout'], ['author (the source team)']])
+  assert.deepEqual([alone.salt.native.author, alone.salt.leftOut], ['post_author', undefined])
 })
 
 test('ID-3944: the ruled types and limits reach ACF', () => {
@@ -653,7 +659,7 @@ test('ID-3944: the ruled types and limits reach ACF', () => {
   const rating = field(groupOf(groups, 'testimonials').fields, 'rating')
   assert.deepEqual([rating.min, rating.max, rating.step], [1, 5, 0.5])
   const socials = field(groupOf(groups, 'team').fields, 'socials')
-  assert.deepEqual([socials.max, socials.sub_fields.map((f) => f.name)], [10, ['name', 'url']])
+  assert.deepEqual([socials.max, socials.salt.target, socials.sub_fields.map((f) => f.name)], [undefined, 10, ['name', 'url']])
 })
 
 test('ID-3944: a renamed collection field fails the drift check, naming both names', () => {
@@ -684,4 +690,51 @@ test('ID-3944: every layout carries a Settings tab, storing nothing, straight be
   // The tab has no name, so the slug registry holds no empty name for it.
   assert.ok(!acfSlugRegistry(groups).fields.group_salt_sections.includes(''))
   assert.ok(acfSlugRegistry(groups).fields.group_salt_collection_case_studies.includes('externalUrl'))
+})
+
+test('ID-3968: a limit is ACF\'s own setting; by the ruling of 19/11/2026 the text lengths and list sizes are targets', () => {
+  const groups = toAcfFieldGroups({ icons })
+  // Limits a page breaks without stay ACF's own, checked on publish.
+  assert.equal(field(layout(layoutsOf(), 'tabs').sub_fields, 'tabs').max, 8)
+  assert.equal(field(layout(layoutsOf(), 'call-to-action').sub_fields, 'buttons').max, 2)
+  // Targets draw no length attribute and nothing refuses them.
+  const role = field(groupOf(groups, 'team').fields, 'role')
+  assert.deepEqual([role.maxlength, role.salt], [undefined, { target: 80 }])
+  const intro = field(layout(layoutsOf(), 'features').sub_fields, 'intro')
+  assert.deepEqual([intro.maxlength, intro.salt], [undefined, { target: 300 }])
+  const benefits = field(groupOf(groups, 'services').fields, 'benefits')
+  assert.deepEqual([benefits.min, benefits.max, benefits.salt.target], [1, undefined, 12])
+  const walk = (fields) => (fields ?? []).flatMap((f) => [...('maxlength' in f ? [f.key] : []), ...walk(f.sub_fields), ...(f.layouts ?? []).flatMap((l) => walk(l.sub_fields))])
+  assert.deepEqual(groups.flatMap((g) => walk(g.fields)), [])
+})
+
+test('ID-3969: a target is under salt, never an ACF setting', () => {
+  const [plain, long, rows, photos, people] = probed([
+    { name: 'plain', type: 'text', label: 'Plain', maxLength: 120, target: 60 },
+    { name: 'long', type: 'textarea', label: 'Long', target: 200 },
+    { name: 'rows', type: 'list', label: 'Rows', target: 6, fields: [{ name: 'text', type: 'text', label: 'Text' }] },
+    { name: 'photos', type: 'image', label: 'Photos', many: true, target: 12 },
+    { name: 'people', type: 'relationship', label: 'People', to: 'team', many: true, target: 4 },
+  ], { sources: { team: {} } })
+  assert.deepEqual(plain, { key: 'field_salt_probe_plain', label: 'Plain', name: 'plain', type: 'text', maxlength: 120, salt: { target: 60 } })
+  assert.deepEqual([long.maxlength, long.salt], [undefined, { target: 200 }])
+  assert.deepEqual([rows.max, rows.salt.target, photos.max, photos.salt], [undefined, 6, undefined, { target: 12 }])
+  assert.deepEqual([people.type, people.max, people.salt], ['user', undefined, { target: 4, to: 'team', userTick: 'showOnWebsite' }])
+})
+
+test('ID-3969: WordPress\'s native title and summary carry their targets under the group\'s salt.targets', () => {
+  const groups = toAcfFieldGroups({ icons })
+  // A record with a page of its own: a hint of 60 and a target of 120, and its summary's 300.
+  for (const source of ['services', 'case-studies', 'posts']) {
+    const group = groupOf(groups, source)
+    assert.deepEqual([group.salt.native.title, group.salt.native.summary, group.salt.targets], ['title', 'excerpt', { title: [60, 120], summary: 300 }], source)
+  }
+  // A team member's page is their own too (19/11/2026), and has no summary.
+  assert.deepEqual(groupOf(groups, 'team').salt.targets, { name: [60, 120] })
+  // No page of its own: the 120 only.
+  const titles = { locations: 'title', faqs: 'question', testimonials: 'name' }
+  for (const [source, name] of Object.entries(titles)) {
+    const group = groupOf(groups, source)
+    assert.deepEqual([group.salt.native[name], group.salt.targets], ['title', { [name]: 120 }], source)
+  }
 })

@@ -200,7 +200,7 @@
     "path": "intro",
     "kind": "missing",
     "difference": "not in salt-wordpress",
-    "evidence": "owes: the field"
+    "evidence": "owes: the field, with a target of 300 characters, shown with a count and never refused"
   },
   {
     "section": "features",
@@ -249,7 +249,7 @@
     "path": "intro",
     "kind": "missing",
     "difference": "not in salt-wordpress",
-    "evidence": "owes: the field"
+    "evidence": "owes: the field, with a target of 300 characters, shown with a count and never refused"
   },
   {
     "section": "stats",
@@ -284,7 +284,7 @@
     "path": "intro",
     "kind": "missing",
     "difference": "not in salt-wordpress",
-    "evidence": "owes: the field"
+    "evidence": "owes: the field, with a target of 300 characters, shown with a count and never refused"
   },
   {
     "section": "logos",
@@ -326,7 +326,7 @@
     "path": "intro",
     "kind": "missing",
     "difference": "not in salt-wordpress",
-    "evidence": "owes: the field"
+    "evidence": "owes: the field, with a target of 300 characters, shown with a count and never refused"
   },
   {
     "section": "gallery",
@@ -382,7 +382,7 @@
     "path": "intro",
     "kind": "missing",
     "difference": "not in salt-wordpress",
-    "evidence": "owes: the field"
+    "evidence": "owes: the field, with a target of 300 characters, shown with a count and never refused"
   },
   {
     "section": "process",
@@ -431,7 +431,7 @@
     "path": "intro",
     "kind": "missing",
     "difference": "not in salt-wordpress",
-    "evidence": "owes: the field"
+    "evidence": "owes: the field, with a target of 300 characters, shown with a count and never refused"
   },
   {
     "section": "faq",
@@ -529,7 +529,7 @@
     "path": "intro",
     "kind": "missing",
     "difference": "not in salt-wordpress",
-    "evidence": "owes: the field"
+    "evidence": "owes: the field, with a target of 300 characters, shown with a count and never refused"
   },
   {
     "section": "collection-showcase (services)",
@@ -578,14 +578,14 @@
     "path": "query.categories",
     "kind": "type",
     "difference": "type select; salt-wordpress taxonomy",
-    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; team's query without by-category or the department picker its layout has today, as team has no categories (SC-027); a select for the query's mode, which is a button group today (SC-023)"
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; team's query without by-category or the department picker its layout has today, as team has no categories (SC-027); a select for the query's mode, which is a button group today (SC-023); and, beside that check, refusing on publish, with a message, mode by-category with a category that does not belong to the chosen source, a draft still saving (the founder's ruling of 19/11/2026)"
   },
   {
     "section": "collection-showcase (services)",
     "path": "query.items",
-    "kind": "relation",
-    "difference": "post_type [\"service\",\"work\",\"testimonial\",\"post\",\"team_member\"]; salt-wordpress [\"service\"]",
-    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; team's query without by-category or the department picker its layout has today, as team has no categories (SC-027); a select for the query's mode, which is a button group today (SC-023)"
+    "kind": "type",
+    "difference": "type select; salt-wordpress relationship",
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; team's query without by-category or the department picker its layout has today, as team has no categories (SC-027); a select for the query's mode, which is a button group today (SC-023); and, beside that check, refusing on publish, with a message, mode by-category with a category that does not belong to the chosen source, a draft still saving (the founder's ruling of 19/11/2026)"
   },
   {
     "section": "collection-showcase (services)",
@@ -606,28 +606,28 @@
     "path": "query.order",
     "kind": "condition",
     "difference": "condition differs (1 of 3 cases), e.g. {\"mode\":\"manual\"}: contract hides, salt-wordpress shows",
-    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; team's query without by-category or the department picker its layout has today, as team has no categories (SC-027); a select for the query's mode, which is a button group today (SC-023)"
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; team's query without by-category or the department picker its layout has today, as team has no categories (SC-027); a select for the query's mode, which is a button group today (SC-023); and, beside that check, refusing on publish, with a message, mode by-category with a category that does not belong to the chosen source, a draft still saving (the founder's ruling of 19/11/2026)"
   },
   {
     "section": "collection-showcase (services)",
     "path": "query.count",
     "kind": "limit",
     "difference": "step 1; salt-wordpress none",
-    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; team's query without by-category or the department picker its layout has today, as team has no categories (SC-027); a select for the query's mode, which is a button group today (SC-023)"
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; team's query without by-category or the department picker its layout has today, as team has no categories (SC-027); a select for the query's mode, which is a button group today (SC-023); and, beside that check, refusing on publish, with a message, mode by-category with a category that does not belong to the chosen source, a draft still saving (the founder's ruling of 19/11/2026)"
   },
   {
     "section": "collection-showcase (services)",
     "path": "query.count",
     "kind": "condition",
     "difference": "condition differs (1 of 3 cases), e.g. {\"mode\":\"manual\"}: contract hides, salt-wordpress shows",
-    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; team's query without by-category or the department picker its layout has today, as team has no categories (SC-027); a select for the query's mode, which is a button group today (SC-023)"
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; team's query without by-category or the department picker its layout has today, as team has no categories (SC-027); a select for the query's mode, which is a button group today (SC-023); and, beside that check, refusing on publish, with a message, mode by-category with a category that does not belong to the chosen source, a draft still saving (the founder's ruling of 19/11/2026)"
   },
   {
     "section": "collection-showcase (services)",
     "path": "query.direction",
     "kind": "extra",
     "difference": "in salt-wordpress, not in the contract",
-    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; team's query without by-category or the department picker its layout has today, as team has no categories (SC-027); a select for the query's mode, which is a button group today (SC-023)"
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; team's query without by-category or the department picker its layout has today, as team has no categories (SC-027); a select for the query's mode, which is a button group today (SC-023); and, beside that check, refusing on publish, with a message, mode by-category with a category that does not belong to the chosen source, a draft still saving (the founder's ruling of 19/11/2026)"
   },
   {
     "section": "collection-showcase (services)",
@@ -704,7 +704,7 @@
     "path": "intro",
     "kind": "missing",
     "difference": "not in salt-wordpress",
-    "evidence": "owes: the field"
+    "evidence": "owes: the field, with a target of 300 characters, shown with a count and never refused"
   },
   {
     "section": "collection-showcase (work)",
@@ -767,14 +767,14 @@
     "path": "query.categories",
     "kind": "type",
     "difference": "type select; salt-wordpress taxonomy",
-    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; team's query without by-category or the department picker its layout has today, as team has no categories (SC-027); a select for the query's mode, which is a button group today (SC-023)"
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; team's query without by-category or the department picker its layout has today, as team has no categories (SC-027); a select for the query's mode, which is a button group today (SC-023); and, beside that check, refusing on publish, with a message, mode by-category with a category that does not belong to the chosen source, a draft still saving (the founder's ruling of 19/11/2026)"
   },
   {
     "section": "collection-showcase (work)",
     "path": "query.items",
-    "kind": "relation",
-    "difference": "post_type [\"service\",\"work\",\"testimonial\",\"post\",\"team_member\"]; salt-wordpress [\"work\"]",
-    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; team's query without by-category or the department picker its layout has today, as team has no categories (SC-027); a select for the query's mode, which is a button group today (SC-023)"
+    "kind": "type",
+    "difference": "type select; salt-wordpress relationship",
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; team's query without by-category or the department picker its layout has today, as team has no categories (SC-027); a select for the query's mode, which is a button group today (SC-023); and, beside that check, refusing on publish, with a message, mode by-category with a category that does not belong to the chosen source, a draft still saving (the founder's ruling of 19/11/2026)"
   },
   {
     "section": "collection-showcase (work)",
@@ -795,28 +795,28 @@
     "path": "query.order",
     "kind": "condition",
     "difference": "condition differs (1 of 3 cases), e.g. {\"mode\":\"manual\"}: contract hides, salt-wordpress shows",
-    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; team's query without by-category or the department picker its layout has today, as team has no categories (SC-027); a select for the query's mode, which is a button group today (SC-023)"
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; team's query without by-category or the department picker its layout has today, as team has no categories (SC-027); a select for the query's mode, which is a button group today (SC-023); and, beside that check, refusing on publish, with a message, mode by-category with a category that does not belong to the chosen source, a draft still saving (the founder's ruling of 19/11/2026)"
   },
   {
     "section": "collection-showcase (work)",
     "path": "query.count",
     "kind": "limit",
     "difference": "step 1; salt-wordpress none",
-    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; team's query without by-category or the department picker its layout has today, as team has no categories (SC-027); a select for the query's mode, which is a button group today (SC-023)"
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; team's query without by-category or the department picker its layout has today, as team has no categories (SC-027); a select for the query's mode, which is a button group today (SC-023); and, beside that check, refusing on publish, with a message, mode by-category with a category that does not belong to the chosen source, a draft still saving (the founder's ruling of 19/11/2026)"
   },
   {
     "section": "collection-showcase (work)",
     "path": "query.count",
     "kind": "condition",
     "difference": "condition differs (1 of 3 cases), e.g. {\"mode\":\"manual\"}: contract hides, salt-wordpress shows",
-    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; team's query without by-category or the department picker its layout has today, as team has no categories (SC-027); a select for the query's mode, which is a button group today (SC-023)"
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; team's query without by-category or the department picker its layout has today, as team has no categories (SC-027); a select for the query's mode, which is a button group today (SC-023); and, beside that check, refusing on publish, with a message, mode by-category with a category that does not belong to the chosen source, a draft still saving (the founder's ruling of 19/11/2026)"
   },
   {
     "section": "collection-showcase (work)",
     "path": "query.direction",
     "kind": "extra",
     "difference": "in salt-wordpress, not in the contract",
-    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; team's query without by-category or the department picker its layout has today, as team has no categories (SC-027); a select for the query's mode, which is a button group today (SC-023)"
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; team's query without by-category or the department picker its layout has today, as team has no categories (SC-027); a select for the query's mode, which is a button group today (SC-023); and, beside that check, refusing on publish, with a message, mode by-category with a category that does not belong to the chosen source, a draft still saving (the founder's ruling of 19/11/2026)"
   },
   {
     "section": "collection-showcase (work)",
@@ -879,7 +879,7 @@
     "path": "intro",
     "kind": "missing",
     "difference": "not in salt-wordpress",
-    "evidence": "owes: the field"
+    "evidence": "owes: the field, with a target of 300 characters, shown with a count and never refused"
   },
   {
     "section": "collection-showcase (team)",
@@ -928,21 +928,21 @@
     "path": "query.categories",
     "kind": "type",
     "difference": "type select; salt-wordpress taxonomy",
-    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; team's query without by-category or the department picker its layout has today, as team has no categories (SC-027); a select for the query's mode, which is a button group today (SC-023)"
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; team's query without by-category or the department picker its layout has today, as team has no categories (SC-027); a select for the query's mode, which is a button group today (SC-023); and, beside that check, refusing on publish, with a message, mode by-category with a category that does not belong to the chosen source, a draft still saving (the founder's ruling of 19/11/2026)"
   },
   {
     "section": "collection-showcase (team)",
     "path": "query.categories",
     "kind": "condition",
     "difference": "condition differs (1 of 3 cases), e.g. {\"mode\":\"by-category\",\"source\":\"team\"}: contract hides, salt-wordpress shows",
-    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; team's query without by-category or the department picker its layout has today, as team has no categories (SC-027); a select for the query's mode, which is a button group today (SC-023)"
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; team's query without by-category or the department picker its layout has today, as team has no categories (SC-027); a select for the query's mode, which is a button group today (SC-023); and, beside that check, refusing on publish, with a message, mode by-category with a category that does not belong to the chosen source, a draft still saving (the founder's ruling of 19/11/2026)"
   },
   {
     "section": "collection-showcase (team)",
     "path": "query.items",
-    "kind": "relation",
-    "difference": "post_type [\"service\",\"work\",\"testimonial\",\"post\",\"team_member\"]; salt-wordpress [\"team_member\"]",
-    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; team's query without by-category or the department picker its layout has today, as team has no categories (SC-027); a select for the query's mode, which is a button group today (SC-023)"
+    "kind": "type",
+    "difference": "type select; salt-wordpress relationship",
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; team's query without by-category or the department picker its layout has today, as team has no categories (SC-027); a select for the query's mode, which is a button group today (SC-023); and, beside that check, refusing on publish, with a message, mode by-category with a category that does not belong to the chosen source, a draft still saving (the founder's ruling of 19/11/2026)"
   },
   {
     "section": "collection-showcase (team)",
@@ -963,28 +963,28 @@
     "path": "query.order",
     "kind": "condition",
     "difference": "condition differs (1 of 3 cases), e.g. {\"mode\":\"manual\"}: contract hides, salt-wordpress shows",
-    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; team's query without by-category or the department picker its layout has today, as team has no categories (SC-027); a select for the query's mode, which is a button group today (SC-023)"
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; team's query without by-category or the department picker its layout has today, as team has no categories (SC-027); a select for the query's mode, which is a button group today (SC-023); and, beside that check, refusing on publish, with a message, mode by-category with a category that does not belong to the chosen source, a draft still saving (the founder's ruling of 19/11/2026)"
   },
   {
     "section": "collection-showcase (team)",
     "path": "query.count",
     "kind": "limit",
     "difference": "step 1; salt-wordpress none",
-    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; team's query without by-category or the department picker its layout has today, as team has no categories (SC-027); a select for the query's mode, which is a button group today (SC-023)"
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; team's query without by-category or the department picker its layout has today, as team has no categories (SC-027); a select for the query's mode, which is a button group today (SC-023); and, beside that check, refusing on publish, with a message, mode by-category with a category that does not belong to the chosen source, a draft still saving (the founder's ruling of 19/11/2026)"
   },
   {
     "section": "collection-showcase (team)",
     "path": "query.count",
     "kind": "condition",
     "difference": "condition differs (1 of 3 cases), e.g. {\"mode\":\"manual\"}: contract hides, salt-wordpress shows",
-    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; team's query without by-category or the department picker its layout has today, as team has no categories (SC-027); a select for the query's mode, which is a button group today (SC-023)"
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; team's query without by-category or the department picker its layout has today, as team has no categories (SC-027); a select for the query's mode, which is a button group today (SC-023); and, beside that check, refusing on publish, with a message, mode by-category with a category that does not belong to the chosen source, a draft still saving (the founder's ruling of 19/11/2026)"
   },
   {
     "section": "collection-showcase (team)",
     "path": "query.direction",
     "kind": "extra",
     "difference": "in salt-wordpress, not in the contract",
-    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; team's query without by-category or the department picker its layout has today, as team has no categories (SC-027); a select for the query's mode, which is a button group today (SC-023)"
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; team's query without by-category or the department picker its layout has today, as team has no categories (SC-027); a select for the query's mode, which is a button group today (SC-023); and, beside that check, refusing on publish, with a message, mode by-category with a category that does not belong to the chosen source, a draft still saving (the founder's ruling of 19/11/2026)"
   },
   {
     "section": "collection-showcase (team)",
@@ -1033,7 +1033,7 @@
     "path": "intro",
     "kind": "missing",
     "difference": "not in salt-wordpress",
-    "evidence": "owes: the field"
+    "evidence": "owes: the field, with a target of 300 characters, shown with a count and never refused"
   },
   {
     "section": "collection-showcase (testimonials)",
@@ -1082,14 +1082,14 @@
     "path": "query.categories",
     "kind": "missing",
     "difference": "not in salt-wordpress",
-    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; team's query without by-category or the department picker its layout has today, as team has no categories (SC-027); a select for the query's mode, which is a button group today (SC-023)"
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; team's query without by-category or the department picker its layout has today, as team has no categories (SC-027); a select for the query's mode, which is a button group today (SC-023); and, beside that check, refusing on publish, with a message, mode by-category with a category that does not belong to the chosen source, a draft still saving (the founder's ruling of 19/11/2026)"
   },
   {
     "section": "collection-showcase (testimonials)",
     "path": "query.items",
-    "kind": "relation",
-    "difference": "post_type [\"service\",\"work\",\"testimonial\",\"post\",\"team_member\"]; salt-wordpress [\"testimonial\"]",
-    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; team's query without by-category or the department picker its layout has today, as team has no categories (SC-027); a select for the query's mode, which is a button group today (SC-023)"
+    "kind": "type",
+    "difference": "type select; salt-wordpress relationship",
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; team's query without by-category or the department picker its layout has today, as team has no categories (SC-027); a select for the query's mode, which is a button group today (SC-023); and, beside that check, refusing on publish, with a message, mode by-category with a category that does not belong to the chosen source, a draft still saving (the founder's ruling of 19/11/2026)"
   },
   {
     "section": "collection-showcase (testimonials)",
@@ -1110,28 +1110,28 @@
     "path": "query.order",
     "kind": "condition",
     "difference": "condition differs (1 of 3 cases), e.g. {\"mode\":\"manual\"}: contract hides, salt-wordpress shows",
-    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; team's query without by-category or the department picker its layout has today, as team has no categories (SC-027); a select for the query's mode, which is a button group today (SC-023)"
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; team's query without by-category or the department picker its layout has today, as team has no categories (SC-027); a select for the query's mode, which is a button group today (SC-023); and, beside that check, refusing on publish, with a message, mode by-category with a category that does not belong to the chosen source, a draft still saving (the founder's ruling of 19/11/2026)"
   },
   {
     "section": "collection-showcase (testimonials)",
     "path": "query.count",
     "kind": "limit",
     "difference": "step 1; salt-wordpress none",
-    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; team's query without by-category or the department picker its layout has today, as team has no categories (SC-027); a select for the query's mode, which is a button group today (SC-023)"
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; team's query without by-category or the department picker its layout has today, as team has no categories (SC-027); a select for the query's mode, which is a button group today (SC-023); and, beside that check, refusing on publish, with a message, mode by-category with a category that does not belong to the chosen source, a draft still saving (the founder's ruling of 19/11/2026)"
   },
   {
     "section": "collection-showcase (testimonials)",
     "path": "query.count",
     "kind": "condition",
     "difference": "condition differs (1 of 3 cases), e.g. {\"mode\":\"manual\"}: contract hides, salt-wordpress shows",
-    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; team's query without by-category or the department picker its layout has today, as team has no categories (SC-027); a select for the query's mode, which is a button group today (SC-023)"
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; team's query without by-category or the department picker its layout has today, as team has no categories (SC-027); a select for the query's mode, which is a button group today (SC-023); and, beside that check, refusing on publish, with a message, mode by-category with a category that does not belong to the chosen source, a draft still saving (the founder's ruling of 19/11/2026)"
   },
   {
     "section": "collection-showcase (testimonials)",
     "path": "query.direction",
     "kind": "extra",
     "difference": "in salt-wordpress, not in the contract",
-    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; team's query without by-category or the department picker its layout has today, as team has no categories (SC-027); a select for the query's mode, which is a button group today (SC-023)"
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; team's query without by-category or the department picker its layout has today, as team has no categories (SC-027); a select for the query's mode, which is a button group today (SC-023); and, beside that check, refusing on publish, with a message, mode by-category with a category that does not belong to the chosen source, a draft still saving (the founder's ruling of 19/11/2026)"
   },
   {
     "section": "collection-showcase (testimonials)",
@@ -1187,7 +1187,7 @@
     "path": "intro",
     "kind": "missing",
     "difference": "not in salt-wordpress",
-    "evidence": "owes: the field"
+    "evidence": "owes: the field, with a target of 300 characters, shown with a count and never refused"
   },
   {
     "section": "collection-showcase (blog_teaser)",
@@ -1250,14 +1250,14 @@
     "path": "query.categories",
     "kind": "type",
     "difference": "type select; salt-wordpress taxonomy",
-    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; team's query without by-category or the department picker its layout has today, as team has no categories (SC-027); a select for the query's mode, which is a button group today (SC-023)"
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; team's query without by-category or the department picker its layout has today, as team has no categories (SC-027); a select for the query's mode, which is a button group today (SC-023); and, beside that check, refusing on publish, with a message, mode by-category with a category that does not belong to the chosen source, a draft still saving (the founder's ruling of 19/11/2026)"
   },
   {
     "section": "collection-showcase (blog_teaser)",
     "path": "query.items",
-    "kind": "relation",
-    "difference": "post_type [\"service\",\"work\",\"testimonial\",\"post\",\"team_member\"]; salt-wordpress [\"post\"]",
-    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; team's query without by-category or the department picker its layout has today, as team has no categories (SC-027); a select for the query's mode, which is a button group today (SC-023)"
+    "kind": "type",
+    "difference": "type select; salt-wordpress relationship",
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; team's query without by-category or the department picker its layout has today, as team has no categories (SC-027); a select for the query's mode, which is a button group today (SC-023); and, beside that check, refusing on publish, with a message, mode by-category with a category that does not belong to the chosen source, a draft still saving (the founder's ruling of 19/11/2026)"
   },
   {
     "section": "collection-showcase (blog_teaser)",
@@ -1278,28 +1278,28 @@
     "path": "query.order",
     "kind": "condition",
     "difference": "condition differs (1 of 3 cases), e.g. {\"mode\":\"manual\"}: contract hides, salt-wordpress shows",
-    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; team's query without by-category or the department picker its layout has today, as team has no categories (SC-027); a select for the query's mode, which is a button group today (SC-023)"
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; team's query without by-category or the department picker its layout has today, as team has no categories (SC-027); a select for the query's mode, which is a button group today (SC-023); and, beside that check, refusing on publish, with a message, mode by-category with a category that does not belong to the chosen source, a draft still saving (the founder's ruling of 19/11/2026)"
   },
   {
     "section": "collection-showcase (blog_teaser)",
     "path": "query.count",
     "kind": "limit",
     "difference": "step 1; salt-wordpress none",
-    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; team's query without by-category or the department picker its layout has today, as team has no categories (SC-027); a select for the query's mode, which is a button group today (SC-023)"
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; team's query without by-category or the department picker its layout has today, as team has no categories (SC-027); a select for the query's mode, which is a button group today (SC-023); and, beside that check, refusing on publish, with a message, mode by-category with a category that does not belong to the chosen source, a draft still saving (the founder's ruling of 19/11/2026)"
   },
   {
     "section": "collection-showcase (blog_teaser)",
     "path": "query.count",
     "kind": "condition",
     "difference": "condition differs (1 of 3 cases), e.g. {\"mode\":\"manual\"}: contract hides, salt-wordpress shows",
-    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; team's query without by-category or the department picker its layout has today, as team has no categories (SC-027); a select for the query's mode, which is a button group today (SC-023)"
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; team's query without by-category or the department picker its layout has today, as team has no categories (SC-027); a select for the query's mode, which is a button group today (SC-023); and, beside that check, refusing on publish, with a message, mode by-category with a category that does not belong to the chosen source, a draft still saving (the founder's ruling of 19/11/2026)"
   },
   {
     "section": "collection-showcase (blog_teaser)",
     "path": "query.direction",
     "kind": "extra",
     "difference": "in salt-wordpress, not in the contract",
-    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; team's query without by-category or the department picker its layout has today, as team has no categories (SC-027); a select for the query's mode, which is a button group today (SC-023)"
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; team's query without by-category or the department picker its layout has today, as team has no categories (SC-027); a select for the query's mode, which is a button group today (SC-023); and, beside that check, refusing on publish, with a message, mode by-category with a category that does not belong to the chosen source, a draft still saving (the founder's ruling of 19/11/2026)"
   },
   {
     "section": "collection-showcase (blog_teaser)",
@@ -1362,7 +1362,7 @@
     "path": "intro",
     "kind": "missing",
     "difference": "not in salt-wordpress",
-    "evidence": "owes: the field"
+    "evidence": "owes: the field, with a target of 300 characters, shown with a count and never refused"
   },
   {
     "section": "carousel (scroll_carousel)",
@@ -1432,7 +1432,7 @@
     "path": "intro",
     "kind": "missing",
     "difference": "not in salt-wordpress",
-    "evidence": "owes: the field"
+    "evidence": "owes: the field, with a target of 300 characters, shown with a count and never refused"
   },
   {
     "section": "carousel (testimonials)",
@@ -1474,14 +1474,14 @@
     "path": "query.categories",
     "kind": "missing",
     "difference": "not in salt-wordpress",
-    "evidence": "owes: the query on scroll_carousel; only the testimonials layout has one today; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; a select for the query's mode, which is a button group today (SC-023)"
+    "evidence": "owes: the query on scroll_carousel; only the testimonials layout has one today; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; a select for the query's mode, which is a button group today (SC-023); and, beside that check, refusing on publish, with a message, mode by-category with a category that does not belong to the chosen source, a draft still saving (the founder's ruling of 19/11/2026)"
   },
   {
     "section": "carousel (testimonials)",
     "path": "query.items",
-    "kind": "relation",
-    "difference": "post_type [\"service\",\"work\",\"testimonial\",\"post\",\"team_member\"]; salt-wordpress [\"testimonial\"]",
-    "evidence": "owes: the query on scroll_carousel; only the testimonials layout has one today; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; a select for the query's mode, which is a button group today (SC-023)"
+    "kind": "type",
+    "difference": "type select; salt-wordpress relationship",
+    "evidence": "owes: the query on scroll_carousel; only the testimonials layout has one today; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; a select for the query's mode, which is a button group today (SC-023); and, beside that check, refusing on publish, with a message, mode by-category with a category that does not belong to the chosen source, a draft still saving (the founder's ruling of 19/11/2026)"
   },
   {
     "section": "carousel (testimonials)",
@@ -1502,28 +1502,28 @@
     "path": "query.order",
     "kind": "condition",
     "difference": "condition differs (1 of 3 cases), e.g. {\"mode\":\"manual\"}: contract hides, salt-wordpress shows",
-    "evidence": "owes: the query on scroll_carousel; only the testimonials layout has one today; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; a select for the query's mode, which is a button group today (SC-023)"
+    "evidence": "owes: the query on scroll_carousel; only the testimonials layout has one today; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; a select for the query's mode, which is a button group today (SC-023); and, beside that check, refusing on publish, with a message, mode by-category with a category that does not belong to the chosen source, a draft still saving (the founder's ruling of 19/11/2026)"
   },
   {
     "section": "carousel (testimonials)",
     "path": "query.count",
     "kind": "limit",
     "difference": "step 1; salt-wordpress none",
-    "evidence": "owes: the query on scroll_carousel; only the testimonials layout has one today; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; a select for the query's mode, which is a button group today (SC-023)"
+    "evidence": "owes: the query on scroll_carousel; only the testimonials layout has one today; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; a select for the query's mode, which is a button group today (SC-023); and, beside that check, refusing on publish, with a message, mode by-category with a category that does not belong to the chosen source, a draft still saving (the founder's ruling of 19/11/2026)"
   },
   {
     "section": "carousel (testimonials)",
     "path": "query.count",
     "kind": "condition",
     "difference": "condition differs (1 of 3 cases), e.g. {\"mode\":\"manual\"}: contract hides, salt-wordpress shows",
-    "evidence": "owes: the query on scroll_carousel; only the testimonials layout has one today; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; a select for the query's mode, which is a button group today (SC-023)"
+    "evidence": "owes: the query on scroll_carousel; only the testimonials layout has one today; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; a select for the query's mode, which is a button group today (SC-023); and, beside that check, refusing on publish, with a message, mode by-category with a category that does not belong to the chosen source, a draft still saving (the founder's ruling of 19/11/2026)"
   },
   {
     "section": "carousel (testimonials)",
     "path": "query.direction",
     "kind": "extra",
     "difference": "in salt-wordpress, not in the contract",
-    "evidence": "owes: the query on scroll_carousel; only the testimonials layout has one today; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; a select for the query's mode, which is a button group today (SC-023)"
+    "evidence": "owes: the query on scroll_carousel; only the testimonials layout has one today; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; a select for the query's mode, which is a button group today (SC-023); and, beside that check, refusing on publish, with a message, mode by-category with a category that does not belong to the chosen source, a draft still saving (the founder's ruling of 19/11/2026)"
   },
   {
     "section": "carousel (testimonials)",
@@ -1552,13 +1552,6 @@
     "kind": "extra",
     "difference": "in salt-wordpress, not in the contract",
     "evidence": "sections.json formerly: testimonials"
-  },
-  {
-    "section": "contact",
-    "path": "intro",
-    "kind": "limit",
-    "difference": "maxlength 300; salt-wordpress none",
-    "evidence": "owes: the 300-character limit"
   },
   {
     "section": "contact",
@@ -1726,7 +1719,7 @@
     "path": "query.mode",
     "kind": "type",
     "difference": "type select; salt-wordpress button_group",
-    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; team's query without by-category or the department picker its layout has today, as team has no categories (SC-027); a select for the query's mode, which is a button group today (SC-023)"
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; team's query without by-category or the department picker its layout has today, as team has no categories (SC-027); a select for the query's mode, which is a button group today (SC-023); and, beside that check, refusing on publish, with a message, mode by-category with a category that does not belong to the chosen source, a draft still saving (the founder's ruling of 19/11/2026)"
   },
   {
     "section": "collection-showcase (work)",
@@ -1740,7 +1733,7 @@
     "path": "query.mode",
     "kind": "type",
     "difference": "type select; salt-wordpress button_group",
-    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; team's query without by-category or the department picker its layout has today, as team has no categories (SC-027); a select for the query's mode, which is a button group today (SC-023)"
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; team's query without by-category or the department picker its layout has today, as team has no categories (SC-027); a select for the query's mode, which is a button group today (SC-023); and, beside that check, refusing on publish, with a message, mode by-category with a category that does not belong to the chosen source, a draft still saving (the founder's ruling of 19/11/2026)"
   },
   {
     "section": "collection-showcase (team)",
@@ -1754,14 +1747,14 @@
     "path": "query.mode",
     "kind": "type",
     "difference": "type select; salt-wordpress button_group",
-    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; team's query without by-category or the department picker its layout has today, as team has no categories (SC-027); a select for the query's mode, which is a button group today (SC-023)"
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; team's query without by-category or the department picker its layout has today, as team has no categories (SC-027); a select for the query's mode, which is a button group today (SC-023); and, beside that check, refusing on publish, with a message, mode by-category with a category that does not belong to the chosen source, a draft still saving (the founder's ruling of 19/11/2026)"
   },
   {
     "section": "collection-showcase (testimonials)",
     "path": "query.mode",
     "kind": "type",
     "difference": "type select; salt-wordpress button_group",
-    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; team's query without by-category or the department picker its layout has today, as team has no categories (SC-027); a select for the query's mode, which is a button group today (SC-023)"
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; team's query without by-category or the department picker its layout has today, as team has no categories (SC-027); a select for the query's mode, which is a button group today (SC-023); and, beside that check, refusing on publish, with a message, mode by-category with a category that does not belong to the chosen source, a draft still saving (the founder's ruling of 19/11/2026)"
   },
   {
     "section": "collection-showcase (blog_teaser)",
@@ -1775,14 +1768,14 @@
     "path": "query.mode",
     "kind": "type",
     "difference": "type select; salt-wordpress button_group",
-    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; team's query without by-category or the department picker its layout has today, as team has no categories (SC-027); a select for the query's mode, which is a button group today (SC-023)"
+    "evidence": "owes: one query group in place of six layout fields; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; team's query without by-category or the department picker its layout has today, as team has no categories (SC-027); a select for the query's mode, which is a button group today (SC-023); and, beside that check, refusing on publish, with a message, mode by-category with a category that does not belong to the chosen source, a draft still saving (the founder's ruling of 19/11/2026)"
   },
   {
     "section": "carousel (testimonials)",
     "path": "query.mode",
     "kind": "type",
     "difference": "type select; salt-wordpress button_group",
-    "evidence": "owes: the query on scroll_carousel; only the testimonials layout has one today; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; a select for the query's mode, which is a button group today (SC-023)"
+    "evidence": "owes: the query on scroll_carousel; only the testimonials layout has one today; an acf/validate_value check refusing mode by-category while the source select holds a source without categories, as ACF cannot hide one mode choice per source (SC-010, salt.modeRequires on the mode field); and checking in the admin that the categories field's conditional logic, which names the layout's source select above the query group, shows and hides it as that select changes; a select for the query's mode, which is a button group today (SC-023); and, beside that check, refusing on publish, with a message, mode by-category with a category that does not belong to the chosen source, a draft still saving (the founder's ruling of 19/11/2026)"
   },
   {
     "section": "locations",

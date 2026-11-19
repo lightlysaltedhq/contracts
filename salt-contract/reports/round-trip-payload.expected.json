@@ -19,5 +19,82 @@
     "kind": "allowed",
     "difference": "allows paragraph, bold, italic, code, link, unordered-list, ordered-list, blockquote, heading-2, heading-3, heading-4, heading-5, heading-6; salt-nextjs paragraph, bold, italic, code, link, unordered-list, ordered-list, blockquote, heading-3, heading-4",
     "evidence": "owes: headings 2, 5 and 6 in the editor, beside 3 and 4"
+  },
+  {
+    "section": "features",
+    "path": "intro",
+    "kind": "limit",
+    "difference": "maxLength none; salt-nextjs 300",
+    "evidence": "owes: a target of 300 characters in place of its maxLength of 300, shown with a count and never refused (the ruling of 19/11/2026)"
+  },
+  {
+    "section": "stats",
+    "path": "intro",
+    "kind": "limit",
+    "difference": "maxLength none; salt-nextjs 300",
+    "evidence": "owes: a target of 300 characters in place of its maxLength of 300, shown with a count and never refused (the ruling of 19/11/2026)"
+  },
+  {
+    "section": "logos",
+    "path": "intro",
+    "kind": "limit",
+    "difference": "maxLength none; salt-nextjs 300",
+    "evidence": "owes: a target of 300 characters in place of its maxLength of 300, shown with a count and never refused (the ruling of 19/11/2026)"
+  },
+  {
+    "section": "gallery",
+    "path": "intro",
+    "kind": "limit",
+    "difference": "maxLength none; salt-nextjs 300",
+    "evidence": "owes: a target of 300 characters in place of its maxLength of 300, shown with a count and never refused (the ruling of 19/11/2026)"
+  },
+  {
+    "section": "process",
+    "path": "intro",
+    "kind": "limit",
+    "difference": "maxLength none; salt-nextjs 300",
+    "evidence": "owes: a target of 300 characters in place of its maxLength of 300, shown with a count and never refused (the ruling of 19/11/2026)"
+  },
+  {
+    "section": "faq",
+    "path": "intro",
+    "kind": "limit",
+    "difference": "maxLength none; salt-nextjs 300",
+    "evidence": "owes: a target of 300 characters in place of its maxLength of 300, shown with a count and never refused (the ruling of 19/11/2026)"
+  },
+  {
+    "section": "tabs",
+    "path": "intro",
+    "kind": "limit",
+    "difference": "maxLength none; salt-nextjs 300",
+    "evidence": "owes: a target of 300 characters in place of its maxLength of 300, shown with a count and never refused (the ruling of 19/11/2026)"
+  },
+  {
+    "section": "collection-showcase",
+    "path": "intro",
+    "kind": "limit",
+    "difference": "maxLength none; salt-nextjs 300",
+    "evidence": "owes: a target of 300 characters in place of its maxLength of 300, shown with a count and never refused (the ruling of 19/11/2026)"
+  },
+  {
+    "section": "carousel",
+    "path": "intro",
+    "kind": "limit",
+    "difference": "maxLength none; salt-nextjs 300",
+    "evidence": "owes: a target of 300 characters in place of its maxLength of 300, shown with a count and never refused (the ruling of 19/11/2026)"
+  },
+  {
+    "section": "listing",
+    "path": "intro",
+    "kind": "limit",
+    "difference": "maxLength none; salt-nextjs 300",
+    "evidence": "owes: a target of 300 characters in place of its maxLength of 300, shown with a count and never refused (the ruling of 19/11/2026)"
+  },
+  {
+    "section": "contact",
+    "path": "intro",
+    "kind": "limit",
+    "difference": "maxLength none; salt-nextjs 300",
+    "evidence": "owes: a target of 300 characters in place of its maxLength of 300, shown with a count and never refused (the ruling of 19/11/2026)"
   }
 ]

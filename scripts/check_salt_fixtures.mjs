@@ -135,7 +135,11 @@ function checkValue(f, v, p, c, siblings) {
   switch (f.type) {
     case 'text': case 'textarea':
       if (typeof v !== 'string') { fail(`${p} must be a string`); return }
-      if (f.maxLength !== undefined && v.length > f.maxLength) fail(`${p} is ${v.length} characters; maxLength is ${f.maxLength}`)
+      if (f.maxLength !== undefined) {
+        // The limits rule counts Unicode code points, a CRLF line break as one (ID-3968).
+        const n = [...v.replace(/\r\n/g, '\n')].length
+        if (n > f.maxLength) fail(`${p} is ${n} characters; maxLength is ${f.maxLength}`)
+      }
       if (f.format === 'url' && v && !/^(https?:\/\/|mailto:|tel:)/.test(v)) fail(`${p} must be an absolute http, https, mailto or tel address`)
       if (f.format === 'anchor' && v && !SLUG.test(v)) fail(`${p} must be a stored anchor slug (lower-case letters, digits, single hyphens)`)
       return

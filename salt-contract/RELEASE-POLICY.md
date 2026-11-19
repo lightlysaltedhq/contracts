@@ -16,6 +16,7 @@ The test for every change below is the same: could an implementation that confor
 | Field ids and types | Rename, removal, retype; a new required field; an optional field becoming required | New optional field with a default | Help text, editor labels |
 | Field choices | Removing or renaming a choice value; changing the default | New choice appended | Choice label text |
 | Field limits (length, count, ranges) | Tightening a limit; adding a limit that did not exist | Loosening a limit | None |
+| Field targets (`target`) | None | Adding or removing a target; turning a limit into one | Changing a target's numbers |
 | Element order in markup | Any change | None | None |
 | Classes (`salt-*` vocabulary) | Rename or removal of a class; moving a class to another element | New class | None |
 | Data attributes | Rename, removal, or a changed value vocabulary | New optional attribute | None |
@@ -26,6 +27,14 @@ The test for every change below is the same: could an implementation that confor
 | Schema (`schema/field-definition.schema.json`) | Tightening it so a valid field file becomes invalid, or removing a keyword | Loosening it, or a new optional keyword | Description text |
 
 Two rules come straight from the WP policy. Markup structure change is MAJOR, and the fixture diff in the PR is the semver evidence, as the snapshot diff is there (WP policy, FLEET01). Adding an optional argument with a default is MINOR, which is why a new optional view prop is MINOR and a retyped one is MAJOR. Where a change fits two rows, the stricter applies.
+
+Every field's numbers are held by one rule, the limits rule (ID-3968; the founder's rulings of 18/11/2026, and of 19/11/2026 on which numbers stay limits and on the cases below):
+
+> A limit never stops a draft from saving and never cuts what an editor wrote: the editor sees it as they edit, and it is checked when content is published. A write from outside the editor (the API, an import, code) that breaks a limit is refused with a message to whoever sent it. A length or a number the design only prefers is a target, shown to the editor with a count and never refused, by the editor or by any other write. A value over its target or its limit is always drawn in full, never cut off or clamped.
+
+Most numbers are targets (`target`, ID-3969). The limits are those a page breaks without (the tabs' and the buttons' maximums, a rating's, a latitude's, a longitude's and a map zoom's range) and those kept as they were (a textarea's `maxLines`, a list's minimum, a collection-query's count). A list at its maximum may refuse to add another row, with a message. Checks that are not limits (a url or email format, a time's form, a number's step, one featured plan) follow the same rule: a draft always saves, and publishing is checked. Every length, of a limit or a target, counts Unicode code points, with a CRLF line break counting as one. The numbers are each field's own and the table above governs them; the rule is how a platform holds them, so an implementation that refuses a draft, cuts what an editor wrote, or refuses text over its target from any write does not conform. That behaviour is the editor's: it counts towards conformance, and each platform's own tests check it, not the shared conformance runner.
+
+A target is never refused, so no implementation's verdict turns on its numbers: changing them is PATCH. Adding or removing a target is MINOR (the founder's ruling of 19/11/2026), and so is turning a limit into a target (renaming the field's `maxLength` or `max` to `target`), which loosens the limit by the *Field limits* row.
 
 ## 3. Deprecation
 

@@ -35,7 +35,14 @@ Lightly Salted product follows) and holds no brand values of its own.
 Decided by the owner on 08/10/2026 (`SC-003` in the decision log): **visitor output** (HTML,
 classes, data attributes, stylesheets, accessibility behaviour) and **editor fields** (names,
 types, choices, limits, descriptions). Admin screens, logins, form delivery and routing stay
-native to each CMS.
+native to each CMS. Public team profiles are a routing exception on both platforms:
+`/team/{slug}/` is the one public URL. The slug is a stable public identifier independent
+of the login and does not change when the display name changes. Team cards, bylines and
+author boxes link directly there. The page has a self-referencing canonical; only its
+canonical URL goes in the sitemap. Existing public author URLs for the same profile return
+a permanent (301) redirect directly to it. Do not create aliases where none existed.
+Only a user marked as a team member has a public profile; an unticked author retains
+their credit as plain text. Each platform tests its HTTP redirects, canonical and sitemap.
 
 ## The customisation ladder
 
@@ -77,15 +84,17 @@ receives and the choices on offer.
 
 ## Status
 
-`1.0.0-rc.7` is the release candidate for `1.0.0`: private, never on the registry, held until an
+`1.0.0-rc.8` is the release candidate for `1.0.0`: private, never on the registry, held until an
 implementation's run of `salt-conformance` against it conforms in full, in a report that names
-`1.0.0-rc.7` (SC-017, SC-018, SC-020, SC-022; `RELEASE-POLICY.md` section 5). It follows
+`1.0.0-rc.8` (SC-017, SC-018, SC-020, SC-022; `RELEASE-POLICY.md` section 5). It follows
 `1.0.0-rc.1`, whose first run raised eight questions about the contract itself, `1.0.0-rc.2`,
 whose run raised three more, `1.0.0-rc.3`, against which bringing Salt for Next.js's core
 markup to the contract raised seven, `1.0.0-rc.4`, after which the owner ruled on the
 priority image and on team's categories, `1.0.0-rc.5`, after which the owner ruled on the
-drawer's close button and on a team card's links, and `1.0.0-rc.6`, after which the owner ruled
-on the collections' field names, a post's sections and rich text's heading levels (18/11/2026);
+drawer's close button and on a team card's links, `1.0.0-rc.6`, after which the owner ruled
+on the collections' field names, a post's sections and rich text's heading levels (18/11/2026),
+and `1.0.0-rc.7`, after which the founder ruled on how a limit is held, on targets and on the
+service example (18/11/2026, ID-3968, ID-3969, ID-3970);
 those rulings (SC-023, SC-024, SC-025, SC-026, SC-027, SC-028, and the rulings of 18/11/2026)
 changed contract files, which each time makes a new candidate and needs a new run. `1.0.0` is the first release, staged
 from CI by npm trusted publishing when the owner pushes the `salt-contract-v1.0.0` tag, and
@@ -227,6 +236,16 @@ records carrying 17 former names), so a
 migration generated from the contract renames or folds every such type. A select that 0.11.0 left
 to Payload's derived name has no fixed former name to record; the site's own schema gives it.
 
+**Limits and targets.** The emitter gives each limit as Payload's own setting (`min`, `max`,
+`minRows`, `maxRows`; `maxLength` were one given), and a `target` (ID-3969) under
+`custom.salt.target`, which is no Payload setting, so nothing refuses it. Under the limits rule
+(ID-3968, `RELEASE-POLICY.md` section 2) Salt for Next.js owes: a draft always saves, by whatever
+means (Payload skips validation on a draft only with `versions.drafts` on); every count it shows
+counts Unicode code points with a CRLF as one (Payload's own `maxLength` counts UTF-16 units); a
+count beside every target, which for a title (`[60, 120]`) notes a title past about 60 and more
+strongly one past 120, neither blocking; a write from outside the editor that breaks a limit is
+refused with a message, as Payload's own settings do, and one over a target saves.
+
 Faults in the contract's own shape are refused whatever the site installs: a malformed condition;
 a `sourceField` naming no sibling select, or one offering no source; and a collection-query that
 reads its source from a select anywhere but the section's top level (in a list, a group or the
@@ -243,9 +262,24 @@ lists it, with the note that accounts for it.
 into the Flexible Content layout Salt for WordPress registers in its page sections field group
 (`group_salt_sections`), and each collection source's fields (`contract/collections`) into a group
 of its own, `group_salt_collection_<source>`, located on the source's post type (`SOURCE_DEFAULTS`,
-or `sources`). A collection field WordPress stores in its own place (the title, body, excerpt,
+or `sources`), except for team: its fields belong on existing users. A collection field WordPress stores in its own place (the title, body, excerpt,
 featured image, categories or date: `platforms.wordpress.native`) is not generated; the group names
-it under `salt.native`. A post's `layout` is a Flexible Content field of the sections a post may
+it under `salt.native`, and a target it carries under `salt.targets`.
+
+**Limits on WordPress.** Every text length and list size is a target (the founder's ruling of
+19/11/2026), recorded under the field's `salt.target`, or the group's `salt.targets` for the title
+and summary WordPress stores in its own place. A target is no ACF setting, so its input draws no
+length attribute and nothing checks it. The remaining limits are numbers and caps held by ACF's
+own settings (`min`, `max`): ACF checks them with a message when a post is published or a
+published post is updated, not on a draft save, and its editor will not add a row past a list's
+`max`, with a message, which the rule allows. Under the limits rule (ID-3968, `RELEASE-POLICY.md`
+section 2) Salt for WordPress owes: a count beside every target, as Salt for Next.js does; a draft
+always saving, an options page and a term screen included; a write from outside the editor (the
+REST API, an import) that breaks a limit refused with a message, and one over a target saved,
+however WordPress gets there (lifting its REST schema's own refusal is WordPress's detail); and the
+checks that are not limits (formats, times, one featured plan, half steps) made on publish. A
+known gap, accepted by the founder on 19/11/2026: with JavaScript off, a failed update drops
+every ACF field silently while WordPress says the post was updated. A post's `layout` is a Flexible Content field of the sections a post may
 use. Each layout carries a Settings tab before its `settings` group, which stores nothing and
 puts the shared settings on a tab of their own. Like the Payload emitter it is a pure data
 transform, reading only this package's files.
@@ -566,7 +600,7 @@ report).
 ```json
 {
   "format": "salt-conformance/1",
-  "contract": { "package": "@lightlysaltedhq/salt-contract", "version": "1.0.0-rc.7" },
+  "contract": { "package": "@lightlysaltedhq/salt-contract", "version": "1.0.0-rc.8" },
   "platform": "nextjs",
   "implementation": { "version": "0.4.0" },
   "adapter": { "kind": "command", "target": "node scripts/salt-adapter.mjs" },
@@ -575,7 +609,7 @@ report).
   "summary": { "pass": 15, "fail": 1, "incomplete": 0, "notShipped": 1 },
   "fields": { "platform": "payload", "snapshot": "…", "options": "…", "problems": [] },
   "problems": [],
-  "stylesheets": { "served": "…", "bundle": "styles/salt.css", "contract": "1.0.0-rc.7", "ok": true, "status": "identical" },
+  "stylesheets": { "served": "…", "bundle": "styles/salt.css", "contract": "1.0.0-rc.8", "ok": true, "status": "identical" },
   "sections": [
     {
       "id": "hero",

@@ -1,6 +1,6 @@
 {
   "$schema": "../../schema/field-definition.schema.json",
-  "version": "1.0.0-rc.7",
+  "version": "1.0.0-rc.8",
   "section": "gallery",
   "shared": {
     "id": "section-settings"
@@ -21,11 +21,14 @@
       "name": "intro",
       "type": "textarea",
       "label": "Intro",
-      "maxLength": 300,
+      "target": 300,
       "description": "Optional. A line or two under the heading, drawn as one paragraph.",
       "platforms": {
+        "nextjs": {
+          "owes": "a target of 300 characters in place of its maxLength of 300, shown with a count and never refused (the ruling of 19/11/2026)"
+        },
         "wordpress": {
-          "owes": "the field"
+          "owes": "the field, with a target of 300 characters, shown with a count and never refused"
         }
       }
     },

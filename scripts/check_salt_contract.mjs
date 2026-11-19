@@ -293,6 +293,8 @@ if (vocab && (vocab.sections ?? []).every((x) => x && typeof x === 'object')) {
         fails.push(`${owner}.${f.name} defaults to icon ${f.default}, which is not a content icon in sections.json`)
       }
       if (typeof f.min === 'number' && typeof f.max === 'number' && f.min > f.max) fails.push(`${owner}.${f.name} min ${f.min} exceeds max ${f.max}`)
+      // A target pair is [hint, target], the hint the lower (ID-3969, the ruling of 19/11/2026).
+      if (Array.isArray(f.target) && !(f.target[0] < f.target[1])) fails.push(`${owner}.${f.name} target [${f.target.join(', ')}] is not an ascending [hint, target] pair`)
       if (f.rowLabel && !(f.fields ?? []).some((c) => c.name === f.rowLabel)) {
         fails.push(`${owner}.${f.name} rowLabel names ${f.rowLabel}, which is not one of its fields`)
       }
@@ -426,7 +428,7 @@ if (vocab && (vocab.sections ?? []).every((x) => x && typeof x === 'object')) {
   const VIEW_TYPES = { card: ['_shared', 'card'], 'faq-item': ['faq', 'faq-item'], office: ['locations', 'office'] }
   const recordChecks = (owner, source, fields) => {
     for (const f of fields ?? []) {
-      if (f.type === 'relationship' && !itemSources.has(f.to)) fails.push(`${owner}.${f.name} points at ${f.to}, which is not an item source`)
+      if (f.type === 'relationship' && f.to !== 'users' && !itemSources.has(f.to)) fails.push(`${owner}.${f.name} points at ${f.to}, which is not an item source`)
       if (f.type === 'topics' && categoriesOf.get(source)?.value !== true) fails.push(`${owner}.${f.name} is topics, but sections.json gives ${source} no categories (SC-010)`)
       if (f.type === 'sections') for (const id of f.sections ?? []) if (!sectionIds.has(id)) fails.push(`${owner}.${f.name} offers ${id}, which is not a section in sections.json`)
       if (f.fields) recordChecks(`${owner}.${f.name}`, source, f.fields)

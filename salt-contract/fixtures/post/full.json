@@ -1,5 +1,5 @@
 {
-  "$comment": "document: a post's fields as contract/collections/posts.json defines them, as the post view receives them. Stored as defined: title, featuredImage (media id). Resolved for the view: href; date (YYYY-MM-DD) from publishedAt in site.timezone; category from primaryTopic and topics from topics, each { title, href }; author, the credited team member (contract/collections/team.json) as { name, href?, role, bio, photo (media id) }; body, the layout's one rich-text section that is prose alone (rich-text string, stored h3 renders h2 at base 1; section#sections-in-a-post, and post/band-* for a layout with bands); readingMinutes, share and adjacent, derived. Shapes of site are this case's own (the gate checks only declared site keys): site.home { href, title }, site.collectionIndexes.post { href, title } (the blog index), site.timezone. Share intents are the services' public share URLs for the post's canonical URL. The markup does not say whether the three meta spans are separated; one space is drawn between them. The contract has no site key for showing the breadcrumb, byline, share or author box; each is drawn here because the document supplies its data.",
+  "$comment": "document: a post's fields as contract/collections/posts.json defines them, as the post view receives them. Stored as defined: title, featuredImage (media id). Resolved for the view: href; date (YYYY-MM-DD) from publishedAt in site.timezone; category from primaryTopic and topics from topics, each { title, href }, the primary topic first and the rest A to Z (Soil, then Composting); author, the credited team member (contract/collections/team.json) as { name, href?, role, bio, photo (media id) }; body, the layout's one rich-text section that is prose alone (rich-text string, stored h3 renders h2 at base 1; section#sections-in-a-post, and post/band-* for a layout with bands); readingMinutes, share and adjacent, derived. Shapes of site are this case's own (the gate checks only declared site keys): site.home { href, title }, site.collectionIndexes.post { href, title } (the blog index), site.timezone. Share intents are the services' public share URLs for the post's canonical URL. The markup does not say whether the three meta spans are separated; one space is drawn between them. The contract has no site key for showing the breadcrumb, byline, share or author box; each is drawn here because the document supplies its data.",
   "view": "post",
   "summary": "A full blog post: breadcrumb, category, byline linked to the author's archive, long date, reading time, the featured image as the priority image, a body whose stored h3 renders h2, tags, share links, the author box, and newer and older neighbours.",
   "context": {
@@ -75,7 +75,7 @@
     ],
     "author": {
       "name": "Priya Shah",
-      "href": "/journal/author/priya-shah/",
+      "href": "/team/priya-shah/",
       "role": "Head gardener",
       "bio": "Priya has run the kitchen garden at Hollin Farm for eleven years and writes about soil, water and patience.",
       "photo": "priya"
