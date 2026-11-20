@@ -1,0 +1,18 @@
+{
+  "section": "rich-text",
+  "summary": "Under a section heading at h2, stored h4 then h3 draw h3 then h3: the first body heading must not skip a rank (section#body-heading-base).",
+  "values": {
+    "heading": "Planting notes",
+    "body": "<h4>First</h4><h3>Second</h3>",
+    "settings": {
+      "anchorId": "planting-notes"
+    }
+  },
+  "context": {
+    "headingLevel": 2,
+    "headingRendered": true,
+    "priorityMedia": false,
+    "track": "rich-text-1",
+    "index": 1
+  }
+}
