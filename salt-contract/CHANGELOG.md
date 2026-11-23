@@ -473,12 +473,11 @@ test, applied through section 2's table, where the stricter row wins.
   - Not reached: the archive's and the search view's own headings and forms sit in unclassed
     elements, so they keep the platform's page measure; giving them the reading measure needs a
     class in the markup.
-  - **Semver.** On its own MINOR by `RELEASE-POLICY.md` section 1's test: no markup changes, and
-    no implementation that conformed stops conforming; each moves its stylesheet pin. The
-    stylesheets row reads a change to rendered output for unchanged markup as MAJOR. Either way it
-    is part of the first major, so the semver call stays MAJOR. **What each target changes.** Both:
-    serve the new `styles/salt.css`. Salt for WordPress may drop its own rules for these classes
-    from `app.css`, keeping the map's notice and canvas.
+  - **Semver: MAJOR**, by `RELEASE-POLICY.md`'s stylesheets row: a change to how unchanged markup
+    renders is MAJOR. It lands in the 1.0.0 candidate series as rc.9, so the semver call stays
+    MAJOR. **What each target changes.** Both: serve the new `styles/salt.css`. Salt for
+    WordPress may drop its own rules for these classes from `app.css`, keeping the map's notice
+    and canvas.
 - The case-study view has fixtures and is required of every implementation (SC-021).
   `fixtures/case-study/` holds four cases (`full`, `aside`, `band` and `minimal`), `case-study`
   joins `REQUIRED_FILES`, and a full conformance run refuses to declare it not shipped. The
