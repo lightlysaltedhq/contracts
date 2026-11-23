@@ -165,6 +165,7 @@ body {
 .salt-header__phone:focus-visible,
 .salt-footer__link:focus-visible,
 .salt-footer__social-link:focus-visible,
+.salt-skip-link:focus-visible,
 /* The contact form's fields (WP7 unit 7). A text field matches `:focus-visible` on a click as well
    as a key, which is the browser's rule for anything that takes typing and is what a field wants. */
 .salt-contact__input:focus-visible,
@@ -236,7 +237,7 @@ body {
    `.salt-section`, so this rule can never match one — but the contract reads the flat-tone
    list and requires the image composition to cover every control in it, and weakening that to
    allow an exception is how a card link quietly drops back to the one-pole indicator. */
-.salt-section[data-media] :is(.salt-button, .salt-card__link, .salt-accordion__summary, .salt-tabs__panel, .salt-showcase__link, .salt-pagination__link, .salt-search__input, .salt-share__link, .salt-copy-link__button, .salt-consent-panel__checkbox, .salt-logo, .salt-nav__link, .salt-nav__sublink, .salt-nav__toggle, .salt-header__burger, .salt-drawer__close, .salt-theme-toggle, .salt-header__phone, .salt-footer__link, .salt-footer__social-link, .salt-contact__input, .salt-contact__link, .salt-showcase__contact-link, .salt-rich-text :where(a), .salt-case-study-view__back-link, .salt-logos__frame, .salt-carousel__track, .salt-contact__status):focus-visible,
+.salt-section[data-media] :is(.salt-button, .salt-card__link, .salt-accordion__summary, .salt-tabs__panel, .salt-showcase__link, .salt-pagination__link, .salt-search__input, .salt-share__link, .salt-copy-link__button, .salt-consent-panel__checkbox, .salt-logo, .salt-nav__link, .salt-nav__sublink, .salt-nav__toggle, .salt-header__burger, .salt-drawer__close, .salt-theme-toggle, .salt-header__phone, .salt-footer__link, .salt-footer__social-link, .salt-skip-link, .salt-contact__input, .salt-contact__link, .salt-showcase__contact-link, .salt-rich-text :where(a), .salt-case-study-view__back-link, .salt-logos__frame, .salt-carousel__track, .salt-contact__status):focus-visible,
 /* The tab, in the same rule rather than a second one. The contract reads a rule at a time and
    asks that it cover every control the flat-tone list names, so a tab in its own rule would be
    a rule that covers one control and fails, and the flat-tone list names `.salt-tabs__input`. */
@@ -1534,6 +1535,16 @@ body:has(.salt-consent-banner)::after {
   flex-wrap: wrap;
   align-items: flex-start;
   gap: 0.5rem;
+}
+
+.salt-share__heading {
+  margin: 0;
+  align-self: center;
+  font-size: var(--text-label);
+  line-height: var(--text-label--line-height);
+  letter-spacing: var(--text-label--letter-spacing);
+  font-weight: var(--text-label--font-weight);
+  font-family: var(--text-label--font-family);
 }
 
 .salt-share__list {

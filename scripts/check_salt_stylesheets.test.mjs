@@ -44,7 +44,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url'
 const HERE = path.dirname(fileURLToPath(import.meta.url))
 const GATE = path.join(HERE, 'check_salt_stylesheets.mjs')
 const PACKAGE = path.resolve(HERE, '../salt-contract')
-const { checkStylesheets, isMainModule, memoSize, readPackage, report } = await import(pathToFileURL(GATE).href)
+const { checkStylesheets, isMainModule, memoSize, readPackage, report, subjectClasses } = await import(pathToFileURL(GATE).href)
 
 /* vitest's spelling over node:assert, for the cases ported as they were written. */
 const expect = (actual) => ({
@@ -98,7 +98,23 @@ const runWith = (raw, edits) => {
     files.set(target(file), mutate(files.get(target(file))))
   }
   const invented = [...saltNames(files)].filter((name) => !COMMITTED.has(name))
-  if (!raw && invented.length > 0) files.set('contract/markup/zz-invented.json', JSON.stringify({ elements: [{ classes: invented }] }))
+  /* A selector list split at its top-level commas only, so `:is(.a, .b)` stays whole. */
+  const topLevel = (list) => {
+    const parts = []
+    let depth = 0
+    let start = 0
+    for (let i = 0; i < list.length; i += 1) {
+      if (list[i] === '(') depth += 1
+      else if (list[i] === ')') depth -= 1
+      else if (list[i] === ',' && depth === 0) { parts.push(list.slice(start, i)); start = i + 1 }
+    }
+    return [...parts, list.slice(start)]
+  }
+  /* An invented class no rule draws (named only as an ancestor, say) is declared a hook, so the
+     check that every class on an element is drawn does not answer for the contract under test. */
+  const drawn = new Set([...files].filter(([file]) => /^styles\/[^/]+\.css$/.test(file)).flatMap(([, text]) => [...text.matchAll(/([^{}]+)\{([^{}]*)\}/g)].filter((m) => m[2].includes(':')).flatMap((m) => topLevel(m[1]).flatMap((sel) => subjectClasses(sel.trim())))))
+  const hooks = invented.filter((name) => !drawn.has(name)).map((name) => ({ class: name, role: 'x', reason: 'A class a test case invents.' }))
+  if (!raw && invented.length > 0) files.set('contract/markup/zz-invented.json', JSON.stringify({ elements: [{ classes: invented }], ...(hooks.length ? { hooks } : {}) }))
   const { code, output } = report(files)
   for (const m of output.matchAll(/^✗ [\w.-]+\.css: (.+)$/gm)) failed.add(m[1])
   return { code, output }
@@ -2286,7 +2302,7 @@ describe('the parse is whole, across every stylesheet in styles/', () => {
   itEach([
     ['a stylesheet the contracts are written against is missing', [removeFile('sections.css')], 'styles/sections.css is missing'],
     /* An unclosed string ends at its line, as in a browser, so the rules after it are still read. */
-    ['an unclosed string hides a keyframe on the next line', [['blocks.css', appending(".salt-a::after { content: 'oops; }\n@keyframes zz { from { color: red; } }")]], 'Parsed 133 rules from blocks.css but the source contains 135 declaration blocks'],
+    ['an unclosed string hides a keyframe on the next line', [['blocks.css', appending(".salt-a::after { content: 'oops; }\n@keyframes zz { from { color: red; } }")]], 'Parsed 131 rules from blocks.css but the source contains 133 declaration blocks'],
     ['a rule nested inside another, which the parse cannot read', [['blocks.css', appending('.salt-note {\n  .salt-x {\n    margin: 0;\n  }\n}')]], 'The parse is dropping rules'],
     ['a declaration written straight into a media block', [['blocks.css', appending('@media (min-width: 48rem) {\n  margin: 0;\n}')]], "directly in an at-rule's block"],
     ['a new stylesheet that drops a focus outline, which a contract sweeping every file reads', [addFile('extra.css', '.salt-button {\n  outline: none;\n}\n')], 'extra.css .salt-button outline: declared outside the focus rules'],
@@ -2389,11 +2405,43 @@ describe('every class on a markup element has a rule or is a declared hook (rc.9
     return JSON.stringify(doc, null, 2)
   }]
   itEach([
-    ['an owed class loses its rule', [['blocks.css', replacing(NAME, '')]], 'contract/markup/ puts .salt-locations__name on an element, and no stylesheet styles it'],
-    ['a new class drawn on an element with no rule', [addFile('contract/markup/zz-new.json', JSON.stringify({ root: { classes: ['salt-unstyled'] } }))], 'puts .salt-unstyled on an element, and no stylesheet styles it'],
+    ['an owed class loses its rule', [['blocks.css', replacing(NAME, '')]], 'contract/markup/ puts .salt-locations__name on an element, and no stylesheet draws it'],
+    ['a new class drawn on an element with no rule', [addFile('contract/markup/zz-new.json', JSON.stringify({ root: { classes: ['salt-unstyled'] } }))], 'puts .salt-unstyled on an element, and no stylesheet draws it'],
   ])('fails when %s', (_case, edits, message) => {
     const { code, output } = runRaw(...edits)
     expect(output).toContain(message)
+    expect(code).toBe(1)
+  })
+  // Negative controls: a mention that draws nothing on screen is not a rule for the class.
+  itEach([
+    ['its only rule is empty', `.salt-locations__name {\n}\n`],
+    ['its only rule is for print', `@media print {\n  .salt-locations__name {\n    margin-inline-end: 1rem;\n  }\n}\n`],
+    ['it is named only as an ancestor', `.salt-locations__name > span {\n  margin-inline-end: 1rem;\n}\n`],
+    ['it is named only inside :not()', `.salt-locations__status:not(.salt-locations__name) {\n  margin-inline-end: 1rem;\n}\n`],
+  ])('fails an owed class when %s', (_case, css) => {
+    const { code, output } = runRaw(['blocks.css', replacing(NAME, css)])
+    expect(output).toContain('contract/markup/ puts .salt-locations__name on an element, and no stylesheet draws it')
+    expect(code).toBe(1)
+  })
+  it('passes a class drawn through :is() in its subject', () => {
+    const { code, output } = runRaw(['blocks.css', replacing(NAME, `:is(.salt-locations__name) {\n  margin-inline-end: 1rem;\n}\n`)])
+    expect(output).toContain('PASS: ')
+    expect(code).toBe(0)
+  })
+  // A hook is kept with no rule on purpose.
+  it('fails a hook that has a rule of its own', () => {
+    const { code, output } = runRaw(withHook('salt-locations__name'))
+    expect(output).toContain('declares .salt-locations__name a hook, kept with no rule, but blocks.css style(s) it')
+    expect(code).toBe(1)
+  })
+  it('fails a hook whose reason says its rule is owed', () => {
+    const owed = ['contract/markup/locations.json', (text) => {
+      const doc = JSON.parse(text)
+      doc.hooks = [{ class: 'salt-locations__name', role: 'name', reason: 'The shared stylesheets owe its rule.' }]
+      return JSON.stringify(doc, null, 2)
+    }]
+    const { code, output } = runRaw(['blocks.css', replacing(NAME, '')], owed)
+    expect(output).toContain("hook .salt-locations__name says its rule is owed")
     expect(code).toBe(1)
   })
   it('passes a class with no rule that its markup declares a hook', () => {

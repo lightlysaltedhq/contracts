@@ -243,7 +243,7 @@
 
 .salt-author-box__label {
   margin-block: 0;
-  color: var(--color-ink-muted);
+  color: var(--salt-section-ink-muted, var(--color-ink-muted));
   font-size: var(--text-small);
   line-height: var(--text-small--line-height);
   letter-spacing: var(--text-small--letter-spacing);

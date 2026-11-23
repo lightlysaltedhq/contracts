@@ -124,7 +124,6 @@ export const CONTAINERS = new Set([
   'salt-post__tags',
   'salt-pricing__features',
   'salt-pricing__plan',
-  'salt-pricing__price',
   'salt-process__number',
   'salt-process__step',
   'salt-search__form',

@@ -445,25 +445,37 @@ test, applied through section 2's table, where the stricter row wins.
   the band's own ink and hairline from existing tokens), and the 14 `stylesheet-owes` notes go,
   with the 19 classes `views.css` already styled. The markup schema drops the `stylesheet-owes`
   topic, and the stylesheet gate now requires the other direction too: every class the markup puts
-  on an element has a rule, or its markup file declares it a hook kept with no rule. No markup or
+  on an element is drawn by a rule, or its markup file declares it a hook kept with no rule. A rule
+  draws a class only when the class is in its selector's subject (not an ancestor, and not inside
+  `:not()` or `:has()`), declares something, and is not for print alone. A hook may have no rule of
+  its own, and its reason may not say a rule is owed. So two hooks that recorded a debt became
+  rules: the skip link (`salt-skip-link`), visually hidden until it takes focus, then drawn at the
+  top of the viewport above the sticky header with the focus ring, and the share row's optional
+  heading (`salt-share__heading`, the `label` role). Nine classes styled only through their
+  children or state are declared hooks with their reasons: `salt-case-study-view__section`,
+  `salt-hero__text`, `salt-logos`, `salt-media-text__body`, `salt-post__breadcrumb`,
+  `salt-post__byline`, `salt-tabs__input`, `salt-pricing` and `salt-pricing__price` (the price
+  line stays running text, so its amount and period keep the markup's space and read as one
+  phrase copied, spoken or unstyled). No markup or
   fixture changes. The visual choices (measures, gaps, which text role each part takes, the map
   facade's 16:9 box) are proposed, for founder approval at contract review.
   - Classes that gained rules: `salt-locations`, `__name`, `__status`, `__office`, `__address`,
     `__line`, `__contact`, `__directions`; `salt-opening-hours`, `__day`, `__span`; `salt-map`,
-    `__label`, `__load`; `salt-pricing`, `__plan`, `__badge`, `__price`, `__amount`, `__period`,
-    `__features`; `salt-contact__details`, `__organisation`, `__address`, `__line`, `__privacy`;
+    `__label`, `__load`; `salt-pricing__plan`, `__badge`, `__amount`, `__period`, `__features`;
+    `salt-contact__details`, `__organisation`, `__address`, `__line`, `__privacy`;
     `salt-showcase__contact`, `__socials`, `__social-link`; `salt-footer__copyright`;
     `salt-display-preferences`, `__panel`, `__summary`, `__controls`, `__group`, `__label`;
     `salt-post`, `__header`; `salt-service`, `__header`, `__benefits`, `__price`, `__cta`;
     `salt-related`; `salt-search__results`; `salt-archive__bio`; `salt-author-box`, `__body`,
-    `__label`, `__bio`. `salt-post__adjacent` gains the post's measure.
+    `__label`, `__bio`; `salt-skip-link`; `salt-share__heading`. `salt-post__adjacent` gains the
+    post's measure.
   - A post's and a service's parts that are not section bands are centred at the reading measure
     inside the gutter, the service's related cards at the default band's; a band in a post keeps
     its own width. The map's facade is a 16:9 flex box on `--salt-section-border` and
     `--radius-md`, its label with no margin. What script draws into it, a notice and the map's
     canvas, is not in the markup, so it is styled where it is drawn (Salt for WordPress's own
     stylesheet) until a markup change records it.
-  - Twelve of the classes are now flex or grid containers, so `normalise.mjs`'s `CONTAINERS`
+  - Sixteen of the classes are now flex or grid containers, so `normalise.mjs`'s `CONTAINERS`
     gains them (`scripts/salt_normalise_containers.mjs --write`): white space between their
     children, which a browser does not draw, is dropped on both sides of a comparison. Nothing that
     matched before stops matching.

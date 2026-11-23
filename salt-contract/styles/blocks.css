@@ -1729,12 +1729,11 @@
 }
 
 /* Pricing: each plan is a card with its parts stacked, its call to action at the foot, so plans in
-   a row line up. A featured plan is told by its badge's words and the band's heavier hairline,
+   a row line up. The list itself is the shared grid's, and the price line is running text: its
+   amount and period keep the markup's space between them, so the price reads "£29 a month" when
+   copied, spoken or drawn with no stylesheet, and a flex box would have made that space
+   insignificant to the comparison. A featured plan is told by its badge's words and the band's heavier hairline,
    never by colour alone. */
-.salt-pricing {
-  align-items: stretch;
-}
-
 .salt-pricing__plan {
   display: flex;
   flex-direction: column;
@@ -1763,13 +1762,6 @@
   letter-spacing: var(--text-label--letter-spacing);
   font-weight: var(--text-label--font-weight);
   font-family: var(--text-label--font-family);
-}
-
-.salt-pricing__price {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0.5rem;
 }
 
 /* The contract's `stat`, "a figure shown as the thing itself": the price is one. */

@@ -1377,3 +1377,13 @@ test('labels: a slide label draws its own position and the track\'s count (revie
   expectFail(['carousel'], (io) => io.html('carousel/testimonials-source.html', 'aria-label="Slide 2 of 3"', 'aria-label="Slide 9 of 9"'), /aria-label="Slide 9 of 9"/)
   expectFail(['carousel'], (io) => io.html('carousel/testimonials-source.html', 'aria-label="Slide 2 of 3"', 'aria-label="Slide 1 of 3"'), /aria-label="Slide 1 of 3"/)
 })
+test('normalise: the space between a price\'s amount and its period is compared, so it reads as one phrase', () => {
+  const html = readFileSync(path.join(pkg, 'fixtures', 'pricing', 'three-plans-featured.html'), 'utf8')
+  const joined = html.replace('<span class="salt-pricing__amount">£29</span>\n              <span class="salt-pricing__period">', '<span class="salt-pricing__amount">£29</span><span class="salt-pricing__period">')
+  assert.notEqual(joined, html)
+  assert.equal(compare(html, joined).equal, false)
+  // A flex or grid container's white space is not compared: the plan's own parts are a control.
+  const plan = html.replace('<h3>Starter</h3>\n            <p class="salt-pricing__price">', '<h3>Starter</h3><p class="salt-pricing__price">')
+  assert.notEqual(plan, html)
+  assert.equal(compare(html, plan).equal, true)
+})

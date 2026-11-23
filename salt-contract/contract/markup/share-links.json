@@ -148,13 +148,6 @@
     "section#focus-ring",
     "section#target-size"
   ],
-  "hooks": [
-    {
-      "class": "salt-share__heading",
-      "role": "heading",
-      "reason": "WordPress's optional visible label; no rule in the shared stylesheets yet."
-    }
-  ],
   "notes": [
     {
       "topic": "ruling",

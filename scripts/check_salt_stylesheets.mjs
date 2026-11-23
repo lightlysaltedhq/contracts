@@ -5815,6 +5815,34 @@ const varReads = memo((text) =>
    writes both skip them, so prose never counts as markup. */
 const NOT_ELEMENTS = new Set(['platforms', 'rules', 'notes', 'hooks', 'omitted'])
 
+/* The salt-* classes in a selector's subject: its last compound, split at the top level on the
+   descendant, child and sibling combinators, with attribute selectors blanked and :not() and :has()
+   taken out, since neither names the element the rule draws. :is() and :where() stay. */
+export function subjectClasses(selector) {
+  const text = selector.replace(/\[[^\]]*\]/g, '')
+  let depth = 0
+  let start = 0
+  for (let i = 0; i < text.length; i += 1) {
+    const char = text[i]
+    if (char === '(') depth += 1
+    else if (char === ')') depth -= 1
+    else if (depth === 0 && /[\s>+~]/.test(char)) start = i + 1
+  }
+  let subject = text.slice(start)
+  for (;;) {
+    const m = /:(?:not|has)\(/i.exec(subject)
+    if (!m) break
+    let d = 0
+    let end = m.index + m[0].length - 1
+    for (; end < subject.length; end += 1) {
+      if (subject[end] === '(') d += 1
+      else if (subject[end] === ')') { d -= 1; if (d === 0) break }
+    }
+    subject = subject.slice(0, m.index) + subject.slice(end + 1)
+  }
+  return [...subject.matchAll(/\.(salt-[\w-]+)/g)].map((m) => m[1])
+}
+
 /*
  * Every custom property an element in a markup file writes, with the value written: from its
  * attribute values (a plain string, an entry's `value`, each of an `enum`'s values), and from the
@@ -6140,11 +6168,38 @@ export function checkStylesheets(files) {
      no rule as a debt (`stylesheet-owes`); a platform that matched it byte for byte served them
      unstyled, an office's name running into its status. The debt is paid (rc.9, option A), and this
      check keeps it from returning: a new class needs its rule, or a hook entry saying why not. */
+  /* A class counts as styled here only where a rule draws it: the class is in the selector's
+     subject (its last compound, outside :not() and :has()), the rule declares something, and it is
+     not for print alone. An empty rule, a print-only rule, or a class named only as an ancestor
+     (`.salt-x .salt-y` styles .salt-y, not .salt-x) leaves the element unstyled on screen. */
+  const covered = new Map()
+  for (const [file, { rules }] of parsed) {
+    for (const rule of rules) {
+      if (rule.order.length === 0) continue
+      if (rule.at.some((prelude) => /^@media\b/i.test(prelude) && /\bprint\b/i.test(prelude) && !/\bnot\s+print\b/i.test(prelude))) continue
+      for (const selector of rule.selectors) {
+        for (const name of subjectClasses(selector)) {
+          if (!covered.has(name)) covered.set(name, new Set())
+          covered.get(name).add(file)
+        }
+      }
+    }
+  }
+  /* A hook is a class kept with no rule on purpose: a stable name for a site's own styles, a
+     script or a test. So a hook has no rule of its own here, and its reason never says a rule is
+     owed; a class waiting for its rule is a debt, not a hook. */
   const hooks = new Set()
-  for (const file of markupFiles) for (const hook of readJson(file)?.hooks ?? []) if (typeof hook?.class === 'string') hooks.add(hook.class)
+  for (const file of markupFiles) {
+    for (const hook of readJson(file)?.hooks ?? []) {
+      if (typeof hook?.class !== 'string') continue
+      hooks.add(hook.class)
+      if (covered.has(hook.class)) fails.push(`${file} declares .${hook.class} a hook, kept with no rule, but ${[...covered.get(hook.class)].join(', ')} style(s) it; take it out of hooks, or take the rule out`)
+      if (/\bowe[sd]?\b|\byet\b|\bmissing\b|\bto do\b|\btodo\b/i.test(hook.reason ?? '')) fails.push(`${file}'s hook .${hook.class} says its rule is owed ("${hook.reason}"); a hook is kept with no rule on purpose, so give the class its rule in styles/ and take it out of hooks`)
+    }
+  }
   for (const name of [...onElements].sort()) {
-    if (!name.startsWith('salt-') || styled.has(name) || hooks.has(name)) continue
-    fails.push(`contract/markup/ puts .${name} on an element, and no stylesheet styles it; add its rule to styles/, or declare it a hook (kept with no rule) in its markup file`)
+    if (!name.startsWith('salt-') || covered.has(name) || hooks.has(name)) continue
+    fails.push(`contract/markup/ puts .${name} on an element, and no stylesheet draws it: no rule with a declaration names it in its selector's subject, outside print; add its rule to styles/, or declare it a hook (kept with no rule) in its markup file`)
   }
 
 

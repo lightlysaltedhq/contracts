@@ -161,6 +161,13 @@
       "text": "No script: radio inputs and :has(:checked) show the chosen panel. The group is a radiogroup, not an ARIA tablist, because it behaves as radios."
     }
   ],
+  "hooks": [
+    {
+      "class": "salt-tabs__input",
+      "role": "input",
+      "reason": "Names each tab's radio for the tab set's state rules, which select its checked and focused states; salt-sr-only hides it."
+    }
+  ],
   "platforms": {
     "nextjs": {
       "owes": [

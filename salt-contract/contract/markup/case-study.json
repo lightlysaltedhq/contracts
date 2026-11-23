@@ -563,6 +563,11 @@
       "class": "salt-case-study-view__live",
       "role": "live",
       "reason": "The live-site link's paragraph; the button carries the rules."
+    },
+    {
+      "class": "salt-case-study-view__section",
+      "role": "challenge",
+      "reason": "Each of the four content sections (challenge, solution, gallery, services); the view's rules space its heading and parts as children of it, and it has no rule of its own."
     }
   ],
   "notes": [

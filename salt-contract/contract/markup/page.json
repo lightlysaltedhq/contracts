@@ -167,13 +167,6 @@
     "section#landmarks",
     "section#single-h1"
   ],
-  "hooks": [
-    {
-      "class": "salt-skip-link",
-      "role": "skip-link",
-      "reason": "New: the skip link's class. The shared stylesheets owe the visually-hidden-until-focused rule."
-    }
-  ],
   "notes": [
     {
       "topic": "ruling",
@@ -213,7 +206,7 @@
         }
       ],
       "owes": [
-        "Rename skip-link to salt-skip-link (and give it a rule in chrome.css).",
+        "Rename skip-link to salt-skip-link; chrome.css draws it hidden until focused.",
         "The header's noscript style in the document head, moved from inside the header."
       ]
     },

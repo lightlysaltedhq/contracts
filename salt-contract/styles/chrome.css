@@ -1177,3 +1177,36 @@ span.salt-footer__link {
 .salt-display-preferences__label {
   margin-inline-end: 0.25rem;
 }
+
+/*
+ * The skip link: visually hidden until it takes focus, then drawn at the top of the viewport above
+ * the sticky header, so the first Tab on a page shows it and Enter moves focus to main. Hidden by
+ * clipping, never by `display` or `visibility`, so it stays in the tab order and the accessibility
+ * tree. Shown on `:focus`, so it appears for any focus, and ringed on `:focus-visible` with every
+ * other control (`primitives.css`). Above the header's 10, the one other number this package
+ * stacks.
+ */
+.salt-skip-link:not(:focus) {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+.salt-skip-link:focus {
+  position: fixed;
+  inset-block-start: 1rem;
+  inset-inline-start: 1rem;
+  z-index: 11;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font-size: var(--text-label);
+  line-height: var(--text-label--line-height);
+  letter-spacing: var(--text-label--letter-spacing);
+  font-weight: var(--text-label--font-weight);
+  font-family: var(--text-label--font-family);
+}
