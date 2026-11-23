@@ -1,6 +1,6 @@
 {
   "$schema": "../../schema/field-definition.schema.json",
-  "version": "1.0.0-rc.8",
+  "version": "1.0.0-rc.9",
   "$comment": "A case study's stored fields, by the founder's rulings of 18/11/2026 on the ID-3944 field names. A case study is fixed fields: it has no page body. The address (slug) and the editor's order are each platform's own (SC-003). The view's document (fixtures/case-study) is these fields as the case-study view receives them, with services resolved to cards for display.",
   "collection": "case-studies",
   "label": "Case study",

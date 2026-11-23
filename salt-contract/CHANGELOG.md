@@ -4,7 +4,7 @@ Newest first. Dates are DD/MM/YYYY. What each part of a version means, and how a
 announced and migrated, is in `RELEASE-POLICY.md`. Decisions cited as `SC-nnn` are in Lightly
 Salted's decision log for Product Salt.
 
-## 1.0.0 (candidate `1.0.0-rc.8`, prepared 18/11/2026; not published, dated when tagged)
+## 1.0.0 (candidate `1.0.0-rc.9`, prepared 23/11/2026; not published, dated when tagged)
 
 **Semver call: MAJOR, the first release of the contract.** No earlier version was published, so no
 implementation conformed to one. Adopting it is still a migration for existing sites, because the
@@ -61,7 +61,7 @@ test, applied through section 2's table, where the stricter row wins.
   (`./view-props/*`); the replaced-logic format (`./schema/replaced-logic`).
 - Image sizes (`./image-sizes`): each slot's `sizes` per band and column count, the candidate
   widths, and the srcset capped at the upload's intrinsic width (SC-016).
-- Fixtures (`./fixtures/*`): 117 cases with their expected HTML, for the 17 sections, the site
+- Fixtures (`./fixtures/*`): 120 cases with their expected HTML, for the 17 sections, the site
   header and footer, the post, service, case-study, archive, search and not-found views, and the
   page (SC-018, SC-019, SC-021); and the normaliser both sides are compared through
   (`./normalise`).
@@ -299,6 +299,107 @@ test, applied through section 2's table, where the stricter row wins.
     (both platforms' query owes in `carousel.json` and `collection-showcase.json`).
   - Team is a linked source for showcase and carousel. The Index layout can list members'
     individual pages; this neither creates a whole-team archive nor adds a view-all link.
+- The founder's rulings of 23/11/2026 change the contract after `1.0.0-rc.8` (EP-72 M4, Salt for
+  WordPress's conformance; SC-029 to SC-032). Each is part of the first major, so the semver call
+  stays MAJOR. On its own each of the first three would be MAJOR by `RELEASE-POLICY.md` section 1's
+  test: markup an implementation drew correctly at rc.8 no longer conforms. **Breaking for both
+  targets, Salt for WordPress (EP-72) and Salt for Next.js (EP-73)**; what each must change is
+  listed under each ruling. Every stylesheet change below is in `styles/salt.css`, so both serve
+  the new bytes when they move their pin.
+  - **No inline style attributes** (SC-029). Salt for WordPress's Content-Security-Policy has no
+    `'unsafe-inline'` for styles, so a browser ignored every `style="…"` the contract drew: bands
+    lost their spacing, ratings did not fill and the case study's aside grid broke. Nothing the
+    contract draws now carries a style attribute (`section#no-inline-style`); a value the design
+    varies is a data attribute from a fixed set, styled in `styles/`. `markup.schema.json` refuses
+    a `style` attribute in any markup file, and the conformance runner gains a fifth check,
+    **inline styles**, which fails any element carrying one in an adapter's output, in every case,
+    with its own column in the report. The fixtures drew 87 style attributes; none remains.
+    - A band's spacing: the style goes, and `sections.css` sets `--salt-section-space` from the
+      `data-spacing` the band already carries (sm, md, lg; none draws none). This covers the case
+      study's header band.
+    - The scrim: `data-strength` (subtle, standard or strong, the setting's three) on
+      `div.salt-section__scrim`, which `sections.css` maps to `--scrim-<strength>`.
+    - A background image: `data-fit` (cover or contain), always written, with cover the
+      stylesheet's default; and the position as `data-focal-x` and `data-focal-y`, each 0 to 100
+      in steps of 5 (42 rules), mapped to `object-position` through `--salt-focal-x` and
+      `--salt-focal-y`, the centre when neither is written (`section#background-position`). A
+      stored focal point snaps on each axis to `min(100, max(0, 5 × floor(v ÷ 5 + 0.5)))`, so a
+      value halfway between two steps takes the higher (32.5 gives 35). The nine named positions
+      take their steps (left and top 0, centre 50, right and bottom 100). Both are left out only
+      for the focal-point position with no stored focal point.
+    - A rating: `data-fill` on `span.salt-showcase__stars`, 0 to 100 in steps of 10, which
+      `blocks.css` maps to `--salt-rating-fill`: the rating ÷ 5 × 100 rounded to the nearest
+      step, halves up, held to 0 to 100. A stored rating (1 to 5 in half stars) always lands on a
+      step.
+    - The case study's aside: `data-aside-rows` (1 to 4) on the article, which `primitives.css`
+      maps to `--salt-case-study-view-aside-rows`. The measure leaves the markup: the aside grid
+      is centred in a default band's `--container-5xl`, fixed in `primitives.css`, and
+      `--salt-case-study-view-measure` is gone; a site that widened its bands widens it in its own
+      stylesheet.
+    - The logo's height leaves the markup. `chrome.css` keeps `--logo-height: 2rem` on
+      `.salt-logo`, and a site that sets a height sets it once, site-wide, in its own stylesheet
+      loaded after `salt.css` (`.salt-logo { --logo-height: 48px; }`). `site.logoHeight` stays a
+      case's input, since the logo's `sizes` are computed from it.
+    - `contract/token-layer.json` drops `writes` and the five properties the markup used to write
+      (`--salt-section-space`, `--salt-scrim-alpha`, `--salt-rating-fill`,
+      `--salt-case-study-view-aside-rows`, `--salt-case-study-view-measure`), which the
+      stylesheets now set themselves. The stylesheet gate's value maps, which filled a
+      `<placeholder>` in a written style from a setting's options, are removed with the schema's
+      `writes`: the markup writes fixed values only, and the gate refuses a placeholder in one.
+      The one style element the contract draws, the scriptless style in the head, stays; a target
+      with a strict Content-Security-Policy allows it by a hash or a nonce and keeps its contents
+      byte for byte (`page.json`).
+    - **What each target changes.** Both: draw no `style` attribute anywhere; write the data
+      attributes above; serve the new `salt.css`. Salt for Next.js: drop the inline
+      `--salt-section-space` on every band and the case study's header band, `--salt-scrim-alpha`
+      on the scrim, `--salt-rating-fill` on the stars, the aside's two properties (its `measure`
+      prop leaves the markup), and `<SiteLogo>`'s `--logo-height` (the brand global's height goes
+      to the site's stylesheet); `objectPosition()` writes the data attributes in place of
+      `object-fit` and `object-position` inline, and no image keeps next/image's inline style. Salt
+      for WordPress: the same attributes in place of the same inline styles, and the logo height
+      from its brand options into its own stylesheet.
+  - **The footer's consent control is optional** (SC-030). `div.salt-footer__consent`, the
+    control and its status line, is drawn only when the site has a consent mechanism wired: on
+    Salt for WordPress an active WP Consent API plugin, on Salt for Next.js its consent store with
+    an integration that needs consent. A case's `site.consent` says one is wired, and the gate
+    requires the control exactly when it is. The new cases `site-footer/consent-wired` and
+    `site-footer/consent-not-wired` show it with and without; `columns-socials-copyright` gains
+    the `site.consent` its comment described, and the seven other cases that drew the
+    control with no mechanism wired (`display-preferences`, `single-flat-menu-inverse`,
+    `theme-toggle-button` and the four page cases) no longer draw it. 120 cases in all. **What each
+    target changes.** Both: draw the control only with a mechanism wired. Salt for WordPress: only
+    when `wp_has_consent` exists.
+  - **The consent panel's boxes are grouped by WP Consent API category** (SC-030). One box per API
+    category the site's integrations use, in the API's order (functional, preferences,
+    statistics, statistics-anonymous, marketing), its id, name and `<category>` the API category,
+    and ticking it sets every Salt category in its group: analytics is the statistics box, and
+    embeds and marketing share the marketing box (a platform's own extra category, WordPress's
+    maps, goes in the box its map names). No two boxes share a setting, so the hydrated WordPress
+    panel's *Shares one setting with …* note goes. `site.consent.categories` gains `covers`, and
+    the gate checks the order, the ids and that each Salt category is in the box its API category
+    names. `consent-panel-open` draws `site-footer__consent-statistics` where it drew
+    `-analytics`. **What each target changes.** Salt for Next.js: two boxes (statistics,
+    marketing) in place of three (analytics, embeds, marketing); its cookie keeps Salt's
+    categories. Salt for WordPress: boxes from `salt_consent_api_category`, one per API category.
+  - **Labels carry their values as named placeholders** (SC-031). The contract drew some values by
+    replacing a placeholder (`readTime`, the search's `results` and `noResults`) and others by
+    appending to a prefix (`slide`, `rating`, and in the listing and archive cases `page`). Every
+    label that carries a number or a query now uses named placeholders, replaced where they stand,
+    so a translation places the value itself; README *Labels* states the rule once: the names
+    (`{n}`, `{N}`, `{q}`, `{kind}`), that an unknown placeholder is drawn as written, and that a
+    label without one is drawn as written with nothing appended. The markup notation lists them:
+    `labels.page ({n})`, `labels.slide ({n}, {N})`, `labels.rating ({n}, {N})`,
+    `labels.readTime ({n})`, `labels.results ({n}, {q})`, `labels.noResults ({q})` and
+    `labels.kind ({kind})`. The fixtures give `Page {n}`, `Slide {n} of {N}` and
+    `Rated {n} of {N}`; no expected HTML changes. Two labels still append a name, outside the
+    ruling: `directions` and `byline`. **What each target changes.** Both: replace the
+    placeholders in those seven labels and append nothing; a site's `page`, `slide` and `rating`
+    labels hold their placeholders (`Page {n}`, `Slide {n} of {N}`, `Rated {n} of {N}`).
+  - **The case study's sidebar parts are defined** (SC-032). *Media aside, an image and a sidebar
+    part* now says which parts are sidebar parts: exactly the challenge (filled), the solution
+    (filled), the gallery (with an image that resolves) and the live-site link (a safe URL), the
+    four Salt for WordPress counts and the gate already counted. The header, results, details and
+    delivered services never are. `data-aside-rows` is how many are drawn. No verdict changes.
 - The case-study view has fixtures and is required of every implementation (SC-021).
   `fixtures/case-study/` holds four cases (`full`, `aside`, `band` and `minimal`), `case-study`
   joins `REQUIRED_FILES`, and a full conformance run refuses to declare it not shipped. The
