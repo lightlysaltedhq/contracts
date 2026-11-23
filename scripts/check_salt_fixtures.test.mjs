@@ -36,6 +36,7 @@ function copy(sections, edit = () => {}) {
       assert.ok(text.includes(from), `${rel} holds ${from}`)
       writeFileSync(file(rel), text.replace(from, to))
     },
+    read: (rel) => readFileSync(file(rel), 'utf8'),
     write: (rel, text) => writeFileSync(path.join(dir, rel), text),
     remove: (rel) => rmSync(file(rel), { recursive: true, force: true }),
   }
@@ -840,49 +841,61 @@ test('sc-021: the case study cases pass their own checks', () => {
   const dir = copy(['case-study'])
   try { assert.doesNotMatch(run(dir).out, /fixtures\/case-study\//, run(dir).out) } finally { rmSync(dir, { recursive: true, force: true }) }
 })
-test('sc-021: the featured image takes the aside slot in the aside layout and the content slot in the flow', () => {
-  expectFail(['case-study'], (io) => io.html('case-study/aside.html', 'sizes="(min-width: 64rem) 23.83rem, 100vw"', 'sizes="(min-width: 64rem) 60rem, 100vw"'),
-    /fixtures\/case-study\/aside\.html: <img> sizes="\(min-width: 64rem\) 60rem, 100vw"; its slot \(aside, band default\) gives "\(min-width: 64rem\) 23\.83rem, 100vw"/)
+const FLOW_OPEN = '    <div class="salt-case-study-view__flow-media">'
+// Cut the indented element that opens with `open`, through its close at the same indent.
+const cutting = (rel, open) => (io) => {
+  const t = io.read(rel)
+  const start = t.indexOf(open)
+  const close = `\n${open.match(/^ */)[0]}</div>\n`
+  io.write(`fixtures/${rel}`, t.slice(0, start) + t.slice(t.indexOf(close, start) + close.length))
+}
+test('sc-034: the hero image is the featured image, last in the header, and the only priority image', () => {
+  expectFail(['case-study'], (io) => io.html('case-study/full.html', 'fetchpriority="high" decoding="async"', 'loading="lazy" decoding="async"'), /fixtures\/case-study\/full\.html: the priority image must be in case-study's hero-image/)
+  // The flow image claiming priority beside the hero.
+  expectFail(['case-study'], (io) => io.html('case-study/full.html', 'alt="The glasshouse half reglazed, its frames stripped back to bare timber" loading="lazy"', 'alt="The glasshouse half reglazed, its frames stripped back to bare timber" fetchpriority="high"'), /2 images claim fetchpriority=high/)
+  // No featured image: the flow image is not promoted to priority.
+  expectFail(['case-study'], (io) => io.html('case-study/flow-only.html', 'alt="A shaded courtyard of ferns and multi-stemmed birches beside the river" loading="lazy"', 'alt="A shaded courtyard of ferns and multi-stemmed birches beside the river" fetchpriority="high"'), /fixtures\/case-study\/flow-only\.html: an img claims priority, but case-study's markup gives priority to none here/)
+  // The hero image left in the flow, as before SC-034.
   expectFail(['case-study'], (io) => {
-    io.json('case-study/full.json', (d) => { d.site.caseStudy = { media: 'aside' } })
-    io.html('case-study/full.html', '<article class="salt-case-study-view">', '<article class="salt-case-study-view" data-media="aside" data-aside-rows="4">')
-  },
-    /fixtures\/case-study\/full\.html: <img> sizes="\(min-width: 64rem\) 60rem, 100vw"; its slot \(aside, band default\)/)
+    const t = io.read('case-study/full.html')
+    const start = t.indexOf('      <div class="salt-case-study-view__media">')
+    const end = t.indexOf('      </div>\n', start) + '      </div>\n'.length
+    const hero = t.slice(start, end)
+    io.write('fixtures/case-study/full.html', (t.slice(0, start) + t.slice(end)).replace('    </header>\n', '    </header>\n' + hero.replace(/^  /gm, '')))
+  }, /fixtures\/case-study\/full\.html: .*\[flow-media\]: <div\.salt-case-study-view__media> has classes "salt-case-study-view__media"; the markup gives "salt-case-study-view__flow-media"/)
+  // The band's hero image takes the default band's content slot.
+  expectFail(['case-study'], (io) => io.html('case-study/band.html', 'sizes="(min-width: 75rem) 60rem, (min-width: 64rem) 60.44rem, calc(100vw - 2rem)"', 'sizes="(min-width: 64rem) 60rem, 100vw"'), /fixtures\/case-study\/band\.html: <img> sizes="\(min-width: 64rem\) 60rem, 100vw"; its slot \(content, band default\)/)
 })
-test('sc-021: the featured image is the priority image, and site.caseStudy.media is flow or aside', () => {
-  expectFail(['case-study'], (io) => io.html('case-study/full.html', 'fetchpriority="high" decoding="async"', 'loading="lazy" decoding="async"'), /fixtures\/case-study\/full\.html: the priority image must be in case-study's image/)
-  expectFail(['case-study'], (io) => io.json('case-study/aside.json', (d) => { d.site.caseStudy.media = 'side' }), /site\.caseStudy is \{ media, header, headerTone, headerToneDark \}: media flow or aside/)
-})
-const ASIDE_ARTICLE = '<article class="salt-case-study-view" data-media="aside" data-aside-rows="3">'
-test('sc-021: the article is laid out aside exactly when the site says aside, an image is set and a part runs beside it', () => {
-  // A flow input with aside HTML.
-  expectFail(['case-study'], (io) => io.json('case-study/aside.json', (d) => { d.site.caseStudy.media = 'flow' }), /fixtures\/case-study\/aside\.html: .*<article\.salt-case-study-view> carries data-media, which the markup draws only when media aside/)
-  expectFail(['case-study'], (io) => io.html('case-study/full.html', '<article class="salt-case-study-view">', ASIDE_ARTICLE.replace('"3"', '"4"')), /fixtures\/case-study\/full\.html: .*<article\.salt-case-study-view> carries data-media, which the markup draws only when media aside/)
-  // An aside input with flow HTML.
-  expectFail(['case-study'], (io) => io.html('case-study/aside.html', ASIDE_ARTICLE, '<article class="salt-case-study-view">'), /fixtures\/case-study\/aside\.html: .*<article\.salt-case-study-view> lacks data-media, which the markup requires when media aside/)
-  expectFail(['case-study'], (io) => io.html('case-study/aside.html', ' data-aside-rows="3"', ''), /<article\.salt-case-study-view> lacks data-aside-rows, which the markup requires when data-media is aside/)
-  // Aside, but nothing to sit beside: the image stays in the flow.
+test('sc-034: the case-study image is drawn between the challenge and the solution, once, and never in an empty wrapper', () => {
+  // Absent from the case, but drawn.
+  expectFail(['case-study'], (io) => io.json('case-study/full.json', (d) => { delete d.document.caseStudyImage }), /fixtures\/case-study\/full\.html: flow-media is drawn, but the markup draws it only when caseStudyImage resolves/)
+  // Given, but not drawn.
+  expectFail(['case-study'], cutting('case-study/full.html', FLOW_OPEN), /fixtures\/case-study\/full\.html: flow-media is not drawn, but caseStudyImage resolves/)
+  // Not resolving: no empty wrapper is kept.
+  expectFail(['case-study'], (io) => io.json('case-study/flow-only.json', (d) => { d.document.caseStudyImage = 'missing' }), /flow-only\.(json|html): /)
+  // The same media item in both fields: drawn once, in the hero.
+  expectFail(['case-study'], (io) => io.json('case-study/full.json', (d) => { d.document.caseStudyImage = 'walled-garden' }), /fixtures\/case-study\/full\.html: flow-media is drawn, but the markup draws it only when caseStudyImage resolves to a media item other than the featured image/)
+  // Identity is the media id: two records with the same alt text and file name are still two items.
+  expectFail(['case-study'], (io) => io.json('case-study/duplicate.json', (d) => { d.media['hedge-copy'] = { ...d.media.hedge }; d.document.caseStudyImage = 'hedge-copy' }), /fixtures\/case-study\/duplicate\.html: flow-media is not drawn, but caseStudyImage resolves to a media item other than the featured image/)
+  // The flow image drawing the featured image's item instead of its own.
+  expectFail(['case-study'], (io) => io.html('case-study/full.html', 'https://uploads.example/walled-garden-glasshouse-1800.jpg"', 'https://uploads.example/walled-garden-2400.jpg"'), /fixtures\/case-study\/full\.html: the case study's flow-media draws https:\/\/uploads\.example\/walled-garden-2400\.jpg; it draws the media item "walled-garden-glasshouse"/)
+  // Out of place: after the solution.
   expectFail(['case-study'], (io) => {
-    io.json('case-study/aside.json', (d) => { delete d.document.challenge; delete d.document.solution; delete d.document.gallery; delete d.document.externalUrl })
-    io.html('case-study/aside.html', ' data-aside-rows="3"', '')
-  }, /<article\.salt-case-study-view> carries data-media, which the markup draws only when/)
+    const t = io.read('case-study/full.html')
+    const start = t.indexOf(FLOW_OPEN)
+    const end = t.indexOf('    </div>\n', start) + '    </div>\n'.length
+    const flow = t.slice(start, end)
+    const rest = t.slice(0, start) + t.slice(end)
+    const gallery = rest.indexOf('    <section class="salt-case-study-view__section" aria-labelledby="case-study__gallery-heading">')
+    io.write('fixtures/case-study/full.html', rest.slice(0, gallery) + flow + rest.slice(gallery))
+  }, /fixtures\/case-study\/full\.html: .*<div\.salt-case-study-view__flow-media> where the markup has gallery \(section\)/)
+  // The removed aside markup is refused.
+  expectFail(['case-study'], (io) => io.html('case-study/full.html', '<article class="salt-case-study-view">', '<article class="salt-case-study-view" data-media="aside" data-aside-rows="4">'), /<article\.salt-case-study-view> carries data-media, which the markup does not declare/)
+  expectFail(['case-study'], (io) => io.json('case-study/full.json', (d) => { d.site.caseStudy = { media: 'aside' } }), /site\.caseStudy is \{ header, headerTone, headerToneDark \}/)
 })
-test('sc-021: the aside\'s rows are the sidebar parts the view draws, and no measure is in the markup (SC-029)', () => {
-  const swap = (rows) => (io) => io.html('case-study/aside.html', 'data-aside-rows="3"', `data-aside-rows="${rows}"`)
-  expectFail(['case-study'], swap(4), /<article\.salt-case-study-view> data-aside-rows="4" disagrees with the case, which gives "3"/)
-  expectFail(['case-study'], swap('three'), /<article\.salt-case-study-view> data-aside-rows="three" disagrees with the case, which gives "3"/)
-  expectFail(['case-study'], (io) => io.html('case-study/aside.html', 'data-aside-rows="3"', 'data-aside-rows="3" style="--salt-case-study-view-measure: 64rem"'), /<article\.salt-case-study-view> carries style, which the markup does not declare/)
-  // The count follows the document: one part fewer, one row fewer.
-  expectFail(['case-study'], (io) => io.json('case-study/aside.json', (d) => { delete d.document.externalUrl }), /<article\.salt-case-study-view> data-aside-rows="3" disagrees with the case, which gives "2"/)
-})
-test('sc-021: a delivered service\'s card takes the full band in the flow, and in the aside the default band from 64rem and the full band below', () => {
+test('sc-021: a delivered service\'s card takes the full band at three columns', () => {
   const full = 'sizes="(min-width: 48.01rem) calc((100vw - 3rem) / 3), (min-width: 40.01rem) calc((100vw - 1.5rem) / 2), calc(100vw)"'
   const byDefault = 'sizes="(min-width: 75rem) 19rem, (min-width: 64rem) 19.1467rem, (min-width: 48.01rem) calc((100vw - 5rem) / 3), (min-width: 40.01rem) calc((100vw - 3.5rem) / 2), calc(100vw - 2rem)"'
-  const mixed = 'sizes="(min-width: 75rem) 19rem, (min-width: 64rem) 19.1467rem, (min-width: 48.01rem) calc((100vw - 3rem) / 3), (min-width: 40.01rem) calc((100vw - 1.5rem) / 2), calc(100vw)"'
-  // Below 64rem the aside lays out as the flow, so the default band's narrower widths under-declare.
-  expectFail(['case-study'], (io) => io.html('case-study/aside.html', mixed, byDefault), /fixtures\/case-study\/aside\.html: <img> sizes="\(min-width: 75rem\) 19rem[^"]*calc\(100vw - 2rem\)"; its slot \(aside-card\) gives "[^"]*calc\(100vw\)"/)
-  // From 64rem the services keep to the measure, so the full band's widths over-declare.
-  expectFail(['case-study'], (io) => io.html('case-study/aside.html', mixed, full), /fixtures\/case-study\/aside\.html: <img> sizes="\(min-width: 48\.01rem\)[^"]*"; its slot \(aside-card\)/)
   expectFail(['case-study'], (io) => io.html('case-study/full.html', full, byDefault), /fixtures\/case-study\/full\.html: <img> sizes="\(min-width: 75rem\) 19rem[^"]*"; its slot \(card, band full, 3 columns\)/)
 })
 const BAND = 'case-study/band.html'

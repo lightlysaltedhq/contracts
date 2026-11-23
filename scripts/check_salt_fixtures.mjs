@@ -241,17 +241,17 @@ function checkSiteAndMedia(c) {
   const h = input.site?.logoHeight
   if (h !== undefined && !(Number.isInteger(h) && h > 0)) fail(`${at}.json: site.logoHeight is the logo's drawn height, a whole number of px`)
   // The case study view's layout, set once by the site rather than stored per case study
-  // (case-study.json):
-  // where it draws its featured image, and whether its header is a band, with the band's tones.
+  // (case-study.json): whether its header is a band, with the band's tones. The view has no
+  // aside, so the site sets nothing about where its images go (SC-034).
   const cs = input.site?.caseStudy
   if (cs !== undefined) {
     const tones = settingsFile.fields.find((f) => f.name === 'tone').options.map((o) => o.value)
     const band = cs?.header === 'band'
-    if (!(isObject(cs) && Object.keys(cs).every((k) => ['media', 'header', 'headerTone', 'headerToneDark'].includes(k)) &&
-      ['flow', 'aside'].includes(cs.media ?? 'flow') && ['plain', 'band'].includes(cs.header ?? 'plain') &&
+    if (!(isObject(cs) && Object.keys(cs).every((k) => ['header', 'headerTone', 'headerToneDark'].includes(k)) &&
+      ['plain', 'band'].includes(cs.header ?? 'plain') &&
       (band ? tones.includes(cs.headerTone) : cs.headerTone === undefined) &&
       (cs.headerToneDark === undefined || (band && tones.includes(cs.headerToneDark))))) {
-      fail(`${at}.json: site.caseStudy is { media, header, headerTone, headerToneDark }: media flow or aside, where the case study view draws its featured image; header plain or band; and with a band only, its tone and optionally its dark tone, each one of ${tones.join(', ')}`)
+      fail(`${at}.json: site.caseStudy is { header, headerTone, headerToneDark }: header plain or band; and with a band only, its tone and optionally its dark tone, each one of ${tones.join(', ')}`)
     }
   }
   // The consent mechanism the site has wired (site-footer.json, SC-030): its boxes, one per WP
@@ -653,21 +653,6 @@ function templateMatch(tpl, value, name, c, el) {
 const textOf = (el) => el.children.map((x) => (x.type === 'text' ? x.value : textOf(x))).join('').replace(/\s+/g, ' ').trim()
 const isImage = (c, id) => typeof id === 'string' && isObject(c.input.media?.[id])
 const background = (c) => isImage(c, c.settings?.backgroundImage?.image)
-// The case study view's aside (case-study.json, data-media): the sidebar parts the image runs
-// beside are exactly the challenge, the solution, a gallery with images and a safe live-site link;
-// with none, or no image, the image stays in the flow whatever the site's layout. A safe link is relative or
-// http, https, mailto or tel, as isSafeHref allows, after the whitespace and control characters
-// a browser strips.
-const safeHref = (v) => {
-  if (typeof v !== 'string' || v === '') return false
-  const m = /^([a-z][a-z0-9+.-]*):/i.exec(v.replace(/[\u0000-\u0020]/g, ''))
-  return !m || ['http', 'https', 'mailto', 'tel'].includes(m[1].toLowerCase())
-}
-const caseStudyBeside = (c) => {
-  const d = c.input.document ?? {}
-  return [filledText(d.challenge), filledText(d.solution), (d.gallery ?? []).some((id) => isImage(c, id)), safeHref(d.externalUrl)].filter(Boolean).length
-}
-const caseStudyAside = (c) => c.input.site?.caseStudy?.media === 'aside' && isImage(c, c.input.document?.image) && caseStudyBeside(c) > 0
 const scrimOn = (c) => background(c) && c.settings.backgroundImage.scrim !== false
 // The stored link a drawn button stands for, found by its label.
 // A button's own words: its text without the site's arrow, which is decoration.
@@ -760,8 +745,6 @@ const WHEN = {
   'site-footer:links:aria-label': (c, el) => !columnTitled(c, el),
   'site-footer:links:aria-labelledby': columnTitled,
   'section:root:data-media': (c) => background(c),
-  'case-study:article:data-media': caseStudyAside,
-  'case-study:article:data-aside-rows': caseStudyAside,
   // A drawn background always has a fit (media.json), and a position unless it is the focal point
   // of an image that stores none (section#background-position).
   'section:background:data-fit': (c) => background(c),
@@ -848,7 +831,6 @@ const VALUE = {
   'section:background:data-focal-x': (c) => (backgroundAt(c) ? String(backgroundAt(c)[0]) : undefined),
   'section:background:data-focal-y': (c) => (backgroundAt(c) ? String(backgroundAt(c)[1]) : undefined),
   'section:scrim:data-strength': (c) => c.settings?.backgroundImage?.scrimStrength ?? 'strong',
-  'case-study:article:data-aside-rows': (c) => String(caseStudyBeside(c)),
   'section:root:data-track': (c) => c.track,
   'section:root:data-tone': (c) => effectiveSetting(c, 'tone'),
   'section:root:data-tone-dark': darkTone,
@@ -1167,6 +1149,14 @@ function checkMarkup(c) {
     ['background', background(c), 'a background image is set'],
     ['scrim', scrimOn(c), 'a background image is drawn and the scrim is on'],
   ]
+  // The case study's two images (case-study.json, SC-034): the hero image when the featured image
+  // resolves, and the flow image when caseStudyImage resolves to another media item. Media identity
+  // is the case's media id, never the alt text or the file name.
+  const caseStudy = doc.id === 'case-study' ? input.document ?? {} : null
+  if (caseStudy) {
+    expectations.push(['hero-media', isImage(c, caseStudy.image), 'the featured image resolves'])
+    expectations.push(['flow-media', isImage(c, caseStudy.caseStudyImage) && caseStudy.caseStudyImage !== caseStudy.image, 'caseStudyImage resolves to a media item other than the featured image'])
+  }
   if (c.sectionId === 'hero') expectations.push(['media', ['split', 'stacked'].includes(effective(c, 'variant')) && isImage(c, c.values.image), 'variant split or stacked with an image'])
   const fieldsByName = new Map((c.fieldsDoc?.fields ?? []).map((f) => [f.name, f]))
   const visitWhen = (nodes) => {
@@ -1180,6 +1170,17 @@ function checkMarkup(c) {
   for (const [role, holds, when] of expectations) {
     if (holds && !drawn(role)) fail(`${at}.html: ${role} is not drawn, but ${when} (the markup draws it then)`)
     if (!holds && drawn(role)) fail(`${at}.html: ${role} is drawn, but the markup draws it only when ${when}`)
+  }
+  // Each drawn image is its own media item: the hero the featured image, the flow the case-study image.
+  if (caseStudy) {
+    for (const [role, id] of [['hero-media', caseStudy.image], ['flow-media', caseStudy.caseStudyImage]]) {
+      for (const holder of bindings.get(role) ?? []) {
+        const img = descendants(holder).find((d) => d.name === 'img')
+        const record = input.media?.[id]
+        const want = img && record && imageTable ? sourcesOf(imageTable, record, attr(img, 'sizes') ?? '').src : null
+        if (imageTable && (!img || attr(img, 'src') !== want)) fail(`${at}.html: the case study's ${role} draws ${img ? attr(img, 'src') : 'no img'}; it draws the media item ${JSON.stringify(id)} (case-study.json, SC-034)`)
+      }
+    }
   }
 
   // Counts the case fixes: a tab set's panels and controls, and the pagination's window.

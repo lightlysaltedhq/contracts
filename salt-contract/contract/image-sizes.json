@@ -74,20 +74,6 @@
         }
       }
     },
-    "aside": {
-      "description": "The case study view's aside.",
-      "sizes": "(min-width: 64rem) 23.83rem, 100vw",
-      "bands": {
-        "full": "(min-width: 64rem) 23.83rem, 100vw",
-        "wide": "(min-width: 80rem) 30.5rem, (min-width: 64rem) calc((100vw - 2rem) * 5 / 12 - 2rem), 100vw",
-        "default": "(min-width: 64rem) 23.83rem, 100vw",
-        "narrow": "(min-width: 64rem) 23.83rem, 100vw"
-      }
-    },
-    "aside-card": {
-      "description": "A card of the case study view's delivered services in the aside layout: from 64rem, where primitives.css confines the services to the measure, a default band's card at three columns; below it, where the aside lays out as the flow, a full band's.",
-      "sizes": "(min-width: 75rem) 19rem, (min-width: 64rem) 19.1467rem, (min-width: 48.01rem) calc((100vw - 3rem) / 3), (min-width: 40.01rem) calc((100vw - 1.5rem) / 2), calc(100vw)"
-    },
     "wide": {
       "description": "A wide measure, unbanded.",
       "sizes": "(min-width: 80rem) 76rem, 100vw"
@@ -234,17 +220,24 @@
     },
     {
       "markup": "case-study",
-      "image": ".salt-case-study-view[data-media=aside] > .salt-case-study-view__media img",
-      "slot": "aside",
-      "band": true,
-      "when": "the featured image in the aside layout, whose columns sit on a default band's measure"
+      "image": ".salt-case-study-view__header > .salt-case-study-view__media img",
+      "slot": "content",
+      "band": false,
+      "when": "the featured image, the hero image, in a plain header in the article's flow"
     },
     {
       "markup": "case-study",
-      "image": ".salt-case-study-view__media img",
+      "image": ".salt-case-study-view__header > .salt-section__content > .salt-case-study-view__media img",
+      "slot": "content",
+      "band": true,
+      "when": "the featured image, the hero image, in a header drawn as a band, whose width is always default"
+    },
+    {
+      "markup": "case-study",
+      "image": ".salt-case-study-view__flow-media img",
       "slot": "content",
       "band": false,
-      "when": "the featured image in the flow, the default layout"
+      "when": "the case-study image, in the article's flow between the challenge and the solution"
     },
     {
       "markup": "case-study",
@@ -255,17 +248,10 @@
     },
     {
       "markup": "case-study",
-      "image": ".salt-case-study-view[data-media=aside] > .salt-case-study-view__services .salt-showcase__media img",
-      "slot": "aside-card",
-      "band": false,
-      "when": "a delivered service's card in the aside layout: the view's .salt-grid, three columns (stepping to two and one as the grid does), in the default band from 64rem, where primitives.css confines the services to the aside's measure, and the full band below it, where the aside lays out as the flow"
-    },
-    {
-      "markup": "case-study",
       "image": ".salt-case-study-view__services .salt-showcase__media img",
       "slot": "card",
       "band": true,
-      "when": "a delivered service's card in the flow, the default layout: the view's .salt-grid, three columns (stepping to two and one as the grid does), in the full band, as the service view's related cards, since no shared stylesheet gives a view's section a measure"
+      "when": "a delivered service's card: the view's .salt-grid, three columns (stepping to two and one as the grid does), in the full band, as the service view's related cards, since no shared stylesheet gives a view's section a measure"
     },
     {
       "markup": "post",

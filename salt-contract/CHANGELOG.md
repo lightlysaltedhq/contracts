@@ -300,7 +300,7 @@ test, applied through section 2's table, where the stricter row wins.
   - Team is a linked source for showcase and carousel. The Index layout can list members'
     individual pages; this neither creates a whole-team archive nor adds a view-all link.
 - The rulings and proposals of 23/11/2026 change the contract after `1.0.0-rc.8` (EP-72 M4, Salt
-  for WordPress's conformance; SC-029 to SC-032). The founder ruled SC-029's principle (no style
+  for WordPress's conformance; SC-029 to SC-032, with SC-033 and SC-034 below). The founder ruled SC-029's principle (no style
   attributes in the contract), both points of SC-030 and SC-031. SC-029's attribute design (the
   value sets, their steps and rounding, the fixed measure and the logo height's place) was approved
   by the coordinator, and SC-032's four sidebar parts come from Salt for WordPress's reading: both
@@ -340,11 +340,9 @@ test, applied through section 2's table, where the stricter row wins.
       step; the new case `carousel/testimonials-half-star` draws 4.5 as 90. The fixtures gate now
       compares each quote's fill and rating label with its item, and every drawn label with the
       site's.
-    - The case study's aside: `data-aside-rows` (1 to 4) on the article, which `primitives.css`
-      maps to `--salt-case-study-view-aside-rows`. The measure leaves the markup: the aside grid
-      is centred in a default band's `--container-5xl`, fixed in `primitives.css`, and
-      `--salt-case-study-view-measure` is gone; a site that widened its bands widens it in its own
-      stylesheet.
+    - The case study's image aside: `data-aside-rows` (1 to 4) on the article, with the measure
+      fixed in `primitives.css`. Withdrawn later in this candidate with the image aside itself
+      (SC-034, below): neither attribute, property nor measure remains.
     - The logo's height leaves the markup. `chrome.css` keeps `--logo-height: 2rem` on
       `.salt-logo`, and a site that sets a height sets it once, site-wide, in its own stylesheet
       loaded after `salt.css` (`.salt-logo { --logo-height: 48px; }`). `site.logoHeight` stays a
@@ -426,7 +424,8 @@ test, applied through section 2's table, where the stricter row wins.
     site's `page`, `slide`, `rating`, `directions` and `byline` labels hold their placeholders
     (`Page {n}`, `Slide {n} of {N}`, `Rated {n} of {N}`, `Directions to {name}`, `By {name}`).
   - **The case study's sidebar parts are defined** (SC-032; proposed, for the founder's approval
-    at contract review). *Media aside, an image and a sidebar part* now says which parts are
+    at contract review; superseded in this candidate by SC-034, which removes the image aside
+    they counted). *Media aside, an image and a sidebar part* now says which parts are
     sidebar parts: exactly the challenge (filled), the solution (filled), the gallery (with an
     image that resolves) and the live-site link (a safe URL), the four Salt for WordPress counts
     and the gate already counted. The header, results, details and delivered services never are.
@@ -490,6 +489,39 @@ test, applied through section 2's table, where the stricter row wins.
     MAJOR. **What each target changes.** Both: serve the new `styles/salt.css`. Salt for
     WordPress may drop its own rules for these classes from `app.css`, keeping the map's notice
     and canvas.
+- **The case study's image aside goes; the featured image is the hero and a new optional image
+  sits in the flow** (SC-034; the founder's ruling of 23/11/2026, option 4B. The field's shape,
+  the duplicate rule and the placement details are implementation details of that ruling, agreed
+  with the coordinator). **Breaking for both targets.** Semver: MAJOR by `RELEASE-POLICY.md`
+  section 1's test (rc.8 markup no longer conforms), in the candidate series as rc.9.
+  - The featured image is the hero image: `div.salt-case-study-view__media` is the header's last
+    part, inside `div.salt-section__content` when the header is a band, and it is the view's only
+    priority image (role `hero-image`). Its sizes are the content slot, unbanded in a plain header
+    and the default band's in a band.
+  - A new optional collection field, `caseStudyImage` (one image reference: a WordPress attachment
+    ID, a Payload upload; alt by the media's normal rules, no caption), drawn in
+    `div.salt-case-study-view__flow-media` after the challenge's place and before the solution's,
+    lazy, in the content slot. It keeps that place when the challenge, the solution or the
+    featured image is absent, is never promoted to the hero, and leaves no wrapper when absent or
+    unresolved. When both fields name one media item (by media identity, never alt text or file
+    name) it is drawn once, in the hero. `featuredImage` and `gallery` are unchanged.
+  - Removed: `data-media` and `data-aside-rows` on the article, the aside grid and its four rules
+    in `primitives.css`, the site key `site.caseStudy.media` (and the ACF options page's aside
+    layout), the `aside` and `aside-card` image slots (no other markup used them), and
+    `--header-height` from `contract/token-layer.json`, which only the sticky aside read. Only the
+    image aside goes: a separate sidebar of related details (sector, client, services) is not ruled
+    out, and nothing about one is modelled or drawn until its fields and presentation are settled.
+  - Fixtures: `case-study/aside` becomes `flow-only` (no featured image), and `full` (both images),
+    `band` (the hero inside a band, no case-study image), `no-challenge`, `no-solution` and
+    `duplicate` cover each image and each narrative section absent on its own. 132 cases in all.
+    The fixtures gate checks each image's presence, place and media item, and its tests refuse a
+    promoted, duplicated, misplaced or wrongly sourced image.
+  - **What each target changes.** Both: draw the featured image last in the header, as the
+    priority image; add the `caseStudyImage` field and draw it as above; drop `data-media`,
+    `data-aside-rows` and the aside layout setting; serve the new `salt.css`. Salt for Next.js:
+    the `media` prop and the aside sizes go, and a delivered service's card takes the card slot in
+    the full band. Salt for WordPress: the field as an ACF image returning an attachment ID, and
+    the options page loses its aside layout.
 - The case-study view has fixtures and is required of every implementation (SC-021).
   `fixtures/case-study/` holds four cases (`full`, `aside`, `band` and `minimal`), `case-study`
   joins `REQUIRED_FILES`, and a full conformance run refuses to declare it not shipped. The
@@ -505,7 +537,8 @@ test, applied through section 2's table, where the stricter row wins.
   takes the card slot at three columns in the full band in the flow, and in the aside the new
   `aside-card` slot: the default band from 64rem, where the services keep to the measure, and the
   full band below. Salt for Next.js owes naming the view's four sections and that card slot; Salt for
-  WordPress owes the markup, and an ACF options page for the band and the aside layout.
+  WordPress owes the markup, and an ACF options page for the band and the aside layout. (The image
+  aside, its site key and its slots are withdrawn in rc.9, SC-034.)
 - The conformance runner (`./conformance`, bin `salt-conformance`): fixtures, field snapshots,
   class vocabulary and the served stylesheet, reported as `conformance.json` (format
   `salt-conformance/1`) and `conformance.md`. An implementation conforms only when all four checks

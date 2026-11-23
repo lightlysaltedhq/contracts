@@ -19,23 +19,6 @@
       "classes": [
         "salt-case-study-view"
       ],
-      "attributes": {
-        "data-media": {
-          "value": "aside",
-          "when": "media aside, an image and a sidebar part",
-          "note": "The site's case-study media setting is aside, the featured image resolves, and at least one sidebar part is drawn. The sidebar parts are exactly four, the parts the image runs beside: the challenge (filled), the solution (filled), the gallery (with at least one image that resolves) and the live-site link (a safe URL). The header, the results, the details and the delivered services are never sidebar parts (SC-032). With none drawn, the image stays in the flow and the article carries neither data-media nor data-aside-rows."
-        },
-        "data-aside-rows": {
-          "enum": [
-            "1",
-            "2",
-            "3",
-            "4"
-          ],
-          "when": "data-media is aside",
-          "note": "How many sidebar parts are drawn (data-media's note), 1 to 4: the grid rows the image spans beside them, which the grid cannot count. primitives.css sets --salt-case-study-view-aside-rows from it. The measure the aside grid is centred in is fixed in primitives.css as a default band's, --container-5xl; a site that widened its bands widens it in its own stylesheet. No style attribute carries either (section#no-inline-style)."
-        }
-      },
       "children": [
         {
           "role": "header",
@@ -154,22 +137,23 @@
                   ]
                 }
               ]
-            }
-          ]
-        },
-        {
-          "role": "media",
-          "element": "div",
-          "classes": [
-            "salt-case-study-view__media"
-          ],
-          "optional": true,
-          "when": "an image is set",
-          "children": [
+            },
             {
-              "role": "image",
-              "component": "media",
-              "note": "Priority; fill, cover."
+              "role": "hero-media",
+              "element": "div",
+              "classes": [
+                "salt-case-study-view__media"
+              ],
+              "optional": true,
+              "when": "the featured image resolves",
+              "note": "The hero image: the featured image, the header's last part, in either header variant. It is the view's priority image, the only one (section#priority-media).",
+              "children": [
+                {
+                  "role": "hero-image",
+                  "component": "media",
+                  "note": "Priority; fill, cover."
+                }
+              ]
             }
           ]
         },
@@ -197,6 +181,23 @@
           "attributes": {
             "aria-labelledby": "case-study__challenge-heading"
           }
+        },
+        {
+          "role": "flow-media",
+          "element": "div",
+          "classes": [
+            "salt-case-study-view__flow-media"
+          ],
+          "optional": true,
+          "when": "caseStudyImage resolves to a media item other than the featured image",
+          "note": "The case-study image in the flow (SC-034): always after the challenge's place and before the solution's, so with no challenge it follows the header, and with no solution it comes before the gallery. It keeps that place when the challenge, the solution or the featured image is absent: it is never promoted to the hero, and nothing is drawn in its place when it is absent or does not resolve. When it resolves to the same media item as the featured image (the same media identity, such as the same WordPress attachment ID, never compared by alt text or file name), it is drawn once, in the hero, and not here.",
+          "children": [
+            {
+              "role": "flow-image",
+              "component": "media",
+              "note": "Never the priority image, so lazy; fill, cover; its alt by the media's normal rules (media.json). No caption."
+            }
+          ]
         },
         {
           "role": "solution",
@@ -512,13 +513,30 @@
                           ]
                         }
                       ]
+                    },
+                    {
+                      "role": "hero-media",
+                      "element": "div",
+                      "classes": [
+                        "salt-case-study-view__media"
+                      ],
+                      "optional": true,
+                      "when": "the featured image resolves",
+                      "note": "The hero image: the featured image, the header's last part, in either header variant. It is the view's priority image, the only one (section#priority-media).",
+                      "children": [
+                        {
+                          "role": "hero-image",
+                          "component": "media",
+                          "note": "Priority; fill, cover."
+                        }
+                      ]
                     }
                   ]
                 }
               ]
             }
           },
-          "note": "The header drawn as section.json draws a band, so the tone's roles, a site's rules for a band's measure and its full-bleed exemptions all reach it: salt-section with the tones, md spacing (which sections.css turns into the band's block space) and the default width, and its parts inside div.salt-section__content."
+          "note": "The header drawn as section.json draws a band, so the tone's roles, a site's rules for a band's measure and its full-bleed exemptions all reach it: salt-section with the tones, md spacing (which sections.css turns into the band's block space) and the default width, and its parts inside div.salt-section__content, the hero image last among them."
         }
       },
       "note": "plain draws the base tree. band wraps the header's parts in a content div, so the order differs from plain's."
@@ -560,6 +578,11 @@
       "reason": "Groups each dt with its dd; the details grid styles the pair's parts."
     },
     {
+      "class": "salt-case-study-view__header",
+      "role": "header",
+      "reason": "The header that holds the title, its lines and the hero image; the view's rules space its parts as children of it, and a band draws it through salt-section."
+    },
+    {
       "class": "salt-case-study-view__live",
       "role": "live",
       "reason": "The live-site link's paragraph; the button carries the rules."
@@ -568,6 +591,11 @@
       "class": "salt-case-study-view__section",
       "role": "challenge",
       "reason": "Each of the four content sections (challenge, solution, gallery, services); the view's rules space its heading and parts as children of it, and it has no rule of its own."
+    },
+    {
+      "class": "salt-case-study-view__services",
+      "role": "services",
+      "reason": "Tells the delivered services' section from the other three; the section's rules come from salt-case-study-view__section's children and the grid."
     }
   ],
   "notes": [
@@ -578,6 +606,10 @@
     {
       "topic": "stylesheet-only",
       "text": "primitives.css mentions .salt-case-study only in a comment (a site's own older copy); it is not contract vocabulary."
+    },
+    {
+      "topic": "ruling",
+      "text": "The hero and the flow (SC-034). The featured image is the hero image, drawn last in the header, inside the band's content when the header is a band, and it is the view's only priority image. caseStudyImage is a separate optional image, drawn in the flow between the challenge and the solution and never the priority image. Neither is ever drawn in the other's place, neither leaves an empty wrapper, and one media item is never drawn twice. The image aside goes: no image runs beside the view's parts, and nothing in the markup counts them. Only the image aside is removed; this does not rule out a separate sidebar of related details (such as the case study's sector, client and services), whose fields and presentation are not yet settled, so the contract draws none and fixes nothing about one."
     }
   ],
   "platforms": {
@@ -591,23 +623,23 @@
       ],
       "owes": [
         "The case-study view's markup above.",
-        "data-aside-rows on the article when the media is aside, counting the four sidebar parts drawn (challenge, solution, gallery, live-site link), as its own count already does; no style attribute, and no measure in the markup (SC-029).",
+        "The featured image drawn in the header, last, as the priority image, and caseStudyImage (an attachment ID) drawn in div.salt-case-study-view__flow-media between the challenge and the solution, lazy, and not at all when it is the featured image's attachment (SC-034). No data-media or data-aside-rows on the article.",
         "The section heading ids case-study__challenge-heading, case-study__solution-heading, case-study__gallery-heading and case-study__services-heading, each named by its section's aria-labelledby (SC-012).",
-        "An ACF options page on which editors set the case-study view's header band (the header variant, plain or band, with the band's tone and dark tone) and its aside layout (the featured image in the flow or aside), the settings a fixture gives as site.caseStudy: header, headerTone, headerToneDark and media."
+        "An ACF options page on which editors set the case-study view's header band (the header variant, plain or band, with the band's tone and dark tone), the settings a fixture gives as site.caseStudy: header, headerTone and headerToneDark. The image aside layout setting goes (SC-034)."
       ]
     },
     "nextjs": {
       "owes": [
-        "data-aside-rows on the article when the media is aside, in place of the inline --salt-case-study-view-aside-rows and --salt-case-study-view-measure it writes today; the measure prop leaves the markup, fixed in primitives.css (SC-029).",
+        "The featured image drawn in the header, last, as the priority image, and caseStudyImage drawn in div.salt-case-study-view__flow-media between the challenge and the solution, lazy, and not at all when it is the featured image's media item; the media prop and its image aside layout go, with data-media, the aside rows and the measure (SC-034).",
         "The header band's spacing from data-spacing alone, with no inline --salt-section-space (SC-029).",
         "Name its four sections: the ids case-study__challenge-heading, case-study__solution-heading, case-study__gallery-heading and case-study__services-heading on their h2s, and aria-labelledby on each section (section#labelled-by, SC-012).",
-        "A delivered service's card image declares its slot from contract/image-sizes.json, at three columns, the grid it is drawn in: the card slot in the full band in the flow, and in the aside the aside-card slot, the default band from 64rem, where primitives.css confines the services to the measure, and the full band below it; case-study-view.tsx passes the unbanded card slot, which is a carousel slide's."
+        "A delivered service's card image declares its slot from contract/image-sizes.json, at three columns, the grid it is drawn in: the card slot in the full band; case-study-view.tsx passes the unbanded card slot, which is a carousel slide's."
       ]
     }
   },
   "priorityMedia": {
-    "role": "image",
-    "when": "an image is set",
+    "role": "hero-image",
+    "when": "the featured image resolves",
     "rules": [
       "section#priority-media"
     ]

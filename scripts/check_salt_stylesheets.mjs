@@ -5726,6 +5726,7 @@ const CONTRACTS = [
         { file: 'blocks.css', image: '.salt-logos__image', frame: '.salt-logos__frame', fit: 'contain' },
         { file: 'blocks.css', image: '.salt-showcase__media > img', frame: '.salt-showcase__media', fit: 'cover' },
         { file: 'primitives.css', image: '.salt-case-study-view__media > img', frame: '.salt-case-study-view__media', fit: 'cover' },
+        { file: 'primitives.css', image: '.salt-case-study-view__flow-media > img', frame: '.salt-case-study-view__flow-media', fit: 'cover' },
         { file: 'primitives.css', image: '.salt-case-study-view__frame > img', frame: '.salt-case-study-view__frame', fit: 'cover' },
         { file: 'views.css', image: '.salt-post__media > img', frame: '.salt-post__media', fit: 'cover' },
         { file: 'views.css', image: '.salt-archive__portrait > img', frame: '.salt-archive__portrait', fit: 'cover' },
@@ -5753,7 +5754,7 @@ const CONTRACTS = [
     what: 'every value of a fixed-set attribute the markup writes in place of a style has its rule',
     why:
       'The markup writes no style attribute (section#no-inline-style, SC-029): a section\u2019s space, a ' +
-      'scrim\u2019s strength, a rating\u2019s fill, a focal point and the aside\u2019s rows reach the page as a ' +
+      'scrim\u2019s strength, a rating\u2019s fill, and a focal point reach the page as a ' +
       'data attribute from a fixed set, which only the shared stylesheets turn into a value. A value ' +
       'with no rule draws nothing, and no fixture can see it, because the markup is right. The value ' +
       'sets are read from the markup, so a step added there needs its rule here too. A known limit: ' +
@@ -5769,7 +5770,6 @@ const CONTRACTS = [
         'data-fill': { owner: '.salt-showcase__stars', property: '--salt-rating-fill', set: (v) => `${v}%`, none: [] },
         'data-focal-x': { owner: '.salt-section__media', property: '--salt-focal-x', set: (v) => `${v}%`, none: [] },
         'data-focal-y': { owner: '.salt-section__media', property: '--salt-focal-y', set: (v) => `${v}%`, none: [] },
-        'data-aside-rows': { owner: '.salt-case-study-view', property: '--salt-case-study-view-aside-rows', set: (v) => v, none: [] },
         'data-fit': { owner: '.salt-section__media', property: 'object-fit', set: (v) => v, none: ['cover'] },
       }
       const values = new Map(Object.keys(ATTRIBUTES).map((name) => [name, new Set()]))

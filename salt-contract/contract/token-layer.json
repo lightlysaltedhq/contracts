@@ -116,7 +116,6 @@
       "id": "set-by-script",
       "what": "Measured and written at run time by the implementation's script. Each read either has a fallback or sits where a missing value draws nothing wrong.",
       "tokens": [
-        { "name": "--header-height", "meaning": "The sticky header's height, on the root, so a sticky aside clears it.", "source": "script" },
         { "name": "--salt-consent-banner-size", "meaning": "The consent banner's height, on the root, so content can scroll clear of it.", "source": "script", "optional": true },
         { "name": "--salt-drawer-toggle-block-start", "meaning": "Where the menu button sits, so the drawer's close button lands on it.", "source": "script", "optional": true },
         { "name": "--salt-drawer-toggle-block-size", "meaning": "The menu button's height, for the drawer's close button.", "source": "script", "optional": true },

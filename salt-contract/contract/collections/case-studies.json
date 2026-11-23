@@ -133,6 +133,20 @@
       }
     },
     {
+      "name": "caseStudyImage",
+      "type": "image",
+      "label": "Case study image",
+      "description": "Optional. One image, drawn between the challenge and what we did; its alt text is the image's own. Not drawn when it is the featured image.",
+      "platforms": {
+        "nextjs": {
+          "owes": "the field, an upload reference"
+        },
+        "wordpress": {
+          "owes": "the field, an attachment ID"
+        }
+      }
+    },
+    {
       "name": "solution",
       "type": "rich-text",
       "label": "What we did",

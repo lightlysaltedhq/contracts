@@ -1,0 +1,39 @@
+{
+  "$comment": "No challenge: the case-study image keeps its place, which is now straight after the header, before the solution (SC-034).",
+  "view": "case-study",
+  "summary": "A case study with a featured image, the case-study image and a solution, and no challenge: the hero image in the header, then the case-study image, then the solution.",
+  "context": {
+    "priorityMedia": true,
+    "path": "/work/orchard-walk/"
+  },
+  "site": {
+    "labels": {
+      "results": "The project in numbers",
+      "challenge": "The challenge",
+      "solution": "What we did",
+      "gallery": "Gallery",
+      "liveSite": "Visit the site",
+      "services": "Services delivered"
+    }
+  },
+  "media": {
+    "orchard": {
+      "url": "https://uploads.example/orchard-walk-{width}.jpg",
+      "width": 2400,
+      "height": 1350,
+      "alt": "A mown path between old apple trees in blossom"
+    },
+    "orchard-bench": {
+      "url": "https://uploads.example/orchard-bench-{width}.jpg",
+      "width": 1600,
+      "height": 900,
+      "alt": "An oak bench under a pear tree at the end of the walk"
+    }
+  },
+  "document": {
+    "title": "An orchard walk",
+    "image": "orchard",
+    "caseStudyImage": "orchard-bench",
+    "solution": "<p>We mowed one path through the long grass and left the rest for the wildflowers.</p>"
+  }
+}
