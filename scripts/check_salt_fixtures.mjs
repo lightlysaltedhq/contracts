@@ -548,6 +548,7 @@ function expand(nodes, doc) {
           children: own ? elements : n.children ?? null,
           doc: own ? comp : doc,
           componentId: comp.id,
+          text: n.text ?? root.text,
         }
       })
       return [{ role: n.role, optional: n.optional, repeat: n.repeat, alts }]
@@ -565,6 +566,7 @@ function expand(nodes, doc) {
         ...withSources([['media', 'root', media], [doc.id, n.role, dataRules(doc, n.role)], [doc.id, n.role, n.attributes], [n.extraId, 'root', n.extraAttrs]]),
         children: n.children ?? null,
         doc: n.childDoc ?? doc,
+        text: n.text,
       }],
     }]
   })
@@ -580,8 +582,26 @@ const placeholders = (c) => (c.anchor == null ? {} : {
   ...(c.index !== undefined ? { '<section index>': String(c.index) } : {}),
 })
 
+// A label the markup draws (from:labels.<name>, with the placeholders it may hold listed after it,
+// README "Labels"): the site's label, every listed placeholder standing for any text and the rest
+// compared as written, so an unknown {placeholder} and a label with none are drawn exactly as
+// given and nothing is appended. Labels live under site.labels, or under the consent and display
+// preferences' own labels. true when the template is no label or the case gives no such label.
+const LABEL = /^from:labels\.([A-Za-z]+)(?: \(([^()]*)\))?$/
+function labelMatch(tpl, value, c) {
+  const m = LABEL.exec(tpl)
+  if (!m) return true
+  const site = c.input.site ?? {}
+  const given = [site.labels, site.consent?.labels, site.displayPreferences?.labels].map((l) => l?.[m[1]]).filter((v) => typeof v === 'string')
+  if (!given.length) return true
+  const listed = (m[2] ?? '').split(',').map((x) => x.trim()).filter(Boolean)
+  const shape = (label) => new RegExp(`^${label.split(/(\{[A-Za-z]+\})/).map((part) => (listed.includes(part) ? '.+?' : escapeRe(part))).join('')}$`)
+  const text = value.replace(/\s+/g, ' ').trim()
+  return given.some((label) => shape(label.replace(/\s+/g, ' ').trim()).test(text))
+}
+
 function templateMatch(tpl, value, name, c) {
-  if (tpl.startsWith('from:')) return true
+  if (tpl.startsWith('from:')) return labelMatch(tpl, value, c)
   const canon = (x) => x
   const known = placeholders(c)
   const re = canon(tpl).split(/(<[^<>]+>)/).map((part) => {
@@ -879,6 +899,8 @@ function matcher(c) {
     for (const alt of spec.alts) {
       if (!alt.tags.includes(el.name)) { note([order(el), 1], `${where}: ${describe(el)} where the markup has ${spec.role} (${alt.tags.join(' or ')})`); continue }
       const problems = checkAttrs(alt, el, c)
+      // A label drawn as text is the site's label, its listed placeholders replaced (README "Labels").
+      if (typeof alt.text === 'string' && !labelMatch(alt.text, labelOf(el), c)) problems.push(`${describe(el)} reads "${labelOf(el)}", which is not ${alt.text.split(' (')[0].slice(5)} as the case gives it, its placeholders replaced and nothing appended`)
       if (problems.length) { note([order(el), 2], `${where} [${spec.role}]: ${problems[0]}`); continue }
       let bindings = new Map()
       if (alt.children !== null) {
@@ -1045,6 +1067,32 @@ function checkMarkup(c) {
   const every = () => [root, ...descendants(root)]
   c.parents = new Map()
   for (const el of [root, ...descendants(root)]) for (const child of elementsOf(el)) c.parents.set(child, el)
+  // A quote's rating (card.json), wherever the quote sits: the carousel's slide and the
+  // showcase's accordion panel hold their card as prose, so the matcher does not reach it. The
+  // quote is the collection item whose title it shows; its rating is named by labels.rating with
+  // {n} and {N} replaced, and the stars' data-fill is its share of five in steps of 10, halves up.
+  const rated = Object.values(c.input.collections ?? {}).flat().filter((i) => typeof i?.title === 'string')
+  for (const quote of every().filter((e) => classesOf(e).includes('salt-showcase__quote'))) {
+    // The accordion names its quote in the summary, outside the figure: the nearest ancestor that
+    // names any item says which.
+    let scope = quote
+    let items = []
+    while (scope && !(items = rated.filter((i) => textOf(scope).includes(i.title))).length) scope = c.parents.get(scope)
+    if (items.length !== 1) continue
+    const { rating, title } = items[0]
+    const ratings = descendants(quote).filter((e) => classesOf(e).includes('salt-showcase__rating'))
+    if (typeof rating !== 'number') {
+      if (ratings.length) fail(`${at}.html: ${title}'s quote draws a rating, but the item has none`)
+      continue
+    }
+    if (ratings.length !== 1) { fail(`${at}.html: ${title}'s quote draws ${ratings.length} ratings; its item is rated ${rating}`); continue }
+    const label = c.input.site?.labels?.rating
+    const wantLabel = typeof label === 'string' ? label.replace(/\{(n|N)\}/g, (_, k) => String(k === 'n' ? rating : 5)) : undefined
+    if (wantLabel !== undefined && attr(ratings[0], 'aria-label') !== wantLabel) fail(`${at}.html: ${title}'s rating is named "${attr(ratings[0], 'aria-label')}"; labels.rating with the rating ${rating} gives "${wantLabel}"`)
+    const stars = descendants(ratings[0]).find((e) => classesOf(e).includes('salt-showcase__stars'))
+    const wantFill = String(Math.min(100, Math.max(0, 10 * Math.floor(rating * 2 + 0.5))))
+    if (!stars || attr(stars, 'data-fill') !== wantFill) fail(`${at}.html: ${title}'s stars carry data-fill="${stars ? attr(stars, 'data-fill') : ''}"; the rating ${rating} gives "${wantFill}"`)
+  }
   // A panel only a visitor opens is drawn, open, if and only if the case's state says so. Asked
   // before the markup is matched, so a case that breaks it is told so first.
   for (const [key, cls, what] of [['consentPanelOpen', 'salt-consent-panel', 'the consent panel'], ['drawerOpen', 'salt-drawer', 'the drawer']]) {

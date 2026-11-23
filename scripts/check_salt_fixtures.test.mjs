@@ -1334,3 +1334,12 @@ test('sc-030: the consent panel draws one box per WP Consent API category in use
   // The panel names a box by its Salt category.
   expectFail(['site-footer'], (io) => io.html('site-footer/consent-panel-open.html', 'name="statistics"', 'name="analytics"'), /the consent panel draws the boxes analytics, marketing; the site's WP Consent API categories are statistics, marketing/)
 })
+test('labels: a drawn label and a rating are compared with the case, not accepted as any text (SC-029, SC-031)', () => {
+  // The stars' fill and the rating's name, in a carousel slide and in an accordion panel.
+  expectFail(['carousel'], (io) => io.html('carousel/testimonials-source.html', 'aria-hidden="true" data-fill="80"', 'aria-hidden="true" data-fill="70"'), /Tom Ashby's stars carry data-fill="70"; the rating 4 gives "80"/)
+  expectFail(['carousel'], (io) => io.html('carousel/testimonials-source.html', 'aria-label="Rated 4 of 5"', 'aria-label="Rated 4 out of 5"'), /Tom Ashby's rating is named "Rated 4 out of 5"; labels.rating with the rating 4 gives "Rated 4 of 5"/)
+  expectFail(['collection-showcase'], (io) => io.html('collection-showcase/accordion-testimonials.html', 'aria-label="Rated 5 of 5"><span class="salt-showcase__stars" aria-hidden="true" data-fill="100"', 'aria-label="Rated 5 of 5"><span class="salt-showcase__stars" aria-hidden="true" data-fill="90"'), /Maya Okafor's stars carry data-fill="90"/)
+  // A label drawn as an attribute and one drawn as text.
+  expectFail(['listing'], (io) => io.html('listing/cards-with-pagination.html', 'aria-label="Page 3"', 'aria-label="Go to page 3"'), /aria-label="Go to page 3"/)
+  expectFail(['post'], (io) => io.html('post/band-media-text.html', '>By Tom Barlow<', '>Written by Tom Barlow<'), /reads "Written by Tom Barlow", which is not labels\.byline/)
+})
