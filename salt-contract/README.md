@@ -95,8 +95,9 @@ drawer's close button and on a team card's links, `1.0.0-rc.6`, after which the 
 on the collections' field names, a post's sections and rich text's heading levels (18/11/2026),
 `1.0.0-rc.7`, after which the founder ruled on how a limit is held, on targets and on the
 service example (18/11/2026, ID-3968, ID-3969, ID-3970), and `1.0.0-rc.8`, after which the
-founder ruled on inline styles, the footer's consent control and panel, label placeholders and the
-case study's sidebar parts (23/11/2026, SC-029 to SC-032);
+founder ruled out inline styles and ruled on the footer's consent control and panel and on label
+placeholders, and the attribute design and the case study's sidebar parts were proposed for his
+approval at contract review (23/11/2026, SC-029 to SC-032);
 those rulings (SC-023 to SC-032, and the rulings of 18/11/2026)
 changed contract files, which each time makes a new candidate and needs a new run. `1.0.0` is the first release, staged
 from CI by npm trusted publishing when the owner pushes the `salt-contract-v1.0.0` tag, and

@@ -299,13 +299,17 @@ test, applied through section 2's table, where the stricter row wins.
     (both platforms' query owes in `carousel.json` and `collection-showcase.json`).
   - Team is a linked source for showcase and carousel. The Index layout can list members'
     individual pages; this neither creates a whole-team archive nor adds a view-all link.
-- The founder's rulings of 23/11/2026 change the contract after `1.0.0-rc.8` (EP-72 M4, Salt for
-  WordPress's conformance; SC-029 to SC-032). Each is part of the first major, so the semver call
-  stays MAJOR. On its own each of the first three would be MAJOR by `RELEASE-POLICY.md` section 1's
-  test: markup an implementation drew correctly at rc.8 no longer conforms. **Breaking for both
-  targets, Salt for WordPress (EP-72) and Salt for Next.js (EP-73)**; what each must change is
-  listed under each ruling. Every stylesheet change below is in `styles/salt.css`, so both serve
-  the new bytes when they move their pin.
+- The rulings and proposals of 23/11/2026 change the contract after `1.0.0-rc.8` (EP-72 M4, Salt
+  for WordPress's conformance; SC-029 to SC-032). The founder ruled SC-029's principle (no style
+  attributes in the contract), both points of SC-030 and SC-031. SC-029's attribute design (the
+  value sets, their steps and rounding, the fixed measure and the logo height's place) was approved
+  by the coordinator, and SC-032's four sidebar parts come from Salt for WordPress's reading: both
+  are proposed, for the founder's approval at contract review. Each is part of the first major, so
+  the semver call stays MAJOR. On its own each of the first three would be MAJOR by
+  `RELEASE-POLICY.md` section 1's test: markup an implementation drew correctly at rc.8 no longer
+  conforms. **Breaking for both targets, Salt for WordPress (EP-72) and Salt for Next.js
+  (EP-73)**; what each must change is listed under each item. Every stylesheet change below is in
+  `styles/salt.css`, so both serve the new bytes when they move their pin.
   - **No inline style attributes** (SC-029). Salt for WordPress's Content-Security-Policy has no
     `'unsafe-inline'` for styles, so a browser ignored every `style="…"` the contract drew: bands
     lost their spacing, ratings did not fill and the case study's aside grid broke. Nothing the
@@ -313,7 +317,8 @@ test, applied through section 2's table, where the stricter row wins.
     varies is a data attribute from a fixed set, styled in `styles/`. `markup.schema.json` refuses
     a `style` attribute in any markup file, and the conformance runner gains a fifth check,
     **inline styles**, which fails any element carrying one in an adapter's output, in every case,
-    with its own column in the report. The fixtures drew 87 style attributes; none remains.
+    with its own column in the report. The fixtures drew 87 style attributes; none remains. The
+    attribute design below is proposed, for the founder's approval at contract review.
     - A band's spacing: the style goes, and `sections.css` sets `--salt-section-space` from the
       `data-spacing` the band already carries (sm, md, lg; none draws none). This covers the case
       study's header band.
@@ -395,11 +400,12 @@ test, applied through section 2's table, where the stricter row wins.
     ruling: `directions` and `byline`. **What each target changes.** Both: replace the
     placeholders in those seven labels and append nothing; a site's `page`, `slide` and `rating`
     labels hold their placeholders (`Page {n}`, `Slide {n} of {N}`, `Rated {n} of {N}`).
-  - **The case study's sidebar parts are defined** (SC-032). *Media aside, an image and a sidebar
-    part* now says which parts are sidebar parts: exactly the challenge (filled), the solution
-    (filled), the gallery (with an image that resolves) and the live-site link (a safe URL), the
-    four Salt for WordPress counts and the gate already counted. The header, results, details and
-    delivered services never are. `data-aside-rows` is how many are drawn. No verdict changes.
+  - **The case study's sidebar parts are defined** (SC-032; proposed, for the founder's approval
+    at contract review). *Media aside, an image and a sidebar part* now says which parts are
+    sidebar parts: exactly the challenge (filled), the solution (filled), the gallery (with an
+    image that resolves) and the live-site link (a safe URL), the four Salt for WordPress counts
+    and the gate already counted. The header, results, details and delivered services never are.
+    `data-aside-rows` is how many are drawn. No verdict changes.
 - The case-study view has fixtures and is required of every implementation (SC-021).
   `fixtures/case-study/` holds four cases (`full`, `aside`, `band` and `minimal`), `case-study`
   joins `REQUIRED_FILES`, and a full conformance run refuses to declare it not shipped. The
