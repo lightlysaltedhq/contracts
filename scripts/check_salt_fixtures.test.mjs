@@ -1353,3 +1353,23 @@ test('labels: a drawn label and a rating are compared with the case, not accepte
   expectFail(['listing'], (io) => io.html('listing/cards-with-pagination.html', 'aria-label="Page 3"', 'aria-label="Go to page 3"'), /aria-label="Go to page 3"/)
   expectFail(['post'], (io) => io.html('post/band-media-text.html', '>By Tom Barlow<', '>Written by Tom Barlow<'), /reads "Written by Tom Barlow", which is not labels\.byline/)
 })
+test('quotes: each quote is the one item its name element names exactly; none is skipped (review N2)', () => {
+  // "Maya" beside "Maya Okafor": a substring match would find both in Maya Okafor's quote and skip it.
+  const maya = (io) => {
+    io.json('carousel/testimonials-source.json', (d) => { d.collections.testimonials[2].title = 'Maya' })
+    io.html('carousel/testimonials-source.html', '<h3>Priya Nair</h3>', '<h3>Maya</h3>')
+  }
+  expectFail(['carousel'], (io) => { maya(io); io.html('carousel/testimonials-source.html', 'aria-hidden="true" data-fill="100"', 'aria-hidden="true" data-fill="90"') }, /Maya Okafor's stars carry data-fill="90"; the rating 5 gives "100"/)
+  // A name no item has, and a name two items share.
+  expectFail(['carousel'], (io) => io.html('carousel/testimonials-source.html', '<h3>Tom Ashby</h3>', '<h3>Tom</h3>'), /the quote named "Tom" matches 0 items by title; it must match exactly one/)
+  expectFail(['carousel'], (io) => io.json('carousel/testimonials-source.json', (d) => { d.collections.testimonials[2].title = 'Tom Ashby' }), /the quote named "Tom Ashby" matches 2 items by title/)
+  // In an accordion the summary names the quote.
+  expectFail(['collection-showcase'], (io) => io.html('collection-showcase/accordion-testimonials.html', '<summary class="salt-accordion__summary">Maya Okafor</summary>', '<summary class="salt-accordion__summary">Someone</summary>'), /the quote named "Someone" matches 0 items/)
+})
+test('labels: a placeholder the case gives a value for must draw that value (review N3)', () => {
+  expectFail(['listing'], (io) => io.html('listing/cards-with-pagination.html', 'aria-label="Page 3"', 'aria-label="Page 7"'), /aria-label="Page 7"/)
+  expectFail(['locations'], (io) => io.html('locations/one-office-open.html', 'Directions to Bristol studio', 'Directions to Elsewhere'), /aria-label="Directions to Elsewhere"/)
+  expectFail(['post'], (io) => io.html('post/full.html', '<span>4 min read</span>', '<span>5 min read</span>'), /reads "5 min read", which is not labels\.readTime/)
+  expectFail(['search'], (io) => io.html('search/results.html', '14 results for “hedge”', '14 results for “hedges”'), /which is not labels\.results/)
+  expectFail(['search'], (io) => io.html('search/no-results.html', 'Nothing matched “xylophone”', 'Nothing matched “piano”'), /which is not labels\.noResults/)
+})

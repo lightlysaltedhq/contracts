@@ -591,21 +591,42 @@ const placeholders = (c) => (c.anchor == null ? {} : {
 // compared as written, so an unknown {placeholder} and a label with none are drawn exactly as
 // given and nothing is appended. Labels live under site.labels, or under the consent and display
 // preferences' own labels. true when the template is no label or the case gives no such label.
+// Where the case gives a placeholder's value (labelValues), it stands for exactly that value, so a
+// label with the wrong number or name fails; {kind} is the platform's word, so stays any text.
 const LABEL = /^from:labels\.([A-Za-z]+)(?: \(([^()]*)\))?$/
-function labelMatch(tpl, value, c) {
+function labelValues(name, c, el) {
+  const doc = c.input.document ?? {}
+  const num = (v) => (typeof v === 'number' ? String(v) : undefined)
+  if (name === 'page' && el) return { '{n}': textOf(el) }
+  if (name === 'byline') return { '{name}': doc.author?.name }
+  if (name === 'readTime') return { '{n}': num(doc.readingMinutes) }
+  if (name === 'results') return { '{n}': num(doc.count), '{q}': doc.query }
+  if (name === 'noResults') return { '{q}': doc.query }
+  if (name === 'directions' && el) {
+    // The office's name, drawn as salt-locations__name in the office's own summary or card.
+    for (let a = c.parents.get(el); a; a = c.parents.get(a)) {
+      const own = descendants(a).find((e) => classesOf(e).includes('salt-locations__name'))
+      if (own) return { '{name}': textOf(own) }
+    }
+  }
+  return {}
+}
+function labelMatch(tpl, value, c, el) {
   const m = LABEL.exec(tpl)
   if (!m) return true
   const site = c.input.site ?? {}
   const given = [site.labels, site.consent?.labels, site.displayPreferences?.labels].map((l) => l?.[m[1]]).filter((v) => typeof v === 'string')
   if (!given.length) return true
   const listed = (m[2] ?? '').split(',').map((x) => x.trim()).filter(Boolean)
-  const shape = (label) => new RegExp(`^${label.split(/(\{[A-Za-z]+\})/).map((part) => (listed.includes(part) ? '.+?' : escapeRe(part))).join('')}$`)
+  const known = labelValues(m[1], c, el)
+  const part = (p) => (!listed.includes(p) ? escapeRe(p) : typeof known[p] === 'string' ? escapeRe(known[p].replace(/\s+/g, ' ').trim()) : '.+?')
+  const shape = (label) => new RegExp(`^${label.split(/(\{[A-Za-z]+\})/).map(part).join('')}$`)
   const text = value.replace(/\s+/g, ' ').trim()
   return given.some((label) => shape(label.replace(/\s+/g, ' ').trim()).test(text))
 }
 
-function templateMatch(tpl, value, name, c) {
-  if (tpl.startsWith('from:')) return labelMatch(tpl, value, c)
+function templateMatch(tpl, value, name, c, el) {
+  if (tpl.startsWith('from:')) return labelMatch(tpl, value, c, el)
   const canon = (x) => x
   const known = placeholders(c)
   const re = canon(tpl).split(/(<[^<>]+>)/).map((part) => {
@@ -851,9 +872,9 @@ function checkAttrs(alt, el, c) {
       if (value !== want) problems.push(`${describe(el)} ${name}="${value}" disagrees with the case, which gives ${JSON.stringify(want)}`)
       continue
     }
-    if (typeof rule === 'string') { if (!templateMatch(rule, value, name, c)) problems.push(`${describe(el)} ${name}="${value}" is not ${JSON.stringify(rule)}`); continue }
+    if (typeof rule === 'string') { if (!templateMatch(rule, value, name, c, el)) problems.push(`${describe(el)} ${name}="${value}" is not ${JSON.stringify(rule)}`); continue }
     if (rule.enum) { if (!rule.enum.includes(value)) problems.push(`${describe(el)} ${name}="${value}" is not one of ${rule.enum.join(', ')}`); continue }
-    if (!templateMatch(rule.value, value, name, c)) problems.push(`${describe(el)} ${name}="${value}" is not ${JSON.stringify(rule.value)}`)
+    if (!templateMatch(rule.value, value, name, c, el)) problems.push(`${describe(el)} ${name}="${value}" is not ${JSON.stringify(rule.value)}`)
   }
   for (const [name, rule] of Object.entries(rules)) {
     if (typeof rule === 'string' || rule.when === undefined) {
@@ -904,7 +925,7 @@ function matcher(c) {
       if (!alt.tags.includes(el.name)) { note([order(el), 1], `${where}: ${describe(el)} where the markup has ${spec.role} (${alt.tags.join(' or ')})`); continue }
       const problems = checkAttrs(alt, el, c)
       // A label drawn as text is the site's label, its listed placeholders replaced (README "Labels").
-      if (typeof alt.text === 'string' && !labelMatch(alt.text, labelOf(el), c)) problems.push(`${describe(el)} reads "${labelOf(el)}", which is not ${alt.text.split(' (')[0].slice(5)} as the case gives it, its placeholders replaced and nothing appended`)
+      if (typeof alt.text === 'string' && !labelMatch(alt.text, labelOf(el), c, el)) problems.push(`${describe(el)} reads "${labelOf(el)}", which is not ${alt.text.split(' (')[0].slice(5)} as the case gives it, its placeholders replaced and nothing appended`)
       if (problems.length) { note([order(el), 2], `${where} [${spec.role}]: ${problems[0]}`); continue }
       let bindings = new Map()
       if (alt.children !== null) {
@@ -1073,16 +1094,22 @@ function checkMarkup(c) {
   for (const el of [root, ...descendants(root)]) for (const child of elementsOf(el)) c.parents.set(child, el)
   // A quote's rating (card.json), wherever the quote sits: the carousel's slide and the
   // showcase's accordion panel hold their card as prose, so the matcher does not reach it. The
-  // quote is the collection item whose title it shows; its rating is named by labels.rating with
-  // {n} and {N} replaced, and the stars' data-fill is its share of five in steps of 10, halves up.
-  const rated = Object.values(c.input.collections ?? {}).flat().filter((i) => typeof i?.title === 'string')
+  // quote is the item whose title its own name element shows exactly: the heading in its caption,
+  // or, in an accordion panel, the summary of its details. A quote with no name element, or whose
+  // name no item or more than one item has, fails; none is skipped. Its rating is named by
+  // labels.rating with {n} and {N} replaced, and the stars' data-fill is its share of five in
+  // steps of 10, halves up.
+  const quoted = [...Object.values(c.input.collections ?? {}).flat(), ...(Array.isArray(c.values?.cards) ? c.values.cards : [])].filter((i) => typeof i?.title === 'string')
   for (const quote of every().filter((e) => classesOf(e).includes('salt-showcase__quote'))) {
-    // The accordion names its quote in the summary, outside the figure: the nearest ancestor that
-    // names any item says which.
-    let scope = quote
-    let items = []
-    while (scope && !(items = rated.filter((i) => textOf(scope).includes(i.title))).length) scope = c.parents.get(scope)
-    if (items.length !== 1) continue
+    const caption = descendants(quote).find((e) => classesOf(e).includes('salt-showcase__caption'))
+    let nameEl = caption && descendants(caption).find((e) => /^h[1-6]$/.test(e.name))
+    for (let a = c.parents.get(quote); !nameEl && a; a = c.parents.get(a)) {
+      if (a.name === 'details') nameEl = elementsOf(a).find((e) => e.name === 'summary')
+    }
+    if (!nameEl) { fail(`${at}.html: a quote draws no name element (a heading in its caption, or its accordion item's summary), so no item is known to be its`); continue }
+    const name = textOf(nameEl)
+    const items = quoted.filter((i) => i.title.replace(/\s+/g, ' ').trim() === name)
+    if (items.length !== 1) { fail(`${at}.html: the quote named "${name}" matches ${items.length} items by title; it must match exactly one`); continue }
     const { rating, title } = items[0]
     const ratings = descendants(quote).filter((e) => classesOf(e).includes('salt-showcase__rating'))
     if (typeof rating !== 'number') {
