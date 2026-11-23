@@ -5758,9 +5758,18 @@ const CONTRACTS = [
       'with no rule draws nothing, and no fixture can see it, because the markup is right. The value ' +
       'sets are read from the markup, so a step added there needs its rule here too.',
     check: (_rules, all) => {
-      /* The attributes, and the values that draw by default and need no rule: spacing none draws
-         no space, and cover is the fit with no attribute value of its own. */
-      const ATTRIBUTES = { 'data-spacing': ['none'], 'data-strength': [], 'data-fill': [], 'data-focal-x': [], 'data-focal-y': [], 'data-aside-rows': [], 'data-fit': ['cover'] }
+      /* Each attribute's owner, the property its rule sets and the value it sets for a value v;
+         and the values that draw by default and need no rule: spacing none draws no space, and
+         cover is the fit with no attribute value of its own. */
+      const ATTRIBUTES = {
+        'data-spacing': { owner: '.salt-section', property: '--salt-section-space', set: (v) => `var(--space-section-${v})`, none: ['none'] },
+        'data-strength': { owner: '.salt-section__scrim', property: '--salt-scrim-alpha', set: (v) => `var(--scrim-${v})`, none: [] },
+        'data-fill': { owner: '.salt-showcase__stars', property: '--salt-rating-fill', set: (v) => `${v}%`, none: [] },
+        'data-focal-x': { owner: '.salt-section__media', property: '--salt-focal-x', set: (v) => `${v}%`, none: [] },
+        'data-focal-y': { owner: '.salt-section__media', property: '--salt-focal-y', set: (v) => `${v}%`, none: [] },
+        'data-aside-rows': { owner: '.salt-case-study-view', property: '--salt-case-study-view-aside-rows', set: (v) => v, none: [] },
+        'data-fit': { owner: '.salt-section__media', property: 'object-fit', set: (v) => v, none: ['cover'] },
+      }
       const values = new Map(Object.keys(ATTRIBUTES).map((name) => [name, new Set()]))
       const walk = (node) => {
         if (Array.isArray(node)) { node.forEach(walk); return }
@@ -5771,17 +5780,22 @@ const CONTRACTS = [
         Object.values(node).forEach(walk)
       }
       for (const file of [...FILES.keys()].filter((f) => /^contract\/markup\/[^/]+\.json$/.test(f))) walk(readJson(file))
-      const selectors = [...all.values()].flat().filter((rule) => rule.order.length > 0).flatMap((rule) => rule.selectors)
+      const rules = [...all.values()].flat()
       const missing = []
       for (const [name, set] of values) {
         if (set.size === 0) { missing.push(`\`${name}\` (the markup gives it no value set)`); continue }
+        const { owner, property, set: expected, none } = ATTRIBUTES[name]
         for (const value of set) {
-          if (ATTRIBUTES[name].includes(value)) continue
-          const spelled = [`[${name}='${value}']`, `[${name}="${value}"]`]
-          if (!selectors.some((selector) => spelled.some((s) => selector.includes(s)))) missing.push(`\`[${name}='${value}']\``)
+          if (none.includes(value)) continue
+          const subjects = [`${owner}[${name}='${value}']`, `${owner}[${name}="${value}"]`]
+          const want = expected(value)
+          const own = rules.filter((rule) => rule.selectors.some((selector) => subjects.includes(selector.trim())))
+          if (own.length === 0) { missing.push(`no rule for \`${subjects[0]}\``); continue }
+          const written = own.map((rule) => rule.declarations[property]).filter((v) => v !== undefined).at(-1)
+          if (written === undefined || written.replace(/\s+/g, ' ').trim() !== want) missing.push(`\`${subjects[0]}\` sets \`${property}: ${written === undefined ? '(nothing)' : written.trim()}\`, not \`${want}\``)
         }
       }
-      return missing.length ? `no rule declares anything for ${missing.join(', ')}` : null
+      return missing.length ? missing.join('; ') : null
     },
   },
 ]
