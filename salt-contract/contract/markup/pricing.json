@@ -216,19 +216,6 @@
   ],
   "notes": [
     {
-      "topic": "stylesheet-owes",
-      "text": "Recipe vocabulary; styled by the recipe, not the shared stylesheets.",
-      "classes": [
-        "salt-pricing",
-        "salt-pricing__plan",
-        "salt-pricing__badge",
-        "salt-pricing__price",
-        "salt-pricing__amount",
-        "salt-pricing__period",
-        "salt-pricing__features"
-      ]
-    },
-    {
       "topic": "order",
       "text": "Platforms differ: WordPress draws the badge before the plan name; Next's recipe the name first. Ruled: name first, so a screen reader meets the plan before its badge."
     },

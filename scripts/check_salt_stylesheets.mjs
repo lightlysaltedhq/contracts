@@ -6135,6 +6135,17 @@ export function checkStylesheets(files) {
     if (onElements.has(name)) continue
     fails.push(`${[...files].join(', ')} style(s) .${name}, which no element in contract/markup/ carries; add it to the markup or take the rule out`)
   }
+  /* And the other way: every class the markup puts on an element has a rule, unless the markup
+     declares it a hook, kept with no rule on purpose. The markup once recorded classes it drew with
+     no rule as a debt (`stylesheet-owes`); a platform that matched it byte for byte served them
+     unstyled, an office's name running into its status. The debt is paid (rc.9, option A), and this
+     check keeps it from returning: a new class needs its rule, or a hook entry saying why not. */
+  const hooks = new Set()
+  for (const file of markupFiles) for (const hook of readJson(file)?.hooks ?? []) if (typeof hook?.class === 'string') hooks.add(hook.class)
+  for (const name of [...onElements].sort()) {
+    if (!name.startsWith('salt-') || styled.has(name) || hooks.has(name)) continue
+    fails.push(`contract/markup/ puts .${name} on an element, and no stylesheet styles it; add its rule to styles/, or declare it a hook (kept with no rule) in its markup file`)
+  }
 
 
   const named = [...reads.keys()].filter((name) => !declaredHere.has(name))
@@ -6143,7 +6154,7 @@ export function checkStylesheets(files) {
     reached: 'all',
     summary: `PASS: ${String(parsed.size)} stylesheet(s) parse whole; ${String(CONTRACTS.length)} decision contract(s) hold; ` +
       `the token layer names the ${String(named.length)} custom properties they and the markup read (${String(named.filter((n) => reads.get(n).withFallback === reads.get(n).count).length)} optional); ` +
-      `${String(styled.size)} salt-* classes styled, each on a markup element.`,
+      `${String(styled.size)} salt-* classes styled, each on a markup element, and every class on a markup element styled or a declared hook (${String(hooks.size)}).`,
   }
 }
 

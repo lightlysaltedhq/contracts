@@ -334,23 +334,6 @@
     {
       "topic": "ruling",
       "text": "The view body is the markup Salt for Next.js's example app writes (apps/example/src/site/blog-views.tsx, PostView), in its order, with its salt-post__* classes (SC-007). The author is the shared author-box component (salt-author-box*), not the example app's salt-post__author, salt-post__author-name, salt-post__author-role and salt-post__portrait, which SC-008 excludes from the adoption."
-    },
-    {
-      "topic": "stylesheet-owes",
-      "text": "The view body classes SC-007 adopts; the shared stylesheets style them (today only the example app's site.css does).",
-      "classes": [
-        "salt-post",
-        "salt-post__header",
-        "salt-post__breadcrumb",
-        "salt-post__category",
-        "salt-post__meta",
-        "salt-post__byline",
-        "salt-post__media",
-        "salt-post__footer",
-        "salt-post__tags",
-        "salt-post__adjacent",
-        "salt-post__adjacent-label"
-      ]
     }
   ],
   "platforms": {

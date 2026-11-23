@@ -452,13 +452,6 @@
   ],
   "notes": [
     {
-      "topic": "stylesheet-owes",
-      "text": "From WordPress: the copyright line; no rule yet.",
-      "classes": [
-        "salt-footer__copyright"
-      ]
-    },
-    {
       "topic": "ruling",
       "text": "Footer links are drawn in columns. A single flat menu, as WordPress has, maps to one untitled column (SC-006): no title paragraph, and its list takes the nav's name."
     },

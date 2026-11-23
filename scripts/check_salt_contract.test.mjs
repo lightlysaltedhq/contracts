@@ -713,3 +713,10 @@ test('markup schema: an attribute named style is refused in any case, and a data
   for (const name of ['style', 'Style', 'STYLE']) assert.equal(valid({ [name]: 'x' }), false, name)
   assert.equal(valid({ 'data-style': 'primary' }), true)
 })
+test('markup schema: a stylesheet-owes note is refused, since every class on an element has a rule (rc.9, option A)', async () => {
+  const { default: Ajv2020 } = await import('ajv/dist/2020.js')
+  const schema = JSON.parse(readFileSync(path.join(path.dirname(script), '..', 'salt-contract', 'schema', 'markup.schema.json'), 'utf8'))
+  const valid = new Ajv2020({ strict: false }).compile({ $schema: schema.$schema, $defs: schema.$defs, $ref: '#/$defs/note' })
+  assert.equal(valid({ topic: 'stylesheet-owes', text: 'x', classes: ['salt-x'] }), false)
+  assert.equal(valid({ topic: 'stylesheet-only', text: 'x', classes: ['salt-x'] }), true)
+})

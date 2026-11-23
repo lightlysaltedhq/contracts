@@ -128,13 +128,6 @@
     {
       "topic": "ruling",
       "text": "The view body is the markup Salt for Next.js's example app writes (apps/example/src/app/(site)/search/page.tsx), in its order: the h1, the form, then either the empty sentence or a named results section with its list and pagination (SC-007). The form's classes are search-form's (salt-search__form, salt-search__label, salt-search__input); the results list is salt-search__results. The results heading's id is search__results-heading (SC-012)."
-    },
-    {
-      "topic": "stylesheet-owes",
-      "text": "The view body class SC-007 adopts; no shared stylesheet styles it yet.",
-      "classes": [
-        "salt-search__results"
-      ]
     }
   ],
   "platforms": {

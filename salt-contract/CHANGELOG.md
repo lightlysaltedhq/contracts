@@ -437,6 +437,48 @@ test, applied through section 2's table, where the stricter row wins.
   h4 draw h3 then h4, and stored h4 then h3 draw h3 then h3. Stored ranks and the editor's
   picker do not change. The new case `rich-text/h4-first-under-h2` shows it. **What each target
   changes.** Both: draw a body's first heading at most one rank below the body base.
+- The shared stylesheets supply every rule the markup owed (the founder's ruling of 23/11/2026,
+  option A). Fourteen markup files recorded classes they drew with no rule (`stylesheet-owes`), and
+  a platform that matched the fixtures byte for byte served them unstyled: Salt for WordPress drew
+  *Bristol studioOpen now* with no gap. `blocks.css`, `chrome.css` and `views.css` gain rules for
+  the 50 classes that had none, structural only (layout, spacing, gaps, alignment, text roles and
+  the band's own ink and hairline from existing tokens), and the 14 `stylesheet-owes` notes go,
+  with the 19 classes `views.css` already styled. The markup schema drops the `stylesheet-owes`
+  topic, and the stylesheet gate now requires the other direction too: every class the markup puts
+  on an element has a rule, or its markup file declares it a hook kept with no rule. No markup or
+  fixture changes. The visual choices (measures, gaps, which text role each part takes, the map
+  facade's 16:9 box) are proposed, for founder approval at contract review.
+  - Classes that gained rules: `salt-locations`, `__name`, `__status`, `__office`, `__address`,
+    `__line`, `__contact`, `__directions`; `salt-opening-hours`, `__day`, `__span`; `salt-map`,
+    `__label`, `__load`; `salt-pricing`, `__plan`, `__badge`, `__price`, `__amount`, `__period`,
+    `__features`; `salt-contact__details`, `__organisation`, `__address`, `__line`, `__privacy`;
+    `salt-showcase__contact`, `__socials`, `__social-link`; `salt-footer__copyright`;
+    `salt-display-preferences`, `__panel`, `__summary`, `__controls`, `__group`, `__label`;
+    `salt-post`, `__header`; `salt-service`, `__header`, `__benefits`, `__price`, `__cta`;
+    `salt-related`; `salt-search__results`; `salt-archive__bio`; `salt-author-box`, `__body`,
+    `__label`, `__bio`. `salt-post__adjacent` gains the post's measure.
+  - A post's and a service's parts that are not section bands are centred at the reading measure
+    inside the gutter, the service's related cards at the default band's; a band in a post keeps
+    its own width. The map's facade is a 16:9 flex box on `--salt-section-border` and
+    `--radius-md`, its label with no margin. What script draws into it, a notice and the map's
+    canvas, is not in the markup, so it is styled where it is drawn (Salt for WordPress's own
+    stylesheet) until a markup change records it.
+  - Twelve of the classes are now flex or grid containers, so `normalise.mjs`'s `CONTAINERS`
+    gains them (`scripts/salt_normalise_containers.mjs --write`): white space between their
+    children, which a browser does not draw, is dropped on both sides of a comparison. Nothing that
+    matched before stops matching.
+  - A team member's links on a linked card already sit above its stretched link, through
+    `primitives.css`'s raise of every nested link (`.salt-card :is(a, …)`); `card.json`'s note said
+    no rule did.
+  - Not reached: the archive's and the search view's own headings and forms sit in unclassed
+    elements, so they keep the platform's page measure; giving them the reading measure needs a
+    class in the markup.
+  - **Semver.** On its own MINOR by `RELEASE-POLICY.md` section 1's test: no markup changes, and
+    no implementation that conformed stops conforming; each moves its stylesheet pin. The
+    stylesheets row reads a change to rendered output for unchanged markup as MAJOR. Either way it
+    is part of the first major, so the semver call stays MAJOR. **What each target changes.** Both:
+    serve the new `styles/salt.css`. Salt for WordPress may drop its own rules for these classes
+    from `app.css`, keeping the map's notice and canvas.
 - The case-study view has fixtures and is required of every implementation (SC-021).
   `fixtures/case-study/` holds four cases (`full`, `aside`, `band` and `minimal`), `case-study`
   joins `REQUIRED_FILES`, and a full conformance run refuses to declare it not shipped. The

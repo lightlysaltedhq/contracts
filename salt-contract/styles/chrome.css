@@ -1116,3 +1116,64 @@ span.salt-footer__link {
   min-block-size: max(2.75rem, 24px);
   color: inherit;
 }
+
+/*
+ * ── Rules the markup owed (rc.9, option A) ──────────────────────────────────────
+ *
+ * The footer's copyright line and its display preferences, which the markup drew with no rule.
+ * Structural only, in the footer's own ink; proposed, for founder approval at contract review.
+ */
+.salt-footer__copyright {
+  margin: 0;
+  color: var(--salt-section-ink-muted, var(--color-ink-muted));
+  font-size: var(--text-small);
+  line-height: var(--text-small--line-height);
+  letter-spacing: var(--text-small--letter-spacing);
+  font-weight: var(--text-small--font-weight);
+  font-family: var(--text-small--font-family);
+}
+
+/* Script shows the preferences by removing `hidden`; no rule here sets `display` on the root, so
+   `hidden` keeps them out of a page that has no script. */
+.salt-display-preferences {
+  flex: 1 1 20rem;
+}
+
+.salt-display-preferences__panel {
+  max-inline-size: var(--container-2xl);
+}
+
+.salt-display-preferences__summary {
+  min-block-size: max(2.75rem, 24px);
+  cursor: pointer;
+  font-size: var(--text-label);
+  line-height: var(--text-label--line-height);
+  letter-spacing: var(--text-label--letter-spacing);
+  font-weight: var(--text-label--font-weight);
+  font-family: var(--text-label--font-family);
+}
+
+.salt-display-preferences__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  padding-block-start: 0.75rem;
+}
+
+/* Each control stands alone, so each is floored at the target size, as the footer's links are. */
+.salt-display-preferences__controls button {
+  min-inline-size: max(2.75rem, 24px);
+  min-block-size: max(2.75rem, 24px);
+}
+
+.salt-display-preferences__group {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.salt-display-preferences__label {
+  margin-inline-end: 0.25rem;
+}
