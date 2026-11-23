@@ -12,7 +12,7 @@
     "timezone": "Europe/London",
     "labels": {
       "breadcrumb": "Breadcrumb",
-      "byline": "By",
+      "byline": "By {name}",
       "readTime": "{n} min read",
       "adjacent": "More posts",
       "newer": "Newer",

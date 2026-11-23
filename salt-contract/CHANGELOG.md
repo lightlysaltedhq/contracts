@@ -388,18 +388,21 @@ test, applied through section 2's table, where the stricter row wins.
     categories. Salt for WordPress: boxes from `salt_consent_api_category`, one per API category.
   - **Labels carry their values as named placeholders** (SC-031). The contract drew some values by
     replacing a placeholder (`readTime`, the search's `results` and `noResults`) and others by
-    appending to a prefix (`slide`, `rating`, and in the listing and archive cases `page`). Every
-    label that carries a number or a query now uses named placeholders, replaced where they stand,
-    so a translation places the value itself; README *Labels* states the rule once: the names
-    (`{n}`, `{N}`, `{q}`, `{kind}`), that an unknown placeholder is drawn as written, and that a
-    label without one is drawn as written with nothing appended. The markup notation lists them:
+    appending to a prefix (`slide`, `rating`, `directions`, `byline`, and in the listing and
+    archive cases `page`). Every label that carries a number, a query or a name now uses named
+    placeholders, replaced where they stand, so a translation places the value itself; README
+    *Labels* states the rule once: the names (`{n}`, `{N}`, `{q}`, `{kind}`, `{name}`), that an
+    unknown placeholder is drawn as written, and that a label without one is drawn as written with
+    nothing appended, so no label has anything appended. The markup notation lists them:
     `labels.page ({n})`, `labels.slide ({n}, {N})`, `labels.rating ({n}, {N})`,
-    `labels.readTime ({n})`, `labels.results ({n}, {q})`, `labels.noResults ({q})` and
-    `labels.kind ({kind})`. The fixtures give `Page {n}`, `Slide {n} of {N}` and
-    `Rated {n} of {N}`; no expected HTML changes. Two labels still append a name, outside the
-    ruling: `directions` and `byline`. **What each target changes.** Both: replace the
-    placeholders in those seven labels and append nothing; a site's `page`, `slide` and `rating`
-    labels hold their placeholders (`Page {n}`, `Slide {n} of {N}`, `Rated {n} of {N}`).
+    `labels.readTime ({n})`, `labels.results ({n}, {q})`, `labels.noResults ({q})`,
+    `labels.kind ({kind})`, `labels.directions ({name})` and `labels.byline ({name})`; the
+    byline's `{name}` is the author's name as text or the link to their archive. The fixtures give
+    `Page {n}`, `Slide {n} of {N}`, `Rated {n} of {N}`, `Directions to {name}` and `By {name}`;
+    no expected HTML changes. **Breaking for both targets.** **What each target changes.** Both:
+    replace the placeholders in those nine labels and append nothing; a site's `page`, `slide`,
+    `rating`, `directions` and `byline` labels hold their placeholders (`Page {n}`,
+    `Slide {n} of {N}`, `Rated {n} of {N}`, `Directions to {name}`, `By {name}`).
   - **The case study's sidebar parts are defined** (SC-032; proposed, for the founder's approval
     at contract review). *Media aside, an image and a sidebar part* now says which parts are
     sidebar parts: exactly the challenge (filled), the solution (filled), the gallery (with an

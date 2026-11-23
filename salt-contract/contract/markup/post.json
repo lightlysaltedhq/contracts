@@ -114,7 +114,7 @@
                   ],
                   "optional": true,
                   "when": "the post has an author and the byline is on",
-                  "text": "from:labels.byline, a space, then the author's name as text when the author has no archive",
+                  "text": "from:labels.byline ({name})",
                   "children": [
                     {
                       "role": "byline-link",
@@ -127,7 +127,7 @@
                       "when": "the author has an archive; it takes the name's place, so the name is never also written as text"
                     }
                   ],
-                  "note": "The label, then either the name as text or the link, never both, as Salt for Next.js's PostView draws it."
+                  "note": "The label with {name} replaced by the author: the name as text when the author has no archive, or the byline-link when they have one, never both, as Salt for Next.js's PostView draws it. Nothing is appended to the label (README, \"Labels\"; SC-031)."
                 },
                 {
                   "role": "date",

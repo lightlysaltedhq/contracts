@@ -193,7 +193,7 @@
                       ],
                       "attributes": {
                         "href": "from:directions url",
-                        "aria-label": "from:labels.directions (office name)"
+                        "aria-label": "from:labels.directions ({name})"
                       },
                       "text": "from:labels.getDirections",
                       "optional": true,

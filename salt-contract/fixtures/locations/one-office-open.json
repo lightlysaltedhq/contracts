@@ -1,5 +1,5 @@
 {
-  "$comment": "context.now is Wednesday 07/10/2026 11:00 in Europe/London (BST, +01:00); the status is open under locations.json open-now step 2. \"labels.status\" is read as the label for the computed status (labels.open, labels.appointment or labels.closed); \"Directions to\" + office name forms the aria-label of the directions link; the opening hours list only days with rows; contact links use the item phone as text, its tel: href per section#display-forms.",
+  "$comment": "context.now is Wednesday 07/10/2026 11:00 in Europe/London (BST, +01:00); the status is open under locations.json open-now step 2. \"labels.status\" is read as the label for the computed status (labels.open, labels.appointment or labels.closed); labels.directions, \"Directions to {name}\" with {name} replaced by the office name, is the aria-label of the directions link; the opening hours list only days with rows; contact links use the item phone as text, its tel: href per section#display-forms.",
   "section": "locations",
   "summary": "One office with address, phone, email and weekday hours; the time given falls inside its hours, so the status is open; maps are off, so no map.",
   "values": {
@@ -76,7 +76,7 @@
       "closed": "Closed",
       "byAppointment": "By appointment",
       "getDirections": "Get directions",
-      "directions": "Directions to",
+      "directions": "Directions to {name}",
       "load": "Load the map",
       "loadMap": "Load map",
       "consent": "Allow map cookies to view this map.",

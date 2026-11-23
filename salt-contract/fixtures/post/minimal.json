@@ -1,5 +1,5 @@
 {
-  "$comment": "Same shapes as post/full. No breadcrumb, category, featured image, tags, share links or author box: the document supplies none of them, so the footer is not drawn. The author has no archive, so the byline is the label and the name as text. context.priorityMedia is true but the post has no image to claim it.",
+  "$comment": "Same shapes as post/full. No breadcrumb, category, featured image, tags, share links or author box: the document supplies none of them, so the footer is not drawn. The author has no archive, so the byline is labels.byline, \"By {name}\", with {name} replaced by the name as text. context.priorityMedia is true but the post has no image to claim it.",
   "view": "post",
   "summary": "A bare post: no breadcrumb, category, featured image, tags, sharing or author box; the byline names its author as plain text; only an older neighbour.",
   "context": {
@@ -12,7 +12,7 @@
     "timezone": "Europe/London",
     "labels": {
       "breadcrumb": "Breadcrumb",
-      "byline": "By",
+      "byline": "By {name}",
       "readTime": "{n} min read",
       "adjacent": "More posts",
       "newer": "Newer",

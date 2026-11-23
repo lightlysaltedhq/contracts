@@ -436,20 +436,21 @@ may hold: `from:labels.page ({n})`.
   position (`slide`), the rating (`rating`), the reading time in minutes (`readTime`) or the
   results' count (`results`). `{N}` is the total it is out of: the slides in the track (`slide`), 5
   for a rating (`rating`). `{q}` is the visitor's search query, as typed (`results`, `noResults`).
-  `{kind}` is a search result's kind word (`kind`). The labels that carry values are exactly
-  these: `page ({n})`, `slide ({n}, {N})`, `rating ({n}, {N})`, `readTime ({n})`,
-  `results ({n}, {q})`, `noResults ({q})` and `kind ({kind})`.
+  `{kind}` is a search result's kind word (`kind`). `{name}` is a name the label is about: the
+  office's (`directions`) or the post's author's (`byline`). The labels that carry values are
+  exactly these: `page ({n})`, `slide ({n}, {N})`, `rating ({n}, {N})`, `readTime ({n})`,
+  `results ({n}, {q})`, `noResults ({q})`, `kind ({kind})`, `directions ({name})` and
+  `byline ({name})`.
 - **Replacing.** Each placeholder the notation names is replaced wherever it stands, every time it
   appears, by its value as text: a number in the form the label's own rules give (a whole page,
-  slide or count as digits; a rating as written, `4.5`), a query escaped as text. Nothing else in
-  the label changes.
+  slide or count as digits; a rating as written, `4.5`), a query or a name escaped as text. The
+  byline's `{name}` is the author's name as text, or the link to the author's archive when they
+  have one (`post.json`). Nothing else in the label changes.
 - **An unknown placeholder.** A `{name}` the notation does not list is not a placeholder: it is
   drawn as written, braces and all, never removed or guessed at.
 - **A label without a placeholder.** It is drawn exactly as written, and nothing is appended to it:
   a site whose `page` label is `Page` draws every page link `Page`, and so loses the number, so a
-  label that should carry one holds its placeholder. Two labels still have a name appended, as the
-  founder's ruling on numbers and queries left them: `directions` (a space, then the office's name)
-  and `byline` (a space, then the author's name, when the author has no archive).
+  label that should carry one holds its placeholder. No label has anything appended.
 
 ### The normaliser
 

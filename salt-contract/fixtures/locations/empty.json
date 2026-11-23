@@ -41,7 +41,7 @@
       "closed": "Closed",
       "byAppointment": "By appointment",
       "getDirections": "Get directions",
-      "directions": "Directions to",
+      "directions": "Directions to {name}",
       "load": "Load the map",
       "loadMap": "Load map",
       "consent": "Allow map cookies to view this map.",
