@@ -312,6 +312,29 @@ test('a style attribute anywhere in the output fails the inline-style check, for
   }
 })
 
+test('the inline-style check reads the raw output: an SVG child, the page\'s body and an empty style fail (SC-029)', async () => {
+  const adapter = brokenAdapter({
+    'site-footer/columns-socials-copyright': { from: 'aria-label="LinkedIn" fill="none" stroke="currentColor">', to: 'aria-label="LinkedIn" fill="none" stroke="currentColor"><path style="fill:red" d="M0 0"/>' },
+    'page/header-section-footer': { from: '<body', to: '<body style="margin:0"' },
+    'hero/full-bleed-background-inverse': { from: 'data-strength="strong"', to: 'data-strength="strong" style=""' },
+  })
+  try {
+    const r = await run(['--platform', 'broken', '--adapter', adapter.command, ...withFields, ...withStyles])
+    assert.equal(r.code, 1, r.out)
+    const footer = r.report.files.find((f) => f.id === 'site-footer')
+    assert.deepEqual(footer.inlineStyles.cases.map((c) => c.case), ['columns-socials-copyright'])
+    assert.match(footer.inlineStyles.cases[0].elements[0], /^<path style="fill:red">/)
+    const page = r.report.files.find((f) => f.id === 'page')
+    assert.deepEqual(page.inlineStyles.cases.map((c) => c.case), ['header-section-footer'])
+    assert.match(page.inlineStyles.cases[0].elements[0], /^<body style="margin:0">/)
+    const hero = section(r.report, 'hero')
+    assert.deepEqual(hero.inlineStyles.cases.map((c) => c.case), ['full-bleed-background-inverse'])
+    assert.equal(hero.inlineStyles.cases[0].elements[0], '<div style="">')
+  } finally {
+    rmSync(adapter.dir, { recursive: true, force: true })
+  }
+})
+
 test('an icon\'s fill and stroke are not compared, every other attribute of it is (SC-024)', async () => {
   const STROKED = 'aria-label="LinkedIn" fill="none" stroke="currentColor"'
   const adapter = brokenAdapter({

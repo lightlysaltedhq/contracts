@@ -17,8 +17,9 @@
 // 5. INLINE STYLES. No element in the adapter's output carries a style attribute
 //    (section#no-inline-style, SC-029): a site's Content-Security-Policy need not allow inline
 //    styles, and a browser that refuses them would draw the page without them. It runs with the
-//    fixtures, on every case, and fails a case's file even where the fixture comparison would not
-//    see the attribute.
+//    fixtures, on every case, and reads the adapter's raw output, before pageOf or normalising, so
+//    it fails a case's file even where the fixture comparison would not see the attribute: an SVG
+//    child, the page's body, an empty style="".
 //
 // The site chrome (site-header, site-footer) and the page views (post, service, archive, search,
 // not-found; SC-018, and case-study; SC-021) have fixtures too. They have no fields of their own,
@@ -584,9 +585,20 @@ export async function runConformance(options) {
       if (o.result.error) { failures.push({ case: o.name, kind: 'adapter', error: o.result.error, stderr: o.result.stderr }); continue }
       const difference = firstDifference(view(o.html), view(o.result.html))
       if (difference) { const { kind, ...rest } = difference; failures.push({ case: o.name, kind: 'mismatch', difference: kind, ...rest }) }
-      const { actual } = compare('', view(o.result.html))
-      const inline = [...actual.matchAll(/<([a-z][a-z0-9-]*)[^<>]*? style="([^"]*)"/g)].map((m) => `<${m[1]} style="${m[2]}">`)
+      // The adapter's raw output, before pageOf or normalising drops anything: any element, an
+      // SVG child or the page's body included, with a style attribute of any value, empty too.
+      const inline = []
+      const visit = (el) => {
+        for (const child of el.children) {
+          if (child.type !== 'element') continue
+          const style = child.attrs.find(([n]) => n === 'style')
+          if (style) inline.push(`<${child.name} style="${style[1]}">`)
+          visit(child)
+        }
+      }
+      visit(parse(o.result.html))
       if (inline.length) styled.push({ case: o.name, elements: inline })
+      const { actual } = compare('', view(o.result.html))
       for (const m of actual.matchAll(/ class="([^"]*)"/g)) {
         for (const c of m[1].split(' ')) {
           if (c.startsWith('salt-') && !vocabulary.has(c)) unknown.set(c, [...new Set([...(unknown.get(c) ?? []), o.name])])
