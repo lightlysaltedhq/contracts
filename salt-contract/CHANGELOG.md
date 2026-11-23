@@ -15,7 +15,7 @@ test, applied through section 2's table, where the stricter row wins.
 ### Accessibility fixes
 
 - Light `surface-alt` bands and footers use normal ink for secondary text. Other tones, dark tone routing and the foundations palette are unchanged.
-- On phones without JavaScript, the visible header menu wraps and its submenus open in the flow, keeping keyboard-focused links on screen. The scripted drawer and the head’s `noscript` style are unchanged.
+- On phones without JavaScript, the visible header menu wraps and its submenus open in the flow. The header scrolls away so it cannot cover a focused form reply. The scripted drawer and the head’s `noscript` style are unchanged.
 
 ### Added
 

@@ -712,6 +712,13 @@ button.salt-nav__toggle {
   }
 }
 
+/* A wrapped menu can be taller than the space reserved for a fragment target. */
+@media (max-width: 48rem) and (scripting: none) {
+  .salt-header {
+    position: relative;
+  }
+}
+
 /*
  * The dialog fills the viewport and paints nothing; the panel inside it is the drawer.
  *
