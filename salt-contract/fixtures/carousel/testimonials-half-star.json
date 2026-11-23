@@ -1,0 +1,54 @@
+{
+  "section": "carousel",
+  "$comment": "A half-star rating: Tom Ashby's 4.5 is named \"Rated 4.5 of 5\" (labels.rating, its {n} the rating as written) and fills 90: 4.5 ÷ 5 × 100 is 90, a step of 10 already. The rest is testimonials-source.",
+  "summary": "Testimonials as a carousel with a half-star rating: 4.5 draws \"Rated 4.5 of 5\" and data-fill=\"90\".",
+  "values": {
+    "heading": "Kind words",
+    "source": "testimonials",
+    "query": {
+      "mode": "automatic",
+      "count": 3
+    },
+    "settings": {
+      "anchorId": "kind-words-carousel",
+      "tone": "brand-tint"
+    }
+  },
+  "context": {
+    "headingLevel": 2,
+    "headingRendered": true,
+    "priorityMedia": false,
+    "track": "carousel-5",
+    "index": 4
+  },
+  "collections": {
+    "testimonials": [
+      {
+        "id": "a",
+        "title": "Maya Okafor",
+        "meta": "Homeowner, Redland",
+        "text": "They turned a patch of builders' rubble into a garden we use every evening.",
+        "rating": 5
+      },
+      {
+        "id": "b",
+        "title": "Tom Ashby",
+        "meta": "Manager, Ashby Mill Cafe",
+        "text": "The terrace planting has had more compliments than the menu.",
+        "rating": 4.5
+      },
+      {
+        "id": "c",
+        "title": "Priya Nair",
+        "meta": "Trustee, Greenway Allotments",
+        "text": "Reliable, tidy and good with volunteers of every age."
+      }
+    ]
+  },
+  "site": {
+    "labels": {
+      "slide": "Slide {n} of {N}",
+      "rating": "Rated {n} of {N}"
+    }
+  }
+}

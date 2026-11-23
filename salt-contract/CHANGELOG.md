@@ -61,7 +61,7 @@ test, applied through section 2's table, where the stricter row wins.
   (`./view-props/*`); the replaced-logic format (`./schema/replaced-logic`).
 - Image sizes (`./image-sizes`): each slot's `sizes` per band and column count, the candidate
   widths, and the srcset capped at the upload's intrinsic width (SC-016).
-- Fixtures (`./fixtures/*`): 122 cases with their expected HTML, for the 17 sections, the site
+- Fixtures (`./fixtures/*`): 126 cases with their expected HTML, for the 17 sections, the site
   header and footer, the post, service, case-study, archive, search and not-found views, and the
   page (SC-018, SC-019, SC-021); and the normaliser both sides are compared through
   (`./normalise`).
@@ -331,11 +331,15 @@ test, applied through section 2's table, where the stricter row wins.
       stored focal point snaps on each axis to `min(100, max(0, 5 × floor(v ÷ 5 + 0.5)))`, so a
       value halfway between two steps takes the higher (32.5 gives 35). The nine named positions
       take their steps (left and top 0, centre 50, right and bottom 100). Both are left out only
-      for the focal-point position with no stored focal point.
+      for the focal-point position with no stored focal point. The new cases
+      `hero/full-bleed-background-focal-snapped` (32.5 and 2.4 draw 35 and 0) and
+      `hero/full-bleed-background-named-position` (top right draws 100 and 0) show it.
     - A rating: `data-fill` on `span.salt-showcase__stars`, 0 to 100 in steps of 10, which
       `blocks.css` maps to `--salt-rating-fill`: the rating ÷ 5 × 100 rounded to the nearest
       step, halves up, held to 0 to 100. A stored rating (1 to 5 in half stars) always lands on a
-      step.
+      step; the new case `carousel/testimonials-half-star` draws 4.5 as 90. The fixtures gate now
+      compares each quote's fill and rating label with its item, and every drawn label with the
+      site's.
     - The case study's aside: `data-aside-rows` (1 to 4) on the article, which `primitives.css`
       maps to `--salt-case-study-view-aside-rows`. The measure leaves the markup: the aside grid
       is centred in a default band's `--container-5xl`, fixed in `primitives.css`, and
@@ -378,7 +382,7 @@ test, applied through section 2's table, where the stricter row wins.
     integration denied, failing closed as `salt_consent()` already does, and draws neither. A
     wired mechanism with no category in use draws no control, no banner and no panel, so
     `site.consent.categories` may now be empty, and the gate requires the control only when it
-    is not; the new case `site-footer/consent-no-categories` shows it. 122 cases in all. **What
+    is not; the new case `site-footer/consent-no-categories` shows it. **What
     each target changes.** Both: draw the banner and the control on that one condition. Salt for
     WordPress: only when `wp_has_consent` exists, denied otherwise.
   - **The consent panel's boxes are grouped by WP Consent API category** (SC-030). One box per API
@@ -410,7 +414,9 @@ test, applied through section 2's table, where the stricter row wins.
     `labels.kind ({kind})`, `labels.directions ({name})` and `labels.byline ({name})`; the
     byline's `{name}` is the author's name as text or the link to their archive. The fixtures give
     `Page {n}`, `Slide {n} of {N}`, `Rated {n} of {N}`, `Directions to {name}` and `By {name}`;
-    no expected HTML changes. **Breaking for both targets.** **What each target changes.** Both:
+    no expected HTML changes. The new case `carousel/testimonials-labels-as-written` draws a slide
+    label with no placeholder (`Slide`) and a rating label with an unknown one (`{stars}`), each as
+    written. 126 cases in all. **Breaking for both targets.** **What each target changes.** Both:
     replace the placeholders in those nine labels and append nothing; a site's `page`, `slide`,
     `rating`, `directions` and `byline` labels hold their placeholders (`Page {n}`,
     `Slide {n} of {N}`, `Rated {n} of {N}`, `Directions to {name}`, `By {name}`).

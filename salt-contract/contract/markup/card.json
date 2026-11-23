@@ -295,7 +295,7 @@
                 "aria-label": "from:labels.rating ({n}, {N})"
               },
               "optional": true,
-              "when": "rating is set (0-5)",
+              "when": "the item has a rating, 1 to 5 in half stars",
               "children": [
                 {
                   "role": "stars",

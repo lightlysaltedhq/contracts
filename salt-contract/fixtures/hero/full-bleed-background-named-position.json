@@ -1,0 +1,54 @@
+{
+  "section": "hero",
+  "summary": "Full bleed over a background image at the named position top right: the named position takes its steps, 100 across and 0 down, and the image's stored focal point is not read (section#background-position). On the surface band at spacing md; the rest is full-bleed-background-inverse.",
+  "values": {
+    "variant": "full-bleed",
+    "eyebrow": "Garden design",
+    "heading": "Outdoor rooms for every season",
+    "subheading": "Planting plans, hard landscaping and aftercare from one small team.",
+    "buttons": [
+      {
+        "link": {
+          "label": "Book a visit",
+          "type": "internal",
+          "document": "contact"
+        }
+      }
+    ],
+    "settings": {
+      "anchorId": "welcome",
+      "tone": "surface",
+      "toneDark": "auto",
+      "spacing": "md",
+      "width": "wide",
+      "backgroundImage": {
+        "image": "meadow",
+        "position": "top-right"
+      }
+    }
+  },
+  "context": {
+    "headingLevel": 1,
+    "priorityMedia": true,
+    "track": "hero-1",
+    "index": 0
+  },
+  "media": {
+    "meadow": {
+      "url": "https://uploads.example/meadow-{width}.jpg",
+      "width": 2400,
+      "height": 1350,
+      "alt": "A wildflower meadow at dusk",
+      "focalPoint": {
+        "x": 30,
+        "y": 60
+      }
+    }
+  },
+  "documents": {
+    "contact": {
+      "href": "/contact/",
+      "title": "Contact"
+    }
+  }
+}
