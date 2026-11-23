@@ -2246,6 +2246,24 @@ describe('every framed image fills its frame', () => {
   })
 })
 
+describe('every fixed-set attribute value has its rule (SC-029)', () => {
+  const WHAT = '✗ sections.css: every value of a fixed-set attribute the markup writes in place of a style has its rule\n'
+  itEach([
+    ['sections.css', 'a section space', replacing(".salt-section[data-spacing='lg'] {", ".salt-section[data-spacing='xl'] {"), "`[data-spacing='lg']`"],
+    ['sections.css', 'a scrim strength', replacing(".salt-section__scrim[data-strength='subtle'] {", ".salt-section__scrim[data-strength='faint'] {"), "`[data-strength='subtle']`"],
+    ['blocks.css', 'a rating step', replacing(".salt-showcase__stars[data-fill='10'] {", ".salt-showcase__stars[data-fill='15'] {"), "`[data-fill='10']`"],
+    ['sections.css', 'a focal step', replacing("[data-focal-x='35']", "[data-focal-x='36']"), "`[data-focal-x='35']`"],
+    ['sections.css', 'a focal step on the other axis', replacing("[data-focal-y='0']", "[data-focal-y='1']"), "`[data-focal-y='0']`"],
+    ['primitives.css', 'an aside row count', replacing(".salt-case-study-view[data-aside-rows='4'] {", ".salt-case-study-view[data-aside-rows='5'] {"), "`[data-aside-rows='4']`"],
+    ['sections.css', 'the contain fit', replacing(".salt-section__media[data-fit='contain'] {", ".salt-section__media[data-fit='fill'] {"), "`[data-fit='contain']`"],
+  ])('%s: fails when %s loses its rule', (file, _case, mutate, message) => {
+    const { code, output } = gate(file, mutate)
+    expect(output).toContain(WHAT)
+    expect(output).toContain(message)
+    expect(code).toBe(1)
+  })
+})
+
 /*
  * ── The checks this gate adds ───────────────────────────────────────────────────────────────
  *

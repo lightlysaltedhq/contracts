@@ -5748,6 +5748,42 @@ const CONTRACTS = [
       return null
     },
   },
+  {
+    file: 'sections.css',
+    what: 'every value of a fixed-set attribute the markup writes in place of a style has its rule',
+    why:
+      'The markup writes no style attribute (section#no-inline-style, SC-029): a section\u2019s space, a ' +
+      'scrim\u2019s strength, a rating\u2019s fill, a focal point and the aside\u2019s rows reach the page as a ' +
+      'data attribute from a fixed set, which only the shared stylesheets turn into a value. A value ' +
+      'with no rule draws nothing, and no fixture can see it, because the markup is right. The value ' +
+      'sets are read from the markup, so a step added there needs its rule here too.',
+    check: (_rules, all) => {
+      /* The attributes, and the values that draw by default and need no rule: spacing none draws
+         no space, and cover is the fit with no attribute value of its own. */
+      const ATTRIBUTES = { 'data-spacing': ['none'], 'data-strength': [], 'data-fill': [], 'data-focal-x': [], 'data-focal-y': [], 'data-aside-rows': [], 'data-fit': ['cover'] }
+      const values = new Map(Object.keys(ATTRIBUTES).map((name) => [name, new Set()]))
+      const walk = (node) => {
+        if (Array.isArray(node)) { node.forEach(walk); return }
+        if (node === null || typeof node !== 'object') return
+        for (const [name, rule] of Object.entries(node.attributes ?? {})) {
+          if (values.has(name) && Array.isArray(rule?.enum)) for (const v of rule.enum) values.get(name).add(String(v))
+        }
+        Object.values(node).forEach(walk)
+      }
+      for (const file of [...FILES.keys()].filter((f) => /^contract\/markup\/[^/]+\.json$/.test(f))) walk(readJson(file))
+      const selectors = [...all.values()].flat().filter((rule) => rule.order.length > 0).flatMap((rule) => rule.selectors)
+      const missing = []
+      for (const [name, set] of values) {
+        if (set.size === 0) { missing.push(`\`${name}\` (the markup gives it no value set)`); continue }
+        for (const value of set) {
+          if (ATTRIBUTES[name].includes(value)) continue
+          const spelled = [`[${name}='${value}']`, `[${name}="${value}"]`]
+          if (!selectors.some((selector) => spelled.some((s) => selector.includes(s)))) missing.push(`\`[${name}='${value}']\``)
+        }
+      }
+      return missing.length ? `no rule declares anything for ${missing.join(', ')}` : null
+    },
+  },
 ]
 
 /* What a stylesheet's text alone can be refused for, found once per text: the test reads the same
