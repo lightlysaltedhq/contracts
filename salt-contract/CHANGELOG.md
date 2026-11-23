@@ -580,9 +580,10 @@ test, applied through section 2's table, where the stricter row wins.
     summary, and in a band inside the tone with the band's `md` foot under it, painted by the same
     outset over the hero's 16:9 frame (`min(100cqi, var(--container-2xl)) * 9 / 16`), so the image
     is drawn once. Measured at 390 against rc.9's previous layout, every part sits at the same
-    place. The gaps there are padding on the story and the aside, since MR-8 lets no other rule
-    move a block margin in the view. The details `dl` loses the user agent's `1em` margin, which
-    started the aside below the story's top on a site without a reset. The results open their own
+    place, the details included. The gaps there are padding on the story and the aside, since MR-8
+    lets no other rule move a block margin in the view. The details `dl` loses the user agent's
+    `1em` margins, which started the aside below the story's top on a site without a reset; below
+    64rem the aside's padding gives the same space back, `--space-4` above and below them. The results open their own
     gap at (0,2,0) over the grid's reset.
   - `image-sizes.json`: two slots, `story` (`(min-width: 44rem) 42rem, calc(100vw - 2rem)`) for the
     hero and the case-study image, and `story-gallery` for a gallery frame, one column of the 3/2/1

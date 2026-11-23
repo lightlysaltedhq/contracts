@@ -2031,6 +2031,16 @@ textarea.salt-contact__input {
   }
 
   /*
+   * The details keep the space round them they had before their `dl` lost the user agent's `1em`
+   * margins to the reset, which the reset takes so the aside starts level with the story from 64rem:
+   * `--space-4` above them, after the gap the story leaves, and below them. `1rem`, the user agent's
+   * `1em` at the body's size.
+   */
+  .salt-case-study-view > .salt-case-study-view__aside {
+    padding-block: calc(var(--space-section-sm) + var(--space-4)) var(--space-4);
+  }
+
+  /*
    * A band keeps the hero inside its tone, as it did when the hero sat in the band's content: the
    * band gives up its foot, its tone runs on down the hero's line gap and the hero's 16:9 frame,
    * which is the story's width, at most the reading measure, by 9/16, and the band's foot, `md` as
