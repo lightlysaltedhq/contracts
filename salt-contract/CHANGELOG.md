@@ -501,7 +501,9 @@ test, applied through section 2's table, where the stricter row wins.
   - A new optional collection field, `caseStudyImage` (one image reference: a WordPress attachment
     ID, a Payload upload; alt by the media's normal rules, no caption), drawn in
     `div.salt-case-study-view__flow-media` after the challenge's place and before the solution's,
-    lazy, in the content slot. It keeps that place when the challenge, the solution or the
+    lazy, in the content slot. It is not framed: it keeps its own proportion at the content width,
+    uncropped (a square photograph is drawn square), its width and height reserving the space; the
+    hero's 16:9 frame and the gallery's 4:3 frames are unchanged. It keeps that place when the challenge, the solution or the
     featured image is absent, is never promoted to the hero, and leaves no wrapper when absent or
     unresolved. When both fields name one media item (by media identity, never alt text or file
     name) it is drawn once, in the hero. `featuredImage` and `gallery` are unchanged.

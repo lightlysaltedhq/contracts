@@ -195,7 +195,7 @@
             {
               "role": "flow-image",
               "component": "media",
-              "note": "Never the priority image, so lazy; fill, cover; its alt by the media's normal rules (media.json). No caption."
+              "note": "Never the priority image, so lazy. Not framed: it keeps its own proportion at the content width, uncropped, its width and height reserving the space (primitives.css). Its alt by the media's normal rules (media.json). No caption."
             }
           ]
         },

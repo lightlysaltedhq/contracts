@@ -5726,7 +5726,6 @@ const CONTRACTS = [
         { file: 'blocks.css', image: '.salt-logos__image', frame: '.salt-logos__frame', fit: 'contain' },
         { file: 'blocks.css', image: '.salt-showcase__media > img', frame: '.salt-showcase__media', fit: 'cover' },
         { file: 'primitives.css', image: '.salt-case-study-view__media > img', frame: '.salt-case-study-view__media', fit: 'cover' },
-        { file: 'primitives.css', image: '.salt-case-study-view__flow-media > img', frame: '.salt-case-study-view__flow-media', fit: 'cover' },
         { file: 'primitives.css', image: '.salt-case-study-view__frame > img', frame: '.salt-case-study-view__frame', fit: 'cover' },
         { file: 'views.css', image: '.salt-post__media > img', frame: '.salt-post__media', fit: 'cover' },
         { file: 'views.css', image: '.salt-archive__portrait > img', frame: '.salt-archive__portrait', fit: 'cover' },

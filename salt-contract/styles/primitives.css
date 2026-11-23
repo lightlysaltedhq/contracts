@@ -1897,12 +1897,10 @@ textarea.salt-contact__input {
 
 /*
  * The frames reserve their space before the image arrives, so a photograph landing late pushes
- * nothing down. The hero frame and the case-study image's frame in the flow are 16:9, the showcase
- * card's proportion (SC-034); the gallery's is 4:3, the proportion a project photograph is usually
- * shot in, which square would crop.
+ * nothing down. The hero frame is 16:9, the showcase card's proportion; the gallery's is 4:3, the
+ * proportion a project photograph is usually shot in, which square would crop.
  */
 .salt-case-study-view__media,
-.salt-case-study-view__flow-media,
 .salt-case-study-view__frame {
   position: relative;
   aspect-ratio: 16 / 9;
@@ -1916,11 +1914,28 @@ textarea.salt-contact__input {
 
 /* Each photograph fills its frame (SC-011). */
 .salt-case-study-view__media > img,
-.salt-case-study-view__flow-media > img,
 .salt-case-study-view__frame > img {
   position: absolute;
   inset: 0;
   inline-size: 100%;
   block-size: 100%;
   object-fit: cover;
+}
+
+/*
+ * The case-study image in the flow (SC-034) has no frame to fill: it stands alone at the content
+ * width and keeps its own proportion, so a square photograph is drawn square and nothing is cropped.
+ * Its width and height attributes reserve the space before it arrives, because `block-size: auto`
+ * lets the browser take the ratio from them. The wrapper rounds its corners as the hero's and the
+ * gallery's frames are rounded.
+ */
+.salt-case-study-view__flow-media {
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+}
+
+.salt-case-study-view__flow-media > img {
+  display: block;
+  inline-size: 100%;
+  block-size: auto;
 }
