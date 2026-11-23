@@ -474,6 +474,15 @@ test, applied through section 2's table, where the stricter row wins.
     `--radius-md`, its label with no margin. What script draws into it, a notice and the map's
     canvas, is not in the markup, so it is styled where it is drawn (Salt for WordPress's own
     stylesheet) until a markup change records it.
+  - The gate's reading of "drawn" and "hook" was closed on three points (review of b5f2436). A
+    hook must be on an element of the markup file declaring it, so a file cannot excuse a class
+    another file draws. A rule whose only declarations set custom properties nothing reads (no
+    stylesheet, no value the markup writes, and not named by `token-layer.json`) does not draw its
+    class; a property that is read anywhere counts. A media list is print-only only when every
+    branch is `print` or `only print`, unnegated, so `@media print, (min-width: 40rem)` counts as
+    screen. Each has a control, and controls pin `not print`, `only print` and a read property.
+    The check is structural: it reads the stylesheets' text, and does not prove that a selector
+    reaches its element in a real document or that a hook is used as its reason says.
   - Sixteen of the classes are now flex or grid containers, so `normalise.mjs`'s `CONTAINERS`
     gains them (`scripts/salt_normalise_containers.mjs --write`): white space between their
     children, which a browser does not draw, is dropped on both sides of a comparison. Nothing that
@@ -483,7 +492,10 @@ test, applied through section 2's table, where the stricter row wins.
     no rule did.
   - Not reached: the archive's and the search view's own headings and forms sit in unclassed
     elements, so they keep the platform's page measure; giving them the reading measure needs a
-    class in the markup.
+    class in the markup. The search results (`ul.salt-search__results`) have a class but no width
+    of their own either, deliberately: by the founder's ruling 7A the search heading, form and
+    results keep their common left edge and the platform's page measure for M4, and the whole
+    search page takes a reading width together in a follow-up, not one part of it here.
   - **Semver: MAJOR**, by `RELEASE-POLICY.md`'s stylesheets row: a change to how unchanged markup
     renders is MAJOR. It lands in the 1.0.0 candidate series as rc.9, so the semver call stays
     MAJOR. **What each target changes.** Both: serve the new `styles/salt.css`. Salt for

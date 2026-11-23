@@ -2417,10 +2417,23 @@ describe('every class on a markup element has a rule or is a declared hook (rc.9
     ['its only rule is for print', `@media print {\n  .salt-locations__name {\n    margin-inline-end: 1rem;\n  }\n}\n`],
     ['it is named only as an ancestor', `.salt-locations__name > span {\n  margin-inline-end: 1rem;\n}\n`],
     ['it is named only inside :not()', `.salt-locations__status:not(.salt-locations__name) {\n  margin-inline-end: 1rem;\n}\n`],
+    ['its only rule sets a custom property nothing reads', `.salt-locations__name {\n  --salt-locations-unread: 1rem;\n}\n`],
+    ['its only rule is for print, spelt only print', `@media only print {\n  .salt-locations__name {\n    margin-inline-end: 1rem;\n  }\n}\n`],
+    ['its only rule is for print in every branch of a list', `@media print, print and (orientation: landscape) {\n  .salt-locations__name {\n    margin-inline-end: 1rem;\n  }\n}\n`],
   ])('fails an owed class when %s', (_case, css) => {
     const { code, output } = runRaw(['blocks.css', replacing(NAME, css)])
     expect(output).toContain('contract/markup/ puts .salt-locations__name on an element, and no stylesheet draws it')
     expect(code).toBe(1)
+  })
+  // A rule that does reach the screen counts, however it is spelt.
+  itEach([
+    ['a custom property something reads', `.salt-locations__name {\n  --salt-section-space: var(--space-4);\n}\n`],
+    ['a media list with a screen branch beside print', `@media print, (min-width: 1px) {\n  .salt-locations__name {\n    margin-inline-end: 1rem;\n  }\n}\n`],
+    ['not print', `@media not print {\n  .salt-locations__name {\n    margin-inline-end: 1rem;\n  }\n}\n`],
+  ])('passes a class whose only rule is %s', (_case, css) => {
+    const { code, output } = runRaw(['blocks.css', replacing(NAME, css)])
+    expect(output).toContain('PASS: ')
+    expect(code).toBe(0)
   })
   it('passes a class drawn through :is() in its subject', () => {
     const { code, output } = runRaw(['blocks.css', replacing(NAME, `:is(.salt-locations__name) {\n  margin-inline-end: 1rem;\n}\n`)])
@@ -2441,6 +2454,16 @@ describe('every class on a markup element has a rule or is a declared hook (rc.9
     }]
     const { code, output } = runRaw(['blocks.css', replacing(NAME, '')], owed)
     expect(output).toContain("hook .salt-locations__name says its rule is owed")
+    expect(code).toBe(1)
+  })
+  it('fails a hook that no element in its own markup file carries', () => {
+    const elsewhere = ['contract/markup/case-study.json', (text) => {
+      const doc = JSON.parse(text)
+      doc.hooks = [...(doc.hooks ?? []), { class: 'salt-locations__name', role: 'name', reason: 'A test hook.' }]
+      return JSON.stringify(doc, null, 2)
+    }]
+    const { code, output } = runRaw(['blocks.css', replacing(NAME, '')], elsewhere)
+    expect(output).toContain('contract/markup/case-study.json declares .salt-locations__name a hook, but no element in contract/markup/case-study.json carries it')
     expect(code).toBe(1)
   })
   it('passes a class with no rule that its markup declares a hook', () => {

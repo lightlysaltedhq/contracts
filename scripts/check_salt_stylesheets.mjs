@@ -6115,16 +6115,22 @@ export function checkStylesheets(files) {
   // them on an element: a root, an element and its children, and a variant's tree. Not a rule's or a
   // note's mention, a platform's former name, a hook (kept with no rule) or an omitted class.
   const onElements = new Set()
-  const collect = (node) => {
-    if (Array.isArray(node)) { node.forEach(collect); return }
+  /* Each markup file's own element classes too, so a hook is checked against the file declaring it. */
+  const onFileElements = new Map()
+  const collect = (node, into) => {
+    if (Array.isArray(node)) { node.forEach((child) => collect(child, into)); return }
     if (!node || typeof node !== 'object') return
     for (const [key, value] of Object.entries(node)) {
       if (NOT_ELEMENTS.has(key)) continue
-      if (key === 'classes' && Array.isArray(value)) value.forEach((name) => onElements.add(name))
-      else collect(value)
+      if (key === 'classes' && Array.isArray(value)) value.forEach((name) => { onElements.add(name); into.add(name) })
+      else collect(value, into)
     }
   }
-  for (const file of markupFiles) collect(readJson(file))
+  for (const file of markupFiles) {
+    const own = new Set()
+    collect(readJson(file), own)
+    onFileElements.set(file, own)
+  }
   const styled = new Map()
   for (const [file, { rules }] of parsed) {
     for (const rule of rules) {
@@ -6150,12 +6156,36 @@ export function checkStylesheets(files) {
   /* A class counts as styled here only where a rule draws it: the class is in the selector's
      subject (its last compound, outside :not() and :has()), the rule declares something, and it is
      not for print alone. An empty rule, a print-only rule, or a class named only as an ancestor
-     (`.salt-x .salt-y` styles .salt-y, not .salt-x) leaves the element unstyled on screen. */
+     (`.salt-x .salt-y` styles .salt-y, not .salt-x) leaves the element unstyled on screen. This is a
+     structural check of the stylesheets' text: it does not prove that a rule's selector reaches the
+     element in a real document, nor that a hook is used for what its reason says. */
+  /* Two more ways a rule draws nothing on screen. Its only declarations set custom properties
+     nothing reads: no stylesheet and no value the markup writes reads them, and the token layer
+     does not name them for a runtime or a site, so they change nothing a reader sees; a property
+     something does read counts, wherever it is read. And a media query for print alone: every
+     query in its list is `print` (or `only print`), unnegated and with no `or`. A list with a
+     screen branch, `@media print, (min-width: 40rem)`, applies on screen and is not print-only. */
+  const tokenLayerNames = new Set((TOKEN_LAYER?.groups ?? []).flatMap((group) => (group.tokens ?? []).map((token) => token.name)))
+  const drawsSomething = (rule) => rule.order.some((property) => !property.startsWith('--') || reads.has(property) || tokenLayerNames.has(property))
+  const printOnly = (prelude) => {
+    const match = /^@media\b([\s\S]*)$/i.exec(prelude.trim())
+    if (match === null) return false
+    const queries = []
+    let depth = 0
+    let current = ''
+    for (const char of match[1] ?? '') {
+      if (char === '(') depth += 1
+      if (char === ')') depth -= 1
+      if (char === ',' && depth === 0) { queries.push(current); current = '' } else current += char
+    }
+    queries.push(current)
+    return queries.every((query) => /^\s*(?:only\s+)?print\b/i.test(query) && !/\bnot\b|\bor\b/i.test(query))
+  }
   const covered = new Map()
   for (const [file, { rules }] of parsed) {
     for (const rule of rules) {
-      if (rule.order.length === 0) continue
-      if (rule.at.some((prelude) => /^@media\b/i.test(prelude) && /\bprint\b/i.test(prelude) && !/\bnot\s+print\b/i.test(prelude))) continue
+      if (!drawsSomething(rule)) continue
+      if (rule.at.some(printOnly)) continue
       for (const selector of rule.selectors) {
         for (const name of subjectClasses(selector)) {
           if (!covered.has(name)) covered.set(name, new Set())
@@ -6172,6 +6202,7 @@ export function checkStylesheets(files) {
     for (const hook of readJson(file)?.hooks ?? []) {
       if (typeof hook?.class !== 'string') continue
       hooks.add(hook.class)
+      if (!onFileElements.get(file)?.has(hook.class)) fails.push(`${file} declares .${hook.class} a hook, but no element in ${file} carries it; a hook names a class its own markup draws, so take it out of hooks or put it on the element`)
       if (covered.has(hook.class)) fails.push(`${file} declares .${hook.class} a hook, kept with no rule, but ${[...covered.get(hook.class)].join(', ')} style(s) it; take it out of hooks, or take the rule out`)
       if (/\bowe[sd]?\b|\byet\b|\bmissing\b|\bto do\b|\btodo\b/i.test(hook.reason ?? '')) fails.push(`${file}'s hook .${hook.class} says its rule is owed ("${hook.reason}"); a hook is kept with no rule on purpose, so give the class its rule in styles/ and take it out of hooks`)
     }
