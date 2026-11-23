@@ -12,6 +12,11 @@ contract renames and folds what Salt for WordPress 5.0.0 and Salt for Next.js 0.
 *What a site does*). From 1.0.0, each change's part is decided by `RELEASE-POLICY.md`: section 1's
 test, applied through section 2's table, where the stricter row wins.
 
+### Accessibility fixes
+
+- Light `surface-alt` bands and footers use normal ink for secondary text. Other tones, dark tone routing and the foundations palette are unchanged.
+- On phones without JavaScript, the visible header menu wraps and its submenus open in the flow, keeping keyboard-focused links on screen. The scripted drawer and the head’s `noscript` style are unchanged.
+
 ### Added
 
 - The vocabulary (`./sections`): 17 sections (hero, rich-text, call-to-action, media-text,

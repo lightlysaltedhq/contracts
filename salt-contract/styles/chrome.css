@@ -690,18 +690,25 @@ button.salt-nav__toggle {
    * it predates the drawer; wrapping the header to three rows at every viewport was not an
    * answer to it.
    *
-   * At 320px, where WCAG 1.4.10 asks, the answer depends on the script, and the sentence that
-   * stood here said otherwise. Measured at 320 by 480 with eight items: WITH a script the
-   * burger is `flex`, the menu is in the drawer, and `scrollWidth` 320 equals `clientWidth`
-   * 320. WITHOUT one the burger is `none`, the menu is in this row, and `scrollWidth` is 589
-   * against 320. Three items fit either way. So the scriptless phone overflows once the menu
-   * is long enough — as it did before this unit, when there was no scriptless mode and no
-   * `flex-wrap` in this file at all. Neither introduced by this rule nor fixed by it, and it
-   * is the configuration this rule is written for, so it is said here rather than left to the
-   * paragraph above.
+   * Wrapping only the outer row still leaves a long scriptless menu wider than the phone.
+   * Wrap its list too, and open submenus in flow rather than beyond the right edge. The
+   * scripted phone header hides this nav; its drawer has its own layout.
    */
   .salt-header__inner {
     flex-wrap: var(--salt-header-phone-wrap, nowrap);
+  }
+
+  .salt-header__inner > .salt-nav > .salt-nav__list {
+    flex-wrap: var(--salt-header-phone-wrap, nowrap);
+  }
+
+  .salt-header__inner > .salt-nav .salt-nav__item {
+    flex-wrap: wrap;
+  }
+
+  .salt-header__inner > .salt-nav .salt-nav__submenu {
+    position: static;
+    flex-basis: 100%;
   }
 }
 

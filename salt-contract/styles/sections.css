@@ -401,7 +401,8 @@
   --salt-section-ink: var(--color-ink);
   --salt-section-ink-contra: var(--color-ink-inverse);
   --salt-section-border: var(--color-border);
-  --salt-section-ink-muted: var(--color-ink-muted);
+  /* Muted ink on the default light alternate surface falls below 4.5:1. */
+  --salt-section-ink-muted: var(--color-ink);
   --salt-section-boundary: var(--color-border-strong);
 }
 
