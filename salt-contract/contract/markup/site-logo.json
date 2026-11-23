@@ -17,12 +17,9 @@
       "data-swaps": {
         "value": "",
         "when": "a dark-scheme image is set"
-      },
-      "style": {
-        "value": "--logo-height: <n>px",
-        "when": "a height is set"
       }
-    }
+    },
+    "note": "The logo's height is never in the markup (section#no-inline-style). chrome.css declares --logo-height: 2rem on .salt-logo; a site that sets a height sets it once, site-wide, in its own stylesheet loaded after salt.css (.salt-logo { --logo-height: 48px; }). The site's height setting still decides the images' sizes, their drawn width in px."
   },
   "elements": [
     {
@@ -148,13 +145,14 @@
         }
       ],
       "owes": [
-        "data-swaps instead of has-dark; name on the link; --logo-height inline.",
+        "data-swaps instead of has-dark; name on the link; the logo height as --logo-height on .salt-logo in the site's own stylesheet, never inline (SC-029).",
         "SC-019, SC-025: in the header, the default scheme's logo carries loading=\"eager\" and the other scheme's loading=\"lazy\"; the footer's are both loading=\"lazy\"."
       ]
     },
     "nextjs": {
       "owes": [
-        "SC-019, SC-025: in the header, the default scheme's logo carries loading=\"eager\" and the other scheme's stays lazy; next/image lazy-loads both by default."
+        "SC-019, SC-025: in the header, the default scheme's logo carries loading=\"eager\" and the other scheme's stays lazy; next/image lazy-loads both by default.",
+        "The brand global's logo height as --logo-height on .salt-logo in the site's stylesheet, in place of the inline style <SiteLogo> writes (SC-029)."
       ]
     }
   }

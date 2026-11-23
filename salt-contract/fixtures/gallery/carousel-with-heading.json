@@ -46,8 +46,8 @@
   },
   "site": {
     "labels": {
-      "slide": "Slide"
+      "slide": "Slide {n} of {N}"
     }
   },
-  "$comment": "Slide wrapper aria-label is labels.slide + ' {n} of {N}'; the label is 'Slide'. Images are all lazy: carousel slides are never the priority image in this case (priorityMedia false)."
+  "$comment": "Slide wrapper aria-label is labels.slide, 'Slide {n} of {N}', with its placeholders replaced. Images are all lazy: carousel slides are never the priority image in this case (priorityMedia false)."
 }

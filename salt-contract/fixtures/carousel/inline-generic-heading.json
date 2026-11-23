@@ -1,6 +1,6 @@
 {
   "section": "carousel",
-  "$comment": "The cards have no link, so the track is a tab stop (tabindex 0). Slide labels read \"Slide 1 of 3\": labels.slide followed by \"{n} of {N}\". The inline card's title is a plain heading (no href, no arrow).",
+  "$comment": "The cards have no link, so the track is a tab stop (tabindex 0). Slide labels read \"Slide 1 of 3\": labels.slide, \"Slide {n} of {N}\", with its placeholders replaced (README, \"Labels\"). The inline card's title is a plain heading (no href, no arrow).",
   "summary": "Three inline generic cards with images under a heading: a carousel region named from the heading, slides wrapping the cards. The previous and next controls are mounted by script and are not in the server HTML.",
   "values": {
     "heading": "Recent gardens",
@@ -57,7 +57,7 @@
   "site": {
     "arrow": "→",
     "labels": {
-      "slide": "Slide"
+      "slide": "Slide {n} of {N}"
     }
   }
 }

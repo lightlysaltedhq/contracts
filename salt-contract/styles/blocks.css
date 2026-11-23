@@ -1183,7 +1183,8 @@
 
 /*
  * A rating drawn as its stored proportion: the filled row laid exactly over the outline row and
- * clipped to `--salt-rating-fill`, which the section writes as the rating's share of five.
+ * clipped to `--salt-rating-fill`, the rating's share of five, which the stars' `data-fill` sets in
+ * steps of 10 (card.json says how a rating rounds to a step).
  *
  * Clipped with `clip-path` rather than by narrowing the filled row. A narrowed row would wrap its
  * stars onto a second line, because `.salt-grid` makes `overflow-wrap: break-word` inherited, and
@@ -1215,6 +1216,50 @@
 
 .salt-showcase__stars-fill:dir(rtl) {
   clip-path: inset(0 0 0 calc(100% - var(--salt-rating-fill, 0%)));
+}
+
+.salt-showcase__stars[data-fill='0'] {
+  --salt-rating-fill: 0%;
+}
+
+.salt-showcase__stars[data-fill='10'] {
+  --salt-rating-fill: 10%;
+}
+
+.salt-showcase__stars[data-fill='20'] {
+  --salt-rating-fill: 20%;
+}
+
+.salt-showcase__stars[data-fill='30'] {
+  --salt-rating-fill: 30%;
+}
+
+.salt-showcase__stars[data-fill='40'] {
+  --salt-rating-fill: 40%;
+}
+
+.salt-showcase__stars[data-fill='50'] {
+  --salt-rating-fill: 50%;
+}
+
+.salt-showcase__stars[data-fill='60'] {
+  --salt-rating-fill: 60%;
+}
+
+.salt-showcase__stars[data-fill='70'] {
+  --salt-rating-fill: 70%;
+}
+
+.salt-showcase__stars[data-fill='80'] {
+  --salt-rating-fill: 80%;
+}
+
+.salt-showcase__stars[data-fill='90'] {
+  --salt-rating-fill: 90%;
+}
+
+.salt-showcase__stars[data-fill='100'] {
+  --salt-rating-fill: 100%;
 }
 
 /*

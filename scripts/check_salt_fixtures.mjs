@@ -225,6 +225,11 @@ function settingsFields(fieldsDoc) {
 const SITE_KEYS = ['arrow', 'labels', 'collectionIndexes', 'acceptsEnquiries', 'organisation', 'contactForm', 'timezone', 'maps',
   'name', 'home', 'logo', 'logoHeight', 'header', 'footer', 'consent', 'themeToggle', 'displayPreferences', 'search', 'caseStudy']
 
+// The WP Consent API's categories in its own order, and the API category each Salt category maps to
+// (site-footer.json's consent ruling, SC-030).
+const WP_CONSENT_API = ['functional', 'preferences', 'statistics', 'statistics-anonymous', 'marketing']
+const SALT_CONSENT = { analytics: 'statistics', embeds: 'marketing', marketing: 'marketing' }
+
 function checkSiteAndMedia(c) {
   const { input, at } = c
   if (input.site !== undefined && !isObject(input.site)) fail(`${at}.json: site must be an object`)
@@ -243,6 +248,20 @@ function checkSiteAndMedia(c) {
       (band ? tones.includes(cs.headerTone) : cs.headerTone === undefined) &&
       (cs.headerToneDark === undefined || (band && tones.includes(cs.headerToneDark))))) {
       fail(`${at}.json: site.caseStudy is { media, header, headerTone, headerToneDark }: media flow or aside, where the case study view draws its featured image; header plain or band; and with a band only, its tone and optionally its dark tone, each one of ${tones.join(', ')}`)
+    }
+  }
+  // The consent mechanism the site has wired (site-footer.json, SC-030): its boxes, one per WP
+  // Consent API category in use, in the API's order, each covering the Salt categories it sets.
+  const consent = input.site?.consent
+  if (consent !== undefined) {
+    const cats = isObject(consent) && Array.isArray(consent.categories) ? consent.categories : null
+    const ids = (cats ?? []).map((k) => k?.id)
+    const covered = (cats ?? []).flatMap((k) => (Array.isArray(k?.covers) ? k.covers : []))
+    if (!cats || cats.length === 0 || cats.some((k) => !isObject(k) || !Array.isArray(k.covers) || k.covers.length === 0 || typeof k.label !== 'string' || typeof k.description !== 'string') ||
+      ids.some((id) => !WP_CONSENT_API.includes(id)) || ids.some((id, i) => i > 0 && WP_CONSENT_API.indexOf(id) <= WP_CONSENT_API.indexOf(ids[i - 1])) ||
+      covered.some((x) => SALT_CONSENT[x] === undefined) || new Set(covered).size !== covered.length ||
+      (cats ?? []).some((k) => (k.covers ?? []).some((x) => SALT_CONSENT[x] !== k.id))) {
+      fail(`${at}.json: site.consent.categories is one box per WP Consent API category in use, in the API's order (${WP_CONSENT_API.join(', ')}): { id, covers, label, description }, id the API category and covers the Salt categories it sets, each in one box only and in the box its API category names (${Object.entries(SALT_CONSENT).map(([a, b]) => `${a} to ${b}`).join(', ')})`)
     }
   }
   for (const [id, m] of Object.entries(input.media ?? {})) {
@@ -552,29 +571,18 @@ function expand(nodes, doc) {
 }
 
 const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-const canonStyle = (v) => v.split(';').map((d) => d.trim()).filter(Boolean).map((d) => {
-  const i = d.indexOf(':')
-  return i === -1 ? d : `${d.slice(0, i).trim()}:${d.slice(i + 1).trim().replace(/\s+/g, ' ')}`
-}).join(';')
 
 // Placeholders the case fixes, from the wrapper's settled data (a section case, or a view's
 // nested section); any other <placeholder> matches any text. A chrome case, or a view nesting no
-// section, fixes none, except the case study view: its aside's rows are the parts the view counts
-// beside the image, and its measure a default band's, 64rem, since a fixture draws no site that
-// widened its bands (case-study.json).
-const placeholders = (c) => ({
-  ...(c.section === 'case-study' ? { '<n>': String(caseStudyBeside(c)), '<measure>': '64rem' } : {}),
-  ...(c.anchor == null ? {} : {
-    '<anchor>': c.anchor,
-    ...(c.index !== undefined ? { '<section index>': String(c.index) } : {}),
-    '<spacing>': effectiveSetting(c, 'spacing'),
-    '<strength>': c.settings?.backgroundImage?.scrimStrength ?? 'strong',
-  }),
+// section, fixes none.
+const placeholders = (c) => (c.anchor == null ? {} : {
+  '<anchor>': c.anchor,
+  ...(c.index !== undefined ? { '<section index>': String(c.index) } : {}),
 })
 
 function templateMatch(tpl, value, name, c) {
   if (tpl.startsWith('from:')) return true
-  const canon = name === 'style' ? canonStyle : (x) => x
+  const canon = (x) => x
   const known = placeholders(c)
   const re = canon(tpl).split(/(<[^<>]+>)/).map((part) => {
     if (known[part] !== undefined) return escapeRe(known[part])
@@ -591,9 +599,9 @@ function templateMatch(tpl, value, name, c) {
 const textOf = (el) => el.children.map((x) => (x.type === 'text' ? x.value : textOf(x))).join('').replace(/\s+/g, ' ').trim()
 const isImage = (c, id) => typeof id === 'string' && isObject(c.input.media?.[id])
 const background = (c) => isImage(c, c.settings?.backgroundImage?.image)
-// The case study view's aside (case-study-view.tsx): the parts the image runs beside are the
-// challenge, the solution, a gallery with images and a safe live-site link; with none, or no
-// image, the image stays in the flow whatever the site's layout. A safe link is relative or
+// The case study view's aside (case-study.json, data-media): the sidebar parts the image runs
+// beside are exactly the challenge, the solution, a gallery with images and a safe live-site link;
+// with none, or no image, the image stays in the flow whatever the site's layout. A safe link is relative or
 // http, https, mailto or tel, as isSafeHref allows, after the whitespace and control characters
 // a browser strips.
 const safeHref = (v) => {
@@ -699,12 +707,14 @@ const WHEN = {
   'site-footer:links:aria-labelledby': columnTitled,
   'section:root:data-media': (c) => background(c),
   'case-study:article:data-media': caseStudyAside,
-  'case-study:article:style': caseStudyAside,
-  // A drawn background always has a fit, so its style always applies (media.json).
-  'section:background:style': (c) => background(c),
+  'case-study:article:data-aside-rows': caseStudyAside,
+  // A drawn background always has a fit (media.json), and a position unless it is the focal point
+  // of an image that stores none (section#background-position).
+  'section:background:data-fit': (c) => background(c),
+  'section:background:data-focal-x': (c) => (background(c) ? backgroundAt(c) !== null : undefined),
+  'section:background:data-focal-y': (c) => (background(c) ? backgroundAt(c) !== null : undefined),
   'section:root:data-divider': (c) => effectiveSetting(c, 'divider') === true,
   'section:root:data-collapse-top': (c) => c.input.context.collapseTop === true,
-  'section:root:style': (c) => effectiveSetting(c, 'spacing') !== 'none',
   'hero:root:data-media-side': (c) => effective(c, 'variant') === 'split' && isImage(c, c.values.image),
   'hero:root:data-align': (c) => effective(c, 'variant') === 'minimal',
   'button:root:target': newTab,
@@ -744,16 +754,18 @@ function rowSide(c, el) {
   const row = shown[k]
   return row ? row.mediaSide ?? byName.get('mediaSide').default : undefined
 }
-// The background's inline style, as media.json writes it: the fit, and the position unless it is
-// the focal point of an image that stores none.
-const KEYWORD = { 'top-left': 'top left', top: 'top', 'top-right': 'top right', left: 'left', centre: 'center', right: 'right',
-  'bottom-left': 'bottom left', bottom: 'bottom', 'bottom-right': 'bottom right' }
-function backgroundStyle(c) {
+// The background's position as section#background-position writes it: [x, y] in per cent, each a
+// step of 5, from a named position or the image's stored focal point (each axis snapped to the
+// nearest step, halves up), or null for the focal point of an image that stores none.
+const NAMED = { 'top-left': [0, 0], top: [50, 0], 'top-right': [100, 0], left: [0, 50], centre: [50, 50], right: [100, 50],
+  'bottom-left': [0, 100], bottom: [50, 100], 'bottom-right': [100, 100] }
+const snap5 = (v) => Math.min(100, Math.max(0, 5 * Math.floor(v / 5 + 0.5)))
+function backgroundAt(c) {
   const bg = c.settings?.backgroundImage ?? {}
   const position = bg.position ?? 'focal-point'
+  if (position !== 'focal-point') return NAMED[position]
   const focal = c.input.media?.[bg.image]?.focalPoint
-  const at = position === 'focal-point' ? (focal ? `${focal.x}% ${focal.y}%` : null) : KEYWORD[position]
-  return `object-fit: ${bg.fit ?? 'cover'}${at ? `; object-position: ${at}` : ''}`
+  return focal ? [snap5(focal.x), snap5(focal.y)] : null
 }
 // A data attribute that mirrors one of the section's fields carries that field's value.
 const field = (name) => (c) => { const v = effective(c, name); return v === undefined ? undefined : String(v) }
@@ -778,7 +790,11 @@ const VALUE = {
   'search-form:input:value': (c) => c.input.document?.query,
   // An untitled column's list takes the footer navigation's name.
   'site-footer:links:aria-label': (c, el) => { for (let p = c.parents.get(el); p; p = c.parents.get(p)) if (p.name === 'nav') return attr(p, 'aria-label') },
-  'section:background:style': backgroundStyle,
+  'section:background:data-fit': (c) => c.settings?.backgroundImage?.fit ?? 'cover',
+  'section:background:data-focal-x': (c) => (backgroundAt(c) ? String(backgroundAt(c)[0]) : undefined),
+  'section:background:data-focal-y': (c) => (backgroundAt(c) ? String(backgroundAt(c)[1]) : undefined),
+  'section:scrim:data-strength': (c) => c.settings?.backgroundImage?.scrimStrength ?? 'strong',
+  'case-study:article:data-aside-rows': (c) => String(caseStudyBeside(c)),
   'section:root:data-track': (c) => c.track,
   'section:root:data-tone': (c) => effectiveSetting(c, 'tone'),
   'section:root:data-tone-dark': darkTone,
@@ -808,8 +824,7 @@ function checkAttrs(alt, el, c) {
     // Where the case fixes the value exactly, that is the test, and the template's shape is not.
     const want = VALUE[alt.from?.[name]]?.(c, el)
     if (typeof want === 'string') {
-      const canon = name === 'style' ? canonStyle : (x) => x
-      if (canon(value) !== canon(want)) problems.push(`${describe(el)} ${name}="${value}" disagrees with the case, which gives ${JSON.stringify(want)}`)
+      if (value !== want) problems.push(`${describe(el)} ${name}="${value}" disagrees with the case, which gives ${JSON.stringify(want)}`)
       continue
     }
     if (typeof rule === 'string') { if (!templateMatch(rule, value, name, c)) problems.push(`${describe(el)} ${name}="${value}" is not ${JSON.stringify(rule)}`); continue }
@@ -1037,6 +1052,17 @@ function checkMarkup(c) {
     const open = c.input.state?.[key] === true
     if (isDrawn && !open) fail(`${at}.html: ${what} is drawn, but the case's state does not say it is open (state.${key})`)
     if (!isDrawn && open) fail(`${at}.html: state.${key} says ${what} is open, but it is not drawn`)
+  }
+  // The footer's consent control is drawn if and only if the site has a consent mechanism wired,
+  // and an open panel draws the site's boxes, in order (site-footer.json, SC-030).
+  if (every().some((e) => e.name === 'footer' && classesOf(e).includes('salt-footer'))) {
+    const wired = isObject(c.input.site?.consent)
+    const control = every().some((e) => classesOf(e).includes('salt-footer__consent'))
+    if (wired && !control) fail(`${at}.html: the site has a consent mechanism wired (site.consent), but the footer draws no consent control`)
+    if (!wired && control) fail(`${at}.html: the footer draws the consent control, but the site has no consent mechanism wired (site.consent); it is drawn only when one is`)
+    const boxes = every().filter((e) => classesOf(e).includes('salt-consent-panel__checkbox')).map((e) => attr(e, 'name'))
+    const want = (c.input.site?.consent?.categories ?? []).map((k) => k?.id)
+    if (boxes.length && boxes.join(',') !== want.join(',')) fail(`${at}.html: the consent panel draws the boxes ${boxes.join(', ')}; the site's WP Consent API categories are ${want.join(', ')}, one box each, in that order`)
   }
   nestedCase = c.kind === 'section' || !c.nested ? null : c
   const { doc, spec, elements } = c.kind === 'section' ? wrapperSpec(c) : documentSpec(c)

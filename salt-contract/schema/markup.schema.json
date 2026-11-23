@@ -122,8 +122,12 @@
     },
     "attributes": {
       "type": "object",
+      "description": "An element's attributes. Never style: nothing the contract draws carries a style attribute (section#no-inline-style), so a value the design varies is a data attribute from a fixed set that the shared stylesheets style.",
       "propertyNames": {
-        "pattern": "^[a-zA-Z][a-zA-Z0-9-]*$"
+        "pattern": "^[a-zA-Z][a-zA-Z0-9-]*$",
+        "not": {
+          "const": "style"
+        }
       },
       "additionalProperties": {
         "$ref": "#/$defs/attributeValue"

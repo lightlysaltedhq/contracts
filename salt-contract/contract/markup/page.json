@@ -177,6 +177,10 @@
   "notes": [
     {
       "topic": "ruling",
+      "text": "The scriptless style in the head is the one inline style element the contract draws, and nothing it draws carries a style attribute (section#no-inline-style, SC-029). A target with a strict Content-Security-Policy (no 'unsafe-inline' for styles) allows that element by a hash or a nonce, and keeps its contents byte for byte as written here, so a hash of them stays valid; Salt for WordPress allows it by the sha256 of its exact contents."
+    },
+    {
+      "topic": "ruling",
       "text": "The consent banner is drawn only when the site runs an integration that needs consent (SC-006). Salt for WordPress ports Salt for Next.js's banner, gate, preferences panel, categories and cookie format; a client that needs a certified consent tool (Google Ads personalisation in the UK and EEA) uses one as a Grain override."
     },
     {

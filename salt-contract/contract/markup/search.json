@@ -26,7 +26,7 @@
     {
       "role": "empty",
       "element": "p",
-      "text": "from:labels.noResults (query)",
+      "text": "from:labels.noResults ({q})",
       "optional": true,
       "when": "a query matches nothing",
       "note": "The empty state is the form and a sentence, never an empty list."
@@ -46,7 +46,7 @@
           "attributes": {
             "id": "search__results-heading"
           },
-          "text": "from:labels.results (count, query)"
+          "text": "from:labels.results ({n}, {q})"
         },
         {
           "role": "more",
@@ -84,7 +84,7 @@
                 {
                   "role": "result-kind",
                   "element": "p",
-                  "text": "from:labels.kind (post, page, service, case study)"
+                  "text": "from:labels.kind ({kind})"
                 },
                 {
                   "role": "result-note",

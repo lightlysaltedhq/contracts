@@ -51,7 +51,7 @@
   },
   "site": {
     "labels": {
-      "rating": "Rated"
+      "rating": "Rated {n} of {N}"
     }
   }
 }

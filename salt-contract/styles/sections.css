@@ -38,6 +38,23 @@
 }
 
 /*
+ * The band's block space, from its `data-spacing` (sm, md or lg; none draws none). The markup writes
+ * no style attribute (a site's Content-Security-Policy need not allow inline styles), so each step is
+ * a rule here, naming its `--space-section-*` token.
+ */
+.salt-section[data-spacing='sm'] {
+  --salt-section-space: var(--space-section-sm);
+}
+
+.salt-section[data-spacing='md'] {
+  --salt-section-space: var(--space-section-md);
+}
+
+.salt-section[data-spacing='lg'] {
+  --salt-section-space: var(--space-section-lg);
+}
+
+/*
  * The two background layers, out of the content flow.
  *
  * Both are decorative by contract — the media carries `alt=""` and `aria-hidden`, and the
@@ -45,10 +62,11 @@
  * loses nothing but atmosphere.
  */
 /*
- * The media fills the band (SC-011). Salt for Next.js's image component writes the same fill as
- * inline style, which is redundant beside this and harmless; a plain `img`, as Salt for WordPress
- * draws it, has only this. `object-fit` is the default fit: an inline `object-fit` or
- * `object-position` the markup writes for the editor's fit and focal point outranks it.
+ * The media fills the band (SC-011), and the markup writes no style attribute on it: the fit and
+ * the position arrive as data attributes from fixed sets, so a site's Content-Security-Policy need
+ * not allow inline styles. `cover` is the default fit and `data-fit='contain'` the other. The
+ * position is `data-focal-x` and `data-focal-y`, each 0 to 100 in steps of 5 (section.json says how
+ * a stored focal point and the nine named positions reach them); with neither, the centre.
  */
 .salt-section__media {
   position: absolute;
@@ -57,6 +75,180 @@
   inline-size: 100%;
   block-size: 100%;
   object-fit: cover;
+  object-position: var(--salt-focal-x, 50%) var(--salt-focal-y, 50%);
+}
+
+.salt-section__media[data-fit='contain'] {
+  object-fit: contain;
+}
+
+/* The focal point's 21 steps on each axis. */
+.salt-section__media[data-focal-x='0'] {
+  --salt-focal-x: 0%;
+}
+
+.salt-section__media[data-focal-x='5'] {
+  --salt-focal-x: 5%;
+}
+
+.salt-section__media[data-focal-x='10'] {
+  --salt-focal-x: 10%;
+}
+
+.salt-section__media[data-focal-x='15'] {
+  --salt-focal-x: 15%;
+}
+
+.salt-section__media[data-focal-x='20'] {
+  --salt-focal-x: 20%;
+}
+
+.salt-section__media[data-focal-x='25'] {
+  --salt-focal-x: 25%;
+}
+
+.salt-section__media[data-focal-x='30'] {
+  --salt-focal-x: 30%;
+}
+
+.salt-section__media[data-focal-x='35'] {
+  --salt-focal-x: 35%;
+}
+
+.salt-section__media[data-focal-x='40'] {
+  --salt-focal-x: 40%;
+}
+
+.salt-section__media[data-focal-x='45'] {
+  --salt-focal-x: 45%;
+}
+
+.salt-section__media[data-focal-x='50'] {
+  --salt-focal-x: 50%;
+}
+
+.salt-section__media[data-focal-x='55'] {
+  --salt-focal-x: 55%;
+}
+
+.salt-section__media[data-focal-x='60'] {
+  --salt-focal-x: 60%;
+}
+
+.salt-section__media[data-focal-x='65'] {
+  --salt-focal-x: 65%;
+}
+
+.salt-section__media[data-focal-x='70'] {
+  --salt-focal-x: 70%;
+}
+
+.salt-section__media[data-focal-x='75'] {
+  --salt-focal-x: 75%;
+}
+
+.salt-section__media[data-focal-x='80'] {
+  --salt-focal-x: 80%;
+}
+
+.salt-section__media[data-focal-x='85'] {
+  --salt-focal-x: 85%;
+}
+
+.salt-section__media[data-focal-x='90'] {
+  --salt-focal-x: 90%;
+}
+
+.salt-section__media[data-focal-x='95'] {
+  --salt-focal-x: 95%;
+}
+
+.salt-section__media[data-focal-x='100'] {
+  --salt-focal-x: 100%;
+}
+
+.salt-section__media[data-focal-y='0'] {
+  --salt-focal-y: 0%;
+}
+
+.salt-section__media[data-focal-y='5'] {
+  --salt-focal-y: 5%;
+}
+
+.salt-section__media[data-focal-y='10'] {
+  --salt-focal-y: 10%;
+}
+
+.salt-section__media[data-focal-y='15'] {
+  --salt-focal-y: 15%;
+}
+
+.salt-section__media[data-focal-y='20'] {
+  --salt-focal-y: 20%;
+}
+
+.salt-section__media[data-focal-y='25'] {
+  --salt-focal-y: 25%;
+}
+
+.salt-section__media[data-focal-y='30'] {
+  --salt-focal-y: 30%;
+}
+
+.salt-section__media[data-focal-y='35'] {
+  --salt-focal-y: 35%;
+}
+
+.salt-section__media[data-focal-y='40'] {
+  --salt-focal-y: 40%;
+}
+
+.salt-section__media[data-focal-y='45'] {
+  --salt-focal-y: 45%;
+}
+
+.salt-section__media[data-focal-y='50'] {
+  --salt-focal-y: 50%;
+}
+
+.salt-section__media[data-focal-y='55'] {
+  --salt-focal-y: 55%;
+}
+
+.salt-section__media[data-focal-y='60'] {
+  --salt-focal-y: 60%;
+}
+
+.salt-section__media[data-focal-y='65'] {
+  --salt-focal-y: 65%;
+}
+
+.salt-section__media[data-focal-y='70'] {
+  --salt-focal-y: 70%;
+}
+
+.salt-section__media[data-focal-y='75'] {
+  --salt-focal-y: 75%;
+}
+
+.salt-section__media[data-focal-y='80'] {
+  --salt-focal-y: 80%;
+}
+
+.salt-section__media[data-focal-y='85'] {
+  --salt-focal-y: 85%;
+}
+
+.salt-section__media[data-focal-y='90'] {
+  --salt-focal-y: 90%;
+}
+
+.salt-section__media[data-focal-y='95'] {
+  --salt-focal-y: 95%;
+}
+
+.salt-section__media[data-focal-y='100'] {
+  --salt-focal-y: 100%;
 }
 
 .salt-section__scrim {
@@ -71,13 +263,25 @@
  * Tinting with the tone rather than with black is what keeps the composite honest. At
  * `strong` the band trends back towards the pairing the contrast audit proved, so text over
  * a photograph converges on a measured result instead of on an arbitrary grey. The alpha
- * arrives as `--salt-scrim-alpha` from the component, naming a `--scrim-*` token, so there
- * is no alpha literal at the point of use and a client retuning one token reaches every
- * scrimmed band at once.
+ * is `--salt-scrim-alpha`, set from the scrim's `data-strength` (subtle, standard or strong) to
+ * the `--scrim-*` token of that name, so there is no alpha literal at the point of use and a
+ * client retuning one token reaches every scrimmed band at once.
  */
 .salt-section__scrim {
   background-color: var(--salt-section-bg);
   opacity: var(--salt-scrim-alpha);
+}
+
+.salt-section__scrim[data-strength='subtle'] {
+  --salt-scrim-alpha: var(--scrim-subtle);
+}
+
+.salt-section__scrim[data-strength='standard'] {
+  --salt-scrim-alpha: var(--scrim-standard);
+}
+
+.salt-section__scrim[data-strength='strong'] {
+  --salt-scrim-alpha: var(--scrim-strong);
 }
 
 /* Content sits above both layers. */

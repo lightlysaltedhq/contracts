@@ -1,6 +1,6 @@
 {
   "section": "hero",
-  "summary": "Minimal, centred, on the inverse band with the alternate surface in dark mode (data-tone-dark differs). Spacing none, so no spacing style; collapsed onto the band above.",
+  "summary": "Minimal, centred, on the inverse band with the alternate surface in dark mode (data-tone-dark differs). Spacing none, so the band has no block space; collapsed onto the band above.",
   "values": {
     "variant": "minimal",
     "eyebrow": "About us",

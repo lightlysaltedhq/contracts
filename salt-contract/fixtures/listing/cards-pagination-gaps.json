@@ -85,7 +85,7 @@
       "nav": "Pagination",
       "previous": "Previous",
       "next": "Next",
-      "page": "Page",
+      "page": "Page {n}",
       "empty": "There are no posts to show yet."
     }
   }

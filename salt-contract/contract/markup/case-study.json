@@ -22,12 +22,18 @@
       "attributes": {
         "data-media": {
           "value": "aside",
-          "when": "media aside, an image and a sidebar part"
+          "when": "media aside, an image and a sidebar part",
+          "note": "The site's case-study media setting is aside, the featured image resolves, and at least one sidebar part is drawn. The sidebar parts are exactly four, the parts the image runs beside: the challenge (filled), the solution (filled), the gallery (with at least one image that resolves) and the live-site link (a safe URL). The header, the results, the details and the delivered services are never sidebar parts (SC-032). With none drawn, the image stays in the flow and the article carries neither data-media nor data-aside-rows."
         },
-        "style": {
-          "value": "--salt-case-study-view-aside-rows: <n>; --salt-case-study-view-measure: <measure>",
+        "data-aside-rows": {
+          "enum": [
+            "1",
+            "2",
+            "3",
+            "4"
+          ],
           "when": "data-media is aside",
-          "note": "<n> is the number of grid rows the image spans beside the article's parts, counted by the view, since the grid cannot count them. <measure> is the band's measure, a rem length: 64rem for a default band (the default measure, --container-5xl), unless a site that widened its bands passes its own width. The stylesheet (primitives.css) reads both."
+          "note": "How many sidebar parts are drawn (data-media's note), 1 to 4: the grid rows the image spans beside them, which the grid cannot count. primitives.css sets --salt-case-study-view-aside-rows from it. The measure the aside grid is centred in is fixed in primitives.css as a default band's, --container-5xl; a site that widened its bands widens it in its own stylesheet. No style attribute carries either (section#no-inline-style)."
         }
       },
       "children": [
@@ -386,8 +392,7 @@
                   "note": "site.caseStudy.headerToneDark, or the tone itself when that is unset, written server-side as a section's is."
                 },
                 "data-spacing": "md",
-                "data-width": "default",
-                "style": "--salt-section-space: var(--space-section-md)"
+                "data-width": "default"
               },
               "children": [
                 {
@@ -513,7 +518,7 @@
               ]
             }
           },
-          "note": "The header drawn as section.json draws a band, so the tone's roles, a site's rules for a band's measure and its full-bleed exemptions all reach it: salt-section with the tones, md spacing, the default width and the spacing's custom property, and its parts inside div.salt-section__content."
+          "note": "The header drawn as section.json draws a band, so the tone's roles, a site's rules for a band's measure and its full-bleed exemptions all reach it: salt-section with the tones, md spacing (which sections.css turns into the band's block space) and the default width, and its parts inside div.salt-section__content."
         }
       },
       "note": "plain draws the base tree. band wraps the header's parts in a content div, so the order differs from plain's."
@@ -581,13 +586,15 @@
       ],
       "owes": [
         "The case-study view's markup above.",
-        "The style custom properties --salt-case-study-view-aside-rows and --salt-case-study-view-measure on the article when the media is aside.",
+        "data-aside-rows on the article when the media is aside, counting the four sidebar parts drawn (challenge, solution, gallery, live-site link), as its own count already does; no style attribute, and no measure in the markup (SC-029).",
         "The section heading ids case-study__challenge-heading, case-study__solution-heading, case-study__gallery-heading and case-study__services-heading, each named by its section's aria-labelledby (SC-012).",
         "An ACF options page on which editors set the case-study view's header band (the header variant, plain or band, with the band's tone and dark tone) and its aside layout (the featured image in the flow or aside), the settings a fixture gives as site.caseStudy: header, headerTone, headerToneDark and media."
       ]
     },
     "nextjs": {
       "owes": [
+        "data-aside-rows on the article when the media is aside, in place of the inline --salt-case-study-view-aside-rows and --salt-case-study-view-measure it writes today; the measure prop leaves the markup, fixed in primitives.css (SC-029).",
+        "The header band's spacing from data-spacing alone, with no inline --salt-section-space (SC-029).",
         "Name its four sections: the ids case-study__challenge-heading, case-study__solution-heading, case-study__gallery-heading and case-study__services-heading on their h2s, and aria-labelledby on each section (section#labelled-by, SC-012).",
         "A delivered service's card image declares its slot from contract/image-sizes.json, at three columns, the grid it is drawn in: the card slot in the full band in the flow, and in the aside the aside-card slot, the default band from 64rem, where primitives.css confines the services to the measure, and the full band below it; case-study-view.tsx passes the unbanded card slot, which is a carousel slide's."
       ]

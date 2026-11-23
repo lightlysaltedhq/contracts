@@ -2221,7 +2221,7 @@ describe('each remaining contract fails when the property it holds is taken away
    from the logo's by its parent. */
 describe('every framed image fills its frame', () => {
   itEach([
-    ['sections.css', 'the band media loses its cover', replacing('  block-size: 100%;\n  object-fit: cover;\n}', '  block-size: 100%;\n}'), '`.salt-section__media` in sections.css declares no `object-fit`'],
+    ['sections.css', 'the band media loses its cover', replacing('  block-size: 100%;\n  object-fit: cover;\n  object-position:', '  block-size: 100%;\n  object-position:'), '`.salt-section__media` in sections.css declares no `object-fit`'],
     ['blocks.css', 'a logo covers its frame', replacing('  block-size: 100%;\n  object-fit: contain;\n}', '  block-size: 100%;\n  object-fit: cover;\n}'), 'sets `object-fit: cover`; the fill is `object-fit: contain`'],
     ['blocks.css', 'the card photograph is no longer absolutely positioned', replacing('.salt-showcase__media > img {\n  position: absolute;', '.salt-showcase__media > img {\n  position: static;'), '`.salt-showcase__media > img` in blocks.css sets `position: static`'],
     ['primitives.css', 'the case study gallery loses its fill rule', replacing('.salt-case-study-view__media > img,\n.salt-case-study-view__frame > img {', '.salt-case-study-view__media > img {'), 'no unconditional `.salt-case-study-view__frame > img` rule in primitives.css fills its frame'],
@@ -2260,13 +2260,12 @@ const tokenLayer = (edit) => ['contract/token-layer.json', (text) => {
   return JSON.stringify(layer, null, 2)
 }]
 const tokenNamed = (layer, name) => layer.groups.flatMap((group) => group.tokens).find((token) => token.name === name)
-const writeOf = (layer, property) => layer.writes.find((entry) => entry.property === property)
 
 describe('the parse is whole, across every stylesheet in styles/', () => {
   itEach([
     ['a stylesheet the contracts are written against is missing', [removeFile('sections.css')], 'styles/sections.css is missing'],
     /* An unclosed string ends at its line, as in a browser, so the rules after it are still read. */
-    ['an unclosed string hides a keyframe on the next line', [['blocks.css', appending(".salt-a::after { content: 'oops; }\n@keyframes zz { from { color: red; } }")]], 'Parsed 87 rules from blocks.css but the source contains 89 declaration blocks'],
+    ['an unclosed string hides a keyframe on the next line', [['blocks.css', appending(".salt-a::after { content: 'oops; }\n@keyframes zz { from { color: red; } }")]], 'Parsed 98 rules from blocks.css but the source contains 100 declaration blocks'],
     ['a rule nested inside another, which the parse cannot read', [['blocks.css', appending('.salt-note {\n  .salt-x {\n    margin: 0;\n  }\n}')]], 'The parse is dropping rules'],
     ['a declaration written straight into a media block', [['blocks.css', appending('@media (min-width: 48rem) {\n  margin: 0;\n}')]], "directly in an at-rule's block"],
     ['a new stylesheet that drops a focus outline, which a contract sweeping every file reads', [addFile('extra.css', '.salt-button {\n  outline: none;\n}\n')], 'extra.css .salt-button outline: declared outside the focus rules'],
@@ -2294,7 +2293,7 @@ describe('the token layer names exactly what the stylesheets read', () => {
     ['the token layer names a property twice', [tokenLayer((layer) => layer.groups[0].tokens.push({ ...tokenNamed(layer, '--color-ink') }))], 'names --color-ink twice'],
     ['the token layer names a property the stylesheets declare', [tokenLayer((layer) => layer.groups[0].tokens.push({ name: '--salt-section-bg', meaning: 'The band.', source: 'salt' }))], 'names --salt-section-bg, which the stylesheets declare themselves'],
     ['a property read without a fallback is marked optional', [tokenLayer((layer) => { tokenNamed(layer, '--header-height').optional = true })], 'marks --header-height optional, but 1 of its 1 read(s) have no fallback'],
-    ['a property with a fallback at every read is not marked optional', [tokenLayer((layer) => { delete tokenNamed(layer, '--salt-rating-fill').optional })], '--salt-rating-fill has a fallback at every read (blocks.css), so contract/token-layer.json marks it optional'],
+    ['a property with a fallback at every read is not marked optional', [tokenLayer((layer) => { delete tokenNamed(layer, '--salt-consent-banner-size').optional })], '--salt-consent-banner-size has a fallback at every read'],
     ['a read loses its fallback', [['chrome.css', replacing('var(--duration-moderate, 200ms)', 'var(--duration-moderate)')]], 'marks --duration-moderate optional, but 1 of its 1 read(s) have no fallback'],
     ['the token layer is not JSON', [['contract/token-layer.json', (text) => text.slice(1)]], 'contract/token-layer.json is missing or not JSON'],
     /* A property only a dial's rungs read passes unread while the dial lists it under requires. */
@@ -2305,18 +2304,11 @@ describe('the token layer names exactly what the stylesheets read', () => {
       return JSON.stringify(dials)
     }]], 'says --color-shadow-lg is required by shadows, but contract/dials.json gives no such dial that requires it'],
     ['a dial-required property naming a dial that does not exist', [tokenLayer((layer) => { tokenNamed(layer, '--color-shadow-sm').requiredBy = ['elevation'] })], 'says --color-shadow-sm is required by elevation'],
-    /* What the markup writes is read too (T2), through each placeholder's value map. */
-    ['a token the markup writes into a band is dropped', [tokenLayer((layer) => { for (const g of layer.groups) g.tokens = g.tokens.filter((t) => t.name !== '--scrim-strong') })], 'contract/markup/section.json read(s) --scrim-strong, which contract/token-layer.json does not name'],
-    ['a spacing the markup writes is dropped', [tokenLayer((layer) => { for (const g of layer.groups) g.tokens = g.tokens.filter((t) => t.name !== '--space-section-lg') })], 'contract/markup/section.json read(s) --space-section-lg, which contract/token-layer.json does not name'],
-    ['the value map loses its exception, so `none` would be a token', [tokenLayer((layer) => { delete writeOf(layer, '--salt-section-space').values.spacing.except })], 'read(s) --space-section-none, which contract/token-layer.json does not name'],
-    ['a placeholder the token layer gives no values for', [tokenLayer((layer) => { layer.writes = layer.writes.filter((entry) => entry.property !== '--salt-scrim-alpha') })], "writes --salt-scrim-alpha as var(--scrim-<strength>), and contract/token-layer.json's writes give no values for <strength>"],
-    ['a value map naming no field', [tokenLayer((layer) => { writeOf(layer, '--salt-scrim-alpha').values.strength.field = '_section-settings#strength' })], "fills --salt-scrim-alpha's <strength> from _section-settings#strength, which is not a field with options"],
-    ['value maps for a property no markup writes', [tokenLayer((layer) => { layer.writes.push({ property: '--color-ink', values: { spacing: { field: '_section-settings#spacing' } } }) })], 'lists writes for --color-ink, which no markup element writes'],
-    /* Each placeholder by name (Z4): one map does not stand in for another, and a stale one fails. */
-    ['a placeholder named differently from its map', [tokenLayer((layer) => { const entry = writeOf(layer, '--salt-scrim-alpha'); entry.values = { alpha: entry.values.strength } })], "give no values for <strength>"],
-    ['a map for a placeholder the markup does not write', [tokenLayer((layer) => { writeOf(layer, '--salt-scrim-alpha').values.opacity = { field: '_section-settings#scrimStrength' } })], 'fills <opacity> in --salt-scrim-alpha, which no markup element writes'],
-    ['a second placeholder in one value, with no map of its own', [addFile('contract/markup/zz-write.json', JSON.stringify({ root: { attributes: { style: '--salt-scrim-alpha: var(--scrim-<strength>, var(--scrim-<fallback>))' } } }))], 'give no values for <fallback>'],
-    ['writes listed twice for one property', [tokenLayer((layer) => { layer.writes.push(structuredClone(writeOf(layer, '--salt-scrim-alpha'))) })], 'lists writes for --salt-scrim-alpha twice'],
+    /* The tokens sections.css sets from a band's data attributes are read too (SC-029). */
+    ['a scrim strength the stylesheet sets is dropped', [tokenLayer((layer) => { for (const g of layer.groups) g.tokens = g.tokens.filter((t) => t.name !== '--scrim-strong') })], 'sections.css read(s) --scrim-strong, which contract/token-layer.json does not name'],
+    ['a spacing the stylesheet sets is dropped', [tokenLayer((layer) => { for (const g of layer.groups) g.tokens = g.tokens.filter((t) => t.name !== '--space-section-lg') })], 'read(s) --space-section-lg, which contract/token-layer.json does not name'],
+    /* The markup writes fixed values only, so a placeholder in a written value is refused (SC-029). */
+    ['a placeholder in a value the markup writes', [addFile('contract/markup/zz-write.json', JSON.stringify({ elements: [{ element: 'noscript', children: [{ element: 'style', text: '.salt-section { --salt-scrim-alpha: var(--scrim-<strength>); }' }] }] }))], 'writes --salt-scrim-alpha as var(--scrim-<strength>); the markup writes fixed values only'],
     /* What a markup element writes (Z1, Z3): a style element's CSS, and each value of an enum. */
     ['a style element writes a token the layer does not name', [addFile('contract/markup/zz-write.json', JSON.stringify({ elements: [{ element: 'noscript', children: [{ element: 'style', text: '.salt-header { --salt-header-phone-menu: var(--phone-unnamed); }' }] }] }))], 'contract/markup/zz-write.json read(s) --phone-unnamed, which contract/token-layer.json does not name'],
     ['an enum value writes a token the layer does not name', [addFile('contract/markup/zz-write.json', JSON.stringify({ root: { attributes: { style: { enum: ['--salt-rating-fill: 0%', '--salt-rating-fill: var(--rating-enum)'] } } } }))], 'read(s) --rating-enum, which contract/token-layer.json does not name'],
@@ -2325,7 +2317,7 @@ describe('the token layer names exactly what the stylesheets read', () => {
     ['a markup write reads a token only in its fallback', [addFile('contract/markup/zz-write.json', JSON.stringify({ root: { attributes: { style: '--salt-rating-fill: var(--rating-unnamed, 0%)' } } }))], 'contract/markup/zz-write.json read(s) --rating-unnamed, which contract/token-layer.json does not name'],
     ['a markup write reads a token nested in a fallback', [addFile('contract/markup/zz-write.json', JSON.stringify({ root: { attributes: { style: '--salt-rating-fill: var(--salt-x, var(--rating-nested))' } } }))], 'read(s) --rating-nested, which contract/token-layer.json does not name'],
     ['a markup write into a property the stylesheets declare', [addFile('contract/markup/zz-write.json', JSON.stringify({ root: { attributes: { style: { value: '--logo-height: var(--logo-unnamed)' } } } }))], 'contract/markup/zz-write.json read(s) --logo-unnamed, which contract/token-layer.json does not name'],
-    ['a placeholder written into a property with no value map', [addFile('contract/markup/zz-write.json', JSON.stringify({ root: { attributes: { style: '--logo-height: var(--logo-<size>)' } } }))], "writes --logo-height as var(--logo-<size>), and contract/token-layer.json's writes give no values for <size>"],
+    ['a placeholder written into a property the stylesheets declare', [addFile('contract/markup/zz-write.json', JSON.stringify({ root: { attributes: { style: '--logo-height: var(--logo-<size>)' } } }))], 'writes --logo-height as var(--logo-<size>); the markup writes fixed values only'],
     /* Prose never counts as a write: a note, a rule, a platform's former markup. */
     ['a token whose only "write" is a note', [addFile('contract/markup/zz-write.json', JSON.stringify({ notes: [{ text: '--header-height: 4rem' }], rules: { r: { statement: '--header-height: 4rem' } }, platforms: { nextjs: { formerly: [{ attributes: { style: '--header-height: 4rem' } }] } } })), tokenLayer((layer) => { tokenNamed(layer, '--header-height').source = 'markup' })], 'says the markup writes --header-height, but no file in contract/markup/ does'],
     /* A token said to come from the markup is written by some markup file (T5). */
@@ -2405,10 +2397,8 @@ describe('the script, run as CI runs it', () => {
   })
 })
 
-describe('the fixes a value map and a layered base allow', () => {
+describe('the fixes a layered base allows', () => {
   itEach([
-    /* A placeholder written into a property the stylesheets declare has a fix: a value map in writes (Z5). */
-    ['a placeholder written into a stylesheet-declared property, with its value map', [addFile('contract/markup/zz-write.json', JSON.stringify({ root: { attributes: { style: '--logo-height: var(--space-section-<spacing>)' } } })), tokenLayer((layer) => { layer.writes.push({ property: '--logo-height', values: { spacing: { field: '_section-settings#spacing', except: ['none'] } } }) })]],
     /* A body or heading rule under a query inside base.css's layer is still in the layer (Z10). */
     ['a heading rule under a media query inside the base layer', [['base.css', (css) => css.replace('@layer base {\n', '@layer base {\n  @media (min-width: 48rem) {\n    :where(#main, .salt-header, .salt-footer) h1 {\n      font-size: var(--text-heading-1);\n      line-height: var(--text-heading-1--line-height);\n      letter-spacing: var(--text-heading-1--letter-spacing);\n      font-weight: var(--text-heading-1--font-weight);\n      font-family: var(--text-heading-1--font-family);\n    }\n  }\n\n')]]],
     /* A brace in a string does not end the layer (Z8). */

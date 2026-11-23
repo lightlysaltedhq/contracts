@@ -49,7 +49,7 @@
               "attributes": {
                 "role": "group",
                 "aria-roledescription": "slide",
-                "aria-label": "from:labels.slide ({n} of {N})"
+                "aria-label": "from:labels.slide ({n}, {N})"
               },
               "text": "the slide: a card or a gallery figure"
             }

@@ -159,9 +159,11 @@
 /*
  * ── The logo ────────────────────────────────────────────────────────────────────
  *
- * `--logo-height` is declared here as the default and overridden per site by the inline
- * style `<SiteLogo>` writes from the brand global. Declared on the element that USES it, so
- * a site that sets neither still draws a logo at a sensible size.
+ * `--logo-height` is declared here as the default. A site that sets a height sets it once, site-wide,
+ * in its own stylesheet loaded after this one (`.salt-logo { --logo-height: 48px; }`): the markup
+ * writes no style attribute, so a site's Content-Security-Policy need not allow inline styles.
+ * Declared on the element that USES it, so a site that sets nothing still draws a logo at a
+ * sensible size.
  *
  * 2rem is duplicated in TypeScript as `LOGO_DEFAULT_HEIGHT_PX` in `components/image-sizes.ts`,
  * because `<SiteLogo>` computes the image's drawn width from it and cannot read a stylesheet.

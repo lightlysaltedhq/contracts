@@ -17,7 +17,7 @@
       "adjacent": "More posts",
       "newer": "Newer",
       "older": "Older",
-      "slide": "Slide"
+      "slide": "Slide {n} of {N}"
     },
     "arrow": "→"
   },

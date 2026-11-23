@@ -142,7 +142,7 @@
                 {
                   "role": "read-time",
                   "element": "span",
-                  "text": "from:labels.readTime (minutes)",
+                  "text": "from:labels.readTime ({n})",
                   "optional": true,
                   "when": "the post has prose and reading time is on"
                 }

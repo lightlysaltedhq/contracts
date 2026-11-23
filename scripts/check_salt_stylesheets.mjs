@@ -5986,13 +5986,13 @@ export function checkStylesheets(files) {
     for (const [name, fallback] of varReads(text)) addRead(name, file, fallback)
     for (const rule of parsed.get(file).rules) for (const property of rule.order) if (property.startsWith('--')) declaredHere.add(property)
   }
-  /* What the markup writes on an element (`--salt-scrim-alpha: var(--scrim-<strength>)` on the
-     scrim's style) reaches the stylesheets too, so every `var()` in a written value is a read,
-     fallbacks and nested `var()`s included. Only what elements write counts: attribute values on
-     the nodes the class check reads, never a note, a rule's statement, an omitted class or a
-     platform's former markup, whose prose could otherwise satisfy it. A `<placeholder>` stands for
-     a setting's options, which the written property's token entry names in `values`
-     (`_section-settings#scrimStrength`): each option is a token the runtime must emit. */
+  /* What the markup writes reaches the stylesheets too, so every `var()` in a written value is a
+     read, fallbacks and nested `var()`s included. Only what elements write counts: attribute values
+     on the nodes the class check reads, and a style element's CSS (the noscript style in the head),
+     never a note, a rule's statement, an omitted class or a platform's former markup, whose prose
+     could otherwise satisfy it. The markup writes no style attribute (section#no-inline-style,
+     SC-029), so a written value is fixed: a `<placeholder>` in one would stand for values no list
+     names, and is refused. */
   const markupWrites = new Map()
   for (const file of markupFiles) {
     for (const { property, value } of markupWritesIn(readJson(file))) {
@@ -6009,34 +6009,12 @@ export function checkStylesheets(files) {
         }
       }
     }
-    /* A value map per written property, token or not, and per placeholder name in it. */
-    const maps = new Map()
-    for (const entry of TOKEN_LAYER.writes ?? []) {
-      if (maps.has(entry.property)) fails.push(`contract/token-layer.json lists writes for ${entry.property} twice`)
-      maps.set(entry.property, entry.values ?? {})
-      if (!markupWrites.has(entry.property)) fails.push(`contract/token-layer.json lists writes for ${entry.property}, which no markup element writes`)
-    }
-    const used = new Set()
     for (const [property, writes] of markupWrites) {
       for (const { file, value } of writes) {
         for (const { name, placeholder, rest, fallback } of varsWritten(value)) {
           if (placeholder === undefined) { addRead(name, file, fallback); continue }
-          const map = maps.get(property)?.[placeholder]
-          if (!map) { fails.push(`${file} writes ${property} as var(${name}<${placeholder}>${rest}), and contract/token-layer.json's writes give no values for <${placeholder}>`); continue }
-          used.add(`${property} <${placeholder}>`)
-          const [fieldFile, fieldName] = String(map.field).split('#')
-          const field = fieldNamed(readJson(`contract/fields/${fieldFile}.json`), fieldName)
-          if (!field || !Array.isArray(field.options)) { fails.push(`contract/token-layer.json fills ${property}'s <${placeholder}> from ${map.field}, which is not a field with options`); continue }
-          for (const option of field.options) {
-            if ((map.except ?? []).includes(option.value)) continue
-            addRead(`${name}${option.value}${rest}`, file, fallback)
-          }
+          fails.push(`${file} writes ${property} as var(${name}<${placeholder}>${rest}); the markup writes fixed values only, so set the property from a data attribute in the stylesheets`)
         }
-      }
-    }
-    for (const [property, values] of maps) {
-      for (const placeholder of Object.keys(values)) {
-        if (markupWrites.has(property) && !used.has(`${property} <${placeholder}>`)) fails.push(`contract/token-layer.json fills <${placeholder}> in ${property}, which no markup element writes`)
       }
     }
     const seen = new Set()

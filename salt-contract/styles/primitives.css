@@ -1922,12 +1922,13 @@ textarea.salt-contact__input {
  * The outer tracks are what a band's content puts before its text: half of what the measure leaves
  * plus the gutter, or the gutter alone on a page narrower than the measure, as `sections.css` centres
  * `.salt-section__content` and pads it. So the columns start at a band title's left edge and the image
- * ends at its right. The measure is `--salt-case-study-view-measure`, which the view writes from its
- * `measure` prop, a `default` band's `--container-5xl` unless a site that widened its bands passes the
- * same width (#226 review, 1). The article's parts are placed by the grid, so their inline margins
- * are zeroed: a site insetting what `<main>` draws outside a band would otherwise inset each column
- * inside its own track. The rows the image spans are counted by the view, which writes them as
- * `--salt-case-study-view-aside-rows`; the grid has no way to say "every row up to the services".
+ * ends at its right. The measure is a `default` band's, `--container-5xl` (#226 review, 1); a site
+ * that widened its bands widens this in its own stylesheet, as the markup carries no measure. The
+ * article's parts are placed by the grid, so their inline margins are zeroed: a site insetting what
+ * `<main>` draws outside a band would otherwise inset each column inside its own track. The rows the
+ * image spans are the sidebar parts the view counts (case-study.json), written as the article's
+ * `data-aside-rows`, 1 to 4, and set here as `--salt-case-study-view-aside-rows`; the grid has no way
+ * to say "every row up to the services".
  *
  * Sticky holds no focus and covers nothing: the image has no control in it, and it sits in its own
  * column, clear of the text beside it. Its offset is the site header's height plus a gap, and the
@@ -1935,14 +1936,30 @@ textarea.salt-contact__input {
  * without it has an invalid offset, so `inset-block-start` is `auto` and the image scrolls with the
  * page rather than sticking under a header it does not know the height of (#226 review, 3).
  */
+.salt-case-study-view[data-aside-rows='1'] {
+  --salt-case-study-view-aside-rows: 1;
+}
+
+.salt-case-study-view[data-aside-rows='2'] {
+  --salt-case-study-view-aside-rows: 2;
+}
+
+.salt-case-study-view[data-aside-rows='3'] {
+  --salt-case-study-view-aside-rows: 3;
+}
+
+.salt-case-study-view[data-aside-rows='4'] {
+  --salt-case-study-view-aside-rows: 4;
+}
+
 @media (min-width: 64rem) {
   .salt-case-study-view[data-media='aside'] {
     display: grid;
     grid-template-columns:
-      [full-start] max(var(--space-gutter), (100% - var(--salt-case-study-view-measure, var(--container-5xl))) / 2 + var(--space-gutter))
+      [full-start] max(var(--space-gutter), (100% - var(--container-5xl)) / 2 + var(--space-gutter))
       [main-start] minmax(0, 7fr)
       [main-end aside-start] minmax(0, 5fr)
-      [aside-end] max(var(--space-gutter), (100% - var(--salt-case-study-view-measure, var(--container-5xl))) / 2 + var(--space-gutter))
+      [aside-end] max(var(--space-gutter), (100% - var(--container-5xl)) / 2 + var(--space-gutter))
       [full-end];
     align-items: start;
   }

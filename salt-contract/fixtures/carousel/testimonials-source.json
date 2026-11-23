@@ -1,6 +1,6 @@
 {
   "section": "carousel",
-  "$comment": "cardStyle is not stored for a collection source (it applies to inline only); testimonial cards are quotes. Ratings: aria-label reads \"Rated 5 of 5\" (labels.rating, then \"{n} of {N}\"); the fill is rating/5 as a percentage.",
+  "$comment": "cardStyle is not stored for a collection source (it applies to inline only); testimonial cards are quotes. Ratings: aria-label reads \"Rated 5 of 5\" (labels.rating, \"Rated {n} of {N}\", with its placeholders replaced); the stars' data-fill is the rating's share of five, in steps of 10.",
   "summary": "Testimonials from the collection as quote cards in a carousel named from the heading. Two have ratings, one has none.",
   "values": {
     "heading": "Kind words",
@@ -47,8 +47,8 @@
   },
   "site": {
     "labels": {
-      "slide": "Slide",
-      "rating": "Rated"
+      "slide": "Slide {n} of {N}",
+      "rating": "Rated {n} of {N}"
     }
   }
 }

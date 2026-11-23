@@ -395,7 +395,7 @@ option covered, and the normaliser sound.
 | `documents` | The pages internal links name, by id: `{ href, title }`. |
 | `collections` | The items of each source the section reads (`faqs`, `services`, `team` …), each with a string `id`, already in the collection's stored order: an adapter passes them through as given and never sorts them, and a query in its default order draws them in that order (SC-023). How an implementation orders a collection on a real site is its own. |
 | `route` | What the route hands a listing: its cards and pagination. |
-| `site` | Site-wide data the markup reads, under declared keys only (the gate refuses any other): `labels` (the strings `labels.<name>` in the markup refers to), `arrow` (the site's arrow glyph), `name`, `home`, `organisation`, `acceptsEnquiries`, `contactForm`, `timezone`, `maps`, `collectionIndexes`, `logo` (`{ light, dark }`, media ids), `logoHeight` (the logo's drawn height in px, the logo slot's input; no other key names it), `header` (menu, phone, call to action, sticky), `footer` (tone, columns, text, socials, copyright, whether it shows the logo), `consent`, `themeToggle`, `displayPreferences`, `search` and `caseStudy` (the case study view's layout, which a site sets once for all its case studies: `{ media, header, headerTone, headerToneDark }`, where `media` is `flow` by default or `aside`, and `header` is `plain` by default or `band`, which draws the header as a toned section band and alone takes `headerTone` and the optional `headerToneDark`; Salt for Next.js sets these in code, and Salt for WordPress on an ACF options page, so editors can change them). A view's variant a site sets this way names its key in its markup (`variants[].site`), and every option its entry in `sections.json` offers needs a case. |
+| `site` | Site-wide data the markup reads, under declared keys only (the gate refuses any other): `labels` (the strings `labels.<name>` in the markup refers to), `arrow` (the site's arrow glyph), `name`, `home`, `organisation`, `acceptsEnquiries`, `contactForm`, `timezone`, `maps`, `collectionIndexes`, `logo` (`{ light, dark }`, media ids), `logoHeight` (the logo's drawn height in px, the logo slot's input for its `sizes`; no other key names it. The height itself is drawn by the site's own stylesheet, `.salt-logo { --logo-height: <n>px }`, never by the markup), `header` (menu, phone, call to action, sticky), `footer` (tone, columns, text, socials, copyright, whether it shows the logo), `consent`, `themeToggle`, `displayPreferences`, `search` and `caseStudy` (the case study view's layout, which a site sets once for all its case studies: `{ media, header, headerTone, headerToneDark }`, where `media` is `flow` by default or `aside`, and `header` is `plain` by default or `band`, which draws the header as a toned section band and alone takes `headerTone` and the optional `headerToneDark`; Salt for Next.js sets these in code, and Salt for WordPress on an ACF options page, so editors can change them). A view's variant a site sets this way names its key in its markup (`variants[].site`), and every option its entry in `sections.json` offers needs a case. |
 | `document` | A view's document: the post, service, archive term or author, search query and results, as the view reads them. A section the view nests (the archive's listing) is `document.listing`: its `values` (the section's field values, shaped and checked as a section case's, with its settled anchor in `values.settings.anchorId`), `track` (its `data-track`), `index` (from 0, required, for `<section index>`; its track counts no more sections than come up to it) and, if given, `headingLevel`, which must agree with the derived level (2 in a view, under its h1). Its block is read against that section's own markup, its variant and conditions answered by its values, so its id, heading, spacing, data attributes and content are fixed by the case. |
 | `state` | What the case knows beyond its content. Each key says how the one element it concerns is drawn and nothing of any other: a case is not before or after script as a whole. `consentPanelOpen` (`true` or `false`): the visitor has opened the footer's consent panel, which only script does, so its dialog is drawn, as it is in no other case, and the consent control beside it has hydrated and carries no `aria-disabled`; in every other case it carries `aria-disabled="true"` (SC-024). `drawerOpen` (`true` or `false`): the visitor has opened the header's drawer, so its dialog is drawn, as it is in no other case. `themeScheme` (`light` or `dark`): the stored scheme, which the platform knows only sometimes when it renders, with which the theme toggle is its button form, pressed for dark and showing the sun or the moon; without it, its empty span server form. The gate refuses a state this row does not document, and fails when the row documents one it does not know, or when this row or this file is missing. |
 
@@ -419,6 +419,34 @@ Conventions, so that every case is deterministic:
   `https://uploads.example`, and the normaliser drops the host.
 - **Dark tone.** `toneDark: auto` is written as `data-tone-dark` equal to the tone: the shared
   stylesheet, not the markup, draws its dark form (SC-016).
+
+### Labels
+
+Every string the markup draws that is not content comes from the site's labels: `from:labels.<name>`
+in `contract/markup` names one, and a case gives it under `site.labels` or `document.labels`. A
+label that carries a value carries it as a named placeholder, and the renderer replaces it (SC-031,
+replacing the earlier mix of placeholders and appended numbers). So a translation puts the number or
+the query wherever its language needs it, and the markup notation lists the placeholders the label
+may hold: `from:labels.page ({n})`.
+
+- **The names.** `{n}` is the number the label is about: a page's number (`page`), a slide's
+  position (`slide`), the rating (`rating`), the reading time in minutes (`readTime`) or the
+  results' count (`results`). `{N}` is the total it is out of: the slides in the track (`slide`), 5
+  for a rating (`rating`). `{q}` is the visitor's search query, as typed (`results`, `noResults`).
+  `{kind}` is a search result's kind word (`kind`). The labels that carry values are exactly
+  these: `page ({n})`, `slide ({n}, {N})`, `rating ({n}, {N})`, `readTime ({n})`,
+  `results ({n}, {q})`, `noResults ({q})` and `kind ({kind})`.
+- **Replacing.** Each placeholder the notation names is replaced wherever it stands, every time it
+  appears, by its value as text: a number in the form the label's own rules give (a whole page,
+  slide or count as digits; a rating as written, `4.5`), a query escaped as text. Nothing else in
+  the label changes.
+- **An unknown placeholder.** A `{name}` the notation does not list is not a placeholder: it is
+  drawn as written, braces and all, never removed or guessed at.
+- **A label without a placeholder.** It is drawn exactly as written, and nothing is appended to it:
+  a site whose `page` label is `Page` draws every page link `Page`, and so loses the number, so a
+  label that should carry one holds its placeholder. Two labels still have a name appended, as the
+  founder's ruling on numbers and queries left them: `directions` (a space, then the office's name)
+  and `byline` (a space, then the author's name, when the author has no archive).
 
 ### The normaliser
 
@@ -499,7 +527,7 @@ written in the implementation's own repository; the contract fixes only its inte
 
 `conformance.mjs` (`@lightlysaltedhq/salt-contract/conformance`, and the `salt-conformance` bin) is
 the runner each implementation points at itself, in its own CI, against the contract version it
-pins. For every section it ships it checks four things:
+pins. For every section it ships it checks five things:
 
 - **Fixtures.** Every case goes to the implementation's adapter (above), one process or request
   per case, and the adapter's HTML and the case's expected HTML both go through `normalise`. A
@@ -523,6 +551,12 @@ pins. For every section it ships it checks four things:
   since shipped fields make it shipped.
 - **Classes.** Every `salt-*` class in the adapter's output is one an element in `contract/markup`
   carries.
+- **Inline styles.** No element in the adapter's output carries a `style` attribute, in any case
+  (`section#no-inline-style`, SC-029). A site's Content-Security-Policy need not allow inline
+  styles, and a browser that refuses them draws the page without them, so a value the design varies
+  is a data attribute the shared stylesheets style. Each case that writes one is named, with the
+  elements that carry it. The one inline style element the contract draws, the scriptless style in
+  the head (`page.json`), is an element, not an attribute, and is not refused.
 - **Stylesheet pin.** The file the implementation serves as its Salt stylesheet (above,
   "Serving it"), or that file fetched from a running site, is byte-identical to
   `styles/salt.css`. A path inside the package itself is refused, since comparing the package's
@@ -530,8 +564,8 @@ pins. For every section it ships it checks four things:
   right bytes and passes. There is no version form: a version the caller states says nothing of
   the bytes served.
 
-An implementation conforms only when all four checks ran for every section it ships and all pass
-(SC-017). A section passes only when all four hold for it; one whose checks that ran all passed,
+An implementation conforms only when all five checks ran for every section it ships and all pass
+(SC-017). A section passes only when all five hold for it; one whose checks that ran all passed,
 but with a check left out, is `incomplete`. So a run without a field snapshot or a stylesheet pin
 fails. A run of some sections (`--sections`) or some checks is allowed only with `--partial`, and
 its report says "partial, not conforming": `ok` is false, `partial` is true and it exits 1. A run
@@ -542,7 +576,7 @@ The site chrome (`site-header`, `site-footer`), the page views with fixtures (`p
 `service`, `archive`, `search`, `not-found`; SC-018, and `case-study`; SC-021) and the page (`page`, compared through
 `pageOf`; SC-019) are run too, each reported as a file of its
 own under `files` in the JSON report and in its own table in the Markdown one. They have no fields,
-so each is held to the fixtures and class checks; the stylesheet pin is the run's. The archive's
+so each is held to the fixtures, class and inline-style checks; the stylesheet pin is the run's. The archive's
 and the search's cases are compared through `routedOf`, so the shape of their pagination addresses
 is not checked and the rest of their pagination is (SC-023). A run conforms
 only when every file it runs passes as well. `--sections` and `--not-shipped` take their ids like
@@ -642,6 +676,6 @@ sections, then each failure on a line.
 The runner is also importable: `runConformance(options)` returns the report, `renderMarkdown(report)`
 its Markdown, and `firstDifference(expected, actual)` the first differing node of two fragments, for
 an implementation's own tests. `npm run salt-conformance` (`scripts/salt_conformance_self.mjs`)
-runs it here against `scripts/salt_fixture_reference_adapter.mjs` with all four checks, once with
+runs it here against `scripts/salt_fixture_reference_adapter.mjs` with all five checks, once with
 the Payload snapshot and once with the ACF snapshot the emitters give for one set of options, and
 both runs must conform.

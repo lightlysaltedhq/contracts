@@ -44,7 +44,8 @@
           "sm",
           "md",
           "lg"
-        ]
+        ],
+        "note": "Also the band's block space: sections.css sets --salt-section-space from it, var(--space-section-<spacing>), and none draws none. No style attribute carries it (section#no-inline-style)."
       },
       "data-width": {
         "enum": [
@@ -69,10 +70,6 @@
       "data-track": {
         "value": "from:renderer",
         "note": "section#data-track"
-      },
-      "style": {
-        "value": "--salt-section-space: var(--space-section-<spacing>)",
-        "when": "spacing is not none"
       }
     },
     "note": "A named section element or a div, never an unnamed section (section#labelled-by)."
@@ -87,10 +84,26 @@
       "attributes": {
         "alt": "",
         "aria-hidden": "true",
-        "style": {
-          "value": "object-fit: <fit>; object-position: <position>",
-          "when": "the background image's fit or position applies",
-          "note": "From the background image settings, written as media.json says; sections.css fills the band and gives way to it. The object-position declaration is left out when the position is focal-point and the image has no stored focal point, so the style is then \"object-fit: <fit>\" alone (media.json)."
+        "data-fit": {
+          "enum": [
+            "cover",
+            "contain"
+          ],
+          "note": "The background image's fit, always written. sections.css fills the band with cover and draws contain from this attribute."
+        },
+        "data-focal-x": {
+          "enum": [
+            "0", "5", "10", "15", "20", "25", "30", "35", "40", "45", "50", "55", "60", "65", "70", "75", "80", "85", "90", "95", "100"
+          ],
+          "when": "the position is a named one, or focal-point and the image stores a focal point",
+          "note": "The position across, in per cent, as section#background-position says; sections.css maps it to object-position."
+        },
+        "data-focal-y": {
+          "enum": [
+            "0", "5", "10", "15", "20", "25", "30", "35", "40", "45", "50", "55", "60", "65", "70", "75", "80", "85", "90", "95", "100"
+          ],
+          "when": "the position is a named one, or focal-point and the image stores a focal point",
+          "note": "The position down, in per cent, as section#background-position says; sections.css maps it to object-position."
         }
       },
       "optional": true,
@@ -104,7 +117,14 @@
         "salt-section__scrim"
       ],
       "attributes": {
-        "style": "--salt-scrim-alpha: var(--scrim-<strength>)"
+        "data-strength": {
+          "enum": [
+            "subtle",
+            "standard",
+            "strong"
+          ],
+          "note": "The scrim strength setting; sections.css sets the scrim's alpha from it, var(--scrim-<strength>)."
+        }
       },
       "optional": true,
       "when": "a background image is drawn and the scrim is on",
@@ -213,6 +233,39 @@
       "on": "root",
       "values": "from:renderer",
       "note": "section#data-track"
+    },
+    {
+      "name": "data-fit",
+      "on": "background",
+      "values": [
+        "cover",
+        "contain"
+      ]
+    },
+    {
+      "name": "data-focal-x",
+      "on": "background",
+      "values": [
+        "0", "5", "10", "15", "20", "25", "30", "35", "40", "45", "50", "55", "60", "65", "70", "75", "80", "85", "90", "95", "100"
+      ],
+      "when": "the position is a named one, or focal-point and the image stores a focal point"
+    },
+    {
+      "name": "data-focal-y",
+      "on": "background",
+      "values": [
+        "0", "5", "10", "15", "20", "25", "30", "35", "40", "45", "50", "55", "60", "65", "70", "75", "80", "85", "90", "95", "100"
+      ],
+      "when": "the position is a named one, or focal-point and the image stores a focal point"
+    },
+    {
+      "name": "data-strength",
+      "on": "scrim",
+      "values": [
+        "subtle",
+        "standard",
+        "strong"
+      ]
     },
     {
       "name": "data-block",
@@ -351,6 +404,12 @@
     "background-decorative": {
       "statement": "A section background image is decorative: alt=\"\" and aria-hidden=\"true\". An image that carries meaning belongs to the block, with its own alt."
     },
+    "background-position": {
+      "statement": "A section background image's position is two data attributes, data-focal-x and data-focal-y, each a whole per cent from 0 to 100 in steps of 5, which sections.css maps to object-position (21 steps on each axis). A named position gives both: left and top are 0, centre is 50, right and bottom are 100 (top-left is 0 0, top is 50 0, bottom-right is 100 100). The focal-point position gives the image's stored focal point, each axis snapped to the nearest step: min(100, max(0, 5 × floor(v ÷ 5 + 0.5))), so a value exactly between two steps takes the higher one (32.5 gives 35, 30 gives 30, 2.4 gives 0). When the position is focal-point and the image stores none, neither attribute is written and the stylesheet's centre applies. The fit is data-fit, cover or contain, always written."
+    },
+    "no-inline-style": {
+      "statement": "Nothing the contract draws carries a style attribute, on any element, in any state (SC-029). A site's Content-Security-Policy need not allow inline styles, and where it does not a browser ignores every style attribute, so a value the design varies is a data attribute from a fixed set that the shared stylesheets style: a band's spacing (data-spacing), its scrim (data-strength), its background image's fit and position (data-fit, data-focal-x, data-focal-y), a rating's fill (data-fill) and the case study aside's rows (data-aside-rows). A value a site sets once for every page, such as its logo's height (--logo-height on .salt-logo), it sets in its own stylesheet. The conformance runner fails any style attribute in an implementation's output (README, \"Conformance\")."
+    },
     "adjacent-collapse": {
       "statement": "A section collapses its top spacing (data-collapse-top) when the previous section shares its tone and dark tone, neither has a background image, it has no divider, and neither section's spacing is none."
     },
@@ -407,7 +466,9 @@
         "Section heading ids <anchor>__heading, built from the section's settled id, in place of uniqueAnchor('<slug>-heading') (lib/sections/plan.ts, SC-012).",
         "An anchor equal to a landmark id becomes <anchor>-section, where uniqueAnchor gives <anchor>-2 today; and a section with no anchor mints its id from its section id, once every editor's anchor is settled (SC-025), where anchorId is null today (lib/sections/plan.ts, SC-012, SC-013).",
         "Anchors get a slug function of their own that follows SC-014 for the site's locale: sanitize_title's result under that locale, tidied. Today anchors go through slugify (fields/slug.ts), which folds by NFKD, so Straße gives stra-e (strase on en_GB, strasse on de_DE), Über uns gives uber-uns even on de_DE (ueber-uns), and a,b gives a-b where WordPress gives ab. slugify itself, which also derives URL slugs and site settings, is unchanged.",
-        "Display forms (section#display-forms): dates and times in the site's locale rather than a fixed en-GB (collection-showcase and carousel construct Intl.DateTimeFormat('en-GB')) (SC-016)."
+        "Display forms (section#display-forms): dates and times in the site's locale rather than a fixed en-GB (collection-showcase and carousel construct Intl.DateTimeFormat('en-GB')) (SC-016).",
+        "No style attribute anywhere (section#no-inline-style, SC-029): the band's spacing from data-spacing alone, the scrim's strength as data-strength, and the background's fit and position as data-fit, data-focal-x and data-focal-y (section#background-position).",
+        "Labels with values by Replace (README, \"Labels\"; SC-031): page ({n}), slide ({n}, {N}), rating ({n}, {N}), readTime ({n}), results ({n}, {q}), noResults ({q}) and kind ({kind}) each have their named placeholders replaced, and nothing is appended to a label: where it appends ' {n}' to page, or ' {n} of {N}' to slide or rating, today, the site's label holds the placeholders instead (\"Page {n}\", \"Slide {n} of {N}\", \"Rated {n} of {N}\")."
       ]
     },
     "wordpress": {
@@ -459,7 +520,9 @@
         "An anchor equal to a landmark id becomes <anchor>-section, where salt_anchor_id gives <anchor>-2 today; and a section with no anchor mints its id from its section id, once every editor's anchor is settled (SC-025), where salt_anchor_id returns '' and settles ids in one pass down the page today (inc/render.php, SC-012, SC-013). A minted id is numbered over the stored layout, counting the unanchored sections of its section id that draw nothing, so it does not move when one above it empties or fills (SC-025).",
         "The tidy step after sanitize_title in salt_anchor_id: every run of underscores or %xx octets becomes one hyphen, repeated hyphens collapse and hyphens are trimmed, so contact__form renders contact-form and 日本語 gives no anchor (SC-014).",
         "Store the anchor's slug on save, as section#anchors says: the ACF text field section_anchor stores the raw text today, with no save filter (inc/acf.php).",
-        "Display forms (section#display-forms): dates with wp_date in the site's locale in its long form, tel: hrefs by the contract's rule, and JSON in data attributes with JSON_UNESCAPED_SLASHES (SC-016)."
+        "Display forms (section#display-forms): dates with wp_date in the site's locale in its long form, tel: hrefs by the contract's rule, and JSON in data attributes with JSON_UNESCAPED_SLASHES (SC-016).",
+        "No style attribute anywhere (section#no-inline-style, SC-029): the band's spacing from data-spacing alone, the scrim's strength as data-strength, and the background's fit and position as data-fit, data-focal-x and data-focal-y (section#background-position).",
+        "Labels with values by Replace (README, \"Labels\"; SC-031): page ({n}), slide ({n}, {N}), rating ({n}, {N}), readTime ({n}), results ({n}, {q}), noResults ({q}) and kind ({kind}) each have their named placeholders replaced, and nothing is appended to a label: where it appends ' {n}' to page, or ' {n} of {N}' to slide or rating, today, the site's label holds the placeholders instead (\"Page {n}\", \"Slide {n} of {N}\", \"Rated {n} of {N}\")."
       ]
     }
   }
