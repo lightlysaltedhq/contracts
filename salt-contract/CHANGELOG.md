@@ -521,8 +521,8 @@ test, applied through section 2's table, where the stricter row wins.
   - **What each target changes.** Both: draw the featured image last in the header, as the
     priority image; add the `caseStudyImage` field and draw it as above; drop `data-media`,
     `data-aside-rows` and the aside layout setting; serve the new `salt.css`. Salt for Next.js:
-    the `media` prop and the aside sizes go, and a delivered service's card takes the card slot in
-    the full band. Salt for WordPress: the field as an ACF image returning an attachment ID, and
+    the `media` prop and the aside sizes go. (Where the images sit and their sizes are revised by
+    SC-036, below.) Salt for WordPress: the field as an ACF image returning an attachment ID, and
     the options page loses its aside layout.
 - **Clients and sectors: two name-only record collections, each off by default** (SC-035; the
   founder's ruling of 23/11/2026; the identifiers and the fallback rules were set by the
@@ -532,7 +532,7 @@ test, applied through section 2's table, where the stricter row wins.
   `client`) and `clientRecord` and `sectorRecord`, one optional relationship each. Both emitters
   install `clients` and `sectors` only when a site names them in `sources`; left out, the case
   study's record field is left out too (`leftOut`), and the free text stays. Wherever the client is
-  drawn today (the card's meta, the view's client line), the chosen record's name is drawn when
+  drawn (the card's meta, and the case study's aside, SC-036), the chosen record's name is drawn when
   clients is enabled and the record resolves, otherwise the free text, and nothing when both are
   empty. No new public slot, link or sidebar draws a sector or a record yet, pending the
   presentation ruling. No record is created, matched by name or deleted automatically, and
@@ -542,7 +542,49 @@ test, applied through section 2's table, where the stricter row wins.
   record fields while enabled, keeping a stored ID and the free text separately across switch
   changes, and offering the chosen name as the free text's initial value when a switch is turned
   off with no free text stored. Salt for WordPress: `client` and `sector` post types, not public,
-  with no archive or rewrite. Salt for Next.js: `clients` and `sectors` collections with no route.
+  with no archive or rewrite. Salt for Next.js: `clients` and `sectors` collections with no route,
+  kept permanently in its Payload config and switched at run time, so switching never changes the
+  schema or drops a stored ID; the emitters' `sources` option is a WordPress-style install list,
+  and Salt for Next.js passes both always.
+- **The case study is a story column and an aside of the project's facts** (SC-036; the founder's
+  ruling of 23/11/2026 on the layout; the class names, the slots and the label names are proposed,
+  for the founder's approval at contract review). **Breaking for both targets.** Semver: MAJOR by
+  `RELEASE-POLICY.md` section 1's test, in the candidate series as rc.9.
+  - `div.salt-case-study-view__story` holds, in order, the header (back link, title, summary and the
+    hero image; in a band, inside its content), the challenge, the case-study image, the solution,
+    the results (moved from the header, after the solution), the gallery and the live-site link.
+    `aside.salt-case-study-view__aside` (`aria-label` from `labels.details`) holds one
+    `dl.salt-case-study-view__details`: the project details, then Client, Sector and Services
+    (`labels.client`, `labels.sector`, `labels.services`), each row only when it has a value, and
+    the aside only when one row does. Client and sector are the record's title when its collection
+    is enabled and the record resolves, otherwise the free text, and never links. A service is one
+    `dd`, a `a.salt-case-study-view__service-link` to its own public page when it has one, plain
+    text when it has none; one that may not be shown is not in the document.
+  - Removed: the header's client line (`p.salt-case-study-view__client`) and its results and
+    details, and the delivered services' card section (`section.salt-case-study-view__services`),
+    so nothing appears twice. The view's section ids are now three:
+    `case-study__services-heading` goes.
+  - `primitives.css`: the article is a grid of one track, `minmax(0, var(--container-2xl))`,
+    centred inside `--space-gutter`; from 64rem the aside takes an implicit second track of
+    `--container-2xs` (new in `token-layer.json`) at a `--space-8` gap, so with no aside there is
+    no track and the story keeps its cap. Below 64rem the aside follows the story. A band's tone
+    bleeds to the viewport by a border image's outset (no overflow), stopping short of the aside;
+    its content keeps the story's left edge. The results open their own gap at (0,2,0) over the
+    grid's reset.
+  - `image-sizes.json`: four slots, measured in Chrome at 390 to 1600 CSS px, matching the drawn
+    width at every width tried (gutter 1rem below 64rem, 2rem from it): `story`
+    (`(min-width: 44rem) 42rem, calc(100vw - 2rem)`), `story-beside` with the aside, and a gallery frame's own
+    `story-gallery` and `story-gallery-beside`, one column of the 3/2/1 grid. The services' `card`
+    placement goes. Results at four columns in the 42rem story are about 9rem each, deliberately.
+  - Fixtures: every case-study case regenerated; the new `sector-plain-service` draws a sector, a
+    linked service and one with no public page. The fixtures gate checks the aside's presence,
+    each row's value and order, that client and sector are never links, and that a service links
+    exactly to its own href, with negative controls. 133 cases in all.
+  - **What each target changes.** Both: the story and aside markup and the new labels (`details`,
+    `client`, `sector`), with translators' comments; drop the header's facts and the service cards;
+    the story slots' sizes; serve the new `salt.css`. Salt for WordPress: link a service only when
+    it is published and has a permalink, draw it plain without a public page, leave it out when it
+    may not be shown.
 - The case-study view has fixtures and is required of every implementation (SC-021).
   `fixtures/case-study/` holds four cases (`full`, `aside`, `band` and `minimal`), `case-study`
   joins `REQUIRED_FILES`, and a full conformance run refuses to declare it not shipped. The

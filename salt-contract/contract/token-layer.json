@@ -68,6 +68,7 @@
       "id": "measure",
       "what": "Content widths: the band's measures, by data-width.",
       "tokens": [
+        { "name": "--container-2xs", "meaning": "The narrowest measure: the case study view's aside.", "source": "design-foundations", "ref": "scale-shape.json container 2xs" },
         { "name": "--container-2xl", "meaning": "The narrow measure: running text, a service's opening text.", "source": "design-foundations", "ref": "scale-shape.json container 2xl" },
         { "name": "--container-5xl", "meaning": "The default measure.", "source": "design-foundations", "ref": "scale-shape.json container 5xl" },
         { "name": "--container-7xl", "meaning": "The wide measure, and the header's and footer's.", "source": "design-foundations", "ref": "scale-shape.json container 7xl" }

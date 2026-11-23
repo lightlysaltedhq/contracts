@@ -1795,65 +1795,65 @@ describe('each component keeps the role the contract names for it', () => {
  * longhand, the reset moved after the owls, and a later rule zeroing or outranking a gap.
  */
 describe('the case study view spaces its header and its sections', () => {
-  const SECTION_GAP = '.salt-case-study-view > .salt-case-study-view__section > * + * {\n  margin-block-start: var(--space-4);\n}'
-  const HEADER_OWL = '.salt-case-study-view > .salt-case-study-view__header > * + *,\n.salt-case-study-view > .salt-case-study-view__header > .salt-section__content > * + *,\n.salt-case-study-view > .salt-case-study-view__section > * + * {'
+  const SECTION_GAP = '.salt-case-study-view__story > .salt-case-study-view__section > * + * {\n  margin-block-start: var(--space-4);\n}'
+  const HEADER_OWL = '.salt-case-study-view__story > .salt-case-study-view__header > * + *,\n.salt-case-study-view__story > .salt-case-study-view__header > .salt-section__content > * + *,\n.salt-case-study-view__story > .salt-case-study-view__section > * + * {'
   itEach([
-    ['the gap above each section deleted', replacing('.salt-case-study-view > * + * {\n  margin-block-start: var(--space-section-sm);\n}', ''), 'no unconditional `.salt-case-study-view > * + *` rule'],
-    ['a gap written as a length', replacing('  margin-block-start: var(--space-section-sm);', '  margin-block-start: 3rem;'), 'writes `margin-block-start: 3rem` for the gap above each section, a length of its own'],
-    ['a gap on another token', replacing('__details {\n  margin-block-start: var(--space-8);', '__details {\n  margin-block-start: var(--space-12);'), 'write `var(--space-8)`, the token this contract compares'],
-    ['a gap !important', replacing('  margin-block-start: var(--space-section-sm);', '  margin-block-start: var(--space-section-sm) !important;'), 'declares `margin-block-start` !important'],
-    ['the owls dropped to (0,1,0)', replacing(HEADER_OWL, '.salt-case-study-view__header > * + *,\n.salt-case-study-view__header > .salt-section__content > * + *,\n.salt-case-study-view__section > * + * {'), 'no unconditional `.salt-case-study-view > .salt-case-study-view__header > * + *` rule'],
-    ['a shorthand after the longhand', replacing('__details {\n  margin-block-start: var(--space-8);\n', '__details {\n  margin-block-start: var(--space-8);\n  margin: 0;\n'), 'writes `margin: 0` beside the gap above the results'],
-    ['the reset moved after the owls', (css) => appending('.salt-case-study-view > .salt-case-study-view__header > *,\n.salt-case-study-view > .salt-case-study-view__header > .salt-section__content > *,\n.salt-case-study-view > .salt-case-study-view__section > h2,\n.salt-case-study-view__detail-value {\n  margin: 0;\n}')(replacing('.salt-case-study-view > .salt-case-study-view__header > *,\n.salt-case-study-view > .salt-case-study-view__header > .salt-section__content > *,\n.salt-case-study-view > .salt-case-study-view__section > h2,\n.salt-case-study-view__detail-value {\n  margin: 0;\n}', '')(css)), 'comes after'],
+    ['the gap above each section deleted', replacing('.salt-case-study-view__story > * + * {\n  margin-block-start: var(--space-section-sm);\n}', ''), 'no unconditional `.salt-case-study-view__story > * + *` rule'],
+    ['a gap written as a length', replacing('.salt-case-study-view__story > * + * {\n  margin-block-start: var(--space-section-sm);', '.salt-case-study-view__story > * + * {\n  margin-block-start: 3rem;'), 'writes `margin-block-start: 3rem` for the gap above each section, a length of its own'],
+    ['a gap on another token', replacing('__results {\n  margin-block-start: var(--space-section-sm);', '__results {\n  margin-block-start: var(--space-12);'), 'write `var(--space-section-sm)`, the token this contract compares'],
+    ['a gap !important', replacing('.salt-case-study-view__story > * + * {\n  margin-block-start: var(--space-section-sm);', '.salt-case-study-view__story > * + * {\n  margin-block-start: var(--space-section-sm) !important;'), 'declares `margin-block-start` !important'],
+    ['the owls dropped to (0,1,0)', replacing(HEADER_OWL, '.salt-case-study-view__header > * + *,\n.salt-case-study-view__header > .salt-section__content > * + *,\n.salt-case-study-view__section > * + * {'), 'no unconditional `.salt-case-study-view__story > .salt-case-study-view__header > * + *` rule'],
+    ['a shorthand after the longhand', replacing('__results {\n  margin-block-start: var(--space-section-sm);\n', '__results {\n  margin-block-start: var(--space-section-sm);\n  margin: 0;\n'), 'writes `margin: 0` beside the gap above the results'],
+    ['the reset moved after the owls', (css) => appending('.salt-case-study-view__story > .salt-case-study-view__header > *,\n.salt-case-study-view__story > .salt-case-study-view__header > .salt-section__content > *,\n.salt-case-study-view__story > .salt-case-study-view__section > h2,\n.salt-case-study-view__detail-value {\n  margin: 0;\n}')(replacing('.salt-case-study-view__story > .salt-case-study-view__header > *,\n.salt-case-study-view__story > .salt-case-study-view__header > .salt-section__content > *,\n.salt-case-study-view__story > .salt-case-study-view__section > h2,\n.salt-case-study-view__detail-value {\n  margin: 0;\n}', '')(css)), 'comes after'],
     ['a later rule zeroing a gap', appending('.salt-case-study-view .salt-rich-text {\n  margin-block-start: 0;\n}'), 'only the gaps MR-8 owes and the reset before them set a block margin there'],
-    ['a padding length on the view', appending('.salt-case-study-view__client {\n  padding-block: 4px;\n}'), 'a length of its own'],
-    ['a length inside calc()', replacing('  margin-block-start: var(--space-4);\n}\n\n.salt-case-study-view > .salt-case-study-view__header > .salt-case-study-view__results', '  margin-block-start: calc(var(--space-4) + 1rem);\n}\n\n.salt-case-study-view > .salt-case-study-view__header > .salt-case-study-view__results'), 'writes `margin-block-start: calc(var(--space-4) + 1rem)`'],
+    ['a padding length on the view', appending('.salt-case-study-view__summary {\n  padding-block: 4px;\n}'), 'a length of its own'],
+    ['a length inside calc()', replacing('.salt-case-study-view__story > .salt-case-study-view__section > * + * {\n  margin-block-start: var(--space-4);', '.salt-case-study-view__story > .salt-case-study-view__section > * + * {\n  margin-block-start: calc(var(--space-4) + 1rem);'), 'a length of its own'],
     /* #201 review, 1: a physical longhand sets the same edge, and the first version never read it. */
-    ['`margin-top: 0` inside a pinned rule', replacing('__details {\n  margin-block-start: var(--space-8);\n', '__details {\n  margin-block-start: var(--space-8);\n  margin-top: 0;\n'), 'writes `margin-top: 0` beside the gap above the results'],
-    ['`all` on the view', appending('.salt-case-study-view__client {\n  all: unset;\n}'), 'writes `all: unset`'],
+    ['`margin-top: 0` inside a pinned rule', replacing('__results {\n  margin-block-start: var(--space-section-sm);\n', '__results {\n  margin-block-start: var(--space-section-sm);\n  margin-top: 0;\n'), 'writes `margin-top: 0` beside the gap above the results'],
+    ['`all` on the view', appending('.salt-case-study-view__summary {\n  all: unset;\n}'), 'writes `all: unset`'],
     /* #201 review, 2: spellings that may compute the same, which the gate does not evaluate. */
     ['a gap as `calc(var(--spacing)*4)`', replacing('  margin-block-start: var(--space-4);', '  margin-block-start: calc(var(--spacing)*4);'), 'a spelling this contract does not read; it compares one `var()`, so write `var(--space-4)`'],
     ['a gap as `calc(4 * var(--spacing))`', replacing('  margin-block-start: var(--space-4);', '  margin-block-start: calc(4 * var(--spacing));'), 'a spelling this contract does not read'],
-    ['a gap with a fallback', replacing('__details {\n  margin-block-start: var(--space-8);', '__details {\n  margin-block-start: var(--space-8, var(--space-12));'), 'a spelling this contract does not read'],
+    ['a gap with a fallback', replacing('__results {\n  margin-block-start: var(--space-section-sm);', '__results {\n  margin-block-start: var(--space-section-sm, var(--space-12));'), 'a spelling this contract does not read'],
     /* BD-178: the details are a band of their own under the results, and their `<dd>` loses the
        user agent's 40px indent only through the reset. */
     [
-      'the gap above the details deleted',
-      replacing(',\n.salt-case-study-view > .salt-case-study-view__header > .salt-case-study-view__details,\n', ',\n'),
-      'no unconditional `.salt-case-study-view > .salt-case-study-view__header > .salt-case-study-view__details` rule',
+      'the gap above the results deleted',
+      replacing('.salt-case-study-view__story > .salt-case-study-view__results {\n  margin-block-start: var(--space-section-sm);\n}', ''),
+      'no unconditional `.salt-case-study-view__story > .salt-case-study-view__results` rule',
     ],
     [
       'the details’ values dropped from the reset',
-      replacing('.salt-case-study-view > .salt-case-study-view__section > h2,\n.salt-case-study-view__detail-value {', '.salt-case-study-view > .salt-case-study-view__section > h2 {'),
+      replacing('.salt-case-study-view__story > .salt-case-study-view__section > h2,\n.salt-case-study-view__detail-value {', '.salt-case-study-view__story > .salt-case-study-view__section > h2 {'),
       'writes `margin: 0` on the case study view; only the gaps MR-8 owes',
     ],
-    ['a gap naming the token in capitals, which is another property', replacing('__details {\n  margin-block-start: var(--space-8);', '__details {\n  margin-block-start: var(--SPACE-8);'), 'write `var(--space-8)`, the token this contract compares'],
+    ['a gap naming the token in capitals, which is another property', replacing('__results {\n  margin-block-start: var(--space-section-sm);', '__results {\n  margin-block-start: var(--SPACE-SECTION-SM);'), 'write `var(--space-section-sm)`, the token this contract compares'],
     /* BD-202: the title off the site header, the article's own padding. */
-    ['the gap under the site header deleted', replacing('.salt-case-study-view {\n  padding-block-start: var(--space-section-md);\n}', ''), 'no unconditional `.salt-case-study-view` rule'],
+    ['the gap under the site header deleted', replacing('.salt-case-study-view {\n  padding-block-start: var(--space-section-md);\n}', ''), 'sets no `padding-block-start`, so nothing opens the gap between the site header and the title'],
     ['the gap under the site header as a length', replacing('  padding-block-start: var(--space-section-md);', '  padding-block-start: 3rem;'), 'writes `padding-block-start: 3rem` for the gap between the site header and the title, a length of its own'],
     ['the gap under the site header on another token', replacing('  padding-block-start: var(--space-section-md);', '  padding-block-start: var(--space-section-sm);'), 'write `var(--space-section-md)`, the token this contract compares'],
     ['a shorthand beside the article’s padding', replacing('  padding-block-start: var(--space-section-md);', '  padding-block-start: var(--space-section-md);\n  padding: 0;'), 'writes `padding: 0` beside the gap between the site header and the title'],
     ['the article’s padding zeroed by an outranking rule', appending('main > .salt-case-study-view {\n  padding-block: 0;\n}'), "writes `padding-block: 0` on the case study view's article"],
     /* BD-202: a section's heading off a heading opening its rich text. */
-    ['the gap over an opening heading deleted', replacing('.salt-case-study-view > .salt-case-study-view__section > h2 + .salt-rich-text:has(> :first-child:is(h3, h4, h5, h6)) {\n  margin-block-start: var(--space-8);\n}', ''), 'no unconditional `.salt-case-study-view > .salt-case-study-view__section > h2 + .salt-rich-text:has(> :first-child:is(h3, h4, h5, h6))` rule'],
+    ['the gap over an opening heading deleted', replacing('.salt-case-study-view__story > .salt-case-study-view__section > h2 + .salt-rich-text:has(> :first-child:is(h3, h4, h5, h6)) {\n  margin-block-start: var(--space-8);\n}', ''), 'no unconditional `.salt-case-study-view__story > .salt-case-study-view__section > h2 + .salt-rich-text:has(> :first-child:is(h3, h4, h5, h6))` rule'],
     ['the gap over an opening heading back on the section owl’s token', replacing(':first-child:is(h3, h4, h5, h6)) {\n  margin-block-start: var(--space-8);', ':first-child:is(h3, h4, h5, h6)) {\n  margin-block-start: var(--space-4);'), 'for the gap between a section’s heading and a heading opening its rich text; write `var(--space-8)`'],
     /* BD-206: a header drawn as a band. */
     ['the band’s zero for the article’s padding deleted', replacing(".salt-case-study-view[data-header='band'] {\n  padding-block-start: var(--space-0);\n}", ''), "no unconditional `.salt-case-study-view[data-header='band']` rule"],
     ['the band’s zero for the article’s padding on another token', replacing('  padding-block-start: var(--space-0);', '  padding-block-start: var(--space-4);'), 'write `var(--space-0)`, the token this contract compares'],
-    ['the band’s lines left out of the owl', replacing('.salt-case-study-view > .salt-case-study-view__header > .salt-section__content > * + *,\n', ''), 'no unconditional `.salt-case-study-view > .salt-case-study-view__header > .salt-section__content > * + *` rule'],
-    ['the band’s lines left out of the reset', replacing('.salt-case-study-view > .salt-case-study-view__header > .salt-section__content > *,\n', ''), 'only the gaps MR-8 owes and the reset before them set a block margin there'],
+    ['the band’s lines left out of the owl', replacing('.salt-case-study-view__story > .salt-case-study-view__header > .salt-section__content > * + *,\n', ''), 'no unconditional `.salt-case-study-view__story > .salt-case-study-view__header > .salt-section__content > * + *` rule'],
+    ['the band’s lines left out of the reset', replacing('.salt-case-study-view__story > .salt-case-study-view__header > .salt-section__content > *,\n', ''), 'only the gaps MR-8 owes and the reset before them set a block margin there'],
     /* #226 review, 5: the band's content centred again after the reset. */
-    ['the band’s centring deleted', replacing('.salt-case-study-view > .salt-case-study-view__header > .salt-section__content {\n  margin-inline: auto;\n}', ''), 'gives a header band’s content'.replace('’', "'")],
-    ['the band’s centring as a length', replacing('  margin-inline: auto;\n}\n\n/*\n * (0,2,0), and it has to be', '  margin-inline: 0;\n}\n\n/*\n * (0,2,0), and it has to be'), 'write `auto`'],
-    ['the band’s centring !important', replacing('  margin-inline: auto;\n}\n\n/*\n * (0,2,0), and it has to be', '  margin-inline: AUTO !important;\n}\n\n/*\n * (0,2,0), and it has to be'), 'declares `margin-inline` !important'],
-    ['the band’s centring as physical margins', replacing('  margin-inline: auto;\n}\n\n/*\n * (0,2,0), and it has to be', '  margin-left: auto;\n}\n\n/*\n * (0,2,0), and it has to be'), 'a spelling this contract does not read; it reads `margin-inline: auto`'],
-    ['the band’s centring through a var()', replacing('  margin-inline: auto;\n}\n\n/*\n * (0,2,0), and it has to be', '  margin-inline: var(--x);\n}\n\n/*\n * (0,2,0), and it has to be'), 'a spelling this contract does not read; it reads `auto`'],
-    ['the band’s centring overridden by a later rule', appending('.salt-case-study-view > .salt-case-study-view__header > .salt-section__content {\n  margin-inline: 0;\n}'), 'on a header band’s content'.replace('’', "'")],
+    ['the band’s centring deleted', replacing('.salt-case-study-view__story > .salt-case-study-view__header > .salt-section__content {\n  margin-inline: auto;\n  padding-inline: var(--space-0);\n}', ''), 'gives a header band’s content'.replace('’', "'")],
+    ['the band’s centring as a length', replacing('  margin-inline: auto;\n  padding-inline: var(--space-0);\n}\n\n/*\n * (0,2,0), and it has to be', '  margin-inline: 0;\n  padding-inline: var(--space-0);\n}\n\n/*\n * (0,2,0), and it has to be'), 'write `auto`'],
+    ['the band’s centring !important', replacing('  margin-inline: auto;\n  padding-inline: var(--space-0);\n}\n\n/*\n * (0,2,0), and it has to be', '  margin-inline: AUTO !important;\n  padding-inline: var(--space-0);\n}\n\n/*\n * (0,2,0), and it has to be'), 'declares `margin-inline` !important'],
+    ['the band’s centring as physical margins', replacing('  margin-inline: auto;\n  padding-inline: var(--space-0);\n}\n\n/*\n * (0,2,0), and it has to be', '  margin-left: auto;\n  padding-inline: var(--space-0);\n}\n\n/*\n * (0,2,0), and it has to be'), 'a spelling this contract does not read; it reads `margin-inline: auto`'],
+    ['the band’s centring through a var()', replacing('  margin-inline: auto;\n  padding-inline: var(--space-0);\n}\n\n/*\n * (0,2,0), and it has to be', '  margin-inline: var(--x);\n  padding-inline: var(--space-0);\n}\n\n/*\n * (0,2,0), and it has to be'), 'a spelling this contract does not read; it reads `auto`'],
+    ['the band’s centring overridden by a later rule', appending('.salt-case-study-view__story > .salt-case-study-view__header > .salt-section__content {\n  margin-inline: 0;\n}'), 'on a header band’s content'.replace('’', "'")],
     /* The section 7 row BD-202 closes: a zero spelled as a token or a `calc()`, and a rule naming the
        view that outranks a gap without repeating its selector. Each rendered a wrong gap and passed. */
     ['a zero spelled as a token', appending('.salt-case-study-view__section > .salt-rich-text {\n  margin-block-start: var(--space-0);\n}'), 'writes `margin-block-start: var(--space-0)` on the case study view; only the gaps MR-8 owes'],
     ['a zero spelled as a calc()', appending('.salt-case-study-view__section > .salt-rich-text {\n  margin-block-start: calc(var(--space-8) * 0);\n}'), 'writes `margin-block-start: calc(var(--space-8) * 0)` on the case study view; only the gaps MR-8 owes'],
-    ['a rule outranking the article owl without repeating it', appending('.salt-case-study-view > .salt-case-study-view__section {\n  margin-block-start: var(--space-8);\n}'), 'writes `margin-block-start: var(--space-8)` on the case study view; only the gaps MR-8 owes'],
+    ['a rule outranking the article owl without repeating it', appending('.salt-case-study-view__story > .salt-case-study-view__section {\n  margin-block-start: var(--space-8);\n}'), 'writes `margin-block-start: var(--space-8)` on the case study view; only the gaps MR-8 owes'],
   ])('fails %s', (_case, mutate, message) => {
     const { code, output } = gate('primitives.css', mutate)
     expect(output).toContain(message)
@@ -1862,8 +1862,8 @@ describe('the case study view spaces its header and its sections', () => {
 
   /* #201 review, 1: a rule repeating a pinned selector in another stylesheet was skipped whole. */
   itEach([
-    ['the section owl zeroed in blocks.css', 'blocks.css', appending('.salt-case-study-view > .salt-case-study-view__section > * + * {\n  margin-block-start: 0;\n}'), 'in blocks.css writes `margin-block-start: 0` on a gap MR-8 owes'],
-    ['the article owl retuned inside a query', 'chrome.css', appending('@media (max-width: 40rem) {\n  .salt-case-study-view > * + * {\n    margin-top: var(--space-8);\n  }\n}'), 'inside `@media (max-width: 40rem)` in chrome.css writes `margin-top: var(--space-8)` on a gap MR-8 owes'],
+    ['the section owl zeroed in blocks.css', 'blocks.css', appending('.salt-case-study-view__story > .salt-case-study-view__section > * + * {\n  margin-block-start: 0;\n}'), 'in blocks.css writes `margin-block-start: 0` on a gap MR-8 owes'],
+    ['the article owl retuned inside a query', 'chrome.css', appending('@media (max-width: 40rem) {\n  .salt-case-study-view__story > * + * {\n    margin-top: var(--space-8);\n  }\n}'), 'inside `@media (max-width: 40rem)` in chrome.css writes `margin-top: var(--space-8)` on a gap MR-8 owes'],
     ['the article’s padding zeroed in blocks.css', 'blocks.css', appending('.salt-case-study-view {\n  padding-top: 0;\n}'), 'in blocks.css writes `padding-top: 0` on a gap MR-8 owes'],
   ])('fails %s', (_case, file, mutate, message) => {
     const { code, output } = gate(file, mutate)
@@ -1872,7 +1872,7 @@ describe('the case study view spaces its header and its sections', () => {
   })
 
   it('fails a gap zeroed from another stylesheet', () => {
-    const { code, output } = gate('blocks.css', appending('.salt-case-study-view > .salt-case-study-view__section > * {\n  margin: 0;\n}'))
+    const { code, output } = gate('blocks.css', appending('.salt-case-study-view__story > .salt-case-study-view__section > * {\n  margin: 0;\n}'))
     expect(output).toContain('in blocks.css writes `margin: 0`')
     expect(code).toBe(1)
   })
@@ -1881,7 +1881,7 @@ describe('the case study view spaces its header and its sections', () => {
   itEach([
     ['a summary centred with an inline margin', appending('.salt-case-study-view__summary {\n  margin-inline: auto;\n}')],
     ['a summary centred, cased differently', appending('.salt-case-study-view__summary {\n  MARGIN-LEFT: auto;\n}')],
-    ['padding on the project details, a pinned gap that is a margin', appending('.salt-case-study-view > .salt-case-study-view__header > .salt-case-study-view__details {\n  padding-block-start: var(--space-4);\n}')],
+    ['padding on the results, a pinned gap that is a margin', appending('.salt-case-study-view__story > .salt-case-study-view__results {\n  padding-block-start: var(--space-4);\n}')],
   ])('passes %s', (_case, mutate) => {
     const { code, output } = gate('primitives.css', mutate)
     expect(output).toContain('PASS: ')
@@ -1889,11 +1889,11 @@ describe('the case study view spaces its header and its sections', () => {
   })
 
   itEach([
-    ['a block-end margin on a part', appending('.salt-case-study-view__client {\n  margin-block-end: var(--space-8);\n}'), 'writes `margin-block-end: var(--space-8)` on the case study view; only the gaps MR-8 owes'],
-    ['a block-end margin, cased differently', appending('.salt-case-study-view__client {\n  Margin-Bottom: var(--space-8);\n}'), 'writes `Margin-Bottom: var(--space-8)` on the case study view'],
+    ['a block-end margin on a part', appending('.salt-case-study-view__summary {\n  margin-block-end: var(--space-8);\n}'), 'writes `margin-block-end: var(--space-8)` on the case study view; only the gaps MR-8 owes'],
+    ['a block-end margin, cased differently', appending('.salt-case-study-view__summary {\n  Margin-Bottom: var(--space-8);\n}'), 'writes `Margin-Bottom: var(--space-8)` on the case study view'],
     ['an inline margin !important', appending('.salt-case-study-view__summary {\n  margin-inline: auto !important;\n}'), 'declares `margin-inline` !important'],
-    ['a margin spelling the contract does not read', appending('.salt-case-study-view__client {\n  margin-trim: block;\n}'), 'a margin this contract does not read'],
-    ['a prefixed margin', appending('.salt-case-study-view__client {\n  -webkit-margin-before: 0;\n}'), 'a spelling this contract does not read'],
+    ['a margin spelling the contract does not read', appending('.salt-case-study-view__summary {\n  margin-trim: block;\n}'), 'a margin this contract does not read'],
+    ['a prefixed margin', appending('.salt-case-study-view__summary {\n  -webkit-margin-before: 0;\n}'), 'a spelling this contract does not read'],
     ['padding on the article repeated', appending('.salt-case-study-view {\n  padding-block: 0;\n}'), 'writes `padding-block: 0` on a gap MR-8 owes'],
     /* #222 re-review: the article's gap is a padding, so a margin on it is a block margin, not its gap. */
     ['a margin shorthand on the article', appending('.salt-case-study-view {\n  margin: 0 auto;\n}'), 'writes `margin: 0 auto` on the case study view; only the gaps MR-8 owes and the reset before them set a block margin there'],

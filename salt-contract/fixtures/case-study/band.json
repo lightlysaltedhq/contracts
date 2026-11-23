@@ -20,7 +20,10 @@
       "solution": "What we did",
       "gallery": "Gallery",
       "liveSite": "Visit the site",
-      "services": "Services delivered"
+      "services": "Services delivered",
+      "details": "Project details",
+      "client": "Client",
+      "sector": "Sector"
     },
     "caseStudy": {
       "header": "band",

@@ -1,13 +1,12 @@
 {
-  "$comment": "document: a case study's fields as contract/collections/case-studies.json defines them, as the case-study view receives them. Stored as defined: title, client, summary, results, details, challenge and solution (rich text HTML, a stored h3 renders h3 at base 2), gallery (media ids), externalUrl. Resolved for the view: image is featuredImage (a media id); services are resolved to cards for display, with image media ids. The view takes labels back, results, challenge, solution, gallery, liveSite and services from site.labels, and the back link's address from site.collectionIndexes['case-study'] (the case studies' index). site.caseStudy is left out, so the header is plain, the default (case-study/band draws it as a band). Two images, each its own field (SC-034): image is featuredImage, the hero image, drawn last in the header and the only priority image; caseStudyImage is drawn in the flow between the challenge and the solution, lazy, and not at all when it names the featured image's media item (media identity is the media id, never the alt text or the file name).",
+  "$comment": "document: a case study's fields as contract/collections/case-studies.json defines them, as the case-study view receives them. Stored as defined: title, client, summary, results, details, challenge and solution (rich text HTML, a stored h3 renders h3 at base 2), gallery (media ids), externalUrl. Resolved for the view: image is featuredImage (a media id); client and sector are the names the view draws (the record's title when the site enables the record's collection and it resolves, otherwise the free text, SC-035); services are resolved to { id, title, href }, href null for a service with no public page. The view takes labels back, results, challenge, solution, gallery, liveSite and services from site.labels, and the back link's address from site.collectionIndexes['case-study'] (the case studies' index). site.caseStudy is left out, so the header is plain, the default (case-study/band draws it as a band). Two images, each its own field (SC-034): image is featuredImage, the hero image, drawn last in the header and the only priority image; caseStudyImage is drawn in the flow between the challenge and the solution, lazy, and not at all when it names the featured image's media item (media identity is the media id, never the alt text or the file name).",
   "view": "case-study",
-  "summary": "A case study with every part set, in the default layout: a link back to the index, the title, client, summary, three results, three project details, the featured image as the hero image and the priority image, a challenge, the case-study image after it in the flow, a solution whose stored h3 renders h3, a gallery of two images, the live-site link opening in a new tab, and two delivered service cards.",
+  "summary": "A case study with every part set: in the story, a link back to the index, the title, the summary, the featured image as the hero and priority image, a challenge, the case-study image, a solution whose stored h3 renders h3, three results, a gallery of two images and the live-site link opening in a new tab; in the aside, three project details, the client, the sector and two delivered services, each linked to its page.",
   "context": {
     "priorityMedia": true,
     "path": "/work/hollin-farm-walled-garden/"
   },
   "site": {
-    "arrow": "→",
     "collectionIndexes": {
       "case-study": {
         "href": "/work/",
@@ -21,7 +20,10 @@
       "solution": "What we did",
       "gallery": "Gallery",
       "liveSite": "Visit the farm's site",
-      "services": "Services delivered"
+      "services": "Services delivered",
+      "details": "Project details",
+      "client": "Client",
+      "sector": "Sector"
     }
   },
   "media": {
@@ -43,18 +45,6 @@
       "height": 900,
       "alt": "A brick path through the garden to the restored glasshouse"
     },
-    "garden-design": {
-      "url": "https://uploads.example/garden-design-{width}.jpg",
-      "width": 1200,
-      "height": 800,
-      "alt": "A curved border of grasses and salvias"
-    },
-    "planting-plans": {
-      "url": "https://uploads.example/planting-plans-{width}.jpg",
-      "width": 800,
-      "height": 600,
-      "alt": "A planting plan drawn in pencil and watercolour"
-    },
     "walled-garden-glasshouse": {
       "url": "https://uploads.example/walled-garden-glasshouse-{width}.jpg",
       "width": 1800,
@@ -65,6 +55,7 @@
   "document": {
     "title": "Restoring the walled garden",
     "client": "Hollin Farm",
+    "sector": "Hospitality and food",
     "summary": "A derelict Victorian kitchen garden brought back into production for the farm shop and café.",
     "results": [
       {
@@ -107,16 +98,12 @@
       {
         "id": "garden-design",
         "title": "Garden design",
-        "href": "/services/garden-design/",
-        "image": "garden-design",
-        "text": "Plans drawn to suit the plot, the soil and the way you use the space."
+        "href": "/services/garden-design/"
       },
       {
         "id": "planting-plans",
         "title": "Planting plans",
-        "href": "/services/planting-plans/",
-        "image": "planting-plans",
-        "text": "Borders planned plant by plant, season by season."
+        "href": "/services/planting-plans/"
       }
     ]
   }

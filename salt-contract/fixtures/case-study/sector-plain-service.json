@@ -1,0 +1,39 @@
+{
+  "$comment": "The aside with only a sector and two services, one with no public page (href null), drawn as plain text, and one linked (SC-036). No details or client, so their rows are not drawn. No featured image, so nothing claims priority.",
+  "view": "case-study",
+  "summary": "A case study whose aside holds a sector and two delivered services, one linked and one plain; the story holds the title and a challenge.",
+  "context": {
+    "priorityMedia": true,
+    "path": "/work/school-orchard/"
+  },
+  "site": {
+    "labels": {
+      "results": "The project in numbers",
+      "challenge": "The challenge",
+      "solution": "What we did",
+      "gallery": "Gallery",
+      "liveSite": "Visit the site",
+      "services": "Services delivered",
+      "details": "Project details",
+      "client": "Client",
+      "sector": "Sector"
+    }
+  },
+  "document": {
+    "title": "An orchard for the school",
+    "sector": "Education",
+    "challenge": "<p>The school had a field it could not mow and wanted something the children could look after.</p>",
+    "services": [
+      {
+        "id": "orchard-planting",
+        "title": "Orchard planting",
+        "href": "/services/orchard-planting/"
+      },
+      {
+        "id": "site-survey",
+        "title": "Site survey",
+        "href": null
+      }
+    ]
+  }
+}

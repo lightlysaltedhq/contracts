@@ -21,55 +21,140 @@
       ],
       "children": [
         {
-          "role": "header",
-          "element": "header",
+          "role": "story",
+          "element": "div",
           "classes": [
-            "salt-case-study-view__header"
+            "salt-case-study-view__story"
           ],
+          "note": "The story column (SC-036): the header, the hero image and the narrative, in reading order, capped at the reading measure whether or not the aside is drawn.",
           "children": [
             {
-              "role": "back",
-              "element": "p",
+              "role": "header",
+              "element": "header",
               "classes": [
-                "salt-case-study-view__back"
+                "salt-case-study-view__header"
               ],
-              "optional": true,
-              "when": "the index has a safe href",
               "children": [
                 {
-                  "role": "back-link",
-                  "element": "a",
+                  "role": "back",
+                  "element": "p",
                   "classes": [
-                    "salt-case-study-view__back-link"
+                    "salt-case-study-view__back"
                   ],
-                  "attributes": {
-                    "href": "from:index.href"
-                  }
+                  "optional": true,
+                  "when": "the index has a safe href",
+                  "children": [
+                    {
+                      "role": "back-link",
+                      "element": "a",
+                      "classes": [
+                        "salt-case-study-view__back-link"
+                      ],
+                      "attributes": {
+                        "href": "from:index.href"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "role": "title",
+                  "element": "h1",
+                  "text": "from:caseStudy.title"
+                },
+                {
+                  "role": "summary",
+                  "element": "p",
+                  "classes": [
+                    "salt-case-study-view__summary"
+                  ],
+                  "optional": true,
+                  "when": "summary is set"
+                },
+                {
+                  "role": "hero-media",
+                  "element": "div",
+                  "classes": [
+                    "salt-case-study-view__media"
+                  ],
+                  "optional": true,
+                  "when": "the featured image resolves",
+                  "note": "The hero image: the featured image, the header's last part, in either header variant. It is the view's priority image, the only one (section#priority-media).",
+                  "children": [
+                    {
+                      "role": "hero-image",
+                      "component": "media",
+                      "note": "Priority; fill, cover."
+                    }
+                  ]
                 }
               ]
             },
             {
-              "role": "title",
-              "element": "h1",
-              "text": "from:caseStudy.title"
-            },
-            {
-              "role": "client",
-              "element": "p",
+              "role": "challenge",
+              "element": "section",
               "classes": [
-                "salt-case-study-view__client"
+                "salt-case-study-view__section"
               ],
               "optional": true,
-              "when": "client is set"
+              "when": "challenge is set",
+              "children": [
+                {
+                  "role": "challenge-heading",
+                  "element": "h2",
+                  "attributes": {
+                    "id": "case-study__challenge-heading"
+                  }
+                },
+                {
+                  "role": "challenge-body",
+                  "component": "rich-text-body"
+                }
+              ],
+              "attributes": {
+                "aria-labelledby": "case-study__challenge-heading"
+              }
             },
             {
-              "role": "summary",
-              "element": "p",
+              "role": "flow-media",
+              "element": "div",
               "classes": [
-                "salt-case-study-view__summary"
+                "salt-case-study-view__flow-media"
               ],
               "optional": true,
-              "when": "summary is set"
+              "when": "caseStudyImage resolves to a media item other than the featured image",
+              "note": "The case-study image in the flow (SC-034): always after the challenge's place and before the solution's, so with no challenge it follows the header, and with no solution it comes before the gallery. It keeps that place when the challenge, the solution or the featured image is absent: it is never promoted to the hero, and nothing is drawn in its place when it is absent or does not resolve. When it resolves to the same media item as the featured image (the same media identity, such as the same WordPress attachment ID, never compared by alt text or file name), it is drawn once, in the hero, and not here.",
+              "children": [
+                {
+                  "role": "flow-image",
+                  "component": "media",
+                  "note": "Never the priority image, so lazy. Not framed: it keeps its own proportion at the content width, uncropped, its width and height reserving the space (primitives.css). Its alt by the media's normal rules (media.json). No caption."
+                }
+              ]
+            },
+            {
+              "role": "solution",
+              "element": "section",
+              "classes": [
+                "salt-case-study-view__section"
+              ],
+              "optional": true,
+              "when": "solution is set",
+              "children": [
+                {
+                  "role": "solution-heading",
+                  "element": "h2",
+                  "attributes": {
+                    "id": "case-study__solution-heading"
+                  }
+                },
+                {
+                  "role": "solution-body",
+                  "component": "rich-text-body"
+                }
+              ],
+              "attributes": {
+                "aria-labelledby": "case-study__solution-heading"
+              }
             },
             {
               "role": "results",
@@ -102,13 +187,100 @@
               ]
             },
             {
+              "role": "gallery",
+              "element": "section",
+              "classes": [
+                "salt-case-study-view__section"
+              ],
+              "optional": true,
+              "when": "gallery images are set",
+              "children": [
+                {
+                  "role": "gallery-heading",
+                  "element": "h2",
+                  "attributes": {
+                    "id": "case-study__gallery-heading"
+                  }
+                },
+                {
+                  "role": "gallery-list",
+                  "element": "ul",
+                  "classes": [
+                    "salt-grid"
+                  ],
+                  "attributes": {
+                    "role": "list"
+                  },
+                  "children": [
+                    {
+                      "role": "gallery-item",
+                      "element": "li",
+                      "repeat": {
+                        "from": "gallery"
+                      },
+                      "children": [
+                        {
+                          "role": "frame",
+                          "element": "div",
+                          "classes": [
+                            "salt-case-study-view__frame"
+                          ],
+                          "children": [
+                            {
+                              "role": "frame-image",
+                              "component": "media"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "attributes": {
+                "aria-labelledby": "case-study__gallery-heading"
+              }
+            },
+            {
+              "role": "live",
+              "element": "p",
+              "classes": [
+                "salt-case-study-view__live"
+              ],
+              "optional": true,
+              "when": "the live url is safe",
+              "children": [
+                {
+                  "role": "live-link",
+                  "component": "button",
+                  "attributes": {
+                    "data-style": "secondary",
+                    "target": "_blank"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "role": "aside",
+          "element": "aside",
+          "classes": [
+            "salt-case-study-view__aside"
+          ],
+          "optional": true,
+          "when": "a detail, the client, the sector or a service is drawn",
+          "attributes": {
+            "aria-label": "from:labels.details"
+          },
+          "note": "The project's facts beside the story from 64rem, after it below 64rem (SC-036). Only rows with a value are drawn, and with none the aside is not drawn at all, so the article keeps no empty track.",
+          "children": [
+            {
               "role": "details",
               "element": "dl",
               "classes": [
                 "salt-case-study-view__details"
               ],
-              "optional": true,
-              "when": "details are set",
               "children": [
                 {
                   "role": "detail",
@@ -135,138 +307,103 @@
                       ]
                     }
                   ]
-                }
-              ]
-            },
-            {
-              "role": "hero-media",
-              "element": "div",
-              "classes": [
-                "salt-case-study-view__media"
-              ],
-              "optional": true,
-              "when": "the featured image resolves",
-              "note": "The hero image: the featured image, the header's last part, in either header variant. It is the view's priority image, the only one (section#priority-media).",
-              "children": [
+                },
                 {
-                  "role": "hero-image",
-                  "component": "media",
-                  "note": "Priority; fill, cover."
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "role": "challenge",
-          "element": "section",
-          "classes": [
-            "salt-case-study-view__section"
-          ],
-          "optional": true,
-          "when": "challenge is set",
-          "children": [
-            {
-              "role": "challenge-heading",
-              "element": "h2",
-              "attributes": {
-                "id": "case-study__challenge-heading"
-              }
-            },
-            {
-              "role": "challenge-body",
-              "component": "rich-text-body"
-            }
-          ],
-          "attributes": {
-            "aria-labelledby": "case-study__challenge-heading"
-          }
-        },
-        {
-          "role": "flow-media",
-          "element": "div",
-          "classes": [
-            "salt-case-study-view__flow-media"
-          ],
-          "optional": true,
-          "when": "caseStudyImage resolves to a media item other than the featured image",
-          "note": "The case-study image in the flow (SC-034): always after the challenge's place and before the solution's, so with no challenge it follows the header, and with no solution it comes before the gallery. It keeps that place when the challenge, the solution or the featured image is absent: it is never promoted to the hero, and nothing is drawn in its place when it is absent or does not resolve. When it resolves to the same media item as the featured image (the same media identity, such as the same WordPress attachment ID, never compared by alt text or file name), it is drawn once, in the hero, and not here.",
-          "children": [
-            {
-              "role": "flow-image",
-              "component": "media",
-              "note": "Never the priority image, so lazy. Not framed: it keeps its own proportion at the content width, uncropped, its width and height reserving the space (primitives.css). Its alt by the media's normal rules (media.json). No caption."
-            }
-          ]
-        },
-        {
-          "role": "solution",
-          "element": "section",
-          "classes": [
-            "salt-case-study-view__section"
-          ],
-          "optional": true,
-          "when": "solution is set",
-          "children": [
-            {
-              "role": "solution-heading",
-              "element": "h2",
-              "attributes": {
-                "id": "case-study__solution-heading"
-              }
-            },
-            {
-              "role": "solution-body",
-              "component": "rich-text-body"
-            }
-          ],
-          "attributes": {
-            "aria-labelledby": "case-study__solution-heading"
-          }
-        },
-        {
-          "role": "gallery",
-          "element": "section",
-          "classes": [
-            "salt-case-study-view__section"
-          ],
-          "optional": true,
-          "when": "gallery images are set",
-          "children": [
-            {
-              "role": "gallery-heading",
-              "element": "h2",
-              "attributes": {
-                "id": "case-study__gallery-heading"
-              }
-            },
-            {
-              "role": "gallery-list",
-              "element": "ul",
-              "classes": [
-                "salt-grid"
-              ],
-              "attributes": {
-                "role": "list"
-              },
-              "children": [
-                {
-                  "role": "gallery-item",
-                  "element": "li",
-                  "repeat": {
-                    "from": "gallery"
-                  },
+                  "role": "client",
+                  "element": "div",
+                  "classes": [
+                    "salt-case-study-view__detail",
+                    "salt-case-study-view__client"
+                  ],
+                  "optional": true,
+                  "when": "the client's name is not empty",
                   "children": [
                     {
-                      "role": "frame",
-                      "element": "div",
+                      "role": "client-label",
+                      "element": "dt",
                       "classes": [
-                        "salt-case-study-view__frame"
+                        "salt-case-study-view__detail-label"
                       ],
+                      "text": "from:labels.client"
+                    },
+                    {
+                      "role": "client-value",
+                      "element": "dd",
+                      "classes": [
+                        "salt-case-study-view__detail-value"
+                      ],
+                      "note": "The client's name: the chosen client record's title when the site enables clients and the record resolves, otherwise the free-text client (SC-035). Never a link."
+                    }
+                  ]
+                },
+                {
+                  "role": "sector",
+                  "element": "div",
+                  "classes": [
+                    "salt-case-study-view__detail",
+                    "salt-case-study-view__sector"
+                  ],
+                  "optional": true,
+                  "when": "the sector's name is not empty",
+                  "children": [
+                    {
+                      "role": "sector-label",
+                      "element": "dt",
+                      "classes": [
+                        "salt-case-study-view__detail-label"
+                      ],
+                      "text": "from:labels.sector"
+                    },
+                    {
+                      "role": "sector-value",
+                      "element": "dd",
+                      "classes": [
+                        "salt-case-study-view__detail-value"
+                      ],
+                      "note": "The sector's name, by the client's rule: the chosen sector record's title when the site enables sectors and the record resolves, otherwise the free-text sector (SC-035). Never a link."
+                    }
+                  ]
+                },
+                {
+                  "role": "services",
+                  "element": "div",
+                  "classes": [
+                    "salt-case-study-view__detail",
+                    "salt-case-study-view__services"
+                  ],
+                  "optional": true,
+                  "when": "a delivered service is drawn",
+                  "children": [
+                    {
+                      "role": "services-label",
+                      "element": "dt",
+                      "classes": [
+                        "salt-case-study-view__detail-label"
+                      ],
+                      "text": "from:labels.services"
+                    },
+                    {
+                      "role": "service",
+                      "element": "dd",
+                      "classes": [
+                        "salt-case-study-view__detail-value"
+                      ],
+                      "repeat": {
+                        "from": "services"
+                      },
+                      "note": "One dd per delivered service the document holds, in its order: the service's title, a link when the service has a public page (its href), plain text when it has none. A service with no public page that may still be shown is drawn plain; one that may not be shown (on WordPress, not published) is not in the document, so is not drawn.",
                       "children": [
                         {
-                          "role": "frame-image",
-                          "component": "media"
+                          "role": "service-link",
+                          "element": "a",
+                          "classes": [
+                            "salt-case-study-view__service-link"
+                          ],
+                          "optional": true,
+                          "when": "the service's href is safe",
+                          "attributes": {
+                            "href": "from:service.href"
+                          }
                         }
                       ]
                     }
@@ -274,79 +411,7 @@
                 }
               ]
             }
-          ],
-          "attributes": {
-            "aria-labelledby": "case-study__gallery-heading"
-          }
-        },
-        {
-          "role": "live",
-          "element": "p",
-          "classes": [
-            "salt-case-study-view__live"
-          ],
-          "optional": true,
-          "when": "the live url is safe",
-          "children": [
-            {
-              "role": "live-link",
-              "component": "button",
-              "attributes": {
-                "data-style": "secondary",
-                "target": "_blank"
-              }
-            }
           ]
-        },
-        {
-          "role": "services",
-          "element": "section",
-          "classes": [
-            "salt-case-study-view__section",
-            "salt-case-study-view__services"
-          ],
-          "optional": true,
-          "when": "services are linked",
-          "children": [
-            {
-              "role": "services-heading",
-              "element": "h2",
-              "attributes": {
-                "id": "case-study__services-heading"
-              }
-            },
-            {
-              "role": "services-list",
-              "element": "ul",
-              "classes": [
-                "salt-grid",
-                "salt-showcase"
-              ],
-              "attributes": {
-                "role": "list",
-                "data-layout": "grid"
-              },
-              "children": [
-                {
-                  "role": "service-item",
-                  "element": "li",
-                  "repeat": {
-                    "from": "services"
-                  },
-                  "children": [
-                    {
-                      "role": "service-card",
-                      "component": "card",
-                      "note": "Generic style, title at h3; never the priority image."
-                    }
-                  ]
-                }
-              ]
-            }
-          ],
-          "attributes": {
-            "aria-labelledby": "case-study__services-heading"
-          }
         }
       ]
     }
@@ -430,15 +495,6 @@
                       "text": "from:caseStudy.title"
                     },
                     {
-                      "role": "client",
-                      "element": "p",
-                      "classes": [
-                        "salt-case-study-view__client"
-                      ],
-                      "optional": true,
-                      "when": "client is set"
-                    },
-                    {
                       "role": "summary",
                       "element": "p",
                       "classes": [
@@ -446,73 +502,6 @@
                       ],
                       "optional": true,
                       "when": "summary is set"
-                    },
-                    {
-                      "role": "results",
-                      "element": "ul",
-                      "classes": [
-                        "salt-grid",
-                        "salt-case-study-view__results"
-                      ],
-                      "attributes": {
-                        "role": "list",
-                        "aria-label": "from:labels.results",
-                        "data-columns": {
-                          "enum": [
-                            "2",
-                            "4"
-                          ],
-                          "when": "two or fewer, or four or more"
-                        }
-                      },
-                      "optional": true,
-                      "when": "results are set",
-                      "children": [
-                        {
-                          "role": "result",
-                          "component": "stat",
-                          "repeat": {
-                            "from": "results"
-                          }
-                        }
-                      ]
-                    },
-                    {
-                      "role": "details",
-                      "element": "dl",
-                      "classes": [
-                        "salt-case-study-view__details"
-                      ],
-                      "optional": true,
-                      "when": "details are set",
-                      "children": [
-                        {
-                          "role": "detail",
-                          "element": "div",
-                          "classes": [
-                            "salt-case-study-view__detail"
-                          ],
-                          "repeat": {
-                            "from": "details"
-                          },
-                          "children": [
-                            {
-                              "role": "detail-label",
-                              "element": "dt",
-                              "classes": [
-                                "salt-case-study-view__detail-label"
-                              ]
-                            },
-                            {
-                              "role": "detail-value",
-                              "element": "dd",
-                              "classes": [
-                                "salt-case-study-view__detail-value"
-                              ]
-                            }
-                          ]
-                        }
-                      ]
                     },
                     {
                       "role": "hero-media",
@@ -536,7 +525,7 @@
               ]
             }
           },
-          "note": "The header drawn as section.json draws a band, so the tone's roles, a site's rules for a band's measure and its full-bleed exemptions all reach it: salt-section with the tones, md spacing (which sections.css turns into the band's block space) and the default width, and its parts inside div.salt-section__content, the hero image last among them."
+          "note": "The header drawn as section.json draws a band, so the tone's roles all reach it: salt-section with the tones, md spacing (which sections.css turns into the band's block space) and the default width, and its parts, the hero image last, inside div.salt-section__content. It sits in the story column (SC-036): its content keeps the story's left edge and measure, and only the tone's background bleeds, to the viewport's left edge, and to its right edge unless the aside is beside it."
         }
       },
       "note": "plain draws the base tree. band wraps the header's parts in a content div, so the order differs from plain's."
@@ -559,8 +548,7 @@
     "stat",
     "media",
     "rich-text-body",
-    "button",
-    "card"
+    "button"
   ],
   "ruleRefs": [
     "section#landmarks",
@@ -573,14 +561,14 @@
       "reason": "The back link's paragraph; the link carries the rules."
     },
     {
-      "class": "salt-case-study-view__detail",
-      "role": "detail",
-      "reason": "Groups each dt with its dd; the details grid styles the pair's parts."
+      "class": "salt-case-study-view__client",
+      "role": "client",
+      "reason": "Tells the client's row from a project detail's, for a site's own styles and for conformance; the row is styled as every detail is, through salt-case-study-view__detail's parts."
     },
     {
-      "class": "salt-case-study-view__header",
-      "role": "header",
-      "reason": "The header that holds the title, its lines and the hero image; the view's rules space its parts as children of it, and a band draws it through salt-section."
+      "class": "salt-case-study-view__detail",
+      "role": "detail",
+      "reason": "Groups each dt with its dd or dds, a detail's, the client's, the sector's or the services'; the details grid styles the pair's parts."
     },
     {
       "class": "salt-case-study-view__live",
@@ -590,12 +578,17 @@
     {
       "class": "salt-case-study-view__section",
       "role": "challenge",
-      "reason": "Each of the four content sections (challenge, solution, gallery, services); the view's rules space its heading and parts as children of it, and it has no rule of its own."
+      "reason": "Each of the three content sections (challenge, solution, gallery); the view's rules space its heading and parts as children of it, and it has no rule of its own."
+    },
+    {
+      "class": "salt-case-study-view__sector",
+      "role": "sector",
+      "reason": "Tells the sector's row from a project detail's, for a site's own styles and for conformance; the row is styled as every detail is, through salt-case-study-view__detail's parts."
     },
     {
       "class": "salt-case-study-view__services",
       "role": "services",
-      "reason": "Tells the delivered services' section from the other three; the section's rules come from salt-case-study-view__section's children and the grid."
+      "reason": "Tells the delivered services' row from a project detail's, for a site's own styles and for conformance; the row is styled as every detail is, through salt-case-study-view__detail's parts."
     }
   ],
   "notes": [
@@ -609,7 +602,11 @@
     },
     {
       "topic": "ruling",
-      "text": "The hero and the flow (SC-034). The featured image is the hero image, drawn last in the header, inside the band's content when the header is a band, and it is the view's only priority image. caseStudyImage is a separate optional image, drawn in the flow between the challenge and the solution and never the priority image. Neither is ever drawn in the other's place, neither leaves an empty wrapper, and one media item is never drawn twice. The image aside goes: no image runs beside the view's parts, and nothing in the markup counts them. Only the image aside is removed; this does not rule out a separate sidebar of related details (such as the case study's sector, client and services), whose fields and presentation are not yet settled, so the contract draws none and fixes nothing about one."
+      "text": "The hero and the flow (SC-034). The featured image is the hero image, drawn last in the header, inside the band's content when the header is a band, and it is the view's only priority image. caseStudyImage is a separate optional image, drawn in the flow between the challenge and the solution and never the priority image. Neither is ever drawn in the other's place, neither leaves an empty wrapper, and one media item is never drawn twice. The image aside goes: no image runs beside the view's parts, and nothing in the markup counts them. Only the image aside is removed: the aside the view draws is of the project's facts, never an image (SC-036)."
+    },
+    {
+      "topic": "ruling",
+      "text": "The story and the aside (SC-036). The article is the story column and, when anything fills it, an aside of the project's facts. The story holds the back link, the title, the summary and the hero image, then the challenge, the case-study image, the solution, the results, the gallery and the live-site link; the aside holds the project details, then the client, the sector and the delivered services, each only when it has a value, a service a link only to its own public page. Nothing appears in both: the header draws no client line, results or details, and no service cards are drawn. From 64rem the aside sits to the story's right; narrower, after it. The story is capped at --container-2xl in either case, and the aside is --container-2xs."
     }
   ],
   "platforms": {
@@ -624,7 +621,8 @@
       "owes": [
         "The case-study view's markup above.",
         "The featured image drawn in the header, last, as the priority image, and caseStudyImage (an attachment ID) drawn in div.salt-case-study-view__flow-media between the challenge and the solution, lazy, and not at all when it is the featured image's attachment (SC-034). No data-media or data-aside-rows on the article.",
-        "The section heading ids case-study__challenge-heading, case-study__solution-heading, case-study__gallery-heading and case-study__services-heading, each named by its section's aria-labelledby (SC-012).",
+        "The section heading ids case-study__challenge-heading, case-study__solution-heading and case-study__gallery-heading, each named by its section's aria-labelledby (SC-012).",
+        "The story column and the aside (SC-036): the header, the results and the details moved, the client line and the services section gone; Client and Sector from the record's title when its module is on and the record resolves, otherwise the free text; a service linked only when it is published and has a permalink, drawn plain when it has no public page, and left out when it may not be shown; the labels details, client and sector, with translators' comments.",
         "An ACF options page on which editors set the case-study view's header band (the header variant, plain or band, with the band's tone and dark tone), the settings a fixture gives as site.caseStudy: header, headerTone and headerToneDark. The image aside layout setting goes (SC-034)."
       ]
     },
@@ -632,8 +630,8 @@
       "owes": [
         "The featured image drawn in the header, last, as the priority image, and caseStudyImage drawn in div.salt-case-study-view__flow-media between the challenge and the solution, lazy, and not at all when it is the featured image's media item; the media prop and its image aside layout go, with data-media, the aside rows and the measure (SC-034).",
         "The header band's spacing from data-spacing alone, with no inline --salt-section-space (SC-029).",
-        "Name its four sections: the ids case-study__challenge-heading, case-study__solution-heading, case-study__gallery-heading and case-study__services-heading on their h2s, and aria-labelledby on each section (section#labelled-by, SC-012).",
-        "A delivered service's card image declares its slot from contract/image-sizes.json, at three columns, the grid it is drawn in: the card slot in the full band; case-study-view.tsx passes the unbanded card slot, which is a carousel slide's."
+        "Name its three sections: the ids case-study__challenge-heading, case-study__solution-heading and case-study__gallery-heading on their h2s, and aria-labelledby on each section (section#labelled-by, SC-012).",
+        "The story column and the aside (SC-036), as Salt for WordPress owes them; the services' cards go, and each story image declares the story slot contract/image-sizes.json gives for whether the aside is drawn."
       ]
     }
   },

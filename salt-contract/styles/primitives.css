@@ -182,6 +182,7 @@ body {
 .salt-rich-text :where(a):focus-visible,
 /* The case study's link back to its index (BD-206). */
 .salt-case-study-view__back-link:focus-visible,
+.salt-case-study-view__service-link:focus-visible,
 .salt-logos__frame:focus-visible,
 .salt-carousel__track:focus-visible,
 /* The contact form's status message, which script focuses after a send so a screen reader
@@ -237,7 +238,7 @@ body {
    `.salt-section`, so this rule can never match one — but the contract reads the flat-tone
    list and requires the image composition to cover every control in it, and weakening that to
    allow an exception is how a card link quietly drops back to the one-pole indicator. */
-.salt-section[data-media] :is(.salt-button, .salt-card__link, .salt-accordion__summary, .salt-tabs__panel, .salt-showcase__link, .salt-pagination__link, .salt-search__input, .salt-share__link, .salt-copy-link__button, .salt-consent-panel__checkbox, .salt-logo, .salt-nav__link, .salt-nav__sublink, .salt-nav__toggle, .salt-header__burger, .salt-drawer__close, .salt-theme-toggle, .salt-header__phone, .salt-footer__link, .salt-footer__social-link, .salt-skip-link, .salt-contact__input, .salt-contact__link, .salt-showcase__contact-link, .salt-rich-text :where(a), .salt-case-study-view__back-link, .salt-logos__frame, .salt-carousel__track, .salt-contact__status):focus-visible,
+.salt-section[data-media] :is(.salt-button, .salt-card__link, .salt-accordion__summary, .salt-tabs__panel, .salt-showcase__link, .salt-pagination__link, .salt-search__input, .salt-share__link, .salt-copy-link__button, .salt-consent-panel__checkbox, .salt-logo, .salt-nav__link, .salt-nav__sublink, .salt-nav__toggle, .salt-header__burger, .salt-drawer__close, .salt-theme-toggle, .salt-header__phone, .salt-footer__link, .salt-footer__social-link, .salt-skip-link, .salt-contact__input, .salt-contact__link, .salt-showcase__contact-link, .salt-rich-text :where(a), .salt-case-study-view__back-link, .salt-case-study-view__service-link, .salt-logos__frame, .salt-carousel__track, .salt-contact__status):focus-visible,
 /* The tab, in the same rule rather than a second one. The contract reads a rule at a time and
    asks that it cover every control the flat-tone list names, so a tab in its own rule would be
    a rule that covers one control and fails, and the flat-tone list names `.salt-tabs__input`. */
@@ -1776,7 +1777,7 @@ textarea.salt-contact__input {
  * different gap above a line than below it. A detail's `<dd>` is zeroed with them, since the user
  * agent indents it 40px from its label, which is an eighth of a 320px screen.
  */
-.salt-case-study-view > * + * {
+.salt-case-study-view__story > * + * {
   margin-block-start: var(--space-section-sm);
 }
 
@@ -1802,20 +1803,22 @@ textarea.salt-contact__input {
   padding-block-start: var(--space-0);
 }
 
-.salt-case-study-view > .salt-case-study-view__header > *,
-.salt-case-study-view > .salt-case-study-view__header > .salt-section__content > *,
-.salt-case-study-view > .salt-case-study-view__section > h2,
+.salt-case-study-view__story > .salt-case-study-view__header > *,
+.salt-case-study-view__story > .salt-case-study-view__header > .salt-section__content > *,
+.salt-case-study-view__story > .salt-case-study-view__section > h2,
 .salt-case-study-view__detail-value {
   margin: 0;
 }
 
 /*
- * The band's content keeps the measure `sections.css` centres it on. The reset above reaches it as
+ * The band's content keeps the story's measure and left edge (SC-036): no gutter of its own, since
+ * the article's is already outside the story. It keeps the centring `sections.css` gives it. The reset above reaches it as
  * the header's one child, at (0,2,0), and `.salt-section > .salt-section__content` is (0,2,0) too, so
  * on source order the reset would pin it to the band's left edge; (0,3,0) gives it back.
  */
-.salt-case-study-view > .salt-case-study-view__header > .salt-section__content {
+.salt-case-study-view__story > .salt-case-study-view__header > .salt-section__content {
   margin-inline: auto;
+  padding-inline: var(--space-0);
 }
 
 /*
@@ -1823,17 +1826,14 @@ textarea.salt-contact__input {
  * lists, whose `margin: 0` is (0,1,0) in `blocks.css`, which a site imports after this file. At
  * (0,1,0) the owl lost to it on source order and the heading sat on the grid.
  */
-.salt-case-study-view > .salt-case-study-view__header > * + *,
-.salt-case-study-view > .salt-case-study-view__header > .salt-section__content > * + *,
-.salt-case-study-view > .salt-case-study-view__section > * + * {
+.salt-case-study-view__story > .salt-case-study-view__header > * + *,
+.salt-case-study-view__story > .salt-case-study-view__header > .salt-section__content > * + *,
+.salt-case-study-view__story > .salt-case-study-view__section > * + * {
   margin-block-start: var(--space-4);
 }
 
-.salt-case-study-view > .salt-case-study-view__header > .salt-case-study-view__results,
-.salt-case-study-view > .salt-case-study-view__header > .salt-case-study-view__details,
-.salt-case-study-view > .salt-case-study-view__header > .salt-section__content > .salt-case-study-view__results,
-.salt-case-study-view > .salt-case-study-view__header > .salt-section__content > .salt-case-study-view__details {
-  margin-block-start: var(--space-8);
+.salt-case-study-view__story > .salt-case-study-view__results {
+  margin-block-start: var(--space-section-sm);
 }
 
 /*
@@ -1846,12 +1846,8 @@ textarea.salt-contact__input {
  * (0,4,2) here, above the (0,2,0) owl whatever the order; an engine without it keeps 16px, which is
  * the gap as it was.
  */
-.salt-case-study-view > .salt-case-study-view__section > h2 + .salt-rich-text:has(> :first-child:is(h3, h4, h5, h6)) {
+.salt-case-study-view__story > .salt-case-study-view__section > h2 + .salt-rich-text:has(> :first-child:is(h3, h4, h5, h6)) {
   margin-block-start: var(--space-8);
-}
-
-.salt-case-study-view__client {
-  color: var(--salt-section-ink-muted, var(--color-ink-muted));
 }
 
 /*
@@ -1859,7 +1855,8 @@ textarea.salt-contact__input {
  * does, so on a toned band it is the tone's own ink and clears AA by the pairing the contrast
  * manifest proves; the underline is what marks it a link rather than its colour.
  */
-.salt-case-study-view__back-link {
+.salt-case-study-view__back-link,
+.salt-case-study-view__service-link {
   text-decoration-line: underline;
   text-underline-offset: 0.15em;
 }
@@ -1938,4 +1935,47 @@ textarea.salt-contact__input {
   display: block;
   inline-size: 100%;
   block-size: auto;
+}
+
+/*
+ * The story and the aside (SC-036). The article is a grid of one track, the story, capped at the
+ * reading measure and centred inside the gutters, so the story keeps its width whether or not the
+ * aside is drawn. From 64rem the aside takes a second track, created only when it is there (an
+ * implicit column of `--container-2xs`), so an empty aside leaves no track; narrower, it follows
+ * the story in the one track. contract/image-sizes.json's story slots are these widths.
+ */
+.salt-case-study-view {
+  display: grid;
+  grid-template-columns: minmax(0, var(--container-2xl));
+  grid-auto-columns: var(--container-2xs);
+  justify-content: center;
+  align-items: start;
+  gap: var(--space-section-sm) var(--space-8);
+  padding-inline: var(--space-gutter);
+}
+
+.salt-case-study-view__story {
+  grid-column: 1;
+}
+
+@media (min-width: 64rem) {
+  .salt-case-study-view__aside {
+    grid-column: 2;
+    grid-row: 1;
+  }
+}
+
+/*
+ * A header drawn as a band keeps its content in the story; only the tone bleeds, to both viewport
+ * edges, painted by a border image's outset, which is ink overflow and adds no scrolling. With the
+ * aside beside it, the tone stops half the gap short of the aside.
+ */
+.salt-case-study-view__story > .salt-case-study-view__header.salt-section {
+  border-image: linear-gradient(var(--salt-section-bg), var(--salt-section-bg)) fill 0 / 0 / 0 100vmax;
+}
+
+@media (min-width: 64rem) {
+  .salt-case-study-view:has(> .salt-case-study-view__aside) > .salt-case-study-view__story > .salt-case-study-view__header.salt-section {
+    border-image-outset: 0 calc(var(--space-8) / 2) 0 100vmax;
+  }
 }

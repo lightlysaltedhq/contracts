@@ -653,6 +653,13 @@ function templateMatch(tpl, value, name, c, el) {
 const textOf = (el) => el.children.map((x) => (x.type === 'text' ? x.value : textOf(x))).join('').replace(/\s+/g, ' ').trim()
 const isImage = (c, id) => typeof id === 'string' && isObject(c.input.media?.[id])
 const background = (c) => isImage(c, c.settings?.backgroundImage?.image)
+// A safe link is relative or http, https, mailto or tel, as isSafeHref allows, after the whitespace
+// and control characters a browser strips.
+const safeHref = (v) => {
+  if (typeof v !== 'string' || v === '') return false
+  const m = /^([a-z][a-z0-9+.-]*):/i.exec(v.replace(/[\u0000-\u0020]/g, ''))
+  return !m || ['http', 'https', 'mailto', 'tel'].includes(m[1].toLowerCase())
+}
 const scrimOn = (c) => background(c) && c.settings.backgroundImage.scrim !== false
 // The stored link a drawn button stands for, found by its label.
 // A button's own words: its text without the site's arrow, which is decoration.
@@ -1156,6 +1163,14 @@ function checkMarkup(c) {
   if (caseStudy) {
     expectations.push(['hero-media', isImage(c, caseStudy.image), 'the featured image resolves'])
     expectations.push(['flow-media', isImage(c, caseStudy.caseStudyImage) && caseStudy.caseStudyImage !== caseStudy.image, 'caseStudyImage resolves to a media item other than the featured image'])
+    // The aside of the project's facts (SC-036): a row only with a value, and no aside with none.
+    const details = (caseStudy.details ?? []).filter((r) => filledText(r?.label) && filledText(r?.value))
+    const services = caseStudy.services ?? []
+    expectations.push(['detail', details.length > 0, 'a project detail has a label and a value'])
+    expectations.push(['client', filledText(caseStudy.client), "the client's name is not empty"])
+    expectations.push(['sector', filledText(caseStudy.sector), "the sector's name is not empty"])
+    expectations.push(['services', services.length > 0, 'a delivered service is drawn'])
+    expectations.push(['aside', details.length > 0 || filledText(caseStudy.client) || filledText(caseStudy.sector) || services.length > 0, 'a detail, the client, the sector or a service is drawn'])
   }
   if (c.sectionId === 'hero') expectations.push(['media', ['split', 'stacked'].includes(effective(c, 'variant')) && isImage(c, c.values.image), 'variant split or stacked with an image'])
   const fieldsByName = new Map((c.fieldsDoc?.fields ?? []).map((f) => [f.name, f]))
@@ -1170,6 +1185,31 @@ function checkMarkup(c) {
   for (const [role, holds, when] of expectations) {
     if (holds && !drawn(role)) fail(`${at}.html: ${role} is not drawn, but ${when} (the markup draws it then)`)
     if (!holds && drawn(role)) fail(`${at}.html: ${role} is drawn, but the markup draws it only when ${when}`)
+  }
+  // The aside's rows (SC-036): each the document's value, in its order; a service a link exactly
+  // when it has a safe public href, to that href, and plain text otherwise. Client and sector are
+  // never links.
+  if (caseStudy) {
+    const inOrder = descendants(root)
+    const rowsOf = (role) => [...(bindings.get(role) ?? [])].sort((a, b) => inOrder.indexOf(a) - inOrder.indexOf(b)).map((row) => elementsOf(row).filter((e) => e.name === 'dd'))
+    const details = (caseStudy.details ?? []).filter((r) => filledText(r?.label) && filledText(r?.value))
+    rowsOf('detail').forEach((dds, i) => { if (dds.length !== 1 || textOf(dds[0]) !== details[i]?.value) fail(`${at}.html: the aside's detail ${i + 1} draws "${dds.map(textOf).join(' | ')}"; the case gives "${details[i]?.value}" (case-study.json, SC-036)`) })
+    for (const role of ['client', 'sector']) {
+      for (const dds of rowsOf(role)) {
+        if (dds.length !== 1 || textOf(dds[0]) !== caseStudy[role]) fail(`${at}.html: the aside's ${role} draws "${dds.map(textOf).join(' | ')}"; the case gives "${caseStudy[role]}" (case-study.json, SC-036)`)
+        if (dds.some((dd) => descendants(dd).some((e) => e.name === 'a'))) fail(`${at}.html: the aside's ${role} is a link; a ${role} is never a link (SC-035)`)
+      }
+    }
+    for (const dds of rowsOf('services')) {
+      const services = caseStudy.services ?? []
+      if (dds.length !== services.length) fail(`${at}.html: the aside draws ${dds.length} service(s); the case gives ${services.length}`)
+      dds.forEach((dd, i) => {
+        const svc = services[i] ?? {}
+        const link = descendants(dd).find((e) => e.name === 'a')
+        if (textOf(dd) !== svc.title) fail(`${at}.html: the aside's service ${i + 1} reads "${textOf(dd)}"; the case gives "${svc.title}"`)
+        if (safeHref(svc.href) ? attr(link ?? { attrs: [] }, 'href') !== svc.href : link) fail(`${at}.html: the aside's service ${i + 1} ${link ? `links to ${attr(link, 'href')}` : 'is plain text'}; ${safeHref(svc.href) ? `it links to its page, ${svc.href}` : 'it has no public page, so it is plain text'} (SC-036)`)
+      })
+    }
   }
   // Each drawn image is its own media item: the hero the featured image, the flow the case-study image.
   if (caseStudy) {

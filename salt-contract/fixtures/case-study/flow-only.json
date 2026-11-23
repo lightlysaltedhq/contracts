@@ -7,14 +7,16 @@
     "path": "/work/riverside-courtyard/"
   },
   "site": {
-    "arrow": "→",
     "labels": {
       "results": "The project in numbers",
       "challenge": "The challenge",
       "solution": "What we did",
       "gallery": "Gallery",
       "liveSite": "Visit the hotel's site",
-      "services": "Services delivered"
+      "services": "Services delivered",
+      "details": "Project details",
+      "client": "Client",
+      "sector": "Sector"
     }
   },
   "media": {
@@ -23,12 +25,6 @@
       "width": 2400,
       "height": 1350,
       "alt": "A shaded courtyard of ferns and multi-stemmed birches beside the river"
-    },
-    "shade-planting": {
-      "url": "https://uploads.example/shade-planting-{width}.jpg",
-      "width": 1200,
-      "height": 800,
-      "alt": "Hostas and ferns under a multi-stemmed birch"
     }
   },
   "document": {
@@ -52,9 +48,7 @@
       {
         "id": "shade-planting",
         "title": "Shade planting",
-        "href": "/services/shade-planting/",
-        "image": "shade-planting",
-        "text": "Planting for the corners the sun never reaches."
+        "href": "/services/shade-planting/"
       }
     ]
   }

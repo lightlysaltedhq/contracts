@@ -73,6 +73,7 @@ export const CONTAINERS = new Set([
   'salt-carousel',
   'salt-carousel__controls',
   'salt-carousel__track',
+  'salt-case-study-view',
   'salt-case-study-view__details',
   'salt-consent-banner',
   'salt-consent-banner__actions',

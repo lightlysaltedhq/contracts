@@ -41,16 +41,15 @@ export function slotOf(img, ancestors, outer, effective) {
   // stylesheet gives a measure (nor does Salt for Next.js's core; only its example app's site.css
   // does), so it spans the full band.
   if (within('salt-related__list')) return { slot: 'card', band: true, columns: '3', fixedBand: 'full' }
-  // The case study view (case-study-view.tsx, SC-034): the hero image, the featured image last in
-  // the header, takes the content slot, unbanded in a plain header and on a default band's measure
-  // in a header drawn as a band (whose width is always default); the case-study image in the flow
-  // and a gallery image the content slot, unbanded; a delivered service's card the card slot at
-  // three columns in the full band, as the service view's related cards.
-  if (within('salt-case-study-view__media')) {
-    return within('salt-section__content') ? { slot: 'content', band: true, fixedBand: 'default' } : { slot: 'content', band: false }
+  // The case study view (case-study-view.tsx, SC-036): every image sits in the story column, the
+  // hero and the case-study image at its width and a gallery frame at a column of its grid, each
+  // narrower from 64rem when the aside is drawn beside the story.
+  if (within('salt-case-study-view__story')) {
+    const article = ancestors.find((a) => classesOf(a).includes('salt-case-study-view'))
+    const beside = article && elementsOf(article).some((e) => classesOf(e).includes('salt-case-study-view__aside')) ? '-beside' : ''
+    if (within('salt-case-study-view__frame')) return { slot: `story-gallery${beside}`, band: false }
+    if (within('salt-case-study-view__media') || within('salt-case-study-view__flow-media')) return { slot: `story${beside}`, band: false }
   }
-  if (within('salt-case-study-view__flow-media') || within('salt-case-study-view__frame')) return { slot: 'content', band: false }
-  if (within('salt-case-study-view__services') && within('salt-showcase__media')) return { slot: 'card', band: true, columns: '3', fixedBand: 'full' }
   if (!within('salt-showcase__media')) return null
   if (section === 'collection-showcase') {
     const layout = effective('layout')

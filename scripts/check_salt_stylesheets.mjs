@@ -5065,53 +5065,32 @@ const CONTRACTS = [
         { selector: '.salt-case-study-view', edge: 'padding', value: 'var(--space-section-md)', join: 'between the site header and the title', afterReset: false },
         /* A header drawn as a band opens that gap with its own padding, so the article's is zero (BD-206). */
         { selector: ".salt-case-study-view[data-header='band']", edge: 'padding', value: 'var(--space-0)', join: 'above a header drawn as a band', afterReset: false },
-        { selector: '.salt-case-study-view > * + *', value: 'var(--space-section-sm)', join: 'above each section', afterReset: false },
+        { selector: '.salt-case-study-view__story > * + *', value: 'var(--space-section-sm)', join: 'above each section', afterReset: false },
+        /* The results are a `.salt-grid`, whose (0,1,0) `margin: 0` in `blocks.css` would beat the owl
+           above, so they open their gap at (0,2,0) (SC-036). */
+        { selector: '.salt-case-study-view__story > .salt-case-study-view__results', value: 'var(--space-section-sm)', join: 'above the results', afterReset: false },
         {
-          selector: '.salt-case-study-view > .salt-case-study-view__header > * + *',
+          selector: '.salt-case-study-view__story > .salt-case-study-view__header > * + *',
           value: 'var(--space-4)',
           join: 'between the title, the client line and the summary',
           afterReset: true,
         },
         /* The same lines inside a band's content, one level down (BD-206). */
         {
-          selector: '.salt-case-study-view > .salt-case-study-view__header > .salt-section__content > * + *',
+          selector: '.salt-case-study-view__story > .salt-case-study-view__header > .salt-section__content > * + *',
           value: 'var(--space-4)',
           join: 'between the title, the client line and the summary on a band',
           afterReset: true,
         },
         {
-          selector: '.salt-case-study-view > .salt-case-study-view__header > .salt-section__content > .salt-case-study-view__results',
-          value: 'var(--space-8)',
-          join: 'above the results on a band',
-          afterReset: true,
-        },
-        {
-          selector: '.salt-case-study-view > .salt-case-study-view__header > .salt-section__content > .salt-case-study-view__details',
-          value: 'var(--space-8)',
-          join: 'above the project details on a band',
-          afterReset: true,
-        },
-        {
-          selector: '.salt-case-study-view > .salt-case-study-view__section > * + *',
+          selector: '.salt-case-study-view__story > .salt-case-study-view__section > * + *',
           value: 'var(--space-4)',
           join: 'between each section’s heading and what it heads',
           afterReset: true,
         },
-        {
-          selector: '.salt-case-study-view > .salt-case-study-view__header > .salt-case-study-view__results',
-          value: 'var(--space-8)',
-          join: 'above the results',
-          afterReset: true,
-        },
-        {
-          selector: '.salt-case-study-view > .salt-case-study-view__header > .salt-case-study-view__details',
-          value: 'var(--space-8)',
-          join: 'above the project details',
-          afterReset: true,
-        },
         /* (0,4,2) through `:has()`, so it outranks the section owl above without coming after it. */
         {
-          selector: '.salt-case-study-view > .salt-case-study-view__section > h2 + .salt-rich-text:has(> :first-child:is(h3, h4, h5, h6))',
+          selector: '.salt-case-study-view__story > .salt-case-study-view__section > h2 + .salt-rich-text:has(> :first-child:is(h3, h4, h5, h6))',
           value: 'var(--space-8)',
           join: 'between a section’s heading and a heading opening its rich text',
           afterReset: false,
@@ -5121,9 +5100,9 @@ const CONTRACTS = [
          headings at (0,2,0), as the owls inside them do, so it has to come before those, and it is the
          one rule here allowed to write a zero. */
       const RESET = [
-        '.salt-case-study-view > .salt-case-study-view__header > *',
-        '.salt-case-study-view > .salt-case-study-view__header > .salt-section__content > *',
-        '.salt-case-study-view > .salt-case-study-view__section > h2',
+        '.salt-case-study-view__story > .salt-case-study-view__header > *',
+        '.salt-case-study-view__story > .salt-case-study-view__header > .salt-section__content > *',
+        '.salt-case-study-view__story > .salt-case-study-view__section > h2',
         '.salt-case-study-view__detail-value',
       ]
       /* Every declaration that sets a box's block-start margin in a horizontal writing mode, logical
@@ -5197,7 +5176,7 @@ const CONTRACTS = [
       /* A header band's content takes back the `margin-inline: auto` the reset takes from it, at
          (0,3,0) over both (0,2,0) rules; deleted, the band's text sits on its left edge and every gap
          above still passes (#226 review, 5). */
-      const CENTRED = '.salt-case-study-view > .salt-case-study-view__header > .salt-section__content'
+      const CENTRED = '.salt-case-study-view__story > .salt-case-study-view__header > .salt-section__content'
       const centring = primitives.find((rule) => rule.at.length === 0 && rule.selectors.includes(CENTRED))
       if (centring === undefined) {
         return `no unconditional \`${CENTRED}\` rule in primitives.css gives a header band's content \`margin-inline: auto\` back from the reset, so its text sits on the band's left edge`
@@ -5248,7 +5227,7 @@ const CONTRACTS = [
             /* Any other block margin on the view is refused, whatever its value, rather than ranked. The first
                version refused only a literal zero, so \`var(--space-0)\` or \`calc(var(--space-8) * 0)\`
                on the rich text zeroed a section's gap, and a rule outranking a gap without repeating its
-               selector, \`.salt-case-study-view > .salt-case-study-view__section\` at (0,2,0) over the
+               selector, \`.salt-case-study-view__story > .salt-case-study-view__section\` at (0,2,0) over the
                (0,1,0) owl, replaced it; all three passed (BD-202 closes the section 7 row). The same
                holds for the article's padding from any rule whose subject is the article. */
             if (rule !== centring && rule.selectors.includes(CENTRED) && INLINE_MARGIN.has(name)) {
