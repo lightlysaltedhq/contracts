@@ -436,7 +436,7 @@ may hold: `from:labels.page ({n})`.
   position (`slide`), the rating (`rating`), the reading time in minutes (`readTime`) or the
   results' count (`results`). `{N}` is the total it is out of: the slides in the track (`slide`), 5
   for a rating (`rating`). `{q}` is the visitor's search query, as typed (`results`, `noResults`).
-  `{kind}` is a search result's kind word (`kind`). `{name}` is a name the label is about: the
+  `{kind}` is a search result's kind word (`kind`), the platform's own translated name for the result's type in the site's language: on Salt for WordPress the post type's singular label, on Salt for Next.js the collection's singular label. `{name}` is a name the label is about: the
   office's (`directions`) or the post's author's (`byline`). The labels that carry values are
   exactly these: `page ({n})`, `slide ({n}, {N})`, `rating ({n}, {N})`, `readTime ({n})`,
   `results ({n}, {q})`, `noResults ({q})`, `kind ({kind})`, `directions ({name})` and

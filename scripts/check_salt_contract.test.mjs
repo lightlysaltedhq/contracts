@@ -706,3 +706,10 @@ test('collections: two fields of one name fail, as in a section', () => {
   const r = collectionsRun((f) => { f['contract/collections/services.json'].fields.push({ name: 'title', type: 'text', label: 'Again' }) })
   assert.equal(r.code, 1); assert.match(r.out, /services has two fields named title/)
 })
+test('markup schema: an attribute named style is refused in any case, and a data attribute is not (section#no-inline-style, SC-029)', async () => {
+  const { default: Ajv2020 } = await import('ajv/dist/2020.js')
+  const schema = JSON.parse(readFileSync(path.join(path.dirname(script), '..', 'salt-contract', 'schema', 'markup.schema.json'), 'utf8'))
+  const valid = new Ajv2020({ strict: false }).compile({ $schema: schema.$schema, $defs: schema.$defs, $ref: '#/$defs/attributes' })
+  for (const name of ['style', 'Style', 'STYLE']) assert.equal(valid({ [name]: 'x' }), false, name)
+  assert.equal(valid({ 'data-style': 'primary' }), true)
+})

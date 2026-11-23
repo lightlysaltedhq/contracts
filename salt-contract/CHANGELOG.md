@@ -305,7 +305,7 @@ test, applied through section 2's table, where the stricter row wins.
   value sets, their steps and rounding, the fixed measure and the logo height's place) was approved
   by the coordinator, and SC-032's four sidebar parts come from Salt for WordPress's reading: both
   are proposed, for the founder's approval at contract review. Each is part of the first major, so
-  the semver call stays MAJOR. On its own each of the first three would be MAJOR by
+  the semver call stays MAJOR. On its own each of the first four would be MAJOR by
   `RELEASE-POLICY.md` section 1's test: markup an implementation drew correctly at rc.8 no longer
   conforms. **Breaking for both targets, Salt for WordPress (EP-72) and Salt for Next.js
   (EP-73)**; what each must change is listed under each item. Every stylesheet change below is in
@@ -420,6 +420,12 @@ test, applied through section 2's table, where the stricter row wins.
     image that resolves) and the live-site link (a safe URL), the four Salt for WordPress counts
     and the gate already counted. The header, results, details and delivered services never are.
     `data-aside-rows` is how many are drawn. No verdict changes.
+- A rendering rule closes the first body heading's gap (`section#body-heading-base`, after
+  `1.0.0-rc.8`). The no-skipped-rank rule now covers a body that stores only h3 or h4, with the
+  body base as the rank before the first heading: under a section heading at h2, stored h3 then
+  h4 draw h3 then h4, and stored h4 then h3 draw h3 then h3. Stored ranks and the editor's
+  picker do not change. The new case `rich-text/h4-first-under-h2` shows it. **What each target
+  changes.** Both: draw a body's first heading at most one rank below the body base.
 - The case-study view has fixtures and is required of every implementation (SC-021).
   `fixtures/case-study/` holds four cases (`full`, `aside`, `band` and `minimal`), `case-study`
   joins `REQUIRED_FILES`, and a full conformance run refuses to declare it not shipped. The

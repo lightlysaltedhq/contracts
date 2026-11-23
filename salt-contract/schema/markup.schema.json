@@ -126,7 +126,7 @@
       "propertyNames": {
         "pattern": "^[a-zA-Z][a-zA-Z0-9-]*$",
         "not": {
-          "const": "style"
+          "pattern": "^[sS][tT][yY][lL][eE]$"
         }
       },
       "additionalProperties": {

@@ -98,7 +98,7 @@
         "Write the fit and position the parent passes as data-fit, data-focal-x and data-focal-y (section#background-position), with focal-point as the upload's stored focalPoint snapped to steps of 5, both left out when none is stored; never an inline style (section#no-inline-style). objectPosition() maps focal-point to nothing today and writes object-position inline (components/image-sizes.ts).",
         "Srcset capped at the upload's intrinsic width (SC-016): next/image lists every candidate the sizes leaves, 3840w included, whatever the upload's width. Salt for Next.js owes listing only the candidates at or below the intrinsic width, then the intrinsic width itself, and writing src as the URL at the intrinsic width.",
         "Width and height on every image, fill images included (SC-007): next/image's fill mode writes neither, so the showcase and listing card images, the logo strip and the case study view's images draw none today. They are the upload's intrinsic size and give the aspect ratio before the image loads.",
-        "Its own img, with none of next/image's own attributes (SC-024): that component writes data-nimg and an inline color:transparent on every image, and can meet none of the three above. The runner masks neither, since an image's inline style is compared."
+        "Its own img, with none of next/image's own attributes (SC-024): that component writes data-nimg and an inline color:transparent on every image, and can meet none of the three above. The runner masks neither: data-nimg fails the fixture comparison, and the inline style fails the inline-style check in every case (section#no-inline-style, SC-029)."
       ]
     },
     "wordpress": {
