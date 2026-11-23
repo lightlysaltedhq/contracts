@@ -1,0 +1,36 @@
+{
+  "$comment": "No consent mechanism is wired: no site.consent (on WordPress, no WP Consent API plugin active). Nothing non-essential loads, so there is nothing to choose, and the footer draws no consent control and no status line (SC-030). The rest is consent-wired's footer.",
+  "chrome": "site-footer",
+  "summary": "No consent mechanism is wired, so the footer draws no consent control: the same footer as consent-wired, without it.",
+  "context": {
+    "path": "/"
+  },
+  "site": {
+    "name": "Hartley Gardens",
+    "home": "/",
+    "organisation": "Hartley Gardens",
+    "labels": {
+      "navigation": "Footer",
+      "preferences": "Cookie preferences"
+    },
+    "footer": {
+      "tone": "surface",
+      "showLogo": false,
+      "columns": [
+        {
+          "links": [
+            {
+              "label": "Contact",
+              "href": "/contact/"
+            },
+            {
+              "label": "Privacy policy",
+              "href": "/privacy/"
+            }
+          ]
+        }
+      ],
+      "copyright": "© 2026 Hartley Gardens"
+    }
+  }
+}

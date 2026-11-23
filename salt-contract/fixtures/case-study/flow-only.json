@@ -1,0 +1,55 @@
+{
+  "$comment": "Same shapes as case-study/full. No featured image, so the header draws no hero image and nothing on the page claims priority, though the plan grants it: the case-study image stays in its place between the challenge and the solution, lazy, and is not promoted to the hero (SC-034). The delivered service's card takes the card slot at three columns in the full band. Two results draw data-columns 2.",
+  "view": "case-study",
+  "summary": "A case study with no featured image: a header with the client and two results, a challenge, the case-study image in the flow, a solution, the live-site link and one delivered service card; no back link, details or gallery.",
+  "context": {
+    "priorityMedia": true,
+    "path": "/work/riverside-courtyard/"
+  },
+  "site": {
+    "labels": {
+      "results": "The project in numbers",
+      "challenge": "The challenge",
+      "solution": "What we did",
+      "gallery": "Gallery",
+      "liveSite": "Visit the hotel's site",
+      "services": "Services delivered",
+      "details": "Project details",
+      "client": "Client",
+      "sector": "Sector"
+    }
+  },
+  "media": {
+    "courtyard": {
+      "url": "https://uploads.example/riverside-courtyard-{width}.jpg",
+      "width": 2400,
+      "height": 1350,
+      "alt": "A shaded courtyard of ferns and multi-stemmed birches beside the river"
+    }
+  },
+  "document": {
+    "title": "A courtyard by the river",
+    "client": "The Riverside Hotel",
+    "results": [
+      {
+        "stat": "38",
+        "label": "covers added outdoors"
+      },
+      {
+        "stat": "6 weeks",
+        "label": "from plan to planting"
+      }
+    ],
+    "challenge": "<p>A north-facing yard between two wings, in shade from October to March and used for bins.</p>",
+    "caseStudyImage": "courtyard",
+    "solution": "<p>We paved it in reclaimed stone and planted for shade, so the restaurant could seat guests outside from spring.</p>",
+    "externalUrl": "https://riversidehotel.example/",
+    "services": [
+      {
+        "id": "shade-planting",
+        "title": "Shade planting",
+        "href": "/services/shade-planting/"
+      }
+    ]
+  }
+}

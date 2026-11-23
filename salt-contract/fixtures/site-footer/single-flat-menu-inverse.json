@@ -1,7 +1,7 @@
 {
-  "$comment": "site.footer.columns holds one column with no title: a single flat menu, as WordPress has (SC-006). Its list takes the nav's name as its aria-label (SC-019). site.logo.light names a media id; no dark logo is set, so the link carries no data-swaps. The logo is drawn at site.logoHeight 40.",
+  "$comment": "site.footer.columns holds one column with no title: a single flat menu, as WordPress has (SC-006). Its list takes the nav's name as its aria-label (SC-019). site.logo.light names a media id; no dark logo is set, so the link carries no data-swaps. site.logoHeight 40 decides the logo's sizes; the height itself is the site stylesheet's --logo-height, never in the markup (SC-029).",
   "chrome": "site-footer",
-  "summary": "A single flat menu as one untitled column, on the surface-inverse tone, with the light logo in the brand block, the copyright line and the consent control, and no socials.",
+  "summary": "A single flat menu as one untitled column, on the surface-inverse tone, with the light logo in the brand block, and the copyright line; no socials, and no consent control, as no consent mechanism is wired (SC-030).",
   "context": {
     "path": "/"
   },

@@ -1,6 +1,6 @@
 {
   "$schema": "../../schema/markup.schema.json",
-  "version": "1.0.0-rc.8",
+  "version": "1.0.0-rc.9",
   "id": "display-preferences",
   "kind": "component",
   "root": {
@@ -151,18 +151,6 @@
     "section#reduced-motion"
   ],
   "notes": [
-    {
-      "topic": "stylesheet-owes",
-      "text": "New vocabulary from WordPress; no rules in the shared stylesheets yet.",
-      "classes": [
-        "salt-display-preferences",
-        "salt-display-preferences__panel",
-        "salt-display-preferences__summary",
-        "salt-display-preferences__controls",
-        "salt-display-preferences__group",
-        "salt-display-preferences__label"
-      ]
-    },
     {
       "topic": "ruling",
       "text": "data-salt-pref and data-salt-action stay: they are the script's contract with the markup."

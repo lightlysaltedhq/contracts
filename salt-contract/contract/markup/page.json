@@ -1,6 +1,6 @@
 {
   "$schema": "../../schema/markup.schema.json",
-  "version": "1.0.0-rc.8",
+  "version": "1.0.0-rc.9",
   "id": "page",
   "kind": "view",
   "summary": "A builder page. Its file also draws the document skeleton every view sits in, once.",
@@ -67,7 +67,7 @@
             "aria-label": "from:labels.region"
           },
           "optional": true,
-          "when": "consent is pending and the site runs an integration that needs it",
+          "when": "consent is pending and the site's consent condition holds (the consent ruling below): an integration needs consent and, on WordPress, a WP Consent API plugin is wired",
           "children": [
             {
               "role": "consent-message",
@@ -167,17 +167,14 @@
     "section#landmarks",
     "section#single-h1"
   ],
-  "hooks": [
-    {
-      "class": "salt-skip-link",
-      "role": "skip-link",
-      "reason": "New: the skip link's class. The shared stylesheets owe the visually-hidden-until-focused rule."
-    }
-  ],
   "notes": [
     {
       "topic": "ruling",
-      "text": "The consent banner is drawn only when the site runs an integration that needs consent (SC-006). Salt for WordPress ports Salt for Next.js's banner, gate, preferences panel, categories and cookie format; a client that needs a certified consent tool (Google Ads personalisation in the UK and EEA) uses one as a Grain override."
+      "text": "The scriptless style in the head is the one inline style element the contract draws, and nothing it draws carries a style attribute (section#no-inline-style, SC-029). A target with a strict Content-Security-Policy (no 'unsafe-inline' for styles) allows that element by a hash or a nonce, and keeps its contents byte for byte as written here, so a hash of them stays valid; Salt for WordPress allows it by the sha256 of its exact contents."
+    },
+    {
+      "topic": "ruling",
+      "text": "The consent banner and the footer's consent control are drawn on one condition (SC-006, SC-030; proposed, for founder approval at contract review): the site runs an integration that needs consent, which is a consent category in use (a fixture's site.consent.categories is not empty), and on Salt for WordPress a WP Consent API plugin is also wired (wp_has_consent exists). Without one, WordPress keeps every integration that needs consent denied, failing closed as salt_consent() does, and draws neither. Salt for Next.js's own consent store is always wired, so its condition is the integration alone. A wired mechanism with no category in use draws neither: a visitor has nothing to choose. Salt for WordPress ports Salt for Next.js's banner, gate, preferences panel, categories and cookie format; a client that needs a certified consent tool (Google Ads personalisation in the UK and EEA) uses one as a Grain override."
     },
     {
       "topic": "ruling",
@@ -209,7 +206,7 @@
         }
       ],
       "owes": [
-        "Rename skip-link to salt-skip-link (and give it a rule in chrome.css).",
+        "Rename skip-link to salt-skip-link; chrome.css draws it hidden until focused.",
         "The header's noscript style in the document head, moved from inside the header."
       ]
     },
@@ -231,7 +228,7 @@
         }
       ],
       "owes": [
-        "salt-skip-link; tabindex -1 on main; the hidden h1 as fallback-heading; the consent banner, gate, preferences panel, categories and cookie format ported from Salt for Next.js, drawn only when an integration needs consent (SC-006).",
+        "salt-skip-link; tabindex -1 on main; the hidden h1 as fallback-heading; the consent banner, gate, preferences panel, categories and cookie format ported from Salt for Next.js, drawn only when the consent condition holds: an integration needs consent and a WP Consent API plugin is wired; without one every such integration stays denied (SC-006, SC-030).",
         "The header's noscript style in the document head (wp_head)."
       ]
     }

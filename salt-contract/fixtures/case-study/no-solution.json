@@ -1,0 +1,44 @@
+{
+  "$comment": "No solution and no featured image: the case-study image keeps its place after the challenge, so it comes before the gallery; it is not promoted to the hero, and nothing claims priority (SC-034).",
+  "view": "case-study",
+  "summary": "A case study with a challenge, the case-study image and a one-image gallery, and no featured image or solution: the image after the challenge, then the gallery.",
+  "context": {
+    "priorityMedia": true,
+    "path": "/work/pond-dipping/"
+  },
+  "site": {
+    "labels": {
+      "results": "The project in numbers",
+      "challenge": "The challenge",
+      "solution": "What we did",
+      "gallery": "Gallery",
+      "liveSite": "Visit the site",
+      "services": "Services delivered",
+      "details": "Project details",
+      "client": "Client",
+      "sector": "Sector"
+    }
+  },
+  "media": {
+    "pond-edge": {
+      "url": "https://uploads.example/pond-edge-{width}.jpg",
+      "width": 1600,
+      "height": 900,
+      "alt": "A shallow pond edge planted with flag iris"
+    },
+    "pond-platform": {
+      "url": "https://uploads.example/pond-platform-{width}.jpg",
+      "width": 1200,
+      "height": 900,
+      "alt": "A low timber dipping platform over the water"
+    }
+  },
+  "document": {
+    "title": "A pond for dipping",
+    "challenge": "<p>The school wanted a pond children could reach safely from one side.</p>",
+    "caseStudyImage": "pond-edge",
+    "gallery": [
+      "pond-platform"
+    ]
+  }
+}

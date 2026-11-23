@@ -5065,7 +5065,10 @@ const CONTRACTS = [
         { selector: '.salt-case-study-view', edge: 'padding', value: 'var(--space-section-md)', join: 'between the site header and the title', afterReset: false },
         /* A header drawn as a band opens that gap with its own padding, so the article's is zero (BD-206). */
         { selector: ".salt-case-study-view[data-header='band']", edge: 'padding', value: 'var(--space-0)', join: 'above a header drawn as a band', afterReset: false },
-        { selector: '.salt-case-study-view > * + *', value: 'var(--space-section-sm)', join: 'above each section', afterReset: false },
+        { selector: '.salt-case-study-view__story > * + *', value: 'var(--space-section-sm)', join: 'above each section', afterReset: false },
+        /* The results are a `.salt-grid`, whose (0,1,0) `margin: 0` in `blocks.css` would beat the owl
+           above, so they open their gap at (0,2,0) (SC-036). */
+        { selector: '.salt-case-study-view__story > .salt-case-study-view__results', value: 'var(--space-section-sm)', join: 'above the results', afterReset: false },
         {
           selector: '.salt-case-study-view > .salt-case-study-view__header > * + *',
           value: 'var(--space-4)',
@@ -5080,38 +5083,14 @@ const CONTRACTS = [
           afterReset: true,
         },
         {
-          selector: '.salt-case-study-view > .salt-case-study-view__header > .salt-section__content > .salt-case-study-view__results',
-          value: 'var(--space-8)',
-          join: 'above the results on a band',
-          afterReset: true,
-        },
-        {
-          selector: '.salt-case-study-view > .salt-case-study-view__header > .salt-section__content > .salt-case-study-view__details',
-          value: 'var(--space-8)',
-          join: 'above the project details on a band',
-          afterReset: true,
-        },
-        {
-          selector: '.salt-case-study-view > .salt-case-study-view__section > * + *',
+          selector: '.salt-case-study-view__story > .salt-case-study-view__section > * + *',
           value: 'var(--space-4)',
           join: 'between each section’s heading and what it heads',
           afterReset: true,
         },
-        {
-          selector: '.salt-case-study-view > .salt-case-study-view__header > .salt-case-study-view__results',
-          value: 'var(--space-8)',
-          join: 'above the results',
-          afterReset: true,
-        },
-        {
-          selector: '.salt-case-study-view > .salt-case-study-view__header > .salt-case-study-view__details',
-          value: 'var(--space-8)',
-          join: 'above the project details',
-          afterReset: true,
-        },
         /* (0,4,2) through `:has()`, so it outranks the section owl above without coming after it. */
         {
-          selector: '.salt-case-study-view > .salt-case-study-view__section > h2 + .salt-rich-text:has(> :first-child:is(h3, h4, h5, h6))',
+          selector: '.salt-case-study-view__story > .salt-case-study-view__section > h2 + .salt-rich-text:has(> :first-child:is(h3, h4, h5, h6))',
           value: 'var(--space-8)',
           join: 'between a section’s heading and a heading opening its rich text',
           afterReset: false,
@@ -5123,7 +5102,8 @@ const CONTRACTS = [
       const RESET = [
         '.salt-case-study-view > .salt-case-study-view__header > *',
         '.salt-case-study-view > .salt-case-study-view__header > .salt-section__content > *',
-        '.salt-case-study-view > .salt-case-study-view__section > h2',
+        '.salt-case-study-view__story > .salt-case-study-view__section > h2',
+        '.salt-case-study-view__details',
         '.salt-case-study-view__detail-value',
       ]
       /* Every declaration that sets a box's block-start margin in a horizontal writing mode, logical
@@ -5248,7 +5228,7 @@ const CONTRACTS = [
             /* Any other block margin on the view is refused, whatever its value, rather than ranked. The first
                version refused only a literal zero, so \`var(--space-0)\` or \`calc(var(--space-8) * 0)\`
                on the rich text zeroed a section's gap, and a rule outranking a gap without repeating its
-               selector, \`.salt-case-study-view > .salt-case-study-view__section\` at (0,2,0) over the
+               selector, \`.salt-case-study-view__story > .salt-case-study-view__section\` at (0,2,0) over the
                (0,1,0) owl, replaced it; all three passed (BD-202 closes the section 7 row). The same
                holds for the article's padding from any rule whose subject is the article. */
             if (rule !== centring && rule.selectors.includes(CENTRED) && INLINE_MARGIN.has(name)) {
@@ -5748,6 +5728,57 @@ const CONTRACTS = [
       return null
     },
   },
+  {
+    file: 'sections.css',
+    what: 'every value of a fixed-set attribute the markup writes in place of a style has its rule',
+    why:
+      'The markup writes no style attribute (section#no-inline-style, SC-029): a section\u2019s space, a ' +
+      'scrim\u2019s strength, a rating\u2019s fill, and a focal point reach the page as a ' +
+      'data attribute from a fixed set, which only the shared stylesheets turn into a value. A value ' +
+      'with no rule draws nothing, and no fixture can see it, because the markup is right. The value ' +
+      'sets are read from the markup, so a step added there needs its rule here too. A known limit: ' +
+      'it reads the owner\u2019s own rule only, so a later rule with a more specific selector that ' +
+      'overrides the same property is not seen.',
+    check: (_rules, all) => {
+      /* Each attribute's owner, the property its rule sets and the value it sets for a value v;
+         and the values that draw by default and need no rule: spacing none draws no space, and
+         cover is the fit with no attribute value of its own. */
+      const ATTRIBUTES = {
+        'data-spacing': { owner: '.salt-section', property: '--salt-section-space', set: (v) => `var(--space-section-${v})`, none: ['none'] },
+        'data-strength': { owner: '.salt-section__scrim', property: '--salt-scrim-alpha', set: (v) => `var(--scrim-${v})`, none: [] },
+        'data-fill': { owner: '.salt-showcase__stars', property: '--salt-rating-fill', set: (v) => `${v}%`, none: [] },
+        'data-focal-x': { owner: '.salt-section__media', property: '--salt-focal-x', set: (v) => `${v}%`, none: [] },
+        'data-focal-y': { owner: '.salt-section__media', property: '--salt-focal-y', set: (v) => `${v}%`, none: [] },
+        'data-fit': { owner: '.salt-section__media', property: 'object-fit', set: (v) => v, none: ['cover'] },
+      }
+      const values = new Map(Object.keys(ATTRIBUTES).map((name) => [name, new Set()]))
+      const walk = (node) => {
+        if (Array.isArray(node)) { node.forEach(walk); return }
+        if (node === null || typeof node !== 'object') return
+        for (const [name, rule] of Object.entries(node.attributes ?? {})) {
+          if (values.has(name) && Array.isArray(rule?.enum)) for (const v of rule.enum) values.get(name).add(String(v))
+        }
+        Object.values(node).forEach(walk)
+      }
+      for (const file of [...FILES.keys()].filter((f) => /^contract\/markup\/[^/]+\.json$/.test(f))) walk(readJson(file))
+      const rules = [...all.values()].flat()
+      const missing = []
+      for (const [name, set] of values) {
+        if (set.size === 0) { missing.push(`\`${name}\` (the markup gives it no value set)`); continue }
+        const { owner, property, set: expected, none } = ATTRIBUTES[name]
+        for (const value of set) {
+          if (none.includes(value)) continue
+          const subjects = [`${owner}[${name}='${value}']`, `${owner}[${name}="${value}"]`]
+          const want = expected(value)
+          const own = rules.filter((rule) => rule.selectors.some((selector) => subjects.includes(selector.trim())))
+          if (own.length === 0) { missing.push(`no rule for \`${subjects[0]}\``); continue }
+          const written = own.map((rule) => rule.declarations[property]).filter((v) => v !== undefined).at(-1)
+          if (written === undefined || written.replace(/\s+/g, ' ').trim() !== want) missing.push(`\`${subjects[0]}\` sets \`${property}: ${written === undefined ? '(nothing)' : written.trim()}\`, not \`${want}\``)
+        }
+      }
+      return missing.length ? missing.join('; ') : null
+    },
+  },
 ]
 
 /* What a stylesheet's text alone can be refused for, found once per text: the test reads the same
@@ -5762,6 +5793,34 @@ const varReads = memo((text) =>
    statement, a note, a hook kept with no rule, an omitted class. The class check and the markup
    writes both skip them, so prose never counts as markup. */
 const NOT_ELEMENTS = new Set(['platforms', 'rules', 'notes', 'hooks', 'omitted'])
+
+/* The salt-* classes in a selector's subject: its last compound, split at the top level on the
+   descendant, child and sibling combinators, with attribute selectors blanked and :not() and :has()
+   taken out, since neither names the element the rule draws. :is() and :where() stay. */
+export function subjectClasses(selector) {
+  const text = selector.replace(/\[[^\]]*\]/g, '')
+  let depth = 0
+  let start = 0
+  for (let i = 0; i < text.length; i += 1) {
+    const char = text[i]
+    if (char === '(') depth += 1
+    else if (char === ')') depth -= 1
+    else if (depth === 0 && /[\s>+~]/.test(char)) start = i + 1
+  }
+  let subject = text.slice(start)
+  for (;;) {
+    const m = /:(?:not|has)\(/i.exec(subject)
+    if (!m) break
+    let d = 0
+    let end = m.index + m[0].length - 1
+    for (; end < subject.length; end += 1) {
+      if (subject[end] === '(') d += 1
+      else if (subject[end] === ')') { d -= 1; if (d === 0) break }
+    }
+    subject = subject.slice(0, m.index) + subject.slice(end + 1)
+  }
+  return [...subject.matchAll(/\.(salt-[\w-]+)/g)].map((m) => m[1])
+}
 
 /*
  * Every custom property an element in a markup file writes, with the value written: from its
@@ -5986,13 +6045,13 @@ export function checkStylesheets(files) {
     for (const [name, fallback] of varReads(text)) addRead(name, file, fallback)
     for (const rule of parsed.get(file).rules) for (const property of rule.order) if (property.startsWith('--')) declaredHere.add(property)
   }
-  /* What the markup writes on an element (`--salt-scrim-alpha: var(--scrim-<strength>)` on the
-     scrim's style) reaches the stylesheets too, so every `var()` in a written value is a read,
-     fallbacks and nested `var()`s included. Only what elements write counts: attribute values on
-     the nodes the class check reads, never a note, a rule's statement, an omitted class or a
-     platform's former markup, whose prose could otherwise satisfy it. A `<placeholder>` stands for
-     a setting's options, which the written property's token entry names in `values`
-     (`_section-settings#scrimStrength`): each option is a token the runtime must emit. */
+  /* What the markup writes reaches the stylesheets too, so every `var()` in a written value is a
+     read, fallbacks and nested `var()`s included. Only what elements write counts: attribute values
+     on the nodes the class check reads, and a style element's CSS (the noscript style in the head),
+     never a note, a rule's statement, an omitted class or a platform's former markup, whose prose
+     could otherwise satisfy it. The markup writes no style attribute (section#no-inline-style,
+     SC-029), so a written value is fixed: a `<placeholder>` in one would stand for values no list
+     names, and is refused. */
   const markupWrites = new Map()
   for (const file of markupFiles) {
     for (const { property, value } of markupWritesIn(readJson(file))) {
@@ -6009,34 +6068,12 @@ export function checkStylesheets(files) {
         }
       }
     }
-    /* A value map per written property, token or not, and per placeholder name in it. */
-    const maps = new Map()
-    for (const entry of TOKEN_LAYER.writes ?? []) {
-      if (maps.has(entry.property)) fails.push(`contract/token-layer.json lists writes for ${entry.property} twice`)
-      maps.set(entry.property, entry.values ?? {})
-      if (!markupWrites.has(entry.property)) fails.push(`contract/token-layer.json lists writes for ${entry.property}, which no markup element writes`)
-    }
-    const used = new Set()
     for (const [property, writes] of markupWrites) {
       for (const { file, value } of writes) {
         for (const { name, placeholder, rest, fallback } of varsWritten(value)) {
           if (placeholder === undefined) { addRead(name, file, fallback); continue }
-          const map = maps.get(property)?.[placeholder]
-          if (!map) { fails.push(`${file} writes ${property} as var(${name}<${placeholder}>${rest}), and contract/token-layer.json's writes give no values for <${placeholder}>`); continue }
-          used.add(`${property} <${placeholder}>`)
-          const [fieldFile, fieldName] = String(map.field).split('#')
-          const field = fieldNamed(readJson(`contract/fields/${fieldFile}.json`), fieldName)
-          if (!field || !Array.isArray(field.options)) { fails.push(`contract/token-layer.json fills ${property}'s <${placeholder}> from ${map.field}, which is not a field with options`); continue }
-          for (const option of field.options) {
-            if ((map.except ?? []).includes(option.value)) continue
-            addRead(`${name}${option.value}${rest}`, file, fallback)
-          }
+          fails.push(`${file} writes ${property} as var(${name}<${placeholder}>${rest}); the markup writes fixed values only, so set the property from a data attribute in the stylesheets`)
         }
-      }
-    }
-    for (const [property, values] of maps) {
-      for (const placeholder of Object.keys(values)) {
-        if (markupWrites.has(property) && !used.has(`${property} <${placeholder}>`)) fails.push(`contract/token-layer.json fills <${placeholder}> in ${property}, which no markup element writes`)
       }
     }
     const seen = new Set()
@@ -6078,16 +6115,22 @@ export function checkStylesheets(files) {
   // them on an element: a root, an element and its children, and a variant's tree. Not a rule's or a
   // note's mention, a platform's former name, a hook (kept with no rule) or an omitted class.
   const onElements = new Set()
-  const collect = (node) => {
-    if (Array.isArray(node)) { node.forEach(collect); return }
+  /* Each markup file's own element classes too, so a hook is checked against the file declaring it. */
+  const onFileElements = new Map()
+  const collect = (node, into) => {
+    if (Array.isArray(node)) { node.forEach((child) => collect(child, into)); return }
     if (!node || typeof node !== 'object') return
     for (const [key, value] of Object.entries(node)) {
       if (NOT_ELEMENTS.has(key)) continue
-      if (key === 'classes' && Array.isArray(value)) value.forEach((name) => onElements.add(name))
-      else collect(value)
+      if (key === 'classes' && Array.isArray(value)) value.forEach((name) => { onElements.add(name); into.add(name) })
+      else collect(value, into)
     }
   }
-  for (const file of markupFiles) collect(readJson(file))
+  for (const file of markupFiles) {
+    const own = new Set()
+    collect(readJson(file), own)
+    onFileElements.set(file, own)
+  }
   const styled = new Map()
   for (const [file, { rules }] of parsed) {
     for (const rule of rules) {
@@ -6105,6 +6148,69 @@ export function checkStylesheets(files) {
     if (onElements.has(name)) continue
     fails.push(`${[...files].join(', ')} style(s) .${name}, which no element in contract/markup/ carries; add it to the markup or take the rule out`)
   }
+  /* And the other way: every class the markup puts on an element has a rule, unless the markup
+     declares it a hook, kept with no rule on purpose. The markup once recorded classes it drew with
+     no rule as a debt (`stylesheet-owes`); a platform that matched it byte for byte served them
+     unstyled, an office's name running into its status. The debt is paid (rc.9, option A), and this
+     check keeps it from returning: a new class needs its rule, or a hook entry saying why not. */
+  /* A class counts as styled here only where a rule draws it: the class is in the selector's
+     subject (its last compound, outside :not() and :has()), the rule declares something, and it is
+     not for print alone. An empty rule, a print-only rule, or a class named only as an ancestor
+     (`.salt-x .salt-y` styles .salt-y, not .salt-x) leaves the element unstyled on screen. This is a
+     structural check of the stylesheets' text: it does not prove that a rule's selector reaches the
+     element in a real document, nor that a hook is used for what its reason says. */
+  /* Two more ways a rule draws nothing on screen. Its only declarations set custom properties
+     nothing reads: no stylesheet and no value the markup writes reads them, and the token layer
+     does not name them for a runtime or a site, so they change nothing a reader sees; a property
+     something does read counts, wherever it is read. And a media query for print alone: every
+     query in its list is `print` (or `only print`), unnegated and with no `or`. A list with a
+     screen branch, `@media print, (min-width: 40rem)`, applies on screen and is not print-only. */
+  const tokenLayerNames = new Set((TOKEN_LAYER?.groups ?? []).flatMap((group) => (group.tokens ?? []).map((token) => token.name)))
+  const drawsSomething = (rule) => rule.order.some((property) => !property.startsWith('--') || reads.has(property) || tokenLayerNames.has(property))
+  const printOnly = (prelude) => {
+    const match = /^@media\b([\s\S]*)$/i.exec(prelude.trim())
+    if (match === null) return false
+    const queries = []
+    let depth = 0
+    let current = ''
+    for (const char of match[1] ?? '') {
+      if (char === '(') depth += 1
+      if (char === ')') depth -= 1
+      if (char === ',' && depth === 0) { queries.push(current); current = '' } else current += char
+    }
+    queries.push(current)
+    return queries.every((query) => /^\s*(?:only\s+)?print\b/i.test(query) && !/\bnot\b|\bor\b/i.test(query))
+  }
+  const covered = new Map()
+  for (const [file, { rules }] of parsed) {
+    for (const rule of rules) {
+      if (!drawsSomething(rule)) continue
+      if (rule.at.some(printOnly)) continue
+      for (const selector of rule.selectors) {
+        for (const name of subjectClasses(selector)) {
+          if (!covered.has(name)) covered.set(name, new Set())
+          covered.get(name).add(file)
+        }
+      }
+    }
+  }
+  /* A hook is a class kept with no rule on purpose: a stable name for a site's own styles, a
+     script or a test. So a hook has no rule of its own here, and its reason never says a rule is
+     owed; a class waiting for its rule is a debt, not a hook. */
+  const hooks = new Set()
+  for (const file of markupFiles) {
+    for (const hook of readJson(file)?.hooks ?? []) {
+      if (typeof hook?.class !== 'string') continue
+      hooks.add(hook.class)
+      if (!onFileElements.get(file)?.has(hook.class)) fails.push(`${file} declares .${hook.class} a hook, but no element in ${file} carries it; a hook names a class its own markup draws, so take it out of hooks or put it on the element`)
+      if (covered.has(hook.class)) fails.push(`${file} declares .${hook.class} a hook, kept with no rule, but ${[...covered.get(hook.class)].join(', ')} style(s) it; take it out of hooks, or take the rule out`)
+      if (/\bowe[sd]?\b|\byet\b|\bmissing\b|\bto do\b|\btodo\b/i.test(hook.reason ?? '')) fails.push(`${file}'s hook .${hook.class} says its rule is owed ("${hook.reason}"); a hook is kept with no rule on purpose, so give the class its rule in styles/ and take it out of hooks`)
+    }
+  }
+  for (const name of [...onElements].sort()) {
+    if (!name.startsWith('salt-') || covered.has(name) || hooks.has(name)) continue
+    fails.push(`contract/markup/ puts .${name} on an element, and no stylesheet draws it: no rule with a declaration names it in its selector's subject, outside print; add its rule to styles/, or declare it a hook (kept with no rule) in its markup file`)
+  }
 
 
   const named = [...reads.keys()].filter((name) => !declaredHere.has(name))
@@ -6113,7 +6219,7 @@ export function checkStylesheets(files) {
     reached: 'all',
     summary: `PASS: ${String(parsed.size)} stylesheet(s) parse whole; ${String(CONTRACTS.length)} decision contract(s) hold; ` +
       `the token layer names the ${String(named.length)} custom properties they and the markup read (${String(named.filter((n) => reads.get(n).withFallback === reads.get(n).count).length)} optional); ` +
-      `${String(styled.size)} salt-* classes styled, each on a markup element.`,
+      `${String(styled.size)} salt-* classes styled, each on a markup element, and every class on a markup element styled or a declared hook (${String(hooks.size)}).`,
   }
 }
 

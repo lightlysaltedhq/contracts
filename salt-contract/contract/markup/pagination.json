@@ -1,6 +1,6 @@
 {
   "$schema": "../../schema/markup.schema.json",
-  "version": "1.0.0-rc.8",
+  "version": "1.0.0-rc.9",
   "id": "pagination",
   "kind": "component",
   "root": {
@@ -56,7 +56,7 @@
               ],
               "attributes": {
                 "href": "from:href(n)",
-                "aria-label": "from:labels.page",
+                "aria-label": "from:labels.page ({n})",
                 "aria-current": {
                   "value": "page",
                   "when": "n is the current page"
@@ -95,7 +95,7 @@
               ],
               "attributes": {
                 "href": "from:href(n)",
-                "aria-label": "from:labels.page",
+                "aria-label": "from:labels.page ({n})",
                 "aria-current": {
                   "value": "page",
                   "when": "n is the current page"
@@ -132,7 +132,7 @@
               ],
               "attributes": {
                 "href": "from:href(n)",
-                "aria-label": "from:labels.page",
+                "aria-label": "from:labels.page ({n})",
                 "aria-current": {
                   "value": "page",
                   "when": "n is the current page"
@@ -202,7 +202,7 @@
   "notes": [
     {
       "topic": "order",
-      "text": "The window is the first page, the last, and the current page with one neighbour each side; a run left out is one gap, and a gap of exactly one page is drawn as that page. So 5 of 9 is previous, 1, gap, 4, 5, 6, gap, 9, next, and 2 of 3 is previous, 1, 2, 3, next. Each page link's accessible name is labels.page with {n} replaced by the number (\"Page 2\"). Gaps sit only where the window skips, as the elements say."
+      "text": "The window is the first page, the last, and the current page with one neighbour each side; a run left out is one gap, and a gap of exactly one page is drawn as that page. So 5 of 9 is previous, 1, gap, 4, 5, 6, gap, 9, next, and 2 of 3 is previous, 1, 2, 3, next. Each page link's accessible name is labels.page with {n} replaced by the page's number (\"Page {n}\" draws \"Page 2\"; README, \"Labels\"). Gaps sit only where the window skips, as the elements say."
     }
   ],
   "platforms": {

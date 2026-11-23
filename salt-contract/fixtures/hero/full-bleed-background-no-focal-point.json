@@ -1,6 +1,6 @@
 {
   "section": "hero",
-  "summary": "Full bleed over a background image with no stored focal point and the default position, so its style is the fit alone; the scrim at subtle strength. Not first on the page: the background is lazy and the heading an h2.",
+  "summary": "Full bleed over a background image with no stored focal point and the default position, so the image carries data-fit alone, no data-focal-x or data-focal-y; the scrim at subtle strength. Not first on the page: the background is lazy and the heading an h2.",
   "values": {
     "variant": "full-bleed",
     "eyebrow": "Garden design",

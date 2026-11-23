@@ -1183,7 +1183,8 @@
 
 /*
  * A rating drawn as its stored proportion: the filled row laid exactly over the outline row and
- * clipped to `--salt-rating-fill`, which the section writes as the rating's share of five.
+ * clipped to `--salt-rating-fill`, the rating's share of five, which the stars' `data-fill` sets in
+ * steps of 10 (card.json says how a rating rounds to a step).
  *
  * Clipped with `clip-path` rather than by narrowing the filled row. A narrowed row would wrap its
  * stars onto a second line, because `.salt-grid` makes `overflow-wrap: break-word` inherited, and
@@ -1215,6 +1216,50 @@
 
 .salt-showcase__stars-fill:dir(rtl) {
   clip-path: inset(0 0 0 calc(100% - var(--salt-rating-fill, 0%)));
+}
+
+.salt-showcase__stars[data-fill='0'] {
+  --salt-rating-fill: 0%;
+}
+
+.salt-showcase__stars[data-fill='10'] {
+  --salt-rating-fill: 10%;
+}
+
+.salt-showcase__stars[data-fill='20'] {
+  --salt-rating-fill: 20%;
+}
+
+.salt-showcase__stars[data-fill='30'] {
+  --salt-rating-fill: 30%;
+}
+
+.salt-showcase__stars[data-fill='40'] {
+  --salt-rating-fill: 40%;
+}
+
+.salt-showcase__stars[data-fill='50'] {
+  --salt-rating-fill: 50%;
+}
+
+.salt-showcase__stars[data-fill='60'] {
+  --salt-rating-fill: 60%;
+}
+
+.salt-showcase__stars[data-fill='70'] {
+  --salt-rating-fill: 70%;
+}
+
+.salt-showcase__stars[data-fill='80'] {
+  --salt-rating-fill: 80%;
+}
+
+.salt-showcase__stars[data-fill='90'] {
+  --salt-rating-fill: 90%;
+}
+
+.salt-showcase__stars[data-fill='100'] {
+  --salt-rating-fill: 100%;
 }
 
 /*
@@ -1558,4 +1603,246 @@
   display: block;
   inline-size: 100%;
   block-size: auto;
+}
+
+/*
+ * ── Rules the markup owed (rc.9, option A) ──────────────────────────────────────
+ *
+ * Classes the markup contract drew with no rule (its `stylesheet-owes` notes), which Salt for
+ * WordPress draws byte for byte and served unstyled: an office's name ran into its status. Each rule
+ * is structural, layout, spacing and a text role, on the tokens the rules above use, and names no
+ * colour of its own: ink is the band's (`--salt-section-*`), so every tone and both themes keep the
+ * pairings the audit proved. The visual choices are proposed, for founder approval at contract
+ * review.
+ */
+
+/* Locations. The office list is the accordion; its summary holds the office's name, then its
+   status as a separate, quieter word that wraps as one piece. */
+.salt-locations__name {
+  margin-inline-end: 1rem;
+}
+
+.salt-locations__status {
+  display: inline-block;
+  color: var(--salt-section-ink-muted, var(--color-ink-muted));
+  font-size: var(--text-small);
+  line-height: var(--text-small--line-height);
+  letter-spacing: var(--text-small--letter-spacing);
+  font-weight: var(--text-small--font-weight);
+  font-family: var(--text-small--font-family);
+}
+
+.salt-locations {
+  max-inline-size: var(--container-2xl);
+}
+
+.salt-locations__office {
+  display: grid;
+  gap: 1.5rem;
+  justify-items: start;
+}
+
+.salt-locations__address {
+  font-style: normal;
+}
+
+.salt-locations__line {
+  display: block;
+}
+
+.salt-locations__contact {
+  display: grid;
+  gap: 0.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* The office's phone, email and directions links stand alone in a row, so each is floored at
+   24px tall (2.5.8), and each takes the band's ink, never the browser's link colour on a toned
+   band. The unclassed contact links keep the link's own underline (only body copy's rule
+   decorates an unclassed link); the directions link, which has a class, declares it, as
+   `salt-contact__link` does. */
+.salt-locations__contact a,
+.salt-locations__directions {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: 24px;
+  color: var(--salt-section-ink, var(--color-ink));
+}
+
+.salt-locations__directions {
+  text-decoration-line: underline;
+  text-underline-offset: 0.15em;
+}
+
+/* Opening hours: one row per day, the day and its hours apart on one line. */
+.salt-opening-hours {
+  display: grid;
+  gap: 0.25rem;
+  inline-size: 100%;
+  max-inline-size: 24rem;
+  margin: 0;
+}
+
+.salt-opening-hours__day {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0 1rem;
+}
+
+.salt-opening-hours__day > dd {
+  margin: 0;
+}
+
+.salt-opening-hours__span {
+  font-variant-numeric: tabular-nums;
+}
+
+/* The map's facade: a 16:9 box on the band's hairline, with its label and load control centred.
+   Script replaces the facade's contents with the map; what script draws is styled where it is
+   drawn until the markup records it. */
+.salt-map {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  inline-size: 100%;
+  aspect-ratio: 16 / 9;
+  box-sizing: border-box;
+  padding: 1rem;
+  overflow: hidden;
+  border: 1px solid var(--salt-section-border, var(--color-border));
+  border-radius: var(--radius-md);
+}
+
+.salt-map__label {
+  margin: 0;
+  text-align: center;
+}
+
+.salt-map__load {
+  flex: none;
+}
+
+/* Pricing: each plan is a card with its parts stacked, its call to action at the foot, so plans in
+   a row line up. The list itself is the shared grid's, and the price line is running text: its
+   amount and period keep the markup's space between them, so the price reads "£29 a month" when
+   copied, spoken or drawn with no stylesheet, and a flex box would have made that space
+   insignificant to the comparison. A featured plan is told by its badge's words and the band's heavier hairline,
+   never by colour alone. */
+.salt-pricing__plan {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  block-size: 100%;
+  padding: 1.5rem;
+  box-sizing: border-box;
+}
+
+.salt-pricing__plan > * {
+  margin-block: 0;
+}
+
+.salt-pricing__plan > .salt-button {
+  align-self: flex-start;
+  margin-block-start: auto;
+}
+
+.salt-pricing__plan[data-featured] {
+  border-color: var(--salt-section-boundary, var(--color-border-strong));
+}
+
+.salt-pricing__badge {
+  font-size: var(--text-label);
+  line-height: var(--text-label--line-height);
+  letter-spacing: var(--text-label--letter-spacing);
+  font-weight: var(--text-label--font-weight);
+  font-family: var(--text-label--font-family);
+}
+
+/* The contract's `stat`, "a figure shown as the thing itself": the price is one. */
+.salt-pricing__amount {
+  font-size: var(--text-stat);
+  line-height: var(--text-stat--line-height);
+  letter-spacing: var(--text-stat--letter-spacing);
+  font-weight: var(--text-stat--font-weight);
+  font-family: var(--text-stat--font-family);
+}
+
+.salt-pricing__period {
+  color: var(--salt-section-ink-muted, var(--color-ink-muted));
+}
+
+.salt-pricing__features {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0;
+  list-style: none;
+}
+
+.salt-pricing__features > li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* The contact section's details column: the organisation, its links and its address, stacked. */
+.salt-contact__details {
+  display: grid;
+  gap: 0.5rem;
+  justify-items: start;
+}
+
+.salt-contact__details > * {
+  margin: 0;
+}
+
+.salt-contact__organisation {
+  font-weight: var(--weight-bold);
+}
+
+.salt-contact__address {
+  font-style: normal;
+}
+
+.salt-contact__line {
+  display: block;
+}
+
+/* The form's privacy line: supporting text, in the band's muted ink. */
+.salt-contact__privacy {
+  margin: 0;
+  color: var(--salt-section-ink-muted, var(--color-ink-muted));
+  font-size: var(--text-small);
+  line-height: var(--text-small--line-height);
+  letter-spacing: var(--text-small--letter-spacing);
+  font-weight: var(--text-small--font-weight);
+  font-family: var(--text-small--font-family);
+}
+
+/* A team member's contact links and social profiles, on a card or an author's archive. On a
+   linked card they sit above its stretched link through `primitives.css`'s raise of every nested
+   link (`.salt-card :is(a, …)`), so they open their own address, not the card's page. */
+.salt-showcase__contact,
+.salt-showcase__socials {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Icon-only, so the floor comes from the box, as the footer's social links' does. */
+.salt-showcase__social-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-inline-size: max(2.75rem, 24px);
+  min-block-size: max(2.75rem, 24px);
+  color: var(--salt-section-ink, var(--color-ink));
 }

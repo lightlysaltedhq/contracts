@@ -173,6 +173,103 @@
 }
 
 /*
+ * ── Rules the markup owed (rc.9, option A) ──────────────────────────────────────
+ *
+ * The view bodies' own classes the markup drew with no rule. A view's body is not a band, so it
+ * takes the band's measure itself: each part of a post or a service that is not a section band is
+ * centred at the reading measure inside the gutter, as is the post's previous and next links after it,
+ * and a band drawn in a post (section#sections-in-a-post) keeps its own width. Proposed, for founder approval at contract review.
+ */
+.salt-post,
+.salt-service {
+  padding-block: var(--space-section-sm);
+}
+
+.salt-post > :not(.salt-section),
+.salt-post__adjacent,
+.salt-service > :not(.salt-section) {
+  box-sizing: border-box;
+  inline-size: min(100% - 2 * var(--space-gutter), var(--container-2xl));
+  margin-inline: auto;
+}
+
+/* The service's related cards take the default band's measure: three cards at the reading
+   measure would each be too narrow for its title. */
+.salt-service > .salt-related {
+  inline-size: min(100% - 2 * var(--space-gutter), var(--container-5xl));
+}
+
+.salt-post__header,
+.salt-service__header {
+  margin-block-end: 1.5rem;
+}
+
+.salt-service__benefits,
+.salt-related {
+  margin-block: 2rem;
+}
+
+.salt-service__price {
+  margin-block: 1.5rem 0;
+  font-size: var(--text-lead);
+  line-height: var(--text-lead--line-height);
+  letter-spacing: var(--text-lead--letter-spacing);
+  font-weight: var(--text-lead--font-weight);
+  font-family: var(--text-lead--font-family);
+}
+
+.salt-service__cta {
+  margin-block: 1.5rem;
+}
+
+/* The author's bio on their archive, at the reading measure. */
+.salt-archive__bio {
+  max-inline-size: var(--container-2xl);
+}
+
+/* The author box: the portrait beside the words, which wrap under it on a narrow screen. */
+.salt-author-box {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 1.5rem;
+  padding-block-start: 2rem;
+  border-block-start: 1px solid var(--salt-section-border, var(--color-border));
+}
+
+.salt-author-box__body {
+  flex: 1 1 20rem;
+}
+
+.salt-author-box__label {
+  margin-block: 0;
+  color: var(--salt-section-ink-muted, var(--color-ink-muted));
+  font-size: var(--text-small);
+  line-height: var(--text-small--line-height);
+  letter-spacing: var(--text-small--letter-spacing);
+  font-weight: var(--text-small--font-weight);
+  font-family: var(--text-small--font-family);
+}
+
+.salt-author-box__bio {
+  margin-block: 0.75rem 0;
+  max-inline-size: var(--container-2xl);
+}
+
+/* The search results: one entry per result, the title link first, then its kind and its note. */
+.salt-search__results {
+  display: grid;
+  gap: 1.5rem;
+  margin-block: 1.5rem;
+  padding: 0;
+  list-style: none;
+}
+
+.salt-search__results p {
+  margin-block: 0.25rem 0;
+}
+
+/*
  * ── Framed images ───────────────────────────────────────────────────────────────
  *
  * Each image fills its frame (SC-011): absolutely positioned against the frame and covering it.

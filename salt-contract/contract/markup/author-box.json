@@ -1,6 +1,6 @@
 {
   "$schema": "../../schema/markup.schema.json",
-  "version": "1.0.0-rc.8",
+  "version": "1.0.0-rc.9",
   "id": "author-box",
   "kind": "component",
   "root": {
@@ -96,21 +96,6 @@
   },
   "uses": [
     "media"
-  ],
-  "notes": [
-    {
-      "topic": "stylesheet-owes",
-      "text": "New vocabulary from WordPress; the shared stylesheets have no rules for it yet.",
-      "classes": [
-        "salt-author-box",
-        "salt-author-box__media",
-        "salt-author-box__body",
-        "salt-author-box__label",
-        "salt-author-box__name",
-        "salt-author-box__role",
-        "salt-author-box__bio"
-      ]
-    }
   ],
   "platforms": {
     "nextjs": {

@@ -985,3 +985,24 @@ test('ID-3969: every collection title, name and question has its target under cu
   // A limit a page breaks without stays Payload's own.
   assert.equal(field(block(blocks(), 'tabs').fields, 'tabs').maxRows, 8)
 })
+
+// SC-035: clients and sectors are enabled independently and are off by default.
+test('sc-035: clients and sectors are off by default and switch on independently', () => {
+  const emit = (sources) => toPayloadCollections({ icons, richTextEditor: editor, sources })
+  const combos = [
+    ['off/off', undefined, []],
+    ['on/on', { 'case-studies': {}, services: {}, clients: {}, sectors: {} }, ['clients', 'sectors']],
+    ['on/off', { 'case-studies': {}, services: {}, clients: {} }, ['clients']],
+    ['off/on', { 'case-studies': {}, services: {}, sectors: {} }, ['sectors']],
+  ]
+  for (const [combo, sources, on] of combos) {
+    const list = emit(sources)
+    const cs = list.find((c) => c.custom.salt.collection === 'case-studies')
+    const relations = cs.fields.filter((f) => f.name.endsWith('Record')).map((f) => [f.name, f.relationTo, f.hasMany ?? false])
+    assert.deepEqual(relations, on.map((s) => [s === 'clients' ? 'clientRecord' : 'sectorRecord', s, false]), combo)
+    assert.ok(cs.fields.some((f) => f.name === 'client') && cs.fields.some((f) => f.name === 'sector'), `${combo}: the free text is always there`)
+    assert.deepEqual(list.map((c) => c.slug).filter((s) => ['clients', 'sectors'].includes(s)), on, combo)
+  }
+  const [clients] = emit({ clients: {} })
+  assert.deepEqual(clients.fields.map((f) => [f.name, f.type, f.required]), [['title', 'text', true]])
+})

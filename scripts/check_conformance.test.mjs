@@ -57,7 +57,7 @@ const withFields = ['--payload-snapshot', path.join(fieldsDir, 'payload.json'), 
 cpSync(path.join(pkg, 'styles', 'salt.css'), path.join(fieldsDir, 'served.css'))
 const withStyles = ['--styles', path.join(fieldsDir, 'served.css')]
 
-test('the reference adapter conforms: all four checks run and pass for every section', async () => {
+test('the reference adapter conforms: all five checks run and pass for every section', async () => {
   const r = await run(['--platform', 'reference', '--adapter', reference, ...withFields, ...withStyles, '--implementation-version', '9.9.9'])
   assert.equal(r.code, 0, r.out)
   assert.equal(r.report.ok, true)
@@ -269,10 +269,10 @@ test('a page is compared through pageOf: the platform\'s head and body scripts p
   }
 })
 
-test('a framework\'s own attributes on an image fail the case: the runner masks neither data-nimg nor an added declaration (SC-024)', async () => {
+test('a framework\'s own attributes on an image fail the case: the runner masks neither data-nimg nor an inline style (SC-024, SC-029)', async () => {
   const adapter = brokenAdapter({
     'hero/split-image-left': { from: ' fetchpriority="high" decoding="async">', to: ' fetchpriority="high" decoding="async" data-nimg="1">' },
-    'hero/full-bleed-background-inverse': { from: 'style="object-fit: cover; object-position: 30% 60%"', to: 'style="color:transparent;object-fit:cover;object-position:30% 60%"' },
+    'hero/full-bleed-background-inverse': { from: 'data-fit="cover"', to: 'data-fit="cover" style="color:transparent"' },
   })
   try {
     const r = await run(['--platform', 'broken', '--adapter', adapter.command, '--sections', 'hero', '--partial'])
@@ -281,8 +281,74 @@ test('a framework\'s own attributes on an image fail the case: the runner masks 
     const nimg = failure(r.report, 'hero', 'split-image-left')
     assert.deepEqual([nimg.difference, nimg.name, nimg.expected, nimg.found], ['attribute', 'data-nimg', null, '1'])
     const style = failure(r.report, 'hero', 'full-bleed-background-inverse')
-    assert.deepEqual([style.difference, style.name, style.expected, style.found],
-      ['attribute', 'style', 'object-fit:cover;object-position:30% 60%', 'color:transparent;object-fit:cover;object-position:30% 60%'])
+    assert.deepEqual([style.difference, style.name, style.expected, style.found], ['attribute', 'style', null, 'color:transparent'])
+  } finally {
+    rmSync(adapter.dir, { recursive: true, force: true })
+  }
+})
+
+test('a style attribute anywhere in the output fails the inline-style check, for a section and a file alike (SC-029)', async () => {
+  const adapter = brokenAdapter({
+    'hero/full-bleed-background-inverse': { from: 'data-strength="strong"', to: 'data-strength="strong" style="--salt-scrim-alpha: var(--scrim-strong)"' },
+    'site-header/menu-submenus-phone-cta-sticky': { from: 'class="salt-logo" href="/"', to: 'class="salt-logo" href="/" style="--logo-height: 48px"' },
+  })
+  try {
+    const r = await run(['--platform', 'broken', '--adapter', adapter.command, ...withFields, ...withStyles])
+    assert.equal(r.code, 1, r.out)
+    const hero = section(r.report, 'hero')
+    assert.equal(hero.status, 'fail')
+    assert.equal(hero.inlineStyles.status, 'fail')
+    assert.deepEqual(hero.inlineStyles.cases.map((c) => c.case), ['full-bleed-background-inverse'])
+    assert.match(hero.inlineStyles.cases[0].elements[0], /^<div style="--salt-scrim-alpha:/)
+    const header = r.report.files.find((f) => f.id === 'site-header')
+    assert.equal(header.status, 'fail')
+    assert.deepEqual(header.inlineStyles.cases.map((c) => c.case), ['menu-submenus-phone-cta-sticky'])
+    // Every other section and file passes the check.
+    assert.ok(r.report.sections.filter((s) => s.id !== 'hero').every((s) => s.inlineStyles.status === 'pass'))
+    assert.match(r.out, /\| Inline styles \|/)
+    assert.match(r.out, /`hero\/full-bleed-background-inverse`: a style attribute, which nothing the contract draws carries/)
+  } finally {
+    rmSync(adapter.dir, { recursive: true, force: true })
+  }
+})
+
+test('the inline-style check reads the raw output: an SVG child, the page\'s body and an empty style fail (SC-029)', async () => {
+  const adapter = brokenAdapter({
+    'site-footer/columns-socials-copyright': { from: 'aria-label="LinkedIn" fill="none" stroke="currentColor">', to: 'aria-label="LinkedIn" fill="none" stroke="currentColor"><path style="fill:red" d="M0 0"/>' },
+    'page/header-section-footer': { from: '<body', to: '<body style="margin:0"' },
+    'hero/full-bleed-background-inverse': { from: 'data-strength="strong"', to: 'data-strength="strong" style=""' },
+  })
+  try {
+    const r = await run(['--platform', 'broken', '--adapter', adapter.command, ...withFields, ...withStyles])
+    assert.equal(r.code, 1, r.out)
+    const footer = r.report.files.find((f) => f.id === 'site-footer')
+    assert.deepEqual(footer.inlineStyles.cases.map((c) => c.case), ['columns-socials-copyright'])
+    assert.match(footer.inlineStyles.cases[0].elements[0], /^<path style="fill:red">/)
+    const page = r.report.files.find((f) => f.id === 'page')
+    assert.deepEqual(page.inlineStyles.cases.map((c) => c.case), ['header-section-footer'])
+    assert.match(page.inlineStyles.cases[0].elements[0], /^<body style="margin:0">/)
+    const hero = section(r.report, 'hero')
+    assert.deepEqual(hero.inlineStyles.cases.map((c) => c.case), ['full-bleed-background-inverse'])
+    assert.equal(hero.inlineStyles.cases[0].elements[0], '<div style="">')
+  } finally {
+    rmSync(adapter.dir, { recursive: true, force: true })
+  }
+})
+
+test('a renderer that strips a placeholder and appends its value fails where the placeholder is not last (SC-031, review N1)', async () => {
+  // What such a renderer draws from "{n}. page", "{name}: directions" and "{name} wrote this".
+  const adapter = brokenAdapter({
+    'listing/page-number-first': { from: 'aria-label="3. page"', to: 'aria-label=". page 3"' },
+    'locations/directions-name-first': { from: 'aria-label="Bristol studio: directions"', to: 'aria-label=": directions Bristol studio"' },
+    'post/byline-name-first': { from: '<span class="salt-post__byline"><a href="/team/priya-shah/">Priya Shah</a> wrote this</span>', to: '<span class="salt-post__byline">wrote this <a href="/team/priya-shah/">Priya Shah</a></span>' },
+  })
+  try {
+    const r = await run(['--platform', 'broken', '--adapter', adapter.command, ...withFields, ...withStyles])
+    assert.equal(r.code, 1, r.out)
+    assert.ok(failure(r.report, 'listing', 'page-number-first'))
+    assert.ok(failure(r.report, 'locations', 'directions-name-first'))
+    const post = r.report.files.find((f) => f.id === 'post')
+    assert.deepEqual(post.fixtures.failures.map((f) => f.case), ['byline-name-first'])
   } finally {
     rmSync(adapter.dir, { recursive: true, force: true })
   }

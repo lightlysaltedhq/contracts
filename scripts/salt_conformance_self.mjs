@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // The conformance runner's self-check (`npm run salt-conformance`): the runner, against the
-// reference adapter over every fixture, with all four checks run as SC-017 requires. Field parity
+// reference adapter over every fixture, with all five checks run as SC-017 requires. Field parity
 // needs a committed snapshot, which the contract has none of, so this writes the Payload and the
 // ACF snapshot the emitters give for one set of options to a temporary directory and runs the
 // runner once for each platform. The stylesheet it pins is a copy of styles/salt.css, standing for
@@ -34,8 +34,8 @@ try {
     try {
       execFileSync(process.execPath, args, { stdio: ['ignore', 'pipe', 'inherit'] })
       const { summary } = JSON.parse(readFileSync(path.join(dir, platform, 'conformance.json'), 'utf8'))
-      console.log(`PASS: the reference adapter conforms with the ${platform} snapshot: ${summary.pass} section(s), all four checks each; ` +
-        `${summary.files.pass} chrome, view and page file(s), fixtures and classes each.`)
+      console.log(`PASS: the reference adapter conforms with the ${platform} snapshot: ${summary.pass} section(s), all five checks each; ` +
+        `${summary.files.pass} chrome, view and page file(s), fixtures, classes and inline styles each.`)
     } catch (e) {
       failed = true
       process.stdout.write(e.stdout ?? '')

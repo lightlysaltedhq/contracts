@@ -1,6 +1,6 @@
 {
   "$schema": "../../schema/markup.schema.json",
-  "version": "1.0.0-rc.8",
+  "version": "1.0.0-rc.9",
   "id": "logos",
   "kind": "section",
   "tier": "core",
@@ -154,6 +154,13 @@
   "ruleRefs": [
     "section#list-semantics",
     "section#focus-ring"
+  ],
+  "hooks": [
+    {
+      "class": "salt-logos",
+      "role": "list",
+      "reason": "Names the logo list; its greyscale setting is selected through it, and salt-grid and salt-logos__item lay it out."
+    }
   ],
   "platforms": {
     "wordpress": {

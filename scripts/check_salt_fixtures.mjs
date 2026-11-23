@@ -225,6 +225,15 @@ function settingsFields(fieldsDoc) {
 const SITE_KEYS = ['arrow', 'labels', 'collectionIndexes', 'acceptsEnquiries', 'organisation', 'contactForm', 'timezone', 'maps',
   'name', 'home', 'logo', 'logoHeight', 'header', 'footer', 'consent', 'themeToggle', 'displayPreferences', 'search', 'caseStudy']
 
+// The WP Consent API's categories in its own order, and the API category each Salt category maps to
+// (site-footer.json's consent ruling, SC-030).
+const WP_CONSENT_API = ['functional', 'preferences', 'statistics', 'statistics-anonymous', 'marketing']
+const SALT_CONSENT = { analytics: 'statistics', embeds: 'marketing', marketing: 'marketing', maps: 'marketing' }
+// The API categories a box may name: only those some Salt category maps to. statistics-anonymous is
+// written with the statistics box's verdict and never drawn; functional and preferences have no
+// Salt category.
+const CONSENT_BOXES = WP_CONSENT_API.filter((id) => Object.values(SALT_CONSENT).includes(id))
+
 function checkSiteAndMedia(c) {
   const { input, at } = c
   if (input.site !== undefined && !isObject(input.site)) fail(`${at}.json: site must be an object`)
@@ -232,17 +241,31 @@ function checkSiteAndMedia(c) {
   const h = input.site?.logoHeight
   if (h !== undefined && !(Number.isInteger(h) && h > 0)) fail(`${at}.json: site.logoHeight is the logo's drawn height, a whole number of px`)
   // The case study view's layout, set once by the site rather than stored per case study
-  // (case-study.json):
-  // where it draws its featured image, and whether its header is a band, with the band's tones.
+  // (case-study.json): whether its header is a band, with the band's tones. The view has no
+  // aside, so the site sets nothing about where its images go (SC-034).
   const cs = input.site?.caseStudy
   if (cs !== undefined) {
     const tones = settingsFile.fields.find((f) => f.name === 'tone').options.map((o) => o.value)
     const band = cs?.header === 'band'
-    if (!(isObject(cs) && Object.keys(cs).every((k) => ['media', 'header', 'headerTone', 'headerToneDark'].includes(k)) &&
-      ['flow', 'aside'].includes(cs.media ?? 'flow') && ['plain', 'band'].includes(cs.header ?? 'plain') &&
+    if (!(isObject(cs) && Object.keys(cs).every((k) => ['header', 'headerTone', 'headerToneDark'].includes(k)) &&
+      ['plain', 'band'].includes(cs.header ?? 'plain') &&
       (band ? tones.includes(cs.headerTone) : cs.headerTone === undefined) &&
       (cs.headerToneDark === undefined || (band && tones.includes(cs.headerToneDark))))) {
-      fail(`${at}.json: site.caseStudy is { media, header, headerTone, headerToneDark }: media flow or aside, where the case study view draws its featured image; header plain or band; and with a band only, its tone and optionally its dark tone, each one of ${tones.join(', ')}`)
+      fail(`${at}.json: site.caseStudy is { header, headerTone, headerToneDark }: header plain or band; and with a band only, its tone and optionally its dark tone, each one of ${tones.join(', ')}`)
+    }
+  }
+  // The consent mechanism the site has wired (site-footer.json, SC-030): its boxes, one per WP
+  // Consent API category in use, in the API's order, each covering the Salt categories it sets.
+  const consent = input.site?.consent
+  if (consent !== undefined) {
+    const cats = isObject(consent) && Array.isArray(consent.categories) ? consent.categories : null
+    const ids = (cats ?? []).map((k) => k?.id)
+    const covered = (cats ?? []).flatMap((k) => (Array.isArray(k?.covers) ? k.covers : []))
+    if (!cats || cats.some((k) => !isObject(k) || !Array.isArray(k.covers) || k.covers.length === 0 || typeof k.label !== 'string' || typeof k.description !== 'string') ||
+      ids.some((id) => !CONSENT_BOXES.includes(id)) || ids.some((id, i) => i > 0 && WP_CONSENT_API.indexOf(id) <= WP_CONSENT_API.indexOf(ids[i - 1])) ||
+      covered.some((x) => SALT_CONSENT[x] === undefined) || new Set(covered).size !== covered.length ||
+      (cats ?? []).some((k) => (k.covers ?? []).some((x) => SALT_CONSENT[x] !== k.id))) {
+      fail(`${at}.json: site.consent.categories is one box per WP Consent API category in use, in the API's order, each one a Salt category maps to (${CONSENT_BOXES.join(', ')}; statistics-anonymous is written with statistics and never drawn), and may be empty: { id, covers, label, description }, id the API category and covers the Salt categories it sets, each in one box only and in the box its API category names (${Object.entries(SALT_CONSENT).map(([a, b]) => `${a} to ${b}`).join(', ')})`)
     }
   }
   for (const [id, m] of Object.entries(input.media ?? {})) {
@@ -529,6 +552,7 @@ function expand(nodes, doc) {
           children: own ? elements : n.children ?? null,
           doc: own ? comp : doc,
           componentId: comp.id,
+          text: n.text ?? root.text,
         }
       })
       return [{ role: n.role, optional: n.optional, repeat: n.repeat, alts }]
@@ -546,35 +570,73 @@ function expand(nodes, doc) {
         ...withSources([['media', 'root', media], [doc.id, n.role, dataRules(doc, n.role)], [doc.id, n.role, n.attributes], [n.extraId, 'root', n.extraAttrs]]),
         children: n.children ?? null,
         doc: n.childDoc ?? doc,
+        text: n.text,
       }],
     }]
   })
 }
 
 const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-const canonStyle = (v) => v.split(';').map((d) => d.trim()).filter(Boolean).map((d) => {
-  const i = d.indexOf(':')
-  return i === -1 ? d : `${d.slice(0, i).trim()}:${d.slice(i + 1).trim().replace(/\s+/g, ' ')}`
-}).join(';')
 
 // Placeholders the case fixes, from the wrapper's settled data (a section case, or a view's
 // nested section); any other <placeholder> matches any text. A chrome case, or a view nesting no
-// section, fixes none, except the case study view: its aside's rows are the parts the view counts
-// beside the image, and its measure a default band's, 64rem, since a fixture draws no site that
-// widened its bands (case-study.json).
-const placeholders = (c) => ({
-  ...(c.section === 'case-study' ? { '<n>': String(caseStudyBeside(c)), '<measure>': '64rem' } : {}),
-  ...(c.anchor == null ? {} : {
-    '<anchor>': c.anchor,
-    ...(c.index !== undefined ? { '<section index>': String(c.index) } : {}),
-    '<spacing>': effectiveSetting(c, 'spacing'),
-    '<strength>': c.settings?.backgroundImage?.scrimStrength ?? 'strong',
-  }),
+// section, fixes none.
+const placeholders = (c) => (c.anchor == null ? {} : {
+  '<anchor>': c.anchor,
+  ...(c.index !== undefined ? { '<section index>': String(c.index) } : {}),
 })
 
-function templateMatch(tpl, value, name, c) {
-  if (tpl.startsWith('from:')) return true
-  const canon = name === 'style' ? canonStyle : (x) => x
+// A label the markup draws (from:labels.<name>, with the placeholders it may hold listed after it,
+// README "Labels"): the site's label, every listed placeholder standing for any text and the rest
+// compared as written, so an unknown {placeholder} and a label with none are drawn exactly as
+// given and nothing is appended. Labels live under site.labels, or under the consent and display
+// preferences' own labels. true when the template is no label or the case gives no such label.
+// Where the case gives a placeholder's value (labelValues), it stands for exactly that value, so a
+// label with the wrong number or name fails; {kind} is the platform's word, so stays any text.
+const LABEL = /^from:labels\.([A-Za-z]+)(?: \(([^()]*)\))?$/
+function labelValues(name, c, el) {
+  const doc = c.input.document ?? {}
+  const num = (v) => (typeof v === 'number' ? String(v) : undefined)
+  if (name === 'page' && el) return { '{n}': textOf(el) }
+  if (name === 'slide' && el) {
+    // {n} is the slide's position from 1 and {N} the slides in its track (carousel-track.json).
+    const slide = c.parents.get(el)
+    const track = slide && c.parents.get(slide)
+    if (track && classesOf(slide).includes('salt-carousel__slide')) {
+      const slides = elementsOf(track).filter((e) => classesOf(e).includes('salt-carousel__slide'))
+      return { '{n}': String(slides.indexOf(slide) + 1), '{N}': String(slides.length) }
+    }
+  }
+  if (name === 'byline') return { '{name}': doc.author?.name }
+  if (name === 'readTime') return { '{n}': num(doc.readingMinutes) }
+  if (name === 'results') return { '{n}': num(doc.count), '{q}': doc.query }
+  if (name === 'noResults') return { '{q}': doc.query }
+  if (name === 'directions' && el) {
+    // The office's name, drawn as salt-locations__name in the office's own summary or card.
+    for (let a = c.parents.get(el); a; a = c.parents.get(a)) {
+      const own = descendants(a).find((e) => classesOf(e).includes('salt-locations__name'))
+      if (own) return { '{name}': textOf(own) }
+    }
+  }
+  return {}
+}
+function labelMatch(tpl, value, c, el) {
+  const m = LABEL.exec(tpl)
+  if (!m) return true
+  const site = c.input.site ?? {}
+  const given = [site.labels, site.consent?.labels, site.displayPreferences?.labels].map((l) => l?.[m[1]]).filter((v) => typeof v === 'string')
+  if (!given.length) return true
+  const listed = (m[2] ?? '').split(',').map((x) => x.trim()).filter(Boolean)
+  const known = labelValues(m[1], c, el)
+  const part = (p) => (!listed.includes(p) ? escapeRe(p) : typeof known[p] === 'string' ? escapeRe(known[p].replace(/\s+/g, ' ').trim()) : '.+?')
+  const shape = (label) => new RegExp(`^${label.split(/(\{[A-Za-z]+\})/).map(part).join('')}$`)
+  const text = value.replace(/\s+/g, ' ').trim()
+  return given.some((label) => shape(label.replace(/\s+/g, ' ').trim()).test(text))
+}
+
+function templateMatch(tpl, value, name, c, el) {
+  if (tpl.startsWith('from:')) return labelMatch(tpl, value, c, el)
+  const canon = (x) => x
   const known = placeholders(c)
   const re = canon(tpl).split(/(<[^<>]+>)/).map((part) => {
     if (known[part] !== undefined) return escapeRe(known[part])
@@ -591,21 +653,13 @@ function templateMatch(tpl, value, name, c) {
 const textOf = (el) => el.children.map((x) => (x.type === 'text' ? x.value : textOf(x))).join('').replace(/\s+/g, ' ').trim()
 const isImage = (c, id) => typeof id === 'string' && isObject(c.input.media?.[id])
 const background = (c) => isImage(c, c.settings?.backgroundImage?.image)
-// The case study view's aside (case-study-view.tsx): the parts the image runs beside are the
-// challenge, the solution, a gallery with images and a safe live-site link; with none, or no
-// image, the image stays in the flow whatever the site's layout. A safe link is relative or
-// http, https, mailto or tel, as isSafeHref allows, after the whitespace and control characters
-// a browser strips.
+// A safe link is relative or http, https, mailto or tel, as isSafeHref allows, after the whitespace
+// and control characters a browser strips.
 const safeHref = (v) => {
   if (typeof v !== 'string' || v === '') return false
   const m = /^([a-z][a-z0-9+.-]*):/i.exec(v.replace(/[\u0000-\u0020]/g, ''))
   return !m || ['http', 'https', 'mailto', 'tel'].includes(m[1].toLowerCase())
 }
-const caseStudyBeside = (c) => {
-  const d = c.input.document ?? {}
-  return [filledText(d.challenge), filledText(d.solution), (d.gallery ?? []).some((id) => isImage(c, id)), safeHref(d.externalUrl)].filter(Boolean).length
-}
-const caseStudyAside = (c) => c.input.site?.caseStudy?.media === 'aside' && isImage(c, c.input.document?.image) && caseStudyBeside(c) > 0
 const scrimOn = (c) => background(c) && c.settings.backgroundImage.scrim !== false
 // The stored link a drawn button stands for, found by its label.
 // A button's own words: its text without the site's arrow, which is decoration.
@@ -698,13 +752,13 @@ const WHEN = {
   'site-footer:links:aria-label': (c, el) => !columnTitled(c, el),
   'site-footer:links:aria-labelledby': columnTitled,
   'section:root:data-media': (c) => background(c),
-  'case-study:article:data-media': caseStudyAside,
-  'case-study:article:style': caseStudyAside,
-  // A drawn background always has a fit, so its style always applies (media.json).
-  'section:background:style': (c) => background(c),
+  // A drawn background always has a fit (media.json), and a position unless it is the focal point
+  // of an image that stores none (section#background-position).
+  'section:background:data-fit': (c) => background(c),
+  'section:background:data-focal-x': (c) => (background(c) ? backgroundAt(c) !== null : undefined),
+  'section:background:data-focal-y': (c) => (background(c) ? backgroundAt(c) !== null : undefined),
   'section:root:data-divider': (c) => effectiveSetting(c, 'divider') === true,
   'section:root:data-collapse-top': (c) => c.input.context.collapseTop === true,
-  'section:root:style': (c) => effectiveSetting(c, 'spacing') !== 'none',
   'hero:root:data-media-side': (c) => effective(c, 'variant') === 'split' && isImage(c, c.values.image),
   'hero:root:data-align': (c) => effective(c, 'variant') === 'minimal',
   'button:root:target': newTab,
@@ -744,16 +798,18 @@ function rowSide(c, el) {
   const row = shown[k]
   return row ? row.mediaSide ?? byName.get('mediaSide').default : undefined
 }
-// The background's inline style, as media.json writes it: the fit, and the position unless it is
-// the focal point of an image that stores none.
-const KEYWORD = { 'top-left': 'top left', top: 'top', 'top-right': 'top right', left: 'left', centre: 'center', right: 'right',
-  'bottom-left': 'bottom left', bottom: 'bottom', 'bottom-right': 'bottom right' }
-function backgroundStyle(c) {
+// The background's position as section#background-position writes it: [x, y] in per cent, each a
+// step of 5, from a named position or the image's stored focal point (each axis snapped to the
+// nearest step, halves up), or null for the focal point of an image that stores none.
+const NAMED = { 'top-left': [0, 0], top: [50, 0], 'top-right': [100, 0], left: [0, 50], centre: [50, 50], right: [100, 50],
+  'bottom-left': [0, 100], bottom: [50, 100], 'bottom-right': [100, 100] }
+const snap5 = (v) => Math.min(100, Math.max(0, 5 * Math.floor(v / 5 + 0.5)))
+function backgroundAt(c) {
   const bg = c.settings?.backgroundImage ?? {}
   const position = bg.position ?? 'focal-point'
+  if (position !== 'focal-point') return NAMED[position]
   const focal = c.input.media?.[bg.image]?.focalPoint
-  const at = position === 'focal-point' ? (focal ? `${focal.x}% ${focal.y}%` : null) : KEYWORD[position]
-  return `object-fit: ${bg.fit ?? 'cover'}${at ? `; object-position: ${at}` : ''}`
+  return focal ? [snap5(focal.x), snap5(focal.y)] : null
 }
 // A data attribute that mirrors one of the section's fields carries that field's value.
 const field = (name) => (c) => { const v = effective(c, name); return v === undefined ? undefined : String(v) }
@@ -778,7 +834,10 @@ const VALUE = {
   'search-form:input:value': (c) => c.input.document?.query,
   // An untitled column's list takes the footer navigation's name.
   'site-footer:links:aria-label': (c, el) => { for (let p = c.parents.get(el); p; p = c.parents.get(p)) if (p.name === 'nav') return attr(p, 'aria-label') },
-  'section:background:style': backgroundStyle,
+  'section:background:data-fit': (c) => c.settings?.backgroundImage?.fit ?? 'cover',
+  'section:background:data-focal-x': (c) => (backgroundAt(c) ? String(backgroundAt(c)[0]) : undefined),
+  'section:background:data-focal-y': (c) => (backgroundAt(c) ? String(backgroundAt(c)[1]) : undefined),
+  'section:scrim:data-strength': (c) => c.settings?.backgroundImage?.scrimStrength ?? 'strong',
   'section:root:data-track': (c) => c.track,
   'section:root:data-tone': (c) => effectiveSetting(c, 'tone'),
   'section:root:data-tone-dark': darkTone,
@@ -808,13 +867,12 @@ function checkAttrs(alt, el, c) {
     // Where the case fixes the value exactly, that is the test, and the template's shape is not.
     const want = VALUE[alt.from?.[name]]?.(c, el)
     if (typeof want === 'string') {
-      const canon = name === 'style' ? canonStyle : (x) => x
-      if (canon(value) !== canon(want)) problems.push(`${describe(el)} ${name}="${value}" disagrees with the case, which gives ${JSON.stringify(want)}`)
+      if (value !== want) problems.push(`${describe(el)} ${name}="${value}" disagrees with the case, which gives ${JSON.stringify(want)}`)
       continue
     }
-    if (typeof rule === 'string') { if (!templateMatch(rule, value, name, c)) problems.push(`${describe(el)} ${name}="${value}" is not ${JSON.stringify(rule)}`); continue }
+    if (typeof rule === 'string') { if (!templateMatch(rule, value, name, c, el)) problems.push(`${describe(el)} ${name}="${value}" is not ${JSON.stringify(rule)}`); continue }
     if (rule.enum) { if (!rule.enum.includes(value)) problems.push(`${describe(el)} ${name}="${value}" is not one of ${rule.enum.join(', ')}`); continue }
-    if (!templateMatch(rule.value, value, name, c)) problems.push(`${describe(el)} ${name}="${value}" is not ${JSON.stringify(rule.value)}`)
+    if (!templateMatch(rule.value, value, name, c, el)) problems.push(`${describe(el)} ${name}="${value}" is not ${JSON.stringify(rule.value)}`)
   }
   for (const [name, rule] of Object.entries(rules)) {
     if (typeof rule === 'string' || rule.when === undefined) {
@@ -864,6 +922,8 @@ function matcher(c) {
     for (const alt of spec.alts) {
       if (!alt.tags.includes(el.name)) { note([order(el), 1], `${where}: ${describe(el)} where the markup has ${spec.role} (${alt.tags.join(' or ')})`); continue }
       const problems = checkAttrs(alt, el, c)
+      // A label drawn as text is the site's label, its listed placeholders replaced (README "Labels").
+      if (typeof alt.text === 'string' && !labelMatch(alt.text, labelOf(el), c, el)) problems.push(`${describe(el)} reads "${labelOf(el)}", which is not ${alt.text.split(' (')[0].slice(5)} as the case gives it, its placeholders replaced and nothing appended`)
       if (problems.length) { note([order(el), 2], `${where} [${spec.role}]: ${problems[0]}`); continue }
       let bindings = new Map()
       if (alt.children !== null) {
@@ -1030,6 +1090,38 @@ function checkMarkup(c) {
   const every = () => [root, ...descendants(root)]
   c.parents = new Map()
   for (const el of [root, ...descendants(root)]) for (const child of elementsOf(el)) c.parents.set(child, el)
+  // A quote's rating (card.json), wherever the quote sits: the carousel's slide and the
+  // showcase's accordion panel hold their card as prose, so the matcher does not reach it. The
+  // quote is the item whose title its own name element shows exactly: the heading in its caption,
+  // or, in an accordion panel, the summary of its details. A quote with no name element, or whose
+  // name no item or more than one item has, fails; none is skipped. Its rating is named by
+  // labels.rating with {n} and {N} replaced, and the stars' data-fill is its share of five in
+  // steps of 10, halves up.
+  const quoted = [...Object.values(c.input.collections ?? {}).flat(), ...(Array.isArray(c.values?.cards) ? c.values.cards : [])].filter((i) => typeof i?.title === 'string')
+  for (const quote of every().filter((e) => classesOf(e).includes('salt-showcase__quote'))) {
+    const caption = descendants(quote).find((e) => classesOf(e).includes('salt-showcase__caption'))
+    let nameEl = caption && descendants(caption).find((e) => /^h[1-6]$/.test(e.name))
+    for (let a = c.parents.get(quote); !nameEl && a; a = c.parents.get(a)) {
+      if (a.name === 'details') nameEl = elementsOf(a).find((e) => e.name === 'summary')
+    }
+    if (!nameEl) { fail(`${at}.html: a quote draws no name element (a heading in its caption, or its accordion item's summary), so no item is known to be its`); continue }
+    const name = textOf(nameEl)
+    const items = quoted.filter((i) => i.title.replace(/\s+/g, ' ').trim() === name)
+    if (items.length !== 1) { fail(`${at}.html: the quote named "${name}" matches ${items.length} items by title; it must match exactly one`); continue }
+    const { rating, title } = items[0]
+    const ratings = descendants(quote).filter((e) => classesOf(e).includes('salt-showcase__rating'))
+    if (typeof rating !== 'number') {
+      if (ratings.length) fail(`${at}.html: ${title}'s quote draws a rating, but the item has none`)
+      continue
+    }
+    if (ratings.length !== 1) { fail(`${at}.html: ${title}'s quote draws ${ratings.length} ratings; its item is rated ${rating}`); continue }
+    const label = c.input.site?.labels?.rating
+    const wantLabel = typeof label === 'string' ? label.replace(/\{(n|N)\}/g, (_, k) => String(k === 'n' ? rating : 5)) : undefined
+    if (wantLabel !== undefined && attr(ratings[0], 'aria-label') !== wantLabel) fail(`${at}.html: ${title}'s rating is named "${attr(ratings[0], 'aria-label')}"; labels.rating with the rating ${rating} gives "${wantLabel}"`)
+    const stars = descendants(ratings[0]).find((e) => classesOf(e).includes('salt-showcase__stars'))
+    const wantFill = String(Math.min(100, Math.max(0, 10 * Math.floor(rating * 2 + 0.5))))
+    if (!stars || attr(stars, 'data-fill') !== wantFill) fail(`${at}.html: ${title}'s stars carry data-fill="${stars ? attr(stars, 'data-fill') : ''}"; the rating ${rating} gives "${wantFill}"`)
+  }
   // A panel only a visitor opens is drawn, open, if and only if the case's state says so. Asked
   // before the markup is matched, so a case that breaks it is told so first.
   for (const [key, cls, what] of [['consentPanelOpen', 'salt-consent-panel', 'the consent panel'], ['drawerOpen', 'salt-drawer', 'the drawer']]) {
@@ -1037,6 +1129,19 @@ function checkMarkup(c) {
     const open = c.input.state?.[key] === true
     if (isDrawn && !open) fail(`${at}.html: ${what} is drawn, but the case's state does not say it is open (state.${key})`)
     if (!isDrawn && open) fail(`${at}.html: state.${key} says ${what} is open, but it is not drawn`)
+  }
+  // The footer's consent control is drawn if and only if the site's consent condition holds: a
+  // mechanism wired with at least one category in use (site-footer.json, SC-030). The panel, when
+  // drawn, draws the site's boxes, in order, and with no panel no box is drawn.
+  if (every().some((e) => e.name === 'footer' && classesOf(e).includes('salt-footer'))) {
+    const wired = isObject(c.input.site?.consent) && (c.input.site.consent.categories ?? []).length > 0
+    const control = every().some((e) => classesOf(e).includes('salt-footer__consent'))
+    if (wired && !control) fail(`${at}.html: the site has a consent mechanism wired (site.consent) with a category in use, but the footer draws no consent control`)
+    if (!wired && control) fail(`${at}.html: the footer draws the consent control, but the site has no consent mechanism wired (site.consent) with a category in use; it is drawn only when it has`)
+    const boxes = every().filter((e) => classesOf(e).includes('salt-consent-panel__checkbox')).map((e) => attr(e, 'name'))
+    const want = (c.input.site?.consent?.categories ?? []).map((k) => k?.id)
+    const panel = every().some((e) => classesOf(e).includes('salt-consent-panel'))
+    if ((panel ? want : []).join(',') !== boxes.join(',')) fail(`${at}.html: the consent panel draws the boxes ${boxes.join(', ')}; the site's WP Consent API categories are ${want.join(', ')}, one box each, in that order`)
   }
   nestedCase = c.kind === 'section' || !c.nested ? null : c
   const { doc, spec, elements } = c.kind === 'section' ? wrapperSpec(c) : documentSpec(c)
@@ -1051,6 +1156,25 @@ function checkMarkup(c) {
     ['background', background(c), 'a background image is set'],
     ['scrim', scrimOn(c), 'a background image is drawn and the scrim is on'],
   ]
+  // The case study's two images (case-study.json, SC-034): the hero image when the featured image
+  // resolves, and the flow image when caseStudyImage resolves to another media item. Media identity
+  // is the case's media id, never the alt text or the file name.
+  const caseStudy = doc.id === 'case-study' ? input.document ?? {} : null
+  if (caseStudy) {
+    expectations.push(['hero-media', isImage(c, caseStudy.image), 'the featured image resolves'])
+    expectations.push(['flow-media', isImage(c, caseStudy.caseStudyImage) && caseStudy.caseStudyImage !== caseStudy.image, 'caseStudyImage resolves to a media item other than the featured image'])
+    // The aside of the project's facts (SC-036): a row only with a value, and no aside with none.
+    const details = (caseStudy.details ?? []).filter((r) => filledText(r?.label) && filledText(r?.value))
+    const services = caseStudy.services ?? []
+    expectations.push(['detail', details.length > 0, 'a project detail has a label and a value'])
+    expectations.push(['client', filledText(caseStudy.client), "the client's name is not empty"])
+    expectations.push(['sector', filledText(caseStudy.sector), "the sector's name is not empty"])
+    expectations.push(['services', services.length > 0, 'a delivered service is drawn'])
+    const storyDrawn = isImage(c, caseStudy.image) || filledText(caseStudy.challenge) || isImage(c, caseStudy.caseStudyImage) || filledText(caseStudy.solution) ||
+      (caseStudy.results ?? []).length > 0 || (caseStudy.gallery ?? []).some((id) => isImage(c, id)) || safeHref(caseStudy.externalUrl)
+    expectations.push(['story', storyDrawn, 'a part of the story is drawn'])
+    expectations.push(['aside', details.length > 0 || filledText(caseStudy.client) || filledText(caseStudy.sector) || services.length > 0, 'a detail, the client, the sector or a service is drawn'])
+  }
   if (c.sectionId === 'hero') expectations.push(['media', ['split', 'stacked'].includes(effective(c, 'variant')) && isImage(c, c.values.image), 'variant split or stacked with an image'])
   const fieldsByName = new Map((c.fieldsDoc?.fields ?? []).map((f) => [f.name, f]))
   const visitWhen = (nodes) => {
@@ -1064,6 +1188,42 @@ function checkMarkup(c) {
   for (const [role, holds, when] of expectations) {
     if (holds && !drawn(role)) fail(`${at}.html: ${role} is not drawn, but ${when} (the markup draws it then)`)
     if (!holds && drawn(role)) fail(`${at}.html: ${role} is drawn, but the markup draws it only when ${when}`)
+  }
+  // The aside's rows (SC-036): each the document's value, in its order; a service a link exactly
+  // when it has a safe public href, to that href, and plain text otherwise. Client and sector are
+  // never links.
+  if (caseStudy) {
+    const inOrder = descendants(root)
+    const rowsOf = (role) => [...(bindings.get(role) ?? [])].sort((a, b) => inOrder.indexOf(a) - inOrder.indexOf(b)).map((row) => elementsOf(row).filter((e) => e.name === 'dd'))
+    const details = (caseStudy.details ?? []).filter((r) => filledText(r?.label) && filledText(r?.value))
+    rowsOf('detail').forEach((dds, i) => { if (dds.length !== 1 || textOf(dds[0]) !== details[i]?.value) fail(`${at}.html: the aside's detail ${i + 1} draws "${dds.map(textOf).join(' | ')}"; the case gives "${details[i]?.value}" (case-study.json, SC-036)`) })
+    for (const role of ['client', 'sector']) {
+      for (const dds of rowsOf(role)) {
+        if (dds.length !== 1 || textOf(dds[0]) !== caseStudy[role]) fail(`${at}.html: the aside's ${role} draws "${dds.map(textOf).join(' | ')}"; the case gives "${caseStudy[role]}" (case-study.json, SC-036)`)
+        if (dds.some((dd) => descendants(dd).some((e) => e.name === 'a'))) fail(`${at}.html: the aside's ${role} is a link; a ${role} is never a link (SC-035)`)
+      }
+    }
+    for (const dds of rowsOf('services')) {
+      const services = caseStudy.services ?? []
+      if (dds.length !== services.length) fail(`${at}.html: the aside draws ${dds.length} service(s); the case gives ${services.length}`)
+      dds.forEach((dd, i) => {
+        const svc = services[i] ?? {}
+        const link = descendants(dd).find((e) => e.name === 'a')
+        if (textOf(dd) !== svc.title) fail(`${at}.html: the aside's service ${i + 1} reads "${textOf(dd)}"; the case gives "${svc.title}"`)
+        if (safeHref(svc.href) ? attr(link ?? { attrs: [] }, 'href') !== svc.href : link) fail(`${at}.html: the aside's service ${i + 1} ${link ? `links to ${attr(link, 'href')}` : 'is plain text'}; ${safeHref(svc.href) ? `it links to its page, ${svc.href}` : 'it has no public page, so it is plain text'} (SC-036)`)
+      })
+    }
+  }
+  // Each drawn image is its own media item: the hero the featured image, the flow the case-study image.
+  if (caseStudy) {
+    for (const [role, id] of [['hero-media', caseStudy.image], ['flow-media', caseStudy.caseStudyImage]]) {
+      for (const holder of bindings.get(role) ?? []) {
+        const img = descendants(holder).find((d) => d.name === 'img')
+        const record = input.media?.[id]
+        const want = img && record && imageTable ? sourcesOf(imageTable, record, attr(img, 'sizes') ?? '').src : null
+        if (imageTable && (!img || attr(img, 'src') !== want)) fail(`${at}.html: the case study's ${role} draws ${img ? attr(img, 'src') : 'no img'}; it draws the media item ${JSON.stringify(id)} (case-study.json, SC-034)`)
+      }
+    }
   }
 
   // Counts the case fixes: a tab set's panels and controls, and the pagination's window.

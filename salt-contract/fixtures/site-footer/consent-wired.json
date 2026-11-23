@@ -1,0 +1,63 @@
+{
+  "$comment": "site.consent is the consent mechanism the site has wired (SC-030): on WordPress a WP Consent API plugin, on Next.js its own consent store. With one wired, the footer draws the consent control, aria-disabled=\"true\" as the server draws it until script hydrates (SC-024), with its status line; the panel is closed, so its dialog is not drawn.",
+  "chrome": "site-footer",
+  "summary": "A consent mechanism is wired, so the footer draws the consent preferences control after the copyright line, closed and not yet hydrated.",
+  "context": {
+    "path": "/"
+  },
+  "site": {
+    "name": "Hartley Gardens",
+    "home": "/",
+    "organisation": "Hartley Gardens",
+    "labels": {
+      "navigation": "Footer",
+      "preferences": "Cookie preferences"
+    },
+    "consent": {
+      "labels": {
+        "preferences": "Cookie preferences",
+        "title": "Cookie preferences",
+        "save": "Save preferences",
+        "cancel": "Cancel"
+      },
+      "categories": [
+        {
+          "id": "statistics",
+          "covers": [
+            "analytics"
+          ],
+          "label": "Analytics",
+          "description": "Helps us see which pages are read, with no personal details."
+        },
+        {
+          "id": "marketing",
+          "covers": [
+            "embeds",
+            "marketing"
+          ],
+          "label": "Marketing and embedded content",
+          "description": "Lets us measure how our adverts perform, and shows videos and maps from other sites."
+        }
+      ]
+    },
+    "footer": {
+      "tone": "surface",
+      "showLogo": false,
+      "columns": [
+        {
+          "links": [
+            {
+              "label": "Contact",
+              "href": "/contact/"
+            },
+            {
+              "label": "Privacy policy",
+              "href": "/privacy/"
+            }
+          ]
+        }
+      ],
+      "copyright": "© 2026 Hartley Gardens"
+    }
+  }
+}

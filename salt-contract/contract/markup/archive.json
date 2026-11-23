@@ -1,6 +1,6 @@
 {
   "$schema": "../../schema/markup.schema.json",
-  "version": "1.0.0-rc.8",
+  "version": "1.0.0-rc.9",
   "id": "archive",
   "kind": "view",
   "summary": "Archive and category pages: a listing with a heading.",
@@ -219,16 +219,6 @@
     {
       "topic": "ruling",
       "text": "A topic has no profile, and later pages draw none. A user marked as a team member has one public profile at /team/{slug}/, whether or not they have written posts. The title comes first, then role as strapline, bio, photo and public contact links when filled, then any authored posts. The profile self-canonicalises; only its canonical URL appears in the sitemap. Team cards, bylines and author boxes link directly there. Existing author addresses for that profile permanently redirect there (301); they never serve duplicate content. An unticked author is credited as text and has no public profile (19/11/2026)."
-    },
-    {
-      "topic": "stylesheet-owes",
-      "text": "The view body classes SC-007 adopts; the shared stylesheets style them (today only the example app's site.css does).",
-      "classes": [
-        "salt-archive__profile",
-        "salt-archive__portrait",
-        "salt-archive__strapline",
-        "salt-archive__bio"
-      ]
     }
   ],
   "platforms": {

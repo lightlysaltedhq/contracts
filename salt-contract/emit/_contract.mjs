@@ -211,7 +211,15 @@ export function checkedClauses(condition, where) {
 }
 
 /** Source ids that hold items (field-definition schema, $defs.source). */
-export const SOURCES = ['services', 'case-studies', 'testimonials', 'posts', 'team', 'faqs', 'locations']
+export const SOURCES = ['services', 'case-studies', 'testimonials', 'posts', 'team', 'faqs', 'locations', 'clients', 'sectors']
+/**
+ * The name-only record collections (SC-035): a site enables each on its own, and each is off by
+ * default, so an emitter given no `sources` installs every source but these. A site that names its
+ * sources installs these only when it names them.
+ */
+export const OPTIONAL_SOURCES = ['clients', 'sectors']
+/** The sources an emitter installs when a site names none: every one but the optional ones. */
+export const DEFAULT_SOURCES = SOURCES.filter((s) => !OPTIONAL_SOURCES.includes(s))
 // Team is a filtered view of native users. Post authorship deliberately does not use this filter.
 export const TEAM_TICK = 'showOnWebsite'
 

@@ -1,6 +1,6 @@
 {
   "$schema": "../../schema/markup.schema.json",
-  "version": "1.0.0-rc.8",
+  "version": "1.0.0-rc.9",
   "id": "site-logo",
   "kind": "component",
   "root": {
@@ -17,12 +17,9 @@
       "data-swaps": {
         "value": "",
         "when": "a dark-scheme image is set"
-      },
-      "style": {
-        "value": "--logo-height: <n>px",
-        "when": "a height is set"
       }
-    }
+    },
+    "note": "The logo's height is never in the markup (section#no-inline-style). chrome.css declares --logo-height: 2rem on .salt-logo; a site that sets a height sets it once, site-wide, from its one stored logo height (proposed, for founder approval at contract review): the site sets .salt-logo { --logo-height: <height>px; } through a stylesheet it serves after salt.css, or a style element its Content-Security-Policy allows by nonce or hash, outside the output a fixture compares. The images' sizes (their drawn width in px) and that rule take the same stored value, so the two never disagree. Salt for WordPress does the nonce'd style element today."
   },
   "elements": [
     {
@@ -148,13 +145,14 @@
         }
       ],
       "owes": [
-        "data-swaps instead of has-dark; name on the link; --logo-height inline.",
+        "data-swaps instead of has-dark; name on the link; the logo height as .salt-logo { --logo-height } from the one stored logo height, through a style element allowed by nonce or hash, or a stylesheet the site serves, never inline (SC-029). Where full-page caching is used a hash is preferable to a nonce, because the rule is stable per site.",
         "SC-019, SC-025: in the header, the default scheme's logo carries loading=\"eager\" and the other scheme's loading=\"lazy\"; the footer's are both loading=\"lazy\"."
       ]
     },
     "nextjs": {
       "owes": [
-        "SC-019, SC-025: in the header, the default scheme's logo carries loading=\"eager\" and the other scheme's stays lazy; next/image lazy-loads both by default."
+        "SC-019, SC-025: in the header, the default scheme's logo carries loading=\"eager\" and the other scheme's stays lazy; next/image lazy-loads both by default.",
+        "The brand global's logo height as .salt-logo { --logo-height } in a stylesheet it serves (or a style element allowed by nonce or hash), from the same stored value as the images' sizes, in place of the inline style <SiteLogo> writes (SC-029)."
       ]
     }
   }

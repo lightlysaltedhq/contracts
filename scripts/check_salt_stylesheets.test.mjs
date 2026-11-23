@@ -44,7 +44,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url'
 const HERE = path.dirname(fileURLToPath(import.meta.url))
 const GATE = path.join(HERE, 'check_salt_stylesheets.mjs')
 const PACKAGE = path.resolve(HERE, '../salt-contract')
-const { checkStylesheets, isMainModule, memoSize, readPackage, report } = await import(pathToFileURL(GATE).href)
+const { checkStylesheets, isMainModule, memoSize, readPackage, report, subjectClasses } = await import(pathToFileURL(GATE).href)
 
 /* vitest's spelling over node:assert, for the cases ported as they were written. */
 const expect = (actual) => ({
@@ -98,7 +98,23 @@ const runWith = (raw, edits) => {
     files.set(target(file), mutate(files.get(target(file))))
   }
   const invented = [...saltNames(files)].filter((name) => !COMMITTED.has(name))
-  if (!raw && invented.length > 0) files.set('contract/markup/zz-invented.json', JSON.stringify({ elements: [{ classes: invented }] }))
+  /* A selector list split at its top-level commas only, so `:is(.a, .b)` stays whole. */
+  const topLevel = (list) => {
+    const parts = []
+    let depth = 0
+    let start = 0
+    for (let i = 0; i < list.length; i += 1) {
+      if (list[i] === '(') depth += 1
+      else if (list[i] === ')') depth -= 1
+      else if (list[i] === ',' && depth === 0) { parts.push(list.slice(start, i)); start = i + 1 }
+    }
+    return [...parts, list.slice(start)]
+  }
+  /* An invented class no rule draws (named only as an ancestor, say) is declared a hook, so the
+     check that every class on an element is drawn does not answer for the contract under test. */
+  const drawn = new Set([...files].filter(([file]) => /^styles\/[^/]+\.css$/.test(file)).flatMap(([, text]) => [...text.matchAll(/([^{}]+)\{([^{}]*)\}/g)].filter((m) => m[2].includes(':')).flatMap((m) => topLevel(m[1]).flatMap((sel) => subjectClasses(sel.trim())))))
+  const hooks = invented.filter((name) => !drawn.has(name)).map((name) => ({ class: name, role: 'x', reason: 'A class a test case invents.' }))
+  if (!raw && invented.length > 0) files.set('contract/markup/zz-invented.json', JSON.stringify({ elements: [{ classes: invented }], ...(hooks.length ? { hooks } : {}) }))
   const { code, output } = report(files)
   for (const m of output.matchAll(/^✗ [\w.-]+\.css: (.+)$/gm)) failed.add(m[1])
   return { code, output }
@@ -1779,47 +1795,47 @@ describe('each component keeps the role the contract names for it', () => {
  * longhand, the reset moved after the owls, and a later rule zeroing or outranking a gap.
  */
 describe('the case study view spaces its header and its sections', () => {
-  const SECTION_GAP = '.salt-case-study-view > .salt-case-study-view__section > * + * {\n  margin-block-start: var(--space-4);\n}'
-  const HEADER_OWL = '.salt-case-study-view > .salt-case-study-view__header > * + *,\n.salt-case-study-view > .salt-case-study-view__header > .salt-section__content > * + *,\n.salt-case-study-view > .salt-case-study-view__section > * + * {'
+  const SECTION_GAP = '.salt-case-study-view__story > .salt-case-study-view__section > * + * {\n  margin-block-start: var(--space-4);\n}'
+  const HEADER_OWL = '.salt-case-study-view > .salt-case-study-view__header > * + *,\n.salt-case-study-view > .salt-case-study-view__header > .salt-section__content > * + *,\n.salt-case-study-view__story > .salt-case-study-view__section > * + * {'
   itEach([
-    ['the gap above each section deleted', replacing('.salt-case-study-view > * + * {\n  margin-block-start: var(--space-section-sm);\n}', ''), 'no unconditional `.salt-case-study-view > * + *` rule'],
-    ['a gap written as a length', replacing('  margin-block-start: var(--space-section-sm);', '  margin-block-start: 3rem;'), 'writes `margin-block-start: 3rem` for the gap above each section, a length of its own'],
-    ['a gap on another token', replacing('__details {\n  margin-block-start: var(--space-8);', '__details {\n  margin-block-start: var(--space-12);'), 'write `var(--space-8)`, the token this contract compares'],
-    ['a gap !important', replacing('  margin-block-start: var(--space-section-sm);', '  margin-block-start: var(--space-section-sm) !important;'), 'declares `margin-block-start` !important'],
+    ['the gap above each section deleted', replacing('.salt-case-study-view__story > * + * {\n  margin-block-start: var(--space-section-sm);\n}', ''), 'no unconditional `.salt-case-study-view__story > * + *` rule'],
+    ['a gap written as a length', replacing('.salt-case-study-view__story > * + * {\n  margin-block-start: var(--space-section-sm);', '.salt-case-study-view__story > * + * {\n  margin-block-start: 3rem;'), 'writes `margin-block-start: 3rem` for the gap above each section, a length of its own'],
+    ['a gap on another token', replacing('__results {\n  margin-block-start: var(--space-section-sm);', '__results {\n  margin-block-start: var(--space-12);'), 'write `var(--space-section-sm)`, the token this contract compares'],
+    ['a gap !important', replacing('.salt-case-study-view__story > * + * {\n  margin-block-start: var(--space-section-sm);', '.salt-case-study-view__story > * + * {\n  margin-block-start: var(--space-section-sm) !important;'), 'declares `margin-block-start` !important'],
     ['the owls dropped to (0,1,0)', replacing(HEADER_OWL, '.salt-case-study-view__header > * + *,\n.salt-case-study-view__header > .salt-section__content > * + *,\n.salt-case-study-view__section > * + * {'), 'no unconditional `.salt-case-study-view > .salt-case-study-view__header > * + *` rule'],
-    ['a shorthand after the longhand', replacing('__details {\n  margin-block-start: var(--space-8);\n', '__details {\n  margin-block-start: var(--space-8);\n  margin: 0;\n'), 'writes `margin: 0` beside the gap above the results'],
-    ['the reset moved after the owls', (css) => appending('.salt-case-study-view > .salt-case-study-view__header > *,\n.salt-case-study-view > .salt-case-study-view__header > .salt-section__content > *,\n.salt-case-study-view > .salt-case-study-view__section > h2,\n.salt-case-study-view__detail-value {\n  margin: 0;\n}')(replacing('.salt-case-study-view > .salt-case-study-view__header > *,\n.salt-case-study-view > .salt-case-study-view__header > .salt-section__content > *,\n.salt-case-study-view > .salt-case-study-view__section > h2,\n.salt-case-study-view__detail-value {\n  margin: 0;\n}', '')(css)), 'comes after'],
+    ['a shorthand after the longhand', replacing('__results {\n  margin-block-start: var(--space-section-sm);\n', '__results {\n  margin-block-start: var(--space-section-sm);\n  margin: 0;\n'), 'writes `margin: 0` beside the gap above the results'],
+    ['the reset moved after the owls', (css) => appending('.salt-case-study-view > .salt-case-study-view__header > *,\n.salt-case-study-view > .salt-case-study-view__header > .salt-section__content > *,\n.salt-case-study-view__story > .salt-case-study-view__section > h2,\n.salt-case-study-view__details,\n.salt-case-study-view__detail-value {\n  margin: 0;\n}')(replacing('.salt-case-study-view > .salt-case-study-view__header > *,\n.salt-case-study-view > .salt-case-study-view__header > .salt-section__content > *,\n.salt-case-study-view__story > .salt-case-study-view__section > h2,\n.salt-case-study-view__details,\n.salt-case-study-view__detail-value {\n  margin: 0;\n}', '')(css)), 'comes after'],
     ['a later rule zeroing a gap', appending('.salt-case-study-view .salt-rich-text {\n  margin-block-start: 0;\n}'), 'only the gaps MR-8 owes and the reset before them set a block margin there'],
-    ['a padding length on the view', appending('.salt-case-study-view__client {\n  padding-block: 4px;\n}'), 'a length of its own'],
-    ['a length inside calc()', replacing('  margin-block-start: var(--space-4);\n}\n\n.salt-case-study-view > .salt-case-study-view__header > .salt-case-study-view__results', '  margin-block-start: calc(var(--space-4) + 1rem);\n}\n\n.salt-case-study-view > .salt-case-study-view__header > .salt-case-study-view__results'), 'writes `margin-block-start: calc(var(--space-4) + 1rem)`'],
+    ['a padding length on the view', appending('.salt-case-study-view__summary {\n  padding-block: 4px;\n}'), 'a length of its own'],
+    ['a length inside calc()', replacing('.salt-case-study-view__story > .salt-case-study-view__section > * + * {\n  margin-block-start: var(--space-4);', '.salt-case-study-view__story > .salt-case-study-view__section > * + * {\n  margin-block-start: calc(var(--space-4) + 1rem);'), 'a length of its own'],
     /* #201 review, 1: a physical longhand sets the same edge, and the first version never read it. */
-    ['`margin-top: 0` inside a pinned rule', replacing('__details {\n  margin-block-start: var(--space-8);\n', '__details {\n  margin-block-start: var(--space-8);\n  margin-top: 0;\n'), 'writes `margin-top: 0` beside the gap above the results'],
-    ['`all` on the view', appending('.salt-case-study-view__client {\n  all: unset;\n}'), 'writes `all: unset`'],
+    ['`margin-top: 0` inside a pinned rule', replacing('__results {\n  margin-block-start: var(--space-section-sm);\n', '__results {\n  margin-block-start: var(--space-section-sm);\n  margin-top: 0;\n'), 'writes `margin-top: 0` beside the gap above the results'],
+    ['`all` on the view', appending('.salt-case-study-view__summary {\n  all: unset;\n}'), 'writes `all: unset`'],
     /* #201 review, 2: spellings that may compute the same, which the gate does not evaluate. */
     ['a gap as `calc(var(--spacing)*4)`', replacing('  margin-block-start: var(--space-4);', '  margin-block-start: calc(var(--spacing)*4);'), 'a spelling this contract does not read; it compares one `var()`, so write `var(--space-4)`'],
     ['a gap as `calc(4 * var(--spacing))`', replacing('  margin-block-start: var(--space-4);', '  margin-block-start: calc(4 * var(--spacing));'), 'a spelling this contract does not read'],
-    ['a gap with a fallback', replacing('__details {\n  margin-block-start: var(--space-8);', '__details {\n  margin-block-start: var(--space-8, var(--space-12));'), 'a spelling this contract does not read'],
+    ['a gap with a fallback', replacing('__results {\n  margin-block-start: var(--space-section-sm);', '__results {\n  margin-block-start: var(--space-section-sm, var(--space-12));'), 'a spelling this contract does not read'],
     /* BD-178: the details are a band of their own under the results, and their `<dd>` loses the
        user agent's 40px indent only through the reset. */
     [
-      'the gap above the details deleted',
-      replacing(',\n.salt-case-study-view > .salt-case-study-view__header > .salt-case-study-view__details,\n', ',\n'),
-      'no unconditional `.salt-case-study-view > .salt-case-study-view__header > .salt-case-study-view__details` rule',
+      'the gap above the results deleted',
+      replacing('.salt-case-study-view__story > .salt-case-study-view__results {\n  margin-block-start: var(--space-section-sm);\n}', ''),
+      'no unconditional `.salt-case-study-view__story > .salt-case-study-view__results` rule',
     ],
     [
       'the details’ values dropped from the reset',
-      replacing('.salt-case-study-view > .salt-case-study-view__section > h2,\n.salt-case-study-view__detail-value {', '.salt-case-study-view > .salt-case-study-view__section > h2 {'),
+      replacing('.salt-case-study-view__story > .salt-case-study-view__section > h2,\n.salt-case-study-view__details,\n.salt-case-study-view__detail-value {', '.salt-case-study-view__story > .salt-case-study-view__section > h2,\n.salt-case-study-view__details {'),
       'writes `margin: 0` on the case study view; only the gaps MR-8 owes',
     ],
-    ['a gap naming the token in capitals, which is another property', replacing('__details {\n  margin-block-start: var(--space-8);', '__details {\n  margin-block-start: var(--SPACE-8);'), 'write `var(--space-8)`, the token this contract compares'],
+    ['a gap naming the token in capitals, which is another property', replacing('__results {\n  margin-block-start: var(--space-section-sm);', '__results {\n  margin-block-start: var(--SPACE-SECTION-SM);'), 'write `var(--space-section-sm)`, the token this contract compares'],
     /* BD-202: the title off the site header, the article's own padding. */
-    ['the gap under the site header deleted', replacing('.salt-case-study-view {\n  padding-block-start: var(--space-section-md);\n}', ''), 'no unconditional `.salt-case-study-view` rule'],
-    ['the gap under the site header as a length', replacing('  padding-block-start: var(--space-section-md);', '  padding-block-start: 3rem;'), 'writes `padding-block-start: 3rem` for the gap between the site header and the title, a length of its own'],
-    ['the gap under the site header on another token', replacing('  padding-block-start: var(--space-section-md);', '  padding-block-start: var(--space-section-sm);'), 'write `var(--space-section-md)`, the token this contract compares'],
-    ['a shorthand beside the article’s padding', replacing('  padding-block-start: var(--space-section-md);', '  padding-block-start: var(--space-section-md);\n  padding: 0;'), 'writes `padding: 0` beside the gap between the site header and the title'],
+    ['the gap under the site header deleted', replacing('.salt-case-study-view {\n  padding-block-start: var(--space-section-md);\n}', ''), 'sets no `padding-block-start`, so nothing opens the gap between the site header and the title'],
+    ['the gap under the site header as a length', replacing('.salt-case-study-view {\n  padding-block-start: var(--space-section-md);', '.salt-case-study-view {\n  padding-block-start: 3rem;'), 'writes `padding-block-start: 3rem` for the gap between the site header and the title, a length of its own'],
+    ['the gap under the site header on another token', replacing('.salt-case-study-view {\n  padding-block-start: var(--space-section-md);', '.salt-case-study-view {\n  padding-block-start: var(--space-section-sm);'), 'write `var(--space-section-md)`, the token this contract compares'],
+    ['a shorthand beside the article’s padding', replacing('.salt-case-study-view {\n  padding-block-start: var(--space-section-md);', '.salt-case-study-view {\n  padding-block-start: var(--space-section-md);\n  padding: 0;'), 'writes `padding: 0` beside the gap between the site header and the title'],
     ['the article’s padding zeroed by an outranking rule', appending('main > .salt-case-study-view {\n  padding-block: 0;\n}'), "writes `padding-block: 0` on the case study view's article"],
     /* BD-202: a section's heading off a heading opening its rich text. */
-    ['the gap over an opening heading deleted', replacing('.salt-case-study-view > .salt-case-study-view__section > h2 + .salt-rich-text:has(> :first-child:is(h3, h4, h5, h6)) {\n  margin-block-start: var(--space-8);\n}', ''), 'no unconditional `.salt-case-study-view > .salt-case-study-view__section > h2 + .salt-rich-text:has(> :first-child:is(h3, h4, h5, h6))` rule'],
+    ['the gap over an opening heading deleted', replacing('.salt-case-study-view__story > .salt-case-study-view__section > h2 + .salt-rich-text:has(> :first-child:is(h3, h4, h5, h6)) {\n  margin-block-start: var(--space-8);\n}', ''), 'no unconditional `.salt-case-study-view__story > .salt-case-study-view__section > h2 + .salt-rich-text:has(> :first-child:is(h3, h4, h5, h6))` rule'],
     ['the gap over an opening heading back on the section owl’s token', replacing(':first-child:is(h3, h4, h5, h6)) {\n  margin-block-start: var(--space-8);', ':first-child:is(h3, h4, h5, h6)) {\n  margin-block-start: var(--space-4);'), 'for the gap between a section’s heading and a heading opening its rich text; write `var(--space-8)`'],
     /* BD-206: a header drawn as a band. */
     ['the band’s zero for the article’s padding deleted', replacing(".salt-case-study-view[data-header='band'] {\n  padding-block-start: var(--space-0);\n}", ''), "no unconditional `.salt-case-study-view[data-header='band']` rule"],
@@ -1827,17 +1843,17 @@ describe('the case study view spaces its header and its sections', () => {
     ['the band’s lines left out of the owl', replacing('.salt-case-study-view > .salt-case-study-view__header > .salt-section__content > * + *,\n', ''), 'no unconditional `.salt-case-study-view > .salt-case-study-view__header > .salt-section__content > * + *` rule'],
     ['the band’s lines left out of the reset', replacing('.salt-case-study-view > .salt-case-study-view__header > .salt-section__content > *,\n', ''), 'only the gaps MR-8 owes and the reset before them set a block margin there'],
     /* #226 review, 5: the band's content centred again after the reset. */
-    ['the band’s centring deleted', replacing('.salt-case-study-view > .salt-case-study-view__header > .salt-section__content {\n  margin-inline: auto;\n}', ''), 'gives a header band’s content'.replace('’', "'")],
-    ['the band’s centring as a length', replacing('  margin-inline: auto;\n}\n\n/*\n * (0,2,0), and it has to be', '  margin-inline: 0;\n}\n\n/*\n * (0,2,0), and it has to be'), 'write `auto`'],
-    ['the band’s centring !important', replacing('  margin-inline: auto;\n}\n\n/*\n * (0,2,0), and it has to be', '  margin-inline: AUTO !important;\n}\n\n/*\n * (0,2,0), and it has to be'), 'declares `margin-inline` !important'],
-    ['the band’s centring as physical margins', replacing('  margin-inline: auto;\n}\n\n/*\n * (0,2,0), and it has to be', '  margin-left: auto;\n}\n\n/*\n * (0,2,0), and it has to be'), 'a spelling this contract does not read; it reads `margin-inline: auto`'],
-    ['the band’s centring through a var()', replacing('  margin-inline: auto;\n}\n\n/*\n * (0,2,0), and it has to be', '  margin-inline: var(--x);\n}\n\n/*\n * (0,2,0), and it has to be'), 'a spelling this contract does not read; it reads `auto`'],
+    ['the band’s centring deleted', replacing('.salt-case-study-view > .salt-case-study-view__header > .salt-section__content {\n  margin-inline: auto;\n  padding-inline: var(--space-0);\n}', ''), 'gives a header band’s content'.replace('’', "'")],
+    ['the band’s centring as a length', replacing('  margin-inline: auto;\n  padding-inline: var(--space-0);\n}\n\n/*\n * (0,2,0), and it has to be', '  margin-inline: 0;\n  padding-inline: var(--space-0);\n}\n\n/*\n * (0,2,0), and it has to be'), 'write `auto`'],
+    ['the band’s centring !important', replacing('  margin-inline: auto;\n  padding-inline: var(--space-0);\n}\n\n/*\n * (0,2,0), and it has to be', '  margin-inline: AUTO !important;\n  padding-inline: var(--space-0);\n}\n\n/*\n * (0,2,0), and it has to be'), 'declares `margin-inline` !important'],
+    ['the band’s centring as physical margins', replacing('  margin-inline: auto;\n  padding-inline: var(--space-0);\n}\n\n/*\n * (0,2,0), and it has to be', '  margin-left: auto;\n  padding-inline: var(--space-0);\n}\n\n/*\n * (0,2,0), and it has to be'), 'a spelling this contract does not read; it reads `margin-inline: auto`'],
+    ['the band’s centring through a var()', replacing('  margin-inline: auto;\n  padding-inline: var(--space-0);\n}\n\n/*\n * (0,2,0), and it has to be', '  margin-inline: var(--x);\n  padding-inline: var(--space-0);\n}\n\n/*\n * (0,2,0), and it has to be'), 'a spelling this contract does not read; it reads `auto`'],
     ['the band’s centring overridden by a later rule', appending('.salt-case-study-view > .salt-case-study-view__header > .salt-section__content {\n  margin-inline: 0;\n}'), 'on a header band’s content'.replace('’', "'")],
     /* The section 7 row BD-202 closes: a zero spelled as a token or a `calc()`, and a rule naming the
        view that outranks a gap without repeating its selector. Each rendered a wrong gap and passed. */
     ['a zero spelled as a token', appending('.salt-case-study-view__section > .salt-rich-text {\n  margin-block-start: var(--space-0);\n}'), 'writes `margin-block-start: var(--space-0)` on the case study view; only the gaps MR-8 owes'],
     ['a zero spelled as a calc()', appending('.salt-case-study-view__section > .salt-rich-text {\n  margin-block-start: calc(var(--space-8) * 0);\n}'), 'writes `margin-block-start: calc(var(--space-8) * 0)` on the case study view; only the gaps MR-8 owes'],
-    ['a rule outranking the article owl without repeating it', appending('.salt-case-study-view > .salt-case-study-view__section {\n  margin-block-start: var(--space-8);\n}'), 'writes `margin-block-start: var(--space-8)` on the case study view; only the gaps MR-8 owes'],
+    ['a rule outranking the article owl without repeating it', appending('.salt-case-study-view__story > .salt-case-study-view__section {\n  margin-block-start: var(--space-8);\n}'), 'writes `margin-block-start: var(--space-8)` on the case study view; only the gaps MR-8 owes'],
   ])('fails %s', (_case, mutate, message) => {
     const { code, output } = gate('primitives.css', mutate)
     expect(output).toContain(message)
@@ -1846,8 +1862,8 @@ describe('the case study view spaces its header and its sections', () => {
 
   /* #201 review, 1: a rule repeating a pinned selector in another stylesheet was skipped whole. */
   itEach([
-    ['the section owl zeroed in blocks.css', 'blocks.css', appending('.salt-case-study-view > .salt-case-study-view__section > * + * {\n  margin-block-start: 0;\n}'), 'in blocks.css writes `margin-block-start: 0` on a gap MR-8 owes'],
-    ['the article owl retuned inside a query', 'chrome.css', appending('@media (max-width: 40rem) {\n  .salt-case-study-view > * + * {\n    margin-top: var(--space-8);\n  }\n}'), 'inside `@media (max-width: 40rem)` in chrome.css writes `margin-top: var(--space-8)` on a gap MR-8 owes'],
+    ['the section owl zeroed in blocks.css', 'blocks.css', appending('.salt-case-study-view__story > .salt-case-study-view__section > * + * {\n  margin-block-start: 0;\n}'), 'in blocks.css writes `margin-block-start: 0` on a gap MR-8 owes'],
+    ['the article owl retuned inside a query', 'chrome.css', appending('@media (max-width: 40rem) {\n  .salt-case-study-view__story > * + * {\n    margin-top: var(--space-8);\n  }\n}'), 'inside `@media (max-width: 40rem)` in chrome.css writes `margin-top: var(--space-8)` on a gap MR-8 owes'],
     ['the article’s padding zeroed in blocks.css', 'blocks.css', appending('.salt-case-study-view {\n  padding-top: 0;\n}'), 'in blocks.css writes `padding-top: 0` on a gap MR-8 owes'],
   ])('fails %s', (_case, file, mutate, message) => {
     const { code, output } = gate(file, mutate)
@@ -1856,7 +1872,7 @@ describe('the case study view spaces its header and its sections', () => {
   })
 
   it('fails a gap zeroed from another stylesheet', () => {
-    const { code, output } = gate('blocks.css', appending('.salt-case-study-view > .salt-case-study-view__section > * {\n  margin: 0;\n}'))
+    const { code, output } = gate('blocks.css', appending('.salt-case-study-view__story > .salt-case-study-view__section > * {\n  margin: 0;\n}'))
     expect(output).toContain('in blocks.css writes `margin: 0`')
     expect(code).toBe(1)
   })
@@ -1865,7 +1881,7 @@ describe('the case study view spaces its header and its sections', () => {
   itEach([
     ['a summary centred with an inline margin', appending('.salt-case-study-view__summary {\n  margin-inline: auto;\n}')],
     ['a summary centred, cased differently', appending('.salt-case-study-view__summary {\n  MARGIN-LEFT: auto;\n}')],
-    ['padding on the project details, a pinned gap that is a margin', appending('.salt-case-study-view > .salt-case-study-view__header > .salt-case-study-view__details {\n  padding-block-start: var(--space-4);\n}')],
+    ['padding on the results, a pinned gap that is a margin', appending('.salt-case-study-view__story > .salt-case-study-view__results {\n  padding-block-start: var(--space-4);\n}')],
   ])('passes %s', (_case, mutate) => {
     const { code, output } = gate('primitives.css', mutate)
     expect(output).toContain('PASS: ')
@@ -1873,11 +1889,11 @@ describe('the case study view spaces its header and its sections', () => {
   })
 
   itEach([
-    ['a block-end margin on a part', appending('.salt-case-study-view__client {\n  margin-block-end: var(--space-8);\n}'), 'writes `margin-block-end: var(--space-8)` on the case study view; only the gaps MR-8 owes'],
-    ['a block-end margin, cased differently', appending('.salt-case-study-view__client {\n  Margin-Bottom: var(--space-8);\n}'), 'writes `Margin-Bottom: var(--space-8)` on the case study view'],
+    ['a block-end margin on a part', appending('.salt-case-study-view__summary {\n  margin-block-end: var(--space-8);\n}'), 'writes `margin-block-end: var(--space-8)` on the case study view; only the gaps MR-8 owes'],
+    ['a block-end margin, cased differently', appending('.salt-case-study-view__summary {\n  Margin-Bottom: var(--space-8);\n}'), 'writes `Margin-Bottom: var(--space-8)` on the case study view'],
     ['an inline margin !important', appending('.salt-case-study-view__summary {\n  margin-inline: auto !important;\n}'), 'declares `margin-inline` !important'],
-    ['a margin spelling the contract does not read', appending('.salt-case-study-view__client {\n  margin-trim: block;\n}'), 'a margin this contract does not read'],
-    ['a prefixed margin', appending('.salt-case-study-view__client {\n  -webkit-margin-before: 0;\n}'), 'a spelling this contract does not read'],
+    ['a margin spelling the contract does not read', appending('.salt-case-study-view__summary {\n  margin-trim: block;\n}'), 'a margin this contract does not read'],
+    ['a prefixed margin', appending('.salt-case-study-view__summary {\n  -webkit-margin-before: 0;\n}'), 'a spelling this contract does not read'],
     ['padding on the article repeated', appending('.salt-case-study-view {\n  padding-block: 0;\n}'), 'writes `padding-block: 0` on a gap MR-8 owes'],
     /* #222 re-review: the article's gap is a padding, so a margin on it is a block margin, not its gap. */
     ['a margin shorthand on the article', appending('.salt-case-study-view {\n  margin: 0 auto;\n}'), 'writes `margin: 0 auto` on the case study view; only the gaps MR-8 owes and the reset before them set a block margin there'],
@@ -2221,7 +2237,7 @@ describe('each remaining contract fails when the property it holds is taken away
    from the logo's by its parent. */
 describe('every framed image fills its frame', () => {
   itEach([
-    ['sections.css', 'the band media loses its cover', replacing('  block-size: 100%;\n  object-fit: cover;\n}', '  block-size: 100%;\n}'), '`.salt-section__media` in sections.css declares no `object-fit`'],
+    ['sections.css', 'the band media loses its cover', replacing('  block-size: 100%;\n  object-fit: cover;\n  object-position:', '  block-size: 100%;\n  object-position:'), '`.salt-section__media` in sections.css declares no `object-fit`'],
     ['blocks.css', 'a logo covers its frame', replacing('  block-size: 100%;\n  object-fit: contain;\n}', '  block-size: 100%;\n  object-fit: cover;\n}'), 'sets `object-fit: cover`; the fill is `object-fit: contain`'],
     ['blocks.css', 'the card photograph is no longer absolutely positioned', replacing('.salt-showcase__media > img {\n  position: absolute;', '.salt-showcase__media > img {\n  position: static;'), '`.salt-showcase__media > img` in blocks.css sets `position: static`'],
     ['primitives.css', 'the case study gallery loses its fill rule', replacing('.salt-case-study-view__media > img,\n.salt-case-study-view__frame > img {', '.salt-case-study-view__media > img {'), 'no unconditional `.salt-case-study-view__frame > img` rule in primitives.css fills its frame'],
@@ -2246,6 +2262,26 @@ describe('every framed image fills its frame', () => {
   })
 })
 
+describe('every fixed-set attribute value has its rule (SC-029)', () => {
+  const WHAT = '✗ sections.css: every value of a fixed-set attribute the markup writes in place of a style has its rule\n'
+  itEach([
+    ['sections.css', 'a section space loses its rule', replacing(".salt-section[data-spacing='lg'] {", ".salt-section[data-spacing='xl'] {"), "no rule for `.salt-section[data-spacing='lg']`"],
+    ['sections.css', 'a scrim strength loses its rule', replacing(".salt-section__scrim[data-strength='subtle'] {", ".salt-section__scrim[data-strength='faint'] {"), "no rule for `.salt-section__scrim[data-strength='subtle']`"],
+    ['blocks.css', 'a rating step loses its rule', replacing(".salt-showcase__stars[data-fill='10'] {", ".salt-showcase__stars[data-fill='15'] {"), "no rule for `.salt-showcase__stars[data-fill='10']`"],
+    ['sections.css', 'a focal step loses its rule', replacing("[data-focal-x='35']", "[data-focal-x='36']"), "no rule for `.salt-section__media[data-focal-x='35']`"],
+    ['sections.css', 'a focal step on the other axis loses its rule', replacing("[data-focal-y='0']", "[data-focal-y='1']"), "no rule for `.salt-section__media[data-focal-y='0']`"],
+    ['sections.css', 'the contain fit loses its rule', replacing(".salt-section__media[data-fit='contain'] {", ".salt-section__media[data-fit='fill'] {"), "no rule for `.salt-section__media[data-fit='contain']`"],
+    ['blocks.css', 'a rating step sets the wrong value', replacing(".salt-showcase__stars[data-fill='50'] {\n  --salt-rating-fill: 50%;", ".salt-showcase__stars[data-fill='50'] {\n  --salt-rating-fill: 40%;"), "`.salt-showcase__stars[data-fill='50']` sets `--salt-rating-fill: 40%`, not `50%`"],
+    ['sections.css', 'a focal rule sits on the wrong owner', replacing(".salt-section__media[data-focal-x='35']", ".salt-section__scrim[data-focal-x='35']"), "no rule for `.salt-section__media[data-focal-x='35']`"],
+    ['sections.css', 'a scrim strength sets another token', replacing("--salt-scrim-alpha: var(--scrim-strong)", "--salt-scrim-alpha: var(--scrim-subtle)"), "sets `--salt-scrim-alpha: var(--scrim-subtle)`, not `var(--scrim-strong)`"],
+  ])('%s: fails when %s', (file, _case, mutate, message) => {
+    const { code, output } = gate(file, mutate)
+    expect(output).toContain(WHAT)
+    expect(output).toContain(message)
+    expect(code).toBe(1)
+  })
+})
+
 /*
  * ── The checks this gate adds ───────────────────────────────────────────────────────────────
  *
@@ -2260,13 +2296,12 @@ const tokenLayer = (edit) => ['contract/token-layer.json', (text) => {
   return JSON.stringify(layer, null, 2)
 }]
 const tokenNamed = (layer, name) => layer.groups.flatMap((group) => group.tokens).find((token) => token.name === name)
-const writeOf = (layer, property) => layer.writes.find((entry) => entry.property === property)
 
 describe('the parse is whole, across every stylesheet in styles/', () => {
   itEach([
     ['a stylesheet the contracts are written against is missing', [removeFile('sections.css')], 'styles/sections.css is missing'],
     /* An unclosed string ends at its line, as in a browser, so the rules after it are still read. */
-    ['an unclosed string hides a keyframe on the next line', [['blocks.css', appending(".salt-a::after { content: 'oops; }\n@keyframes zz { from { color: red; } }")]], 'Parsed 87 rules from blocks.css but the source contains 89 declaration blocks'],
+    ['an unclosed string hides a keyframe on the next line', [['blocks.css', appending(".salt-a::after { content: 'oops; }\n@keyframes zz { from { color: red; } }")]], 'Parsed 131 rules from blocks.css but the source contains 133 declaration blocks'],
     ['a rule nested inside another, which the parse cannot read', [['blocks.css', appending('.salt-note {\n  .salt-x {\n    margin: 0;\n  }\n}')]], 'The parse is dropping rules'],
     ['a declaration written straight into a media block', [['blocks.css', appending('@media (min-width: 48rem) {\n  margin: 0;\n}')]], "directly in an at-rule's block"],
     ['a new stylesheet that drops a focus outline, which a contract sweeping every file reads', [addFile('extra.css', '.salt-button {\n  outline: none;\n}\n')], 'extra.css .salt-button outline: declared outside the focus rules'],
@@ -2293,8 +2328,8 @@ describe('the token layer names exactly what the stylesheets read', () => {
     ['the token layer names a property nothing reads', [tokenLayer((layer) => layer.groups[0].tokens.push({ name: '--color-accent', meaning: 'Unread.', source: 'design-foundations' }))], 'names --color-accent, which neither a stylesheet nor a value the markup writes reads'],
     ['the token layer names a property twice', [tokenLayer((layer) => layer.groups[0].tokens.push({ ...tokenNamed(layer, '--color-ink') }))], 'names --color-ink twice'],
     ['the token layer names a property the stylesheets declare', [tokenLayer((layer) => layer.groups[0].tokens.push({ name: '--salt-section-bg', meaning: 'The band.', source: 'salt' }))], 'names --salt-section-bg, which the stylesheets declare themselves'],
-    ['a property read without a fallback is marked optional', [tokenLayer((layer) => { tokenNamed(layer, '--header-height').optional = true })], 'marks --header-height optional, but 1 of its 1 read(s) have no fallback'],
-    ['a property with a fallback at every read is not marked optional', [tokenLayer((layer) => { delete tokenNamed(layer, '--salt-rating-fill').optional })], '--salt-rating-fill has a fallback at every read (blocks.css), so contract/token-layer.json marks it optional'],
+    ['a property read without a fallback is marked optional', [tokenLayer((layer) => { tokenNamed(layer, '--scrim-strong').optional = true })], 'marks --scrim-strong optional, but 1 of its 1 read(s) have no fallback'],
+    ['a property with a fallback at every read is not marked optional', [tokenLayer((layer) => { delete tokenNamed(layer, '--salt-consent-banner-size').optional })], '--salt-consent-banner-size has a fallback at every read'],
     ['a read loses its fallback', [['chrome.css', replacing('var(--duration-moderate, 200ms)', 'var(--duration-moderate)')]], 'marks --duration-moderate optional, but 1 of its 1 read(s) have no fallback'],
     ['the token layer is not JSON', [['contract/token-layer.json', (text) => text.slice(1)]], 'contract/token-layer.json is missing or not JSON'],
     /* A property only a dial's rungs read passes unread while the dial lists it under requires. */
@@ -2305,31 +2340,24 @@ describe('the token layer names exactly what the stylesheets read', () => {
       return JSON.stringify(dials)
     }]], 'says --color-shadow-lg is required by shadows, but contract/dials.json gives no such dial that requires it'],
     ['a dial-required property naming a dial that does not exist', [tokenLayer((layer) => { tokenNamed(layer, '--color-shadow-sm').requiredBy = ['elevation'] })], 'says --color-shadow-sm is required by elevation'],
-    /* What the markup writes is read too (T2), through each placeholder's value map. */
-    ['a token the markup writes into a band is dropped', [tokenLayer((layer) => { for (const g of layer.groups) g.tokens = g.tokens.filter((t) => t.name !== '--scrim-strong') })], 'contract/markup/section.json read(s) --scrim-strong, which contract/token-layer.json does not name'],
-    ['a spacing the markup writes is dropped', [tokenLayer((layer) => { for (const g of layer.groups) g.tokens = g.tokens.filter((t) => t.name !== '--space-section-lg') })], 'contract/markup/section.json read(s) --space-section-lg, which contract/token-layer.json does not name'],
-    ['the value map loses its exception, so `none` would be a token', [tokenLayer((layer) => { delete writeOf(layer, '--salt-section-space').values.spacing.except })], 'read(s) --space-section-none, which contract/token-layer.json does not name'],
-    ['a placeholder the token layer gives no values for', [tokenLayer((layer) => { layer.writes = layer.writes.filter((entry) => entry.property !== '--salt-scrim-alpha') })], "writes --salt-scrim-alpha as var(--scrim-<strength>), and contract/token-layer.json's writes give no values for <strength>"],
-    ['a value map naming no field', [tokenLayer((layer) => { writeOf(layer, '--salt-scrim-alpha').values.strength.field = '_section-settings#strength' })], "fills --salt-scrim-alpha's <strength> from _section-settings#strength, which is not a field with options"],
-    ['value maps for a property no markup writes', [tokenLayer((layer) => { layer.writes.push({ property: '--color-ink', values: { spacing: { field: '_section-settings#spacing' } } }) })], 'lists writes for --color-ink, which no markup element writes'],
-    /* Each placeholder by name (Z4): one map does not stand in for another, and a stale one fails. */
-    ['a placeholder named differently from its map', [tokenLayer((layer) => { const entry = writeOf(layer, '--salt-scrim-alpha'); entry.values = { alpha: entry.values.strength } })], "give no values for <strength>"],
-    ['a map for a placeholder the markup does not write', [tokenLayer((layer) => { writeOf(layer, '--salt-scrim-alpha').values.opacity = { field: '_section-settings#scrimStrength' } })], 'fills <opacity> in --salt-scrim-alpha, which no markup element writes'],
-    ['a second placeholder in one value, with no map of its own', [addFile('contract/markup/zz-write.json', JSON.stringify({ root: { attributes: { style: '--salt-scrim-alpha: var(--scrim-<strength>, var(--scrim-<fallback>))' } } }))], 'give no values for <fallback>'],
-    ['writes listed twice for one property', [tokenLayer((layer) => { layer.writes.push(structuredClone(writeOf(layer, '--salt-scrim-alpha'))) })], 'lists writes for --salt-scrim-alpha twice'],
+    /* The tokens sections.css sets from a band's data attributes are read too (SC-029). */
+    ['a scrim strength the stylesheet sets is dropped', [tokenLayer((layer) => { for (const g of layer.groups) g.tokens = g.tokens.filter((t) => t.name !== '--scrim-strong') })], 'sections.css read(s) --scrim-strong, which contract/token-layer.json does not name'],
+    ['a spacing the stylesheet sets is dropped', [tokenLayer((layer) => { for (const g of layer.groups) g.tokens = g.tokens.filter((t) => t.name !== '--space-section-lg') })], 'read(s) --space-section-lg, which contract/token-layer.json does not name'],
+    /* The markup writes fixed values only, so a placeholder in a written value is refused (SC-029). */
+    ['a placeholder in a value the markup writes', [addFile('contract/markup/zz-write.json', JSON.stringify({ elements: [{ element: 'noscript', children: [{ element: 'style', text: '.salt-section { --salt-scrim-alpha: var(--scrim-<strength>); }' }] }] }))], 'writes --salt-scrim-alpha as var(--scrim-<strength>); the markup writes fixed values only'],
     /* What a markup element writes (Z1, Z3): a style element's CSS, and each value of an enum. */
     ['a style element writes a token the layer does not name', [addFile('contract/markup/zz-write.json', JSON.stringify({ elements: [{ element: 'noscript', children: [{ element: 'style', text: '.salt-header { --salt-header-phone-menu: var(--phone-unnamed); }' }] }] }))], 'contract/markup/zz-write.json read(s) --phone-unnamed, which contract/token-layer.json does not name'],
     ['an enum value writes a token the layer does not name', [addFile('contract/markup/zz-write.json', JSON.stringify({ root: { attributes: { style: { enum: ['--salt-rating-fill: 0%', '--salt-rating-fill: var(--rating-enum)'] } } } }))], 'read(s) --rating-enum, which contract/token-layer.json does not name'],
-    ["an element's text is not a write, unless the element is a style", [addFile('contract/markup/zz-write.json', JSON.stringify({ elements: [{ element: 'p', text: '--header-height: 4rem' }] })), tokenLayer((layer) => { tokenNamed(layer, '--header-height').source = 'markup' })], 'says the markup writes --header-height, but no file in contract/markup/ does'],
+    ["an element's text is not a write, unless the element is a style", [addFile('contract/markup/zz-write.json', JSON.stringify({ elements: [{ element: 'p', text: '--salt-consent-banner-size: 4rem' }] })), tokenLayer((layer) => { tokenNamed(layer, '--salt-consent-banner-size').source = 'markup' })], 'says the markup writes --salt-consent-banner-size, but no file in contract/markup/ does'],
     /* Every write the markup makes is read, into any property, fallbacks and nested var()s included. */
     ['a markup write reads a token only in its fallback', [addFile('contract/markup/zz-write.json', JSON.stringify({ root: { attributes: { style: '--salt-rating-fill: var(--rating-unnamed, 0%)' } } }))], 'contract/markup/zz-write.json read(s) --rating-unnamed, which contract/token-layer.json does not name'],
     ['a markup write reads a token nested in a fallback', [addFile('contract/markup/zz-write.json', JSON.stringify({ root: { attributes: { style: '--salt-rating-fill: var(--salt-x, var(--rating-nested))' } } }))], 'read(s) --rating-nested, which contract/token-layer.json does not name'],
     ['a markup write into a property the stylesheets declare', [addFile('contract/markup/zz-write.json', JSON.stringify({ root: { attributes: { style: { value: '--logo-height: var(--logo-unnamed)' } } } }))], 'contract/markup/zz-write.json read(s) --logo-unnamed, which contract/token-layer.json does not name'],
-    ['a placeholder written into a property with no value map', [addFile('contract/markup/zz-write.json', JSON.stringify({ root: { attributes: { style: '--logo-height: var(--logo-<size>)' } } }))], "writes --logo-height as var(--logo-<size>), and contract/token-layer.json's writes give no values for <size>"],
+    ['a placeholder written into a property the stylesheets declare', [addFile('contract/markup/zz-write.json', JSON.stringify({ root: { attributes: { style: '--logo-height: var(--logo-<size>)' } } }))], 'writes --logo-height as var(--logo-<size>); the markup writes fixed values only'],
     /* Prose never counts as a write: a note, a rule, a platform's former markup. */
-    ['a token whose only "write" is a note', [addFile('contract/markup/zz-write.json', JSON.stringify({ notes: [{ text: '--header-height: 4rem' }], rules: { r: { statement: '--header-height: 4rem' } }, platforms: { nextjs: { formerly: [{ attributes: { style: '--header-height: 4rem' } }] } } })), tokenLayer((layer) => { tokenNamed(layer, '--header-height').source = 'markup' })], 'says the markup writes --header-height, but no file in contract/markup/ does'],
+    ['a token whose only "write" is a note', [addFile('contract/markup/zz-write.json', JSON.stringify({ notes: [{ text: '--salt-consent-banner-size: 4rem' }], rules: { r: { statement: '--salt-consent-banner-size: 4rem' } }, platforms: { nextjs: { formerly: [{ attributes: { style: '--salt-consent-banner-size: 4rem' } }] } } })), tokenLayer((layer) => { tokenNamed(layer, '--salt-consent-banner-size').source = 'markup' })], 'says the markup writes --salt-consent-banner-size, but no file in contract/markup/ does'],
     /* A token said to come from the markup is written by some markup file (T5). */
-    ['a token the markup is said to write and none does', [tokenLayer((layer) => { tokenNamed(layer, '--header-height').source = 'markup' })], 'says the markup writes --header-height, but no file in contract/markup/ does'],
+    ['a token the markup is said to write and none does', [tokenLayer((layer) => { tokenNamed(layer, '--salt-consent-banner-size').source = 'markup' })], 'says the markup writes --salt-consent-banner-size, but no file in contract/markup/ does'],
   ])('fails when %s', (_case, edits, message) => {
     const { code, output } = run(...edits)
     expect(output).toContain(message)
@@ -2363,6 +2391,83 @@ describe('every class the stylesheets style is on an element in the markup contr
     ['a class named only inside an attribute selector', [['blocks.css', appending("[class*='salt-anything'] {\n  margin: 0;\n}")]]],
   ])('passes %s', (_case, edits) => {
     const { code, output } = runRaw(...edits)
+    expect(output).toContain('PASS: ')
+    expect(code).toBe(0)
+  })
+})
+
+describe('every class on a markup element has a rule or is a declared hook (rc.9, option A)', () => {
+  const NAME = ".salt-locations__name {\n  margin-inline-end: 1rem;\n}\n"
+  const withHook = (cls) => ['contract/markup/locations.json', (text) => {
+    const doc = JSON.parse(text)
+    doc.hooks = [...(doc.hooks ?? []), { class: cls, role: 'name', reason: 'A test hook.' }]
+    return JSON.stringify(doc, null, 2)
+  }]
+  itEach([
+    ['an owed class loses its rule', [['blocks.css', replacing(NAME, '')]], 'contract/markup/ puts .salt-locations__name on an element, and no stylesheet draws it'],
+    ['a new class drawn on an element with no rule', [addFile('contract/markup/zz-new.json', JSON.stringify({ root: { classes: ['salt-unstyled'] } }))], 'puts .salt-unstyled on an element, and no stylesheet draws it'],
+  ])('fails when %s', (_case, edits, message) => {
+    const { code, output } = runRaw(...edits)
+    expect(output).toContain(message)
+    expect(code).toBe(1)
+  })
+  // Negative controls: a mention that draws nothing on screen is not a rule for the class.
+  itEach([
+    ['its only rule is empty', `.salt-locations__name {\n}\n`],
+    ['its only rule is for print', `@media print {\n  .salt-locations__name {\n    margin-inline-end: 1rem;\n  }\n}\n`],
+    ['it is named only as an ancestor', `.salt-locations__name > span {\n  margin-inline-end: 1rem;\n}\n`],
+    ['it is named only inside :not()', `.salt-locations__status:not(.salt-locations__name) {\n  margin-inline-end: 1rem;\n}\n`],
+    ['its only rule sets a custom property nothing reads', `.salt-locations__name {\n  --salt-locations-unread: 1rem;\n}\n`],
+    ['its only rule is for print, spelt only print', `@media only print {\n  .salt-locations__name {\n    margin-inline-end: 1rem;\n  }\n}\n`],
+    ['its only rule is for print in every branch of a list', `@media print, print and (orientation: landscape) {\n  .salt-locations__name {\n    margin-inline-end: 1rem;\n  }\n}\n`],
+  ])('fails an owed class when %s', (_case, css) => {
+    const { code, output } = runRaw(['blocks.css', replacing(NAME, css)])
+    expect(output).toContain('contract/markup/ puts .salt-locations__name on an element, and no stylesheet draws it')
+    expect(code).toBe(1)
+  })
+  // A rule that does reach the screen counts, however it is spelt.
+  itEach([
+    ['a custom property something reads', `.salt-locations__name {\n  --salt-section-space: var(--space-4);\n}\n`],
+    ['a media list with a screen branch beside print', `@media print, (min-width: 1px) {\n  .salt-locations__name {\n    margin-inline-end: 1rem;\n  }\n}\n`],
+    ['not print', `@media not print {\n  .salt-locations__name {\n    margin-inline-end: 1rem;\n  }\n}\n`],
+  ])('passes a class whose only rule is %s', (_case, css) => {
+    const { code, output } = runRaw(['blocks.css', replacing(NAME, css)])
+    expect(output).toContain('PASS: ')
+    expect(code).toBe(0)
+  })
+  it('passes a class drawn through :is() in its subject', () => {
+    const { code, output } = runRaw(['blocks.css', replacing(NAME, `:is(.salt-locations__name) {\n  margin-inline-end: 1rem;\n}\n`)])
+    expect(output).toContain('PASS: ')
+    expect(code).toBe(0)
+  })
+  // A hook is kept with no rule on purpose.
+  it('fails a hook that has a rule of its own', () => {
+    const { code, output } = runRaw(withHook('salt-locations__name'))
+    expect(output).toContain('declares .salt-locations__name a hook, kept with no rule, but blocks.css style(s) it')
+    expect(code).toBe(1)
+  })
+  it('fails a hook whose reason says its rule is owed', () => {
+    const owed = ['contract/markup/locations.json', (text) => {
+      const doc = JSON.parse(text)
+      doc.hooks = [{ class: 'salt-locations__name', role: 'name', reason: 'The shared stylesheets owe its rule.' }]
+      return JSON.stringify(doc, null, 2)
+    }]
+    const { code, output } = runRaw(['blocks.css', replacing(NAME, '')], owed)
+    expect(output).toContain("hook .salt-locations__name says its rule is owed")
+    expect(code).toBe(1)
+  })
+  it('fails a hook that no element in its own markup file carries', () => {
+    const elsewhere = ['contract/markup/case-study.json', (text) => {
+      const doc = JSON.parse(text)
+      doc.hooks = [...(doc.hooks ?? []), { class: 'salt-locations__name', role: 'name', reason: 'A test hook.' }]
+      return JSON.stringify(doc, null, 2)
+    }]
+    const { code, output } = runRaw(['blocks.css', replacing(NAME, '')], elsewhere)
+    expect(output).toContain('contract/markup/case-study.json declares .salt-locations__name a hook, but no element in contract/markup/case-study.json carries it')
+    expect(code).toBe(1)
+  })
+  it('passes a class with no rule that its markup declares a hook', () => {
+    const { code, output } = runRaw(['blocks.css', replacing(NAME, '')], withHook('salt-locations__name'))
     expect(output).toContain('PASS: ')
     expect(code).toBe(0)
   })
@@ -2405,10 +2510,8 @@ describe('the script, run as CI runs it', () => {
   })
 })
 
-describe('the fixes a value map and a layered base allow', () => {
+describe('the fixes a layered base allows', () => {
   itEach([
-    /* A placeholder written into a property the stylesheets declare has a fix: a value map in writes (Z5). */
-    ['a placeholder written into a stylesheet-declared property, with its value map', [addFile('contract/markup/zz-write.json', JSON.stringify({ root: { attributes: { style: '--logo-height: var(--space-section-<spacing>)' } } })), tokenLayer((layer) => { layer.writes.push({ property: '--logo-height', values: { spacing: { field: '_section-settings#spacing', except: ['none'] } } }) })]],
     /* A body or heading rule under a query inside base.css's layer is still in the layer (Z10). */
     ['a heading rule under a media query inside the base layer', [['base.css', (css) => css.replace('@layer base {\n', '@layer base {\n  @media (min-width: 48rem) {\n    :where(#main, .salt-header, .salt-footer) h1 {\n      font-size: var(--text-heading-1);\n      line-height: var(--text-heading-1--line-height);\n      letter-spacing: var(--text-heading-1--letter-spacing);\n      font-weight: var(--text-heading-1--font-weight);\n      font-family: var(--text-heading-1--font-family);\n    }\n  }\n\n')]]],
     /* A brace in a string does not end the layer (Z8). */

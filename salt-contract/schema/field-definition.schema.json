@@ -131,7 +131,7 @@
       "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
     },
     "source": {
-      "description": "A source id from contract/sections.json that holds items (not 'inline').",
+      "description": "A source id that holds items: one from contract/sections.json (not 'inline'), or one of the name-only record collections, clients and sectors, which no section lists and a site enables on its own (SC-035).",
       "enum": [
         "services",
         "case-studies",
@@ -139,7 +139,9 @@
         "posts",
         "team",
         "faqs",
-        "locations"
+        "locations",
+        "clients",
+        "sectors"
       ]
     },
     "text": {
@@ -1094,7 +1096,14 @@
       "properties": {
         "to": {
           "description": "An item source, or users for a relationship to native users regardless of their team tick. Users is not a collection-query source.",
-          "anyOf": [{ "$ref": "#/$defs/source" }, { "const": "users" }]
+          "anyOf": [
+            {
+              "$ref": "#/$defs/source"
+            },
+            {
+              "const": "users"
+            }
+          ]
         },
         "many": {
           "type": "boolean"

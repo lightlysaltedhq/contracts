@@ -1,6 +1,6 @@
 {
   "$schema": "../../schema/markup.schema.json",
-  "version": "1.0.0-rc.8",
+  "version": "1.0.0-rc.9",
   "id": "post",
   "kind": "view",
   "summary": "A blog post.",
@@ -114,7 +114,7 @@
                   ],
                   "optional": true,
                   "when": "the post has an author and the byline is on",
-                  "text": "from:labels.byline, a space, then the author's name as text when the author has no archive",
+                  "text": "from:labels.byline ({name})",
                   "children": [
                     {
                       "role": "byline-link",
@@ -127,7 +127,7 @@
                       "when": "the author has an archive; it takes the name's place, so the name is never also written as text"
                     }
                   ],
-                  "note": "The label, then either the name as text or the link, never both, as Salt for Next.js's PostView draws it."
+                  "note": "The label with {name} replaced by the author: the name as text when the author has no archive, or the byline-link when they have one, never both, as Salt for Next.js's PostView draws it. Nothing is appended to the label (README, \"Labels\"; SC-031)."
                 },
                 {
                   "role": "date",
@@ -142,7 +142,7 @@
                 {
                   "role": "read-time",
                   "element": "span",
-                  "text": "from:labels.readTime (minutes)",
+                  "text": "from:labels.readTime ({n})",
                   "optional": true,
                   "when": "the post has prose and reading time is on"
                 }
@@ -334,23 +334,18 @@
     {
       "topic": "ruling",
       "text": "The view body is the markup Salt for Next.js's example app writes (apps/example/src/site/blog-views.tsx, PostView), in its order, with its salt-post__* classes (SC-007). The author is the shared author-box component (salt-author-box*), not the example app's salt-post__author, salt-post__author-name, salt-post__author-role and salt-post__portrait, which SC-008 excludes from the adoption."
+    }
+  ],
+  "hooks": [
+    {
+      "class": "salt-post__breadcrumb",
+      "role": "breadcrumb",
+      "reason": "The breadcrumb landmark; its list and links carry the rules."
     },
     {
-      "topic": "stylesheet-owes",
-      "text": "The view body classes SC-007 adopts; the shared stylesheets style them (today only the example app's site.css does).",
-      "classes": [
-        "salt-post",
-        "salt-post__header",
-        "salt-post__breadcrumb",
-        "salt-post__category",
-        "salt-post__meta",
-        "salt-post__byline",
-        "salt-post__media",
-        "salt-post__footer",
-        "salt-post__tags",
-        "salt-post__adjacent",
-        "salt-post__adjacent-label"
-      ]
+      "class": "salt-post__byline",
+      "role": "byline",
+      "reason": "The byline's span; its author link carries the rule, and the text takes the meta line's."
     }
   ],
   "platforms": {

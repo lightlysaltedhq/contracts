@@ -1,6 +1,6 @@
 {
   "$schema": "../../schema/markup.schema.json",
-  "version": "1.0.0-rc.8",
+  "version": "1.0.0-rc.9",
   "id": "media-text",
   "kind": "section",
   "tier": "core",
@@ -198,6 +198,13 @@
     {
       "topic": "platform-difference",
       "text": "WordPress draws later row headings at the section level (h2 beside an h2); Next ranks them under the first row (h3). Ruled: Next's, so the first row's heading names the section and the rest rank under it."
+    }
+  ],
+  "hooks": [
+    {
+      "class": "salt-media-text__body",
+      "role": "body",
+      "reason": "Holds the row's words; the rhythm rule selects its children, and it has no rule of its own."
     }
   ],
   "platforms": {

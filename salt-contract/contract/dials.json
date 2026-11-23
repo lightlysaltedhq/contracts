@@ -1,6 +1,6 @@
 {
   "$schema": "../schema/dials.schema.json",
-  "version": "1.0.0-rc.8",
+  "version": "1.0.0-rc.9",
   "$comment": "The design dials (ladder tier 2): four, by the owner's ruling recorded as SC-015, from the ruling of 06/10/2026 on the Salt page that named corners, shadows, button style and density. Neither platform has a dial today: Salt for Next.js's brand global and salt-wordpress's options-brand.php offer brand settings only (colours, type scale, fonts, logos, dark mode), which are tier 1. So every dial here is owed by both. Shadows and button style move component tokens the shared stylesheets read with a fallback (--salt-card-shadow, --salt-button-radius), so a site renders as before until an admin turns them. A dial's options point at rungs; the runtime writes the rung's value from its scale, on the root, after the theme and before any site override in code. Drafted 09/10/2026.",
   "dials": [
     {
@@ -191,7 +191,7 @@
           "owes": "the select in options-brand.php's Appearance tab, editable by the admin role only, and salt_brand_css() writing each re-pointed rung's value, once the section space rungs are in its token layer"
         }
       },
-      "note": "The case-study view reads --space-section-sm between its parts and beside an aside, and --space-section-md above itself, so it moves with the bands by design: it is laid out on the same rhythm. The card joins (--space-card-*) are Salt's own tokens with no rung beside them to move to, so a density that reached inside cards needs a scale for them first."
+      "note": "The case-study view reads --space-section-sm between its parts, and --space-section-md above itself, so it moves with the bands by design: it is laid out on the same rhythm. The card joins (--space-card-*) are Salt's own tokens with no rung beside them to move to, so a density that reached inside cards needs a scale for them first."
     }
   ]
 }

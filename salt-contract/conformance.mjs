@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // The conformance runner an implementation points at itself (README, "Conformance"). It ships in
 // the package, so Salt for Next.js and Salt for WordPress each run the contract they pin against
-// their own adapter in their own CI, and both are held to the same four checks per section:
+// their own adapter in their own CI, and both are held to the same five checks per section:
 //
 // 1. FIXTURES. Every case of every section is sent to the implementation's adapter (README, "The
 //    adapter protocol"); its HTML and the case's expected HTML go through normalise() and must be
@@ -14,6 +14,12 @@
 // 4. STYLESHEET PIN. The CSS the implementation serves (a file it builds, or a URL on a running
 //    site) is byte-identical to styles/salt.css, the one bundle both platforms serve. The package's
 //    own copy is refused: comparing it with itself would prove nothing.
+// 5. INLINE STYLES. No element in the adapter's output carries a style attribute
+//    (section#no-inline-style, SC-029): a site's Content-Security-Policy need not allow inline
+//    styles, and a browser that refuses them would draw the page without them. It runs with the
+//    fixtures, on every case, and reads the adapter's raw output, before pageOf or normalising, so
+//    it fails a case's file even where the fixture comparison would not see the attribute: an SVG
+//    child, the page's body, an empty style="".
 //
 // The site chrome (site-header, site-footer) and the page views (post, service, archive, search,
 // not-found; SC-018, and case-study; SC-021) have fixtures too. They have no fields of their own,
@@ -23,7 +29,7 @@
 // normalise.mjs, SC-023): the links, their order, labels and current-page state are checked, and
 // the shape of their URLs, which is routing (SC-003), is not.
 //
-// An implementation conforms only when all four ran for every section it ships and all pass
+// An implementation conforms only when all five ran for every section it ships and all pass
 // (SC-017): a run without a field snapshot or a stylesheet pin fails. A run that leaves a check or
 // a section out is allowed only with --partial, and its report says "partial, not conforming".
 // It writes a JSON report (the parity matrix's input) and a Markdown one, and exits 1 on any
@@ -570,6 +576,7 @@ export async function runConformance(options) {
     const mine = outcomes.filter((o) => o.section === id)
     const failures = []
     const unknown = new Map()
+    const styled = []
     // A page is compared as pageOf reads it: Salt's own head elements and the body (SC-019). An
     // archive or a search is compared as routedOf reads it: its pagination's addresses are routing,
     // which is the platform's (SC-003), so each is a placeholder on both sides (SC-023).
@@ -578,6 +585,19 @@ export async function runConformance(options) {
       if (o.result.error) { failures.push({ case: o.name, kind: 'adapter', error: o.result.error, stderr: o.result.stderr }); continue }
       const difference = firstDifference(view(o.html), view(o.result.html))
       if (difference) { const { kind, ...rest } = difference; failures.push({ case: o.name, kind: 'mismatch', difference: kind, ...rest }) }
+      // The adapter's raw output, before pageOf or normalising drops anything: any element, an
+      // SVG child or the page's body included, with a style attribute of any value, empty too.
+      const inline = []
+      const visit = (el) => {
+        for (const child of el.children) {
+          if (child.type !== 'element') continue
+          const style = child.attrs.find(([n]) => n === 'style')
+          if (style) inline.push(`<${child.name} style="${style[1]}">`)
+          visit(child)
+        }
+      }
+      visit(parse(o.result.html))
+      if (inline.length) styled.push({ case: o.name, elements: inline })
       const { actual } = compare('', view(o.result.html))
       for (const m of actual.matchAll(/ class="([^"]*)"/g)) {
         for (const c of m[1].split(' ')) {
@@ -588,30 +608,31 @@ export async function runConformance(options) {
     return {
       fixtures: { total: mine.length, passed: mine.length - failures.length, failed: failures.length, failures },
       classes: { status: unknown.size ? 'fail' : 'pass', unknown: [...unknown].sort().map(([name, cases]) => ({ class: name, cases })) },
+      inlineStyles: { status: styled.length ? 'fail' : 'pass', cases: styled },
     }
   }
 
   const sections = run.map((id) => {
     if (notShipped.has(id)) return { id, status: 'not shipped' }
-    const { fixtures, classes } = judge(id)
+    const { fixtures, classes, inlineStyles } = judge(id)
     const own = fields?.bySection.get(id) ?? []
     const fieldParity = fields ? { status: own.length || fields.problems.length ? 'fail' : 'pass', problems: own } : { status: 'not run', problems: [] }
     const stylesheets = { status: styles ? (styles.ok ? 'pass' : 'fail') : 'not run' }
     // A section with no fixture case cannot be shown to conform.
     const fixturesOk = fixtures.total > 0 && fixtures.failed === 0
-    const checks = [fixturesOk ? 'pass' : 'fail', classes.status, fieldParity.status, stylesheets.status]
-    // Every check that ran passed, but not all four ran: not a pass (SC-017).
+    const checks = [fixturesOk ? 'pass' : 'fail', classes.status, inlineStyles.status, fieldParity.status, stylesheets.status]
+    // Every check that ran passed, but not all five ran: not a pass (SC-017).
     const status = checks.includes('fail') ? 'fail' : checks.includes('not run') ? 'incomplete' : 'pass'
-    return { id, status, fixtures, fields: fieldParity, classes, stylesheets }
+    return { id, status, fixtures, fields: fieldParity, classes, inlineStyles, stylesheets }
   })
 
   // The chrome and views: fixtures and classes only, as they have no fields; the stylesheet pin is
   // the run's. A file with no case cannot be shown to conform.
   const files = runFiles.map((id) => {
     if (notShipped.has(id)) return { id, kind: kindOf(id), status: 'not shipped' }
-    const { fixtures, classes } = judge(id)
-    const status = fixtures.total > 0 && fixtures.failed === 0 && classes.status === 'pass' ? 'pass' : 'fail'
-    return { id, kind: kindOf(id), status, fixtures, classes }
+    const { fixtures, classes, inlineStyles } = judge(id)
+    const status = fixtures.total > 0 && fixtures.failed === 0 && classes.status === 'pass' && inlineStyles.status === 'pass' ? 'pass' : 'fail'
+    return { id, kind: kindOf(id), status, fixtures, classes, inlineStyles }
   })
 
   const count = (status) => sections.filter((s) => s.status === status).length
@@ -663,18 +684,19 @@ export function renderMarkdown(report) {
   const fileCount = report.summary.files ? ` Chrome, views and page: ${report.summary.files.pass} pass, ${report.summary.files.fail} fail, ${report.summary.files.notShipped} not shipped.` : ''
   lines.push(`**${verdict}.** ${pass} section(s) pass, ${fail} fail, ${incomplete} incomplete, ${notShipped} not shipped.${fileCount} ` +
     `Adapter: ${report.adapter.kind} ${code(report.adapter.target)}.`, '')
-  lines.push('| Section | Fixtures | Field parity | Classes | Stylesheet pin |', '| --- | --- | --- | --- | --- |')
+  const inline = (x) => (x.inlineStyles?.status === 'fail' ? `${x.inlineStyles.cases.length} case(s)` : x.inlineStyles?.status ?? 'not run')
+  lines.push('| Section | Fixtures | Field parity | Classes | Inline styles | Stylesheet pin |', '| --- | --- | --- | --- | --- | --- |')
   for (const s of report.sections) {
-    if (s.status === 'not shipped') { lines.push(`| ${s.id} | not shipped | not shipped | not shipped | not shipped |`); continue }
+    if (s.status === 'not shipped') { lines.push(`| ${s.id} | not shipped | not shipped | not shipped | not shipped | not shipped |`); continue }
     const classes = s.classes.status === 'pass' ? 'pass' : `${s.classes.unknown.length} unknown`
     const fields = s.fields.status === 'fail' ? `fail (${s.fields.problems.length})` : s.fields.status
-    lines.push(`| ${s.id} | ${s.fixtures.passed}/${s.fixtures.total} | ${fields} | ${classes} | ${s.stylesheets.status} |`)
+    lines.push(`| ${s.id} | ${s.fixtures.passed}/${s.fixtures.total} | ${fields} | ${classes} | ${inline(s)} | ${s.stylesheets.status} |`)
   }
   if (report.files?.length) {
-    lines.push('', '| Chrome, views and page | Kind | Fixtures | Classes |', '| --- | --- | --- | --- |')
+    lines.push('', '| Chrome, views and page | Kind | Fixtures | Classes | Inline styles |', '| --- | --- | --- | --- | --- |')
     for (const f of report.files) {
-      if (f.status === 'not shipped') { lines.push(`| ${f.id} | ${f.kind} | not shipped | not shipped |`); continue }
-      lines.push(`| ${f.id} | ${f.kind} | ${f.fixtures.passed}/${f.fixtures.total} | ${f.classes.status === 'pass' ? 'pass' : `${f.classes.unknown.length} unknown`} |`)
+      if (f.status === 'not shipped') { lines.push(`| ${f.id} | ${f.kind} | not shipped | not shipped | not shipped |`); continue }
+      lines.push(`| ${f.id} | ${f.kind} | ${f.fixtures.passed}/${f.fixtures.total} | ${f.classes.status === 'pass' ? 'pass' : `${f.classes.unknown.length} unknown`} | ${inline(f)} |`)
     }
   }
   lines.push('')
@@ -702,6 +724,7 @@ export function renderMarkdown(report) {
     if (s.fixtures.total === 0) lines.push('- no fixture cases: the section cannot be shown to conform')
     for (const f of s.fixtures.failures) lines.push(`- \`${s.id}/${f.case}\`: ${describeFailure(f)}`)
     for (const u of s.classes.unknown) lines.push(`- class ${code(u.class)} is on no element in contract/markup (cases: ${u.cases.join(', ')})`)
+    for (const i of s.inlineStyles?.cases ?? []) lines.push(`- \`${s.id}/${i.case}\`: a style attribute, which nothing the contract draws carries (section#no-inline-style): ${i.elements.map(code).join(', ')}`)
     for (const p of s.fields?.problems ?? []) lines.push(`- fields: ${p}`)
   }
   return `${lines.join('\n')}\n`

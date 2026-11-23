@@ -159,9 +159,11 @@
 /*
  * ── The logo ────────────────────────────────────────────────────────────────────
  *
- * `--logo-height` is declared here as the default and overridden per site by the inline
- * style `<SiteLogo>` writes from the brand global. Declared on the element that USES it, so
- * a site that sets neither still draws a logo at a sensible size.
+ * `--logo-height` is declared here as the default. A site that sets a height sets it once, site-wide,
+ * in its own stylesheet loaded after this one (`.salt-logo { --logo-height: 48px; }`): the markup
+ * writes no style attribute, so a site's Content-Security-Policy need not allow inline styles.
+ * Declared on the element that USES it, so a site that sets nothing still draws a logo at a
+ * sensible size.
  *
  * 2rem is duplicated in TypeScript as `LOGO_DEFAULT_HEIGHT_PX` in `components/image-sizes.ts`,
  * because `<SiteLogo>` computes the image's drawn width from it and cannot read a stylesheet.
@@ -688,18 +690,32 @@ button.salt-nav__toggle {
    * it predates the drawer; wrapping the header to three rows at every viewport was not an
    * answer to it.
    *
-   * At 320px, where WCAG 1.4.10 asks, the answer depends on the script, and the sentence that
-   * stood here said otherwise. Measured at 320 by 480 with eight items: WITH a script the
-   * burger is `flex`, the menu is in the drawer, and `scrollWidth` 320 equals `clientWidth`
-   * 320. WITHOUT one the burger is `none`, the menu is in this row, and `scrollWidth` is 589
-   * against 320. Three items fit either way. So the scriptless phone overflows once the menu
-   * is long enough — as it did before this unit, when there was no scriptless mode and no
-   * `flex-wrap` in this file at all. Neither introduced by this rule nor fixed by it, and it
-   * is the configuration this rule is written for, so it is said here rather than left to the
-   * paragraph above.
+   * Wrapping only the outer row still leaves a long scriptless menu wider than the phone.
+   * Wrap its list too, and open submenus in flow rather than beyond the right edge. The
+   * scripted phone header hides this nav; its drawer has its own layout.
    */
   .salt-header__inner {
     flex-wrap: var(--salt-header-phone-wrap, nowrap);
+  }
+
+  .salt-header__inner > .salt-nav > .salt-nav__list {
+    flex-wrap: var(--salt-header-phone-wrap, nowrap);
+  }
+
+  .salt-header__inner > .salt-nav .salt-nav__item {
+    flex-wrap: wrap;
+  }
+
+  .salt-header__inner > .salt-nav .salt-nav__submenu {
+    position: static;
+    flex-basis: 100%;
+  }
+}
+
+/* A wrapped menu can be taller than the space reserved for a fragment target. */
+@media (max-width: 48rem) and (scripting: none) {
+  .salt-header {
+    position: relative;
   }
 }
 
@@ -1113,4 +1129,98 @@ span.salt-footer__link {
   min-inline-size: max(2.75rem, 24px);
   min-block-size: max(2.75rem, 24px);
   color: inherit;
+}
+
+/*
+ * ── Rules the markup owed (rc.9, option A) ──────────────────────────────────────
+ *
+ * The footer's copyright line and its display preferences, which the markup drew with no rule.
+ * Structural only, in the footer's own ink; proposed, for founder approval at contract review.
+ */
+.salt-footer__copyright {
+  margin: 0;
+  color: var(--salt-section-ink-muted, var(--color-ink-muted));
+  font-size: var(--text-small);
+  line-height: var(--text-small--line-height);
+  letter-spacing: var(--text-small--letter-spacing);
+  font-weight: var(--text-small--font-weight);
+  font-family: var(--text-small--font-family);
+}
+
+/* Script shows the preferences by removing `hidden`; no rule here sets `display` on the root, so
+   `hidden` keeps them out of a page that has no script. */
+.salt-display-preferences {
+  flex: 1 1 20rem;
+}
+
+.salt-display-preferences__panel {
+  max-inline-size: var(--container-2xl);
+}
+
+.salt-display-preferences__summary {
+  min-block-size: max(2.75rem, 24px);
+  cursor: pointer;
+  font-size: var(--text-label);
+  line-height: var(--text-label--line-height);
+  letter-spacing: var(--text-label--letter-spacing);
+  font-weight: var(--text-label--font-weight);
+  font-family: var(--text-label--font-family);
+}
+
+.salt-display-preferences__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  padding-block-start: 0.75rem;
+}
+
+/* Each control stands alone, so each is floored at the target size, as the footer's links are. */
+.salt-display-preferences__controls button {
+  min-inline-size: max(2.75rem, 24px);
+  min-block-size: max(2.75rem, 24px);
+}
+
+.salt-display-preferences__group {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.salt-display-preferences__label {
+  margin-inline-end: 0.25rem;
+}
+
+/*
+ * The skip link: visually hidden until it takes focus, then drawn at the top of the viewport above
+ * the sticky header, so the first Tab on a page shows it and Enter moves focus to main. Hidden by
+ * clipping, never by `display` or `visibility`, so it stays in the tab order and the accessibility
+ * tree. Shown on `:focus`, so it appears for any focus, and ringed on `:focus-visible` with every
+ * other control (`primitives.css`). Above the header's 10, the one other number this package
+ * stacks.
+ */
+.salt-skip-link:not(:focus) {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+.salt-skip-link:focus {
+  position: fixed;
+  inset-block-start: 1rem;
+  inset-inline-start: 1rem;
+  z-index: 11;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font-size: var(--text-label);
+  line-height: var(--text-label--line-height);
+  letter-spacing: var(--text-label--letter-spacing);
+  font-weight: var(--text-label--font-weight);
+  font-family: var(--text-label--font-family);
 }

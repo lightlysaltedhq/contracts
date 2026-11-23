@@ -1,0 +1,37 @@
+{
+  "$comment": "caseStudyImage names the featured image's media item (the same media id, as a WordPress site stores one attachment ID in both), so it is drawn once, in the hero, and the flow draws nothing between the challenge and the solution: no duplicate and no empty wrapper (SC-034).",
+  "view": "case-study",
+  "summary": "A case study whose case-study image is its featured image: the image once, in the header, as the priority image; then the challenge and the solution with nothing between them.",
+  "context": {
+    "priorityMedia": true,
+    "path": "/work/hedge-laying/"
+  },
+  "site": {
+    "labels": {
+      "results": "The project in numbers",
+      "challenge": "The challenge",
+      "solution": "What we did",
+      "gallery": "Gallery",
+      "liveSite": "Visit the site",
+      "services": "Services delivered",
+      "details": "Project details",
+      "client": "Client",
+      "sector": "Sector"
+    }
+  },
+  "media": {
+    "hedge": {
+      "url": "https://uploads.example/hedge-laying-{width}.jpg",
+      "width": 2400,
+      "height": 1350,
+      "alt": "A newly laid hawthorn hedge, its pleachers bound with hazel"
+    }
+  },
+  "document": {
+    "title": "Laying a field hedge",
+    "image": "hedge",
+    "challenge": "<p>The hedge had grown into a line of thin trees with gaps at the base.</p>",
+    "caseStudyImage": "hedge",
+    "solution": "<p>We laid it in the Midland style and planted up the gaps with whips.</p>"
+  }
+}

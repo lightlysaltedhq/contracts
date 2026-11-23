@@ -1,6 +1,6 @@
 {
   "$schema": "../../schema/markup.schema.json",
-  "version": "1.0.0-rc.8",
+  "version": "1.0.0-rc.9",
   "id": "pricing",
   "kind": "section",
   "tier": "edge",
@@ -216,25 +216,24 @@
   ],
   "notes": [
     {
-      "topic": "stylesheet-owes",
-      "text": "Recipe vocabulary; styled by the recipe, not the shared stylesheets.",
-      "classes": [
-        "salt-pricing",
-        "salt-pricing__plan",
-        "salt-pricing__badge",
-        "salt-pricing__price",
-        "salt-pricing__amount",
-        "salt-pricing__period",
-        "salt-pricing__features"
-      ]
-    },
-    {
       "topic": "order",
       "text": "Platforms differ: WordPress draws the badge before the plan name; Next's recipe the name first. Ruled: name first, so a screen reader meets the plan before its badge."
     },
     {
       "topic": "ruling",
       "text": "An edge recipe on both platforms (SC-006); Salt for WordPress moves its pricing layout into a Grain for WordPress recipe."
+    }
+  ],
+  "hooks": [
+    {
+      "class": "salt-pricing",
+      "role": "list",
+      "reason": "Names the plan list for sites and tests; salt-grid lays it out, and it has no rule of its own."
+    },
+    {
+      "class": "salt-pricing__price",
+      "role": "price",
+      "reason": "The price line: running text whose amount and period carry the rules, with the markup's own space between them, so it reads as one phrase copied, spoken or unstyled."
     }
   ],
   "platforms": {

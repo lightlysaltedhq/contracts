@@ -1,0 +1,67 @@
+{
+  "$comment": "A Salt for WordPress site with a map integration: maps, WordPress's own consent category, maps to the WP Consent API's marketing (SC-030), so the marketing box covers embeds, maps and marketing, and the panel still draws two boxes. The rest is consent-panel-open.",
+  "chrome": "site-footer",
+  "summary": "The consent panel open on a WordPress site with maps: two boxes, statistics and marketing, the marketing box setting embeds, maps and marketing together.",
+  "context": {
+    "path": "/"
+  },
+  "state": {
+    "consentPanelOpen": true
+  },
+  "site": {
+    "name": "Hartley Gardens",
+    "home": "/",
+    "organisation": "Hartley Gardens",
+    "labels": {
+      "navigation": "Footer",
+      "preferences": "Cookie preferences"
+    },
+    "consent": {
+      "labels": {
+        "preferences": "Cookie preferences",
+        "title": "Cookie preferences",
+        "save": "Save preferences",
+        "cancel": "Cancel"
+      },
+      "categories": [
+        {
+          "id": "statistics",
+          "covers": [
+            "analytics"
+          ],
+          "label": "Analytics",
+          "description": "Helps us see which pages are read, with no personal details."
+        },
+        {
+          "id": "marketing",
+          "covers": [
+            "embeds",
+            "maps",
+            "marketing"
+          ],
+          "label": "Marketing and embedded content",
+          "description": "Lets us measure how our adverts perform, and shows videos and maps from other sites, our own map included."
+        }
+      ]
+    },
+    "footer": {
+      "tone": "surface",
+      "showLogo": false,
+      "columns": [
+        {
+          "links": [
+            {
+              "label": "Contact",
+              "href": "/contact/"
+            },
+            {
+              "label": "Privacy policy",
+              "href": "/privacy/"
+            }
+          ]
+        }
+      ],
+      "copyright": "© 2026 Hartley Gardens"
+    }
+  }
+}

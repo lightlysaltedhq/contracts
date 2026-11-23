@@ -1,7 +1,7 @@
 {
-  "$comment": "site.consent is { labels: { preferences, title, save, cancel }, categories: [{ id, label, description }] }. state.consentPanelOpen draws the dialog. Only script opens it, so the consent control beside it has hydrated and carries no aria-disabled (SC-024). The dialog carries open: it is drawn only when open (SC-019). The consent-description element has no declared children, so the description is plain text inside it. The consent-save and consent-cancel buttons are button-form components with their label as text.",
+  "$comment": "site.consent is the consent mechanism the site has wired (SC-030): { labels: { preferences, title, save, cancel }, categories: [{ id, covers, label, description }] }. Each category is one box, named by its WP Consent API category (id), in the API's order, and covers lists the Salt categories ticking it sets: statistics covers analytics, and marketing covers embeds and marketing, so the panel draws two boxes and no note that two share one setting. state.consentPanelOpen draws the dialog. Only script opens it, so the consent control beside it has hydrated and carries no aria-disabled (SC-024). The dialog carries open: it is drawn only when open (SC-019). The consent-description element has no declared children, so the description is plain text inside it. The consent-save and consent-cancel buttons are button-form components with their label as text.",
   "chrome": "site-footer",
-  "summary": "The consent preferences panel open: its dialog with a title, two categories (analytics, marketing) each with checkbox, label and description, and save and cancel buttons, beside the footer's links and consent control.",
+  "summary": "The consent preferences panel open: its dialog with a title, one box per WP Consent API category the site's integrations use (statistics, then marketing, which covers embeds and marketing), each with checkbox, label and description, and save and cancel buttons, beside the footer's links and consent control.",
   "context": {
     "path": "/"
   },
@@ -25,14 +25,21 @@
       },
       "categories": [
         {
-          "id": "analytics",
+          "id": "statistics",
+          "covers": [
+            "analytics"
+          ],
           "label": "Analytics",
           "description": "Helps us see which pages are read, with no personal details."
         },
         {
           "id": "marketing",
-          "label": "Marketing",
-          "description": "Lets us measure how our adverts perform."
+          "covers": [
+            "embeds",
+            "marketing"
+          ],
+          "label": "Marketing and embedded content",
+          "description": "Lets us measure how our adverts perform, and shows videos and maps from other sites."
         }
       ]
     },

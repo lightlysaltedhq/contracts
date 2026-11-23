@@ -24,7 +24,7 @@
   },
   "site": {
     "labels": {
-      "slide": "Slide"
+      "slide": "Slide {n} of {N}"
     }
   }
 }

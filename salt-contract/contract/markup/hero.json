@@ -1,6 +1,6 @@
 {
   "$schema": "../../schema/markup.schema.json",
-  "version": "1.0.0-rc.8",
+  "version": "1.0.0-rc.9",
   "id": "hero",
   "kind": "section",
   "tier": "core",
@@ -238,6 +238,13 @@
     {
       "topic": "order",
       "text": "Platforms differ: WordPress full-bleed draws the image before the text. Ruled: text, then media, in every variant; the full-bleed photograph is the section background, decorative."
+    }
+  ],
+  "hooks": [
+    {
+      "class": "salt-hero__text",
+      "role": "text",
+      "reason": "Holds the hero's eyebrow, heading, subheading and actions; the rhythm rules select its children, and it has no rule of its own."
     }
   ],
   "platforms": {

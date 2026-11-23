@@ -1,6 +1,6 @@
 {
   "$schema": "../../schema/markup.schema.json",
-  "version": "1.0.0-rc.8",
+  "version": "1.0.0-rc.9",
   "id": "service",
   "kind": "view",
   "summary": "A service page.",
@@ -216,22 +216,6 @@
     {
       "topic": "ruling",
       "text": "The view body is the markup Salt for Next.js's example app writes (apps/example/src/site/catalogue-views.tsx, ServiceView), in its order, with its salt-service__* and salt-related classes (SC-007). The related services sit inside the article, as Next draws them. The page draws no icon: the title names the service. The heading ids are service__benefits-heading and service__related-heading (SC-012)."
-    },
-    {
-      "topic": "stylesheet-owes",
-      "text": "The view body classes SC-007 adopts; the shared stylesheets style them (today only the example app's site.css does).",
-      "classes": [
-        "salt-service",
-        "salt-service__header",
-        "salt-service__summary",
-        "salt-service__intro",
-        "salt-service__benefits",
-        "salt-service__price",
-        "salt-service__price-label",
-        "salt-service__cta",
-        "salt-related",
-        "salt-related__list"
-      ]
     }
   ],
   "platforms": {

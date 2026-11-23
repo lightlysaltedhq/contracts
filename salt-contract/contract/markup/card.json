@@ -1,6 +1,6 @@
 {
   "$schema": "../../schema/markup.schema.json",
-  "version": "1.0.0-rc.8",
+  "version": "1.0.0-rc.9",
   "id": "card",
   "kind": "component",
   "summary": "One card. The generic style serves services, case studies, posts, team, features and inline cards; the quote style serves testimonials.",
@@ -292,10 +292,10 @@
               ],
               "attributes": {
                 "role": "img",
-                "aria-label": "from:labels.rating ({n} of {N})"
+                "aria-label": "from:labels.rating ({n}, {N})"
               },
               "optional": true,
-              "when": "rating is set (0-5)",
+              "when": "the item has a rating, 1 to 5 in half stars",
               "children": [
                 {
                   "role": "stars",
@@ -305,7 +305,22 @@
                   ],
                   "attributes": {
                     "aria-hidden": "true",
-                    "style": "--salt-rating-fill: <percentage>"
+                    "data-fill": {
+                      "enum": [
+                        "0",
+                        "10",
+                        "20",
+                        "30",
+                        "40",
+                        "50",
+                        "60",
+                        "70",
+                        "80",
+                        "90",
+                        "100"
+                      ],
+                      "note": "How much of the five stars is filled, in per cent, in steps of 10, which blocks.css maps to the fill's clip: the rating ÷ 5 × 100, rounded to the nearest step, a value exactly between two steps taking the higher one, then held to 0 to 100. A stored rating (1 to 5 in half stars) always lands on a step: 4 gives 80, 4.5 gives 90. No style attribute carries it (section#no-inline-style)."
+                    }
                   },
                   "text": "five empty stars",
                   "children": [
@@ -426,15 +441,6 @@
       "text": "The quote style changes the root element (figure) and its children's order; the generic style is the base."
     },
     {
-      "topic": "stylesheet-owes",
-      "text": "Team contact and social links (SC-006). Still owed for all of them: on a linked card they sit under its stretched a.salt-card__link, so a rule must lift them above it (position: relative and a higher z-index) or they open the card's page instead; no rule does yet. The lists and the social links have no rules at all. The email and phone links have only their colour, underline and focus indicator (salt-showcase__contact-link, SC-028), which is not the lift.",
-      "classes": [
-        "salt-showcase__contact",
-        "salt-showcase__socials",
-        "salt-showcase__social-link"
-      ]
-    },
-    {
       "topic": "ruling",
       "text": "The person in a quote card is named by a heading (SC-006), so a carousel of quotes has an outline. WordPress's testimonial card draws a span today."
     },
@@ -464,7 +470,8 @@
         }
       ],
       "owes": [
-        "Team members' optional email, phone and social links, drawn on the card only when filled (SC-006)."
+        "Team members' optional email, phone and social links, drawn on the card only when filled (SC-006).",
+        "A rating's fill as data-fill on span.salt-showcase__stars, in steps of 10, in place of the inline --salt-rating-fill it writes today (SC-029)."
       ]
     },
     "wordpress": {
@@ -604,7 +611,7 @@
       ],
       "owes": [
         "One div.salt-card (figure for quotes) with the order above; drop x-card-media and x-card-content wrappers.",
-        "Rating as p.salt-showcase__rating with the two star spans, not five icons.",
+        "Rating as p.salt-showcase__rating with the two star spans, not five icons, the fill as data-fill in steps of 10, never an inline style (SC-029).",
         "Name the person in a quote card with a heading (SC-006).",
         "Team contact and social links as ul.salt-showcase__contact and ul.salt-showcase__socials, drawn only when filled."
       ]

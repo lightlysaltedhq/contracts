@@ -1,5 +1,5 @@
 {
-  "$comment": "site.footer is { tone, showLogo, columns: [{ title?, links: [{ label, href }] }], text (rich text), profiles: [{ name, url, icon? }], copyright }. site.consent is { labels: { preferences }, categories }. The consent control is drawn aria-disabled=\"true\", as the server draws it until script hydrates (SC-024). The third profile (Substack) has no glyph in contract/sections.json icons, so its name is drawn as text.",
+  "$comment": "site.footer is { tone, showLogo, columns: [{ title?, links: [{ label, href }] }], text (rich text), profiles: [{ name, url, icon? }], copyright }. site.consent is the consent mechanism the site has wired (SC-030): { labels: { preferences, title, save, cancel }, categories: [{ id, covers, label, description }] }, so the control is drawn. The consent control is drawn aria-disabled=\"true\", as the server draws it until script hydrates (SC-024). The third profile (Substack) has no glyph in contract/sections.json icons, so its name is drawn as text.",
   "chrome": "site-footer",
   "summary": "Three titled columns of links with the current page marked, footer text, three social profiles (two with a glyph, one drawn as its name), the copyright line and the consent preferences control, on the surface tone.",
   "context": {
@@ -21,33 +21,92 @@
         {
           "title": "Studio",
           "links": [
-            { "label": "About us", "href": "/about/" },
-            { "label": "Our work", "href": "/work/" },
-            { "label": "Journal", "href": "/journal/" }
+            {
+              "label": "About us",
+              "href": "/about/"
+            },
+            {
+              "label": "Our work",
+              "href": "/work/"
+            },
+            {
+              "label": "Journal",
+              "href": "/journal/"
+            }
           ]
         },
         {
           "title": "Services",
           "links": [
-            { "label": "Garden design", "href": "/services/garden-design/" },
-            { "label": "Planting", "href": "/services/planting/" }
+            {
+              "label": "Garden design",
+              "href": "/services/garden-design/"
+            },
+            {
+              "label": "Planting",
+              "href": "/services/planting/"
+            }
           ]
         },
         {
           "title": "Help",
           "links": [
-            { "label": "Contact", "href": "/contact/" },
-            { "label": "Privacy policy", "href": "/privacy/" }
+            {
+              "label": "Contact",
+              "href": "/contact/"
+            },
+            {
+              "label": "Privacy policy",
+              "href": "/privacy/"
+            }
           ]
         }
       ],
       "text": "<p>We plan, plant and look after gardens across <strong>Bristol and Bath</strong>.</p>",
       "profiles": [
-        { "name": "Instagram", "url": "https://www.instagram.com/hartleygardens", "icon": "instagram" },
-        { "name": "LinkedIn", "url": "https://www.linkedin.com/company/hartley-gardens", "icon": "linkedin" },
-        { "name": "Substack", "url": "https://hartleygardens.substack.com" }
+        {
+          "name": "Instagram",
+          "url": "https://www.instagram.com/hartleygardens",
+          "icon": "instagram"
+        },
+        {
+          "name": "LinkedIn",
+          "url": "https://www.linkedin.com/company/hartley-gardens",
+          "icon": "linkedin"
+        },
+        {
+          "name": "Substack",
+          "url": "https://hartleygardens.substack.com"
+        }
       ],
       "copyright": "© 2026 Hartley Gardens"
+    },
+    "consent": {
+      "labels": {
+        "preferences": "Cookie preferences",
+        "title": "Cookie preferences",
+        "save": "Save preferences",
+        "cancel": "Cancel"
+      },
+      "categories": [
+        {
+          "id": "statistics",
+          "covers": [
+            "analytics"
+          ],
+          "label": "Analytics",
+          "description": "Helps us see which pages are read, with no personal details."
+        },
+        {
+          "id": "marketing",
+          "covers": [
+            "embeds",
+            "marketing"
+          ],
+          "label": "Marketing and embedded content",
+          "description": "Lets us measure how our adverts perform, and shows videos and maps from other sites."
+        }
+      ]
     }
   }
 }
