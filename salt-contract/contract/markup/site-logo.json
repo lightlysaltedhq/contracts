@@ -145,7 +145,7 @@
         }
       ],
       "owes": [
-        "data-swaps instead of has-dark; name on the link; the logo height as --logo-height on .salt-logo in the site's own stylesheet, never inline (SC-029).",
+        "data-swaps instead of has-dark; name on the link; the logo height as .salt-logo { --logo-height } from the one stored logo height, through a style element allowed by nonce or hash, or a stylesheet the site serves, never inline (SC-029). Where full-page caching is used a hash is preferable to a nonce, because the rule is stable per site.",
         "SC-019, SC-025: in the header, the default scheme's logo carries loading=\"eager\" and the other scheme's loading=\"lazy\"; the footer's are both loading=\"lazy\"."
       ]
     },

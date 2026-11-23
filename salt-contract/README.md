@@ -57,8 +57,9 @@ the Salt page.
 1. **Brand settings.** The site's colours, fonts, type scale and logos, set in the admin. *On
    update, everything still reaches the site.*
 2. **Design dials and tokens.** Site-wide choices from a scale (corners, shadows, button style
-   and density), set in the admin by the admin role only (`contract/dials.json`). Any token in `contract/token-layer.json` may also be overridden in the site's code, for what the
-   dials do not cover. A site's own CSS reaches values through tokens, never hard-coded ones, so
+   and density), set in the admin by the admin role only (`contract/dials.json`). Any token in
+   `contract/token-layer.json` may also be overridden in the site's code, for what the dials do
+   not cover. A site's own CSS reaches values through tokens, never hard-coded ones, so
    dark mode, the contrast checks and the dials keep working on it. *On update, everything still
    reaches the site.*
 3. **Variants.** A section's layout or style option, chosen by an editor (the `variants` in
@@ -559,8 +560,11 @@ pins. For every section it ships it checks five things:
   (`section#no-inline-style`, SC-029). A site's Content-Security-Policy need not allow inline
   styles, and a browser that refuses them draws the page without them, so a value the design varies
   is a data attribute the shared stylesheets style. Each case that writes one is named, with the
-  elements that carry it. The one inline style element the contract draws, the scriptless style in
-  the head (`page.json`), is an element, not an attribute, and is not refused.
+  elements that carry it. The check reads the adapter's whole raw output, the head and the page's
+  `html` and `body` included, before anything is normalised: a Content-Security-Policy refuses a
+  style attribute anywhere on the page, so conformance does too. The one inline style element the
+  contract draws, the scriptless style in the head (`page.json`), is an element, not an attribute,
+  and is not refused.
 - **Stylesheet pin.** The file the implementation serves as its Salt stylesheet (above,
   "Serving it"), or that file fetched from a running site, is byte-identical to
   `styles/salt.css`. A path inside the package itself is refused, since comparing the package's
