@@ -47,13 +47,57 @@
       "name": "client",
       "type": "text",
       "label": "Client",
-      "description": "Optional. Shown on the card and beneath the title.",
+      "description": "Optional. The client's name as free text, shown on the card and beneath the title. With clients enabled it is the fallback when no client record is chosen or the chosen one no longer resolves.",
       "platforms": {
         "nextjs": {
           "formerly": "client"
         },
         "wordpress": {
           "formerly": "client"
+        }
+      }
+    },
+    {
+      "name": "clientRecord",
+      "type": "relationship",
+      "label": "Client record",
+      "to": "clients",
+      "description": "Optional. One client from the clients collection, offered only when the site enables clients. Its name replaces the free-text client wherever the client is drawn; with none chosen, or one that no longer resolves, the free text is drawn.",
+      "platforms": {
+        "nextjs": {
+          "owes": "the field, kept with its stored ID when clients is switched off (SC-035)"
+        },
+        "wordpress": {
+          "owes": "the field, an ACF post object returning an ID, kept with its stored ID when clients is switched off (SC-035)"
+        }
+      }
+    },
+    {
+      "name": "sector",
+      "type": "text",
+      "label": "Sector",
+      "description": "Optional. The sector's name as free text. Stored and offered to editors; no public slot draws it until its presentation is ruled.",
+      "platforms": {
+        "nextjs": {
+          "owes": "the field"
+        },
+        "wordpress": {
+          "owes": "the field"
+        }
+      }
+    },
+    {
+      "name": "sectorRecord",
+      "type": "relationship",
+      "label": "Sector record",
+      "to": "sectors",
+      "description": "Optional. One sector from the sectors collection, offered only when the site enables sectors. No public slot draws it until its presentation is ruled.",
+      "platforms": {
+        "nextjs": {
+          "owes": "the field, kept with its stored ID when sectors is switched off (SC-035)"
+        },
+        "wordpress": {
+          "owes": "the field, an ACF post object returning an ID, kept with its stored ID when sectors is switched off (SC-035)"
         }
       }
     },
@@ -329,7 +373,8 @@
         "from": "featuredImage"
       },
       "meta": {
-        "from": "client"
+        "from": "client",
+        "note": "The client's name: the chosen client record's title when the site enables clients and the record resolves, otherwise the free-text client; drawn only when non-empty (SC-035). A record is never a link."
       },
       "text": {
         "from": "summary"

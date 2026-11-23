@@ -30,7 +30,7 @@
 import { readFileSync, writeFileSync } from 'node:fs'
 
 import { allowedFor, categorisedSources, categorySources, clauses, collectionQueryShape, diffSnapshots, isMainModule, LINK_SHAPE, loadContract,
-  normaliseLineEndings, parseEmitterArguments, planSections, resolveCollection, sourceValues, SOURCES, TEAM_TICK } from './_contract.mjs'
+  normaliseLineEndings, parseEmitterArguments, planSections, resolveCollection, sourceValues, SOURCES, DEFAULT_SOURCES, TEAM_TICK } from './_contract.mjs'
 
 /**
  * Each source's post type and category taxonomy, as Salt for WordPress registers them by default.
@@ -46,6 +46,9 @@ export const SOURCE_DEFAULTS = {
   team: { taxonomy: null }, // A filtered set of users, not a post type.
   faqs: { postType: 'faq', taxonomy: 'faq_category' },
   locations: { postType: 'location', taxonomy: 'location_area' },
+  // The name-only records (SC-035): not public, no archive, no rewrite; off unless the site names them.
+  clients: { postType: 'client', taxonomy: null },
+  sectors: { postType: 'sector', taxonomy: null },
 }
 
 export const SECTIONS_GROUP_KEY = 'group_salt_sections'
@@ -89,7 +92,7 @@ export function conditionalLogic(list, keyOf) {
 
 function sourcesFrom(options) {
   const given = options.sources
-  const installed = given ? SOURCES.filter((s) => s in given) : SOURCES
+  const installed = given ? SOURCES.filter((s) => s in given) : DEFAULT_SOURCES
   return Object.fromEntries(installed.map((s) => [s, { ...SOURCE_DEFAULTS[s], ...(given?.[s] ?? {}) }]))
 }
 
@@ -491,7 +494,7 @@ function build(options) {
  *              field that allows headings, and may not add one the contract refuses
  *   icons      the site's icon registry, [{ value, label }]; required when a section uses it
  *   sources    { [source id]: { postType?, taxonomy? } } for the sources the site has; all of
- *              them, with SOURCE_DEFAULTS' slugs, when left out
+ *              them but clients and sectors, which are off unless named (SC-035), with SOURCE_DEFAULTS' slugs, when left out
  *   postTypes  where the sections group shows (['page']); a collection's group shows on its own
  *              post type (sources), except team on the user edit form
  *   sections   the section ids to emit, in this order; one the site's sources cannot carry

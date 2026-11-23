@@ -524,6 +524,25 @@ test, applied through section 2's table, where the stricter row wins.
     the `media` prop and the aside sizes go, and a delivered service's card takes the card slot in
     the full band. Salt for WordPress: the field as an ACF image returning an attachment ID, and
     the options page loses its aside layout.
+- **Clients and sectors: two name-only record collections, each off by default** (SC-035; the
+  founder's ruling of 23/11/2026; the identifiers and the fallback rules were set by the
+  coordinator and are proposed, for the founder's approval at contract review). New collections
+  `clients` and `sectors` (`contract/collections/`), each a `title` and nothing else, with no
+  route, page or public address. A case study gains `sector` (free text, beside the unchanged
+  `client`) and `clientRecord` and `sectorRecord`, one optional relationship each. Both emitters
+  install `clients` and `sectors` only when a site names them in `sources`; left out, the case
+  study's record field is left out too (`leftOut`), and the free text stays. Wherever the client is
+  drawn today (the card's meta, the view's client line), the chosen record's name is drawn when
+  clients is enabled and the record resolves, otherwise the free text, and nothing when both are
+  empty. No new public slot, link or sidebar draws a sector or a record yet, pending the
+  presentation ruling. No record is created, matched by name or deleted automatically, and
+  switching a collection off writes nothing. Semver: MINOR on its own (optional fields and opt-in
+  collections; the default output gains only the `sector` field); it ships in the rc.9 candidate.
+  **What each target changes.** Both: the two switches, off by default; the `sector` field; the
+  record fields while enabled, keeping a stored ID and the free text separately across switch
+  changes, and offering the chosen name as the free text's initial value when a switch is turned
+  off with no free text stored. Salt for WordPress: `client` and `sector` post types, not public,
+  with no archive or rewrite. Salt for Next.js: `clients` and `sectors` collections with no route.
 - The case-study view has fixtures and is required of every implementation (SC-021).
   `fixtures/case-study/` holds four cases (`full`, `aside`, `band` and `minimal`), `case-study`
   joins `REQUIRED_FILES`, and a full conformance run refuses to declare it not shipped. The

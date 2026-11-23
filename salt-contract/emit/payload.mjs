@@ -42,7 +42,7 @@ import { readFileSync, writeFileSync } from 'node:fs'
 
 import { allowedFor, categorisedSources, categorySources, clauseHolds, clauses, collectionQueryShape, diffSnapshots, hasVisibleText,
   isFilled, isMainModule, LINK_SHAPE, loadContract, modeAllowed, normaliseLineEndings, parseEmitterArguments, planSections,
-  resolveCollection, siblingValue, sourceValues, SOURCES, TEAM_TICK } from './_contract.mjs'
+  resolveCollection, siblingValue, sourceValues, SOURCES, DEFAULT_SOURCES, TEAM_TICK } from './_contract.mjs'
 
 /**
  * Each source's Payload collection and category taxonomy, as Salt for Next.js names them by
@@ -59,6 +59,9 @@ export const SOURCE_DEFAULTS = {
   team: { collection: 'users', taxonomy: null },
   faqs: { collection: 'faqs', taxonomy: 'faq-categories' },
   locations: { collection: 'locations', taxonomy: 'areas' },
+  // The name-only records (SC-035): no route; off unless the site names them.
+  clients: { collection: 'clients', taxonomy: null },
+  sectors: { collection: 'sectors', taxonomy: null },
 }
 
 const snake = (s) => s.replace(/([a-z0-9])([A-Z])/g, '$1_$2').replace(/-/g, '_').toLowerCase()
@@ -79,7 +82,7 @@ const conditionFor = (list, defaults) => (_data, siblingData) => clausesHold(lis
 
 function sourcesFrom(options) {
   const given = options.sources
-  const installed = given ? SOURCES.filter((s) => s in given) : SOURCES
+  const installed = given ? SOURCES.filter((s) => s in given) : DEFAULT_SOURCES
   const sources = Object.fromEntries(installed.map((s) => [s, { ...SOURCE_DEFAULTS[s], ...(given?.[s] ?? {}) }]))
   if (sources.team) {
     const auth = options.usersSlug ?? SOURCE_DEFAULTS.team.collection
@@ -461,7 +464,7 @@ function buildCollections(options, snapshot) {
  *                   text field that allows headings, and may not add one the contract refuses
  *   icons           the site's icon registry, [{ value, label }]; required when a section uses it
  *   sources         { [source id]: { collection?, taxonomy? } } for the sources the site has;
- *                   all of them, with SOURCE_DEFAULTS' slugs, when left out
+ *                   all of them but clients and sectors, which are off unless named (SC-035), with SOURCE_DEFAULTS' slugs, when left out
  *   richTextEditor  (allowed) => the Payload editor for that allowed list; required for rich text
  *   sections        the section ids to emit, in this order; one the site's sources cannot carry
  *                   throws. Left out or null: every section in sections.json the sources can

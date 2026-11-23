@@ -738,3 +738,33 @@ test('ID-3969: WordPress\'s native title and summary carry their targets under t
     assert.deepEqual([group.salt.native[name], group.salt.targets], ['title', { [name]: 120 }], source)
   }
 })
+
+// SC-035: clients and sectors are enabled independently and are off by default. Off, the case
+// study's record field is left out (ACF keeps its stored meta); the free-text client and sector
+// are always emitted, and a record field is a post object returning one ID, never a link.
+test('sc-035: clients and sectors are off by default and switch on independently', () => {
+  const caseStudy = (sources) => groupOf(toAcfFieldGroups({ icons, sources }), 'case-studies')
+  const names = (g) => g.fields.map((f) => f.name)
+  const combos = [
+    ['off/off', undefined, [], ['clientRecord (the source clients)', 'sectorRecord (the source sectors)']],
+    ['on/on', { 'case-studies': {}, services: {}, clients: {}, sectors: {} }, ['clientRecord', 'sectorRecord'], []],
+    ['on/off', { 'case-studies': {}, services: {}, clients: {} }, ['clientRecord'], ['sectorRecord (the source sectors)']],
+    ['off/on', { 'case-studies': {}, services: {}, sectors: {} }, ['sectorRecord'], ['clientRecord (the source clients)']],
+  ]
+  for (const [combo, sources, records, leftOut] of combos) {
+    const g = caseStudy(sources)
+    assert.ok(names(g).includes('client') && names(g).includes('sector'), `${combo}: the free text is always there`)
+    assert.deepEqual(names(g).filter((n) => n.endsWith('Record')), records, combo)
+    assert.deepEqual(g.salt.leftOut ?? [], leftOut, combo)
+    for (const r of records) {
+      const f = g.fields.find((x) => x.name === r)
+      assert.equal(f.type, 'post_object', combo)
+      assert.deepEqual(f.post_type, [r === 'clientRecord' ? 'client' : 'sector'], combo)
+      assert.equal(f.return_format, 'id', combo)
+    }
+    const groups = toAcfFieldGroups({ icons, sources })
+    assert.equal(Boolean(groupOf(groups, 'clients')), records.includes('clientRecord'), `${combo}: the clients group`)
+    assert.equal(Boolean(groupOf(groups, 'sectors')), records.includes('sectorRecord'), `${combo}: the sectors group`)
+  }
+  assert.deepEqual(groupOf(toAcfFieldGroups({ icons, sources: { clients: {} } }), 'clients').salt.native, { title: 'title' })
+})
