@@ -335,6 +335,25 @@ test('the inline-style check reads the raw output: an SVG child, the page\'s bod
   }
 })
 
+test('a renderer that strips a placeholder and appends its value fails where the placeholder is not last (SC-031, review N1)', async () => {
+  // What such a renderer draws from "{n}. page", "{name}: directions" and "{name} wrote this".
+  const adapter = brokenAdapter({
+    'listing/page-number-first': { from: 'aria-label="3. page"', to: 'aria-label=". page 3"' },
+    'locations/directions-name-first': { from: 'aria-label="Bristol studio: directions"', to: 'aria-label=": directions Bristol studio"' },
+    'post/byline-name-first': { from: '<span class="salt-post__byline"><a href="/team/priya-shah/">Priya Shah</a> wrote this</span>', to: '<span class="salt-post__byline">wrote this <a href="/team/priya-shah/">Priya Shah</a></span>' },
+  })
+  try {
+    const r = await run(['--platform', 'broken', '--adapter', adapter.command, ...withFields, ...withStyles])
+    assert.equal(r.code, 1, r.out)
+    assert.ok(failure(r.report, 'listing', 'page-number-first'))
+    assert.ok(failure(r.report, 'locations', 'directions-name-first'))
+    const post = r.report.files.find((f) => f.id === 'post')
+    assert.deepEqual(post.fixtures.failures.map((f) => f.case), ['byline-name-first'])
+  } finally {
+    rmSync(adapter.dir, { recursive: true, force: true })
+  }
+})
+
 test('an icon\'s fill and stroke are not compared, every other attribute of it is (SC-024)', async () => {
   const STROKED = 'aria-label="LinkedIn" fill="none" stroke="currentColor"'
   const adapter = brokenAdapter({

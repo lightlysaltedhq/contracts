@@ -1,0 +1,85 @@
+{
+  "section": "listing",
+  "$comment": "labels.page is \"{n}. page\": the number comes first, so a renderer that strips the placeholder and appends the number draws \". page 3\" and fails (README \"Labels\"). The rest is cards-with-pagination.",
+  "summary": "Page links whose label puts the number first: \"{n}. page\" draws \"1. page\", \"2. page\" and \"3. page\".",
+  "values": {
+    "heading": "The journal",
+    "settings": {
+      "anchorId": "journal"
+    }
+  },
+  "context": {
+    "headingLevel": 1,
+    "priorityMedia": true,
+    "track": "listing-1",
+    "index": 0,
+    "locale": "en-GB"
+  },
+  "media": {
+    "soil": {
+      "url": "https://uploads.example/soil-health-{width}.jpg",
+      "width": 800,
+      "height": 600,
+      "alt": "Hands holding a handful of dark compost"
+    },
+    "hedge": {
+      "url": "https://uploads.example/hedge-laying-{width}.jpg",
+      "width": 800,
+      "height": 600,
+      "alt": "A freshly laid hedge along a field edge"
+    },
+    "pots": {
+      "url": "https://uploads.example/winter-pots-{width}.jpg",
+      "width": 800,
+      "height": 600,
+      "alt": "Terracotta pots wrapped in fleece"
+    }
+  },
+  "route": {
+    "cards": [
+      {
+        "id": "soil",
+        "title": "Feeding your soil, not your plants",
+        "href": "/journal/feeding-your-soil/",
+        "image": "soil",
+        "date": "2026-03-12",
+        "text": "Why compost does more than any bottle of feed."
+      },
+      {
+        "id": "hedge",
+        "title": "A beginner's guide to hedge laying",
+        "href": "/journal/hedge-laying/",
+        "image": "hedge",
+        "date": "2026-02-26",
+        "text": "An old craft that still keeps livestock in and wildlife housed."
+      },
+      {
+        "id": "pots",
+        "title": "Overwintering pots without a greenhouse",
+        "href": "/journal/overwintering-pots/",
+        "image": "pots",
+        "date": "2026-01-15",
+        "text": "Fleece, feet and a sheltered wall."
+      }
+    ],
+    "pagination": {
+      "current": 2,
+      "total": 3,
+      "hrefs": {
+        "1": "/journal/",
+        "2": "/journal/page/2/",
+        "3": "/journal/page/3/"
+      }
+    }
+  },
+  "site": {
+    "arrow": "→",
+    "labels": {
+      "nav": "Pagination",
+      "previous": "Previous",
+      "next": "Next",
+      "page": "{n}. page",
+      "empty": "There are no posts to show yet."
+    }
+  }
+}

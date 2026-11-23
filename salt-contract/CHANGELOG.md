@@ -61,7 +61,7 @@ test, applied through section 2's table, where the stricter row wins.
   (`./view-props/*`); the replaced-logic format (`./schema/replaced-logic`).
 - Image sizes (`./image-sizes`): each slot's `sizes` per band and column count, the candidate
   widths, and the srcset capped at the upload's intrinsic width (SC-016).
-- Fixtures (`./fixtures/*`): 126 cases with their expected HTML, for the 17 sections, the site
+- Fixtures (`./fixtures/*`): 129 cases with their expected HTML, for the 17 sections, the site
   header and footer, the post, service, case-study, archive, search and not-found views, and the
   page (SC-018, SC-019, SC-021); and the normaliser both sides are compared through
   (`./normalise`).
@@ -416,7 +416,12 @@ test, applied through section 2's table, where the stricter row wins.
     `Page {n}`, `Slide {n} of {N}`, `Rated {n} of {N}`, `Directions to {name}` and `By {name}`;
     no expected HTML changes. The new case `carousel/testimonials-labels-as-written` draws a slide
     label with no placeholder (`Slide`) and a rating label with an unknown one (`{stars}`), each as
-    written. 126 cases in all. **Breaking for both targets.** **What each target changes.** Both:
+    written. Three cases put the placeholder first, so a renderer that strips it and appends the
+    value fails: `listing/page-number-first` (`{n}. page`), `locations/directions-name-first`
+    (`{name}: directions`) and `post/byline-name-first` (`{name} wrote this`). The fixtures gate
+    compares each placeholder with the value the case gives where it gives one (the page's
+    number, the office's and the author's names, the reading time, the results' count and the
+    query); `{kind}` matches any text. 129 cases in all. **Breaking for both targets.** **What each target changes.** Both:
     replace the placeholders in those nine labels and append nothing; a site's `page`, `slide`,
     `rating`, `directions` and `byline` labels hold their placeholders (`Page {n}`,
     `Slide {n} of {N}`, `Rated {n} of {N}`, `Directions to {name}`, `By {name}`).
