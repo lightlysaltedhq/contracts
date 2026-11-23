@@ -421,10 +421,10 @@ test, applied through section 2's table, where the stricter row wins.
     (`{name}: directions`) and `post/byline-name-first` (`{name} wrote this`). The fixtures gate
     compares each placeholder with the value the case gives where it gives one (the page's
     number, the office's and the author's names, the reading time, the results' count and the
-    query); `{kind}` matches any text. 129 cases in all. **Breaking for both targets.** **What each target changes.** Both:
-    replace the placeholders in those nine labels and append nothing; a site's `page`, `slide`,
-    `rating`, `directions` and `byline` labels hold their placeholders (`Page {n}`,
-    `Slide {n} of {N}`, `Rated {n} of {N}`, `Directions to {name}`, `By {name}`).
+    query); `{kind}` matches any text. 129 cases in all. **Breaking for both targets.** **What each
+    target changes.** Both: replace the placeholders in those nine labels and append nothing; a
+    site's `page`, `slide`, `rating`, `directions` and `byline` labels hold their placeholders
+    (`Page {n}`, `Slide {n} of {N}`, `Rated {n} of {N}`, `Directions to {name}`, `By {name}`).
   - **The case study's sidebar parts are defined** (SC-032; proposed, for the founder's approval
     at contract review). *Media aside, an image and a sidebar part* now says which parts are
     sidebar parts: exactly the challenge (filled), the solution (filled), the gallery (with an

@@ -5756,7 +5756,9 @@ const CONTRACTS = [
       'scrim\u2019s strength, a rating\u2019s fill, a focal point and the aside\u2019s rows reach the page as a ' +
       'data attribute from a fixed set, which only the shared stylesheets turn into a value. A value ' +
       'with no rule draws nothing, and no fixture can see it, because the markup is right. The value ' +
-      'sets are read from the markup, so a step added there needs its rule here too.',
+      'sets are read from the markup, so a step added there needs its rule here too. A known limit: ' +
+      'it reads the owner\u2019s own rule only, so a later rule with a more specific selector that ' +
+      'overrides the same property is not seen.',
     check: (_rules, all) => {
       /* Each attribute's owner, the property its rule sets and the value it sets for a value v;
          and the values that draw by default and need no rule: spacing none draws no space, and

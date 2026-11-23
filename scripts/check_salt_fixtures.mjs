@@ -598,6 +598,15 @@ function labelValues(name, c, el) {
   const doc = c.input.document ?? {}
   const num = (v) => (typeof v === 'number' ? String(v) : undefined)
   if (name === 'page' && el) return { '{n}': textOf(el) }
+  if (name === 'slide' && el) {
+    // {n} is the slide's position from 1 and {N} the slides in its track (carousel-track.json).
+    const slide = c.parents.get(el)
+    const track = slide && c.parents.get(slide)
+    if (track && classesOf(slide).includes('salt-carousel__slide')) {
+      const slides = elementsOf(track).filter((e) => classesOf(e).includes('salt-carousel__slide'))
+      return { '{n}': String(slides.indexOf(slide) + 1), '{N}': String(slides.length) }
+    }
+  }
   if (name === 'byline') return { '{name}': doc.author?.name }
   if (name === 'readTime') return { '{n}': num(doc.readingMinutes) }
   if (name === 'results') return { '{n}': num(doc.count), '{q}': doc.query }

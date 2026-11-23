@@ -1373,3 +1373,7 @@ test('labels: a placeholder the case gives a value for must draw that value (rev
   expectFail(['search'], (io) => io.html('search/results.html', '14 results for “hedge”', '14 results for “hedges”'), /which is not labels\.results/)
   expectFail(['search'], (io) => io.html('search/no-results.html', 'Nothing matched “xylophone”', 'Nothing matched “piano”'), /which is not labels\.noResults/)
 })
+test('labels: a slide label draws its own position and the track\'s count (review L-a)', () => {
+  expectFail(['carousel'], (io) => io.html('carousel/testimonials-source.html', 'aria-label="Slide 2 of 3"', 'aria-label="Slide 9 of 9"'), /aria-label="Slide 9 of 9"/)
+  expectFail(['carousel'], (io) => io.html('carousel/testimonials-source.html', 'aria-label="Slide 2 of 3"', 'aria-label="Slide 1 of 3"'), /aria-label="Slide 1 of 3"/)
+})
