@@ -21,71 +21,71 @@
       ],
       "children": [
         {
+          "role": "header",
+          "element": "header",
+          "classes": [
+            "salt-case-study-view__header"
+          ],
+          "children": [
+            {
+              "role": "back",
+              "element": "p",
+              "classes": [
+                "salt-case-study-view__back"
+              ],
+              "optional": true,
+              "when": "the index has a safe href",
+              "children": [
+                {
+                  "role": "back-link",
+                  "element": "a",
+                  "classes": [
+                    "salt-case-study-view__back-link"
+                  ],
+                  "attributes": {
+                    "href": "from:index.href"
+                  }
+                }
+              ]
+            },
+            {
+              "role": "title",
+              "element": "h1",
+              "text": "from:caseStudy.title"
+            },
+            {
+              "role": "summary",
+              "element": "p",
+              "classes": [
+                "salt-case-study-view__summary"
+              ],
+              "optional": true,
+              "when": "summary is set"
+            }
+          ]
+        },
+        {
           "role": "story",
           "element": "div",
           "classes": [
             "salt-case-study-view__story"
           ],
-          "note": "The story column (SC-036): the header, the hero image and the narrative, in reading order, capped at the reading measure whether or not the aside is drawn.",
+          "note": "The story column (SC-036): the hero image and the narrative, in reading order, capped at the reading measure whether or not the aside is drawn. With no part to draw, as for a case study with only a title, no story is drawn, so no empty wrapper.",
           "children": [
             {
-              "role": "header",
-              "element": "header",
+              "role": "hero-media",
+              "element": "div",
               "classes": [
-                "salt-case-study-view__header"
+                "salt-case-study-view__media"
               ],
+              "optional": true,
+              "when": "the featured image resolves",
+              "note": "The hero image: the featured image, the story's first part, in either header variant. It is the view's priority image, the only one (section#priority-media).",
               "children": [
                 {
-                  "role": "back",
-                  "element": "p",
-                  "classes": [
-                    "salt-case-study-view__back"
-                  ],
-                  "optional": true,
-                  "when": "the index has a safe href",
-                  "children": [
-                    {
-                      "role": "back-link",
-                      "element": "a",
-                      "classes": [
-                        "salt-case-study-view__back-link"
-                      ],
-                      "attributes": {
-                        "href": "from:index.href"
-                      }
-                    }
-                  ]
-                },
-                {
-                  "role": "title",
-                  "element": "h1",
-                  "text": "from:caseStudy.title"
-                },
-                {
-                  "role": "summary",
-                  "element": "p",
-                  "classes": [
-                    "salt-case-study-view__summary"
-                  ],
-                  "optional": true,
-                  "when": "summary is set"
-                },
-                {
-                  "role": "hero-media",
-                  "element": "div",
-                  "classes": [
-                    "salt-case-study-view__media"
-                  ],
-                  "optional": true,
-                  "when": "the featured image resolves",
-                  "note": "The hero image: the featured image, the header's last part, in either header variant. It is the view's priority image, the only one (section#priority-media).",
-                  "children": [
-                    {
-                      "role": "hero-image",
-                      "component": "media",
-                      "note": "Priority; fill, cover."
-                    }
-                  ]
+                  "role": "hero-image",
+                  "component": "media",
+                  "note": "Priority; fill, cover."
                 }
               ]
             },
@@ -260,7 +260,9 @@
                 }
               ]
             }
-          ]
+          ],
+          "optional": true,
+          "when": "a part of the story is drawn"
         },
         {
           "role": "aside",
@@ -502,30 +504,13 @@
                       ],
                       "optional": true,
                       "when": "summary is set"
-                    },
-                    {
-                      "role": "hero-media",
-                      "element": "div",
-                      "classes": [
-                        "salt-case-study-view__media"
-                      ],
-                      "optional": true,
-                      "when": "the featured image resolves",
-                      "note": "The hero image: the featured image, the header's last part, in either header variant. It is the view's priority image, the only one (section#priority-media).",
-                      "children": [
-                        {
-                          "role": "hero-image",
-                          "component": "media",
-                          "note": "Priority; fill, cover."
-                        }
-                      ]
                     }
                   ]
                 }
               ]
             }
           },
-          "note": "The header drawn as section.json draws a band, so the tone's roles all reach it: salt-section with the tones, md spacing (which sections.css turns into the band's block space) and the default width, and its parts, the hero image last, inside div.salt-section__content. It sits in the story column (SC-036): its content keeps the story's left edge and measure, and only the tone's background bleeds, to the viewport's left edge, and to its right edge unless the aside is beside it."
+          "note": "The header drawn as section.json draws a band, so the tone's roles all reach it: salt-section with the tones, md spacing (which sections.css turns into the band's block space) and the default width, and its parts inside div.salt-section__content. It is the article's first row, above the story and the aside (SC-036): its content keeps their left edge and the width they span, and the tone's background bleeds to both viewport edges."
         }
       },
       "note": "plain draws the base tree. band wraps the header's parts in a content div, so the order differs from plain's."
@@ -555,11 +540,6 @@
     "section#single-h1"
   ],
   "hooks": [
-    {
-      "class": "salt-case-study-view__back",
-      "role": "back",
-      "reason": "The back link's paragraph; the link carries the rules."
-    },
     {
       "class": "salt-case-study-view__client",
       "role": "client",
@@ -602,11 +582,11 @@
     },
     {
       "topic": "ruling",
-      "text": "The hero and the flow (SC-034). The featured image is the hero image, drawn last in the header, inside the band's content when the header is a band, and it is the view's only priority image. caseStudyImage is a separate optional image, drawn in the flow between the challenge and the solution and never the priority image. Neither is ever drawn in the other's place, neither leaves an empty wrapper, and one media item is never drawn twice. The image aside goes: no image runs beside the view's parts, and nothing in the markup counts them. Only the image aside is removed: the aside the view draws is of the project's facts, never an image (SC-036)."
+      "text": "The hero and the flow (SC-034). The featured image is the hero image, drawn first in the story column below the header, in either header variant, and it is the view's only priority image. caseStudyImage is a separate optional image, drawn in the flow between the challenge and the solution and never the priority image. Neither is ever drawn in the other's place, neither leaves an empty wrapper, and one media item is never drawn twice. The image aside goes: no image runs beside the view's parts, and nothing in the markup counts them. Only the image aside is removed: the aside the view draws is of the project's facts, never an image (SC-036)."
     },
     {
       "topic": "ruling",
-      "text": "The story and the aside (SC-036). The article is the story column and, when anything fills it, an aside of the project's facts. The story holds the back link, the title, the summary and the hero image, then the challenge, the case-study image, the solution, the results, the gallery and the live-site link; the aside holds the project details, then the client, the sector and the delivered services, each only when it has a value, a service a link only to its own public page. Nothing appears in both: the header draws no client line, results or details, and no service cards are drawn. From 64rem the aside sits to the story's right; narrower, after it. The story is capped at --container-2xl in either case, and the aside is --container-2xs."
+      "text": "The header, the story and the aside (SC-036). The article's first row is the header: the back link, the title and the summary, across the width the story and the aside span below it. Then the story column holds the hero image, the challenge, the case-study image, the solution, the results, the gallery and the live-site link; the aside holds the project details, then the client, the sector and the delivered services, each only when it has a value, a service a link only to its own public page. The aside starts beside the story, never beside the title. Nothing appears in both: the header draws no client line, results or details, and no service cards are drawn. From 64rem the aside sits to the story's right, and the header puts the back link on its own line above the title, on its left edge, with the title and the summary side by side below it; with no back link no line is kept for it. Narrower, the aside follows the story and the header's lines stack, the hero reading as the header's last line, inside a band's tone. The story is capped at --container-2xl in either case, and the aside is --container-2xs."
     }
   ],
   "platforms": {
@@ -620,18 +600,18 @@
       ],
       "owes": [
         "The case-study view's markup above.",
-        "The featured image drawn in the header, last, as the priority image, and caseStudyImage (an attachment ID) drawn in div.salt-case-study-view__flow-media between the challenge and the solution, lazy, and not at all when it is the featured image's attachment (SC-034). No data-media or data-aside-rows on the article.",
+        "The featured image drawn first in the story column, as the priority image, and caseStudyImage (an attachment ID) drawn in div.salt-case-study-view__flow-media between the challenge and the solution, lazy, and not at all when it is the featured image's attachment (SC-034). No data-media or data-aside-rows on the article.",
         "The section heading ids case-study__challenge-heading, case-study__solution-heading and case-study__gallery-heading, each named by its section's aria-labelledby (SC-012).",
-        "The story column and the aside (SC-036): the header, the results and the details moved, the client line and the services section gone; Client and Sector from the record's title when its module is on and the record resolves, otherwise the free text; a service linked only when it is published and has a permalink, drawn plain when it has no public page, and left out when it may not be shown; the labels details, client and sector, with translators' comments.",
+        "The header row, the story column and the aside (SC-036): the hero image moved into the story, the results and the details moved, the client line and the services section gone; Client and Sector from the record's title when its module is on and the record resolves, otherwise the free text; a service linked only when it is published and has a permalink, drawn plain when it has no public page, and left out when it may not be shown; the labels details, client and sector, with translators' comments.",
         "An ACF options page on which editors set the case-study view's header band (the header variant, plain or band, with the band's tone and dark tone), the settings a fixture gives as site.caseStudy: header, headerTone and headerToneDark. The image aside layout setting goes (SC-034)."
       ]
     },
     "nextjs": {
       "owes": [
-        "The featured image drawn in the header, last, as the priority image, and caseStudyImage drawn in div.salt-case-study-view__flow-media between the challenge and the solution, lazy, and not at all when it is the featured image's media item; the media prop and its image aside layout go, with data-media, the aside rows and the measure (SC-034).",
+        "The featured image drawn first in the story column, as the priority image, and caseStudyImage drawn in div.salt-case-study-view__flow-media between the challenge and the solution, lazy, and not at all when it is the featured image's media item; the media prop and its image aside layout go, with data-media, the aside rows and the measure (SC-034).",
         "The header band's spacing from data-spacing alone, with no inline --salt-section-space (SC-029).",
         "Name its three sections: the ids case-study__challenge-heading, case-study__solution-heading and case-study__gallery-heading on their h2s, and aria-labelledby on each section (section#labelled-by, SC-012).",
-        "The story column and the aside (SC-036), as Salt for WordPress owes them; the services' cards go, and each story image declares the story slot contract/image-sizes.json gives for whether the aside is drawn."
+        "The header row, the story column and the aside (SC-036), as Salt for WordPress owes them; the services' cards go, and each story image declares the story slot contract/image-sizes.json gives for whether the aside is drawn."
       ]
     }
   },

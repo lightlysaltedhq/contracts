@@ -1170,6 +1170,9 @@ function checkMarkup(c) {
     expectations.push(['client', filledText(caseStudy.client), "the client's name is not empty"])
     expectations.push(['sector', filledText(caseStudy.sector), "the sector's name is not empty"])
     expectations.push(['services', services.length > 0, 'a delivered service is drawn'])
+    const storyDrawn = isImage(c, caseStudy.image) || filledText(caseStudy.challenge) || isImage(c, caseStudy.caseStudyImage) || filledText(caseStudy.solution) ||
+      (caseStudy.results ?? []).length > 0 || (caseStudy.gallery ?? []).some((id) => isImage(c, id)) || safeHref(caseStudy.externalUrl)
+    expectations.push(['story', storyDrawn, 'a part of the story is drawn'])
     expectations.push(['aside', details.length > 0 || filledText(caseStudy.client) || filledText(caseStudy.sector) || services.length > 0, 'a detail, the client, the sector or a service is drawn'])
   }
   if (c.sectionId === 'hero') expectations.push(['media', ['split', 'stacked'].includes(effective(c, 'variant')) && isImage(c, c.values.image), 'variant split or stacked with an image'])

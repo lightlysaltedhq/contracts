@@ -550,9 +550,11 @@ test, applied through section 2's table, where the stricter row wins.
   ruling of 23/11/2026 on the layout; the class names, the slots and the label names are proposed,
   for the founder's approval at contract review). **Breaking for both targets.** Semver: MAJOR by
   `RELEASE-POLICY.md` section 1's test, in the candidate series as rc.9.
-  - `div.salt-case-study-view__story` holds, in order, the header (back link, title, summary and the
-    hero image; in a band, inside its content), the challenge, the case-study image, the solution,
-    the results (moved from the header, after the solution), the gallery and the live-site link.
+  - The article holds, in order, `header.salt-case-study-view__header` (back link, title and
+    summary; in a band, inside its content), `div.salt-case-study-view__story` and the aside. The
+    story holds, in order, the hero image (moved out of the header, the story's first part), the
+    challenge, the case-study image, the solution, the results (moved from the header, after the
+    solution), the gallery and the live-site link, and is drawn only when one of them is.
     `aside.salt-case-study-view__aside` (`aria-label` from `labels.details`) holds one
     `dl.salt-case-study-view__details`: the project details, then Client, Sector and Services
     (`labels.client`, `labels.sector`, `labels.services`), each row only when it has a value, and
@@ -565,12 +567,23 @@ test, applied through section 2's table, where the stricter row wins.
     so nothing appears twice. The view's section ids are now three:
     `case-study__services-heading` goes.
   - `primitives.css`: the article is a grid of one track, `minmax(0, var(--container-2xl))`,
-    centred inside `--space-gutter`; from 64rem the aside takes an implicit second track of
-    `--container-2xs` (new in `token-layer.json`) at a `--space-8` gap, so with no aside there is
-    no track and the story keeps its cap. Below 64rem the aside follows the story. A band's tone
-    bleeds to the viewport by a border image's outset (no overflow), stopping short of the aside;
-    its content keeps the story's left edge. The results open their own gap at (0,2,0) over the
-    grid's reset.
+    centred inside `--space-gutter`, and a query container. The header is its first row, across
+    every track; from 64rem the aside takes an implicit second track of `--container-2xs` (new in
+    `token-layer.json`) at a `--space-8` gap, in the story's row, so it starts level with the hero
+    and never beside the title; with no aside there is no track and the story keeps its cap. From
+    64rem the header lays out as a grid: the back link on its own line on the title's left edge,
+    then the title and the summary side by side in two equal halves on a shared first baseline,
+    each wrapping in its own half; without the link no row is kept for it, and a title with no
+    summary takes the row. A band's tone crosses the whole row to both viewport edges by a border
+    image's outset (no overflow), with nothing beside it. Below 64rem the aside follows the story
+    and the page reads as it did with the hero in the header: the hero `--space-4` under the
+    summary, and in a band inside the tone with the band's `md` foot under it, painted by the same
+    outset over the hero's 16:9 frame (`min(100cqi, var(--container-2xl)) * 9 / 16`), so the image
+    is drawn once. Measured at 390 against rc.9's previous layout, every part sits at the same
+    place. The gaps there are padding on the story and the aside, since MR-8 lets no other rule
+    move a block margin in the view. The details `dl` loses the user agent's `1em` margin, which
+    started the aside below the story's top on a site without a reset. The results open their own
+    gap at (0,2,0) over the grid's reset.
   - `image-sizes.json`: two slots, `story` (`(min-width: 44rem) 42rem, calc(100vw - 2rem)`) for the
     hero and the case-study image, and `story-gallery` for a gallery frame, one column of the 3/2/1
     grid (at most 13rem). They are written at a reference gutter, the design system's floor of 1rem
@@ -588,8 +601,10 @@ test, applied through section 2's table, where the stricter row wins.
   - Fixtures: every case-study case regenerated; the new `sector-plain-service` draws a sector, a
     linked service and one with no public page. The fixtures gate checks the aside's presence,
     each row's value and order, that client and sector are never links, and that a service links
-    exactly to its own href, with negative controls. 133 cases in all.
-  - **What each target changes.** Both: the story and aside markup and the new labels (`details`,
+    exactly to its own href, the header holding no image, the hero opening the story, the aside
+    after the story and no empty story wrapper, with negative controls. 133 cases in all.
+  - **What each target changes.** Both: move the header out of the story to the article's first
+    child and the hero out of the header to the story's first child; the story and aside markup and the new labels (`details`,
     `client`, `sector`), with translators' comments; drop the header's facts and the service cards;
     the story slots' sizes; serve the new `salt.css`. Salt for WordPress: link a service only when
     it is published and has a permalink, draw it plain without a public page, leave it out when it

@@ -1775,7 +1775,8 @@ textarea.salt-contact__input {
  * The headings, paragraphs and lists are zeroed for a consuming repo without a reset, as
  * `.salt-block`'s heading is, so the user agent's margins cannot stack with the owl and put a
  * different gap above a line than below it. A detail's `<dd>` is zeroed with them, since the user
- * agent indents it 40px from its label, which is an eighth of a 320px screen.
+ * agent indents it 40px from its label, which is an eighth of a 320px screen, and so is the details
+ * `<dl>`, whose user-agent `1em` above it would start the aside below the story's top.
  */
 .salt-case-study-view__story > * + * {
   margin-block-start: var(--space-section-sm);
@@ -1803,9 +1804,10 @@ textarea.salt-contact__input {
   padding-block-start: var(--space-0);
 }
 
-.salt-case-study-view__story > .salt-case-study-view__header > *,
-.salt-case-study-view__story > .salt-case-study-view__header > .salt-section__content > *,
+.salt-case-study-view > .salt-case-study-view__header > *,
+.salt-case-study-view > .salt-case-study-view__header > .salt-section__content > *,
 .salt-case-study-view__story > .salt-case-study-view__section > h2,
+.salt-case-study-view__details,
 .salt-case-study-view__detail-value {
   margin: 0;
 }
@@ -1816,7 +1818,7 @@ textarea.salt-contact__input {
  * the header's one child, at (0,2,0), and `.salt-section > .salt-section__content` is (0,2,0) too, so
  * on source order the reset would pin it to the band's left edge; (0,3,0) gives it back.
  */
-.salt-case-study-view__story > .salt-case-study-view__header > .salt-section__content {
+.salt-case-study-view > .salt-case-study-view__header > .salt-section__content {
   margin-inline: auto;
   padding-inline: var(--space-0);
 }
@@ -1826,8 +1828,8 @@ textarea.salt-contact__input {
  * lists, whose `margin: 0` is (0,1,0) in `blocks.css`, which a site imports after this file. At
  * (0,1,0) the owl lost to it on source order and the heading sat on the grid.
  */
-.salt-case-study-view__story > .salt-case-study-view__header > * + *,
-.salt-case-study-view__story > .salt-case-study-view__header > .salt-section__content > * + *,
+.salt-case-study-view > .salt-case-study-view__header > * + *,
+.salt-case-study-view > .salt-case-study-view__header > .salt-section__content > * + *,
 .salt-case-study-view__story > .salt-case-study-view__section > * + * {
   margin-block-start: var(--space-4);
 }
@@ -1938,11 +1940,14 @@ textarea.salt-contact__input {
 }
 
 /*
- * The story and the aside (SC-036). The article is a grid of one track, the story, capped at the
- * reading measure and centred inside the gutters, so the story keeps its width whether or not the
- * aside is drawn. From 64rem the aside takes a second track, created only when it is there (an
- * implicit column of `--container-2xs`), so an empty aside leaves no track; narrower, it follows
- * the story in the one track. contract/image-sizes.json's story slots are these widths.
+ * The header, the story and the aside (SC-036). The article is a grid: the header is its first row,
+ * across every track; below it the story, capped at the reading measure and centred inside the
+ * gutters, so it keeps its width whether or not the aside is drawn. From 64rem an article with an
+ * aside has a second track of `--container-2xs` beside the story, starting level with it, never
+ * beside the title; an article without one has no second track, so no empty space. Narrower, the
+ * aside follows the story in the one track. The aside is placed in the second track even where
+ * `:has()` is not supported, as an implicit track; there the header spans the story's track alone.
+ * contract/image-sizes.json's story slots are these widths at the reference gutter.
  */
 .salt-case-study-view {
   display: grid;
@@ -1954,28 +1959,99 @@ textarea.salt-contact__input {
   padding-inline: var(--space-gutter);
 }
 
+.salt-case-study-view > .salt-case-study-view__header {
+  grid-column: 1 / -1;
+}
+
 .salt-case-study-view__story {
   grid-column: 1;
 }
 
 @media (min-width: 64rem) {
+  .salt-case-study-view:has(> .salt-case-study-view__aside) {
+    grid-template-columns: minmax(0, var(--container-2xl)) var(--container-2xs);
+  }
+
   .salt-case-study-view__aside {
     grid-column: 2;
-    grid-row: 1;
+    grid-row: 2;
   }
 }
 
 /*
- * A header drawn as a band keeps its content in the story; only the tone bleeds, to both viewport
- * edges, painted by a border image's outset, which is ink overflow and adds no scrolling. With the
- * aside beside it, the tone stops half the gap short of the aside.
+ * The header row on a wide screen (SC-036): the link back to the index on a line of its own, on the
+ * title's left edge, and below it the title and the summary side by side, each in half the row, so
+ * a long title or summary wraps in its own half rather than pushing the other off. The link spans
+ * both tracks and the title and summary fall to the next row by auto-placement, so without the link
+ * no row is kept for it; a title with no summary after it takes the whole row. The owl's
+ * `--space-4` still opens the gap under the link, so the rows take no gap of their own; the title
+ * and the summary share their first baseline, which also absorbs the owl's margin on whichever of
+ * them follows the other. Narrower, the lines stack as they always have. A plain header lays out
+ * its own children, a band its content div.
  */
-.salt-case-study-view__story > .salt-case-study-view__header.salt-section {
-  border-image: linear-gradient(var(--salt-section-bg), var(--salt-section-bg)) fill 0 / 0 / 0 100vmax;
+@media (min-width: 64rem) {
+  .salt-case-study-view > .salt-case-study-view__header:not(.salt-section),
+  .salt-case-study-view > .salt-case-study-view__header > .salt-section__content {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: baseline;
+    gap: var(--space-0) var(--space-8);
+  }
+
+  .salt-case-study-view__back,
+  .salt-case-study-view__header h1:last-child {
+    grid-column: 1 / -1;
+  }
 }
 
-@media (min-width: 64rem) {
-  .salt-case-study-view:has(> .salt-case-study-view__aside) > .salt-case-study-view__story > .salt-case-study-view__header.salt-section {
-    border-image-outset: 0 calc(var(--space-8) / 2) 0 100vmax;
+/*
+ * Narrower than the two columns (SC-036), the hero reads as the header's last line, as it did when
+ * it sat in the header: `--space-4` under the summary, the header's own line gap, rather than the
+ * gap between the header and the story. The grid's row gap gives way to padding on the story and
+ * the aside, the same `section-sm` but `--space-4` above a story the hero opens; padding, because
+ * MR-8 lets no other rule move a block margin in the view. The article is the query container the
+ * band's outset below measures the story by.
+ */
+.salt-case-study-view {
+  container-type: inline-size;
+}
+
+@media (max-width: 63.99rem) {
+  .salt-case-study-view {
+    row-gap: var(--space-0);
   }
+
+  .salt-case-study-view > .salt-case-study-view__story,
+  .salt-case-study-view > .salt-case-study-view__aside {
+    padding-block-start: var(--space-section-sm);
+  }
+
+  .salt-case-study-view > .salt-case-study-view__story:has(> .salt-case-study-view__media:first-child) {
+    padding-block-start: var(--space-4);
+  }
+
+  /*
+   * A band keeps the hero inside its tone, as it did when the hero sat in the band's content: the
+   * band gives up its foot, its tone runs on down the hero's line gap and the hero's 16:9 frame,
+   * which is the story's width, at most the reading measure, by 9/16, and the band's foot, `md` as
+   * the band's spacing always is, opens under the hero, on whatever follows it. Painted by the
+   * border image's outset, as the bleed to the edges is, so the hero is drawn once.
+   */
+  .salt-case-study-view[data-header='band']:has(> .salt-case-study-view__story > .salt-case-study-view__media:first-child) > .salt-case-study-view__header {
+    padding-block-end: var(--space-0);
+    border-image-outset: 0 100vmax calc(var(--space-4) + min(100cqi, var(--container-2xl)) * 9 / 16 + var(--space-section-md));
+  }
+
+  .salt-case-study-view[data-header='band'] > .salt-case-study-view__story > .salt-case-study-view__media:first-child + * {
+    padding-block-start: var(--space-section-md);
+  }
+}
+
+/*
+ * A header drawn as a band keeps its content on the grid's left edge and across its tracks; only
+ * the tone bleeds, to both viewport edges, painted by a border image's outset, which is ink
+ * overflow and adds no scrolling.
+ */
+.salt-case-study-view > .salt-case-study-view__header.salt-section {
+  border-image: linear-gradient(var(--salt-section-bg), var(--salt-section-bg)) fill 0 / 0 / 0 100vmax;
 }

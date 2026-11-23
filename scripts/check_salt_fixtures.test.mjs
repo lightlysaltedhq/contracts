@@ -849,20 +849,30 @@ const cutting = (rel, open) => (io) => {
   const close = `\n${open.match(/^ */)[0]}</div>\n`
   io.write(`fixtures/${rel}`, t.slice(0, start) + t.slice(t.indexOf(close, start) + close.length))
 }
-test('sc-034: the hero image is the featured image, last in the header, and the only priority image', () => {
+test('sc-034: the hero image is the featured image, first in the story, and the only priority image', () => {
   expectFail(['case-study'], (io) => io.html('case-study/full.html', 'fetchpriority="high" decoding="async"', 'loading="lazy" decoding="async"'), /fixtures\/case-study\/full\.html: the priority image must be in case-study's hero-image/)
   // The flow image claiming priority beside the hero.
   expectFail(['case-study'], (io) => io.html('case-study/full.html', 'alt="The glasshouse half reglazed, its frames stripped back to bare timber" loading="lazy"', 'alt="The glasshouse half reglazed, its frames stripped back to bare timber" fetchpriority="high"'), /2 images claim fetchpriority=high/)
   // No featured image: the flow image is not promoted to priority.
   expectFail(['case-study'], (io) => io.html('case-study/flow-only.html', 'alt="A shaded courtyard of ferns and multi-stemmed birches beside the river" loading="lazy"', 'alt="A shaded courtyard of ferns and multi-stemmed birches beside the river" fetchpriority="high"'), /fixtures\/case-study\/flow-only\.html: an img claims priority, but case-study's markup gives priority to none here/)
-  // The hero image left in the flow, as before SC-034.
+  // The hero image back inside the header row, as before the header row (SC-036).
   expectFail(['case-study'], (io) => {
     const t = io.read('case-study/full.html')
-    const start = t.indexOf('        <div class="salt-case-study-view__media">')
-    const end = t.indexOf('        </div>\n', start) + '        </div>\n'.length
+    const start = t.indexOf('      <div class="salt-case-study-view__media">')
+    const end = t.indexOf('      </div>\n', start) + '      </div>\n'.length
     const hero = t.slice(start, end)
-    io.write('fixtures/case-study/full.html', (t.slice(0, start) + t.slice(end)).replace('      </header>\n', '      </header>\n' + hero.replace(/^  /gm, '')))
-  }, /fixtures\/case-study\/full\.html: .*\[flow-media\]: <div\.salt-case-study-view__media> has classes "salt-case-study-view__media"; the markup gives "salt-case-study-view__flow-media"/)
+    io.write('fixtures/case-study/full.html', (t.slice(0, start) + t.slice(end)).replace('    </header>\n', hero + '    </header>\n'))
+  }, /fixtures\/case-study\/full\.html: .*<header\.salt-case-study-view__header>: <div\.salt-case-study-view__media> is not in the markup at this point/)
+  // The hero image after the challenge: it opens the story.
+  expectFail(['case-study'], (io) => {
+    const t = io.read('case-study/full.html')
+    const start = t.indexOf('      <div class="salt-case-study-view__media">')
+    const end = t.indexOf('      </div>\n', start) + '      </div>\n'.length
+    const hero = t.slice(start, end)
+    const rest = t.slice(0, start) + t.slice(end)
+    const flow = rest.indexOf('      <div class="salt-case-study-view__flow-media">')
+    io.write('fixtures/case-study/full.html', rest.slice(0, flow) + hero + rest.slice(flow))
+  }, /fixtures\/case-study\/full\.html: .*<div\.salt-case-study-view__story> \[flow-media\]: <div\.salt-case-study-view__media> has classes "salt-case-study-view__media"; the markup gives "salt-case-study-view__flow-media"/)
   // The band's hero image takes the story's slot, the aside beside it or not (SC-036).
   expectFail(['case-study'], (io) => io.html('case-study/band.html', 'sizes="(min-width: 44rem) 42rem, calc(100vw - 2rem)"', 'sizes="(min-width: 64rem) 60rem, 100vw"'), /fixtures\/case-study\/band\.html: <img> sizes="\(min-width: 64rem\) 60rem, 100vw"; its slot \(story\) gives/)
 })
@@ -908,8 +918,19 @@ test('sc-036: the aside draws a row only with a value, and is not drawn with non
   // The row's value is the case's.
   expectFail(['case-study'], (io) => io.html('case-study/full.html', '>Hospitality and food<', '>Food<'), /full\.html: the aside's sector draws "Food"; the case gives "Hospitality and food"/)
   // No facts: no aside at all, and an empty aside is refused.
-  expectFail(['case-study'], (io) => io.html('case-study/minimal.html', '    </div>\n  </article>', '    </div>\n    <aside class="salt-case-study-view__aside" aria-label="Project details">\n      <dl class="salt-case-study-view__details"></dl>\n    </aside>\n  </article>'), /minimal\.html: aside is drawn, but the markup draws it only when a detail, the client, the sector or a service is drawn/)
+  expectFail(['case-study'], (io) => io.html('case-study/minimal.html', '    </header>\n  </article>', '    </header>\n    <aside class="salt-case-study-view__aside" aria-label="Project details">\n      <dl class="salt-case-study-view__details"></dl>\n    </aside>\n  </article>'), /minimal\.html: aside is drawn, but the markup draws it only when a detail, the client, the sector or a service is drawn/)
   expectFail(['case-study'], (io) => io.json('case-study/sector-plain-service.json', (d) => { delete d.document.sector; d.document.services = [] }), /sector-plain-service\.html: aside is drawn, but the markup draws it only when/)
+  // The aside follows the story in the source, so it never leads on a narrow screen.
+  expectFail(['case-study'], (io) => {
+    const t = io.read('case-study/full.html')
+    const start = t.indexOf('    <aside class="salt-case-study-view__aside"')
+    const end = t.indexOf('    </aside>\n', start) + '    </aside>\n'.length
+    const aside = t.slice(start, end)
+    const rest = t.slice(0, start) + t.slice(end)
+    io.write('fixtures/case-study/full.html', rest.replace('    <div class="salt-case-study-view__story">\n', aside + '    <div class="salt-case-study-view__story">\n'))
+  }, /fixtures\/case-study\/full\.html: .*<article\.salt-case-study-view>: <div\.salt-case-study-view__story> is not in the markup at this point/)
+  // No part of the story drawn: no empty story wrapper.
+  expectFail(['case-study'], (io) => io.html('case-study/minimal.html', '    </header>\n  </article>', '    </header>\n    <div class="salt-case-study-view__story"></div>\n  </article>'), /fixtures\/case-study\/minimal\.html: story is drawn, but the markup draws it only when a part of the story is drawn/)
   // The facts never repeat in the header.
   expectFail(['case-study'], (io) => io.html('case-study/full.html', '<h1>Restoring the walled garden</h1>', '<h1>Restoring the walled garden</h1>\n        <p class="salt-case-study-view__client">Hollin Farm</p>'), /fixtures\/case-study\/full\.html: .*<p\.salt-case-study-view__client> has classes "salt-case-study-view__client"; the markup gives "salt-case-study-view__summary"/)
 })
@@ -939,7 +960,7 @@ test('sc-021: the header band is drawn as a section band: its tones the site\'s,
   expectFail(['case-study'], (io) => io.html(BAND, 'class="salt-section salt-case-study-view__header"', 'class="salt-case-study-view__header"'), /<header\.salt-case-study-view__header> has classes "salt-case-study-view__header"; the markup gives "salt-case-study-view__header salt-section"/)
 })
 test('sc-021: the band\'s parts sit in its content div, and only a band\'s article carries data-header', () => {
-  expectFail(['case-study'], (io) => io.html(BAND, `${BAND_HEADER}\n        <div class="salt-section__content">`, BAND_HEADER), /<p\.salt-case-study-view__back> where the markup has header-content \(div\)/)
+  expectFail(['case-study'], (io) => io.html(BAND, `${BAND_HEADER}\n      <div class="salt-section__content">`, BAND_HEADER), /<p\.salt-case-study-view__back> where the markup has header-content \(div\)/)
   expectFail(['case-study'], (io) => io.html(BAND, ' data-header="band"', ''), /<article\.salt-case-study-view> lacks data-header, which the markup requires/)
   expectFail(['case-study'], (io) => io.html('case-study/minimal.html', '<article class="salt-case-study-view">', '<article class="salt-case-study-view" data-header="band">'), /fixtures\/case-study\/minimal\.html: .*<article\.salt-case-study-view> carries data-header, which the markup does not declare/)
 })

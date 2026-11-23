@@ -231,7 +231,7 @@
       "image": ".salt-case-study-view__media img",
       "slot": "story",
       "band": false,
-      "when": "the hero image, in a plain header or a band, with or without the aside"
+      "when": "the hero image, the story's first part, in either header variant, with or without the aside"
     },
     {
       "markup": "case-study",

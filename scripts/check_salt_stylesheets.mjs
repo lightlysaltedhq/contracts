@@ -5070,14 +5070,14 @@ const CONTRACTS = [
            above, so they open their gap at (0,2,0) (SC-036). */
         { selector: '.salt-case-study-view__story > .salt-case-study-view__results', value: 'var(--space-section-sm)', join: 'above the results', afterReset: false },
         {
-          selector: '.salt-case-study-view__story > .salt-case-study-view__header > * + *',
+          selector: '.salt-case-study-view > .salt-case-study-view__header > * + *',
           value: 'var(--space-4)',
           join: 'between the title, the client line and the summary',
           afterReset: true,
         },
         /* The same lines inside a band's content, one level down (BD-206). */
         {
-          selector: '.salt-case-study-view__story > .salt-case-study-view__header > .salt-section__content > * + *',
+          selector: '.salt-case-study-view > .salt-case-study-view__header > .salt-section__content > * + *',
           value: 'var(--space-4)',
           join: 'between the title, the client line and the summary on a band',
           afterReset: true,
@@ -5100,9 +5100,10 @@ const CONTRACTS = [
          headings at (0,2,0), as the owls inside them do, so it has to come before those, and it is the
          one rule here allowed to write a zero. */
       const RESET = [
-        '.salt-case-study-view__story > .salt-case-study-view__header > *',
-        '.salt-case-study-view__story > .salt-case-study-view__header > .salt-section__content > *',
+        '.salt-case-study-view > .salt-case-study-view__header > *',
+        '.salt-case-study-view > .salt-case-study-view__header > .salt-section__content > *',
         '.salt-case-study-view__story > .salt-case-study-view__section > h2',
+        '.salt-case-study-view__details',
         '.salt-case-study-view__detail-value',
       ]
       /* Every declaration that sets a box's block-start margin in a horizontal writing mode, logical
@@ -5176,7 +5177,7 @@ const CONTRACTS = [
       /* A header band's content takes back the `margin-inline: auto` the reset takes from it, at
          (0,3,0) over both (0,2,0) rules; deleted, the band's text sits on its left edge and every gap
          above still passes (#226 review, 5). */
-      const CENTRED = '.salt-case-study-view__story > .salt-case-study-view__header > .salt-section__content'
+      const CENTRED = '.salt-case-study-view > .salt-case-study-view__header > .salt-section__content'
       const centring = primitives.find((rule) => rule.at.length === 0 && rule.selectors.includes(CENTRED))
       if (centring === undefined) {
         return `no unconditional \`${CENTRED}\` rule in primitives.css gives a header band's content \`margin-inline: auto\` back from the reset, so its text sits on the band's left edge`
