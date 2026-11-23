@@ -75,20 +75,12 @@
       }
     },
     "story": {
-      "description": "The case study view's story column with no aside (SC-036): the hero image, the case-study image in the flow. The story is capped at 42rem and centred inside the gutters. The gutter is taken as 1rem below 64rem and 2rem from it, as the content slot's bands take it; the gap beside the aside is --space-8, 2rem; the aside --container-2xs, 18rem; the story --container-2xl, 42rem.",
+      "description": "The case study view's story column (SC-036): the hero image and the case-study image in the flow, capped at 42rem, with or without the aside. Its sizes take the gutter at the design system's floor, 1rem (foundations vocabulary.json layoutRoles L4, the gutter's min end), the reference gutter, with the aside --container-2xs at a --space-8 gap and the story --container-2xl. A target's gutter is its own and at least the floor (Salt for WordPress steps 1rem, 1.5rem from 40rem, 2rem from 64rem; Salt for Next.js clamps 1rem to 2rem), so the image is drawn at or below this width and never wider: these sizes may over-declare by twice the gutter's excess over 1rem, at most 2rem, and never under-declare. At the reference gutter the aside changes nothing: from 64rem, 100vw less two gutters, the gap and the aside is already 42rem, so one slot serves the story with or without it.",
       "sizes": "(min-width: 44rem) 42rem, calc(100vw - 2rem)"
     },
-    "story-beside": {
-      "description": "The story column with the aside beside it from 64rem: 100vw less both gutters, the gap and the aside until the story reaches 42rem at 66rem; below 64rem the aside stacks after the story, as with no aside. The gutter is taken as 1rem below 64rem and 2rem from it, as the content slot's bands take it; the gap beside the aside is --space-8, 2rem; the aside --container-2xs, 18rem; the story --container-2xl, 42rem.",
-      "sizes": "(min-width: 66rem) 42rem, (min-width: 64rem) calc(100vw - 24rem), (min-width: 44rem) 42rem, calc(100vw - 2rem)"
-    },
     "story-gallery": {
-      "description": "A gallery frame in the story with no aside: one column of the view's .salt-grid inside the story, three across above 48rem, two above 40rem, one below, with the grid's 1.5rem gap. The gutter is taken as 1rem below 64rem and 2rem from it, as the content slot's bands take it; the gap beside the aside is --space-8, 2rem; the aside --container-2xs, 18rem; the story --container-2xl, 42rem.",
+      "description": "A gallery frame in the story: one column of the view's .salt-grid, three across above 48rem, two above 40rem, one below, with the grid's 1.5rem gap; at most 13rem. Its sizes take the gutter at the design system's floor, 1rem (foundations vocabulary.json layoutRoles L4, the gutter's min end), the reference gutter, with the aside --container-2xs at a --space-8 gap and the story --container-2xl. A target's gutter is its own and at least the floor (Salt for WordPress steps 1rem, 1.5rem from 40rem, 2rem from 64rem; Salt for Next.js clamps 1rem to 2rem), so the image is drawn at or below this width and never wider: these sizes may over-declare by twice the gutter's excess over 1rem, at most 2rem, and never under-declare. At the reference gutter the aside changes nothing: from 64rem, 100vw less two gutters, the gap and the aside is already 42rem, so one slot serves the story with or without it.",
       "sizes": "(min-width: 48.01rem) 13rem, (min-width: 44rem) 20.25rem, (min-width: 40.01rem) calc((100vw - 3.5rem) / 2), calc(100vw - 2rem)"
-    },
-    "story-gallery-beside": {
-      "description": "A gallery frame in the story with the aside beside it from 64rem: a third of the story less the grid's gaps. The gutter is taken as 1rem below 64rem and 2rem from it, as the content slot's bands take it; the gap beside the aside is --space-8, 2rem; the aside --container-2xs, 18rem; the story --container-2xl, 42rem.",
-      "sizes": "(min-width: 66rem) 13rem, (min-width: 64rem) calc((100vw - 27rem) / 3), (min-width: 48.01rem) 13rem, (min-width: 44rem) 20.25rem, (min-width: 40.01rem) calc((100vw - 3.5rem) / 2), calc(100vw - 2rem)"
     },
     "wide": {
       "description": "A wide measure, unbanded.",
@@ -239,42 +231,21 @@
       "image": ".salt-case-study-view__media img",
       "slot": "story",
       "band": false,
-      "when": "the hero image, in a plain header or a band, with no aside"
+      "when": "the hero image, in a plain header or a band, with or without the aside"
     },
     {
       "markup": "case-study",
       "image": ".salt-case-study-view__flow-media img",
       "slot": "story",
       "band": false,
-      "when": "the case-study image in the story, with no aside"
-    },
-    {
-      "markup": "case-study",
-      "image": ".salt-case-study-view__media img",
-      "slot": "story-beside",
-      "band": false,
-      "when": "the hero image, in a plain header or a band, with the aside drawn"
-    },
-    {
-      "markup": "case-study",
-      "image": ".salt-case-study-view__flow-media img",
-      "slot": "story-beside",
-      "band": false,
-      "when": "the case-study image in the story, with the aside drawn"
+      "when": "the case-study image in the story, with or without the aside"
     },
     {
       "markup": "case-study",
       "image": ".salt-case-study-view__frame img",
       "slot": "story-gallery",
       "band": false,
-      "when": "a gallery image, with no aside"
-    },
-    {
-      "markup": "case-study",
-      "image": ".salt-case-study-view__frame img",
-      "slot": "story-gallery-beside",
-      "band": false,
-      "when": "a gallery image, with the aside drawn"
+      "when": "a gallery image, with or without the aside"
     },
     {
       "markup": "post",

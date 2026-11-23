@@ -863,8 +863,8 @@ test('sc-034: the hero image is the featured image, last in the header, and the 
     const hero = t.slice(start, end)
     io.write('fixtures/case-study/full.html', (t.slice(0, start) + t.slice(end)).replace('      </header>\n', '      </header>\n' + hero.replace(/^  /gm, '')))
   }, /fixtures\/case-study\/full\.html: .*\[flow-media\]: <div\.salt-case-study-view__media> has classes "salt-case-study-view__media"; the markup gives "salt-case-study-view__flow-media"/)
-  // The band's hero image takes the story's slot, here with the aside beside it (SC-036).
-  expectFail(['case-study'], (io) => io.html('case-study/band.html', 'sizes="(min-width: 66rem) 42rem, (min-width: 64rem) calc(100vw - 24rem), (min-width: 44rem) 42rem, calc(100vw - 2rem)"', 'sizes="(min-width: 44rem) 42rem, calc(100vw - 2rem)"'), /fixtures\/case-study\/band\.html: <img> sizes="[^"]*"; its slot \(story-beside\) gives/)
+  // The band's hero image takes the story's slot, the aside beside it or not (SC-036).
+  expectFail(['case-study'], (io) => io.html('case-study/band.html', 'sizes="(min-width: 44rem) 42rem, calc(100vw - 2rem)"', 'sizes="(min-width: 64rem) 60rem, 100vw"'), /fixtures\/case-study\/band\.html: <img> sizes="\(min-width: 64rem\) 60rem, 100vw"; its slot \(story\) gives/)
 })
 test('sc-034: the case-study image is drawn between the challenge and the solution, once, and never in an empty wrapper', () => {
   // Absent from the case, but drawn.
@@ -893,12 +893,11 @@ test('sc-034: the case-study image is drawn between the challenge and the soluti
   expectFail(['case-study'], (io) => io.html('case-study/full.html', '<article class="salt-case-study-view">', '<article class="salt-case-study-view" data-media="aside" data-aside-rows="4">'), /<article\.salt-case-study-view> carries data-media, which the markup does not declare/)
   expectFail(['case-study'], (io) => io.json('case-study/full.json', (d) => { d.site.caseStudy = { media: 'aside' } }), /site\.caseStudy is \{ header, headerTone, headerToneDark \}/)
 })
-test('sc-036: the story images take the story column\'s slots, narrower beside the aside, and a gallery frame a column of its grid', () => {
-  // Full draws the aside, so its hero, flow and gallery images take the beside slots.
-  expectFail(['case-study'], (io) => io.html('case-study/full.html', 'sizes="(min-width: 66rem) 42rem, (min-width: 64rem) calc(100vw - 24rem), (min-width: 44rem) 42rem, calc(100vw - 2rem)"', 'sizes="(min-width: 44rem) 42rem, calc(100vw - 2rem)"'), /fixtures\/case-study\/full\.html: <img> sizes="[^"]*"; its slot \(story-beside\) gives/)
-  expectFail(['case-study'], (io) => io.html('case-study/full.html', 'sizes="(min-width: 66rem) 13rem, (min-width: 64rem) calc((100vw - 27rem) / 3), (min-width: 48.01rem) 13rem, (min-width: 44rem) 20.25rem, (min-width: 40.01rem) calc((100vw - 3.5rem) / 2), calc(100vw - 2rem)"', 'sizes="(min-width: 66rem) 42rem, (min-width: 64rem) calc(100vw - 24rem), (min-width: 44rem) 42rem, calc(100vw - 2rem)"'), /fixtures\/case-study\/full\.html: <img> sizes="[^"]*"; its slot \(story-gallery-beside\) gives/)
-  // No-solution draws no aside, so its gallery frame takes the story's own grid slot.
-  expectFail(['case-study'], (io) => io.html('case-study/no-solution.html', 'sizes="(min-width: 48.01rem) 13rem, (min-width: 44rem) 20.25rem, (min-width: 40.01rem) calc((100vw - 3.5rem) / 2), calc(100vw - 2rem)"', 'sizes="(min-width: 66rem) 13rem, (min-width: 64rem) calc((100vw - 27rem) / 3), (min-width: 48.01rem) 13rem, (min-width: 44rem) 20.25rem, (min-width: 40.01rem) calc((100vw - 3.5rem) / 2), calc(100vw - 2rem)"'), /fixtures\/case-study\/no-solution\.html: <img> sizes="[^"]*"; its slot \(story-gallery\) gives/)
+test('sc-036: the story images take the story slot, and a gallery frame a column of its grid, with or without the aside', () => {
+  // The old content slot, and the story slot on a gallery frame, are refused.
+  expectFail(['case-study'], (io) => io.html('case-study/full.html', 'sizes="(min-width: 44rem) 42rem, calc(100vw - 2rem)"', 'sizes="(min-width: 64rem) 60rem, 100vw"'), /fixtures\/case-study\/full\.html: <img> sizes="\(min-width: 64rem\) 60rem, 100vw"; its slot \(story\) gives/)
+  expectFail(['case-study'], (io) => io.html('case-study/no-solution.html', 'sizes="(min-width: 48.01rem) 13rem, (min-width: 44rem) 20.25rem, (min-width: 40.01rem) calc((100vw - 3.5rem) / 2), calc(100vw - 2rem)"', 'sizes="(min-width: 44rem) 42rem, calc(100vw - 2rem)"'), /fixtures\/case-study\/no-solution\.html: <img> sizes="[^"]*"; its slot \(story-gallery\) gives/)
+  expectFail(['case-study'], (io) => io.html('case-study/full.html', 'sizes="(min-width: 48.01rem) 13rem, (min-width: 44rem) 20.25rem, (min-width: 40.01rem) calc((100vw - 3.5rem) / 2), calc(100vw - 2rem)"', 'sizes="(min-width: 44rem) 42rem, calc(100vw - 2rem)"'), /fixtures\/case-study\/full\.html: <img> sizes="[^"]*"; its slot \(story-gallery\) gives/)
 })
 test('sc-036: the aside draws a row only with a value, and is not drawn with none', () => {
   const ROW = (kind) => new RegExp(`\\n        <div class="salt-case-study-view__detail salt-case-study-view__${kind}">[\\s\\S]*?\\n        </div>`)

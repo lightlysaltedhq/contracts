@@ -42,14 +42,10 @@ export function slotOf(img, ancestors, outer, effective) {
   // does), so it spans the full band.
   if (within('salt-related__list')) return { slot: 'card', band: true, columns: '3', fixedBand: 'full' }
   // The case study view (case-study-view.tsx, SC-036): every image sits in the story column, the
-  // hero and the case-study image at its width and a gallery frame at a column of its grid, each
-  // narrower from 64rem when the aside is drawn beside the story.
-  if (within('salt-case-study-view__story')) {
-    const article = ancestors.find((a) => classesOf(a).includes('salt-case-study-view'))
-    const beside = article && elementsOf(article).some((e) => classesOf(e).includes('salt-case-study-view__aside')) ? '-beside' : ''
-    if (within('salt-case-study-view__frame')) return { slot: `story-gallery${beside}`, band: false }
-    if (within('salt-case-study-view__media') || within('salt-case-study-view__flow-media')) return { slot: `story${beside}`, band: false }
-  }
+  // hero and the case-study image at its width and a gallery frame at a column of its grid. At the
+  // reference gutter the aside does not narrow the story, so one slot serves either layout.
+  if (within('salt-case-study-view__frame')) return { slot: 'story-gallery', band: false }
+  if (within('salt-case-study-view__media') || within('salt-case-study-view__flow-media')) return { slot: 'story', band: false }
   if (!within('salt-showcase__media')) return null
   if (section === 'collection-showcase') {
     const layout = effective('layout')

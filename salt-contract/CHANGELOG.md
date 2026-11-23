@@ -571,11 +571,20 @@ test, applied through section 2's table, where the stricter row wins.
     bleeds to the viewport by a border image's outset (no overflow), stopping short of the aside;
     its content keeps the story's left edge. The results open their own gap at (0,2,0) over the
     grid's reset.
-  - `image-sizes.json`: four slots, measured in Chrome at 390 to 1600 CSS px, matching the drawn
-    width at every width tried (gutter 1rem below 64rem, 2rem from it): `story`
-    (`(min-width: 44rem) 42rem, calc(100vw - 2rem)`), `story-beside` with the aside, and a gallery frame's own
-    `story-gallery` and `story-gallery-beside`, one column of the 3/2/1 grid. The services' `card`
-    placement goes. Results at four columns in the 42rem story are about 9rem each, deliberately.
+  - `image-sizes.json`: two slots, `story` (`(min-width: 44rem) 42rem, calc(100vw - 2rem)`) for the
+    hero and the case-study image, and `story-gallery` for a gallery frame, one column of the 3/2/1
+    grid (at most 13rem). They are written at a reference gutter, the design system's floor of 1rem
+    (foundations L4), so they never under-declare on a target whose gutter is at or above it, and the
+    aside needs no slot of its own: at that gutter the story is already 42rem from 64rem. Each
+    target's gutter stays its own. **A deliberate approximation**: a wider gutter draws the image
+    narrower than declared, by twice its excess over 1rem. Measured in Chrome at 390, 639–641,
+    703–704, 719–720, 767–769, 1023–1025, 1040, 1055–1056, 1280 and 1600 CSS px, with and without
+    the aside, no image was ever drawn wider than declared. Salt for WordPress's gutter (1rem,
+    1.5rem from 40rem, 2rem from 64rem) over-declared by at most 16px below 64rem (592 drawn, 608
+    declared, at 640) and 32px from 64rem to 66rem with the aside (640 of 672 at 1024). Salt for
+    Next.js's clamp (1rem to 2rem, `0.5rem + 2vw`) over-declared by at most 25px (647 of 672 at
+    1024). The services' `card` placement goes. Results at four columns in the 42rem story are
+    about 9rem each, deliberately.
   - Fixtures: every case-study case regenerated; the new `sector-plain-service` draws a sector, a
     linked service and one with no public page. The fixtures gate checks the aside's presence,
     each row's value and order, that client and sector are never links, and that a service links
