@@ -61,7 +61,7 @@ test, applied through section 2's table, where the stricter row wins.
   (`./view-props/*`); the replaced-logic format (`./schema/replaced-logic`).
 - Image sizes (`./image-sizes`): each slot's `sizes` per band and column count, the candidate
   widths, and the srcset capped at the upload's intrinsic width (SC-016).
-- Fixtures (`./fixtures/*`): 120 cases with their expected HTML, for the 17 sections, the site
+- Fixtures (`./fixtures/*`): 122 cases with their expected HTML, for the 17 sections, the site
   header and footer, the post, service, case-study, archive, search and not-found views, and the
   page (SC-018, SC-019, SC-021); and the normaliser both sides are compared through
   (`./normalise`).
@@ -371,15 +371,26 @@ test, applied through section 2's table, where the stricter row wins.
     `site-footer/consent-not-wired` show it with and without; `columns-socials-copyright` gains
     the `site.consent` its comment described, and the seven other cases that drew the
     control with no mechanism wired (`display-preferences`, `single-flat-menu-inverse`,
-    `theme-toggle-button` and the four page cases) no longer draw it. 120 cases in all. **What each
-    target changes.** Both: draw the control only with a mechanism wired. Salt for WordPress: only
-    when `wp_has_consent` exists.
+    `theme-toggle-button` and the four page cases) no longer draw it. **One condition for the
+    banner and the control** (proposed, for founder approval at contract review): both are drawn
+    only when the site runs an integration that needs consent, and on Salt for WordPress only
+    when a WP Consent API plugin is also wired; without one, WordPress keeps every such
+    integration denied, failing closed as `salt_consent()` already does, and draws neither. A
+    wired mechanism with no category in use draws no control, no banner and no panel, so
+    `site.consent.categories` may now be empty, and the gate requires the control only when it
+    is not; the new case `site-footer/consent-no-categories` shows it. 122 cases in all. **What
+    each target changes.** Both: draw the banner and the control on that one condition. Salt for
+    WordPress: only when `wp_has_consent` exists, denied otherwise.
   - **The consent panel's boxes are grouped by WP Consent API category** (SC-030). One box per API
     category the site's integrations use, in the API's order (functional, preferences,
     statistics, statistics-anonymous, marketing), its id, name and `<category>` the API category,
     and ticking it sets every Salt category in its group: analytics is the statistics box, and
-    embeds and marketing share the marketing box (a platform's own extra category, WordPress's
-    maps, goes in the box its map names). No two boxes share a setting, so the hydrated WordPress
+    embeds, marketing and WordPress's own `maps` share the marketing box. Only an API category a
+    Salt category maps to can be a box, statistics and marketing, so functional and preferences
+    are refused; `statistics-anonymous` is never drawn, and is written with the statistics box's
+    verdict (proposed, for founder approval at contract review). The gate checks the open panel's
+    boxes even when it draws none, and the new case `site-footer/consent-panel-maps` is a
+    WordPress site with a map. No two boxes share a setting, so the hydrated WordPress
     panel's *Shares one setting with …* note goes. `site.consent.categories` gains `covers`, and
     the gate checks the order, the ids and that each Salt category is in the box its API category
     names. `consent-panel-open` draws `site-footer__consent-statistics` where it drew

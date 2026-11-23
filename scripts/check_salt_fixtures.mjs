@@ -228,7 +228,11 @@ const SITE_KEYS = ['arrow', 'labels', 'collectionIndexes', 'acceptsEnquiries', '
 // The WP Consent API's categories in its own order, and the API category each Salt category maps to
 // (site-footer.json's consent ruling, SC-030).
 const WP_CONSENT_API = ['functional', 'preferences', 'statistics', 'statistics-anonymous', 'marketing']
-const SALT_CONSENT = { analytics: 'statistics', embeds: 'marketing', marketing: 'marketing' }
+const SALT_CONSENT = { analytics: 'statistics', embeds: 'marketing', marketing: 'marketing', maps: 'marketing' }
+// The API categories a box may name: only those some Salt category maps to. statistics-anonymous is
+// written with the statistics box's verdict and never drawn; functional and preferences have no
+// Salt category.
+const CONSENT_BOXES = WP_CONSENT_API.filter((id) => Object.values(SALT_CONSENT).includes(id))
 
 function checkSiteAndMedia(c) {
   const { input, at } = c
@@ -257,11 +261,11 @@ function checkSiteAndMedia(c) {
     const cats = isObject(consent) && Array.isArray(consent.categories) ? consent.categories : null
     const ids = (cats ?? []).map((k) => k?.id)
     const covered = (cats ?? []).flatMap((k) => (Array.isArray(k?.covers) ? k.covers : []))
-    if (!cats || cats.length === 0 || cats.some((k) => !isObject(k) || !Array.isArray(k.covers) || k.covers.length === 0 || typeof k.label !== 'string' || typeof k.description !== 'string') ||
-      ids.some((id) => !WP_CONSENT_API.includes(id)) || ids.some((id, i) => i > 0 && WP_CONSENT_API.indexOf(id) <= WP_CONSENT_API.indexOf(ids[i - 1])) ||
+    if (!cats || cats.some((k) => !isObject(k) || !Array.isArray(k.covers) || k.covers.length === 0 || typeof k.label !== 'string' || typeof k.description !== 'string') ||
+      ids.some((id) => !CONSENT_BOXES.includes(id)) || ids.some((id, i) => i > 0 && WP_CONSENT_API.indexOf(id) <= WP_CONSENT_API.indexOf(ids[i - 1])) ||
       covered.some((x) => SALT_CONSENT[x] === undefined) || new Set(covered).size !== covered.length ||
       (cats ?? []).some((k) => (k.covers ?? []).some((x) => SALT_CONSENT[x] !== k.id))) {
-      fail(`${at}.json: site.consent.categories is one box per WP Consent API category in use, in the API's order (${WP_CONSENT_API.join(', ')}): { id, covers, label, description }, id the API category and covers the Salt categories it sets, each in one box only and in the box its API category names (${Object.entries(SALT_CONSENT).map(([a, b]) => `${a} to ${b}`).join(', ')})`)
+      fail(`${at}.json: site.consent.categories is one box per WP Consent API category in use, in the API's order, each one a Salt category maps to (${CONSENT_BOXES.join(', ')}; statistics-anonymous is written with statistics and never drawn), and may be empty: { id, covers, label, description }, id the API category and covers the Salt categories it sets, each in one box only and in the box its API category names (${Object.entries(SALT_CONSENT).map(([a, b]) => `${a} to ${b}`).join(', ')})`)
     }
   }
   for (const [id, m] of Object.entries(input.media ?? {})) {
@@ -1101,16 +1105,18 @@ function checkMarkup(c) {
     if (isDrawn && !open) fail(`${at}.html: ${what} is drawn, but the case's state does not say it is open (state.${key})`)
     if (!isDrawn && open) fail(`${at}.html: state.${key} says ${what} is open, but it is not drawn`)
   }
-  // The footer's consent control is drawn if and only if the site has a consent mechanism wired,
-  // and an open panel draws the site's boxes, in order (site-footer.json, SC-030).
+  // The footer's consent control is drawn if and only if the site's consent condition holds: a
+  // mechanism wired with at least one category in use (site-footer.json, SC-030). The panel, when
+  // drawn, draws the site's boxes, in order, and with no panel no box is drawn.
   if (every().some((e) => e.name === 'footer' && classesOf(e).includes('salt-footer'))) {
-    const wired = isObject(c.input.site?.consent)
+    const wired = isObject(c.input.site?.consent) && (c.input.site.consent.categories ?? []).length > 0
     const control = every().some((e) => classesOf(e).includes('salt-footer__consent'))
-    if (wired && !control) fail(`${at}.html: the site has a consent mechanism wired (site.consent), but the footer draws no consent control`)
-    if (!wired && control) fail(`${at}.html: the footer draws the consent control, but the site has no consent mechanism wired (site.consent); it is drawn only when one is`)
+    if (wired && !control) fail(`${at}.html: the site has a consent mechanism wired (site.consent) with a category in use, but the footer draws no consent control`)
+    if (!wired && control) fail(`${at}.html: the footer draws the consent control, but the site has no consent mechanism wired (site.consent) with a category in use; it is drawn only when it has`)
     const boxes = every().filter((e) => classesOf(e).includes('salt-consent-panel__checkbox')).map((e) => attr(e, 'name'))
     const want = (c.input.site?.consent?.categories ?? []).map((k) => k?.id)
-    if (boxes.length && boxes.join(',') !== want.join(',')) fail(`${at}.html: the consent panel draws the boxes ${boxes.join(', ')}; the site's WP Consent API categories are ${want.join(', ')}, one box each, in that order`)
+    const panel = every().some((e) => classesOf(e).includes('salt-consent-panel'))
+    if ((panel ? want : []).join(',') !== boxes.join(',')) fail(`${at}.html: the consent panel draws the boxes ${boxes.join(', ')}; the site's WP Consent API categories are ${want.join(', ')}, one box each, in that order`)
   }
   nestedCase = c.kind === 'section' || !c.nested ? null : c
   const { doc, spec, elements } = c.kind === 'section' ? wrapperSpec(c) : documentSpec(c)

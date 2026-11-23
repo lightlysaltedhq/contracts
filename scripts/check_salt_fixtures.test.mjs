@@ -1319,7 +1319,9 @@ test('protocol: an input no fixture holds exits non-zero with nothing on stdout'
 test('sc-030: the footer draws the consent control exactly when a consent mechanism is wired', () => {
   const CONTROL = '\n      <div class="salt-footer__consent">\n        <button class="salt-button" type="button" data-style="secondary" data-salt-consent-preferences="" aria-disabled="true">Cookie preferences</button>\n        <p class="salt-sr-only" role="status" aria-live="polite"></p>\n      </div>'
   expectFail(['site-footer'], (io) => io.json('site-footer/consent-wired.json', (d) => { delete d.site.consent }), /consent-wired\.html: the footer draws the consent control, but the site has no consent mechanism wired/)
-  expectFail(['site-footer'], (io) => io.html('site-footer/consent-wired.html', CONTROL, ''), /consent-wired\.html: the site has a consent mechanism wired \(site\.consent\), but the footer draws no consent control/)
+  // A wired mechanism with no category in use draws no control.
+  expectFail(['site-footer'], (io) => io.html('site-footer/consent-no-categories.html', 'Hartley Gardens</p>', `Hartley Gardens</p>${CONTROL}`), /consent-no-categories\.html: the footer draws the consent control, but the site has no consent mechanism wired \(site\.consent\) with a category in use/)
+  expectFail(['site-footer'], (io) => io.html('site-footer/consent-wired.html', CONTROL, ''), /consent-wired\.html: the site has a consent mechanism wired \(site\.consent\) with a category in use, but the footer draws no consent control/)
 })
 test('sc-030: the consent panel draws one box per WP Consent API category in use, in the API order', () => {
   // A box per Salt category, as before: embeds is not an API category.
@@ -1329,6 +1331,14 @@ test('sc-030: the consent panel draws one box per WP Consent API category in use
     const [stats, mkt] = d.site.consent.categories
     d.site.consent.categories = [stats, { ...mkt, covers: ['embeds'] }, { ...mkt, covers: ['marketing'] }]
   }), /site\.consent\.categories is one box per WP Consent API category/)
+  // An API category no Salt category maps to, and statistics-anonymous, which is never drawn.
+  for (const id of ['functional', 'preferences', 'statistics-anonymous']) {
+    expectFail(['site-footer'], (io) => io.json('site-footer/consent-panel-open.json', (d) => { d.site.consent.categories[0].id = id }), /each one a Salt category maps to \(statistics, marketing; statistics-anonymous is written with statistics and never drawn\)/)
+  }
+  // maps is WordPress's own category, and goes in the marketing box only.
+  expectFail(['site-footer'], (io) => io.json('site-footer/consent-panel-maps.json', (d) => { d.site.consent.categories[0].covers.push('maps'); d.site.consent.categories[1].covers = ['embeds', 'marketing'] }), /site\.consent\.categories is one box per WP Consent API category/)
+  // The open panel is checked even when it draws no box at all.
+  expectFail(['site-footer'], (io) => io.html('site-footer/consent-panel-open.html', "            <div class=\"salt-consent-panel__category\">\n              <input class=\"salt-consent-panel__checkbox\" type=\"checkbox\" id=\"site-footer__consent-statistics\" name=\"statistics\" aria-describedby=\"site-footer__consent-statistics-description\">\n              <label for=\"site-footer__consent-statistics\">Analytics</label>\n              <div class=\"salt-consent-panel__description\" id=\"site-footer__consent-statistics-description\">Helps us see which pages are read, with no personal details.</div>\n            </div>\n            <div class=\"salt-consent-panel__category\">\n              <input class=\"salt-consent-panel__checkbox\" type=\"checkbox\" id=\"site-footer__consent-marketing\" name=\"marketing\" aria-describedby=\"site-footer__consent-marketing-description\">\n              <label for=\"site-footer__consent-marketing\">Marketing and embedded content</label>\n              <div class=\"salt-consent-panel__description\" id=\"site-footer__consent-marketing-description\">Lets us measure how our adverts perform, and shows videos and maps from other sites.</div>\n            </div>\n", ''), /the consent panel draws the boxes ; the site's WP Consent API categories are statistics, marketing/)
   // Out of the API's order.
   expectFail(['site-footer'], (io) => io.json('site-footer/consent-panel-open.json', (d) => { d.site.consent.categories.reverse() }), /in the API's order/)
   // The panel names a box by its Salt category.

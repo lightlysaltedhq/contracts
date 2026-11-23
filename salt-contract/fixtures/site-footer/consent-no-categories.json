@@ -1,0 +1,45 @@
+{
+  "$comment": "A consent mechanism is wired (on WordPress, a WP Consent API plugin), but no integration the site runs needs consent: site.consent.categories is empty. A visitor has nothing to choose, so the footer draws no consent control and no status line, and no banner is drawn (SC-030; proposed, for founder approval at contract review). The HTML is consent-not-wired's.",
+  "chrome": "site-footer",
+  "summary": "A consent mechanism wired with no category in use: the footer draws no consent control.",
+  "context": {
+    "path": "/"
+  },
+  "site": {
+    "name": "Hartley Gardens",
+    "home": "/",
+    "organisation": "Hartley Gardens",
+    "labels": {
+      "navigation": "Footer",
+      "preferences": "Cookie preferences"
+    },
+    "consent": {
+      "labels": {
+        "preferences": "Cookie preferences",
+        "title": "Cookie preferences",
+        "save": "Save preferences",
+        "cancel": "Cancel"
+      },
+      "categories": []
+    },
+    "footer": {
+      "tone": "surface",
+      "showLogo": false,
+      "columns": [
+        {
+          "links": [
+            {
+              "label": "Contact",
+              "href": "/contact/"
+            },
+            {
+              "label": "Privacy policy",
+              "href": "/privacy/"
+            }
+          ]
+        }
+      ],
+      "copyright": "© 2026 Hartley Gardens"
+    }
+  }
+}

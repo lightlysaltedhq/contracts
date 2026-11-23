@@ -272,8 +272,8 @@
                 "salt-footer__consent"
               ],
               "optional": true,
-              "when": "the site has a consent mechanism wired",
-              "note": "Drawn only when the site has a consent mechanism wired, so that a visitor has something to choose (SC-030): on Salt for WordPress an active WP Consent API plugin (wp_has_consent exists), on Salt for Next.js its own consent store with an integration that needs consent. With none wired nothing non-essential loads, and the footer draws neither the control nor its status line. A fixture's site.consent says one is wired.",
+              "when": "the site's consent condition holds: an integration needs consent and, on WordPress, a WP Consent API plugin is wired",
+              "note": "The consent banner and the footer's consent control are drawn on one condition (SC-030; proposed, for founder approval at contract review): the site runs an integration that needs consent, which is a consent category in use (a fixture's site.consent.categories is not empty), and on Salt for WordPress a WP Consent API plugin is also wired (wp_has_consent exists). Without one, WordPress keeps every integration that needs consent denied, failing closed as salt_consent() does, and draws neither. Salt for Next.js's own consent store is always wired, so its condition is the integration alone. A wired mechanism with no category in use draws neither: a visitor has nothing to choose. The banner (page.json) is drawn on the same condition. When it does not hold, the footer draws neither the control nor its status line. A fixture's site.consent says a mechanism is wired, and its categories are the ones in use.",
               "children": [
                 {
                   "role": "consent-control",
@@ -338,7 +338,7 @@
                           "repeat": {
                             "from": "categories"
                           },
-                          "note": "One box per WP Consent API category the site's integrations use, in the API's order (functional, preferences, statistics, statistics-anonymous, marketing), never one per Salt category: <category> is the API category, and ticking the box grants or refuses every Salt category in its group (site-footer's consent ruling, SC-030). So no box shares its setting with another, and the panel draws no note that two do.",
+                          "note": "One box per WP Consent API category the site's integrations use, in the API's order, never one per Salt category, and only the API categories a Salt category maps to (statistics, marketing): <category> is the API category, and ticking the box grants or refuses every Salt category in its group (site-footer's consent ruling, SC-030). So no box shares its setting with another, and the panel draws no note that two do.",
                           "children": [
                             {
                               "role": "consent-checkbox",
@@ -464,7 +464,7 @@
     },
     {
       "topic": "ruling",
-      "text": "The consent panel groups its boxes by WP Consent API category (SC-030). Each Salt category maps to one API category: analytics to statistics, embeds to marketing, marketing to marketing, and a platform's own extra category to the one its platform maps it to (Salt for WordPress's maps to marketing); necessary is never a box. The panel draws one box per API category that at least one of the site's integrations uses, in the API's order (functional, preferences, statistics, statistics-anonymous, marketing). The box's id, name and <category> are the API category; its label and description are the site's. Ticking a box grants every Salt category in its group, and clearing it refuses them all, so a visitor's choice reads the same through the WP Consent API (wp_has_consent) and through Salt's own gate, and no two boxes ever share one setting. A site whose integrations use only analytics draws one box, statistics."
+      "text": "The consent panel groups its boxes by WP Consent API category (SC-030). Each Salt category maps to one API category: analytics to statistics, embeds to marketing, marketing to marketing, and maps (Salt for WordPress's own category) to marketing; necessary is never a box. The panel draws one box per API category that at least one of the site's integrations uses, in the API's order, and only an API category some Salt category maps to can be one: statistics, then marketing. functional and preferences have no Salt category, so no box. statistics-anonymous is never drawn: Salt writes it with the statistics box's verdict, so a plugin that reads it agrees with the visitor's one choice. A wired mechanism with no category in use draws no control, no banner and no panel (proposed, for founder approval at contract review). The box's id, name and <category> are the API category; its label and description are the site's. Ticking a box grants every Salt category in its group, and clearing it refuses them all, so a visitor's choice reads the same through the WP Consent API (wp_has_consent) and through Salt's own gate, and no two boxes ever share one setting. A site whose integrations use only analytics draws one box, statistics."
     },
     {
       "topic": "order",
@@ -482,7 +482,7 @@
         "The column ids site-footer__column-<n>, counting from 1, in place of the salt-footer-column-<n> ones it builds from idPrefix and counts from 0; the idPrefix prop goes (SC-012).",
         "The consent panel's ids site-footer__consent-title, site-footer__consent-<category> and site-footer__consent-<category>-description in place of the useId() prefix it builds them from today (SC-012).",
         "The consent panel's boxes by WP Consent API category (SC-030): one statistics box for analytics and one marketing box for embeds and marketing, named and id'd by the API category, each setting every Salt category in its group, in place of one box per Salt category (analytics, embeds, marketing). The consent cookie keeps Salt's categories.",
-        "The consent control and its status line drawn only when its consent store is wired to an integration that needs consent (SC-030)."
+        "The consent control and its status line, and the banner, drawn only when an integration needs consent (SC-030)."
       ]
     },
     "wordpress": {
@@ -555,8 +555,8 @@
         }
       ],
       "owes": [
-        "Rename to salt-footer*; data-tone on the footer; columns, its single menu as one untitled column; the consent control and panel only when a WP Consent API plugin is active (SC-030); social icons named by role=img and aria-label.",
-        "The hydrated consent panel's boxes by WP Consent API category (SC-030): one per API category the site's integrations use, named by it, each setting every Salt category salt_consent_api_category maps to it, so the 'Shares one setting with …' note goes.",
+        "Rename to salt-footer*; data-tone on the footer; columns, its single menu as one untitled column; the consent banner, control and panel only when an integration needs consent and a WP Consent API plugin is active, every such integration denied without one (SC-030); social icons named by role=img and aria-label.",
+        "The hydrated consent panel's boxes by WP Consent API category (SC-030): one per API category the site's integrations use, named by it, each setting every Salt category salt_consent_api_category maps to it, so the 'Shares one setting with …' note goes; statistics-anonymous written with the statistics box's verdict, never drawn.",
         "The column and consent panel ids exactly as the ruling note fixes them (SC-012).",
         "SC-019: the theme toggle's server form is the empty span[aria-hidden] and its button draws the sun or moon glyph; an untitled column's list carries the nav's name as aria-label; the consent panel dialog carries open."
       ]
