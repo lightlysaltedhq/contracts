@@ -1,6 +1,6 @@
 {
   "$schema": "../../schema/field-definition.schema.json",
-  "version": "1.0.0-rc.10",
+  "version": "1.0.0",
   "$comment": "A postal address, one shape for a location's address and the company's (the founder's rulings of 18/11/2026, change 27 and question 1): Salt for Next.js's company address names, with the street allowed two lines. The company address lives in each platform's company settings (Salt for Next.js's company global, Salt for WordPress's company options), which no emitter generates; each owes this shape there too. The parts feed schema.org's PostalAddress.",
   "shape": "address",
   "fields": [

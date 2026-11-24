@@ -1,6 +1,6 @@
 {
   "$schema": "../schema/socials.schema.json",
-  "version": "1.0.0-rc.10",
+  "version": "1.0.0",
   "$comment": "Which address means which social network (the founder's ruling of 18/11/2026, condition 25): a social link is stored as { name, url } (contract/collections/_person.json, socials) and its network, the glyph a card draws (view-props/_shared.json, profile.network), is derived from the url here. Taken from Salt for Next.js's SOCIAL_HOSTS (core src/icons/registry.ts), which is the wider of the two platforms' tables: Salt for WordPress's salt_chrome_social_hosts() (inc/services/chrome.php) lacks fb.com, fb.me, lnkd.in, pinterest.co.uk, pin.it, reddit, whatsapp, t.co, youtu.be and bsky.social, and owes them.",
   "rule": "Read the url's host, lower-cased, with one leading www. removed. It names a network when it equals one of that network's hosts or ends with a dot and one of them (a subdomain); never by a substring, so notlinkedin.com and linkedin.com.example name none. An address with no host, or whose host matches none, names no network: the card draws the link's name as text. Networks are tried in this file's order and the first match wins; no host appears twice.",
   "networks": [

@@ -85,23 +85,23 @@ receives and the choices on offer.
 
 ## Status
 
-`1.0.0-rc.10` is the release candidate for `1.0.0`: private, never on the registry, held until an
-implementation's run of `salt-conformance` against it conforms in full, in a report that names
-`1.0.0-rc.10` (SC-017, SC-018, SC-020, SC-022; `RELEASE-POLICY.md` section 5). It follows
-`1.0.0-rc.1`, whose first run raised eight questions about the contract itself, `1.0.0-rc.2`,
-whose run raised three more, `1.0.0-rc.3`, against which bringing Salt for Next.js's core
-markup to the contract raised seven, `1.0.0-rc.4`, after which the owner ruled on the
-priority image and on team's categories, `1.0.0-rc.5`, after which the owner ruled on the
-drawer's close button and on a team card's links, `1.0.0-rc.6`, after which the owner ruled
+Salt for WordPress passed the full `salt-conformance` run against candidate 10 for `1.0.0`
+(SC-017, SC-018, SC-020, SC-022; `RELEASE-POLICY.md` section 5). See `CHANGELOG.md` for
+the Salt for Next.js lag. The final candidate follows
+candidate 1, whose first run raised eight questions about the contract itself, candidate 2,
+whose run raised three more, candidate 3, against which bringing Salt for Next.js's core
+markup to the contract raised seven, candidate 4, after which the owner ruled on the
+priority image and on team's categories, candidate 5, after which the owner ruled on the
+drawer's close button and on a team card's links, candidate 6, after which the owner ruled
 on the collections' field names, a post's sections and rich text's heading levels (18/11/2026),
-`1.0.0-rc.7`, after which the founder ruled on how a limit is held, on targets and on the
-service example (18/11/2026, ID-3968, ID-3969, ID-3970), and `1.0.0-rc.8`, after which the
+candidate 7, after which the founder ruled on how a limit is held, on targets and on the
+service example (18/11/2026, ID-3968, ID-3969, ID-3970), and candidate 8, after which the
 founder ruled out inline styles and ruled on the footer's consent control and panel and on label
 placeholders, and the attribute design and the case study's sidebar parts were proposed for his
 approval at contract review (23/11/2026, SC-029 to SC-032), and the founder replaced the case
 study's image aside with a hero image and an image in the flow (23/11/2026, SC-034), added
 clients and sectors (SC-035) and laid the case study out as a story and an aside of the project's
-facts (SC-036), and `1.0.0-rc.9`, against which Salt for WordPress conformed in full and after
+facts (SC-036), and candidate 9, against which Salt for WordPress conformed in full and after
 which the contract defined a line break inside a paragraph, as the founder ruled it must before
 1.0.0 (18/11/2026, ID-3966);
 those rulings (SC-023 to SC-036, and the rulings of 18/11/2026)
@@ -649,7 +649,7 @@ report).
 ```json
 {
   "format": "salt-conformance/1",
-  "contract": { "package": "@lightlysaltedhq/salt-contract", "version": "1.0.0-rc.10" },
+  "contract": { "package": "@lightlysaltedhq/salt-contract", "version": "1.0.0" },
   "platform": "nextjs",
   "implementation": { "version": "0.4.0" },
   "adapter": { "kind": "command", "target": "node scripts/salt-adapter.mjs" },
@@ -658,7 +658,7 @@ report).
   "summary": { "pass": 15, "fail": 1, "incomplete": 0, "notShipped": 1 },
   "fields": { "platform": "payload", "snapshot": "…", "options": "…", "problems": [] },
   "problems": [],
-  "stylesheets": { "served": "…", "bundle": "styles/salt.css", "contract": "1.0.0-rc.10", "ok": true, "status": "identical" },
+  "stylesheets": { "served": "…", "bundle": "styles/salt.css", "contract": "1.0.0", "ok": true, "status": "identical" },
   "sections": [
     {
       "id": "hero",

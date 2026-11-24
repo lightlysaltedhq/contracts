@@ -1,6 +1,6 @@
 {
   "$schema": "../../schema/markup.schema.json",
-  "version": "1.0.0-rc.10",
+  "version": "1.0.0",
   "id": "icon",
   "kind": "component",
   "root": {
