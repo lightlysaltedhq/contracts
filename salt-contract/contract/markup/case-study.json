@@ -1,6 +1,6 @@
 {
   "$schema": "../../schema/markup.schema.json",
-  "version": "1.0.0-rc.9",
+  "version": "1.0.0-rc.10",
   "id": "case-study",
   "kind": "view",
   "summary": "A case study, drawn by core's case-study view.",
@@ -602,8 +602,7 @@
         "The case-study view's markup above.",
         "The featured image drawn first in the story column, as the priority image, and caseStudyImage (an attachment ID) drawn in div.salt-case-study-view__flow-media between the challenge and the solution, lazy, and not at all when it is the featured image's attachment (SC-034). No data-media or data-aside-rows on the article.",
         "The section heading ids case-study__challenge-heading, case-study__solution-heading and case-study__gallery-heading, each named by its section's aria-labelledby (SC-012).",
-        "The header row, the story column and the aside (SC-036): the hero image moved into the story, the results and the details moved, the client line and the services section gone; Client and Sector from the record's title when its module is on and the record resolves, otherwise the free text; a service linked only when it is published and has a permalink, drawn plain when it has no public page, and left out when it may not be shown; the labels details, client and sector, with translators' comments.",
-        "An ACF options page on which editors set the case-study view's header band (the header variant, plain or band, with the band's tone and dark tone), the settings a fixture gives as site.caseStudy: header, headerTone and headerToneDark. The image aside layout setting goes (SC-034)."
+        "The header row, the story column and the aside (SC-036): the hero image moved into the story, the results and the details moved, the client line and the services section gone; Client and Sector from the record's title when its module is on and the record resolves, otherwise the free text; a service linked only when it is published and has a permalink, drawn plain when it has no public page, and left out when it may not be shown; the labels details, client and sector, with translators' comments."
       ]
     },
     "nextjs": {

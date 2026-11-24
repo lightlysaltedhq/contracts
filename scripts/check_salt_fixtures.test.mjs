@@ -1255,6 +1255,23 @@ test('normalise: white space at block boundaries does not count, between inline 
   differ('<li><svg class="salt-icon"></svg>\n  Priority support</li>', '<li><svg class="salt-icon"></svg>Priority support</li>')
   differ('<p>Read more</p>', '<p>Readmore</p>')
 })
+test('normalise: a br ends a line, so the space either side of it does not count, and it is neither a space nor a paragraph (ID-3966)', () => {
+  const br = '<p>First line<br>Second line</p>'
+  same('<p>First line <br>Second line</p>', br)
+  same('<p>First line<br> Second line</p>', br)
+  same('<p>First line\n  <br />\n  Second line</p>', br)
+  same('<p><strong>First line </strong><br>Second line</p>', '<p><strong>First line</strong><br>Second line</p>')
+  // The controls: a space, no space, two paragraphs, two breaks.
+  differ('<p>First line Second line</p>', br)
+  differ('<p>First lineSecond line</p>', br)
+  differ('<p>First line</p><p>Second line</p>', br)
+  differ('<p>First line<br><br>Second line</p>', br)
+  // A no-break space is not white space, and pre keeps its own.
+  differ('<p>First line&nbsp;<br>Second line</p>', br)
+  differ('<pre>First line <br>Second line</pre>', '<pre>First line<br>Second line</pre>')
+  // Between two inline elements, away from a br, a space still counts.
+  differ('<p><em>First</em> <em>line</em><br>Second line</p>', '<p><em>First</em><em>line</em><br>Second line</p>')
+})
 test('normalise: boolean attribute forms are one form', () => {
   same('<details open="">x</details>', '<details open>x</details>')
   same('<input required="required">', '<input required>')

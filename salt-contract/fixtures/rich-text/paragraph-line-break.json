@@ -1,0 +1,18 @@
+{
+  "section": "rich-text",
+  "summary": "A line break inside a paragraph (ID-3966), beside its two controls. The first paragraph's stored br is drawn as one br in that same p: never a space, which the second paragraph is, and never a paragraph boundary, which the third and fourth are, with the same words. The last paragraph breaks after an inline element. The body's newlines between paragraphs are source formatting, which compares as nothing.",
+  "values": {
+    "heading": "Where to find us",
+    "body": "<p>Unit 4, Mill Lane<br>Bristol BS1 4XY</p>\n<p>Unit 4, Mill Lane Bristol BS1 4XY</p>\n<p>Unit 4, Mill Lane</p>\n<p>Bristol BS1 4XY</p>\n<p><strong>Visits by appointment</strong><br>Ring the bell at the side gate.</p>",
+    "settings": {
+      "anchorId": "find-us"
+    }
+  },
+  "context": {
+    "headingLevel": 2,
+    "headingRendered": true,
+    "priorityMedia": false,
+    "track": "rich-text-1",
+    "index": 1
+  }
+}

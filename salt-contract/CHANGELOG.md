@@ -4,7 +4,7 @@ Newest first. Dates are DD/MM/YYYY. What each part of a version means, and how a
 announced and migrated, is in `RELEASE-POLICY.md`. Decisions cited as `SC-nnn` are in Lightly
 Salted's decision log for Product Salt.
 
-## 1.0.0 (candidate `1.0.0-rc.9`, prepared 23/11/2026; not published, dated when tagged)
+## 1.0.0 (candidate `1.0.0-rc.10`, prepared 24/11/2026; not published, dated when tagged)
 
 **Semver call: MAJOR, the first release of the contract.** No earlier version was published, so no
 implementation conformed to one. Adopting it is still a migration for existing sites, because the
@@ -12,7 +12,9 @@ contract renames and folds what Salt for WordPress 5.0.0 and Salt for Next.js 0.
 *What a site does*). From 1.0.0, each change's part is decided by `RELEASE-POLICY.md`: section 1's
 test, applied through section 2's table, where the stricter row wins.
 
-### Accessibility fixes
+### Changed
+
+Accessibility fixes, after `1.0.0-rc.8`:
 
 - Light `surface-alt` bands and footers use normal ink for secondary text. Other tones, dark tone routing and the foundations palette are unchanged.
 - On phones without JavaScript, the visible header menu wraps and its submenus open in the flow. The header scrolls away so it cannot cover a focused form reply. The scripted drawer and the head’s `noscript` style are unchanged.
@@ -66,7 +68,7 @@ test, applied through section 2's table, where the stricter row wins.
   (`./view-props/*`); the replaced-logic format (`./schema/replaced-logic`).
 - Image sizes (`./image-sizes`): each slot's `sizes` per band and column count, the candidate
   widths, and the srcset capped at the upload's intrinsic width (SC-016).
-- Fixtures (`./fixtures/*`): 129 cases with their expected HTML, for the 17 sections, the site
+- Fixtures (`./fixtures/*`): 134 cases with their expected HTML, for the 17 sections, the site
   header and footer, the post, service, case-study, archive, search and not-found views, and the
   page (SC-018, SC-019, SC-021); and the normaliser both sides are compared through
   (`./normalise`).
@@ -627,6 +629,39 @@ test, applied through section 2's table, where the stricter row wins.
     the story slots' sizes; serve the new `salt.css`. Salt for WordPress: link a service only when
     it is published and has a permalink, draw it plain without a public page, leave it out when it
     may not be shown.
+- **A line break inside a paragraph is defined** (ID-3966, after `1.0.0-rc.9`; the founder ruled
+  on 18/11/2026 that the contract defines it before 1.0.0). A rich-text field's `paragraph` now
+  covers a line break in a paragraph (`schema/field-definition.schema.json`, `allowed`;
+  `markup/rich-text-body.json`). In the stored form, the fixtures' interchange HTML, a break is a
+  `br` inside its `p`, and it is drawn as one `br` in that same `p`: never as a space, and never as
+  a new paragraph, which is a new `p`. The interchange's white space is HTML's (README, *Stored
+  forms*): a newline in its source is formatting and collapses like a space, so only a `br`
+  breaks a line. How an editor makes a break and how a platform stores it (Lexical's linebreak
+  node; the WordPress editor's `br`, or a newline its formatting turns into one) stay each
+  platform's. The fixtures gate offered only `p` for `paragraph` and refused a `br`; it offers
+  both. The new case `rich-text/paragraph-line-break` draws a break beside its two controls in the
+  same words, a space and a paragraph boundary, and a break after an inline element, with
+  newlines between its paragraphs as source formatting. 134 cases in all. Semver: MAJOR by
+  `RELEASE-POLICY.md` section 2's fixtures row (a new case can turn a conforming implementation
+  red), in the candidate series as rc.10, so the call stays MAJOR. **What each target changes.**
+  Neither's drawing: Salt for Next.js draws Lexical's linebreak as `br` in its paragraph, and
+  Salt for WordPress's `paragraph` allows `p` and `br`. Both: keep a `br` the adapter is given as
+  the platform's own break, and run the new case.
+- **The normaliser reads a `br` as the end of a line** (ID-3966, after `1.0.0-rc.9`). By the CSS
+  rule it already follows, white space either side of a `br` is not drawn, but the normaliser
+  dropped only the space after one: `First line <br>Second line`, and a template's
+  `First line\n<br>`, differed from `First line<br>Second line`, while `<br> Second line` did
+  not. Both sides of the break now go. A no-break space before a `br` still compares, as does
+  white space in `pre` and a space between two inline elements away from a break. Only outputs a
+  browser draws alike newly compare equal, so no implementation that passed can fail: section 2
+  has no row for the normaliser, and section 1's test makes the change PATCH on its own.
+- **Salt for WordPress no longer owes the case study's options page**
+  (`markup/case-study.json`, after `1.0.0-rc.9`). Its `owes` asked for an ACF options page on
+  which editors set the view's header band (`site.caseStudy`: `header`, `headerTone`,
+  `headerToneDark`), with the image aside's setting gone (SC-034). Salt for WordPress ships that
+  page, without the aside's setting, so the entry goes; the image aside's switch is not restored.
+  How a site sets the view's layout stays the platform's (README, `site.caseStudy`). Text only: no
+  verdict changes (PATCH on its own).
 - The case-study view has fixtures and is required of every implementation (SC-021).
   `fixtures/case-study/` holds four cases (`full`, `aside`, `band` and `minimal`), `case-study`
   joins `REQUIRED_FILES`, and a full conformance run refuses to declare it not shipped. The
@@ -643,7 +678,8 @@ test, applied through section 2's table, where the stricter row wins.
   `aside-card` slot: the default band from 64rem, where the services keep to the measure, and the
   full band below. Salt for Next.js owes naming the view's four sections and that card slot; Salt for
   WordPress owes the markup, and an ACF options page for the band and the aside layout. (The image
-  aside, its site key and its slots are withdrawn in rc.9, SC-034.)
+  aside, its site key and its slots are withdrawn in rc.9, SC-034, and the options page is no
+  longer owed from rc.10, below.)
 - The conformance runner (`./conformance`, bin `salt-conformance`): fixtures, field snapshots,
   class vocabulary and the served stylesheet, reported as `conformance.json` (format
   `salt-conformance/1`) and `conformance.md`. An implementation conforms only when all four checks

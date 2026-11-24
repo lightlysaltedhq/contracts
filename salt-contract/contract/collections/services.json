@@ -1,6 +1,6 @@
 {
   "$schema": "../../schema/field-definition.schema.json",
-  "version": "1.0.0-rc.9",
+  "version": "1.0.0-rc.10",
   "$comment": "A service's stored fields, by the founder's rulings of 18/11/2026 on the ID-3944 field names. The address (slug) and the editor's order are each platform's own (SC-003). The view's document (fixtures/service) is these fields as the service view receives them, with relatedServices resolved to cards for display (related).",
   "collection": "services",
   "label": "Service",
