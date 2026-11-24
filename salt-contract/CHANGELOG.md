@@ -4,7 +4,7 @@ Newest first. Dates are DD/MM/YYYY. What each part of a version means, and how a
 announced and migrated, is in `RELEASE-POLICY.md`. Decisions cited as `SC-nnn` are in Lightly
 Salted's decision log for Product Salt.
 
-## 1.0.0 (candidate `1.0.0-rc.10`, prepared 24/11/2026; not published, dated when tagged)
+## 1.0.0 (24/11/2026)
 
 **Semver call: MAJOR, the first release of the contract.** No earlier version was published, so no
 implementation conformed to one. Adopting it is still a migration for existing sites, because the
@@ -12,9 +12,15 @@ contract renames and folds what Salt for WordPress 5.0.0 and Salt for Next.js 0.
 *What a site does*). From 1.0.0, each change's part is decided by `RELEASE-POLICY.md`: section 1's
 test, applied through section 2's table, where the stricter row wins.
 
+**First-release conformance (24/11/2026).** Salt for WordPress passed the full conformance run
+against candidate 10. The release owner accepted the following lag for Salt for Next.js: it
+remains pinned to candidate 8, where its adapter cannot render four header and footer cases
+that depend on client-side state. It does not claim conformance to 1.0.0. For this first tag,
+one fully conforming implementation is sufficient (SC-018, SC-022; release policy section 5).
+
 ### Changed
 
-Accessibility fixes, after `1.0.0-rc.8`:
+Accessibility fixes, after candidate 8:
 
 - Light `surface-alt` bands and footers use normal ink for secondary text. Other tones, dark tone routing and the foundations palette are unchanged.
 - On phones without JavaScript, the visible header menu wraps and its submenus open in the flow. The header scrolls away so it cannot cover a focused form reply. The scripted drawer and the head’s `noscript` style are unchanged.
@@ -83,7 +89,7 @@ Accessibility fixes, after `1.0.0-rc.8`:
   `archive/topic`'s and `search/results`'s expected HTML do; which links are drawn, their order,
   labels, `rel`, `data-step` and `aria-current` still compare, and a link with no address
   differs. A listing section's pagination compares whole.
-- Three rulings on the run against `1.0.0-rc.2` (SC-024). A framework's own attributes on an image
+- Three rulings on the run against candidate 2 (SC-024). A framework's own attributes on an image
   are not masked: `next/image`'s `data-nimg` and inline `color:transparent` differ, and
   `markup/media.json` records that Salt for Next.js owes its own `img`. The footer's consent
   control is drawn `aria-disabled="true"` until script hydrates and not after:
@@ -99,7 +105,7 @@ Accessibility fixes, after `1.0.0-rc.8`:
   like what is inside it (SC-007): the normaliser drops both from `svg.salt-icon`, so a filled
   mark passes against a stroked fixture, while the svg's every other attribute still compares and
   the gate still holds each of the two to the values `markup/icon.json` allows.
-- Seven rulings from bringing Salt for Next.js's core markup to `1.0.0-rc.3` (SC-025), six of
+- Seven rulings from bringing Salt for Next.js's core markup to candidate 3 (SC-025), six of
   which change the contract. A section that draws no heading has body base 1, wherever it sits on
   the page, so its body headings and card titles are `h2` and no rank is skipped
   (`section#body-heading-base`); `rich-text/body-only-no-heading`, `carousel/inline-no-name-list`,
@@ -124,7 +130,7 @@ Accessibility fixes, after `1.0.0-rc.8`:
   header's two logos only the default scheme's is `loading="eager"`; the other scheme's is lazy.
   The other ruling changes no file: a team member's email, phone and social links are drawn
   only when filled, as `markup/card.json` already says.
-- Two rulings change the contract after `1.0.0-rc.4` (SC-026, SC-027). The team source has no
+- Two rulings change the contract after candidate 4 (SC-026, SC-027). The team source has no
   categories, on either platform (SC-027): `contract/sections.json` gives team `categories` false
   in the collection-showcase and the carousel, so a team query offers the automatic and manual
   modes only, with no categories picker, as testimonials do. Both emitters follow from that
@@ -140,7 +146,7 @@ Accessibility fixes, after `1.0.0-rc.8`:
   0 to be granted the priority image, and no longer refuses a later section that holds it. No
   fixture case yet shows a later section taking the slot, so a conforming run does not prove
   SC-026.
-- Two rulings change the contract after `1.0.0-rc.5` (SC-028). The drawer's close button draws the
+- Two rulings change the contract after candidate 5 (SC-028). The drawer's close button draws the
   burger's three bars (`markup/site-header.json`'s `drawer-close`), which `styles/chrome.css`
   already turned into the cross at rest and animated from bars as the drawer opens; it had been
   drawn empty, so the rules had nothing to move. No stylesheet changes for it, and
@@ -153,7 +159,7 @@ Accessibility fixes, after `1.0.0-rc.8`:
   social links keep `salt-showcase__social-link`. `collection-showcase/grid-team-contacts` draws
   the class. `styles/salt.css` changes, so each implementation serves the new bytes: 45,331
   bytes, SHA-256 `4f3bca26398e6153aa0eda8ad09e048bc48a1a63feb56606dd718d2098f907ec`.
-- The owner's rulings of 18/11/2026 change the contract after `1.0.0-rc.6` (ID-3944, ID-3949,
+- The owner's rulings of 18/11/2026 change the contract after candidate 6 (ID-3944, ID-3949,
   ID-3950; recorded with the decision log's next SC numbers when the log is written up). Each is
   part of the first major, so the semver call stays MAJOR; on its own, by `RELEASE-POLICY.md`
   section 2, each would be MAJOR too: new required fields and limits (ID-3944), a changed heading
@@ -202,7 +208,7 @@ Accessibility fixes, after `1.0.0-rc.8`:
     of describing the documents. `scripts/round_trip_acf.mjs` matches a layout by its contract id
     as well as its former names, which salt-wordpress now ships; both round-trip reports are
     regenerated.
-- The founder's rulings of 18/11/2026 and 19/11/2026 change the contract after `1.0.0-rc.7`
+- The founder's rulings of 18/11/2026 and 19/11/2026 change the contract after candidate 7
   (ID-3968, ID-3969, ID-3970). Each is part of the first major, so the semver call stays MAJOR. On
   its own, by `RELEASE-POLICY.md` section 1's test, the limits rule would be MAJOR: until now the
   contract did not say how a limit is held, and from this candidate an implementation that refuses
@@ -306,7 +312,7 @@ Accessibility fixes, after `1.0.0-rc.8`:
     (both platforms' query owes in `carousel.json` and `collection-showcase.json`).
   - Team is a linked source for showcase and carousel. The Index layout can list members'
     individual pages; this neither creates a whole-team archive nor adds a view-all link.
-- The rulings and proposals of 23/11/2026 change the contract after `1.0.0-rc.8` (EP-72 M4, Salt
+- The rulings and proposals of 23/11/2026 change the contract after candidate 8 (EP-72 M4, Salt
   for WordPress's conformance; SC-029 to SC-032, with SC-033 and SC-034 below). The founder ruled SC-029's principle (no style
   attributes in the contract), both points of SC-030 and SC-031. SC-029's attribute design (the
   value sets, their steps and rounding, the fixed measure and the logo height's place) was approved
@@ -438,7 +444,7 @@ Accessibility fixes, after `1.0.0-rc.8`:
     and the gate already counted. The header, results, details and delivered services never are.
     `data-aside-rows` is how many are drawn. No verdict changes.
 - A rendering rule closes the first body heading's gap (`section#body-heading-base`, after
-  `1.0.0-rc.8`). The no-skipped-rank rule now covers a body that stores only h3 or h4, with the
+  candidate 8). The no-skipped-rank rule now covers a body that stores only h3 or h4, with the
   body base as the rank before the first heading: under a section heading at h2, stored h3 then
   h4 draw h3 then h4, and stored h4 then h3 draw h3 then h3. Stored ranks and the editor's
   picker do not change. The new case `rich-text/h4-first-under-h2` shows it. **What each target
@@ -629,7 +635,7 @@ Accessibility fixes, after `1.0.0-rc.8`:
     the story slots' sizes; serve the new `salt.css`. Salt for WordPress: link a service only when
     it is published and has a permalink, draw it plain without a public page, leave it out when it
     may not be shown.
-- **A line break inside a paragraph is defined** (ID-3966, after `1.0.0-rc.9`; the founder ruled
+- **A line break inside a paragraph is defined** (ID-3966, after candidate 9; the founder ruled
   on 18/11/2026 that the contract defines it before 1.0.0). A rich-text field's `paragraph` now
   covers a line break in a paragraph (`schema/field-definition.schema.json`, `allowed`;
   `markup/rich-text-body.json`). In the stored form, the fixtures' interchange HTML, a break is a
@@ -647,7 +653,7 @@ Accessibility fixes, after `1.0.0-rc.8`:
   Neither's drawing: Salt for Next.js draws Lexical's linebreak as `br` in its paragraph, and
   Salt for WordPress's `paragraph` allows `p` and `br`. Both: keep a `br` the adapter is given as
   the platform's own break, and run the new case.
-- **The normaliser reads a `br` as the end of a line** (ID-3966, after `1.0.0-rc.9`). By the CSS
+- **The normaliser reads a `br` as the end of a line** (ID-3966, after candidate 9). By the CSS
   rule it already follows, white space either side of a `br` is not drawn, but the normaliser
   dropped only the space after one: `First line <br>Second line`, and a template's
   `First line\n<br>`, differed from `First line<br>Second line`, while `<br> Second line` did
@@ -656,7 +662,7 @@ Accessibility fixes, after `1.0.0-rc.8`:
   browser draws alike newly compare equal, so no implementation that passed can fail: section 2
   has no row for the normaliser, and section 1's test makes the change PATCH on its own.
 - **Salt for WordPress no longer owes the case study's options page**
-  (`markup/case-study.json`, after `1.0.0-rc.9`). Its `owes` asked for an ACF options page on
+  (`markup/case-study.json`, after candidate 9). Its `owes` asked for an ACF options page on
   which editors set the view's header band (`site.caseStudy`: `header`, `headerTone`,
   `headerToneDark`), with the image aside's setting gone (SC-034). Salt for WordPress ships that
   page, without the aside's setting, so the entry goes; the image aside's switch is not restored.

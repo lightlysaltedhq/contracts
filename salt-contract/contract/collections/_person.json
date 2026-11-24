@@ -1,6 +1,6 @@
 {
   "$schema": "../../schema/field-definition.schema.json",
-  "version": "1.0.0-rc.10",
+  "version": "1.0.0",
   "$comment": "Public profile fields on a native user. Team selects ticked users; post credit reads the same user independently of that tick. The job title is not an account role. These public fields are the only person data a view reads; in particular an absent publicEmail means no email link, never the account's login email. Targets are shown with a count and never refused (18/11/2026 and 19/11/2026).",
   "shape": "person",
   "fields": [

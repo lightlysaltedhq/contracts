@@ -1,6 +1,6 @@
 {
   "$schema": "../../schema/field-definition.schema.json",
-  "version": "1.0.0-rc.10",
+  "version": "1.0.0",
   "$comment": "An FAQ's stored fields, by the founder's rulings of 18/11/2026 on the ID-3944 field names. FAQs have no page of their own; the editor's order is each platform's own.",
   "collection": "faqs",
   "label": "FAQ",
