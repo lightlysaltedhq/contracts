@@ -8,7 +8,9 @@
 //    HTML parser treats them.
 // 2. Insignificant whitespace, by the CSS rule for collapsible white space, read from the elements:
 //    a run collapses to one space, and goes only at a block boundary (the start or end of a
-//    block's inline content, or beside a block-level element) or after another space. Between
+//    block's inline content, or beside a block-level element), either side of a br, which ends a
+//    line (`One <br>\nTwo` is `One<br>Two`), or after another space. A no-break space is not
+//    white space and always stays. Between
 //    two inline (phrasing) elements a run is one space and stays, whether it was typed or is a
 //    template's line break, because a browser draws it: `<span>£49</span>\n<span>a month</span>`
 //    shows "£49 a month" and differs from the two spans written together. Inside a flex or grid
@@ -262,9 +264,10 @@ function collapse(block) {
   let run = []
   const flush = () => {
     let prevSpace = true
-    for (const item of run) {
+    for (const [at, item] of run.entries()) {
       if (item === 'atom') { prevSpace = false; continue }
-      if (item === 'break') { trimEnd(); prevSpace = true; continue }
+      // A br ends a line: the space before it goes, as the space after it does.
+      if (item === 'break') { trimEnd(at); prevSpace = true; continue }
       let v = item.value.replace(WS, ' ')
       if (prevSpace && v.startsWith(' ')) v = v.slice(1)
       if (v) prevSpace = v.endsWith(' ')
@@ -273,9 +276,10 @@ function collapse(block) {
     trimEnd()
     run = []
   }
-  // The trailing space of a run, wherever its last non-empty text sits.
-  const trimEnd = () => {
-    for (let k = run.length - 1; k >= 0; k--) {
+  // The trailing space of the run before `end` (the whole run by default), wherever its last
+  // non-empty text sits.
+  const trimEnd = (end = run.length) => {
+    for (let k = end - 1; k >= 0; k--) {
       const item = run[k]
       if (item === 'atom' || item === 'break') return
       if (item.value === '') continue

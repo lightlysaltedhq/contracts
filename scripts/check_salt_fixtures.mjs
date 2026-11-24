@@ -95,7 +95,8 @@ if (existsSync(fixturesDir)) {
 // SC-009: text is filled when something visible is left after white space and zero-width
 // characters go.
 const filledText = (v) => typeof v === 'string' && v.replace(/[\s​-‍⁠﻿]/g, '') !== ''
-const RICH_TAGS = { paragraph: ['p'], bold: ['strong', 'b'], italic: ['em', 'i'], code: ['code'], link: ['a'],
+// A paragraph may hold line breaks (ID-3966): `paragraph` offers br with p.
+const RICH_TAGS = { paragraph: ['p', 'br'], bold: ['strong', 'b'], italic: ['em', 'i'], code: ['code'], link: ['a'],
   'unordered-list': ['ul', 'li'], 'ordered-list': ['ol', 'li'], blockquote: ['blockquote'], 'heading-2': ['h2'], 'heading-3': ['h3'], 'heading-4': ['h4'], 'heading-5': ['h5'], 'heading-6': ['h6'] }
 const SLUG = /^[a-z0-9]+(-[a-z0-9]+)*$/
 

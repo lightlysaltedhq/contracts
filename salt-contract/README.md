@@ -85,9 +85,9 @@ receives and the choices on offer.
 
 ## Status
 
-`1.0.0-rc.9` is the release candidate for `1.0.0`: private, never on the registry, held until an
+`1.0.0-rc.10` is the release candidate for `1.0.0`: private, never on the registry, held until an
 implementation's run of `salt-conformance` against it conforms in full, in a report that names
-`1.0.0-rc.9` (SC-017, SC-018, SC-020, SC-022; `RELEASE-POLICY.md` section 5). It follows
+`1.0.0-rc.10` (SC-017, SC-018, SC-020, SC-022; `RELEASE-POLICY.md` section 5). It follows
 `1.0.0-rc.1`, whose first run raised eight questions about the contract itself, `1.0.0-rc.2`,
 whose run raised three more, `1.0.0-rc.3`, against which bringing Salt for Next.js's core
 markup to the contract raised seven, `1.0.0-rc.4`, after which the owner ruled on the
@@ -99,8 +99,12 @@ service example (18/11/2026, ID-3968, ID-3969, ID-3970), and `1.0.0-rc.8`, after
 founder ruled out inline styles and ruled on the footer's consent control and panel and on label
 placeholders, and the attribute design and the case study's sidebar parts were proposed for his
 approval at contract review (23/11/2026, SC-029 to SC-032), and the founder replaced the case
-study's image aside with a hero image and an image in the flow (23/11/2026, SC-034);
-those rulings (SC-023 to SC-032, and the rulings of 18/11/2026)
+study's image aside with a hero image and an image in the flow (23/11/2026, SC-034), added
+clients and sectors (SC-035) and laid the case study out as a story and an aside of the project's
+facts (SC-036), and `1.0.0-rc.9`, against which Salt for WordPress conformed in full and after
+which the contract defined a line break inside a paragraph, as the founder ruled it must before
+1.0.0 (18/11/2026, ID-3966);
+those rulings (SC-023 to SC-036, and the rulings of 18/11/2026)
 changed contract files, which each time makes a new candidate and needs a new run. `1.0.0` is the first release, staged
 from CI by npm trusted publishing when the owner pushes the `salt-contract-v1.0.0` tag, and
 approved by the owner. See `RELEASE-POLICY.md` for what each part
@@ -413,7 +417,9 @@ Conventions, so that every case is deterministic:
   newTab }` with `document` a key of `documents`, and a collection query stores `{ mode, categories,
   items, order, count }`. Rich text is an HTML string using only the field's allowed elements: the
   fixtures' interchange form, which each platform's adapter turns into its own (Lexical, the
-  WordPress editor's HTML). A view's rich text (a post's `body`, a service's `intro`) is given the
+  WordPress editor's HTML). Its white space is HTML's: a newline in the source is formatting, which
+  collapses like a space, and only a `br` inside a `p` is a line break, which the adapter keeps as
+  its platform's own break and the platform draws as that `br` (ID-3966). A view's rich text (a post's `body`, a service's `intro`) is given the
   same way (SC-023): its headings are the stored `h3` and `h4`, never the level the view draws
   them at, so a stored `h3` under a view's `h1` is expected as `h2`.
 - **Images.** Each image declares its slot's default `sizes` for its section's band and the
@@ -643,7 +649,7 @@ report).
 ```json
 {
   "format": "salt-conformance/1",
-  "contract": { "package": "@lightlysaltedhq/salt-contract", "version": "1.0.0-rc.9" },
+  "contract": { "package": "@lightlysaltedhq/salt-contract", "version": "1.0.0-rc.10" },
   "platform": "nextjs",
   "implementation": { "version": "0.4.0" },
   "adapter": { "kind": "command", "target": "node scripts/salt-adapter.mjs" },
@@ -652,7 +658,7 @@ report).
   "summary": { "pass": 15, "fail": 1, "incomplete": 0, "notShipped": 1 },
   "fields": { "platform": "payload", "snapshot": "…", "options": "…", "problems": [] },
   "problems": [],
-  "stylesheets": { "served": "…", "bundle": "styles/salt.css", "contract": "1.0.0-rc.9", "ok": true, "status": "identical" },
+  "stylesheets": { "served": "…", "bundle": "styles/salt.css", "contract": "1.0.0-rc.10", "ok": true, "status": "identical" },
   "sections": [
     {
       "id": "hero",

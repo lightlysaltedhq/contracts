@@ -847,7 +847,7 @@
       ],
       "properties": {
         "allowed": {
-          "description": "The element kinds an editor may use; both platforms strip anything else. Links allow http, https, mailto and tel. Headings are stored at the level the editor chose, from heading-2 to heading-6, and drawn relative to the heading above the body (markup/section#body-heading-base): the highest-ranked heading in a body draws at base + 1 and the others keep their distance below it.",
+          "description": "The element kinds an editor may use; both platforms strip anything else. A paragraph may hold line breaks (ID-3966): in the stored form a break is a br inside its p, and it is drawn as one br in that same p, never as a space and never as a new paragraph, which is a new p. How an editor makes a break and how a platform's own storage keeps it (Lexical's linebreak node; WordPress's br, or a newline its formatting turns into one) are the platform's; what is drawn is the contract's. Links allow http, https, mailto and tel. Headings are stored at the level the editor chose, from heading-2 to heading-6, and drawn relative to the heading above the body (markup/section#body-heading-base): the highest-ranked heading in a body draws at base + 1 and the others keep their distance below it.",
           "type": "array",
           "minItems": 1,
           "uniqueItems": true,
