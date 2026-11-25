@@ -5316,6 +5316,46 @@ const CONTRACTS = [
     },
   },
   {
+    file: 'blocks.css',
+    what: 'a labelled icon in a grid or carousel card takes its link’s colour',
+    why:
+      '`.salt-grid .salt-icon` paints a card’s icons in the brand colour, which is scoped as a foreground ' +
+      'to no tone and measured 1.14 to 2.77:1 on an inverse band, under WCAG 1.4.11’s 3:1. A decorative ' +
+      'icon can afford it. A team card’s social link can be an icon alone, `role="img"` with an ' +
+      '`aria-label`, the link’s only visible name, so a labelled icon takes the link’s colour as the ' +
+      'arrow does (ID-4033, ruled by Ollie 25/11/2026). A tidy-up removing the rule, narrowing it to a ' +
+      'class, or a later rule colouring the icon leaves every test of the markup green.',
+    check: (rules, all) => {
+      const COLOURED = [".salt-grid .salt-icon[role='img']", ".salt-block[data-block='carousel'] .salt-icon[role='img']"].map(normalise)
+      const colour = rules.find((rule) => rule.at.length === 0 && COLOURED.every((selector) => rule.selectors.includes(selector)))
+      if (colour === undefined) return `no unconditional \`${COLOURED.join(', ')}\` rule in blocks.css gives a labelled icon its link's colour, so a social link drawn as an icon alone takes the brand colour`
+      /* `inherit` and `currentcolor` are one colour for the `color` property, the parent's. */
+      const keeps = (value) => {
+        const word = keyword(value)
+        if (word === 'inherit' || word === 'currentcolor') return true
+        return /var\(|env\(|calc\(/i.test(value) ? null : false
+      }
+      const value = colour.declarations['color']
+      if (value === undefined) return `\`${COLOURED.join(', ')}\` in blocks.css sets no \`color\``
+      if (isImportant(value)) return `\`${COLOURED.join(', ')}\` declares \`color\` !important, which no contract here can rank`
+      const verdict = keeps(value)
+      if (verdict === null) return `\`${COLOURED.join(', ')}\` writes \`color: ${value.trim()}\`, a spelling this contract does not read; it reads \`inherit\` or \`currentcolor\``
+      if (!verdict) return `\`${COLOURED.join(', ')}\` writes \`color: ${value.trim()}\`; write \`inherit\`, the link's colour`
+      /* Any other rule reaching an icon at the colour rule's (0,3,0) or above. The card icon's own brand
+         rule is the colour rule's selectors less `[role='img']`, which the colour rule outranks branch
+         for branch by construction, so it alone is set aside. */
+      const BRAND = new Set(['.salt-grid .salt-icon', ".salt-block[data-block='carousel'] .salt-icon"].map(normalise))
+      const reaches = (selector) => reachesChild(selector, 'salt-icon', null) && !BRAND.has(normalise(selector))
+      for (const other of overriders(all, reaches, new Set([colour]), [0, 3, 0], new Set(['color', 'all']))) {
+        const kept = other.property === 'color' && !isImportant(other.value) ? keeps(other.value) : false
+        if (kept === true) continue
+        if (kept === null) return `${other.where} writes \`color: ${other.value.trim()}\` on an icon, a spelling this contract does not read, so it cannot say a labelled icon keeps its link's colour`
+        return `${other.where} writes \`${other.property}: ${other.value.trim()}\` on an icon, over the colour rule's \`color: inherit\`; a labelled icon then leaves its link's colour`
+      }
+      return null
+    },
+  },
+  {
     file: 'chrome.css',
     what: 'a footer link keeps a 24 CSS px floor at every width, 44px below `lg` and 32px from it',
     why:
