@@ -237,7 +237,7 @@
  *
  * `--space-card-row`, 32 to 40 CSS px, where the grid's own 1.5rem sets both axes. A row gap smaller
  * than the gaps inside a card let two rows of cards read as one block of text, measured on
- * Floorworkz's preview on 30/09/2026. Only a grid whose items are cards: a gallery's photographs, a
+ * the pilot site's preview on 30/09/2026. Only a grid whose items are cards: a gallery's photographs, a
  * logo wall and a row of figures have no gaps inside them to outgrow, so they keep 1.5rem both ways.
  * The column gap is untouched, which is what `IMAGE_SIZES.card` divides the measure by.
  *

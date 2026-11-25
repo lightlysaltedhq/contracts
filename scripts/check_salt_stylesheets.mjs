@@ -2964,7 +2964,7 @@ const CONTRACTS = [
       'The track stretches every slide to the tallest one, but the slide holds its `role="group"` ' +
       'wrapper rather than the card, so a card’s `block-size: 100%` resolves against the wrapper. ' +
       'With the wrapper at its content’s height, every card in a row was as tall as its own words: ' +
-      '471, 309 and 434px in 638px slides on Floorworkz’s /services, measured in Chromium 154 on ' +
+      '471, 309 and 434px in 638px slides on the pilot site’s /services, measured in Chromium 154 on ' +
       '05/10/2026 (BD-205). And with the card in `content-box`, the 100% leaves out the padding and ' +
       'border, so on a site with no CSS reset each card ran 50px past its slide and the track gained ' +
       'a vertical scroll. Deleting either line reads as a tidy-up and changes nothing in markup.',
@@ -5051,7 +5051,7 @@ const CONTRACTS = [
     why:
       'every site’s copy of the case study view drew the title, the client line and the summary, each ' +
       'section’s `h2` and its rich text, and each `h2` and the paragraph before it with 0px between them, ' +
-      'measured on Floorworkz’s preview on 28/09/2026 (the mirrored row MR-8); core’s view then still put ' +
+      'measured on the pilot site’s preview on 28/09/2026 (the mirrored row MR-8); core’s view then still put ' +
       'its title 0px under the site header and a section’s `h2` 16px over an opening `h3` 18px over its ' +
       'text, measured on 04/10/2026 (BD-202). Core’s view fixes those gaps once (BD-179), and a site ' +
       'retunes them through the tokens, so a length written back, a gap removed, or a later rule ' +
@@ -5409,7 +5409,7 @@ const CONTRACTS = [
     why:
       'a card was one flat `gap: 0.75rem`, so its title clung to its photograph while its meta line and ' +
       'summary drifted off, a feature card’s icon sat nearer its title than the title to its text, and ' +
-      'the grid’s 1.5rem row gap was smaller than the gaps inside a card, measured on Floorworkz’s ' +
+      'the grid’s 1.5rem row gap was smaller than the gaps inside a card, measured on the pilot site’s ' +
       'preview against opshaug.no on 30/09/2026 (the mirrored row MR-9). Ollie ruled that core fixes it ' +
       'and that a site retunes it as tokens (BD-195), so a gap written back on the card, a join removed ' +
       'or spelled as a length, or a later rule moving a join’s edge is the flat card returning. The ' +

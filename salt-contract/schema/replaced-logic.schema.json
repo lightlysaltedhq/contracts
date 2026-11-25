@@ -157,7 +157,7 @@
   "examples": [
     {
       "$schema": "https://unpkg.com/@lightlysaltedhq/salt-contract@1.0.0/schema/replaced-logic.schema.json",
-      "site": "floorworkz",
+      "site": "pilot-site",
       "platform": "nextjs",
       "contract": "1.0.0",
       "sections": [

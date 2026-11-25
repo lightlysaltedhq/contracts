@@ -4,6 +4,32 @@ Newest first. Dates are DD/MM/YYYY. What each part of a version means, and how a
 announced and migrated, is in `RELEASE-POLICY.md`. Decisions cited as `SC-nnn` are in Lightly
 Salted's decision log for Product Salt.
 
+## 1.0.1 (25/11/2026)
+
+**Semver call: PATCH, for ID-4032.** No conforming implementation's verdict changes, and no
+consumer of an export can break (`RELEASE-POLICY.md` section 1). The edits are CSS comments, an
+example in a schema and the stylesheet gate's explanatory text. `styles/salt.css`, which holds no
+comments, is byte-identical to 1.0.0's, so what the stylesheets draw for unchanged markup is
+unchanged (section 2, *Stylesheets*, PATCH). The schema's example is description text (section 2,
+*Schema*, PATCH). No contract file changes other than its `version`.
+
+1.0.0 is deprecated on npm in favour of this release. The reason is only that 1.0.0 carries the
+text removed below; install 1.0.1. A site, or an implementation's exact pin (section 5), moves to
+1.0.1 with no other change. Salt for WordPress's conformance report against candidate 10 and
+Salt for Next.js's lag, both recorded under 1.0.0, are not re-run for this release.
+
+### Changed
+
+- Removed a client's name from the files the package ships. It was in four stylesheet comments
+  (`styles/primitives.css` and `styles/blocks.css`), where it named the site the measurements were
+  taken on, and in the `site` example of `schema/replaced-logic.schema.json`. The comments now say
+  "the pilot site" and the example's `site` is `pilot-site`. The stylesheet gate's explanatory
+  text, which is not shipped, says the same (ID-4032).
+<!-- ID-4033 SLOT. Its release PR adds its bullet here, under Changed, and rewrites the Semver call
+above to cover it (a stylesheet change that alters rendered output for unchanged markup is MAJOR
+under RELEASE-POLICY.md section 2 unless the owner rules otherwise). Delete this comment before
+tagging: it would ship in the tarball. -->
+
 ## 1.0.0 (24/11/2026)
 
 **Semver call: MAJOR, the first release of the contract.** No earlier version was published, so no

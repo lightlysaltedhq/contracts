@@ -588,7 +588,7 @@ body {
  *
  * `<Arrow>` wraps an icon from the site's own registry, after a linked card title, a view-all label or
  * a button's label, so a site stops faking one with a text glyph. A `→` in a font sits on that font's
- * maths axis, which in the faces measured on Floorworkz's preview was 4 to 7px below the middle of the
+ * maths axis, which in the faces measured on the pilot site's preview was 4 to 7px below the middle of the
  * capitals it followed.
  *
  * Sized to the text rather than the icon scale's rem steps, because it belongs to the words: 0.7em
@@ -905,7 +905,7 @@ body {
  * stretched flex item's height is definite: a percentage inside it resolves. But the `<li>` holds the
  * slide's `role="group"` wrapper rather than the card, and the wrapper's height was its content's, so
  * the carousel card's `block-size: 100%` in `blocks.css` resolved against the card itself and every
- * card was as tall as its own words. Measured on Floorworkz's /services in headless Brave 154.1.96.59
+ * card was as tall as its own words. Measured on the pilot site's /services in headless Brave 154.1.96.59
  * (Chromium 154.0.8037.58) on 05/10/2026: three visible testimonial cards of 471, 309 and 434px in
  * 638px slides, so a caption pushed to the card's foot sat 162px higher on one card than the next
  * (BD-205).
@@ -1754,7 +1754,7 @@ textarea.salt-contact__input {
  * `<CaseStudyView>`'s rhythm, which each site's copy of the view left to base styles that give
  * headings and paragraphs no margin: the title, the client line and the summary touched, each
  * section's `h2` sat on its rich text, and each `h2` sat on the paragraph before it. 0px at every
- * one of those joins, measured on Floorworkz's preview on 28/09/2026 (the mirrored row MR-8).
+ * one of those joins, measured on the pilot site's preview on 28/09/2026 (the mirrored row MR-8).
  *
  * **Keyed on `.salt-case-study-view`, a class only core's view renders.** Every site's own copy of the
  * view draws `.salt-case-study` and its elements, and a site that keeps its copy after upgrading must

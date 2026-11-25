@@ -1,6 +1,6 @@
 {
   "$schema": "../../schema/field-definition.schema.json",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "$comment": "A location's stored fields, by the founder's rulings of 18/11/2026 on the ID-3944 field names: the address shape (contract/collections/_address.json), shared with the company address; lat from -90 to 90 and lng from -180 to 180; a map zoom of 14 by default, whole numbers from 1 to 20; opening hours as rows of day, open, close and appointment, times stored as HH:MM. Salt for Next.js has no locations collection yet (contract/sections.json, locations), so every Salt for Next.js note here is owed with it. Locations have no page of their own.",
   "collection": "locations",
   "label": "Location",
