@@ -57,9 +57,11 @@ the Salt page.
 1. **Brand settings.** The site's colours, fonts, type scale and logos, set in the admin. *On
    update, everything still reaches the site.*
 2. **Design dials and tokens.** Site-wide choices from a scale (corners, shadows, button style
-   and density), set in the admin by the admin role only (`contract/dials.json`). Any token in
-   `contract/token-layer.json` may also be overridden in the site's code, for what the dials do
-   not cover. A site's own CSS reaches values through tokens, never hard-coded ones, so
+   and density), set in the admin by the admin role only (`contract/dials.json`): Salt for
+   WordPress's Site Settings, or Salt for Next.js's brand global in Payload. A child theme or a
+   client site does not set a dial in a config file, and `salt-overrides.json` never holds one.
+   Any token in `contract/token-layer.json` may also be overridden in the site's code, for what
+   the dials do not cover. A site's own CSS reaches values through tokens, never hard-coded ones, so
    dark mode, the contrast checks and the dials keep working on it. *On update, everything still
    reaches the site.*
 3. **Variants.** A section's layout or style option, chosen by an editor (the `variants` in
@@ -649,7 +651,7 @@ report).
 ```json
 {
   "format": "salt-conformance/1",
-  "contract": { "package": "@lightlysaltedhq/salt-contract", "version": "1.0.1" },
+  "contract": { "package": "@lightlysaltedhq/salt-contract", "version": "2.0.0" },
   "platform": "nextjs",
   "implementation": { "version": "0.4.0" },
   "adapter": { "kind": "command", "target": "node scripts/salt-adapter.mjs" },
@@ -658,7 +660,7 @@ report).
   "summary": { "pass": 15, "fail": 1, "incomplete": 0, "notShipped": 1 },
   "fields": { "platform": "payload", "snapshot": "…", "options": "…", "problems": [] },
   "problems": [],
-  "stylesheets": { "served": "…", "bundle": "styles/salt.css", "contract": "1.0.1", "ok": true, "status": "identical" },
+  "stylesheets": { "served": "…", "bundle": "styles/salt.css", "contract": "2.0.0", "ok": true, "status": "identical" },
   "sections": [
     {
       "id": "hero",

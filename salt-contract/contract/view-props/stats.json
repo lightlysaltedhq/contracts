@@ -1,6 +1,6 @@
 {
   "$schema": "../../schema/view-props.schema.json",
-  "version": "1.0.1",
+  "version": "2.0.0",
   "section": "stats",
   "data": [
     {
