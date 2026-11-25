@@ -357,6 +357,20 @@
 }
 
 /*
+ * Nor an icon that names something (ID-4033). The markup writes `role="img"` and an `aria-label` on an
+ * icon only when it is not decorative (markup/icon.json), and a team card's social link can be that
+ * icon alone, so the icon is the link's only visible name. A control's name is drawn to WCAG 1.4.11's
+ * 3:1, which the brand colour is proved to on no tone as a foreground (1.14 to 2.77:1 on an inverse
+ * band), so it takes the link's ink as the arrow does. Chosen by the role, not by a class, so a
+ * labelled icon anywhere in a card is covered. A decorative icon (`aria-hidden`) keeps the brand colour
+ * above and carries no floor.
+ */
+.salt-grid .salt-icon[role='img'],
+.salt-block[data-block='carousel'] .salt-icon[role='img'] {
+  color: inherit;
+}
+
+/*
  * A carousel card has no `.salt-grid` above it to inherit the grid's wrap from, and a slide is
  * `min(100%, 20rem)` wide, so a title or a URL with nowhere to break paints over the next slide.
  * The grid's declaration and reason, given to the card. `break-word` for the reason the grid

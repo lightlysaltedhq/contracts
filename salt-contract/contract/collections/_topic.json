@@ -1,6 +1,6 @@
 {
   "$schema": "../../schema/field-definition.schema.json",
-  "version": "1.0.1",
+  "version": "2.0.0",
   "$comment": "A topic: one of a collection's category terms. Every collection that has categories (contract/sections.json) stores its terms as topics and keeps its own list (the founder's ruling of 18/11/2026, question 5). Topics are flat: no parent. The archive draws a topic's description (markup/archive.json). On WordPress a topic is a term of the source's taxonomy (SOURCE_DEFAULTS in emit/acf.mjs), so both fields are native and no ACF field is generated; WordPress's default category (Uncategorised) is never drawn as a topic.",
   "shape": "topic",
   "fields": [

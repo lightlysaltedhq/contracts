@@ -1010,6 +1010,10 @@ const WORDMARK_WRAP = '  overflow-wrap: anywhere;\n'
 const IMAGE_FIT = '  object-fit: contain;\n'
 const appending = (addition) => (css) => `${css}\n${addition}\n`
 
+/* The arrow's colour rule ends the carousel branch; a labelled icon's own rule ends the same way, so the branch is named. */
+const arrowColour = (value) =>
+  replacing("[data-block='carousel'] .salt-arrow > .salt-icon {\n  color: inherit;\n}", `[data-block='carousel'] .salt-arrow > .salt-icon {\n  color: ${value};\n}`)
+
 describe('the logo gives way when the header row runs out of room', () => {
   itEach([
     /* The first round's cases, each still refused. */
@@ -2012,6 +2016,44 @@ describe('the card reset, the arrow’s line and colour, and the footer link flo
 })
 
 /*
+ * ID-4033: a team card's social link can be an icon alone, `role="img"` with an `aria-label`, so it
+ * takes the link's colour instead of the brand colour, which measures 1.14 to 2.77:1 on an inverse band.
+ * Each case below is the old stylesheet or a way of undoing the fix, and each fails by name; the first
+ * is the rule exactly as 1.0.0 shipped it, with no labelled-icon rule at all.
+ */
+describe('a labelled icon in a card takes its link’s colour', () => {
+  const LABELLED = ".salt-grid .salt-icon[role='img'],\n.salt-block[data-block='carousel'] .salt-icon[role='img'] {\n  color: inherit;\n}"
+  const NOT_FOUND = "gives a labelled icon its link's colour"
+  itEach([
+    ['the 1.0.0 stylesheet, with no labelled-icon rule', replacing(LABELLED, ''), NOT_FOUND],
+    ['the rule narrowed to the social link’s class', replacing(LABELLED, LABELLED.replaceAll('.salt-icon[role=\'img\']', '.salt-showcase__social-link .salt-icon')), NOT_FOUND],
+    ['the rule keyed on the decorative icon instead', replacing(LABELLED, LABELLED.replaceAll("[role='img']", "[aria-hidden='true']")), NOT_FOUND],
+    ['the carousel branch dropped', replacing(LABELLED, ".salt-grid .salt-icon[role='img'] {\n  color: inherit;\n}"), NOT_FOUND],
+    ['the grid branch dropped', replacing(LABELLED, ".salt-block[data-block='carousel'] .salt-icon[role='img'] {\n  color: inherit;\n}"), NOT_FOUND],
+    ['the rule given the brand colour', replacing(LABELLED, LABELLED.replace('color: inherit', 'color: var(--color-brand)')), 'writes `color: var(--color-brand)`, a spelling this contract does not read'],
+    ['the rule given a colour of its own', replacing(LABELLED, LABELLED.replace('color: inherit', 'color: blue')), "write `inherit`, the link's colour"],
+    ['the rule given no colour', replacing(LABELLED, LABELLED.replace('  color: inherit;\n', '')), 'sets no `color`'],
+    ['a later, more specific rule painting the brand colour', appending(".salt-grid .salt-card .salt-icon[role='img'] {\n  color: var(--color-brand);\n}"), "writes `color: var(--color-brand)` on an icon"],
+    ['a later rule painting the labelled icon from another stylesheet', appending('.salt-block .salt-grid .salt-icon {\n  color: var(--color-brand);\n}'), "writes `color: var(--color-brand)` on an icon"],
+  ])('blocks.css: fails %s', (_case, mutate, message) => {
+    const { code, output } = gate('blocks.css', mutate)
+    expect(output).toContain('blocks.css: a labelled icon in a grid or carousel card takes its link’s colour')
+    expect(output).toContain(message)
+    expect(code).toBe(1)
+  })
+
+  itEach([
+    ['the rule as `currentcolor`', replacing(LABELLED, LABELLED.replace('color: inherit', 'color: currentcolor'))],
+    ['a rule colouring an icon outside a card, which cannot outrank it', appending('.salt-header__phone > .salt-icon {\n  color: var(--color-brand);\n}')],
+    ['the decorative icon’s own brand rule, left as it is', (css) => css],
+  ])('passes %s', (_case, mutate) => {
+    const { code, output } = gate('blocks.css', mutate)
+    expect(output).toContain('PASS: ')
+    expect(code).toBe(0)
+  })
+})
+
+/*
  * The re-review's seven mutations (#211 re-review, 1): each overrides a pinned declaration from a rule
  * the first version of these contracts never read, a later one or a more specific one, and each left
  * the gate at exit 0. Each now fails, and so does the same override from another stylesheet or a query.
@@ -2053,10 +2095,9 @@ describe('a pinned declaration overridden by a later or more specific rule fails
  */
 describe('the pins read equivalent spellings, and say so when they cannot', () => {
   const RESET = ".salt-grid .salt-card > *,\n.salt-block[data-block='carousel'] .salt-card > * {\n  margin-block: 0;\n}"
-  const COLOUR_DECL = '  color: inherit;\n}'
   itEach([
-    ['blocks.css', 'the arrow’s colour as `currentcolor`', replacing(COLOUR_DECL, '  color: currentcolor;\n}')],
-    ['blocks.css', 'the arrow’s colour as `INHERIT`', replacing(COLOUR_DECL, '  color: INHERIT;\n}')],
+    ['blocks.css', 'the arrow’s colour as `currentcolor`', arrowColour('currentcolor')],
+    ['blocks.css', 'the arrow’s colour as `INHERIT`', arrowColour('INHERIT')],
     ['primitives.css', 'the arrow’s display as `INLINE-BLOCK`', replacing('  display: inline-block;\n  margin-inline-start: 0.3em;', '  display: INLINE-BLOCK;\n  margin-inline-start: 0.3em;')],
     ['primitives.css', 'the left-to-right undo as `scale: 1`', replacing('.salt-arrow:dir(ltr) > .salt-icon {\n  scale: none;', '.salt-arrow:dir(ltr) > .salt-icon {\n  scale: 1;')],
     ['primitives.css', 'the mirror as `scale: -1 1 1`', replacing('.salt-arrow:dir(rtl) > .salt-icon {\n  scale: -1 1;', '.salt-arrow:dir(rtl) > .salt-icon {\n  scale: -1 1 1;')],
@@ -2072,12 +2113,12 @@ describe('the pins read equivalent spellings, and say so when they cannot', () =
   })
 
   itEach([
-    ['blocks.css', 'the arrow’s colour as a `var()`', replacing(COLOUR_DECL, '  color: var(--arrow);\n}'), 'writes `color: var(--arrow)`, a spelling this contract does not read; it reads `inherit` or `currentcolor`'],
+    ['blocks.css', 'the arrow’s colour as a `var()`', arrowColour('var(--arrow)'), 'writes `color: var(--arrow)`, a spelling this contract does not read; it reads `inherit` or `currentcolor`'],
     ['primitives.css', 'the arrow’s display as a `var()`', replacing('  display: inline-block;\n  margin-inline-start: 0.3em;', '  display: var(--d);\n  margin-inline-start: 0.3em;'), 'writes `display: var(--d)`, a spelling this contract does not read'],
     ['primitives.css', 'the mirror as a `var()`', replacing('.salt-arrow:dir(rtl) > .salt-icon {\n  scale: -1 1;', '.salt-arrow:dir(rtl) > .salt-icon {\n  scale: var(--flip);'), 'writes `scale: var(--flip)`, a spelling this contract does not read'],
     ['blocks.css', 'the reset as a `var()`', replacing(RESET, RESET.replace('margin-block: 0', 'margin-block: var(--z)')), 'a spelling this contract does not read; it reads lengths'],
     ['chrome.css', 'the footer floor’s rem as a `var()`', replacing('    min-block-size: max(2rem, 24px);', '    min-block-size: max(var(--row), 24px);'), 'a spelling this contract does not read; it reads `max(<rem>, <px>)`'],
-    ['blocks.css', 'the arrow given the brand colour', replacing(COLOUR_DECL, '  color: blue;\n}'), 'writes `color: blue`; write `inherit`, the words\' colour'],
+    ['blocks.css', 'the arrow given the brand colour', arrowColour('blue'), 'writes `color: blue`; write `inherit`, the words\' colour'],
     ['primitives.css', 'the button’s floor under 24px in capitals', replacing('  min-block-size: max(2.75rem, 24px);\n  padding-inline: 1.25rem;', '  min-block-size: MAX(2.75rem, 20PX);\n  padding-inline: 1.25rem;'), 'which never reaches 24 CSS px'],
   ])('%s: fails %s', (file, _case, mutate, message) => {
     const { code, output } = gate(file, mutate)
@@ -2087,7 +2128,7 @@ describe('the pins read equivalent spellings, and say so when they cannot', () =
 
   /* The colour rule is in blocks.css, and a failure about it names blocks.css in its header. */
   it('names the stylesheet the failing rule is in', () => {
-    const { output } = gate('blocks.css', replacing(COLOUR_DECL, '  color: blue;\n}'))
+    const { output } = gate('blocks.css', arrowColour('blue'))
     expect(output).toContain('blocks.css: the arrow after a linked card title takes its words’ colour')
     expect(output).not.toContain('primitives.css: the arrow after a way onward is drawn in its line')
   })
@@ -2107,7 +2148,7 @@ describe('the last-child edge and each !important arm fail', () => {
     ['blocks.css', 'the last-child edge !important', replacing(LAST, LAST.replace('margin-block-end: 0', 'margin-block-end: 0 !important')), 'declares `margin-block-end` !important'],
     ['blocks.css', 'the row gap !important', replacing('  row-gap: var(--space-card-row);', '  row-gap: var(--space-card-row) !important;'), 'declares `row-gap` !important'],
     ['primitives.css', 'the arrow’s display !important', replacing('  display: inline-block;\n  margin-inline-start: 0.3em;', '  display: inline-block !important;\n  margin-inline-start: 0.3em;'), 'declares `display` !important'],
-    ['blocks.css', 'the arrow’s colour !important', replacing('  color: inherit;\n}', '  color: inherit !important;\n}'), 'declares `color` !important'],
+    ['blocks.css', 'the arrow’s colour !important', arrowColour('inherit !important'), 'declares `color` !important'],
     ['primitives.css', 'the mirror !important', replacing('.salt-arrow:dir(rtl) > .salt-icon {\n  scale: -1 1;', '.salt-arrow:dir(rtl) > .salt-icon {\n  scale: -1 1 !important;'), 'declares `scale` !important'],
     ['chrome.css', 'the footer floor !important', replacing('    min-block-size: max(2rem, 24px);', '    min-block-size: max(2rem, 24px) !important;'), 'declares `min-block-size` !important'],
     /* An override at any rank, once !important. */
@@ -2301,7 +2342,7 @@ describe('the parse is whole, across every stylesheet in styles/', () => {
   itEach([
     ['a stylesheet the contracts are written against is missing', [removeFile('sections.css')], 'styles/sections.css is missing'],
     /* An unclosed string ends at its line, as in a browser, so the rules after it are still read. */
-    ['an unclosed string hides a keyframe on the next line', [['blocks.css', appending(".salt-a::after { content: 'oops; }\n@keyframes zz { from { color: red; } }")]], 'Parsed 131 rules from blocks.css but the source contains 133 declaration blocks'],
+    ['an unclosed string hides a keyframe on the next line', [['blocks.css', appending(".salt-a::after { content: 'oops; }\n@keyframes zz { from { color: red; } }")]], 'Parsed 132 rules from blocks.css but the source contains 134 declaration blocks'],
     ['a rule nested inside another, which the parse cannot read', [['blocks.css', appending('.salt-note {\n  .salt-x {\n    margin: 0;\n  }\n}')]], 'The parse is dropping rules'],
     ['a declaration written straight into a media block', [['blocks.css', appending('@media (min-width: 48rem) {\n  margin: 0;\n}')]], "directly in an at-rule's block"],
     ['a new stylesheet that drops a focus outline, which a contract sweeping every file reads', [addFile('extra.css', '.salt-button {\n  outline: none;\n}\n')], 'extra.css .salt-button outline: declared outside the focus rules'],

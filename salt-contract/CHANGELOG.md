@@ -4,6 +4,53 @@ Newest first. Dates are DD/MM/YYYY. What each part of a version means, and how a
 announced and migrated, is in `RELEASE-POLICY.md`. Decisions cited as `SC-nnn` are in Lightly
 Salted's decision log for Product Salt.
 
+## 2.0.0 (25/11/2026)
+
+**Semver call: MAJOR, for ID-4033.** The Stylesheets row of `RELEASE-POLICY.md` section 2 makes
+"any change that alters rendered output for unchanged markup" a MAJOR. A labelled icon in a grid or
+carousel card, such as a team card's icon-only social link, is drawn in the link's colour instead of
+the brand colour, and the markup that draws it is unchanged. It is not a PATCH, which needs
+byte-identical rendered output, nor a MINOR, whose new selector must be one that unchanged markup
+does not match; this one matches it. The release owner ruled it 2.0.0 on 25/11/2026.
+
+What changes for a conforming implementation, so the call can be checked. No fixture's expected
+HTML changes, and no field, section, class, data attribute or markup file changes (the only edits
+under `contract/` and `schema/` are the `version` and the dials `$comment` below). The stylesheet
+pin does change: it compares the served `styles/salt.css` with the package's byte for byte, so an
+implementation that takes 2.0.0 without copying the new bundle fails it in every section it ships.
+The other four checks are unchanged. Nothing is renamed, removed or retyped, so there is nothing
+for a `contract/migrations/2.0.0.json` to list (section 4). This entry records no conformance run
+against 2.0.0; section 5 governs adoption.
+
+### Changed
+
+- Labelled icons (`role="img"` with an `aria-label`) in grid and carousel cards take their link's
+  colour instead of the brand colour, as the arrow after a linked title already did. A team card's
+  social link can be an icon alone, so the icon is the link's only visible name, and the brand
+  colour measured 1.14 to 2.77:1 against an inverse band, under WCAG 1.4.11's 3:1. The link's own
+  colour is the band's ink, which the contrast manifest proves on every tone. A decorative icon
+  (`aria-hidden`) keeps the brand colour and carries no floor. The rule is chosen by the icon's
+  role, so a labelled icon anywhere in a card is covered, not only the social link. Salt for
+  WordPress's contrast census (ID-3589) found it; Ollie's ruling of 25/11/2026 (ID-4033). The
+  stylesheet gate pins the rule and fails 1.0.0's stylesheet.
+- The design dials are set only in the admin UIs: Salt for WordPress's Site Settings and the brand
+  global in Payload for Salt for Next.js (Ollie, 25/11/2026). A child theme or a client site does
+  not set one in a config file. 1.0.0's entry below said the dials are "set per site in
+  `salt-overrides.json`"; that was wrong, and `salt-overrides.json` declares view swaps and image
+  sizes only. `contract/dials.json` (its `$comment`) and the README now say so. This is wording:
+  no dial, option, token or schema changes, `schema/replaced-logic.schema.json` has never had a
+  place for a dial, and no export changes.
+
+### What a site does
+
+- Copy the 2.0.0 `styles/salt.css` to where the site serves it, and move the exact pin of
+  `@lightlysaltedhq/salt-contract` to 2.0.0. Nothing else moves: no markup, field or fixture
+  changes.
+- A site that wants a labelled icon in the brand colour says so in its own stylesheet, through
+  the brand token.
+- A site that set a dial in a config file stops: set it in the admin. Nothing in the contract read
+  a dial from `salt-overrides.json`.
+
 ## 1.0.1 (25/11/2026)
 
 **Semver call: PATCH, for ID-4032.** No conforming implementation's verdict changes, and no
