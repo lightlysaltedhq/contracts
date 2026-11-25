@@ -1,6 +1,6 @@
 {
   "$schema": "../../schema/field-definition.schema.json",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "$comment": "A testimonial's stored fields, by the founder's rulings of 18/11/2026 on the ID-3944 field names. The person is name, not author, so it does not clash with a post's author. The quote card draws the photo only, with no fallback to a logo; the company logo and the service a testimonial is about are dropped until something draws them. Testimonials have no topics (contract/sections.json) and no page of their own.",
   "collection": "testimonials",
   "label": "Testimonial",
