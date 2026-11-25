@@ -25,10 +25,6 @@ Salt for Next.js's lag, both recorded under 1.0.0, are not re-run for this relea
   taken on, and in the `site` example of `schema/replaced-logic.schema.json`. The comments now say
   "the pilot site" and the example's `site` is `pilot-site`. The stylesheet gate's explanatory
   text, which is not shipped, says the same (ID-4032).
-<!-- ID-4033 SLOT. Its release PR adds its bullet here, under Changed, and rewrites the Semver call
-above to cover it (a stylesheet change that alters rendered output for unchanged markup is MAJOR
-under RELEASE-POLICY.md section 2 unless the owner rules otherwise). Delete this comment before
-tagging: it would ship in the tarball. -->
 
 ## 1.0.0 (24/11/2026)
 
