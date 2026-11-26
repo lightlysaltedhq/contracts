@@ -70,6 +70,33 @@
   min-block-size: 24px;
 }
 
+/*
+ * A view's own link is underlined, as a link in body copy is (ID-4078).
+ *
+ * The markup writes each of these as a bare `<a href>`, with no class. Tailwind's preflight sets
+ * `a { color: inherit; text-decoration: inherit }`, and until this rule nothing in these
+ * stylesheets drew their line, so behind the reset both platforms serve they were the words
+ * around them: the text's colour and no underline, with only the pointer to tell them from text
+ * (WCAG 1.4.1). The line is what marks a link, never a colour alone (SC-025, SC-028), and it is
+ * body copy's line to the letter, which is what lets the stylesheet gate admit a rule keyed on an
+ * unclassed link. No colour is declared: each keeps the ink around it, as a body link does, so its
+ * contrast is the pairing its text already clears.
+ *
+ * `main > a` is the not-found view's link home, which `not-found.json` writes as a child of
+ * `main` with nothing between them. A class on any other link outranks it.
+ */
+.salt-post__breadcrumb a,
+.salt-post__category a,
+.salt-post__byline a,
+.salt-post__tags a,
+.salt-post__adjacent a,
+.salt-author-box__name a,
+.salt-search__results > li > a,
+main > a {
+  text-decoration-line: underline;
+  text-underline-offset: 0.15em;
+}
+
 /* The current page is marked by its place at the end of the trail and by losing the link's line, not
    by weight: no rule sets a state's weight (the owner's ruling of 28/09/2026, which the stylesheet
    gate holds). The example app's own copy of this rule set it bold. */

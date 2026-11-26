@@ -1674,6 +1674,75 @@ const oneColumnLayout =
     return null
   }
 
+/* The one spelling of a link's line: a body link's, and a view's own link's (ID-4078). */
+const LINK_LINE = {
+  'text-decoration-line': 'underline',
+  'text-underline-offset': '0.15em',
+}
+
+/* Every property that draws, colours, moves or removes a link's line, and `all`, which
+   resets every one of them at once. Names are ASCII case-insensitive in CSS. */
+const lineProperties = (rule) =>
+  rule.order
+    .map((property) => property.toLowerCase())
+    .filter(
+      (property) =>
+        property === 'all' ||
+        /^(?:-webkit-)?text-decoration(?:-[a-z]+)*$/.test(property) ||
+        /^text-underline-(?:offset|position)$/.test(property),
+    )
+
+/**
+ * A view's own links (ID-4078): the links a view or a section writes with no class, outside body
+ * copy, each with the stylesheet that underlines it. `contract/markup/` writes every one as a bare
+ * `<a href>`: a post's breadcrumb, category, byline, tags and previous and next links
+ * (`post.json`), the author box's name (`author-box.json`), a search result's title
+ * (`search.json`), the not-found view's link home, a child of `main` (`not-found.json`), and an
+ * office's phone and email (`locations.json`).
+ *
+ * Two contracts read the list. The body-link contract admits these selectors and no others, and
+ * the view-link contract requires each of them. A link added to the markup with no class is
+ * added here, with its rule, or it draws as plain text under Tailwind's preflight.
+ */
+const VIEW_LINKS = [
+  ['views.css', '.salt-post__breadcrumb a'],
+  ['views.css', '.salt-post__category a'],
+  ['views.css', '.salt-post__byline a'],
+  ['views.css', '.salt-post__tags a'],
+  ['views.css', '.salt-post__adjacent a'],
+  ['views.css', '.salt-author-box__name a'],
+  ['views.css', '.salt-search__results > li > a'],
+  ['views.css', 'main > a'],
+  ['blocks.css', '.salt-locations__contact a'],
+]
+
+/**
+ * What stops a rule being the link's line to the letter, or `null` when nothing does: the two
+ * `LINK_LINE` declarations, once each, unconditional, without `!important`, and no other property
+ * that touches the line. A rule that passes cannot change what a body link computes even where its
+ * selector reaches one, because every value it could win the cascade with is the value the body
+ * link's own rule already declares. That is the whole proof, and it is why the list above needs no
+ * claim about where rich text can be nested.
+ */
+const linkLineFault = (rule) => {
+  const queries = conditional(rule.at)
+  if (queries.length > 0) return `sits inside \`${queries.join(' ')}\``
+  const declared = lineProperties(rule)
+  for (const property of declared) {
+    const expected = LINK_LINE[property]
+    if (expected === undefined) return `declares \`${property}\``
+    if (declared.filter((name) => name === property).length > 1) return `declares \`${property}\` more than once`
+    const written = rule.order.find((name) => name.toLowerCase() === property) ?? property
+    const value = rule.declarations[written] ?? ''
+    if (isImportant(value)) return `declares \`${property}\` as \`!important\``
+    if (value.trim().toLowerCase() !== expected) return `sets \`${property}\` to \`${value.trim()}\``
+  }
+  for (const property of Object.keys(LINK_LINE)) {
+    if (!declared.includes(property)) return `does not declare \`${property}\``
+  }
+  return null
+}
+
 const CONTRACTS = [
   {
     file: 'blocks.css',
@@ -3918,25 +3987,12 @@ const CONTRACTS = [
        */
       const CARRIES = ['href', 'target', 'rel']
       const OWNER = '.salt-rich-text a'
-      const CANONICAL = {
-        'text-decoration-line': 'underline',
-        'text-underline-offset': '0.15em',
-      }
+      const CANONICAL = LINK_LINE
       const WRITE =
         'underline body links in the `.salt-rich-text a` rule alone, as ' +
         '`text-decoration-line: underline` and `text-underline-offset: 0.15em`'
 
-      /* Every property that draws, colours, moves or removes a link's line, and `all`, which
-         resets every one of them at once. Names are ASCII case-insensitive in CSS. */
-      const governedIn = (rule) =>
-        rule.order
-          .map((property) => property.toLowerCase())
-          .filter(
-            (property) =>
-              property === 'all' ||
-              /^(?:-webkit-)?text-decoration(?:-[a-z]+)*$/.test(property) ||
-              /^text-underline-(?:offset|position)$/.test(property),
-          )
+      const governedIn = lineProperties
 
       /* The compound with every parenthesised argument cut out, nesting included, so
          `a:not(.x)` reads as `a:not` and `.y:is(a, b)` as `.y:is`. */
@@ -4021,10 +4077,51 @@ const CONTRACTS = [
              * only distinguishing part is inside one is refused.
              */
             if (!misses(stripArguments(key))) {
+              /* A view's own link (ID-4078): one of the selectors `VIEW_LINKS` names, in the
+                 stylesheet it names, in a rule that is the line to the letter. Such a rule can
+                 reach a body link and still not change it, because it declares only what the
+                 owner declares (`linkLineFault`). Any other value, property, condition or
+                 selector is refused as before. */
+              const named = VIEW_LINKS.some(([sheet, link]) => sheet === file && link === normalise(selector))
+              if (named && linkLineFault(rule) === null) continue
               return `\`${selector}\` in ${file} declares \`${touched.join('`, `')}\` and nothing proves it misses a body link (an \`<a href>\` with no class, and \`target\` and \`rel\` at most) — ${WRITE}, and key any other decoration on a class or element a body link never carries`
             }
           }
         }
+      }
+      return null
+    },
+  },
+  {
+    file: 'views.css',
+    what: 'a view’s own link is underlined as a link in body copy is, by one rule that names it',
+    why:
+      'A post’s breadcrumb, category, byline, tags and previous and next links, the author ' +
+      'box’s name, a search result’s title, the not-found view’s link home and an office’s ' +
+      'phone and email are written with no class, and 2.0.0’s stylesheets drew no line under ' +
+      'any of them. Tailwind’s preflight sets `a { color: inherit; text-decoration: inherit }`, ' +
+      'so behind the reset both platforms serve each was the words around it, with the pointer ' +
+      'the only cue: WCAG 1.4.1, found on the Salt for WordPress 6.0.0 canary on 26/11/2026 ' +
+      '(ID-4078). `views.css` even marks the current crumb “by losing the link’s line”, a line ' +
+      'no rule drew. The body-link contract refuses any decoration on an unclassed link, so ' +
+      'these rules are admitted there by name and held here: each selector in `VIEW_LINKS` has ' +
+      'one unconditional rule, in the stylesheet named, that is body copy’s line to the letter. ' +
+      'Taking a rule out, narrowing it, or changing a value fails this; a second rule that ' +
+      'removes the line fails the body-link contract.',
+    check: (_rules, all) => {
+      const WRITE =
+        'underline it in one unconditional rule in that stylesheet, as ' +
+        '`text-decoration-line: underline` and `text-underline-offset: 0.15em` and nothing ' +
+        'else that touches the line'
+      for (const [file, link] of VIEW_LINKS) {
+        const own = (all.get(file) ?? []).filter(
+          (rule) => rule.selectors.some((selector) => normalise(selector) === link) && lineProperties(rule).length > 0,
+        )
+        if (own.length !== 1) {
+          return `${own.length === 0 ? 'no' : String(own.length)} rule(s) in ${file} draw the line under \`${link}\` — ${WRITE}`
+        }
+        const fault = linkLineFault(own[0])
+        if (fault !== null) return `the \`${link}\` rule in ${file} ${fault} — ${WRITE}`
       }
       return null
     },

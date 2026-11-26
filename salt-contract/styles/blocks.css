@@ -1674,9 +1674,10 @@
 
 /* The office's phone, email and directions links stand alone in a row, so each is floored at
    24px tall (2.5.8), and each takes the band's ink, never the browser's link colour on a toned
-   band. The unclassed contact links keep the link's own underline (only body copy's rule
-   decorates an unclassed link); the directions link, which has a class, declares it, as
-   `salt-contact__link` does. */
+   band. Each declares its line, as `salt-contact__link` does. The unclassed contact links were
+   left to "the link's own underline", which Tailwind's preflight takes away, so behind the
+   reset they drew as plain text (ID-4078); theirs is body copy's line to the letter, which the
+   stylesheet gate admits on an unclassed link named in its list. */
 .salt-locations__contact a,
 .salt-locations__directions {
   display: inline-flex;
@@ -1685,6 +1686,7 @@
   color: var(--salt-section-ink, var(--color-ink));
 }
 
+.salt-locations__contact a,
 .salt-locations__directions {
   text-decoration-line: underline;
   text-underline-offset: 0.15em;
