@@ -651,7 +651,7 @@ report).
 ```json
 {
   "format": "salt-conformance/1",
-  "contract": { "package": "@lightlysaltedhq/salt-contract", "version": "2.0.0" },
+  "contract": { "package": "@lightlysaltedhq/salt-contract", "version": "3.0.0" },
   "platform": "nextjs",
   "implementation": { "version": "0.4.0" },
   "adapter": { "kind": "command", "target": "node scripts/salt-adapter.mjs" },
@@ -660,7 +660,7 @@ report).
   "summary": { "pass": 15, "fail": 1, "incomplete": 0, "notShipped": 1 },
   "fields": { "platform": "payload", "snapshot": "…", "options": "…", "problems": [] },
   "problems": [],
-  "stylesheets": { "served": "…", "bundle": "styles/salt.css", "contract": "2.0.0", "ok": true, "status": "identical" },
+  "stylesheets": { "served": "…", "bundle": "styles/salt.css", "contract": "3.0.0", "ok": true, "status": "identical" },
   "sections": [
     {
       "id": "hero",

@@ -1,6 +1,6 @@
 {
   "$schema": "../../schema/field-definition.schema.json",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "$comment": "A post's stored fields, by the founder's rulings of 18/11/2026 (posts, topics and people). A post is stored as sections (layout) on both platforms; a section that is prose alone draws as the post's prose, and every other section as a band (markup/post.json, sections in a post). Video is in the ruled starting list but has no section yet (ID-3951); it joins layout's sections when it exists. Tables are parked for their own PRD. The view's document (fixtures/post) is these fields as the post view receives them: its date derived from publishedAt in the site's time zone, its category from primaryTopic, its topics and author resolved, the topics drawn with the primary topic first and the rest A to Z by title, not in the order they were picked (the founder's ruling of 19/11/2026), its layout's sections as stored.",
   "collection": "posts",
   "label": "Post",

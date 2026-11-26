@@ -1,6 +1,6 @@
 {
   "$schema": "../../schema/field-definition.schema.json",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "$comment": "A name-only record collection (SC-035, the founder's ruling of 23/11/2026): a sector is a name and nothing else, which a case study may point at (sectorRecord). A site enables sectors on its own, independently of the other name-only collection, and it is off by default, so an existing site changes nothing. A record has no page, no route and no public address: an association is not a link, and nothing in the markup draws one. No record is created, matched by name or deleted automatically, from free text or when the switch changes.",
   "collection": "sectors",
   "label": "Sector",

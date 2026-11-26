@@ -4,6 +4,54 @@ Newest first. Dates are DD/MM/YYYY. What each part of a version means, and how a
 announced and migrated, is in `RELEASE-POLICY.md`. Decisions cited as `SC-nnn` are in Lightly
 Salted's decision log for Product Salt.
 
+## 3.0.0 (26/11/2026)
+
+**Semver call: MAJOR, for ID-4078.** The Stylesheets row of `RELEASE-POLICY.md` section 2 makes
+"any change that alters rendered output for unchanged markup" a MAJOR. The links a view writes with
+no class are underlined where they drew no line, and the markup that draws them is unchanged. It is
+not a PATCH, which needs byte-identical rendered output, nor a MINOR, whose new selector must be
+one that unchanged markup does not match; these match it. The release owner ruled it 3.0.0 on
+26/11/2026.
+
+What changes for a conforming implementation, so the call can be checked. No fixture's expected
+HTML changes, and no field, section, class, data attribute or markup file changes (the only edit
+under `contract/` and `schema/` is the `version`). The stylesheet pin does change: it compares the
+served `styles/salt.css` with the package's byte for byte, so an implementation that takes 3.0.0
+without copying the new bundle fails it in every section it ships. The other four checks are
+unchanged. Nothing is renamed, removed or retyped, so there is nothing for a
+`contract/migrations/3.0.0.json` to list (section 4). This entry records no conformance run
+against 3.0.0.
+
+**Exception to section 5 (26/11/2026).** Section 5 has a major adopted by both implementations
+before the next major is released. Salt for Next.js has not adopted 2.0.0: it remains pinned to
+candidate 8 of 1.0.0, the lag recorded under 1.0.0 below. The release owner ruled on 26/11/2026
+that 3.0.0 is released without waiting for it. The reason: site adoption is still limited, so the
+shared link fix need not wait for Salt for Next.js to adopt 2.0.0. The exception is one-time and
+this release's alone; section 5 governs every later major.
+
+### Changed
+
+- A view's own link is underlined, as a link in body copy is. A post's breadcrumb, category,
+  byline, tags and previous and next links, the author box's name, a search result's title, the
+  not-found view's link home and an office's phone and email in the locations section are written
+  with no class, and no rule drew a line under them. Behind Tailwind's preflight (`a { color:
+  inherit; text-decoration: inherit }`), which both platforms serve, each took its text's colour
+  and no underline, so only the pointer told it from the words around it (WCAG 1.4.1). Each now
+  takes body copy's line (`text-decoration-line: underline`, `text-underline-offset: 0.15em`) and
+  keeps the ink around it. The current breadcrumb still has no line. Salt for WordPress's 6.0.0
+  canary check found it on 26/11/2026 (ID-4078). The stylesheet gate holds one rule for each of
+  the nine selectors and fails 2.0.0's stylesheet.
+
+### What a site does
+
+- Copy the 3.0.0 `styles/salt.css` to where the site serves it, and move the exact pin of
+  `@lightlysaltedhq/salt-contract` to 3.0.0. Nothing else moves: no markup, field or fixture
+  changes.
+- A site that drew its own line or colour on one of these links checks a post, the search page and
+  the not-found page: its rule still wins only where it outranks the contract's.
+- A site with an unclassed link written straight into `main` now has it underlined, because the
+  not-found view's link home is matched as `main > a`. Give the link a class to style it otherwise.
+
 ## 2.0.0 (25/11/2026)
 
 **Semver call: MAJOR, for ID-4033.** The Stylesheets row of `RELEASE-POLICY.md` section 2 makes

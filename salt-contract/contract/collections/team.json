@@ -1,6 +1,6 @@
 {
   "$schema": "../../schema/field-definition.schema.json",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "$comment": "Team is a logical source: on both platforms it selects native users with showOnWebsite ticked, never a separate post type or collection. Apply that filter to every team query and manual selection, not to post credit. A ticked user needs no admin access. Editors may manage public profiles, but that permission must not let them create or manage accounts, roles, credentials or security fields. Ticking the box grants no account permissions. The public page at /team/{slug}/ reads the person fields and the member's posts, if any. Team has no topics (SC-027), no collection index page and no view-all link. The editor's order is each platform's own.",
   "collection": "team",
   "label": "Team member",
