@@ -1271,6 +1271,154 @@ describe('a link in body copy is underlined by one rule, and nothing else touche
 })
 
 /**
+ * ── A view's own link is underlined as a link in body copy is (ID-4078) ───────────
+ *
+ * The links a view writes with no class drew as plain text behind Tailwind's preflight, because no
+ * rule gave them a line and the body-link contract above refuses any rule that could. The fix
+ * admits nine selectors by name, and only as the body link's line to the letter. So this has two
+ * halves to prove. The view-link contract fails when a named link loses its rule, or its rule
+ * stops being the line. And the body-link contract still refuses everything it refused before:
+ * the admission is not a way to decorate an unclassed link that is not on the list, to give a
+ * named one any other value, or to take a named one's line away with a second rule.
+ */
+describe('a view’s own link is underlined as a link in body copy is', () => {
+  const LINE = '  text-decoration-line: underline;\n  text-underline-offset: 0.15em;\n'
+  const SELECTORS =
+    '.salt-post__breadcrumb a,\n.salt-post__category a,\n.salt-post__byline a,\n.salt-post__tags a,\n.salt-post__adjacent a,\n.salt-author-box__name a,\n.salt-search__results > li > a,\nmain > a'
+  const VIEWS = `${SELECTORS} {\n${LINE}}`
+  const OFFICE = `.salt-locations__contact a,\n.salt-locations__directions {\n${LINE}}`
+  const WHAT = 'views.css: a view’s own link is underlined as a link in body copy is, by one rule that names it'
+  const REFUSED = 'nothing proves it misses a body link'
+
+  itEach([
+    ['the rule is taken out', 'views.css', replacing(VIEWS, ''), 'no rule(s) in views.css draw the line under `.salt-post__breadcrumb a`'],
+    [
+      'one link is dropped from the rule',
+      'views.css',
+      replacing(',\nmain > a {\n  text-decoration-line', ' {\n  text-decoration-line'),
+      'no rule(s) in views.css draw the line under `main > a`',
+    ],
+    [
+      'the office’s phone and email lose theirs',
+      'blocks.css',
+      replacing(OFFICE, `.salt-locations__directions {\n${LINE}}`),
+      'no rule(s) in blocks.css draw the line under `.salt-locations__contact a`',
+    ],
+    [
+      'the line is turned off in the rule itself',
+      'views.css',
+      replacing(VIEWS, `${SELECTORS} {\n  text-decoration-line: none;\n  text-underline-offset: 0.15em;\n}`),
+      'the `.salt-post__breadcrumb a` rule in views.css sets `text-decoration-line` to `none`',
+    ],
+    [
+      'the line is drawn and made invisible',
+      'views.css',
+      replacing(VIEWS, `${SELECTORS} {\n${LINE}  text-decoration-color: transparent;\n}`),
+      'the `.salt-post__breadcrumb a` rule in views.css declares `text-decoration-color`',
+    ],
+    [
+      'the rule is written with the shorthand',
+      'views.css',
+      replacing(VIEWS, `${SELECTORS} {\n  text-decoration: underline;\n}`),
+      'the `.salt-post__breadcrumb a` rule in views.css declares `text-decoration`',
+    ],
+    [
+      'the rule is `!important`',
+      'views.css',
+      replacing(VIEWS, `${SELECTORS} {\n  text-decoration-line: underline !important;\n  text-underline-offset: 0.15em;\n}`),
+      'the `.salt-post__breadcrumb a` rule in views.css declares `text-decoration-line` as `!important`',
+    ],
+    [
+      'the rule holds at one width only',
+      'views.css',
+      replacing(VIEWS, `@media (min-width: 48rem) {\n  ${SELECTORS} {\n  ${LINE}  }\n}`),
+      'the `.salt-post__breadcrumb a` rule in views.css sits inside `@media (min-width: 48rem)`',
+    ],
+    [
+      'the rule loses its offset',
+      'views.css',
+      replacing(VIEWS, `${SELECTORS} {\n  text-decoration-line: underline;\n}`),
+      'the `.salt-post__breadcrumb a` rule in views.css does not declare `text-underline-offset`',
+    ],
+    [
+      'a link is narrowed to one view',
+      'views.css',
+      replacing('.salt-post__tags a,\n.salt-post__adjacent a,\n.salt-author-box__name a,', '.salt-post .salt-post__tags a,\n.salt-post__adjacent a,\n.salt-author-box__name a,'),
+      'no rule(s) in views.css draw the line under `.salt-post__tags a`',
+    ],
+    [
+      'a second rule draws a named link’s line again',
+      'views.css',
+      appending(`.salt-post__tags a {\n${LINE}}`),
+      '2 rule(s) in views.css draw the line under `.salt-post__tags a`',
+    ],
+  ])('fails when %s', (_case, file, mutate, message) => {
+    const { code, output } = gate(file, mutate)
+    expect(output).toContain(WHAT)
+    expect(output).toContain(message)
+    /* Every refusal says what to write, not only what is wrong. */
+    expect(output).toContain('underline it in one unconditional rule in that stylesheet')
+    expect(code).toBe(1)
+  })
+
+  /* The body-link contract's half: what the admission by name must not let through. */
+  itEach([
+    [
+      'a second rule takes a named link’s line away',
+      'views.css',
+      appending('.salt-post__tags a {\n  text-decoration: none;\n}'),
+      '`.salt-post__tags a` in views.css declares `text-decoration`',
+    ],
+    [
+      'a named link’s line is taken away in another stylesheet',
+      'chrome.css',
+      appending('.salt-search__results > li > a {\n  text-decoration-line: none;\n}'),
+      '`.salt-search__results > li > a` in chrome.css declares `text-decoration-line`',
+    ],
+    [
+      'the line is repeated to the letter in a stylesheet the list does not name',
+      'chrome.css',
+      appending(`main > a {\n${LINE}}`),
+      '`main > a` in chrome.css declares `text-decoration-line`, `text-underline-offset`',
+    ],
+    [
+      'an unclassed link that is not on the list takes the line to the letter',
+      'blocks.css',
+      appending(`.salt-card a {\n${LINE}}`),
+      '`.salt-card a` in blocks.css declares `text-decoration-line`, `text-underline-offset`',
+    ],
+    [
+      'a named link is keyed on an attribute every link carries',
+      'views.css',
+      appending('.salt-post__tags a[href] {\n  text-decoration: none;\n}'),
+      '`.salt-post__tags a[href]` in views.css declares `text-decoration`',
+    ],
+    [
+      'a named link’s line is reset through `all`',
+      'views.css',
+      appending('.salt-post__byline a {\n  all: unset;\n}'),
+      '`.salt-post__byline a` in views.css declares `all`',
+    ],
+  ])('the body-link contract still refuses it when %s', (_case, file, mutate, message) => {
+    const { code, output } = gate(file, mutate)
+    expect(output).toContain(message)
+    expect(output).toContain(REFUSED)
+    expect(code).toBe(1)
+  })
+
+  itEach([
+    ['the child combinators are written without spaces', 'views.css', replacing('.salt-search__results > li > a,\nmain > a {', '.salt-search__results>li>a,\nmain>a {')],
+    ['the line is in another case', 'views.css', replacing(VIEWS, `${SELECTORS} {\n  TEXT-DECORATION-LINE: UNDERLINE;\n  text-underline-offset: 0.15EM;\n}`)],
+    ['a named link takes a property that is not the line’s', 'views.css', appending('.salt-post__tags a {\n  padding-inline: 0.25rem;\n}')],
+    ['a state of a named link, keyed on an attribute, loses the line', 'views.css', appending(".salt-post__tags a[aria-current='page'] {\n  text-decoration: none;\n}")],
+  ])('passes when %s', (_case, file, mutate) => {
+    const { code, output } = gate(file, mutate)
+    expect(output).toContain('PASS: ')
+    expect(code).toBe(0)
+  })
+})
+
+/**
  * The page ground is core's, painted once (BD-162).
  *
  * `primitives.css` paints `body` with `surface` and `ink`, which the example app and salt-site did
